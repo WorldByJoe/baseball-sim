@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v1.6 · 2026-09-30
+  baseball.html · v1.7 · 2026-10-01
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
@@ -38,6 +38,9 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v1.7  on the wall: wall.js is loaded when it is beside the file, the game tells
+          the stall watchdog its length, hands on through the ring at the final
+          out, and a visit with no ?seed plays a new game drawn from the clock
     v1.6  the running game on screen: a runner going with the pitch, the catcher's
           throw, safe or out at the bag, wild pitches skipping to the backstop;
           bases and outs follow each pitch; foul chases stay on reachable ground
@@ -52,18 +55,11 @@
           win probability shaded in team colours; speed on powers of two; the hit
           ball leaves the catcher's view in the pitch's slow motion; the flight
           inset follows the ground track; innings appear as reached, full names
-    v1.2  dugouts with the batting order and a manager, on-deck circles, bullpens
-          with the warming reliever; men jog off after outs and runs, a new
-          pitcher jogs in from the pen; batting dots carry positions; the
-          fatigue bar shows pitch count against stamina with the 70% tick
-    v1.1  Joe's eight: team colours, R H E, the bat always shown and swung, the
-          hit ball leaving the catcher's view, air/ground track styles and the
-          flight inset, plain words in the at-bat box, speed on the arrows
-    v1.0  the whole game animated on a deterministic schedule; pre-game and
-          final screens; line score, win probability, lane banners
-    v0.2  pitch codes keyed to their names in the pitcher card (Joe)
-    v0.1  mock-up: one real frame
 ============================================================================ -->
+<!-- On the wall the shared ring script sits beside this file (handoff, settings,
+     the stall budget, the setup door on 's'); standalone it is absent, so every
+     use of Wall below is guarded. -->
+<script src="wall.js"></script>
 <style>
 :root{
   --wu: min(calc(100vw / 3840), calc(100vh / 2160));
@@ -161,7 +157,8 @@ tr.tag td.num { letter-spacing:0; }
   function hashStr(t) { var h = 7; for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0; return h; }
   var MONO = 'ui-monospace, "SF Mono", Menlo, monospace';
   var Q = new URLSearchParams(location.search);
-  var SEED = +Q.get('seed') || 59, SPEED = +Q.get('speed') || 1, SEEK = +Q.get('t') || 0;
+  var SEED = Q.has('seed') ? +Q.get('seed') : 100 + Math.floor(Date.now() / 60000) % 90000;   // no seed asked for: a new game from the clock (the HUD shows it, so it can be replayed)
+  var SPEED = +Q.get('speed') || 1, SEEK = +Q.get('t') || 0;
   var PACE = { pregame: 45, halfStart: 4, paStart: 4, setup: 3, flight: 1.8, take: 2.6, foul: 2.4, bipPad: 2.6, change: 3.5, halfEnd: 4.5, final: 40 };
   var BASES = BBField.BASES;
 
@@ -302,8 +299,8 @@ tr.tag td.num { letter-spacing:0; }
     if (e.key === ' ') { paused = !paused; e.preventDefault(); }
     else if (e.key === 'ArrowRight') { for (var j = i + 1; j < SEG.length; j++) if (SEG[j].kind === 'paStart' || SEG[j].kind === 'halfStart' || SEG[j].kind === 'final') { T = SEG[j].t0; break; } }
     else if (e.key === 'ArrowLeft') { for (var q = i - 1; q >= 0; q--) if (SEG[q].kind === 'paStart' || SEG[q].kind === 'halfStart') { T = SEG[q].t0; break; } }
-    else if (e.key === 'ArrowUp') { speed = Math.min(16, speed * 2); e.preventDefault(); }       // powers of two, 1/4x to 16x (Joe)
-    else if (e.key === 'ArrowDown') { speed = Math.max(0.25, speed / 2); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { speed = Math.min(16, speed * 2); declareBudget(); e.preventDefault(); }       // powers of two, 1/4x to 16x (Joe)
+    else if (e.key === 'ArrowDown') { speed = Math.max(0.25, speed / 2); declareBudget(); e.preventDefault(); }
     else if (e.key === 'g') location.replace(location.pathname + '?seed=' + (SEED + 1) + (speed !== 1 ? '&speed=' + speed : ''));
     else if (e.key === 'p' && s.kind === 'pregame') T = s.t0 + s.dur;
   });
@@ -1220,10 +1217,18 @@ tr.tag td.num { letter-spacing:0; }
     play.pa.pitches.forEach(function (q) { (q.bases || []).forEach(function (pl) { if (pl && pl.id === id) f = pl; }); });
     return f;
   }
+  // At the final out the wall's ring says what comes next - another game or the
+  // next piece; standalone, or when the ring wants another game, the next seed plays.
+  function nextGame() {
+    var me = location.pathname.split('/').pop(), spd = speed !== 1 ? '&speed=' + speed : '';
+    var to = window.Wall && Wall.nextPage ? Wall.nextPage('kiosk.html') : '';
+    if (to && to !== me) { location.href = to; return; }
+    location.replace(me + '?seed=' + (SEED + 1) + spd);
+  }
   function render(t) {
     var seg = segAt(t), tau = t - seg.t0, play = seg.play || null;
     drawOverlay(seg, tau);
-    if (seg.kind === 'final' && tau >= seg.dur - 0.05) { location.replace(location.pathname + '?seed=' + (SEED + 1) + (speed !== 1 ? '&speed=' + speed : '')); return; }
+    if (seg.kind === 'final' && tau >= seg.dur - 0.05) { nextGame(); return; }
     var count = '', outs = 0, bases = [], done = false, thrown = 0, laneMain = null, laneSub = null;
     if (play) {
       var i = seg.i === undefined ? -1 : seg.i;
@@ -1299,6 +1304,10 @@ tr.tag td.num { letter-spacing:0; }
   render(T);
   requestAnimationFrame(frame);
   window.BALLGAME = { G: G, SEG: SEG, seek: function (t) { T = t; }, total: total };
+  // The wall's stall watchdog asks how long this URL may be held: one whole game at
+  // this speed (per run) plus a few seconds to build and lay it out (once).
+  function declareBudget() { window.WALL_SECONDS_PER_RUN = Math.round(total / (speed || SPEED)); window.WALL_SECONDS_ONCE = 5; }
+  declareBudget();
 })();
 </script>
 </body>
