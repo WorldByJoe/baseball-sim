@@ -1,0 +1,59 @@
+run_pa  N=50000  seed=11  pitches=187663  (21.8 s)
+                    metric    model      MLB
+-- per plate appearance
+                        K%     22.8     22.6
+                       BB%     12.1      8.2
+                      HBP%      0.4      1.1
+                       HR%      2.1      3.0
+           balls in play %     62.6     65.1
+            pitches per PA     3.75     3.90
+-- per pitch
+                      ball     40.4     36.3
+             called strike     17.9     16.4
+           swinging strike     10.1     11.1
+                      foul     14.2     17.9
+         in play (incl HR)     17.2     17.3
+        first-pitch strike     59.1     61.0
+-- plate discipline
+                    zone %     48.3     49.0
+                   swing %     41.6     47.2
+              zone swing %     63.1     67.2
+                   chase %     21.5     28.5
+            zone contact %     81.2     85.2
+           chase contact %     60.3     56.5
+                 contact %     75.6     76.3
+-- batted balls in fair territory (n=32349)
+            exit velo mean     93.4     88.5
+              exit velo sd     10.4      ~14
+         launch angle mean     10.3     12.5
+           launch angle sd     28.5      ~26
+          hard hit % (95+)     50.7     38.5
+                  barrel %      6.8      7.8
+       ground ball % (<10)     50.9       43
+      line drive % (10-25)     19.0       24
+        fly ball % (25-50)     20.9       24
+             popup % (>50)      9.2        9
+             HR / fly ball     10.7      ~17
+     HR projected distance      378     ~400
+              HR exit velo    104.4   ~103.5
+           HR launch angle     27.8      ~28
+                    pull %     37.2       40
+                  centre %     42.8       34
+                opposite %     19.9       26
+-- by pitch type: usage / whiff per swing / mean EV   (MLB whiff: FF 21, SI 13, FC 23, SL 34, ST 33, CU 31, CH 31, FS 34)
+                        FF     37.7     33.0     92.8
+                        FC      2.9     16.5     95.1
+                        CU      6.4      6.3     88.7
+                        CH      8.3     32.5     94.9
+                        ST      4.6     16.8     94.1
+                        SI     12.6     12.8     93.6
+                        SL     23.5     21.8     95.0
+                        FS      3.9     31.0     95.2
+-- why swings missed (share of misses)
+                     under     51.0         
+                      over     34.1         
+               off the end     10.3         
+                 way early      2.5         
+                  way late      1.3         
+          inside the hands      0.5         
+               no catch-up      0.2         

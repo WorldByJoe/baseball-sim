@@ -1,0 +1,33 @@
+run_games  N=300 games  seed=11  (11.0 s)
+                  metric    model      MLB
+-- per team-game
+                    runs     2.77     4.39
+                    hits     7.19     8.15
+                 doubles     1.70     1.60
+                 triples     0.39     0.14
+               home runs     0.69     1.12
+                   walks     3.61     3.10
+              strikeouts     9.63     8.40
+                  errors     0.66     0.55
+            double plays     1.16     0.72
+            left on base     4.74     ~6.8
+                 pitches      137      146
+           pitchers used     3.75      4.2
+        innings per game     9.38      9.1
+    extra-inning games %     14.3       ~8
+-- batting
+                     AVG     .212     .243
+                     OBP     .289     .312
+                     SLG     .346     .399
+                   BABIP     .274     .291
+                      K%     25.5     22.6
+                     BB%      9.6      8.2
+                     HR%      1.8      3.0
+-- BABIP by batted-ball type (MLB: GB .24, LD .68, FB .12, PU .02)
+             GB (n=7151)     .262         
+             LD (n=2263)     .722         
+             FB (n=2460)     .150         
+             PU (n=2335)     .009         
+     GB / LD / FB / PU %49/16/19/1643/24/24/9
+-- outcomes of balls in play: {"OUT":9134,"1B":2643,"3B":235,"HR":416,"2B":1021,"FC":818,"E":334,"SF":24}
+-- team runs: min 0 median 2 max 14   shutouts 104/600

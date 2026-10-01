@@ -1,0 +1,1305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ballgame</title>
+<!-- ============================================================================
+  baseball.html · v1.6 · 2026-09-30
+
+  The baseball app's screen: a whole game, played by the engine up front
+  (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
+  (Joe, 2026-09-29): a pitch every ten seconds or so, every number on
+  screen real, nothing hidden. The schedule is deterministic, so ?t=SECONDS
+  seeks to any moment of a game (used to check frames headless), ?seed=N
+  draws another game, ?speed=X paces it.
+
+  Each pitch is three beats. SETUP (3 s): the count, the pitcher's intent
+  and pitch mix, where he is aiming (crosshair, one-sigma command circle),
+  and the pitch the batter is sitting on (his dashed picture of it).
+  FLIGHT (1.8 s): the real pitch flies in slow motion in the catcher's view
+  and across the field; the two paths separate at the commit point; his
+  barrel appears if he swings. RESULT: the read (picked up / fooled), his
+  judgement, the swing or the call, and for a ball in play the play itself
+  at real speed on the field - the ball's shadow and height, the fielder
+  who takes it, throws, runners, outs and runs - then the banner.
+
+  Around the action: line score and win-probability ribbon (an estimate
+  from run difference, innings left and the base-out state), count, outs,
+  bases, park air and umpire; the batter's and pitcher's trait cards with
+  250-PA projections; this at-bat's pitches. A pre-game screen shows both
+  lineups and starters first. Keys: space pauses, arrows skip a plate
+  appearance, up and down arrows change speed, g draws a new game.
+
+  Layout in design px of a 3840 x 2160 screen scaled to the window. Data
+  rows are the wall's 30 px floor (below its 37 px sofa floor, the price of
+  showing everything). Pitch-type colours: the eight validated dark hues,
+  assigned so every real repertoire is as distinct as they allow;
+  colour-blind separation waived for now (Joe).
+
+  CHANGED
+    v1.6  the running game on screen: a runner going with the pitch, the catcher's
+          throw, safe or out at the bag, wild pitches skipping to the backstop;
+          bases and outs follow each pitch; foul chases stay on reachable ground
+    v1.5  every man moves on a ball in play (bases covered, cut-off man, pitcher
+          and catcher backing up, outfielders backing up) and jogs back after;
+          runners go halfway on a fly that might drop; nobody drawn past the fence
+    v1.4  Joe's third look: fouls drawn with their own ball (not the at-bat's last);
+          unassisted putouts and the pitcher covering; fielders chase playable
+          fouls; dots warm with effort; the reasoning lingers between at-bats;
+          the at-bat panel lists his day; ribbon label off the plot; dugout text upright
+    v1.3  Joe's second look: a man the ball beats breaks for it and lunges late;
+          win probability shaded in team colours; speed on powers of two; the hit
+          ball leaves the catcher's view in the pitch's slow motion; the flight
+          inset follows the ground track; innings appear as reached, full names
+    v1.2  dugouts with the batting order and a manager, on-deck circles, bullpens
+          with the warming reliever; men jog off after outs and runs, a new
+          pitcher jogs in from the pen; batting dots carry positions; the
+          fatigue bar shows pitch count against stamina with the 70% tick
+    v1.1  Joe's eight: team colours, R H E, the bat always shown and swung, the
+          hit ball leaving the catcher's view, air/ground track styles and the
+          flight inset, plain words in the at-bat box, speed on the arrows
+    v1.0  the whole game animated on a deterministic schedule; pre-game and
+          final screens; line score, win probability, lane banners
+    v0.2  pitch codes keyed to their names in the pitcher card (Joe)
+    v0.1  mock-up: one real frame
+============================================================================ -->
+<style>
+:root{
+  --wu: min(calc(100vw / 3840), calc(100vh / 2160));
+  --t1: calc(93 * var(--wu));
+  --t2: calc(68 * var(--wu));
+  --t3: calc(51 * var(--wu));
+  --t4: calc(37 * var(--wu));
+  --t5: calc(30 * var(--wu));
+  --ink:   rgba(238,244,252,.95);
+  --ink-2: rgba(206,220,240,.78);
+  --ink-3: rgba(206,220,240,.48);
+  --ground: #0b0e14;
+  --plate: rgba(17,21,29,.94);
+  --edge:  rgba(255,255,255,.13);
+  --font-ui:   ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-num:  ui-monospace, "SF Mono", Menlo, monospace;
+  --font-name: Georgia, "Times New Roman", serif;
+  --r: calc(16 * var(--wu));
+}
+html, body { margin:0; height:100%; background:var(--ground); color:var(--ink); overflow:hidden; }
+#stage { position:absolute; left:50%; top:50%; width:calc(3840 * var(--wu)); height:calc(2160 * var(--wu));
+         transform:translate(-50%, -50%); }
+#stage > * { position:absolute; box-sizing:border-box; }
+.plate { background:var(--plate); border:1px solid var(--edge); border-radius:var(--r);
+         padding:calc(20 * var(--wu)) calc(30 * var(--wu)); overflow:hidden; }
+.key  { font:400 var(--t5)/1.36 var(--font-num); letter-spacing:.10em; text-transform:uppercase; color:var(--ink-2); }
+.tag  { font:400 var(--t5)/1.3 var(--font-num); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); }
+.fig  { font:300 var(--t3)/1.2 var(--font-ui); }
+.big  { font:300 var(--t2)/1.15 var(--font-ui); }
+.name { font:italic 400 var(--t4)/1.25 var(--font-name); }
+.row  { font:400 var(--t5)/1.36 var(--font-num); white-space:nowrap; }
+.row > .key:first-child { display:inline-block; width:calc(150 * var(--wu)); }
+.dim  { opacity:.45; }
+.hot  { color:var(--ink); }
+.soft { color:var(--ink-2); }
+.faint{ color:var(--ink-3); }
+.sw   { display:inline-block; width:calc(22 * var(--wu)); height:calc(22 * var(--wu)); border-radius:50%;
+        vertical-align:middle; margin-right:calc(12 * var(--wu)); }
+.track{ display:inline-block; position:relative; width:calc(130 * var(--wu)); height:calc(12 * var(--wu));
+        background:rgba(255,255,255,.08); border-radius:calc(6 * var(--wu)); vertical-align:middle; }
+.track > i { position:absolute; left:0; top:0; bottom:0; border-radius:calc(6 * var(--wu)); background:var(--ink-2); }
+.track > b { position:absolute; top:calc(-4 * var(--wu)); bottom:calc(-4 * var(--wu)); width:calc(2 * var(--wu)); background:var(--ink-3); }
+.gap  { height:calc(14 * var(--wu)); }
+table { border-collapse:collapse; }
+td    { padding:0 calc(18 * var(--wu)) 0 0; white-space:nowrap; }
+td.num{ text-align:right; padding:0 0 0 calc(9 * var(--wu)); }
+td.on { color:var(--ink); }
+td.rhe { padding-left:calc(12 * var(--wu)); }
+td.num:not(.rhe) + td.rhe { border-left:1px solid var(--edge); padding-left:calc(14 * var(--wu)); }
+.tight td.num:not(.rhe) { padding-left:calc(7 * var(--wu)); }
+tr.tag td.num { letter-spacing:0; }
+.wide td.num { padding-left:calc(26 * var(--wu)); }
+#lane { left:calc(660 * var(--wu)); top:calc(310 * var(--wu)); width:calc(1010 * var(--wu)); text-align:center; pointer-events:none;
+        font:300 var(--t2)/1.25 var(--font-ui); letter-spacing:.01em; color:var(--ink); text-shadow:0 0 calc(30*var(--wu)) #000, 0 0 calc(8*var(--wu)) #000;
+        opacity:0; transition:opacity .4s; }
+#lane.on { opacity:1; }
+#lane .sub { font:400 var(--t4)/1.4 var(--font-num); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2); display:block; }
+#overlay { left:0; top:0; width:100%; height:100%; background:var(--ground); padding:calc(90 * var(--wu)) calc(134 * var(--wu)); display:none; }
+#overlay.on { display:block; }
+#overlay h1 { font:italic 400 var(--t1)/1.15 var(--font-name); margin:0 0 calc(10 * var(--wu)); }
+#overlay .cols { display:flex; gap:calc(120 * var(--wu)); margin-top:calc(50 * var(--wu)); }
+#overlay .cols > div { flex:1; }
+#overlay .tm { font:italic 400 var(--t3)/1.2 var(--font-name); margin-bottom:calc(16 * var(--wu)); }
+#hud { right:calc(134 * var(--wu)); bottom:calc(22 * var(--wu)); }
+#wp { display:block; width:100%; height:calc(84 * var(--wu)); margin-top:calc(10 * var(--wu)); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="field"></canvas>
+  <div id="board" class="plate"></div>
+  <div id="state" class="plate"></div>
+  <canvas id="zone"></canvas>
+  <div id="think" class="plate"></div>
+  <div id="bcard" class="plate"></div>
+  <div id="pcard" class="plate"></div>
+  <div id="seq" class="plate"></div>
+  <div id="lane"></div>
+  <div id="overlay"></div>
+  <div id="hud" class="tag"></div>
+</div>
+<!-- version tags so a browser never runs a stale engine against a new page -->
+<script src="bb_engine.js?v=0.7"></script>
+<script src="bb_names.js?v=0.1"></script>
+<script src="bb_field.js?v=0.6"></script>
+<script src="bb_game.js?v=0.6"></script>
+<script>
+(function () {
+  'use strict';
+  var U = BB.units, FT = U.FT, IN = U.IN, MPH = U.MPH, DEG = U.DEG, GEO = BB.geometry;
+  var COL = { FF: '#199e70', SI: '#3987e5', FC: '#9085e9', SL: '#c98500', ST: '#d95926', CU: '#d55181', CH: '#008300', FS: '#e66767' };
+  var INK = 'rgba(238,244,252,.95)', INK2 = 'rgba(206,220,240,.78)', INK3 = 'rgba(206,220,240,.48)';
+  // team colours: two of six, chosen from the nickname so the game's own random stream is untouched
+  var TEAM_COLS = ['#e8c547', '#6ec1ff', '#ff8a65', '#c7a3ff', '#7fe0b2', '#ff7fb0'];
+  function hashStr(t) { var h = 7; for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0; return h; }
+  var MONO = 'ui-monospace, "SF Mono", Menlo, monospace';
+  var Q = new URLSearchParams(location.search);
+  var SEED = +Q.get('seed') || 59, SPEED = +Q.get('speed') || 1, SEEK = +Q.get('t') || 0;
+  var PACE = { pregame: 45, halfStart: 4, paStart: 4, setup: 3, flight: 1.8, take: 2.6, foul: 2.4, bipPad: 2.6, change: 3.5, halfEnd: 4.5, final: 40 };
+  var BASES = BBField.BASES;
+
+  function Phi(z) { var t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989422804 * Math.exp(-z * z / 2);
+    var p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; }
+  function f0(v) { return Math.round(v).toLocaleString(); }
+  function f1(v) { return (Math.round(v * 10) / 10).toFixed(1); }
+  function pct(a, b) { return b ? f1(100 * a / b) : '-'; }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+  function place(id, x, y, w, h) {
+    var el = document.getElementById(id);
+    el.style.left = 'calc(' + x + ' * var(--wu))'; el.style.top = 'calc(' + y + ' * var(--wu))';
+    el.style.width = 'calc(' + w + ' * var(--wu))'; if (h) el.style.height = 'calc(' + h + ' * var(--wu))';
+    return el;
+  }
+  function setHTML(el, html) { if (el._h !== html) { el._h = html; el.innerHTML = html; } }
+  var ORD = ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th', '13th', '14th', '15th', '16th', '17th', '18th'];
+
+  // ============================================================ THE GAME
+  var rng = BB.makeRng(SEED), teams = BBNames.teams(rng);
+  var away = BBGame.makeTeam(rng, teams[0]), home = BBGame.makeTeam(rng, teams[1]);
+  var env = BB.mlbEnv(rng), parkName = BBNames.park(rng);
+  var ump = BB.makeUmp(rng); ump.name = BBNames.fullName(BBNames.person(rng));
+  var G = BBGame.simGame(away, home, { rng: rng, env: env, ump: ump });
+  away.col = TEAM_COLS[hashStr(away.nick) % 6];
+  home.col = TEAM_COLS[(hashStr(home.nick) + (TEAM_COLS[hashStr(home.nick) % 6] === away.col ? 1 : 0)) % 6];
+  var rho0 = BB.makeEnv({ tempF: 70, elevFt: 0, rh: 0.5 }).rho;
+
+  // Run expectancy by outs and base state (bits 1B=1, 2B=2, 3B=4); the rest of the
+  // game as normal noise. An estimate, labelled as one.
+  var RE = [[0.48, 0.86, 1.10, 1.44, 1.35, 1.78, 1.96, 2.29], [0.26, 0.51, 0.66, 0.90, 0.95, 1.13, 1.38, 1.54], [0.10, 0.22, 0.32, 0.43, 0.35, 0.48, 0.58, 0.75]];
+  function winProb(inning, half, outs, bases, score) {
+    if (outs >= 3) { half = 1 - half; if (half === 0) inning++; outs = 0; bases = [null, null, null, null]; }
+    var idx = (bases[1] ? 1 : 0) + (bases[2] ? 2 : 0) + (bases[3] ? 4 : 0), re = RE[Math.min(outs, 2)][idx];
+    var left = Math.max(0, 9 - inning), awayH = left, homeH = left + (half === 0 ? 1 : 0);
+    var mean = (score[1] - score[0]) + (half === 1 ? re : -re) + 0.48 * (homeH - awayH);
+    var sd = Math.sqrt(0.9 * (awayH + homeH) + 0.9);
+    return Phi(mean / sd);
+  }
+  // score before each play, runs in the half so far, win probability
+  (function () {
+    var sc = [0, 0], innRuns = 0, last = null;
+    G.plays.forEach(function (p) {
+      if (!last || last.inning !== p.inning || last.half !== p.half) innRuns = 0;
+      p.scoreBefore = sc.slice(); p.innRunsBefore = innRuns;
+      p.wpBefore = winProb(p.inning, p.half, p.outs, p.bases, sc);
+      sc = p.score.slice(); innRuns += p.runs; last = p;
+      p.wpAfter = winProb(p.inning, p.half, p.outsAfter, p.basesAfter, sc);
+    });
+    G.plays[G.plays.length - 1].wpAfter = G.score[1] > G.score[0] ? 1 : 0;
+  })();
+
+  // 250-PA projections for the cards and the pre-game sheet; a separate stream
+  var r2 = BB.makeRng((SEED ^ 0x5bd1e995) >>> 0), lp = [], lb = [], k;
+  for (k = 0; k < 24; k++) lp.push(BB.makePitcher(r2, { role: k < 14 ? 'SP' : 'RP' }));
+  for (k = 0; k < 48; k++) lb.push(BB.makeBatter(r2, {}));
+  var U2 = BB.makeUmp(r2), PROJ = {};
+  function newStats() { return { pa: 0, K: 0, BB: 0, HR: 0, sw: 0, wh: 0, oz: 0, ch: 0, np: 0, iz: 0, ev: 0, nev: 0 }; }
+  function addPA(s, r) {
+    s.pa++; if (r.result === 'K') s.K++; if (r.result === 'BB') s.BB++; if (r.result === 'HR') s.HR++;
+    r.pitches.forEach(function (p) {
+      s.np++; if (p.inZone) s.iz++; else s.oz++;
+      if (p.swing) { s.sw++; if (!p.swing.contact) s.wh++; if (!p.inZone) s.ch++; }
+      if (p.bb && p.bb.fair) { s.ev += p.bb.ev; s.nev++; }
+    });
+  }
+  function projBatter(B) {
+    if (PROJ['b' + B.id]) return PROJ['b' + B.id];
+    var s = newStats();
+    for (var i = 0; i < 250; i++) { var P = lp[i % lp.length]; P.load = r2.u() * P.stamina; addPA(s, BB.simPA(P, B, { env: BB.mlbEnv(r2), ump: U2, framing: 0, seen: r2.u() * 80 }, r2)); }
+    return (PROJ['b' + B.id] = s);
+  }
+  function projPitcher(P) {
+    if (PROJ['p' + P.id]) return PROJ['p' + P.id];
+    var s = newStats(), save = P.load;
+    for (var i = 0; i < 250; i++) { P.load = r2.u() * P.stamina; addPA(s, BB.simPA(P, lb[i % lb.length], { env: BB.mlbEnv(r2), ump: U2, framing: 0, seen: r2.u() * 80 }, r2)); }
+    P.load = save;
+    return (PROJ['p' + P.id] = s);
+  }
+  // movement of a pitcher's pitches (vs spinless), for his card
+  function movement(P) {
+    if (P._moved) return;
+    var rel = BB.releasePoint(P);
+    P.pitches.forEach(function (q) {
+      var spd = q.velo * MPH, a = BB.aim(rel, spd, q.rpm, q.tilt, q.eff, P.armSide, [0, 0.76], env, null);
+      var d = BB.dirOf(a.yaw, a.pit), v0 = [d[0] * spd, d[1] * spd, d[2] * spd];
+      var r = BB.flyPitch(rel, v0, BB.spinVector(d, q.rpm, q.tilt, q.eff, P.armSide), env, false), o = BB.flyPitch(rel, v0, [0, 0, 0], env, false);
+      q.ivb = (r.z - o.z) / IN; q.hb = (r.x - o.x) / IN * P.armSide;
+    });
+    P._moved = true;
+  }
+
+  // ========================================================= THE SCHEDULE
+  var SEG = [], total = 0;
+  function add(kind, dur, d) { var s = d || {}; s.kind = kind; s.dur = dur; s.t0 = total; SEG.push(s); total += dur; return s; }
+  function playDuration(play) {
+    var r = play.play, bb = play.pa.bb;
+    if (!r) return 2;
+    var t = bb.hang + 1;
+    r.events.forEach(function (e) { if (e.t) t = Math.max(t, e.t); if (e.arrive) t = Math.max(t, e.arrive); });
+    if (r.hit === 'HR') t = bb.hang + 2.5;
+    return Math.min(t, 16) + 0.6;
+  }
+  add('pregame', PACE.pregame);
+  G.innings.forEach(function (inn) {
+    add('halfStart', PACE.halfStart, { inn: inn });
+    inn.plays.forEach(function (play) {
+      if (play.newPitcher) add('change', PACE.change, { play: play, change: play.newPitcher });
+      if (play.pinchHit) add('change', PACE.change, { play: play, pinch: play.pinchHit });
+      add('paStart', PACE.paStart, { play: play });
+      var n = play.pa.pitches.length;
+      play.pa.pitches.forEach(function (p, i) {
+        add('setup', PACE.setup, { play: play, i: i });
+        add('flight', PACE.flight, { play: play, i: i });
+        var last = i === n - 1, dur, running = (p.steal && !p.steal.back) || p.wild;   // a steal or a wild pitch plays out in real time
+        if (last && play.play) dur = playDuration(play) + PACE.bipPad;
+        else if (p.result === 'foul') dur = (p.bb ? Math.min(p.bb.hang, 3) : 0) + PACE.foul;
+        else dur = running ? 5.0 : PACE.take;
+        var sg = add('result', dur, { play: play, i: i, last: last });
+        p.tResult = sg.t0;
+        if (last) { play.tResult = sg.t0; play.tResolve = sg.t0 + (play.play ? playDuration(play) - 0.6 : running ? 2.6 : 0.4); }
+      });
+    });
+    inn.tEnd = add('halfEnd', PACE.halfEnd, { inn: inn }).t0;
+  });
+  add('final', PACE.final);
+  function segAt(t) {
+    var lo = 0, hi = SEG.length - 1;
+    while (lo < hi) { var m = (lo + hi + 1) >> 1; if (SEG[m].t0 <= t) lo = m; else hi = m - 1; }
+    return SEG[lo];
+  }
+
+  // ============================================================ THE CLOCK
+  var T = SEEK, speed = SPEED, paused = false, lastNow = null;
+  document.addEventListener('keydown', function (e) {
+    var s = segAt(T), i = SEG.indexOf(s);
+    if (e.key === ' ') { paused = !paused; e.preventDefault(); }
+    else if (e.key === 'ArrowRight') { for (var j = i + 1; j < SEG.length; j++) if (SEG[j].kind === 'paStart' || SEG[j].kind === 'halfStart' || SEG[j].kind === 'final') { T = SEG[j].t0; break; } }
+    else if (e.key === 'ArrowLeft') { for (var q = i - 1; q >= 0; q--) if (SEG[q].kind === 'paStart' || SEG[q].kind === 'halfStart') { T = SEG[q].t0; break; } }
+    else if (e.key === 'ArrowUp') { speed = Math.min(16, speed * 2); e.preventDefault(); }       // powers of two, 1/4x to 16x (Joe)
+    else if (e.key === 'ArrowDown') { speed = Math.max(0.25, speed / 2); e.preventDefault(); }
+    else if (e.key === 'g') location.replace(location.pathname + '?seed=' + (SEED + 1) + (speed !== 1 ? '&speed=' + speed : ''));
+    else if (e.key === 'p' && s.kind === 'pregame') T = s.t0 + s.dur;
+  });
+
+  // ============================================================== FIELD
+  var FW = 2330, FH = 1690, S = 3.3, HX = 1165, HY = 1600;
+  function fx(m) { return HX + m / FT * S; }        // metres -> canvas x
+  function fy(m) { return HY - m / FT * S; }
+  function polarFt(r, a) { return [r * Math.sin(a * DEG), r * Math.cos(a * DEG)]; }
+  var fieldC, fieldG, bg = null, zoneC, zoneG;
+  function setup(id, W, H, x, y) {
+    var c = place(id, x, y, W, H), r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr);
+    var g = c.getContext('2d'); g.setTransform(c.width / W, 0, 0, c.height / H, 0, 0);
+    return { c: c, g: g };
+  }
+  function text(g, s, x, y, px, col, align, base) {
+    g.font = px + 'px ' + MONO; g.fillStyle = col; g.textAlign = align || 'left'; g.textBaseline = base || 'alphabetic';
+    g.fillText(s, x, y);
+  }
+  function drawFieldBG(g) {
+    var a, p, fenceFt = function (sp) { return BB.fenceAt(env, sp) / FT; };
+    var pf = function (rFt, aDeg) { var q = polarFt(rFt, aDeg); return [HX + q[0] * S, HY - q[1] * S]; };
+    g.fillStyle = '#0b0e14'; g.fillRect(0, 0, FW, FH);
+    g.beginPath();
+    var cL = pf(fenceFt(-45), -45), cR = pf(fenceFt(45), 45);
+    g.moveTo(cL[0] - 32, cL[1] + 32);
+    for (a = 225; a <= 315; a += 5) { p = pf(60, a + 90); g.lineTo(p[0], p[1]); }
+    g.lineTo(cR[0] + 32, cR[1] + 32);
+    for (a = 45; a >= -45; a -= 1) { p = pf(fenceFt(a), a); g.lineTo(p[0], p[1]); }
+    g.closePath(); g.fillStyle = '#152018'; g.fill();
+    function wedge(inset) { g.beginPath(); g.moveTo(HX, HY); for (a = -45; a <= 45; a += 1) { p = pf(fenceFt(a) - inset, a); g.lineTo(p[0], p[1]); } g.closePath(); }
+    wedge(0); g.fillStyle = '#2d251c'; g.fill();
+    wedge(15); g.fillStyle = '#1b281d'; g.fill();
+    g.save(); wedge(0); g.clip(); g.beginPath(); g.arc(HX, HY - 60.5 * S, 95 * S, 0, 7); g.fillStyle = '#3a2f23'; g.fill(); g.restore();
+    var b1 = pf(90, 45), b2 = pf(127.28, 0), b3 = pf(90, -45);
+    g.beginPath(); g.moveTo(HX, HY - 7 * S); g.lineTo(b1[0] - 6 * S, b1[1]); g.lineTo(HX, b2[1] + 7 * S); g.lineTo(b3[0] + 6 * S, b3[1]); g.closePath();
+    g.fillStyle = '#1b281d'; g.fill();
+    [[0, 59, 9], [0, 0, 13]].forEach(function (c) { g.beginPath(); g.arc(HX + c[0] * S, HY - c[1] * S, c[2] * S, 0, 7); g.fillStyle = '#3a2f23'; g.fill(); });
+    g.strokeStyle = 'rgba(238,244,252,.5)'; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(cL[0], cL[1]); g.lineTo(HX, HY); g.lineTo(cR[0], cR[1]); g.stroke();
+    g.beginPath(); for (a = -45; a <= 45; a += 1) { p = pf(fenceFt(a), a); if (a === -45) g.moveTo(p[0], p[1]); else g.lineTo(p[0], p[1]); }
+    g.strokeStyle = 'rgba(238,244,252,.7)'; g.lineWidth = 5; g.stroke();
+    [-45, -22.5, 0, 22.5, 45].forEach(function (s) { var q = pf(fenceFt(s) - 24, s); text(g, f0(fenceFt(s)), q[0], q[1], 30, 'rgba(238,244,252,.6)', 'center', 'middle'); });
+    g.fillStyle = INK;
+    [b1, b2, b3].forEach(function (b) { g.save(); g.translate(b[0], b[1]); g.rotate(Math.PI / 4); g.fillRect(-7, -7, 14, 14); g.restore(); });
+    g.beginPath(); g.moveTo(HX - 0.71 * S, HY - 1.42 * S); g.lineTo(HX + 0.71 * S, HY - 1.42 * S); g.lineTo(HX + 0.71 * S, HY - 0.71 * S); g.lineTo(HX, HY);
+    g.lineTo(HX - 0.71 * S, HY - 0.71 * S); g.closePath(); g.fill();
+    g.fillRect(HX - 1 * S, HY - 61 * S, 2 * S, 0.5 * S);
+  }
+  function person(g, x, y, label, effort) {   // effort 0..1 lights the dot: his speed over his own top speed (white, so no team colour is mistaken for it)
+    g.beginPath(); g.arc(x, y, 20, 0, 7); g.fillStyle = '#0b0e14'; g.fill();
+    if (effort > 0.02) { g.fillStyle = 'rgba(238,244,252,' + (0.9 * effort).toFixed(2) + ')'; g.fill(); }
+    g.lineWidth = 3; g.strokeStyle = INK; g.stroke();
+    text(g, label, x, y + 1, 26, effort > 0.5 ? '#0b0e14' : INK, 'center', 'middle');
+  }
+  function runnerDot(g, x, y, col, label, alpha) {
+    if (alpha !== undefined) g.globalAlpha = alpha;
+    g.beginPath(); g.arc(x, y, 19, 0, 7); g.fillStyle = col || '#e8c547'; g.fill(); g.lineWidth = 3; g.strokeStyle = '#0b0e14'; g.stroke();
+    if (label) text(g, label, x, y + 1, 20, '#0b0e14', 'center', 'middle');
+    g.globalAlpha = 1;
+  }
+  function ring(g, x, y, label) {   // an empty seat
+    g.beginPath(); g.arc(x, y, 17, 0, 7); g.lineWidth = 2; g.strokeStyle = INK3; g.stroke();
+    if (label) text(g, label, x, y + 1, 18, INK3, 'center', 'middle');
+  }
+  function ballAt(g, x, y, z) {   // shadow on the ground, the ball raised by its height
+    var Y = fy(y), X = fx(x), h = z / FT;
+    g.beginPath(); g.ellipse(X, Y, 7 + h / 25, 5 + h / 40, 0, 0, 7); g.fillStyle = 'rgba(0,0,0,.45)'; g.fill();
+    g.beginPath(); g.arc(X, Y - h * 0.9, 7 + h / 30, 0, 7); g.fillStyle = INK; g.fill();
+  }
+  function lerp(a, b, u) { return [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u]; }
+  // where a runner is on the base paths at time t
+  function runnerPos(r, t) {
+    var start = (r.start === null || r.start === undefined) ? Infinity : r.start;
+    var from = BASES[r.from], lead = r.lead !== undefined ? r.lead : (r.from > 0 && start < 0.5 ? 3.5 : 0);
+    if (r.to <= r.from) return from;
+    var nx = BASES[r.from + 1], dn = Math.hypot(nx[0] - from[0], nx[1] - from[1]);
+    if (t <= start) { var l0 = lead > 4 ? 3.5 + (lead - 3.5) * clamp((t - 0.05) / 1.5, 0, 1) : lead;   // halfway: he jogs out there while the ball is up
+      return [from[0] + (nx[0] - from[0]) / dn * l0, from[1] + (nx[1] - from[1]) / dn * l0]; }
+    var f = clamp((t - start) / Math.max(0.2, r.arrive - start), 0, 1), L = 90 * FT, d0 = lead + f * ((r.to - r.from) * L - lead), acc = 0;
+    for (var b = r.from; b < r.to; b++) {
+      var A = BASES[b], Bp = BASES[b + 1];
+      if (d0 <= acc + L) { var u = (d0 - acc) / L; return [A[0] + (Bp[0] - A[0]) * u, A[1] + (Bp[1] - A[1]) * u]; }
+      acc += L;
+    }
+    return BASES[r.to];
+  }
+  function fieldEvent(r) { return r.events.filter(function (e) { return e.kind === 'catch' || e.kind === 'field' || e.kind === 'muff'; })[0]; }
+  // The men the ball beats. For each fielder who did not take it, the ball's
+  // nearest pass (below head height, before it was fielded): he breaks for that
+  // spot when he reads the ball and gets there just after it has gone. The
+  // fielding layer's ruling stands; this only shows the attempt - a comebacker
+  // past the pitcher at 0.4 s is by him before he can react, and used to look
+  // like it rolled through a man who never moved.
+  function lungeOf(play) {
+    if (play._lunge) return play._lunge;
+    var r = play.play, bb = play.pa.bb, L = {};
+    if (!r || !r.track || !r.fielded) return (play._lunge = L);
+    var tHeld = r.fielded.t, pts = [];
+    bb.path.forEach(function (q) { if (q[0] < tHeld && q[3] < 2.0) pts.push(q); });
+    r.track.ground.forEach(function (q) { if (q[0] < tHeld && q[3] < 2.0) pts.push(q); });
+    play.defense.forEach(function (F) {
+      if (F.pos === r.fielded.who || F.pos === 'C') return;
+      var best = null;
+      pts.forEach(function (q) { var d = Math.hypot(q[1] - F.at[0], q[2] - F.at[1]); if (!best || d < best.d) best = { d: d, t: q[0], at: [q[1], q[2]] }; });
+      if (best && best.d < 6) L[F.pos] = best;
+    });
+    return (play._lunge = L);
+  }
+  // the ball in play at time t: [x, y, z] or null once it is gone
+  function ballInPlay(play, t) {
+    var r = play.play, bb = play.pa.bb, P = bb.path, fld = fieldEvent(r), tHeld = fld ? fld.t : Infinity;
+    var throws = r.events.filter(function (e) { return e.kind === 'throw' || e.kind === 'carry'; });   // thrown, or carried to the bag
+    if (t < Math.min(bb.landT, tHeld) || !r.track) {
+      var i = 0; while (i < P.length - 1 && P[i + 1][0] < t) i++;
+      var q = P[i];
+      if (i === P.length - 1 && t > q[0] + 0.1) return r.track ? [q[1], q[2], 0] : null;
+      return [q[1], q[2], q[3]];
+    }
+    if (t < tHeld) {
+      var Gd = r.track.ground, j = 0; while (j < Gd.length - 1 && Gd[j + 1][0] < t) j++;
+      var s = Gd.length ? Gd[j] : null;
+      return s ? [s[1], s[2], s[3]] : [r.track.land.x, r.track.land.y, 0];
+    }
+    var pos = fld.at ? fld.at.slice() : [0, 0];
+    for (var k = 0; k < throws.length; k++) {
+      var th = throws[k]; if (t < th.t) break;
+      var to = BASES[th.to], from = th.from || pos;
+      if (t < th.arrive) { var u = (t - th.t) / Math.max(0.05, th.arrive - th.t), d = Math.hypot(to[0] - from[0], to[1] - from[1]), pt = lerp(from, to, u);
+        return [pt[0], pt[1], th.kind === 'carry' ? 1 : 1.5 + 4 * u * (1 - u) * Math.min(d / 25, 2.5)]; }
+      pos = to;
+    }
+    return [pos[0], pos[1], 1];
+  }
+  function runnerArrive(r, rn, bb) {
+    if (rn.arrive !== undefined) return rn.arrive;
+    var ev = r.events.filter(function (e) { return e.kind === 'safe' && e.who === rn.id; })[0];
+    var th = r.events.filter(function (e) { return e.kind === 'throw' && e.to === rn.to; })[0];
+    var a = ev && isFinite(ev.t) ? ev.t : th ? th.arrive : (rn.start || 0) + (rn.to - rn.from) * 3.7;
+    if (r.hit === 'HR') { rn.start = bb.hang * 0.3; a = bb.hang + (rn.to - rn.from) * 1.2; }
+    var ct = r.events.filter(function (e) { return e.kind === 'catch'; })[0];
+    if (rn.from === 0 && rn.out && ct) { rn.to = 1; rn.start = 0.05; a = ct.t + 4; rn.gone = ct.t; }   // the batter runs it out until the catch
+    rn.arrive = a; return a;
+  }
+
+  // ------------------------------------------------------------ the venue
+  // Dugouts, on-deck circles and bullpens sit in foul ground, parallel to the
+  // lines: home on the first-base side, visitors on third. `sd` is that side.
+  var WALK = 5.0;   // s: a man jogs back to the dugout in this long
+  function box(cx, cy, sd, len, wid) { return { cx: cx, cy: cy, rot: -sd * Math.PI / 4, len: len, wid: wid, sd: sd }; }
+  function dugoutOf(sd) { return box(HX + sd * 655, HY - 345, sd, 560, 76); }
+  function penOf(sd) { return box(HX + sd * 965, HY - 640, sd, 300, 80); }
+  function deckOf(sd) { return [HX + sd * 200, HY - 60]; }
+  function along(b, u, v) { var c = Math.cos(b.rot), sn = Math.sin(b.rot); return [b.cx + u * c - v * sn, b.cy + u * sn + v * c]; }
+  function slotU(sd, i) { return sd < 0 ? -220 + i * 48 : 220 - i * 48; }      // slot 1 farthest from home, manager nearest
+  function homeU(sd, k) { return sd < 0 ? k : -k; }                              // +k toward home plate along the box
+  function drawBox(g, b, label) {
+    g.save(); g.translate(b.cx, b.cy); g.rotate(b.rot);
+    g.fillStyle = 'rgba(17,21,29,.92)'; g.strokeStyle = 'rgba(255,255,255,.14)'; g.lineWidth = 2;
+    g.beginPath(); g.roundRect(-b.len / 2, -b.wid / 2, b.len, b.wid, 14); g.fill(); g.stroke();
+    g.restore();
+    if (label) textAlong(g, b, homeU(b.sd, -b.len / 2 + 90), b.wid / 2 + 26, label, 22, INK3);
+  }
+  // text written along a box, on its outer side (v positive is away from the field), always upright
+  function textAlong(g, b, u, v, str, px, col) {
+    var pt = along(b, u, b.sd < 0 ? v : -v);
+    g.save(); g.translate(pt[0], pt[1]); g.rotate(b.rot);
+    g.font = px + 'px ' + MONO; g.fillStyle = col; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(str, 0, 0); g.restore();
+  }
+  // who walks back after this play, and from where
+  function walksOf(play) {
+    if (play._walk) return play._walk;
+    var W = [], r = play.play, bb = play.pa.bb, t0 = play.tResult || 0;
+    if (r) r.runners.forEach(function (rn) {
+      var a = runnerArrive(r, rn, bb);
+      if (rn.out) W.push({ id: rn.id, t: t0 + (rn.gone !== undefined ? rn.gone : a), from: rn.gone !== undefined ? runnerPos(rn, rn.gone) : BASES[Math.min(3, rn.to)] });
+      else if (rn.to >= 4) W.push({ id: rn.id, t: t0 + a, from: BASES[0] });
+    });
+    else if (play.pa.result === 'K') W.push({ id: play.batter.id, t: (play.tResolve || 0), from: [0.6 * BB.batterSide(play.batter, play.pitcher), -0.3] });
+    // a man thrown out stealing walks in from the bag he never reached
+    play.pa.pitches.forEach(function (p) { if (p.steal && !p.steal.back && !p.steal.safe) W.push({ id: p.steal.id, t: (p.tResult || 0) + Math.max(0.5, p.steal.tRun - 1.35) + 1.4, from: BASES[p.steal.to] }); });
+    return (play._walk = W);
+  }
+  // THE RUNNING GAME on the field, in real time from the moment the pitch reaches
+  // the plate (tau 0 of the result segment): the runner has been going since the
+  // pitcher's first move, so he is 9 m down the line; the catcher's throw leaves
+  // after his transfer and reaches the bag at his pop time; the runner arrives at
+  // his own time. On a wild pitch the ball skips to the backstop and every man
+  // moves up. Returns the base dots to draw (with their positions) and the ball.
+  function runningGame(play, p, tau, TC, byId, g) {
+    var st = p.steal, w = p.wild, shown = {};
+    if (st && !st.back) {
+      var from = BASES[st.from], to = BASES[st.to], run = lerp(from, to, 9 / (90 * FT)), tArr = Math.max(0.5, st.tRun - 1.35), tBall = Math.max(0.4, st.tBall - 1.35);
+      var f = clamp(tau / tArr, 0, 1), pos = lerp(run, to, f), pl = byId[st.id];
+      if (!st.safe && tau > tArr + 1.4) shown[st.id] = null;                        // walking off (walksOf)
+      else { runnerDot(g, fx(pos[0]), fy(pos[1]), TC, pl && pl.pos); shown[st.id] = true; }
+      if (tau > 0.6 && tau < tBall + 0.5) {                                          // the throw
+        var u = clamp((tau - 0.6) / Math.max(0.3, tBall - 0.6), 0, 1), bp = lerp([0, 0], to, u);
+        g.strokeStyle = st.wild ? '#e66767' : 'rgba(238,244,252,.6)'; g.lineWidth = 2; g.setLineDash([4, 8]); g.beginPath(); g.moveTo(fx(0), fy(0)); g.lineTo(fx(to[0]), fy(to[1])); g.stroke(); g.setLineDash([]);
+        if (u < 1) ballAt(g, bp[0], bp[1], 1.5 + 4 * u * (1 - u));
+      }
+      if (!st.safe && tau > tArr && tau < tArr + 1.6) { g.strokeStyle = '#e66767'; g.lineWidth = 6; g.beginPath();
+        g.moveTo(fx(to[0]) - 18, fy(to[1]) - 18); g.lineTo(fx(to[0]) + 18, fy(to[1]) + 18); g.moveTo(fx(to[0]) + 18, fy(to[1]) - 18); g.lineTo(fx(to[0]) - 18, fy(to[1]) + 18); g.stroke(); }
+      if (st.safe && tau > tArr && tau < tArr + 1.6) text(g, 'SAFE', fx(to[0]) + 30, fy(to[1]) - 20, 37, TC, 'left');
+    } else if (st && st.back && tau < 1.5) {                                          // a foul: he trots back
+      var b0 = BASES[st.from], b1 = BASES[st.from + 1], back = lerp(lerp(b0, b1, 9 / (90 * FT)), lerp(b0, b1, 3.5 / (90 * FT)), clamp(tau / 1.5, 0, 1)), plb = byId[st.id];
+      runnerDot(g, fx(back[0]), fy(back[1]), TC, plb && plb.pos); shown[st.id] = true;
+    }
+    if (w) {
+      var k = clamp(tau / 1.2, 0, 1), px = p.pitch.plate.x, bs = [px, 0.4], be = [px * 4, -14];
+      if (tau < 2.0) { var q = lerp(bs, be, k); ballAt(g, q[0], q[1], 0.2); }
+      w.from.forEach(function (b) { var rp = lerp(BASES[b], BASES[b + 1], clamp((tau - 0.4) / 2.0, 0, 1)), pl2 = (p.bases || [])[b];
+        if (pl2) { if (b + 1 >= 4 && tau > 2.4) { if (tau < 3.9) text(g, '+1', fx(0) + 40, fy(0) - 30, 44, TC, 'left'); shown[pl2.id] = null; }
+          else { runnerDot(g, fx(rp[0]), fy(rp[1]), TC, pl2.pos); shown[pl2.id] = true; } } });
+    }
+    return shown;
+  }
+  // Where each man is at play time t (s from contact) on a ball in play. Every
+  // man moves. The man on the ball closes on it from his reaction time and
+  // carries it to the bag on an unassisted putout; the pitcher covers first when
+  // sent; a man the ball beats lunges late; everyone else takes his assignment:
+  // infielders cover their bases, the middle infielder on the ball's side goes
+  // out as the cut-off man, the pitcher breaks to first on a ball to the right
+  // side and backs up the plate (or third) on a hit, the catcher trails the
+  // batter up the line, outfielders back up the man on the ball. The fielding
+  // layer waits for a receiver to reach his bag before a throw can arrive; this
+  // shows him getting there. They stop where the play ends; nobody is drawn
+  // beyond the warning track.
+  function planner(play) {
+    if (play._plan) return play._plan;
+    var r = play.play, bb = play.pa.bb, fld = fieldEvent(r), tSettle = playDuration(play) - 0.6;
+    var runEvs = {}, cover = null;
+    r.events.forEach(function (e) { if (e.kind === 'carry') runEvs[e.who] = e; if (e.kind === 'cover') cover = e; });
+    var fw = fld ? fld.who : null, fwOF = fw === 'LF' || fw === 'CF' || fw === 'RF', hr = r.hit === 'HR', land = bb.landing;
+    var cut = land[0] > 0 ? '2B' : 'SS', men = !!(play.bases[2] || play.bases[3]), empty = !(play.bases[1] || play.bases[2] || play.bases[3]);
+    function toward(from, to, stopShort, maxMove) {   // a point on the way to `to`, short of it, no farther than maxMove
+      var d = Math.hypot(to[0] - from[0], to[1] - from[1]), m = Math.min(d - stopShort, maxMove); if (m <= 0) return null;
+      return [from[0] + (to[0] - from[0]) * m / d, from[1] + (to[1] - from[1]) * m / d];
+    }
+    function target(F) {
+      switch (F.pos) {
+        case '1B': return hr ? null : BASES[1];
+        case '3B': return hr ? null : BASES[3];
+        case '2B': case 'SS': return hr ? null : fwOF && F.pos === cut ? toward(F.at, fld.at, 25, 30) : BASES[2];
+        case 'P': return fw === '1B' || fw === '2B' ? BASES[1] : fwOF ? (men ? [0, -5] : [BASES[3][0] - 4, BASES[3][1] + 4]) : null;
+        case 'C': return fw && !fwOF && empty ? [BASES[1][0] + 5, BASES[1][1] + 5] : null;   // trails the batter only with nobody on; otherwise the plate is his
+        default: return toward(F.at, land, fwOF ? 8 : 20, fwOF ? 30 : 18);   // outfielders back up the man on the ball, or watch it leave
+      }
+    }
+    var lg = lungeOf(play);
+    function at(F, t) {
+      var re = F.react || 0.7, p = F.at, tt = Math.min(t, tSettle);
+      if (fld && F.pos === fld.who) {
+        var u = clamp((t - re) / Math.max(0.3, fld.t - re), 0, 1); u = u * u * (3 - 2 * u); p = lerp(F.at, fld.at, u);
+        var rv = runEvs[F.pos]; if (rv && t > rv.t) p = lerp(fld.at, BASES[rv.to], clamp((t - rv.t) / Math.max(0.2, rv.arrive - rv.t), 0, 1));
+      } else if (cover && F.pos === cover.who) { if (t > cover.t) p = lerp(F.at, BASES[cover.to], clamp((t - cover.t) / Math.max(0.3, cover.arrive - cover.t), 0, 1)); }
+      else {
+        var L = lg[F.pos], from = F.at, t0 = re;
+        if (L && t > re) {   // a man the ball beats breaks for it, arrives just after it has passed, then goes about his assignment from there
+          var f = clamp((t - re) / Math.max(0.2, L.t + 0.3 - re), 0, 1); f = f * f * (3 - 2 * f);
+          var run = Math.min(L.d * f, (F.speed || 27) * FT * 0.8 * (t - re)); p = [F.at[0] + (L.at[0] - F.at[0]) / L.d * run, F.at[1] + (L.at[1] - F.at[1]) / L.d * run];
+          from = [F.at[0] + (L.at[0] - F.at[0]) / L.d * Math.min(L.d, (F.speed || 27) * FT * 0.8 * (L.t + 0.3 - re)), F.at[1] + (L.at[1] - F.at[1]) / L.d * Math.min(L.d, (F.speed || 27) * FT * 0.8 * (L.t + 0.3 - re))];
+          t0 = L.t + 0.5;
+        }
+        var tg = target(F);
+        if (tg && tt > t0) { var d = Math.hypot(tg[0] - from[0], tg[1] - from[1]), tArr = t0 + BBField.moveTime(plOf(F), d) - re, k = clamp((tt - t0) / Math.max(0.2, tArr - t0), 0, 1); k = k * k * (3 - 2 * k); p = lerp(from, tg, k); }
+      }
+      return inside(p);
+    }
+    return (play._plan = at);
+  }
+  function inside(p) {   // pulled back onto the warning track if a spot lies past the fence
+    var rr = Math.hypot(p[0], p[1]), sp = Math.atan2(p[0], p[1]) / DEG;
+    if (rr < 1 || Math.abs(sp) > 45) return p;
+    var lim = BB.fenceAt(env, sp) - 2.5;   // the dot is 1.8 m in radius: keep all of it inside the line
+    return rr > lim ? [p[0] * lim / rr, p[1] * lim / rr] : p;
+  }
+  // A foul the defence can get near: the man with the best chance runs for it.
+  // The engine's foulCatch already decided whether he made it (a catch is a
+  // play, drawn as one); this is the try. Landing in the seats: nobody moves.
+  function plOf(F) { return { pos: F.pos, speed: F.speed || 27, react: F.react || 0.7, route: F.route || 1, glove: 1 }; }
+  function foulChase(play, p) {
+    if (p._chase !== undefined) return p._chase;
+    var bb = p.bb, out = null;
+    if (bb && bb.path && bb.hang >= 1.2 && BBField.accessible(bb.landing[0], bb.landing[1])) {   // in the seats or the dugout: nobody goes
+      var T = BBField.buildTrack(bb, env), best = null;
+      play.defense.forEach(function (F) { var pl = plOf(F), c = BBField.catchChance({ pos: F.pos, pl: pl, at: F.at }, T); if (!best || c.m > best.m) best = { pos: F.pos, m: c.m, pl: pl, at: F.at }; });
+      if (best && best.m > -2.5) out = { pos: best.pos, at: [T.land.x, T.land.y], land: T.land.t, tArr: BBField.moveTime(best.pl, Math.hypot(T.land.x - best.at[0], T.land.y - best.at[1])) };
+    }
+    return (p._chase = out);
+  }
+  function bumble(t, k) { return [Math.sin(t * 0.9 + k) * 12 + Math.sin(t * 2.3 + k * 2) * 5, Math.cos(t * 0.7 + k) * 10 + Math.cos(t * 1.9 + k) * 4]; }
+  function penThrow(tAbs) {   // where the ball is between the pen's mound (0) and plate (1)
+    var ph = tAbs % 3.6;
+    if (ph < 0.45) return { u: ph / 0.45, z: 0 };
+    if (ph < 1.2) return { u: 1, z: 0 };
+    if (ph < 2.5) { var f = (ph - 1.2) / 1.3; return { u: 1 - f, z: 4 * f * (1 - f) }; }
+    return { u: 0, z: 0 };
+  }
+  function drawPen(g, sd, who, TC, tAbs, name) {
+    var b = penOf(sd); drawBox(g, b, name ? name.toUpperCase() + ' BULLPEN' : 'BULLPEN');
+    var mound = along(b, homeU(sd, -100), 0), plate = along(b, homeU(sd, 100), 0);
+    g.fillStyle = INK3; g.fillRect(mound[0] - 6, mound[1] - 2, 12, 4); g.fillRect(plate[0] - 5, plate[1] - 5, 10, 10);
+    if (!who) return;
+    person(g, mound[0], mound[1], 'P'); person(g, plate[0], plate[1], 'C');
+    var th = penThrow(tAbs), pt = lerp(mound, plate, th.u);
+    g.beginPath(); g.arc(pt[0], pt[1] - th.z * 12, 5, 0, 7); g.fillStyle = INK; g.fill();
+    textAlong(g, b, 0, -(b.wid / 2 + 26), who.name.split(' ').pop() + ' warming', 24, INK2);   // inner side, facing the field
+  }
+
+  function drawField(seg, tau, tAbs) {
+    var g = fieldG;
+    if (!bg) { bg = document.createElement('canvas'); bg.width = fieldC.width; bg.height = fieldC.height;
+      var bgg = bg.getContext('2d'); bgg.setTransform(fieldC.width / FW, 0, 0, fieldC.height / FH, 0, 0); drawFieldBG(bgg); }
+    g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(bg, 0, 0); g.restore();
+    var play = seg.play;
+    // the venue, always
+    [-1, 1].forEach(function (sd) { var Tm = G.teams[sd < 0 ? 0 : 1]; drawBox(g, dugoutOf(sd), Tm.nick.toUpperCase()); var dk = deckOf(sd);
+      g.beginPath(); g.arc(dk[0], dk[1], 30, 0, 7); g.lineWidth = 2; g.strokeStyle = INK3; g.stroke(); });
+    if (!play) { [-1, 1].forEach(function (sd) { drawPen(g, sd, null); }); return; }
+    var half = play.half, batTeam = G.teams[half], defTeam = G.teams[1 - half], TC = batTeam.col;
+    var sdBat = half === 1 ? 1 : -1, sdDef = -sdBat;
+    var D = play.defense, r = play.play, bb = play.pa.bb;
+    var pitch = play.pa.pitches[seg.i === undefined ? play.pa.pitches.length - 1 : seg.i];
+    var inPlay = seg.kind === 'result' && seg.last && !!r, tb = inPlay ? tau : -1, pd = inPlay ? playDuration(play) : 0;
+    if (r && !r.runners) r.runners = [];
+    var runningLast = seg.last && ((pitch.steal && !pitch.steal.back) || pitch.wild);   // a steal or wild pitch on the last pitch plays out first
+    var settled = seg.kind === 'result' && seg.last && tau >= (r ? pd - 0.6 : runningLast ? 2.6 : 0.4);
+    var fld = inPlay ? fieldEvent(r) : null;
+    var byId = {}; byId[play.batter.id] = play.batter; [1, 2, 3].forEach(function (b) { if (play.bases[b]) byId[play.bases[b].id] = play.bases[b]; });
+    play.pa.pitches.forEach(function (q) { (q.bases || []).forEach(function (pl) { if (pl) byId[pl.id] = pl; }); });
+    var quiet = seg.kind === 'halfStart' || seg.kind === 'halfEnd' || seg.kind === 'change' || seg.kind === 'paStart';
+
+    // bullpens: whoever is warming, on either side
+    drawPen(g, sdDef, play.warming, defTeam.col, tAbs, defTeam.nick);
+    drawPen(g, sdBat, play.warmingBat, TC, tAbs, batTeam.nick);
+
+    // the defence: on a ball in play every man moves (planner); on a foul the
+    // nearest man chases it; between plays they jog back from where the last play
+    // left them. A dot warms with effort: speed over his own top speed.
+    var plan = inPlay ? planner(play) : null;
+    var chase = (!inPlay && seg.kind === 'result' && pitch.result === 'foul') ? foulChase(play, pitch) : null;
+    var back = null;
+    if (!inPlay && (seg.kind === 'paStart' || seg.kind === 'change')) { var kq = G.plays.indexOf(play), pq = kq > 0 ? G.plays[kq - 1] : null;
+      if (pq && pq.play && pq.half === play.half && pq.inning === play.inning) { var kb = clamp(tau / Math.max(1, seg.dur - 0.5), 0, 1); back = { plan: planner(pq), D: pq.defense, k: kb * kb * (3 - 2 * kb), end: playDuration(pq) }; } }
+    var tF = inPlay ? tb : tau;
+    // on a steal the middle infielder away from the hitter's pull side covers second (the third baseman covers third)
+    var stl = seg.kind === 'result' && pitch.steal && !pitch.steal.back ? pitch.steal : null;
+    var stealCover = stl ? (stl.to === 3 ? '3B' : BB.batterSide(play.batter, play.pitcher) < 0 ? '2B' : 'SS') : null;
+    function fielderAt(F, t) {
+      if (plan) return plan(F, t);
+      var re = F.react || 0.7;
+      if (stealCover && F.pos === stealCover) { var kc = clamp(t / 1.3, 0, 1); kc = kc * kc * (3 - 2 * kc); return lerp(F.at, BASES[stl.to], kc); }
+      if (chase && chase.pos === F.pos && t > re) {
+        var tStop = Math.min(t, chase.land + 0.4);   // gives up once it has landed
+        return lerp(F.at, chase.at, clamp((tStop - re) / Math.max(0.2, chase.tArr - re), 0, 1));
+      }
+      if (back) { var Fp = back.D.filter(function (q) { return q.pos === F.pos; })[0]; if (Fp) return lerp(back.plan(Fp, back.end), F.at, back.k); }
+      return F.at;
+    }
+    D.forEach(function (F) {
+      var at = fielderAt(F, tF), effort = 0;
+      if (plan || chase || stealCover) { var a1 = fielderAt(F, tF - 0.05), a2 = fielderAt(F, tF + 0.05); effort = clamp(Math.hypot(a2[0] - a1[0], a2[1] - a1[1]) / 0.1 / ((F.speed || 27) * FT), 0, 1); }
+      if (seg.kind === 'change' && F.pos === 'P' && seg.change) {   // the new man jogs in from the pen; the old one walks off
+        var pm = along(penOf(sdDef), homeU(sdDef, -100), 0), k = clamp(tau / (seg.dur - 0.4), 0, 1); k = k * k * (3 - 2 * k);
+        at = lerp([(pm[0] - HX) / S * FT, (HY - pm[1]) / S * FT], F.at, k);
+        var dg = along(dugoutOf(sdDef), homeU(sdDef, 236), 0), old = lerp(F.at, [(dg[0] - HX) / S * FT, (HY - dg[1]) / S * FT], k);
+        person(g, fx(old[0]), fy(old[1]), 'P');
+      }
+      if (!inPlay && !quiet) {
+        var dx = fx(F.at[0]) - fx(F.std[0]), dy = fy(F.at[1]) - fy(F.std[1]), L = Math.hypot(dx, dy);
+        if (L > 16) { g.beginPath(); g.arc(fx(F.std[0]), fy(F.std[1]), 6, 0, 7); g.fillStyle = INK3; g.fill();
+          g.strokeStyle = INK3; g.lineWidth = 3; g.beginPath(); g.moveTo(fx(F.std[0]), fy(F.std[1])); g.lineTo(fx(F.at[0]) - dx / L * 22, fy(F.at[1]) - dy / L * 22); g.stroke(); }
+      }
+      person(g, fx(at[0]), fy(at[1] - (F.pos === 'C' ? 1.8 : 0)), F.pos, effort);   // the catcher drawn a step back, clear of the batter
+    });
+    // the defence's dugout: empty seats, the DH sitting, the manager
+    var dgD = dugoutOf(sdDef);
+    defTeam.lineup.forEach(function (pl, i) { var sp = along(dgD, slotU(sdDef, i), 0);
+      if (pl.pos === 'DH' && G.rules === 'AL') runnerDot(g, sp[0], sp[1], defTeam.col, 'DH'); else ring(g, sp[0], sp[1], G.rules === 'NL' && pl.pos === 'DH' ? 'P' : pl.pos); });
+    var mD = along(dgD, homeU(sdDef, 236), 0); runnerDot(g, mD[0], mD[1], defTeam.col, 'M');
+
+    // the batting team: who is on the field, who is walking back, who is on deck, who sits
+    var onField = {};
+    if (!quiet && !settled) onField[play.batter.id] = true;
+    if (inPlay && tb <= pd - 0.6) {
+      r.runners.forEach(function (rn) {
+        var arrive = runnerArrive(r, rn, bb);
+        if (rn.to <= rn.from && rn.from > 0) { var bp = BASES[rn.from], plq = byId[rn.id]; runnerDot(g, fx(bp[0]), fy(bp[1]), TC, plq && plq.pos); onField[rn.id] = true; return; }
+        if (rn.gone !== undefined && tb > rn.gone) return;
+        if (rn.out && tb > arrive) {
+          if (tb < arrive + 1.6) { var ob = BASES[rn.to]; g.strokeStyle = '#e66767'; g.lineWidth = 6; g.beginPath();
+            g.moveTo(fx(ob[0]) - 18, fy(ob[1]) - 18); g.lineTo(fx(ob[0]) + 18, fy(ob[1]) + 18); g.moveTo(fx(ob[0]) + 18, fy(ob[1]) - 18); g.lineTo(fx(ob[0]) - 18, fy(ob[1]) + 18); g.stroke(); }
+          return;
+        }
+        if (!rn.out && rn.to >= 4 && tb > arrive) { if (tb < arrive + 1.5) text(g, '+1', fx(0) + 40, fy(0) - 30, 44, TC, 'left'); return; }
+        var pos = runnerPos(rn, tb), plr = byId[rn.id]; runnerDot(g, fx(pos[0]), fy(pos[1]), TC, plr && plr.pos); onField[rn.id] = true;
+      });
+    } else {
+      // the bases follow each pitch: a steal or wild pitch moves men mid-count
+      var running = seg.kind === 'result' && ((pitch.steal && !pitch.steal.back) || pitch.wild), shown = {};
+      var basesNow = (settled || seg.kind === 'halfEnd') ? play.basesAfter : (running && tau >= 2.6 && pitch.basesAfter) ? pitch.basesAfter : (pitch.bases || play.bases);
+      if (seg.kind === 'halfEnd') basesNow = [null, null, null, null];
+      if (seg.kind === 'result' && (pitch.steal || pitch.wild) && !settled) shown = runningGame(play, pitch, tau, TC, byId, g);
+      Object.keys(shown).forEach(function (id) { onField[id] = true; });
+      if (seg.kind === 'flight' && pitch.before) { var gb = BASES[pitch.before.from], gn = BASES[pitch.before.to], gl = lerp(gb, gn, (3.5 + 5.5 * clamp(tau / PACE.flight, 0, 1)) / (90 * FT)), gpl = byId[pitch.before.id];
+        runnerDot(g, fx(gl[0]), fy(gl[1]), TC, gpl && gpl.pos); shown[pitch.before.id] = true; onField[pitch.before.id] = true; }   // he's going
+      [1, 2, 3].forEach(function (b) { var pl = basesNow[b]; if (!pl || shown[pl.id] !== undefined) return; runnerDot(g, fx(BASES[b][0]), fy(BASES[b][1]), TC, pl.pos); onField[pl.id] = true; });
+      if (!quiet && !settled) runnerDot(g, fx(BB.batterSide(play.batter, play.pitcher) * 2.6), fy(0.3), TC, play.batter.pos);   // stood a little wide of the plate so he clears the catcher
+    }
+    // walkers: this play's outs and runs, the last play's tail, and men left on base at the end of a half
+    var walkers = {}, k0 = G.plays.indexOf(play), prev = k0 > 0 ? G.plays[k0 - 1] : null;
+    [prev, play].forEach(function (p) { if (!p || (prev && p === prev && (p.half !== play.half))) return;
+      walksOf(p).forEach(function (w) { var dt = tAbs - w.t; if (dt >= 0 && dt < WALK) walkers[w.id] = { from: w.from, f: dt / WALK }; }); });
+    if (seg.kind === 'halfEnd' && seg.inn) { var lastP = seg.inn.plays[seg.inn.plays.length - 1];
+      [1, 2, 3].forEach(function (b) { var pl = lastP.basesAfter[b]; if (pl && tau < WALK) walkers[pl.id] = { from: BASES[b], f: tau / WALK }; }); }
+    // on deck: the next man due in this half
+    var nextB = null;
+    if (seg.kind !== 'halfEnd') { var idx = batTeam.lineup.indexOf(play.batter);
+      var nxt = G.plays[k0 + 1]; if (nxt && nxt.half === play.half) nextB = nxt.batter; else if (idx >= 0) nextB = batTeam.lineup[(idx + 1) % 9]; }
+    if (seg.kind === 'halfStart') nextB = play.batter;
+    var dgB = dugoutOf(sdBat), dk = deckOf(sdBat);
+    batTeam.lineup.forEach(function (pl, i) {
+      var sp = along(dgB, slotU(sdBat, i), 0), lab = G.rules === 'NL' && pl.pos === 'DH' ? 'P' : pl.pos;
+      if (G.rules === 'NL' && pl.pos === 'DH') { ring(g, sp[0], sp[1], 'P'); return; }
+      if (onField[pl.id]) { ring(g, sp[0], sp[1], lab); return; }
+      var w = walkers[pl.id];
+      if (w) { var e = w.f * w.f * (3 - 2 * w.f), from = [fx(w.from[0]), fy(w.from[1])], pw = lerp(from, sp, e); runnerDot(g, pw[0], pw[1], TC, lab); ring(g, sp[0], sp[1], lab); return; }
+      if (nextB && pl.id === nextB.id) { var bm = bumble(tAbs, i); runnerDot(g, dk[0] + bm[0], dk[1] + bm[1], TC, lab); ring(g, sp[0], sp[1], lab); return; }
+      runnerDot(g, sp[0], sp[1], TC, lab);
+    });
+    var mB = along(dgB, homeU(sdBat, 236), 0); runnerDot(g, mB[0], mB[1], TC, 'M');
+
+    // the pitch crossing the field
+    if (seg.kind === 'flight' && pitch._path) {
+      var s = clamp(tau / PACE.flight, 0, 1), P = pitch._path, q = P[Math.min(P.length - 1, Math.floor(s * (P.length - 1)))];
+      ballAt(g, q[1], q[2], q[3]);
+    }
+    // the batted ball: fair balls in play, and fouls sailing off. A foul is THIS
+    // pitch's ball (play.pa.bb is the at-bat's last one - drawing that sent fouls
+    // over centre field, Joe's report)
+    var bbNow = inPlay ? bb : pitch.bb;
+    if (seg.kind === 'result' && bbNow && bbNow.path && (inPlay || pitch.result === 'foul')) {
+      var B3;
+      if (inPlay) B3 = ballInPlay(play, tb);
+      else { var P2 = bbNow.path, i2 = 0; while (i2 < P2.length - 1 && P2[i2 + 1][0] < tau) i2++; var q2 = P2[i2]; B3 = (i2 === P2.length - 1 && tau > q2[0] + 0.05) ? null : [q2[1], q2[2], q2[3]]; }
+      // in the air: a solid line; on the ground: dashed, only until a fielder has it
+      // (the track itself runs on to where the ball WOULD have rolled - drawing that
+      // put a dashed line past the man who fielded it: Joe's "balls roll past the fielder")
+      var tHeld = fld ? fld.t : Infinity;
+      if (inPlay && r.track && tb > bb.landT && tHeld > bb.landT) {
+        var tg = Math.min(tb, tHeld);
+        g.setLineDash([8, 10]); g.strokeStyle = 'rgba(238,244,252,.55)'; g.lineWidth = 3; g.beginPath(); g.moveTo(fx(bb.landing[0]), fy(bb.landing[1]));
+        r.track.ground.forEach(function (q, i) { if (q[0] <= tg && i % 3 === 0) g.lineTo(fx(q[1]), fy(q[2])); }); g.stroke(); g.setLineDash([]);
+      }
+      var upto = inPlay ? Math.min(tb, bb.landT) : tau;
+      g.strokeStyle = 'rgba(238,244,252,.6)'; g.lineWidth = 3; g.beginPath();
+      bbNow.path.forEach(function (q, i) { if (q[0] > upto) return; if (i === 0) g.moveTo(fx(q[1]), fy(q[2])); else g.lineTo(fx(q[1]), fy(q[2])); });
+      g.stroke();
+      drawProfile(g, bbNow, upto, TC, inPlay && r.track ? r.track : null, fld ? fld.t : Infinity, tb);
+      if (B3) ballAt(g, B3[0], B3[1], B3[2]);
+      if (inPlay && tb > bb.landT && r.hit !== 'HR') { var e2 = bb.landing; text(g, f0(bb.dist) + ' ft', fx(e2[0]) + (e2[0] < 0 ? -26 : 26), fy(e2[1]) + 10, 30, INK2, e2[0] < 0 ? 'right' : 'left'); }
+      if (inPlay && r.hit === 'HR' && tb > bb.hang) { var L2 = bb.path[bb.path.length - 1]; text(g, f0(bb.projDist) + ' ft', fx(L2[1]), fy(L2[2]) - 24, 37, INK, 'center'); }
+      if (inPlay) r.events.forEach(function (e) {
+        if (e.kind !== 'throw' || tb < e.t || tb > e.arrive + 0.6) return;
+        var from = e.from || (fld ? fld.at : [0, 0]), to = BASES[e.to];
+        g.strokeStyle = e.wild ? '#e66767' : 'rgba(238,244,252,.6)'; g.lineWidth = 2; g.setLineDash([4, 8]); g.beginPath(); g.moveTo(fx(from[0]), fy(from[1])); g.lineTo(fx(to[0]), fy(to[1])); g.stroke(); g.setLineDash([]);
+      });
+    }
+  }
+
+  // Side view of the flight, lower left: distance along the ground against
+  // height, with the fence and its wall at this spray angle. Drawn as far as
+  // the ball has gone: the flight solid, then its bounces and roll dashed
+  // (as on the field) until a fielder has it at tHeld.
+  function drawProfile(g, bb, upto, col, track, tHeld, tb) {
+    var x0 = 150, y0 = 1600, w = 480, h = 230, P = bb.path, Gd = track ? track.ground : [];
+    var fd = BB.fenceAt(env, Math.max(-45, Math.min(45, bb.spray))) / FT;
+    if (track && track._rmax === undefined) { var rm = 0; Gd.forEach(function (q) { if (q[0] <= tHeld) rm = Math.max(rm, Math.hypot(q[1], q[2])); }); track._rmax = rm / FT; }
+    var L = P[P.length - 1], dmax = Math.max(Math.hypot(L[1], L[2]) / FT, fd, track ? track._rmax : 0) * 1.06, hmax = Math.max(bb.apex * 1.15, 40);
+    function px(q) { return [x0 + Math.hypot(q[1], q[2]) / FT / dmax * w, y0 - q[3] / FT / hmax * h]; }
+    text(g, 'FLIGHT', x0, y0 - h - 22, 30, INK2);
+    g.strokeStyle = INK3; g.lineWidth = 2; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x0 + w, y0); g.stroke();
+    var fxp = x0 + fd / dmax * w;
+    g.strokeStyle = 'rgba(238,244,252,.7)'; g.lineWidth = 4; g.beginPath(); g.moveTo(fxp, y0); g.lineTo(fxp, y0 - env.wallFt / hmax * h); g.stroke();
+    g.strokeStyle = col; g.lineWidth = 4; g.beginPath();
+    var last = null;
+    P.forEach(function (q, i) { if (q[0] > upto) return; var s = px(q); if (i === 0) g.moveTo(s[0], s[1]); else g.lineTo(s[0], s[1]); last = s; });
+    g.stroke();
+    if (track && tb > bb.landT && last) {
+      var tg = Math.min(tb, tHeld);
+      g.setLineDash([8, 10]); g.beginPath(); g.moveTo(last[0], last[1]);
+      Gd.forEach(function (q, i) { if (q[0] > tg || i % 2) return; var s = px(q); g.lineTo(s[0], s[1]); last = s; });
+      g.stroke(); g.setLineDash([]);
+    }
+    if (last) { g.beginPath(); g.arc(last[0], last[1], 7, 0, 7); g.fillStyle = INK; g.fill(); }
+    text(g, '0', x0, y0 + 32, 30, INK3, 'left');
+    text(g, f0(dmax / 1.06) + ' ft', x0 + w, y0 + 32, 30, INK3, 'right');
+    text(g, f0(hmax) + ' ft', x0 - 10, y0 - h + 10, 26, INK3, 'right');
+  }
+
+  // ===================================================== CATCHER'S VIEW
+  var ZW = 1336, ZH = 820, ZX = 2370, ZY = 76, CAM_Y = -1.3, CAM_Z = 1.15, FOC = 1250, ZCX = ZW / 2, ZCY = 110;
+  function proj(x, y, z) { var d = y - CAM_Y; return [ZCX + FOC * x / d, ZCY - FOC * (z - CAM_Z) / d]; }
+  function atPlate(x, z) { return proj(x, GEO.Y_PLATE, z); }
+  var PXM = FOC / (GEO.Y_PLATE - CAM_Y);
+  function pitchPaths(play, p) {
+    if (!p._path) { p._path = BB.flyPitch(p.pitch.rel, p.pitch.v0, p.pitch.w0, env, true).path; p._ghost = BB.ghostPitch(p.pitch, p.expect, play.pitcher, env, true); }
+  }
+  function drawZone(seg, tau) {
+    var g = zoneG, play = seg.play;
+    g.fillStyle = 'rgba(17,21,29,.94)'; g.strokeStyle = 'rgba(255,255,255,.13)'; g.lineWidth = 2;
+    g.beginPath(); g.roundRect(1, 1, ZW - 2, ZH - 2, 16); g.fill(); g.stroke();
+    g.save(); g.beginPath(); g.roundRect(1, 1, ZW - 2, ZH - 2, 16); g.clip();
+    text(g, "CATCHER'S VIEW", 30, 52, 30, INK2);
+    if (!play) { g.restore(); return; }
+    var B = play.batter, P = play.pitcher, side = BB.batterSide(B, P), zb = B.zone.bot, zt = B.zone.top, ph = GEO.PLATE_HALF;
+    var b0 = atPlate(side * 0.58, 1.75), b1 = atPlate(side * 0.82, 0.25);
+    g.fillStyle = 'rgba(206,220,240,.06)'; g.beginPath(); g.roundRect(Math.min(b0[0], b1[0]), b0[1], Math.abs(b1[0] - b0[0]), b1[1] - b0[1], 30); g.fill();
+    text(g, B.bats === 'S' ? 'switch, batting ' + (side < 0 ? 'right' : 'left') : (side < 0 ? 'right-handed' : 'left-handed'), (b0[0] + b1[0]) / 2, b1[1] - 24, 26, INK3, 'center');
+    var a = atPlate(-ph, zt), b = atPlate(ph, zb);
+    g.strokeStyle = INK2; g.lineWidth = 3; g.strokeRect(a[0], a[1], b[0] - a[0], b[1] - a[1]);
+    g.strokeStyle = 'rgba(206,220,240,.18)'; g.lineWidth = 2;
+    for (var t = 1; t < 3; t++) { var xx = a[0] + (b[0] - a[0]) * t / 3, yy = a[1] + (b[1] - a[1]) * t / 3;
+      g.beginPath(); g.moveTo(xx, a[1]); g.lineTo(xx, b[1]); g.moveTo(a[0], yy); g.lineTo(b[0], yy); g.stroke(); }
+    var e = ump.edge, xin = side * (ph + e.inside * IN), xout = -side * (ph + e.outside * IN);
+    var ua = atPlate(Math.min(xin, xout), zt + e.high * IN), ub = atPlate(Math.max(xin, xout), zb - e.low * IN);
+    g.setLineDash([8, 10]); g.strokeStyle = 'rgba(206,220,240,.45)'; g.lineWidth = 2; g.strokeRect(ua[0], ua[1], ub[0] - ua[0], ub[1] - ua[1]); g.setLineDash([]);
+    text(g, "umpire's zone", side > 0 ? ua[0] - 14 : ub[0] + 14, ua[1] + 26, 26, INK3, side > 0 ? 'right' : 'left');
+    var col = seg.i !== undefined ? COL[play.pa.pitches[seg.i].pitch.type] : INK2, ky = ZH - 184, kx = side < 0 ? ZW - 520 : 26;
+    [["pitcher's aim ± 1σ command", function (x, y) { g.strokeStyle = INK; g.lineWidth = 3; g.beginPath(); g.moveTo(x - 14, y); g.lineTo(x + 14, y); g.moveTo(x, y - 14); g.lineTo(x, y + 14); g.stroke(); }],
+     ["batter's expected pitch", function (x, y) { g.setLineDash([8, 6]); g.strokeStyle = INK2; g.lineWidth = 3; g.beginPath(); g.arc(x, y, 13, 0, 7); g.stroke(); g.setLineDash([]); }],
+     ['the pitch', function (x, y) { g.beginPath(); g.arc(x, y, 13, 0, 7); g.fillStyle = col; g.fill(); }],
+     ["batter's bat", function (x, y) { g.strokeStyle = 'rgba(206,220,240,.30)'; g.lineWidth = 16; g.lineCap = 'round'; g.beginPath(); g.moveTo(x - 16, y); g.lineTo(x + 16, y); g.stroke(); g.lineCap = 'butt'; }]
+    ].forEach(function (it, i) { var x = kx + 14, y = ky + i * 44; it[1](x, y); text(g, it[0], x + 34, y + 9, 26, INK2); });
+    var upto = seg.i === undefined ? 0 : seg.i;
+    play.pa.pitches.slice(0, upto).forEach(function (p, i) {
+      var q = atPlate(p.pitch.plate.x, p.pitch.plate.z), rr = GEO.BALL_R * PXM;
+      g.beginPath(); g.arc(q[0], q[1], rr * 0.62, 0, 7); g.fillStyle = COL[p.pitch.type]; g.globalAlpha = 0.55; g.fill(); g.globalAlpha = 1;
+      text(g, String(i + 1), q[0], q[1] + 1, 26, INK, 'center', 'middle');
+    });
+    if (seg.i === undefined) { g.restore(); return; }
+    var p = play.pa.pitches[seg.i], pch = p.pitch;
+    pitchPaths(play, p);
+    var showAim = seg.kind !== 'setup' || tau > 0.8, showGhost = seg.kind !== 'setup' || tau > 1.8;
+    function line(path, upTo, dash, c, w) {
+      g.setLineDash(dash); g.strokeStyle = c; g.lineWidth = w; g.beginPath();
+      var started = false;
+      path.forEach(function (q) { if (q[0] > upTo) return; var s = proj(q[1], q[2], q[3]); if (!started) { g.moveTo(s[0], s[1]); started = true; } else g.lineTo(s[0], s[1]); });
+      g.stroke(); g.setLineDash([]);
+    }
+    if (showGhost) { line(p._ghost.path, 99, [10, 10], INK2, 3); var ge = atPlate(p._ghost.x, p._ghost.z);
+      g.beginPath(); g.arc(ge[0], ge[1], GEO.BALL_R * PXM, 0, 7); g.strokeStyle = INK2; g.lineWidth = 3; g.setLineDash([8, 6]); g.stroke(); g.setLineDash([]); }
+    if (showAim) { var tg = atPlate(p.plan.target[0], p.plan.target[1]), rc = pch.cmdIn * IN * PXM;
+      g.strokeStyle = INK; g.lineWidth = 2; g.setLineDash([6, 8]); g.beginPath(); g.arc(tg[0], tg[1], rc, 0, 7); g.stroke(); g.setLineDash([]);
+      g.lineWidth = 3; g.beginPath(); g.moveTo(tg[0] - 22, tg[1]); g.lineTo(tg[0] + 22, tg[1]); g.moveTo(tg[0], tg[1] - 22); g.lineTo(tg[0], tg[1] + 22); g.stroke(); }
+    if (seg.kind === 'setup') { drawBat(g, play, p, side, 0); g.restore(); return; }
+    var s = seg.kind === 'flight' ? clamp(tau / PACE.flight, 0, 1) : 1, tNow = s * pch.plate.t, P = p._path;
+    line(P, tNow, [], col, 6);
+    var idx = 0; while (idx < P.length - 1 && P[idx + 1][0] <= tNow) idx++;
+    var q = P[idx], sp = proj(q[1], q[2], q[3]), rad = GEO.BALL_R * FOC / (q[2] - CAM_Y);
+    var tc = pch.plate.t - 0.175;
+    if (tNow >= tc) { var cp = null; P.forEach(function (qq) { if (!cp && qq[0] >= tc) cp = qq; });
+      if (cp) { var cs = proj(cp[1], cp[2], cp[3]); g.beginPath(); g.arc(cs[0], cs[1], 8, 0, 7); g.fillStyle = INK; g.fill();
+        text(g, 'commit', cs[0] + (cs[0] < ZCX ? 20 : -20), cs[1] + 9, 26, INK2, cs[0] < ZCX ? 'left' : 'right'); } }
+    drawBat(g, play, p, side, s);
+    g.beginPath(); g.arc(sp[0], sp[1], rad, 0, 7); g.fillStyle = col; g.fill(); g.lineWidth = 3; g.strokeStyle = '#0b0e14'; g.stroke();
+    if (rad > 18) text(g, pch.type, sp[0], sp[1] + 1, Math.min(30, rad), '#0b0e14', 'center', 'middle');
+    // the batted ball leaves along its real line at twice the slow motion the pitch
+    // came in (Joe: at real speed it was gone before the eye caught it; the frame
+    // ends 5 degrees above the horizon, so anything hit higher is out of it within
+    // a tenth of a second), shrinking into the distance or growing as it comes back
+    // over the screen; then it fades
+    if (seg.kind === 'result' && p.bb && p.bb.path) {
+      var slow = 2 * PACE.flight / pch.plate.t, tb2 = tau / slow, fade = clamp((3.0 - tau) / 0.6, 0, 1);
+      if (fade > 0) {
+        var BP = p.bb.path, trail = [], bq = null;
+        BP.forEach(function (q) { if (q[0] <= tb2 && q[2] - CAM_Y > 0.3) { trail.push(proj(q[1], q[2], q[3])); bq = q; } });
+        g.globalAlpha = fade;
+        if (trail.length > 1) { g.strokeStyle = 'rgba(238,244,252,.75)'; g.lineWidth = 5; g.lineCap = 'round'; g.beginPath(); trail.forEach(function (t2, i) { if (i === 0) g.moveTo(t2[0], t2[1]); else g.lineTo(t2[0], t2[1]); }); g.stroke(); g.lineCap = 'butt'; }
+        if (bq) { var bs = proj(bq[1], bq[2], bq[3]), br = Math.max(3, GEO.BALL_R * FOC / (bq[2] - CAM_Y));
+          g.beginPath(); g.arc(bs[0], bs[1], br, 0, 7); g.fillStyle = INK; g.fill(); if (br > 8) { g.lineWidth = 2; g.strokeStyle = '#0b0e14'; g.stroke(); } }
+        g.globalAlpha = 1;
+      }
+    }
+    if (seg.kind === 'result' && tau < 2.2) {
+      var call = p.result === 'ball' ? 'BALL' : p.result === 'called_strike' ? 'STRIKE' : p.result === 'swinging_strike' ? 'SWING AND MISS' : p.result === 'foul' ? 'FOUL' : p.result === 'hbp' ? 'HIT BY PITCH' : p.result === 'hr' ? 'HOME RUN' : 'IN PLAY';
+      text(g, call, ZCX, 120, 51, INK, 'center');
+      if (p.call) text(g, f0(100 * p.call.p) + '% strike from this umpire', ZCX, 158, 26, INK2, 'center');
+    }
+    g.restore();
+  }
+
+  // THE BAT. Cocked at the shoulder until he commits; if he swings it sweeps
+  // from behind him through the zone to where the barrel met (or missed) the
+  // ball - low or high by his vertical miss (D), out front or late by his
+  // timing (the horizontal angle theta), rising at his attack angle - with a
+  // trail of where it just was. If he takes, it never moves.
+  function drawBat(g, play, p, side, s) {
+    var pch = p.pitch, sw = p.swing, YP = GEO.Y_PLATE, L = 0.86;   // 34 in
+    var hands0 = [side * 0.6, YP - 0.15, 1.0];                     // cocked: hands chest-high (the camera's frame ends just above)
+    var az0 = side < 0 ? -150 : -30, el0 = 40;                     // tip behind his shoulder, pointing up and back
+    var u = 0, poses = [];
+    if (sw) {
+      // where the bat met the ball (or would have)
+      var th = sw.theta, zc = pch.plate.z - sw.D, xs = pch.plate.x + sw.dLong * side, ys = YP + 0.3;
+      var ax = [Math.cos(th), -Math.sin(th), 0], tip = [ax[0] * -side, ax[1] * -side];   // unit, toward the tip
+      var az1 = Math.atan2(tip[1], tip[0]) / DEG, el1 = sw.attack || 8;
+      // shortest sweep in azimuth
+      while (az1 - az0 > 180) az1 -= 360; while (az1 - az0 < -180) az1 += 360;
+      var hands1 = [xs - tip[0] * 0.6, ys - tip[1] * 0.6, zc - 0.03];
+      u = clamp((s - 0.64) / 0.36, 0, 1);
+      [u - 0.16, u - 0.08, u].forEach(function (uu, i) {
+        if (uu < 0) return;
+        var k = uu * uu * (3 - 2 * uu), az = (az0 + (az1 - az0) * k) * DEG, el = (el0 + (el1 - el0) * k) * DEG;
+        var hd = [hands0[0] + (hands1[0] - hands0[0]) * k, hands0[1] + (hands1[1] - hands0[1]) * k, hands0[2] + (hands1[2] - hands0[2]) * k];
+        poses.push({ h: hd, d: [Math.cos(el) * Math.cos(az), Math.cos(el) * Math.sin(az), Math.sin(el)], a: i === 2 ? 0.55 : 0.12 + 0.08 * i });
+      });
+    }
+    if (!poses.length) poses.push({ h: hands0, d: [Math.cos(el0 * DEG) * Math.cos(az0 * DEG), Math.cos(el0 * DEG) * Math.sin(az0 * DEG), Math.sin(el0 * DEG)], a: 0.55 });
+    poses.forEach(function (ps) {
+      var h = ps.h, d = ps.d, knob = proj(h[0], h[1], h[2]), mid = proj(h[0] + d[0] * L * 0.45, h[1] + d[1] * L * 0.45, h[2] + d[2] * L * 0.45), tp = proj(h[0] + d[0] * L, h[1] + d[1] * L, h[2] + d[2] * L);
+      var wBar = Math.min(70, 2.61 * IN * FOC / Math.max(0.3, h[1] + d[1] * L * 0.7 - CAM_Y)), wHan = Math.min(34, 1.2 * IN * FOC / Math.max(0.3, h[1] - CAM_Y));
+      g.lineCap = 'round'; g.strokeStyle = 'rgba(206,220,240,' + ps.a + ')';
+      g.lineWidth = wHan; g.beginPath(); g.moveTo(knob[0], knob[1]); g.lineTo(mid[0], mid[1]); g.stroke();
+      g.lineWidth = wBar; g.beginPath(); g.moveTo(mid[0], mid[1]); g.lineTo(tp[0], tp[1]); g.stroke();
+      g.lineCap = 'butt';
+    });
+  }
+
+  // ============================================================ PANELS
+  var EL = {};
+  ['board', 'state', 'think', 'bcard', 'pcard', 'seq', 'lane', 'overlay', 'hud'].forEach(function (id) { EL[id] = document.getElementById(id); });
+  place('board', 134, 76, 700); place('state', 1650, 76, 680); place('think', 2370, 916, 1336, 754);
+  place('bcard', 134, 1690, 986, 394); place('pcard', 1140, 1690, 1190, 394); place('seq', 2370, 1690, 1336, 394);
+
+  function countAfter(play, i) {
+    var ps = play.pa.pitches;
+    if (i + 1 < ps.length) return ps[i + 1].count;
+    var r = play.pa.result, c = ps[i].count.split('-').map(Number);
+    if (r === 'K') return c[0] + '-3'; if (r === 'BB') return '4-' + c[1]; return ps[i].count;
+  }
+  var FIRST_INN = {};   // inning count -> first inning column that fits the board
+  function drawBoard(seg, play, done) {
+    var sc = play ? (done ? play.score : play.scoreBefore) : (seg.kind === 'final' ? G.score : [0, 0]);
+    var upto = play ? (done ? G.plays.indexOf(play) : G.plays.indexOf(play) - 1) : (seg.kind === 'final' ? G.plays.length - 1 : -1);
+    // innings appear as the game reaches them (nine to start); the names in team colour are the key for the ribbon
+    var cols = Math.max(9, play ? play.inning : seg.kind === 'final' ? G.finalInning : 9), h = [], innRuns = [[], []], hits = [0, 0], errs = [0, 0];
+    for (var k = 0; k <= upto && k < G.plays.length; k++) { var p = G.plays[k]; innRuns[p.half][p.inning - 1] = (innRuns[p.half][p.inning - 1] || 0) + p.runs;
+      if (p.play && ['1B', '2B', '3B', 'HR'].indexOf(p.play.hit) >= 0) hits[p.half]++; if (p.play && p.play.error) errs[1 - p.half]++; }
+    if (play && innRuns[play.half][play.inning - 1] === undefined) innRuns[play.half][play.inning - 1] = 0;
+    // In a long game the earliest innings drop off the left behind an ellipsis;
+    // how many fit is MEASURED on the rendered table (the fonts decide, not a guess)
+    // and remembered per inning count.
+    function tableHTML(first) {
+      var t = ['<table class="row' + (cols > 10 ? ' tight' : '') + '"><tr class="tag"><td></td>' + (first ? '<td class="num">…</td>' : '')];
+      for (var i = first; i < cols; i++) t.push('<td class="num">' + (i + 1) + '</td>');
+      t.push('<td class="num rhe">R</td><td class="num rhe">H</td><td class="num rhe">E</td></tr>');
+      [0, 1].forEach(function (s) {
+        t.push('<tr><td style="color:' + G.teams[s].col + '">' + esc(G.teams[s].nick) + '</td>' + (first ? '<td></td>' : ''));
+        for (var i2 = first; i2 < cols; i2++) { var v = innRuns[s][i2], cur = play && play.half === s && play.inning === i2 + 1 && !(done && play.outsAfter >= 3);
+          t.push('<td class="num' + (cur ? ' on' : '') + '">' + (v === undefined ? '' : v) + '</td>'); }
+        t.push('<td class="num rhe hot">' + sc[s] + '</td><td class="num rhe hot">' + hits[s] + '</td><td class="num rhe hot">' + errs[s] + '</td></tr>');
+      });
+      return t.join('') + '</table>';
+    }
+    var wp = play ? (done ? play.wpAfter : play.wpBefore) : (seg.kind === 'final' ? (G.score[1] > G.score[0] ? 1 : 0) : 0.5);
+    var fav = wp >= 0.5 ? G.teams[1] : G.teams[0];
+    var tail = '<canvas id="wp"></canvas>';   // the ribbon carries its own caption (the board must clear the fence)
+    var first = FIRST_INN[cols] || 0, html = tableHTML(first) + tail;
+    if (EL.board._h !== html) {
+      setHTML(EL.board, html);
+      var inner = EL.board.clientWidth - 2 * parseFloat(getComputedStyle(EL.board).paddingLeft);
+      while (first < cols - 3 && EL.board.querySelector('table').offsetWidth > inner) { first++; setHTML(EL.board, tableHTML(first) + tail); }
+      FIRST_INN[cols] = first;
+    }
+    // the ribbon: home 100% at the top, away 100% at the bottom, the area between the
+    // curve and even money shaded in whichever team's colour is ahead
+    var c = document.getElementById('wp'), rct = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    if (c.width !== Math.round(rct.width * dpr)) { c.width = Math.round(rct.width * dpr); c.height = Math.round(rct.height * dpr); }
+    // the plot takes the top of the canvas; the label and caption have the strip below it
+    var g = c.getContext('2d'), W = c.width, Hh = c.height, ph = Math.round(Hh * 0.62);
+    g.clearRect(0, 0, W, Hh);
+    var n = G.plays.length, pts = [0.5];
+    for (var m = 0; m <= upto && m < n; m++) pts.push(G.plays[m].wpAfter);
+    if (play && !done) pts.push(play.wpBefore);
+    var xs = pts.map(function (v, j) { return j / Math.max(1, n) * W; }), ys = pts.map(function (v) { return ph - v * ph; });
+    function shade(top, col) {
+      g.save(); g.beginPath(); g.rect(0, top ? 0 : ph / 2, W, ph / 2); g.clip();
+      g.beginPath(); g.moveTo(xs[0], ph / 2); pts.forEach(function (v, j) { g.lineTo(xs[j], ys[j]); }); g.lineTo(xs[xs.length - 1], ph / 2); g.closePath();
+      g.fillStyle = col; g.globalAlpha = 0.42; g.fill(); g.restore();
+    }
+    shade(true, G.teams[1].col); shade(false, G.teams[0].col);
+    g.strokeStyle = 'rgba(206,220,240,.18)'; g.lineWidth = 1; g.beginPath(); g.moveTo(0, 0.5); g.lineTo(W, 0.5); g.moveTo(0, ph - 0.5); g.lineTo(W, ph - 0.5); g.stroke();
+    g.strokeStyle = 'rgba(206,220,240,.35)'; g.beginPath(); g.moveTo(0, ph / 2); g.lineTo(W, ph / 2); g.stroke();
+    g.strokeStyle = INK; g.lineWidth = 2 * dpr; g.beginPath();
+    pts.forEach(function (v, j) { if (j === 0) g.moveTo(xs[j], ys[j]); else g.lineTo(xs[j], ys[j]); });
+    g.stroke();
+    // the favourite and his odds, below the plot (30 design px; the canvas is 640 wide);
+    // "estimate" is said once, on the pre-game sheet
+    text(g, fav.nick + ' ' + f0(100 * Math.max(wp, 1 - wp)) + '%', 0, Hh - 2, 30 * W / 640, fav.col, 'left', 'bottom');
+    text(g, 'win probability', W, Hh - 2, 30 * W / 640, INK3, 'right', 'bottom');
+  }
+  function rulesWords() { return G.rules + ' rules · ' + (G.rules === 'AL' ? 'designated hitter' : 'pitcher bats'); }
+  function basesSVG(bases) {
+    function sq(cx, cy, on) { return '<rect x="' + (cx - 11) + '" y="' + (cy - 11) + '" width="22" height="22" transform="rotate(45 ' + cx + ' ' + cy + ')" fill="' + (on ? '#e8c547' : 'none') + '" stroke="rgba(206,220,240,.7)" stroke-width="3"/>'; }
+    return '<svg viewBox="0 0 100 70" style="width:calc(120*var(--wu));height:calc(84*var(--wu));vertical-align:middle">' + sq(50, 14, bases[2]) + sq(80, 40, bases[1]) + sq(20, 40, bases[3]) + '</svg>';
+  }
+  function drawState(seg, play, count, outs, bases) {
+    var h = [], inn = play ? (play.half ? 'bottom ' : 'top ') + ORD[play.inning] : '';
+    h.push('<div class="key">' + esc(inn) + '</div>');
+    h.push('<div style="display:flex;align-items:center;gap:calc(40*var(--wu))"><div class="big">' + (count || '&nbsp;') + '</div>' +
+           '<div class="fig">' + ['○○○', '●○○', '●●○', '●●●'][Math.min(3, outs || 0)] + ' <span class="key">out</span></div>' + basesSVG(bases || []) + '</div>');
+    h.push('<div class="row soft">' + esc(parkName) + ' · ' + f0(env.elevFt) + ' ft</div>');
+    h.push('<div class="row soft">' + rulesWords() + '</div>');
+    h.push('<div class="row soft">' + f0(env.tempF) + '°F · ' + f0(100 * env.rh) + '% RH · air −' + f1(100 * (1 - env.rho / rho0)) + '%</div>');
+    h.push('<div class="row soft">ump ' + esc(ump.name) + ' · edge ' + f1(ump.sd) + ' in</div>');
+    if (ump.quirk) h.push('<div class="row soft">calls the ' + ump.quirk.edge + ' edge ' + ump.quirk.dir + '</div>');
+    setHTML(EL.state, h.join(''));
+  }
+  function aimWords(B, side, tx, tz) {
+    var zb = B.zone.bot, zt = B.zone.top, hh = zt - zb, ph = GEO.PLATE_HALF, xin = tx * side, v, s, off = [];
+    if (tz < zb) { v = 'below the zone'; off.push(f1((zb - tz) / IN) + ' in under'); }
+    else if (tz > zt) { v = 'above the zone'; off.push(f1((tz - zt) / IN) + ' in over'); }
+    else v = tz < zb + hh / 3 ? 'low' : tz > zt - hh / 3 ? 'up' : 'middle height';
+    if (xin > ph) { s = 'inside, off the plate'; off.push(f1((xin - ph) / IN) + ' in in'); }
+    else if (xin < -ph) { s = 'away, off the plate'; off.push(f1((-xin - ph) / IN) + ' in off'); }
+    else s = xin > ph / 3 ? 'inside' : xin < -ph / 3 ? 'away' : 'over the middle';
+    return v + ', ' + s + (off.length ? ' (' + off.join(', ') + ')' : '');
+  }
+  function sprayWords(sp, side) {
+    var pull = sp * side, fld = sp < -30 ? 'the left-field line' : sp < -12 ? 'left-centre' : sp <= 12 ? 'centre' : sp <= 30 ? 'right-centre' : 'the right-field line';
+    return fld + (Math.abs(pull) > 12 ? (pull > 0 ? ', pulled' : ', the other way') : '');
+  }
+  var RESULT = { ball: 'ball', called_strike: 'called strike', swinging_strike: 'swinging strike', foul: 'foul', in_play: 'in play', hr: 'home run', hbp: 'hit by pitch' };
+  function drawThink(seg, tau) {
+    var play = seg.play, h = [];
+    if (!play || seg.i === undefined) {
+      if (play) h.push('<div><span class="key">Pitcher&nbsp;&nbsp;</span><span class="name">' + esc(play.pitcher.name) + '</span></div><div class="gap"></div><div><span class="key">Batter&nbsp;&nbsp;&nbsp;</span><span class="name">' + esc(play.batter.name) + '</span></div>');
+      setHTML(EL.think, h.join('')); return;
+    }
+    var L = play.pa.pitches[seg.i], pl = L.plan, ex = L.expect, pch = L.pitch, rf = L.read, P = play.pitcher, B = play.batter, side = L.side;
+    var stage = seg.kind === 'setup' ? 0 : seg.kind === 'flight' ? 1 : 2;
+    function line(key, body) { h.push('<div class="row"><span class="key">' + key + '</span>' + body + '</div>'); }
+    h.push('<div><span class="key">Pitcher&nbsp;&nbsp;</span><span class="name">' + esc(P.name) + '</span></div>');
+    h.push('<div class="fig">' + L.count + ' · ' + pl.intent + '</div>');
+    line('intent', 'attack ' + f0(100 * pl.intentP[0]) + '% · edge ' + f0(100 * pl.intentP[1]) + '% · expand ' + f0(100 * pl.intentP[2]) + '%');
+    line('mix', P.pitches.map(function (q, i) {
+      var on = i === pl.pick && stage >= 1;
+      return '<span class="' + (on ? 'hot' : 'soft') + '"><span class="sw" style="background:' + COL[q.type] + '"></span>' + q.type + ' ' + f0(100 * pl.probs[i]) + '%' + (on ? '&nbsp;◀' : '') + '</span>';
+    }).join('&nbsp;&nbsp;'));
+    if (stage >= 1 || tau > 0.8) line('aims', aimWords(B, side, pl.target[0], pl.target[1]));
+    h.push('<div class="gap"></div>');
+    h.push('<div><span class="key">Batter&nbsp;&nbsp;&nbsp;</span><span class="name">' + esc(B.name) + '</span></div>');
+    if (stage >= 1 || tau > 1.6) {
+      line('sits', 'on the <span class="hot">' + BB.PITCH_TYPES[ex.guessType].name + '</span>, ' + f0(100 * ex.commit) + '% committed · expects ' + f1(ex.velo) + ' mph');
+      line('plan', ex.approach === 'protect' ? 'two strikes: protect the plate' : ex.approach === 'hunt' ? "hitter's count: hunt his pitch" : ex.approach === 'take' ? '3-0: take unless it is a meatball' : 'normal approach');
+    }
+    if (stage >= 2) {
+      h.push('<div class="gap"></div>');
+      var miss = Math.hypot(pch.plate.x - pl.target[0], pch.plate.z - pl.target[1]) / IN;
+      line('pitch', '<span class="hot">' + BB.PITCH_TYPES[pch.type].name + ' ' + f1(pch.mph) + ' mph</span> · ' + f0(pch.rpm) + ' rpm · ' + f1(miss) + ' in off his spot');
+      var sat = ex.guessType === pch.type;
+      line('read', sat && rf.sep / IN < 1.5 ? 'the pitch he was sitting on' : f1(rf.sep / IN) + ' in off his picture at the commit point');
+      if (!(sat && rf.sep / IN < 1.5)) line('', '→ <span class="hot">' + (rf.detected ? 'picked it up' : 'fooled') + '</span> (' + f0(100 * rf.pFooled) + '% odds of being fooled)');
+      if (L.decide) line('judged', f0(100 * L.decide.pin) + '% a strike; he swings above ' + f0(100 * L.decide.thr) + '%');
+      if (L.swing) { var sw = L.swing;
+        line('swing', f1(Math.abs(sw.e) * 1000) + ' ms ' + (sw.e > 0 ? 'early' : 'late') + ' · barrel ' + f1(Math.abs(sw.D) / IN) + ' in ' + (sw.D > 0 ? 'under' : 'over') + ' · ' + f1(Math.abs(sw.dLong) / IN) + ' in to the ' + (sw.dLong > 0 ? 'tip' : 'hands') + (sw.contact ? '' : ' → <span class="hot">' + esc(sw.why) + '</span>')); }
+      else if (L.call) line('call', (L.call.strike ? 'strike' : 'ball') + ' (' + f0(100 * L.call.p) + '% odds of a strike from this umpire)');
+      if (L.bb) { var bb = L.bb;
+        line('result', '<span class="hot">' + f1(bb.ev) + ' mph at ' + f0(bb.la) + '°</span> · ' + f0(Math.max(0, bb.backspin)) + ' rpm backspin' + (bb.fair ? '' : ' · foul'));
+        if (bb.fair || play.pa.foulCaught) line('', '<span class="hot">' + f0(bb.projDist) + ' ft</span> to ' + sprayWords(bb.spray, side) + ' · ' + f1(bb.hang) + ' s in the air'); }
+    }
+    setHTML(EL.think, h.join(''));
+  }
+  function pctBar(p) { return '<span class="track"><i style="width:' + f0(100 * clamp(p, 0.02, 1)) + '%"></i></span>'; }
+  // pitches thrown as a share of stamina; the tick at 70% is where speed and command start to go
+  function loadBar(p) { return '<span class="track"><i style="width:' + f0(100 * clamp(p / 1.3, 0.01, 1)) + '%"></i><b style="left:' + f0(100 * 0.7 / 1.3) + '%"></b></span>'; }
+  function traitRow(label, val, unit, key, lowerBetter) {
+    var t = BB.TRAITS[key], z = (val - t[0]) / t[1], p = lowerBetter ? 1 - Phi(z) : Phi(z);
+    return '<tr><td class="key">' + label + '</td><td class="row hot">' + (unit === 'in' && val < 3 ? val.toFixed(2) : val.toFixed(1)) + ' <span class="soft">' + unit + '</span></td><td>' + pctBar(p) + '</td></tr>';
+  }
+  function statRow(label, v) { return '<tr><td class="key">' + label + '</td><td class="row hot">' + v + '</td></tr>'; }
+  // one plate appearance in a word or two, and whether it counts as an at-bat / a hit
+  function paWords(p) {
+    var r = p.pa.result, pl = p.play;
+    if (r === 'END') return null;   // the inning ended on the bases: no plate appearance
+    if (r === 'K') return { word: 'strikeout', ab: true };
+    if (r === 'BB') return { word: 'walk' };
+    if (r === 'HBP') return { word: 'hit by pitch' };
+    if (!pl) return { word: String(r).toLowerCase(), ab: true };
+    var h = pl.hit, W = { '1B': 'single', '2B': 'double', '3B': 'triple', HR: 'home run' };
+    if (W[h]) return { word: W[h], ab: true, hit: true };
+    if (h === 'E') return { word: 'error', ab: true };
+    if (h === 'FC') return { word: "fielder's choice", ab: true };
+    if (h === 'SF') return { word: 'sac fly' };
+    if (pl.dp) return { word: 'double play', ab: true };
+    return { word: { GB: 'ground out', LD: 'line out', FB: 'fly out', PU: 'pop out' }[pl.type] || 'out', ab: true };
+  }
+  // his day so far: each time up before this one, in order (shown on the at-bat panel; the card is full)
+  function dayOf(play) {
+    var b = play.batter, pas = [], ab = 0, hits = 0, kNow = G.plays.indexOf(play);
+    G.plays.forEach(function (p, k) { if (k >= kNow || p.batter.id !== b.id) return; var w = paWords(p); if (!w) return; pas.push(w.word); if (w.ab) ab++; if (w.hit) hits++; });
+    return { pas: pas, ab: ab, hits: hits };
+  }
+  function drawBatter(play) {
+    if (!play) { setHTML(EL.bcard, ''); return; }
+    var b = play.batter, h = [], hIn = Math.round(b.heightIn), s = projBatter(b), order = G.teams[play.half].lineup.indexOf(b);
+    h.push('<div><span class="sw" style="background:' + G.teams[play.half].col + '"></span><span class="name">' + esc(b.name) + '</span>&nbsp;&nbsp;<span class="key">' + b.pos + ' · ' + b.bats + ' · ' + Math.floor(hIn / 12) + "'" + (hIn % 12) + '"' + (b.weightLb ? ' · ' + f0(b.weightLb) + ' lb' : '') + (order >= 0 ? ' · #' + (order + 1) : ' · pinch') + '</span></div>');
+    h.push('<div style="display:flex;gap:calc(30*var(--wu));margin-top:calc(10*var(--wu))"><table>');
+    h.push(traitRow('bat speed', b.batSpeed, 'mph', 'batSpeed'));
+    h.push(traitRow('recognition', b.spotIn, 'in', 'spotIn', true));
+    h.push(traitRow('zone eye', b.eyeSD, 'in', 'eyeSD', true));
+    h.push(traitRow('bat-to-ball', b.barrelSD, 'in', 'barrelSD', true));
+    h.push(traitRow('timing', b.timingSD, 'ms', 'timingSD', true));
+    h.push(traitRow('speed', b.speed, 'ft/s', 'speed'));
+    h.push('</table><table>');
+    h.push('<tr><td class="tag" colspan="2">per 250 PA</td></tr>');
+    h.push(statRow('strikeout', pct(s.K, s.pa) + '%'));
+    h.push(statRow('walk', pct(s.BB, s.pa) + '%'));
+    h.push(statRow('home run', pct(s.HR, s.pa) + '%'));
+    h.push(statRow('whiff', pct(s.wh, s.sw) + '%'));
+    h.push(statRow('chase', pct(s.ch, s.oz) + '%'));
+    h.push(statRow('exit velo', (s.nev ? f1(s.ev / s.nev) : '-') + ' mph'));
+    h.push('</table></div>');
+    setHTML(EL.bcard, h.join(''));
+  }
+  function drawPitcher(play, thrown) {
+    if (!play) { setHTML(EL.pcard, ''); return; }
+    var p = play.pitcher, h = [], s = projPitcher(p); movement(p);
+    var load = play.load + thrown, st = p.stamina, xf = (load - 0.7 * st) / (0.45 * st), f = xf <= 0 ? 0 : Math.min(1.5, xf * xf);
+    h.push('<div><span class="name">' + esc(p.name) + '</span>&nbsp;&nbsp;<span class="key">' + (p.throws === 'R' ? 'RHP' : 'LHP') + ' · ' + p.arch + '</span></div>');
+    h.push('<div style="display:flex;gap:calc(30*var(--wu));margin-top:calc(10*var(--wu))"><table>');
+    h.push('<tr class="tag"><td colspan="2">pitch</td><td>mph</td><td>↕ in</td><td>↔ in</td><td>use</td></tr>');
+    p.pitches.forEach(function (q) {
+      h.push('<tr><td class="row hot"><span class="sw" style="background:' + COL[q.type] + '"></span>' + q.type + '</td><td class="row soft">' + BB.PITCH_TYPES[q.type].name + '</td><td class="row hot">' + f1(q.velo) +
+             '</td><td class="row soft">' + f0(q.ivb) + '</td><td class="row soft">' + f0(q.hb) + '</td><td class="row soft">' + f0(100 * q.usage) + '%</td></tr>');
+    });
+    h.push('<tr><td class="tag" colspan="6">↔ + toward his arm side</td></tr>');
+    h.push('</table><table>');
+    h.push(statRow('pitches', (play.pitchCount + thrown) + ' <span class="soft">of ' + f0(p.stamina) + '</span>'));
+    h.push('<tr><td class="key">fatigue</td><td class="row">' + loadBar(load / st) + ' <span class="soft">' + (f > 0 ? '−' + f1(3 * f) + ' mph' : 'fresh') + '</span></td></tr>');
+    h.push(statRow('command', f1(p.command) + ' <span class="soft">in</span>'));
+    h.push('<tr><td class="tag" colspan="2">per 250 batters</td></tr>');
+    h.push(statRow('K / BB', pct(s.K, s.pa) + ' / ' + pct(s.BB, s.pa) + '%'));
+    h.push(statRow('HR / whiff', pct(s.HR, s.pa) + ' / ' + pct(s.wh, s.sw) + '%'));
+    h.push('</table></div>');
+    setHTML(EL.pcard, h.join(''));
+  }
+  function drawSeq(play, upto, showLast) {
+    if (!play) { setHTML(EL.seq, ''); return; }
+    var day = dayOf(play), today = day.pas.length ? 'today ' + (day.ab ? day.hits + ' for ' + day.ab + ' · ' : '') + day.pas.join(', ') : 'first time up today';
+    var h = ['<div class="key">This at-bat <span class="soft" style="text-transform:none;letter-spacing:0">&nbsp;· ' + esc(today) + '</span></div><table><tr class="tag"><td>#</td><td>count</td><td>pitch</td><td>result</td><td>the batter</td></tr>'];
+    play.pa.pitches.forEach(function (p, i) {
+      if (i > upto) return;
+      var done = i < upto || showLast, nm = BB.PITCH_TYPES[p.expect.guessType].name;
+      var read = p.expect.guessType === p.pitch.type ? 'expected this pitch' : 'expected ' + nm + ' · ' + (p.read.detected ? 'read it' : 'fooled');
+      h.push('<tr class="row' + (i === upto ? ' hot' : ' soft') + '"><td>' + (i + 1) + '</td><td>' + p.count + '</td><td><span class="sw" style="background:' + COL[p.pitch.type] + '"></span>' +
+             (done ? p.pitch.type + ' ' + f1(p.pitch.mph) : '·') + '</td><td>' + (done ? RESULT[p.result] + (p.steal && !p.steal.back ? (p.steal.safe ? ' · stolen base' : ' · caught stealing') : '') + (p.wild ? (p.wild.kind === 'WP' ? ' · wild pitch' : ' · passed ball') : '') : '') + '</td><td class="soft">' + (done ? read : '') + '</td></tr>');
+    });
+    h.push('</table>');
+    setHTML(EL.seq, h.join(''));
+  }
+  function lane(main, sub) { if (!main) { EL.lane.className = ''; return; } setHTML(EL.lane, esc(main) + (sub ? '<span class="sub">' + esc(sub) + '</span>' : '')); EL.lane.className = 'on'; }
+
+  // ------------------------------------------------ pre-game and final
+  function teamSheet(Tm, isHome) {
+    var h = ['<div><div class="tm"><span class="sw" style="background:' + Tm.col + ';width:calc(30*var(--wu));height:calc(30*var(--wu))"></span>' + esc(Tm.name) + (isHome ? ' <span class="key">home</span>' : ' <span class="key">away</span>') + '</div><table>'];
+    h.push('<tr class="tag"><td></td><td></td><td>pos</td><td>b</td><td>bat mph</td><td>recog</td><td>eye</td><td class="num">K%</td><td class="num">BB%</td><td class="num">HR%</td><td class="num">EV</td></tr>');
+    var order = G.rules === 'NL' ? Tm.lineup.filter(function (b) { return b.pos !== 'DH'; }) : Tm.lineup;
+    order.forEach(function (b, i) {
+      var s = projBatter(b);
+      h.push('<tr class="row"><td class="soft">' + (i + 1) + '</td><td class="name hot" style="font-size:var(--t5)">' + esc(b.name) + '</td><td class="soft">' + b.pos + '</td><td class="soft">' + b.bats + '</td><td>' + f1(b.batSpeed) + '</td><td>' + b.spotIn.toFixed(1) + '</td><td>' + b.eyeSD.toFixed(1) +
+             '</td><td class="num">' + pct(s.K, s.pa) + '</td><td class="num">' + pct(s.BB, s.pa) + '</td><td class="num">' + pct(s.HR, s.pa) + '</td><td class="num">' + (s.nev ? f1(s.ev / s.nev) : '-') + '</td></tr>');
+    });
+    var P = Tm.starter, sp = projPitcher(P); movement(P);
+    h.push('<tr><td colspan="11" class="gap"></td></tr>');
+    h.push('<tr class="row"><td class="soft">P</td><td class="name hot" style="font-size:var(--t5)">' + esc(P.name) + '</td><td class="soft" colspan="3">' + (P.throws === 'R' ? 'RHP' : 'LHP') + ' · ' + P.arch + '</td><td class="soft" colspan="2">' +
+           P.pitches.map(function (q) { return '<span class="sw" style="background:' + COL[q.type] + '"></span>' + q.type + ' ' + f0(q.velo); }).join(' ') +
+           '</td><td class="num">' + pct(sp.K, sp.pa) + '</td><td class="num">' + pct(sp.BB, sp.pa) + '</td><td class="num">' + pct(sp.HR, sp.pa) + '</td><td class="num soft">' + f1(P.command) + ' in</td></tr>');
+    h.push('</table></div>');
+    return h.join('');
+  }
+  function drawOverlay(seg, tau) {
+    if (seg.kind === 'pregame') {
+      var h = ['<h1>' + esc(G.teams[0].name) + ' at ' + esc(G.teams[1].name) + '</h1>'];
+      h.push('<div class="row soft">' + esc(parkName) + ' · ' + f0(env.elevFt) + ' ft · ' + f0(env.tempF) + '°F · ' + f0(100 * env.rh) + '% RH · ' + rulesWords() + ' · HP umpire ' + esc(ump.name) + '</div>');
+      h.push('<div class="row faint">traits drawn at random; the numbers on the right are each man\'s odds, projected over 250 plate appearances against a league of the same stuff · first pitch in ' + f0(Math.max(0, seg.dur - tau)) + ' s (p to skip)</div>');
+      h.push('<div class="row faint">the win probability on the board is an estimate from the run difference, the innings left and the base-out state</div>');
+      h.push('<div class="cols">' + teamSheet(G.teams[0], false) + teamSheet(G.teams[1], true) + '</div>');
+      setHTML(EL.overlay, h.join('')); EL.overlay.className = 'on';
+    } else if (seg.kind === 'final') {
+      var w = G.score[1] > G.score[0] ? G.teams[1] : G.teams[0], cols = Math.max(9, G.finalInning);
+      var h2 = ['<h1>Final · ' + esc(G.teams[0].nick) + ' ' + G.score[0] + ', ' + esc(G.teams[1].nick) + ' ' + G.score[1] + '</h1>'];
+      h2.push('<div class="row soft">' + esc(w.name) + ' win · ' + G.finalInning + ' innings · ' + G.pitches + ' pitches · ' + G.pitchersUsed.join(' + ') + ' pitchers</div>');
+      var tbl = ['<table class="row wide" style="margin-top:calc(40*var(--wu))"><tr class="tag"><td></td>'];
+      for (var i = 0; i < cols; i++) tbl.push('<td class="num">' + (i + 1) + '</td>');
+      tbl.push('<td class="num">R</td><td class="num">H</td><td class="num">E</td></tr>');
+      [0, 1].forEach(function (s) { tbl.push('<tr><td class="soft">' + esc(G.teams[s].name) + '</td>');
+        for (var j = 0; j < cols; j++) tbl.push('<td class="num">' + (G.lineScore[s][j] === undefined ? '' : G.lineScore[s][j]) + '</td>');
+        tbl.push('<td class="num hot">' + G.score[s] + '</td><td class="num">' + G.hits[s] + '</td><td class="num">' + G.errors[s] + '</td></tr>'); });
+      tbl.push('</table>');
+      h2.push(tbl.join(''));
+      h2.push('<div class="row faint" style="margin-top:calc(40*var(--wu))">next game in ' + f0(Math.max(0, seg.dur - tau)) + ' s · g for a new one now</div>');
+      setHTML(EL.overlay, h2.join('')); EL.overlay.className = 'on';
+    } else EL.overlay.className = '';
+  }
+
+  // ============================================================= RENDER
+  var FAULTS = {};
+  function byId2(play, id) {   // a runner in this at-bat by id
+    var f = null; [1, 2, 3].forEach(function (b) { if (play.bases[b] && play.bases[b].id === id) f = play.bases[b]; });
+    play.pa.pitches.forEach(function (q) { (q.bases || []).forEach(function (pl) { if (pl && pl.id === id) f = pl; }); });
+    return f;
+  }
+  function render(t) {
+    var seg = segAt(t), tau = t - seg.t0, play = seg.play || null;
+    drawOverlay(seg, tau);
+    if (seg.kind === 'final' && tau >= seg.dur - 0.05) { location.replace(location.pathname + '?seed=' + (SEED + 1) + (speed !== 1 ? '&speed=' + speed : '')); return; }
+    var count = '', outs = 0, bases = [], done = false, thrown = 0, laneMain = null, laneSub = null;
+    if (play) {
+      var i = seg.i === undefined ? -1 : seg.i;
+      if (i >= 0) {
+        var p = play.pa.pitches[i], runningLast = (p.steal && !p.steal.back) || p.wild;
+        done = seg.kind === 'result' && seg.last && tau >= (play.play ? playDuration(play) - 0.6 : runningLast ? 2.6 : 0.4);
+        count = seg.kind === 'result' && tau > 0.3 ? countAfter(play, i) : p.count;
+        thrown = seg.kind === 'result' ? i + 1 : i;
+        if (seg.kind === 'result' && seg.last) {
+          var r = play.pa.result;
+          if (r === 'K' && tau > 0.6) laneMain = 'Strikeout';
+          else if (r === 'BB' && tau > 0.6) laneMain = 'Walk';
+          else if (r === 'HBP' && tau > 0.6) laneMain = 'Hit by pitch';
+          else if (play.play && tau >= playDuration(play) - 0.6) { laneMain = play.desc.charAt(0).toUpperCase() + play.desc.slice(1); if (play.runs) laneSub = play.runs + ' run' + (play.runs > 1 ? 's' : '') + ' score' + (play.runs > 1 ? '' : 's'); }
+        }
+        // the running game's banners, over any at-bat banner once the play at the bag is made
+        if (seg.kind === 'result') {
+          var stl = p.steal, wld = p.wild, rn = stl && byId2(play, stl.id);
+          if (stl && !stl.back && tau > Math.max(0.5, stl.tRun - 1.35) + 0.2) { laneMain = stl.safe ? 'Stolen base' : (play.pa.result === 'END' ? 'Caught stealing, inning over' : 'Caught stealing'); laneSub = (rn ? rn.name : '') + (stl.wild ? ' · the throw gets away' : ''); }
+          if (wld && tau > 1.2) { laneMain = wld.kind === 'WP' ? 'Wild pitch' : 'Passed ball'; laneSub = wld.runs ? 'runner scores' : 'runner' + (wld.from.length > 1 ? 's' : '') + ' move' + (wld.from.length > 1 ? '' : 's') + ' up'; }
+        }
+      } else count = play.pa.pitches[0].count;
+      // bases and outs follow each pitch (a steal or a wild pitch moves them mid-count)
+      var mid = i >= 0 && seg.kind === 'result' && tau >= 2.6 && play.pa.pitches[i].basesAfter;
+      outs = done ? play.outsAfter : mid ? play.pa.pitches[i].outsAfter : play.outs;
+      bases = done ? play.basesAfter : mid ? play.pa.pitches[i].basesAfter : (i >= 0 && play.pa.pitches[i].bases) || play.bases;
+      if (seg.kind === 'change') { laneMain = seg.change ? 'Pitching change' : 'Pinch hitter'; laneSub = seg.change ? seg.change.in.name + ' for ' + seg.change.out.name : seg.pinch.batter.name + ' for ' + seg.pinch.forPitcher.name; }
+    } else if (seg.kind === 'halfEnd') {
+      var inn = seg.inn, lastPlay = inn.plays[inn.plays.length - 1];
+      play = lastPlay; done = true; outs = 3; bases = [];
+      laneMain = (inn.half ? 'End of the ' : 'Middle of the ') + ORD[inn.n]; laneSub = G.teams[0].nick + ' ' + lastPlay.score[0] + ', ' + G.teams[1].nick + ' ' + lastPlay.score[1];
+    } else if (seg.kind === 'halfStart') {
+      var first = seg.inn.plays[0];
+      play = first; count = ''; outs = 0; bases = first.bases; done = false;
+      laneMain = (seg.inn.half ? 'Bottom of the ' : 'Top of the ') + ORD[seg.inn.n]; laneSub = G.teams[seg.inn.half].nick + ' batting';
+    }
+    var quiet = seg.kind === 'halfStart' || seg.kind === 'halfEnd';
+    // one drawing fault must never blank the screen for the rest of the game (logged once)
+    function safe(name, fn) { try { fn(); } catch (err) { if (!FAULTS[name]) { FAULTS[name] = true; console.error(name, err); } } }
+    safe('field', function () { drawField(quiet ? { kind: seg.kind, play: play, inn: seg.inn } : seg, tau, t); });
+    safe('zone', function () { drawZone(quiet ? { kind: seg.kind, play: null } : seg, tau); });
+    safe('board', function () { drawBoard(seg, play, done); });
+    safe('state', function () { drawState(seg, play, count, outs, bases); });
+    // the last at-bat's reasoning lingers while its man walks off and the next walks up (Joe)
+    var linger = null;
+    if (play && (seg.kind === 'paStart' || seg.kind === 'change')) { var kp = G.plays.indexOf(play), pv = kp > 0 ? G.plays[kp - 1] : null; if (pv && pv.half === play.half && pv.inning === play.inning) linger = pv; }
+    if (seg.kind === 'halfEnd') linger = play;
+    var thinkSeg = linger ? { kind: 'result', play: linger, i: linger.pa.pitches.length - 1 } : quiet ? { kind: seg.kind, play: null } : seg;
+    safe('panels', function () {
+      drawThink(thinkSeg, linger ? 99 : tau);
+      if (quiet) { drawSeq(null); drawBatter(seg.kind === 'halfStart' ? play : null); drawPitcher(seg.kind === 'halfStart' ? play : null, 0); }
+      else { drawSeq(play, seg.i === undefined ? -1 : seg.i, seg.kind === 'result'); drawBatter(play); drawPitcher(play, thrown); }
+    });
+    lane(laneMain, laneSub);
+    var spd = speed >= 1 ? speed.toFixed(2).replace(/\.?0+$/, '') : '1/' + Math.round(1 / speed);
+    EL.hud.innerHTML = '<span class="fig hot">' + (paused ? '❚❚' : '▶') + ' ' + spd + '×</span>&nbsp;&nbsp;&nbsp;seed ' + SEED + ' · space pause · ↑ ↓ speed · ← → at-bat · g new game';
+  }
+
+  function init() {
+    var f = setup('field', FW, FH, 0, 0); fieldC = f.c; fieldG = f.g; bg = null;
+    var z = setup('zone', ZW, ZH, ZX, ZY); zoneC = z.c; zoneG = z.g;
+  }
+  init();
+  window.addEventListener('resize', init);
+  function frame(now) {
+    if (lastNow === null) lastNow = now;
+    if (!paused) T += (now - lastNow) / 1000 * speed;
+    lastNow = now;
+    if (T > total) T = total - 0.01;
+    render(T);
+    requestAnimationFrame(frame);
+  }
+  render(T);
+  requestAnimationFrame(frame);
+  window.BALLGAME = { G: G, SEG: SEG, seek: function (t) { T = t; }, total: total };
+})();
+</script>
+</body>
+</html>
