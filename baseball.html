@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v1.7 · 2026-10-01
+  baseball.html · v1.8 · 2026-10-01
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
@@ -38,6 +38,10 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v1.8  the dots become people: everyone walks between his stations - seat, on-deck
+          circle, plate, bases, position - laid down with the schedule; sides change
+          over on foot and change colour as they go; warm-up pitches; home-run trots;
+          the whole bench out for a grand slam and for the win (Joe)
     v1.7  on the wall: wall.js is loaded when it is beside the file, the game tells
           the stall watchdog its length, hands on through the ring at the final
           out, and a visit with no ?seed plays a new game drawn from the clock
@@ -51,10 +55,6 @@
           unassisted putouts and the pitcher covering; fielders chase playable
           fouls; dots warm with effort; the reasoning lingers between at-bats;
           the at-bat panel lists his day; ribbon label off the plot; dugout text upright
-    v1.3  Joe's second look: a man the ball beats breaks for it and lunges late;
-          win probability shaded in team colours; speed on powers of two; the hit
-          ball leaves the catcher's view in the pitch's slow motion; the flight
-          inset follows the ground track; innings appear as reached, full names
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -119,6 +119,8 @@ tr.tag td.num { letter-spacing:0; }
 #lane .sub { font:400 var(--t4)/1.4 var(--font-num); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2); display:block; }
 #overlay { left:0; top:0; width:100%; height:100%; background:var(--ground); padding:calc(90 * var(--wu)) calc(134 * var(--wu)); display:none; }
 #overlay.on { display:block; }
+#overlay.final { background:linear-gradient(var(--ground) 0%, var(--ground) 52%, rgba(0,0,0,0) 72%); }   /* the field shows below the line score: the winners gather */
+body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.final #state, body.final #think { visibility:hidden; }   /* under the final screen only the field shows */
 #overlay h1 { font:italic 400 var(--t1)/1.15 var(--font-name); margin:0 0 calc(10 * var(--wu)); }
 #overlay .cols { display:flex; gap:calc(120 * var(--wu)); margin-top:calc(50 * var(--wu)); }
 #overlay .cols > div { flex:1; }
@@ -159,7 +161,11 @@ tr.tag td.num { letter-spacing:0; }
   var Q = new URLSearchParams(location.search);
   var SEED = Q.has('seed') ? +Q.get('seed') : 100 + Math.floor(Date.now() / 60000) % 90000;   // no seed asked for: a new game from the clock (the HUD shows it, so it can be replayed)
   var SPEED = +Q.get('speed') || 1, SEEK = +Q.get('t') || 0;
-  var PACE = { pregame: 45, halfStart: 4, paStart: 4, setup: 3, flight: 1.8, take: 2.6, foul: 2.4, bipPad: 2.6, change: 3.5, halfEnd: 4.5, final: 40 };
+  var PACE = { pregame: 45, halfStart: 8, paStart: 4, setup: 3, flight: 1.8, take: 2.6, foul: 2.4, bipPad: 2.6, change: 3.5, halfEnd: 5.5, final: 40 };
+  // how people move, in seconds: a jog back to the dugout, the walk out to a position, seat to the
+  // on-deck circle, circle to the plate, a jog to the next bag on a walk, a home-run trot per base,
+  // and how long a huddle at the plate holds
+  var WALK = 5.0, WALK_OUT = 6.0, DECK_WALK = 3.0, PLATE_WALK = 3.0, JOG_BASE = 2.6, HR_BASE = 1.6, CELEB = 3.5;
   var BASES = BBField.BASES;
 
   function Phi(z) { var t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989422804 * Math.exp(-z * z / 2);
@@ -260,7 +266,7 @@ tr.tag td.num { letter-spacing:0; }
     if (!r) return 2;
     var t = bb.hang + 1;
     r.events.forEach(function (e) { if (e.t) t = Math.max(t, e.t); if (e.arrive) t = Math.max(t, e.arrive); });
-    if (r.hit === 'HR') t = bb.hang + 2.5;
+    if (r.hit === 'HR') t = bb.hang * 0.3 + 4 * HR_BASE + 0.4;   // the trot: he sets off as the ball leaves and touches them all
     return Math.min(t, 16) + 0.6;
   }
   add('pregame', PACE.pregame);
@@ -275,7 +281,7 @@ tr.tag td.num { letter-spacing:0; }
         add('setup', PACE.setup, { play: play, i: i });
         add('flight', PACE.flight, { play: play, i: i });
         var last = i === n - 1, dur, running = (p.steal && !p.steal.back) || p.wild;   // a steal or a wild pitch plays out in real time
-        if (last && play.play) dur = playDuration(play) + PACE.bipPad;
+        if (last && play.play) dur = playDuration(play) + PACE.bipPad + (play.play.hit === 'HR' && play.play.runs === 4 ? CELEB + 1.0 : 0);   // a grand slam: the bench comes out
         else if (p.result === 'foul') dur = (p.bb ? Math.min(p.bb.hang, 3) : 0) + PACE.foul;
         else dur = running ? 5.0 : PACE.take;
         var sg = add('result', dur, { play: play, i: i, last: last });
@@ -441,7 +447,7 @@ tr.tag td.num { letter-spacing:0; }
     var ev = r.events.filter(function (e) { return e.kind === 'safe' && e.who === rn.id; })[0];
     var th = r.events.filter(function (e) { return e.kind === 'throw' && e.to === rn.to; })[0];
     var a = ev && isFinite(ev.t) ? ev.t : th ? th.arrive : (rn.start || 0) + (rn.to - rn.from) * 3.7;
-    if (r.hit === 'HR') { rn.start = bb.hang * 0.3; a = bb.hang + (rn.to - rn.from) * 1.2; }
+    if (r.hit === 'HR') { rn.start = bb.hang * 0.3; a = rn.start + (rn.to - rn.from) * HR_BASE; }
     var ct = r.events.filter(function (e) { return e.kind === 'catch'; })[0];
     if (rn.from === 0 && rn.out && ct) { rn.to = 1; rn.start = 0.05; a = ct.t + 4; rn.gone = ct.t; }   // the batter runs it out until the catch
     rn.arrive = a; return a;
@@ -450,13 +456,12 @@ tr.tag td.num { letter-spacing:0; }
   // ------------------------------------------------------------ the venue
   // Dugouts, on-deck circles and bullpens sit in foul ground, parallel to the
   // lines: home on the first-base side, visitors on third. `sd` is that side.
-  var WALK = 5.0;   // s: a man jogs back to the dugout in this long
   function box(cx, cy, sd, len, wid) { return { cx: cx, cy: cy, rot: -sd * Math.PI / 4, len: len, wid: wid, sd: sd }; }
   function dugoutOf(sd) { return box(HX + sd * 655, HY - 345, sd, 560, 76); }
   function penOf(sd) { return box(HX + sd * 965, HY - 640, sd, 300, 80); }
   function deckOf(sd) { return [HX + sd * 200, HY - 60]; }
   function along(b, u, v) { var c = Math.cos(b.rot), sn = Math.sin(b.rot); return [b.cx + u * c - v * sn, b.cy + u * sn + v * c]; }
-  function slotU(sd, i) { return sd < 0 ? -220 + i * 48 : 220 - i * 48; }      // slot 1 farthest from home, manager nearest
+  function slotU(sd, i) { return sd < 0 ? -220 + i * 48 : 220 - i * 48; }      // slot 1 farthest from home; then the pitcher's seat, then the manager
   function homeU(sd, k) { return sd < 0 ? k : -k; }                              // +k toward home plate along the box
   function drawBox(g, b, label) {
     g.save(); g.translate(b.cx, b.cy); g.rotate(b.rot);
@@ -485,6 +490,169 @@ tr.tag td.num { letter-spacing:0; }
     play.pa.pitches.forEach(function (p) { if (p.steal && !p.steal.back && !p.steal.safe) W.push({ id: p.steal.id, t: (p.tResult || 0) + Math.max(0.5, p.steal.tRun - 1.35) + 1.4, from: BASES[p.steal.to] }); });
     return (play._walk = W);
   }
+  // ------------------------------------------------------------ the people
+  // Every man on both benches has a seat, and between plays he WALKS: to the
+  // on-deck circle, to the plate, out to his position, back to the dugout, to
+  // the next bag on a walk. A move is a timed walk between two spots in screen
+  // space, and the dot's look blends from his team's colour (k = 0) to the dark
+  // field dot (k = 1) as he goes. The moves are laid down once, with the
+  // schedule, so a seek puts everyone where he belongs. The field, the bases
+  // and the plate draw the men they own (fielders in position, runners, the
+  // batter in the box) and the people pass draws everyone else - mid-move, or
+  // resting where his last move ended. Whenever the game puts a man somewhere
+  // (a bag, the plate) the track is told, so it is never stale.
+  var PEOPLE = {}, SLOTS = [[], []];   // id -> person; team -> nine slots, each a history of [{t, id, label}]
+  function slotSeat(sd, i) { return along(dugoutOf(sd), slotU(sd, i), 0); }
+  function pitcherSeat(sd) { return along(dugoutOf(sd), homeU(sd, 206), 0); }
+  function showerSeat(sd, n) { return along(dugoutOf(sd), homeU(sd, -262 + 8 * n), 0); }   // out of the game: the far end
+  function managerSeat(sd) { return along(dugoutOf(sd), homeU(sd, 252), 0); }
+  function fieldPt(F) { return [fx(F.at[0]), fy(F.at[1] - (F.pos === 'C' ? 1.8 : 0))]; }   // where the field draws him
+  function platePt(B, P) { return [fx(BB.batterSide(B, P) * 2.6), fy(0.3)]; }
+  function basePt(b) { var q = BASES[b % 4]; return [fx(q[0]), fy(q[1])]; }
+  function penMound(sd) { return along(penOf(sd), homeU(sd, -100), 0); }
+  function clusterPt(c, j) { var a = j * 2.39996, r = 1.6 + 1.1 * Math.sqrt(j); return [fx(c[0] + r * Math.sin(a)), fy(c[1] + r * Math.cos(a))]; }   // a huddle, in metres about c
+  function who(pl, team, label) { return PEOPLE[pl.id] || (PEOPLE[pl.id] = { id: pl.id, team: team, label: label, moves: [], seat: null }); }
+  function placeAt(p, t, pt, k, st) { p.moves.push({ t0: t, t1: t, a: pt, b: pt, ka: k, kb: k, st: st }); }
+  function inward(team) { var b = dugoutOf(team ? 1 : -1), dx = HX - b.cx, dy = (HY - 600) - b.cy, L = Math.hypot(dx, dy); return [dx / L, dy / L]; }   // out of the dugout, toward the infield
+  function stateAt(p, t) {   // null before he has appeared; else { p, k, moving, st }
+    var M = p.moves, m = null;
+    for (var i = M.length - 1; i >= 0; i--) if (M[i].t0 <= t) { m = M[i]; break; }
+    if (!m) return null;
+    if (t >= m.t1) return { p: m.b, k: m.kb, moving: false, st: m.st };
+    var u = (t - m.t0) / (m.t1 - m.t0), e = u * u * (3 - 2 * u), q = lerp(m.a, m.b, e);
+    if (m.n) { var bg = 80 * Math.sin(Math.PI * e); q = [q[0] + m.n[0] * bg, q[1] + m.n[1] * bg]; }   // a walk that starts or ends at the bench steps out in front of it
+    return { p: q, k: m.ka + (m.kb - m.ka) * e, moving: true, st: m.st };
+  }
+  function move(p, t0, dur, to, kTo, st) {   // from wherever he is at t0; a walk still under way turns there
+    var M = p.moves, last = M[M.length - 1];
+    if (last && t0 < last.t0) t0 = last.t0;
+    var cur = stateAt(p, t0) || { p: to, k: kTo, st: st };
+    if (last && last.t1 > t0) { last.b = cur.p; last.kb = cur.k; last.t1 = t0; last.n = null; }
+    var bench = st === 'seat' || cur.st === 'seat' || (last && last.st === 'seat');
+    M.push({ t0: t0, t1: t0 + dur, a: cur.p, b: to, ka: cur.k, kb: kTo, st: st, n: bench ? inward(p.team) : null });
+  }
+  function holderOf(tm, i, t) { var h = SLOTS[tm][i], cur = h[0]; for (var q = 1; q < h.length; q++) if (h[q].t <= t) cur = h[q]; return cur; }
+  function slotOf(tm, id, t) { for (var i = 0; i < 9; i++) if (holderOf(tm, i, t).id === id) return i; return -1; }
+  function buildPeople() {
+    var curP = [away.starter, home.starter], shower = [0, 0], lastDef = [null, null];
+    [0, 1].forEach(function (tm) {
+      var sd = tm ? 1 : -1, Tm = G.teams[tm];
+      Tm.lineup.forEach(function (pl, i) {
+        var isP = G.rules === 'NL' && pl.pos === 'DH', man = isP ? curP[tm] : pl, p = who(man, tm, isP ? 'P' : pl.pos);
+        SLOTS[tm].push([{ t: -1, id: man.id, label: isP ? 'P' : pl.pos }]);
+        p.seat = slotSeat(sd, i); placeAt(p, -1, p.seat, 0, 'seat');
+      });
+    });
+    function takeMound(tm, P, t) {   // P is this side's pitcher from t on: his seat, his slot in an NL order
+      var sd = tm ? 1 : -1, p = who(P, tm, 'P');
+      if (G.rules === 'NL') { var i = slotOf(tm, curP[tm].id, t); if (i < 0) i = SLOTS[tm].map(function (h) { return h[0].label; }).indexOf('P');
+        if (i >= 0) { SLOTS[tm][i].push({ t: t, id: P.id, label: 'P' }); p.seat = slotSeat(sd, i); } }
+      else p.seat = pitcherSeat(sd);
+      if (curP[tm].id !== P.id) { var old = PEOPLE[curP[tm].id]; if (old) old.seat = showerSeat(sd, shower[tm]++); }
+      curP[tm] = P;
+      return p;
+    }
+    SEG.forEach(function (sg, si) {
+      var play = sg.play, inn = sg.inn, h, sdB, sdD, batTm, defTm;
+      if (sg.kind === 'halfStart') {
+        h = inn.half; batTm = h; defTm = 1 - h; sdB = h ? 1 : -1; sdD = -sdB;
+        var first = inn.plays[0], D = first.defense, tEnd = si > 0 && SEG[si - 1].kind === 'halfEnd' ? SEG[si - 1].t0 : sg.t0 - 0.5;
+        // the side that was in the field comes in and sits down, in its own colours again
+        if (lastDef[h]) lastDef[h].forEach(function (F, i) { var p = PEOPLE[F.id]; if (p) move(p, tEnd + 0.3 + i * 0.12, WALK, p.seat, 0, 'seat'); });
+        // the side that batted goes out; a new pitcher comes from the pen
+        var pNew = first.pitcher.id !== curP[defTm].id || !lastDef[defTm];
+        D.forEach(function (F, i) {
+          var p = who(F, defTm, F.pos);
+          if (F.pos === 'P') { if (!stateAt(p, tEnd)) placeAt(p, tEnd, penMound(sdD), 1, 'pen'); if (pNew) takeMound(defTm, first.pitcher, tEnd); }
+          move(p, tEnd + 0.8 + i * 0.12, WALK_OUT, fieldPt(F), 1, 'field');
+        });
+        // the first man up walks to the on-deck circle while the pitcher warms
+        move(who(first.batter, batTm, first.batter.pos), sg.t0 + 1.0, DECK_WALK, deckOf(sdB), 0, 'deck');
+      }
+      if (sg.kind === 'paStart') {
+        h = play.half; batTm = h; sdB = h ? 1 : -1;
+        var B = play.batter, pB = who(B, batTm, B.pos), prev = SEG[si - 1];
+        if (!(prev && prev.kind === 'change' && prev.pinch)) move(pB, sg.t0 + 0.2, PLATE_WALK, platePt(B, play.pitcher), 0, 'plate');
+        var k0 = G.plays.indexOf(play), nxt = G.plays[k0 + 1], nb = null;
+        if (nxt && nxt.half === h && !nxt.pinchHit) nb = PEOPLE[nxt.batter.id];
+        else { var sl = slotOf(batTm, B.id, sg.t0); if (sl >= 0) nb = PEOPLE[holderOf(batTm, (sl + 1) % 9, sg.t0).id]; }
+        if (nb && nb.id !== B.id) { var sN = stateAt(nb, sg.t0 + 0.6); if (!sN || sN.st !== 'deck') move(nb, sg.t0 + 0.6, DECK_WALK, deckOf(sdB), 0, 'deck'); }
+      }
+      if (sg.kind === 'change' && sg.pinch) {
+        h = play.half; batTm = h; sdB = h ? 1 : -1;
+        var PH = sg.pinch.batter, forP = sg.pinch.forPitcher, slot = slotOf(batTm, forP.id, sg.t0);
+        var pPH = who(PH, batTm, 'PH');
+        if (slot >= 0) { pPH.seat = slotSeat(sdB, slot); SLOTS[batTm][slot].push({ t: sg.t0, id: PH.id, label: 'PH' }); } else pPH.seat = showerSeat(sdB, shower[batTm]);
+        placeAt(pPH, sg.t0, pPH.seat, 0, 'seat');
+        var pOld = PEOPLE[forP.id]; if (pOld) { pOld.seat = showerSeat(sdB, shower[batTm]++); move(pOld, sg.t0 + 0.3, DECK_WALK, pOld.seat, 0, 'seat'); }
+        move(pPH, sg.t0 + 0.6, PACE.change + PACE.paStart - 1.0, platePt(PH, play.pitcher), 0, 'plate');
+      }
+      if (sg.kind === 'change' && sg.change) {
+        h = play.half; defTm = 1 - h; sdD = h ? -1 : 1;
+        var FP = play.defense.filter(function (q) { return q.pos === 'P'; })[0], pOut = PEOPLE[sg.change.out.id];
+        var pIn = takeMound(defTm, sg.change.in, sg.t0);
+        if (!stateAt(pIn, sg.t0)) placeAt(pIn, sg.t0, penMound(sdD), 1, 'pen');
+        move(pIn, sg.t0 + 0.2, PACE.change - 0.5, fieldPt(FP), 1, 'field');
+        if (pOut) move(pOut, sg.t0 + 0.2, PACE.change + 1.0, pOut.seat, 0, 'seat');
+      }
+      if (sg.kind === 'result') {
+        h = play.half; batTm = h; sdB = h ? 1 : -1;
+        var pitch = play.pa.pitches[sg.i];
+        // the bases move mid-count on a steal or a wild pitch: tell the track where each man ended up
+        if ((pitch.steal || pitch.wild) && pitch.basesAfter) [1, 2, 3].forEach(function (b) { var pl = pitch.basesAfter[b]; if (pl && PEOPLE[pl.id]) placeAt(PEOPLE[pl.id], sg.t0 + 2.6, basePt(b), 0, 'base'); });
+        if (!sg.last) return;
+        var r = play.play, res = play.pa.result, tR = play.tResolve;
+        if (res === 'BB' || res === 'HBP') {   // he jogs down; anyone forced jogs ahead of him
+          move(PEOPLE[play.batter.id], tR, JOG_BASE, basePt(1), 0, 'base');
+          [3, 2, 1].forEach(function (b) { var pl = play.bases[b]; if (!pl || !PEOPLE[pl.id]) return;
+            if (b < 3 && play.basesAfter[b + 1] && play.basesAfter[b + 1].id === pl.id) move(PEOPLE[pl.id], tR + 0.1 * (3 - b), JOG_BASE, basePt(b + 1), 0, 'base');
+            else if (b === 3 && !play.basesAfter[3]) { move(PEOPLE[pl.id], tR, JOG_BASE, basePt(0), 0, 'base'); move(PEOPLE[pl.id], tR + JOG_BASE, WALK, PEOPLE[pl.id].seat, 0, 'seat'); } });
+        }
+        if (r) {   // where the ball in play left each man
+          var bb = play.pa.bb, t0 = play.tResult;
+          r.runners.forEach(function (rn) { var a = runnerArrive(r, rn, bb), p = PEOPLE[rn.id]; if (p && !rn.out && rn.to >= 1 && rn.to <= 3) placeAt(p, t0 + a, basePt(rn.to), 0, 'base'); });
+        }
+        var slam = r && r.hit === 'HR' && r.runs === 4, j = 0, hc = [sdB * 2.2, 2.4], tC = 0;
+        if (slam) { var bat = r.runners.filter(function (q) { return q.from === 0; })[0]; tC = play.tResult + runnerArrive(r, bat, play.pa.bb); }
+        walksOf(play).forEach(function (w) { var p = PEOPLE[w.id]; if (!p) return;
+          if (slam && w.from === BASES[0]) move(p, w.t, 1.4, clusterPt(hc, j++), 0, 'huddle');
+          else move(p, w.t, WALK, p.seat, 0, 'seat'); });
+        if (slam) {   // the bench streams out to meet him at the plate, then everyone goes back
+          var huddlers = [];
+          Object.keys(PEOPLE).forEach(function (id) { var p = PEOPLE[id]; if (p.team !== batTm) return; var st = stateAt(p, tC - 2.4);
+            if (st && !st.moving && (st.st === 'seat' || st.st === 'deck')) { move(p, tC - 2.4 + 0.08 * j, 2.6, clusterPt(hc, j++), 0, 'huddle'); huddlers.push(p); } });
+          Object.keys(PEOPLE).forEach(function (id) { var p = PEOPLE[id]; if (p.team !== batTm) return; var st = stateAt(p, tC + CELEB); if (st && st.st === 'huddle') move(p, tC + CELEB + 0.1 * (j-- % 7), WALK, p.seat, 0, 'seat'); });
+        }
+      }
+      if (sg.kind === 'halfEnd') {
+        var lastP = inn.plays[inn.plays.length - 1]; h = inn.half; batTm = h; sdB = h ? 1 : -1;
+        lastDef[1 - h] = lastP.defense;
+        [1, 2, 3].forEach(function (b) { var pl = lastP.basesAfter[b]; if (pl && PEOPLE[pl.id]) move(PEOPLE[pl.id], sg.t0 + 0.2, WALK, PEOPLE[pl.id].seat, 0, 'seat'); });
+        Object.keys(PEOPLE).forEach(function (id) { var p = PEOPLE[id]; if (p.team !== batTm) return; var st = stateAt(p, sg.t0 + 0.25);
+          if (st && !st.moving && (st.st === 'deck' || st.st === 'plate')) move(p, sg.t0 + 0.25, WALK, p.seat, 0, 'seat'); });
+      }
+      if (sg.kind === 'final') {   // the winners gather - at the plate if they just walked it off, else on the mound; the losers go in
+        var lp = G.plays[G.plays.length - 1], hb = lp.half, batWon = G.score[hb] > G.score[1 - hb], winTm = batWon ? hb : 1 - hb, sdW = winTm ? 1 : -1, jj = 0;
+        var centre = batWon ? [sdW * 2.2, 2.4] : [0, 15.5];
+        Object.keys(PEOPLE).forEach(function (id) { var p = PEOPLE[id], st = stateAt(p, sg.t0 + 0.3); if (!st) return;
+          if (p.team === winTm) move(p, sg.t0 + 0.3 + 0.1 * jj, 4.0, clusterPt(centre, jj++), st.st === 'field' ? 1 : 0, 'huddle');
+          else if (st.st !== 'seat') move(p, sg.t0 + 0.3, WALK, p.seat, 0, 'seat'); });
+      }
+    });
+  }
+  buildPeople();
+  function mix(a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]; }
+  function rgbOf(hex) { return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)]; }
+  var DARK = [11, 14, 20], INKC = [238, 244, 252];
+  function blendDot(g, x, y, k, col, label) {   // k 0 = his team's dot, 1 = the dark field dot; between, on his way out or in
+    if (k <= 0.02) return runnerDot(g, x, y, col, label);
+    if (k >= 0.98) return person(g, x, y, label, 0);
+    var f = mix(rgbOf(col), DARK, k), e = mix(DARK, INKC, k);
+    g.beginPath(); g.arc(x, y, 19 + k, 0, 7); g.fillStyle = 'rgb(' + f.map(Math.round).join(',') + ')'; g.fill();
+    g.lineWidth = 3; g.strokeStyle = 'rgb(' + e.map(Math.round).join(',') + ')'; g.stroke();
+    text(g, label, x, y + 1, 20 + 6 * k, 'rgb(' + e.map(Math.round).join(',') + ')', 'center', 'middle');
+  }
+
   // THE RUNNING GAME on the field, in real time from the moment the pitch reaches
   // the plate (tau 0 of the result segment): the runner has been going since the
   // pitcher's first move, so he is 9 m down the line; the catcher's throw leaves
@@ -633,7 +801,7 @@ tr.tag td.num { letter-spacing:0; }
     var fld = inPlay ? fieldEvent(r) : null;
     var byId = {}; byId[play.batter.id] = play.batter; [1, 2, 3].forEach(function (b) { if (play.bases[b]) byId[play.bases[b].id] = play.bases[b]; });
     play.pa.pitches.forEach(function (q) { (q.bases || []).forEach(function (pl) { if (pl) byId[pl.id] = pl; }); });
-    var quiet = seg.kind === 'halfStart' || seg.kind === 'halfEnd' || seg.kind === 'change' || seg.kind === 'paStart';
+    var quiet = seg.kind === 'halfStart' || seg.kind === 'halfEnd' || seg.kind === 'change' || seg.kind === 'paStart' || seg.kind === 'final' || seg.kind === 'pregame';
 
     // bullpens: whoever is warming, on either side
     drawPen(g, sdDef, play.warming, defTeam.col, tAbs, defTeam.nick);
@@ -641,7 +809,9 @@ tr.tag td.num { letter-spacing:0; }
 
     // the defence: on a ball in play every man moves (planner); on a foul the
     // nearest man chases it; between plays they jog back from where the last play
-    // left them. A dot warms with effort: speed over his own top speed.
+    // left them. A dot warms with effort: speed over his own top speed. A man who
+    // is walking out, walking in or in a huddle belongs to the people pass below.
+    var drawn = {};
     var plan = inPlay ? planner(play) : null;
     var chase = (!inPlay && seg.kind === 'result' && pitch.result === 'foul') ? foulChase(play, pitch) : null;
     var back = null;
@@ -663,14 +833,11 @@ tr.tag td.num { letter-spacing:0; }
       return F.at;
     }
     D.forEach(function (F) {
+      var ps = PEOPLE[F.id] ? stateAt(PEOPLE[F.id], tAbs) : null;
+      if (!ps || ps.moving || ps.st !== 'field') return;
+      drawn[F.id] = true;
       var at = fielderAt(F, tF), effort = 0;
       if (plan || chase || stealCover) { var a1 = fielderAt(F, tF - 0.05), a2 = fielderAt(F, tF + 0.05); effort = clamp(Math.hypot(a2[0] - a1[0], a2[1] - a1[1]) / 0.1 / ((F.speed || 27) * FT), 0, 1); }
-      if (seg.kind === 'change' && F.pos === 'P' && seg.change) {   // the new man jogs in from the pen; the old one walks off
-        var pm = along(penOf(sdDef), homeU(sdDef, -100), 0), k = clamp(tau / (seg.dur - 0.4), 0, 1); k = k * k * (3 - 2 * k);
-        at = lerp([(pm[0] - HX) / S * FT, (HY - pm[1]) / S * FT], F.at, k);
-        var dg = along(dugoutOf(sdDef), homeU(sdDef, 236), 0), old = lerp(F.at, [(dg[0] - HX) / S * FT, (HY - dg[1]) / S * FT], k);
-        person(g, fx(old[0]), fy(old[1]), 'P');
-      }
       if (!inPlay && !quiet) {
         var dx = fx(F.at[0]) - fx(F.std[0]), dy = fy(F.at[1]) - fy(F.std[1]), L = Math.hypot(dx, dy);
         if (L > 16) { g.beginPath(); g.arc(fx(F.std[0]), fy(F.std[1]), 6, 0, 7); g.fillStyle = INK3; g.fill();
@@ -678,19 +845,18 @@ tr.tag td.num { letter-spacing:0; }
       }
       person(g, fx(at[0]), fy(at[1] - (F.pos === 'C' ? 1.8 : 0)), F.pos, effort);   // the catcher drawn a step back, clear of the batter
     });
-    // the defence's dugout: empty seats, the DH sitting, the manager
-    var dgD = dugoutOf(sdDef);
-    defTeam.lineup.forEach(function (pl, i) { var sp = along(dgD, slotU(sdDef, i), 0);
-      if (pl.pos === 'DH' && G.rules === 'AL') runnerDot(g, sp[0], sp[1], defTeam.col, 'DH'); else ring(g, sp[0], sp[1], G.rules === 'NL' && pl.pos === 'DH' ? 'P' : pl.pos); });
-    var mD = along(dgD, homeU(sdDef, 236), 0); runnerDot(g, mD[0], mD[1], defTeam.col, 'M');
+    // warm-up pitches at the start of a half, once the battery is out there
+    if (seg.kind === 'halfStart' && tau > 1.8) {
+      var FP = D.filter(function (q) { return q.pos === 'P'; })[0], FC = D.filter(function (q) { return q.pos === 'C'; })[0];
+      if (FP && FC) { var ph = (tau - 1.8) % 2.4; if (ph < 0.5) { var uu = ph / 0.5, wp = lerp(FP.at, [FC.at[0], FC.at[1] - 1.8], uu); ballAt(g, wp[0], wp[1], 1.4 + 2.4 * uu * (1 - uu)); } }
+    }
 
-    // the batting team: who is on the field, who is walking back, who is on deck, who sits
-    var onField = {};
-    if (!quiet && !settled) onField[play.batter.id] = true;
+    // the batting side: on the bases and at the plate
+    function moving(id) { var pp = PEOPLE[id], st = pp && stateAt(pp, tAbs); return !!(st && st.moving); }
     if (inPlay && tb <= pd - 0.6) {
       r.runners.forEach(function (rn) {
         var arrive = runnerArrive(r, rn, bb);
-        if (rn.to <= rn.from && rn.from > 0) { var bp = BASES[rn.from], plq = byId[rn.id]; runnerDot(g, fx(bp[0]), fy(bp[1]), TC, plq && plq.pos); onField[rn.id] = true; return; }
+        if (rn.to <= rn.from && rn.from > 0) { var bp = BASES[rn.from], plq = byId[rn.id]; runnerDot(g, fx(bp[0]), fy(bp[1]), TC, plq && plq.pos); drawn[rn.id] = true; return; }
         if (rn.gone !== undefined && tb > rn.gone) return;
         if (rn.out && tb > arrive) {
           if (tb < arrive + 1.6) { var ob = BASES[rn.to]; g.strokeStyle = '#e66767'; g.lineWidth = 6; g.beginPath();
@@ -698,42 +864,38 @@ tr.tag td.num { letter-spacing:0; }
           return;
         }
         if (!rn.out && rn.to >= 4 && tb > arrive) { if (tb < arrive + 1.5) text(g, '+1', fx(0) + 40, fy(0) - 30, 44, TC, 'left'); return; }
-        var pos = runnerPos(rn, tb), plr = byId[rn.id]; runnerDot(g, fx(pos[0]), fy(pos[1]), TC, plr && plr.pos); onField[rn.id] = true;
+        var pos = runnerPos(rn, tb), plr = byId[rn.id]; runnerDot(g, fx(pos[0]), fy(pos[1]), TC, plr && plr.pos); drawn[rn.id] = true;
       });
     } else {
       // the bases follow each pitch: a steal or wild pitch moves men mid-count
       var running = seg.kind === 'result' && ((pitch.steal && !pitch.steal.back) || pitch.wild), shown = {};
       var basesNow = (settled || seg.kind === 'halfEnd') ? play.basesAfter : (running && tau >= 2.6 && pitch.basesAfter) ? pitch.basesAfter : (pitch.bases || play.bases);
-      if (seg.kind === 'halfEnd') basesNow = [null, null, null, null];
+      if (seg.kind === 'halfEnd' || seg.kind === 'final' || seg.kind === 'pregame') basesNow = [null, null, null, null];
       if (seg.kind === 'result' && (pitch.steal || pitch.wild) && !settled) shown = runningGame(play, pitch, tau, TC, byId, g);
-      Object.keys(shown).forEach(function (id) { onField[id] = true; });
+      Object.keys(shown).forEach(function (id) { drawn[id] = true; });
       if (seg.kind === 'flight' && pitch.before) { var gb = BASES[pitch.before.from], gn = BASES[pitch.before.to], gl = lerp(gb, gn, (3.5 + 5.5 * clamp(tau / PACE.flight, 0, 1)) / (90 * FT)), gpl = byId[pitch.before.id];
-        runnerDot(g, fx(gl[0]), fy(gl[1]), TC, gpl && gpl.pos); shown[pitch.before.id] = true; onField[pitch.before.id] = true; }   // he's going
-      [1, 2, 3].forEach(function (b) { var pl = basesNow[b]; if (!pl || shown[pl.id] !== undefined) return; runnerDot(g, fx(BASES[b][0]), fy(BASES[b][1]), TC, pl.pos); onField[pl.id] = true; });
-      if (!quiet && !settled) runnerDot(g, fx(BB.batterSide(play.batter, play.pitcher) * 2.6), fy(0.3), TC, play.batter.pos);   // stood a little wide of the plate so he clears the catcher
+        runnerDot(g, fx(gl[0]), fy(gl[1]), TC, gpl && gpl.pos); shown[pitch.before.id] = true; drawn[pitch.before.id] = true; }   // he's going
+      [1, 2, 3].forEach(function (b) { var pl = basesNow[b]; if (!pl || shown[pl.id] !== undefined || moving(pl.id)) return; runnerDot(g, fx(BASES[b][0]), fy(BASES[b][1]), TC, pl.pos); drawn[pl.id] = true; });
+      if (!quiet && !settled && !moving(play.batter.id)) { runnerDot(g, fx(BB.batterSide(play.batter, play.pitcher) * 2.6), fy(0.3), TC, play.batter.pos); drawn[play.batter.id] = true; }   // stood a little wide of the plate so he clears the catcher
     }
-    // walkers: this play's outs and runs, the last play's tail, and men left on base at the end of a half
-    var walkers = {}, k0 = G.plays.indexOf(play), prev = k0 > 0 ? G.plays[k0 - 1] : null;
-    [prev, play].forEach(function (p) { if (!p || (prev && p === prev && (p.half !== play.half))) return;
-      walksOf(p).forEach(function (w) { var dt = tAbs - w.t; if (dt >= 0 && dt < WALK) walkers[w.id] = { from: w.from, f: dt / WALK }; }); });
-    if (seg.kind === 'halfEnd' && seg.inn) { var lastP = seg.inn.plays[seg.inn.plays.length - 1];
-      [1, 2, 3].forEach(function (b) { var pl = lastP.basesAfter[b]; if (pl && tau < WALK) walkers[pl.id] = { from: BASES[b], f: tau / WALK }; }); }
-    // on deck: the next man due in this half
-    var nextB = null;
-    if (seg.kind !== 'halfEnd') { var idx = batTeam.lineup.indexOf(play.batter);
-      var nxt = G.plays[k0 + 1]; if (nxt && nxt.half === play.half) nextB = nxt.batter; else if (idx >= 0) nextB = batTeam.lineup[(idx + 1) % 9]; }
-    if (seg.kind === 'halfStart') nextB = play.batter;
-    var dgB = dugoutOf(sdBat), dk = deckOf(sdBat);
-    batTeam.lineup.forEach(function (pl, i) {
-      var sp = along(dgB, slotU(sdBat, i), 0), lab = G.rules === 'NL' && pl.pos === 'DH' ? 'P' : pl.pos;
-      if (G.rules === 'NL' && pl.pos === 'DH') { ring(g, sp[0], sp[1], 'P'); return; }
-      if (onField[pl.id]) { ring(g, sp[0], sp[1], lab); return; }
-      var w = walkers[pl.id];
-      if (w) { var e = w.f * w.f * (3 - 2 * w.f), from = [fx(w.from[0]), fy(w.from[1])], pw = lerp(from, sp, e); runnerDot(g, pw[0], pw[1], TC, lab); ring(g, sp[0], sp[1], lab); return; }
-      if (nextB && pl.id === nextB.id) { var bm = bumble(tAbs, i); runnerDot(g, dk[0] + bm[0], dk[1] + bm[1], TC, lab); ring(g, sp[0], sp[1], lab); return; }
-      runnerDot(g, sp[0], sp[1], TC, lab);
+
+    // THE PEOPLE: the seats and their rings, the managers, and every man the
+    // field, the bases and the plate did not draw - walking, or resting where
+    // his last walk ended
+    [0, 1].forEach(function (tm) {
+      var sd = tm ? 1 : -1, Tm = G.teams[tm];
+      SLOTS[tm].forEach(function (hist, i) { var cur = hist[0]; for (var q = 1; q < hist.length; q++) if (hist[q].t <= tAbs) cur = hist[q]; var sp = slotSeat(sd, i); ring(g, sp[0], sp[1], cur.label); });
+      if (G.rules === 'AL') { var sp2 = pitcherSeat(sd); ring(g, sp2[0], sp2[1], 'P'); }
+      var mg = managerSeat(sd); runnerDot(g, mg[0], mg[1], Tm.col, 'M');
     });
-    var mB = along(dgB, homeU(sdBat, 236), 0); runnerDot(g, mB[0], mB[1], TC, 'M');
+    Object.keys(PEOPLE).forEach(function (id) {
+      if (drawn[id]) return;
+      var p = PEOPLE[id], st = stateAt(p, tAbs);
+      if (!st || (!st.moving && st.st === 'pen')) return;   // not here yet, or waiting in the pen, which draws its own men
+      var pt = st.p;
+      if (!st.moving && st.st === 'deck') { var bm = bumble(tAbs, p.team * 3 + 1); pt = [pt[0] + bm[0], pt[1] + bm[1]]; }
+      blendDot(g, pt[0], pt[1], st.k, G.teams[p.team].col, p.label);
+    });
 
     // the pitch crossing the field
     if (seg.kind === 'flight' && pitch._path) {
@@ -1206,8 +1368,8 @@ tr.tag td.num { letter-spacing:0; }
       tbl.push('</table>');
       h2.push(tbl.join(''));
       h2.push('<div class="row faint" style="margin-top:calc(40*var(--wu))">next game in ' + f0(Math.max(0, seg.dur - tau)) + ' s · g for a new one now</div>');
-      setHTML(EL.overlay, h2.join('')); EL.overlay.className = 'on';
-    } else EL.overlay.className = '';
+      setHTML(EL.overlay, h2.join('')); EL.overlay.className = 'on final'; document.body.className = 'final';
+    } else { EL.overlay.className = ''; document.body.className = ''; }
   }
 
   // ============================================================= RENDER
@@ -1268,7 +1430,7 @@ tr.tag td.num { letter-spacing:0; }
     var quiet = seg.kind === 'halfStart' || seg.kind === 'halfEnd';
     // one drawing fault must never blank the screen for the rest of the game (logged once)
     function safe(name, fn) { try { fn(); } catch (err) { if (!FAULTS[name]) { FAULTS[name] = true; console.error(name, err); } } }
-    safe('field', function () { drawField(quiet ? { kind: seg.kind, play: play, inn: seg.inn } : seg, tau, t); });
+    safe('field', function () { drawField(seg.kind === 'final' ? { kind: 'final', play: G.plays[G.plays.length - 1] } : seg.kind === 'pregame' ? { kind: 'pregame', play: G.plays[0] } : quiet ? { kind: seg.kind, play: play, inn: seg.inn } : seg, tau, t); });
     safe('zone', function () { drawZone(quiet ? { kind: seg.kind, play: null } : seg, tau); });
     safe('board', function () { drawBoard(seg, play, done); });
     safe('state', function () { drawState(seg, play, count, outs, bases); });
@@ -1303,7 +1465,7 @@ tr.tag td.num { letter-spacing:0; }
   }
   render(T);
   requestAnimationFrame(frame);
-  window.BALLGAME = { G: G, SEG: SEG, seek: function (t) { T = t; }, total: total };
+  window.BALLGAME = { G: G, SEG: SEG, seek: function (t) { T = t; }, total: total, PEOPLE: PEOPLE, stateAt: stateAt };
   // The wall's stall watchdog asks how long this URL may be held: one whole game at
   // this speed (per run) plus a few seconds to build and lay it out (once).
   function declareBudget() { window.WALL_SECONDS_PER_RUN = Math.round(total / (speed || SPEED)); window.WALL_SECONDS_ONCE = 5; }
