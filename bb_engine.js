@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v0.7 · 2026-09-30
+   bb_engine.js · v0.8 · 2026-10-01
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -49,6 +49,9 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v0.8  the bat is a tapered wood beam: its shape gives the radius the ball meets,
+           the rigid recoil about the balance point and the bending modes that drain
+           a strike off the sweet spot (Nathan 2000); the ball's COR falls with speed
      v0.7  the power chain: bat speed BUILT from height, weight, swing power per kg,
            swing length and the bat (v^3 = 4pWL/mEff); the bat's mass sets the
            collision efficiency; precision worsens as bat speed squared; fitted to
@@ -59,10 +62,6 @@
      v0.5  fielding and running traits on every player; landing state for the fielding
            layer; foul pops can be caught (g.foulCatch)
      v0.4  ghostPitch can keep its flight path, for drawing the batter's expected pitch
-     v0.3  recognition = yes/no tunnelling event; MLB park/air mix; humidity;
-           batted-ball drag fitted; home runs carried to projected distance
-     v0.2  plate coverage: execution errors grow with reach off the zone
-     v0.1  first build - pitch physics, decisions, umpire, collision, flight
 ============================================================================ */
 
 var BB = (function () {
@@ -122,17 +121,122 @@ var BB = (function () {
   function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
   function norm(a) { return Math.sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]); }
   function unit(a) { var m = norm(a); return [a[0] / m, a[1] / m, a[2] / m]; }
+  function jacobi(A, n) {   // eigenvalues and eigenvectors of a symmetric matrix by cyclic Jacobi rotations; A is overwritten
+    var V = [], i, j, p, q, sweep;
+    for (i = 0; i < n; i++) { V.push([]); for (j = 0; j < n; j++) V[i].push(i === j ? 1 : 0); }
+    for (sweep = 0; sweep < 60; sweep++) {
+      var off = 0, dg = 0;
+      for (p = 0; p < n; p++) { dg += A[p][p] * A[p][p]; for (q = p + 1; q < n; q++) off += A[p][q] * A[p][q]; }
+      if (off <= 1e-26 * dg) break;
+      for (p = 0; p < n; p++) for (q = p + 1; q < n; q++) {
+        if (A[p][q] === 0) continue;
+        var th = (A[q][q] - A[p][p]) / (2 * A[p][q]);
+        var t = (th >= 0 ? 1 : -1) / (Math.abs(th) + Math.sqrt(th * th + 1));
+        var c = 1 / Math.sqrt(t * t + 1), sn = t * c, apq = A[p][q];
+        A[p][p] -= t * apq; A[q][q] += t * apq; A[p][q] = A[q][p] = 0;
+        for (i = 0; i < n; i++) {
+          if (i !== p && i !== q) {
+            var aip = A[i][p], aiq = A[i][q];
+            A[i][p] = A[p][i] = c * aip - sn * aiq;
+            A[i][q] = A[q][i] = sn * aip + c * aiq;
+          }
+          var vip = V[i][p], viq = V[i][q];
+          V[i][p] = c * vip - sn * viq; V[i][q] = sn * vip + c * viq;
+        }
+      }
+    }
+    var val = [], vec = [];
+    for (i = 0; i < n; i++) { val.push(A[i][i]); vec.push([]); for (j = 0; j < n; j++) vec[i].push(V[j][i]); }
+    return { val: val, vec: vec };
+  }
 
   // ------------------------------------------------------ the ball and bat
   var BALL_M = 0.145, BALL_R = 0.0366;        // 5.125 oz; 9.125 in around
   var BALL_A = Math.PI * BALL_R * BALL_R;
-  var BAT_R = 0.0331;                          // 2.61 in barrel
-  var R_SUM = BALL_R + BAT_R;                  // centre-to-centre when touching: 2.75 in
-  var Q_SWEET = 0.21;     // collision efficiency of wood at the sweet spot (Nathan): exit speed = q*pitch + (1+q)*bat
+  // The bat is a tapered wood beam: a 34 in professional profile, diameter
+  // in inches at inches from the barrel end. The shape, not a constant,
+  // gives the collision what it needs - the radius a ball meets at each
+  // point, the balance point and the recoil about it, and the bending modes
+  // that drain a strike away from the sweet spot (Nathan, Am. J. Phys. 68,
+  // 979 (2000); Cross, Am. J. Phys. 66, 772 (1998)).
+  var BAT_SHAPE = [[0, 2.55], [5, 2.55], [11, 2.2], [16, 1.7], [21, 1.2], [25, 0.96], [33, 0.94], [34, 1.6]];
+  var SWEET_IN = 6;       // in from the barrel end: where a batter means to meet the ball; dLong is measured from here, + toward the end
+  var BAT_TAU = 0.001;    // s: how long ball and bat touch. A bending mode slower than this takes energy as if the bat were lighter there; a faster one hands it back
+  var WOOD_C = 4300;      // m/s: sqrt(E/rho) of ash and maple; sets the mode frequencies
+  var E_COR = [0.546, 0.51];   // the ball's own coefficient of restitution at 60 mph (the MLB specification) and at 140 mph (Nathan); linear between
   var MU_BAT = 0.5;       // ball-bat friction; caps the tangential impulse on glancing contact
   var SWING_RADIUS = 0.6; // m: the barrel turns at (bat speed / this) rad/s near contact, so timing sets spray
+  var SWING_CURV = 0.5;   // 1/m: how sharply the barrel's path curves upward through the hitting zone - a 0.9 m circle tilted 30 deg (sin 30 / 0.9)
   var C_LOC = 0.9;        // rad per m: an inside pitch is met farther out front and pulled
   var TIP_IN = 6, HANDLE_IN = -14;   // how far along the barrel from the sweet spot a ball can still be struck
+
+  function batDiameter(shape, x) {   // in, at x in from the barrel end
+    if (x <= 0) return shape[0][1];
+    for (var j = 1; j < shape.length; j++) if (x <= shape[j][0]) { var a = shape[j - 1], b = shape[j]; return a[1] + (b[1] - a[1]) * (x - a[0]) / (b[0] - a[0]); }
+    return shape[shape.length - 1][1];
+  }
+  // The shape's bending modes, computed once in inches with E and rho scaled
+  // out: a free-free Euler-Bernoulli beam on a half-inch grid, bending energy
+  // from the second differences weighted by pi r^4/4, mass pi r^2 h, solved
+  // by Jacobi rotations. The two zero modes are the rigid recoil (balance
+  // point xc, radius of gyration k); the next three bending modes are kept,
+  // each with S(x) = phi(x)^2 M / m_mode, its share of the inverse mass a
+  // ball at x feels, and its frequency for the shape at this length.
+  function batModes(shape) {
+    var L = shape[shape.length - 1][0], N = 2 * L + 1, h = L / (N - 1), i, j, k, x = [], mu = [], ei = [], A = [];
+    for (i = 0; i < N; i++) { var d = batDiameter(shape, i * h); x.push(i * h); mu.push(Math.PI * d * d / 4 * h); ei.push(Math.PI * Math.pow(d / 2, 4) / 4); }
+    for (i = 0; i < N; i++) { A.push([]); for (j = 0; j < N; j++) A[i].push(0); }
+    for (i = 1; i < N - 1; i++) {
+      var w = ei[i] / (h * h * h), st = [[i - 1, 1], [i, -2], [i + 1, 1]], a, b;
+      for (a = 0; a < 3; a++) for (b = 0; b < 3; b++) A[st[a][0]][st[b][0]] += w * st[a][1] * st[b][1];
+    }
+    for (i = 0; i < N; i++) for (j = 0; j < N; j++) A[i][j] /= Math.sqrt(mu[i] * mu[j]);
+    var E = jacobi(A, N), order = [], M = 0, xc = 0, k2 = 0, modes = [];
+    for (i = 0; i < N; i++) { order.push(i); M += mu[i]; xc += mu[i] * x[i]; }
+    order.sort(function (p, q) { return E.val[p] - E.val[q]; });
+    xc /= M;
+    for (i = 0; i < N; i++) k2 += mu[i] * (x[i] - xc) * (x[i] - xc);
+    k2 /= M;
+    for (k = 2; k < 5; k++) {
+      var v = E.vec[order[k]], phi = [], S = [], mn = 0;
+      for (i = 0; i < N; i++) { phi.push(v[i] / Math.sqrt(mu[i])); mn += mu[i] * phi[i] * phi[i]; }
+      for (i = 0; i < N; i++) S.push(phi[i] * phi[i] * M / mn);
+      modes.push({ f: Math.sqrt(Math.max(0, E.val[order[k]])) * WOOD_C / IN / (2 * Math.PI), phi: phi, S: S });
+    }
+    return { L: L, h: h, x: x, xc: xc, k2: k2, modes: modes };
+  }
+  var BAT_MODES = batModes(BAT_SHAPE);
+  function pulseOf(wt) {   // energy a half-sine force pulse leaves in a mode (w x tau), relative to an instant blow
+    var d = 1 - (wt / Math.PI) * (wt / Math.PI), F = Math.abs(d) < 1e-6 ? Math.PI / 4 : Math.cos(wt / 2) / d;
+    return F * F;
+  }
+  // A bat: this weight of wood in the shape, at this length. batRadius is
+  // the radius the ball meets x in from the end; batMass the mass it feels
+  // there - the rigid recoil about the balance point plus every bending mode
+  // slow enough to take energy during the contact (the pulse factor filters
+  // each by its frequency, which scales as 1/length when the shape is
+  // stretched). mEff is the rigid mass at the sweet spot, the inertia the
+  // swing accelerates; q is the collision efficiency there at game speed, the
+  // reference for the squared-up measure. The ball's own COR falls with the
+  // approach speed, so a glancing or slow collision keeps a little more.
+  function batOf(oz, lenIn) {
+    var bat = { oz: oz, lenIn: lenIn, m: oz * 0.02835, g: [] };
+    BAT_MODES.modes.forEach(function (md) { bat.g.push(pulseOf(2 * Math.PI * md.f * BAT_MODES.L / lenIn * BAT_TAU)); });
+    var b = SWEET_IN * BAT_MODES.L / lenIn - BAT_MODES.xc;
+    bat.mEff = bat.m / (1 + b * b / BAT_MODES.k2);
+    bat.q = qAt(bat, SWEET_IN, 140 * MPH);
+    return bat;
+  }
+  function batRadius(bat, xIn) { return 0.5 * batDiameter(BAT_SHAPE, xIn * BAT_MODES.L / bat.lenIn) * IN; }
+  function batMass(bat, xIn) {
+    var xs = xIn * BAT_MODES.L / bat.lenIn, b = xs - BAT_MODES.xc, inv = 1 + b * b / BAT_MODES.k2;
+    var i = Math.max(0, Math.min(BAT_MODES.x.length - 1, Math.round(xs / BAT_MODES.h)));
+    for (var n = 0; n < BAT_MODES.modes.length; n++) inv += bat.g[n] * BAT_MODES.modes[n].S[i];
+    return bat.m / inv;
+  }
+  function corOf(vn) { return clamp(E_COR[0] + (E_COR[1] - E_COR[0]) * (vn / MPH - 60) / 80, 0.40, 0.60); }   // vn: normal approach speed, m/s
+  function qAt(bat, xIn, vn) { var ms = batMass(bat, xIn); return (corOf(vn) * ms - BALL_M) / (ms + BALL_M); }   // exit = q*pitch + (1+q)*bat along the normal
+  var BAT_DEFAULT = batOf(31.8, 34);
 
   // ---------------------------------------------------------- the field
   var Y_PLATE = 17 * IN;                       // front edge of the plate - where location is measured
@@ -454,15 +558,7 @@ var BB = (function () {
   function drawT(rng, t) { return clamp(rng.n(t[0], t[1]), t[2], t[3]); }
 
   // ------------------------------------------------------ the power chain
-  // The bat: effective mass at the sweet spot (Nathan: I_pivot / r^2, about
-  // 0.72 of a wood bat's mass) and the collision efficiency that follows from
-  // it with the ball-bat COR at game speed: a 31.8 oz bat gives q = 0.21.
-  var BAT_EFF = 0.72, E_COR = 0.48;
-  function batOf(oz, lenIn) {
-    var m = oz * 0.02835, mEff = BAT_EFF * m;
-    return { oz: oz, lenIn: lenIn, m: m, mEff: mEff, q: (E_COR * mEff - BALL_M) / (mEff + BALL_M) };
-  }
-  // Bat speed from the chain. The bat's kinetic energy 1/2 mEff v^2 is the
+  // Bat speed from the chain (the bat itself is built above, with the ball). The bat's kinetic energy 1/2 mEff v^2 is the
   // swing power (W/kg) x body mass x swing time, and the swing time is 2L/v
   // (from rest over the arc L), so v^3 = 4 p W L / mEff. At the means: 337 J
   // delivered in 0.139 s (2.4 kW) - the measured shape of a major-league swing.
@@ -714,17 +810,22 @@ var BB = (function () {
     var fl = flyPitch(pitch.rel, [d[0] * v, d[1] * v, d[2] * v], w, env, !!rec);
     return { x: fl.x, z: fl.z, t: fl.t, path: fl.path };
   }
-  // RECOGNITION IS A YES/NO EVENT. Either he picks the pitch up before he
-  // commits (COMMIT_S before it reaches the plate - about 24 ft out, where
-  // Baseball Prospectus measures pitch tunnels) or he is fooled:
-  //   picked up:  he re-reads it as what it is; DETECT_RESID of the
-  //               ghost-vs-real difference is left over
-  //   fooled:     he swings at the pitch he expected; all he has corrected
-  //               is the break he could SEE by the commit point, which grows
-  //               as time squared - so the residual is 1 - (t_commit/t_flight)^2
-  //               (~0.68 on a fastball, ~0.60 on a curveball)
+  // RECOGNITION IS A YES/NO EVENT, WITH A SECOND LOOK. Either he picks the
+  // pitch up before he commits (COMMIT_S before it reaches the plate - about
+  // 24 ft out, where Baseball Prospectus measures pitch tunnels) or he is
+  // fooled and launches the swing for the pitch he expected, having corrected
+  // only the break he could SEE by then (which grows as time squared: tc^2 of
+  // the ghost-vs-real gap). The swing then flies for STEER_S more before the
+  // last look that can still change the barrel's path (the visuomotor delay). By that look more of the gap has shown itself (ts^2):
+  //   picked up at commit:  he swings for the pitch it is; DETECT_RESID of
+  //                         the gap is left over
+  //   picked up late:       he redirects toward the real pitch, but the barrel
+  //                         can move no more than STEER_IN after launch
+  //   still fooled:         he extrapolates from the last look, so the gap that
+  //                         develops after it (1 - ts^2) is left, and the
+  //                         redirect is bounded the same way
   // TUNNELLING: the chance he is fooled falls with how far the real pitch
-  // has already separated from the expected one at the commit point,
+  // has already separated from the expected one at the look in question,
   //   pFooled = exp(-separation / spot)
   // `spot` is his trait (spotIn): the separation he needs to see, smaller =
   // better. It grows with time pressure (tp = 1 for a 94-mph fastball; a
@@ -737,16 +838,27 @@ var BB = (function () {
   // When he guessed right the separation is tiny, and so is the damage.
   // (v0.2 used a proportional misread, then a saturating one; both spread
   // contact evenly across the bat face and flattened the launch angles.)
-  var COMMIT_S = 0.175, DETECT_RESID = 0.05;
+  // STEER_S is the visuomotor delay: the last look that can still change the
+  // barrel's path, the "last 150 ms" of the hitting literature (110 and 130 ms
+  // were tried: whiffs fell to .17-.19 per swing and league K% to 16-20%).
+  // STEER_IN is how far the barrel can be redirected after the swing launches
+  // (late corrections of 5-10 cm are reported when the cue comes 150 ms out).
+  var COMMIT_S = 0.175, STEER_S = 0.15, STEER_IN = 3, DETECT_RESID = 0.05;
   function readFactors(B, pitch, gh, seen, rng) {
     var T = pitch.plate.t, tp = 0.26 / Math.max(0.12, T - 0.15);
-    var tc = Math.max(0, T - COMMIT_S) / T;
-    var dx = gh.x - pitch.plate.x, dz = gh.z - pitch.plate.z;
-    var sep = Math.sqrt(dx * dx + dz * dz) * tc * tc;
+    var tc = Math.max(0, T - COMMIT_S) / T, ts = Math.max(0, T - STEER_S) / T;
+    var dx = gh.x - pitch.plate.x, dz = gh.z - pitch.plate.z, gap = Math.sqrt(dx * dx + dz * dz);
+    var sep = gap * tc * tc;
     var spot = B.spotIn * IN * tp * (1 - B.learn * (1 - Math.exp(-(seen || 0) / 40)));
     var pFooled = Math.exp(-sep / spot);
     var detected = rng.u() >= pFooled;
-    return { tp: tp, sep: sep, pFooled: pFooled, detected: detected, resid: detected ? DETECT_RESID : 1 - tc * tc };
+    var late = !detected && rng.u() >= Math.exp(-gap * ts * ts / spot);
+    var resid = DETECT_RESID;
+    if (!detected) {
+      var launched = 1 - tc * tc, want = late ? launched - DETECT_RESID : ts * ts - tc * tc;   // share of the gap he tries to steer out after launch
+      resid = launched - (gap > 0 ? Math.min(want, STEER_IN * IN / gap) : want);
+    }
+    return { tp: tp, sep: sep, pFooled: pFooled, detected: detected, late: late, resid: resid };
   }
   function misreadOf(rf, pitch, gh) {       // [x m, z m, t s]: where he is wrong, signed ghost - real
     return [rf.resid * (gh.x - pitch.plate.x), rf.resid * (gh.z - pitch.plate.z), rf.resid * (gh.t - pitch.plate.t)];
@@ -806,41 +918,53 @@ var BB = (function () {
     var batMph = B.batSpeed * (st.strikes === 2 ? 0.96 : 1);
     var omega = batMph * MPH / SWING_RADIUS;
     var theta = sb * (omega * e + C_LOC * pitch.plate.x * sb + B.pullBias * DEG);
-    var sw = { e: e, D: D, dLong: dLong, theta: theta, batMph: batMph, attack: B.attack + rng.n(0, 3), reach: reach, contact: false, why: '',
-               qSweet: B.bat ? B.bat.q : Q_SWEET };   // his bat's collision efficiency
-    if (Math.abs(D) >= R_SUM) { sw.why = D > 0 ? 'under' : 'over'; return sw; }
+    var attack = B.attack + rng.n(0, 3);
+    // Timing also moves the strike up or down the ball. An early bat meets
+    // the ball out in front of the planned point, a late one deeper: the
+    // meeting point slides forward by s = v_bat e v_pitch / (v_bat + v_pitch).
+    // Out there the ball has yet to descend (it sits higher by s tan(descent))
+    // while the barrel, on its rising and curving path, is higher by
+    // s tan(attack) + SWING_CURV s^2 / 2. A swing on the pitch's plane is
+    // forgiving to first order; the curve of the arc tops the ball either
+    // way, more the further from the plan.
+    var vb = batMph * MPH, vp = norm(pitch.plate.v), descent = Math.atan2(-pitch.plate.v[2], -pitch.plate.v[1]);
+    var sFwd = vb * e * vp / (vb + vp);
+    D += sFwd * (Math.tan(descent) - Math.tan(attack * DEG)) - 0.5 * SWING_CURV * sFwd * sFwd;
+    var bat = B.bat || BAT_DEFAULT;
+    var sw = { e: e, D: D, dLong: dLong, theta: theta, batMph: batMph, attack: attack, sFwd: sFwd, reach: reach, contact: false, why: '',
+               bat: bat, qSweet: bat.q };   // his bat, and its collision efficiency at the sweet spot
     if (dLong > TIP_IN * IN) { sw.why = 'off the end'; return sw; }
     if (dLong < HANDLE_IN * IN) { sw.why = 'inside the hands'; return sw; }
+    if (Math.abs(D) >= BALL_R + batRadius(bat, SWEET_IN - dLong / IN)) { sw.why = D > 0 ? 'under' : 'over'; return sw; }   // the barrel is thinner toward the hands
     if (Math.abs(theta) > 80 * DEG) { sw.why = e > 0 ? 'way early' : 'way late'; return sw; }
     sw.contact = true;
     return sw;
   }
 
   // The collision, in the frame of the bat's contact point. n is the line
-  // of centres (tilted by the vertical offset D); the ball's approach along
-  // n reverses with collision efficiency q; friction brings the contact
-  // point toward rolling on the bat (sphere, I = 0.4 m R^2), capped by
-  // Coulomb friction. Backspin, topspin and hook/slice all come out of the
-  // same impulse - including what the pitch's own spin contributes.
-  function qOf(dLong, qSweet) {   // falls off along the barrel from the sweet-spot value (his bat's, or the wood default)
-    var d = dLong / IN, L = d >= 0 ? 5.5 : 10;
-    return Math.max(0, (qSweet || Q_SWEET) * (1 - (d / L) * (d / L)));
-  }
+  // of centres, tilted by the vertical offset D over the radius the barrel
+  // has where the ball meets it; the ball's approach along n reverses with
+  // the collision efficiency the bat shows at that point and speed (qAt);
+  // friction brings the contact point toward rolling on the bat (sphere,
+  // I = 0.4 m R^2), capped by Coulomb friction. Backspin, topspin and
+  // hook/slice all come out of the same impulse - including what the
+  // pitch's own spin contributes.
   function collide(pitch, sw) {
+    var bat = sw.bat || BAT_DEFAULT, xBar = SWEET_IN - sw.dLong / IN;   // in from the barrel end
     var al = sw.attack * DEG, th = sw.theta;
     var p = [Math.sin(th) * Math.cos(al), Math.cos(th) * Math.cos(al), Math.sin(al)];   // bat path
     var ax = [Math.cos(th), -Math.sin(th), 0];                                          // bat axis (level)
     var q = cross(p, ax);
     if (q[2] < 0) q = [-q[0], -q[1], -q[2]];
-    var s = sw.D / R_SUM, c = Math.sqrt(1 - s * s);
+    var s = sw.D / (BALL_R + batRadius(bat, xBar)), c = Math.sqrt(Math.max(0, 1 - s * s));
     var n = [c * p[0] + s * q[0], c * p[1] + s * q[1], c * p[2] + s * q[2]];
     var vb = sw.batMph * MPH * (1 + sw.dLong / (30 * IN));
     var V = [p[0] * vb, p[1] * vb, p[2] * vb];
-    var qe = qOf(sw.dLong, sw.qSweet);
     var vin = pitch.plate.v, win = pitch.plate.w;
     var u = [vin[0] - V[0], vin[1] - V[1], vin[2] - V[2]];
     var un = dot(u, n);
     if (un >= 0) return null;                  // the bat never closes on the ball
+    var qe = qAt(bat, xBar, -un);
     var dvn = -(1 + qe) * un;
     var rc = [-BALL_R * n[0], -BALL_R * n[1], -BALL_R * n[2]];
     var wr = cross(win, rc);
@@ -949,6 +1073,7 @@ var BB = (function () {
     makeRng: makeRng, makeEnv: makeEnv, mlbEnv: mlbEnv, MLB_PARKS: MLB_PARKS, fenceAt: fenceAt,
     makePitcher: makePitcher, makeBatter: makeBatter, makeUmp: makeUmp, equipFielder: equipFielder, FIELD_MEANS: FIELD_MEANS,
     batOf: batOf, batSpeedOf: batSpeedOf, swingPowerOf: swingPowerOf, POWER_EXP: POWER_EXP,
+    batMass: batMass, batRadius: batRadius, qAt: qAt, corOf: corOf, BAT_MODES: BAT_MODES, BAT_SHAPE: BAT_SHAPE, SWEET_IN: SWEET_IN, BAT_DEFAULT: BAT_DEFAULT,
     flyPitch: flyPitch, flyBatted: flyBatted, spinVector: spinVector, dirOf: dirOf, aim: aim,
     fatigueOf: fatigueOf, releasePoint: releasePoint, batterSide: batterSide, inZone: inZone,
     planPitch: planPitch, expectPitch: expectPitch, throwPitch: throwPitch, ghostPitch: ghostPitch,

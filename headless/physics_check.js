@@ -1,5 +1,5 @@
 /* ============================================================================
-   physics_check.js · v0.1 · 2026-09-29
+   physics_check.js · v0.2 · 2026-10-01
 
    Checks the engine's flight physics against published numbers before any
    plate appearance is judged: (1) each pitch type, thrown by a league-typical
@@ -10,6 +10,7 @@
    Run:  jsc ../bb_engine.js physics_check.js
 
    CHANGED
+     v0.2  the collision line quotes the default bat's own q (bb_engine v0.8)
      v0.1  first build
 ============================================================================ */
 (function () {
@@ -60,7 +61,8 @@
   var pitch = { plate: { v: [0, -38.7, -2.5], w: [0, 0, 0] } };
   var sw = { attack: 0, theta: 0, D: 0, dLong: 0, batMph: 72 };
   var col = BB.collide(pitch, sw), ev = Math.sqrt(col.v[0] * col.v[0] + col.v[1] * col.v[1] + col.v[2] * col.v[2]) / U.MPH;
-  print('exit speed ' + f1(ev) + ' mph   (q*86.6 + 1.21*72 = ' + f1(0.21 * 86.6 + 1.21 * 72) + ')');
+  var q0 = BB.BAT_DEFAULT.q;
+  print('exit speed ' + f1(ev) + ' mph   (the bat\'s q ' + q0.toFixed(3) + ': q*86.6 + (1+q)*72 = ' + f1(q0 * 86.6 + (1 + q0) * 72) + ')');
   [0.5, 1.0, 1.5, 2.0].forEach(function (D) {
     sw.D = D * U.IN; sw.attack = 10;
     pitch.plate.w = [-2200 * U.RPM * 0.9, 0, 0];     // a four-seamer's backspin (axis -x for a ball heading to the plate)
