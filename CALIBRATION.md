@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v0.6 · 2026-09-30`
+`CALIBRATION.md · v0.7 · 2026-09-30`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -117,6 +117,82 @@ What the chain exposed, both for the next layers rather than this one:
 
 A fitting lesson: the weight exponent read off the proxy power/kg = bat speed³/(swing length × weight) was −0.6, but that proxy carries weight in its own denominator, so its slope is biased toward −1; the exponent that reproduces weight~bat speed .53 in the drawn league is −0.45. Fit to the measurable the data actually reports, not to a derived proxy.
 
+### The contact model (bb_engine v0.8; 2026-09-30)
+
+The goal was a middle ground between the whiff and clean contact: squared-up per contact from 0.78 to about 0.34 without raising K%. That goal was not reached. One mechanism was built and kept. Three more were built, measured and removed, and a map of the trade-off showed why widening the spread of contact offsets cannot reach the target in this engine as it stands. Runs: `run_games` 200 games at seeds 3, 11, 29; `power_chain` 500 hitters × 40 PA at seeds 3 and 11 (v0.2 of the script, which added the rows marked new). All under jsc.
+
+**Built and kept: timing moves the strike up and down the bat face (`timingLift`).** Until v0.7 a timing error only turned the bat (spray). Seen from the bat, the ball comes in along the relative velocity u = v_ball − v_bat. A bat that is early by e sits v_bat·e farther along its own path, and the part of that shift across the ball's line of approach changes where the ball meets the barrel: ΔD = −e·(v_bat across u). In the vertical plane that is −e·v_bat·v_pitch·sin(attack − descent)/|u|. This is pure geometry with no new constant. The brief suggested adding the two terms, e·(v_bat·sin attack + v_pitch,vertical). Worked through, the early bat and the ball both meet higher, so the terms subtract. That is the hitting coach's "match the plane of the pitch": a 9° attack angle against a pitch falling at 6–10° is forgiving of timing. A bat path steeper than the pitch tops the ball when early and gets under it when late. The random draws keep v0.7's order. With the term switched off, run_games at seed 3 reproduced v0.7 to the digit, so every difference below came from the mechanism.
+
+| | before (v0.7) | after (v0.8) | 2025 / MLB |
+|---|---|---|---|
+| squared-up per contact, own q (v0.7 measure) | .782 / .758 | .773 / .750 | .337 (band .30–.40) |
+| squared-up per contact, Statcast proxy (new) | .744 / .716 | .731 / .710 | .337 |
+| squared-up per ball in play, Statcast proxy (new) | .836 / .830 | .831 / .822 | ~.66 |
+| squared-up per foul, Statcast proxy (new) | .620 / .575 | .607 / .574 | ~0 (implied) |
+| exit velo avg (mph) | 93.85 / 93.25 | 93.64 / 92.94 | 89.7 (88.5–91.0) |
+| hard-hit (95+) share | .532 / .504 | .521 / .490 | .42 (.36–.46) |
+| EV50 (mph) | 100.8 / 100.3 | 100.7 / 100.0 | 100.6 (99–102) |
+| whiff per swing | .243 / .252 | .252 / .269 | .238 (.21–.27) |
+| K% (power_chain) | .215 / .255 | .229 / .270 | .204 (.19–.25) |
+| bat speed ~ squared-up, 40 PA | −.15 / −.16 | −.12 / −.11 | −.52 |
+| bat speed ~ squared-up, 300 PA | −.07 / −.25 | −.16 / −.17 | −.52 |
+| bat speed ~ whiff, 300 PA | +.03 / +.05 | +.00 / +.02 | +.69 |
+| foul per pitch (new) | .135 / .141 | .137 / .140 | .179 |
+| fair LA mean / sd (new) | 11.6 / 27.4, 11.0 / 28.6 | 11.2 / 28.1, 10.4 / 28.9 | 12.5 / ~26 |
+| fair EV sd (new) | 10.0 / 10.1 | 10.2 / 10.3 | ~14 |
+| fair EV by type GB / LD / FB / PU, seed 3 (new) | 94.4 / 97.5 / 93.8 / 82.6 | 94.1 / 97.6 / 93.5 / 83.1 | 86 / 93 / 93 / – (2022) |
+
+| league line, seeds 3 / 11 / 29 | before (v0.7) | after (v0.8) | MLB |
+|---|---|---|---|
+| runs | 3.43 / 3.76 / 3.68 | 3.21 / 3.20 / 3.69 | 4.39 |
+| hits | 7.58 / 8.04 / 7.96 | 7.42 / 7.36 / 7.86 | 8.15 |
+| doubles | 1.96 / 2.04 / 1.94 | 1.88 / 1.75 / 1.78 | 1.60 |
+| triples | 0.48 / 0.56 / 0.53 | 0.46 / 0.47 / 0.58 | 0.14 |
+| home runs | 0.67 / 0.77 / 0.76 | 0.63 / 0.66 / 0.74 | 1.12 |
+| walks | 3.90 / 3.75 / 3.80 | 3.93 / 3.73 / 3.97 | 3.10 |
+| strikeouts | 10.28 / 10.20 / 10.15 | 10.28 / 10.31 / 10.50 | 8.40 |
+| errors | 0.69 / 0.72 / 0.73 | 0.65 / 0.71 / 0.65 | 0.55 |
+| double plays | 0.86 / 0.76 / 0.72 | 0.85 / 0.80 / 0.73 | 0.72 |
+| AVG / OBP / SLG | .220/.301/.364, .231/.308/.389, .231/.309/.385 | .217/.299/.354, .216/.296/.353, .226/.307/.375 | .243/.312/.399 |
+| BABIP | .294 / .305 / .305 | .291 / .289 / .302 | .291 |
+| K% | 26.8 / 26.4 / 26.4 | 26.8 / 27.1 / 27.0 | 22.6 |
+| BB% | 10.1 / 9.7 / 9.9 | 10.3 / 9.8 / 10.2 | 8.2 |
+| HR% | 1.7 / 2.0 / 2.0 | 1.6 / 1.7 / 1.9 | 3.0 |
+| GB / LD / FB / PU % | 49/18/20/13, 50/18/20/13, 49/18/20/14 | 49/17/20/14, 50/17/19/14, 50/17/20/13 | 43/24/24/9 |
+
+The effect was small and mixed. Contact got a little weaker: squared-up −.01, exit velocity −0.2 to −0.3 mph, hard-hit −.01. Whiffs rose by .01–.02, and league K% rose 0.6–0.7 points at seeds 11 and 29 (unchanged at seed 3). The batted-ball mix did not move. Bat speed ~ squared-up did not move consistently: at 300 PA per hitter the seed-to-seed spread was ±0.1, larger than any shift. The mechanism was kept because it is geometry the engine had left out, not a fitted knob. Dropping it is a one-line change that restores v0.7 exactly.
+
+**Built, measured, removed:**
+
+| mechanism (two values: power_chain seeds 3 / 11; one value: a 300-hitter diagnostic at seed 3) | whiff/swing | squared-up/contact | K% (games) | other |
+|---|---|---|---|---|
+| timing also moves the strike ALONG the barrel (barrel turning about a fixed point SWING_RADIUS behind the sweet spot: r = R·cos(planned)/cos(actual)) | .374 / .378 | .786 / .754 | 29.3 / 29.6 / 29.7 | foul/pitch .086; mistimed swings went off the end as misses instead of weak contact |
+| continuous read: a detected pitch keeps a share √(lateness) of the fooled residual, lateness = ln u / ln pFooled from the same draw | .569 / .623 | .556 / .511 | 61.6 / 62.3 / 62.2 | LA sd 36–39°: the proportional-misread failure of v0.2 again |
+| the same, share = lateness | .449 | .614 | 49.7 | LA sd 34.5° |
+| the same, timing residual only | .288 | .773 | 39.0 | foul/pitch .183 (MLB .179), but pop-ups 20% |
+
+The continuous read failed for one reason. The pitches a batter detects are exactly the ones whose real path differs most from the one he expected. A curveball read as a fastball differs by a foot at the plate, so even a modest residual share of that gap is a miss. Mechanism 3 (a heavier-shouldered motor scatter) was not built. The trade-off map below bounds it, and it needed a new trait with no measurement behind it.
+
+**Why widening the offsets cannot reach .34 here: the trade-off map.** These runs scaled every swing's execution scatter in a scratch copy, not committed, at seed 3 with 300 hitters × 40 PA:
+
+| execution scatter × | whiff/swing | squared-up/contact (own q) | Statcast proxy | per ball in play | foul/pitch |
+|---|---|---|---|---|---|
+| as built | .250 | .780 | .739 | .842 | .135 |
+| vertical × 2 | .303 | .712 | .668 | .789 | .133 |
+| vertical × 3 | .377 | .662 | .614 | .756 | .129 |
+| along the barrel × 2 | .349 | .635 | .587 | .681 | .120 |
+| timing × 2 | .309 | .780 | .744 | .832 | .174 |
+| all three × 2 | .440 | .607 | .558 | .650 | .145 |
+
+Four findings came out of it.
+
+1. **The collision keeps 80% of the maximum exit velocity out to about 1.8 in of vertical offset, on a contact half-width of 2.75 in.** So even contact spread evenly across the bat face squares up about 0.6 of the time. Every widening that lowered squared-up raised whiffs about as much. The .30–.40 band needs something other than a wider spread of offsets.
+2. **Statcast's squared-up per contact counts fouls.** Per ball in play the league ran about .66 (FanGraphs, early 2024, same proxy), which implied that the league's fouls were almost never squared up, so most of them must have been glancing contact. The model's fouls were squared up 57–62% of the time. Two-thirds of them went foul beside the lines (28–34% went behind the plate) with a median of 86% of the maximum exit velocity: solid balls with the wrong direction. Per ball in play the model ran .82–.84 against .66.
+3. **The excess exit velocity sat in ground balls and line drives.** Ground balls came off at 93–94 mph against MLB's 86, line drives at 97–98 against 93, while fly balls matched (93.5 vs 93). The rigid-body collision is symmetric in the vertical offset: a topped ball at −19° keeps 94% of the maximum, as an equally undercut one does. Whatever makes the league's grounders weak was missing: contact off the end or near the hands, a falling bat path on low pitches, rolling over, or a steeper loss of speed with offset than this collision gives.
+4. **The fooled branch owns the whiff budget.** About half of all swings were "fooled", and they whiffed 46% of the time against 5% for detected pitches, so fooled swings made about 90% of the whiffs. By pitch kind the model whiffed on fastballs .25, breaking balls .18 and off-speed .34; MLB runs about .20 / .33 / .32. With the budget spent there, the recognised pitches cannot take the broader scatter that, in the league, produces whiffs and mishits together.
+
+A measuring lesson: at 40 PA a hitter's squared-up rate carries binomial noise of about .08, twice the real spread between hitters (.041). Bat speed ~ squared-up needs 300 PA or more per hitter to read at all.
+
 ## What was learned building the fielding layer
 
 - **Statcast's outfield JUMP (about 30 ft covered in the first 3 s) is the right anchor for outfielder motion.** The first fielders covered 44 ft in 3 s and caught nearly every fly ball (fly-ball BABIP .03). Slowing everyone to the jump figure fixed the outfield but let 52% of ground balls through, so infielders got their own harder acceleration and a dive reach. That's a real difference: they work from a crouch on a ball that is on them at once.
@@ -134,7 +210,7 @@ A fitting lesson: the weight exponent read off the proxy power/kg = bat speed³/
 
 ## Known gaps, to fix with mechanisms rather than knob-turning
 
-1. **Contact is two-state.** A fooled batter whiffs; a batter who picks up the pitch makes clean contact. Real hitting has a middle ground: late recognition, partial adjustment, the flare. Adding it should lower exit velocity (93 → 88.5), widen its spread (10 → 14 mph) and add fouls (14 → 18%).
+1. **Contact is too clean; partly addressed in bb_engine v0.8.** Closed: a timing error now moves the strike up or down the bat face as well as turning it, through the angle between the bat's path and the pitch's (see "The contact model" above). Still open, at seeds 3 and 11: squared-up per contact .75–.77 vs .34, and per ball in play .82–.83 vs .66; fouls squared up about 60% of the time where the league's almost never were; ground balls 93–94 mph vs 86 while fly balls matched; exit velocity 93–94 vs 89.7 with spread 10 vs 14 mph; fouls 14% of pitches vs 18%. The trade-off map showed that widening the spread of contact offsets cannot close this alone. The next candidates are the READ layer's whiff budget (fooled swings made about 90% of the whiffs, with breaking balls whiffed too rarely and fastballs too often; gap 2), the collision's loss of speed on topped balls, and whatever makes the league's fouls glancing contact.
 2. **Whiff rate by pitch type.** Curveballs were whiffed on 7% of swings against 31%, and fastballs 33% against 21%. The dependence of detection on separation is too steep, and batters who hedge are too late on fastballs.
 3. **Batters are too passive.** Chase rate was 22% against 28.5%, and walks 11–12% against 8.2%.
 4. **Home runs.** They ran 2.0% of plate appearances against 3.0%, and 11% of fly balls against 17%. See the drag proxy above; exit velocity is also too uniform.
