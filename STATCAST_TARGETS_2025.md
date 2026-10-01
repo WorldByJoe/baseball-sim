@@ -373,3 +373,176 @@ Pearson r across players (n in brackets); only |r| ≥ 0.25 shown, sorted by |r|
 - pitch tempo with the bases empty (median, s) is above; the CSV export repeats that value in its men-on column, so the hold (delivery with a runner on) is NOT available from this board
 - base stealers' leads: primary and secondary, overall and on attempts (ft), attempt rate per opportunity and success fraction: above
 - catchers: pop time to second, exchange time, max-effort arm (mph): above
+
+## What a foul is (pitch level, 2025, 42 days)
+
+Every pitch of 552 regular-season games over three two-week spans (May, early July before the break, September): 165,166 pitches, 78,837 swings. Squared up is Statcast's rule applied pitch by pitch, launch_speed ≥ 0.80 × (1.23 × bat_speed + 0.23 × effective_speed). The tables below were written by `statcast/fouls.py`; this paragraph was written by hand and is not rewritten by the script.
+
+What the data showed, on these dates:
+
+1. **Fouls were half of contact:** .521 of 60,571 contacts (fastballs .548, breaking .489, off-speed .472). The share barely moved with the count: .52 at 0, 1 and 2 strikes. Whiffs were .232 per swing.
+2. **Fouls were weaker than balls in play, but they were not "almost never squared up".** Of 25,278 tracked fouls, .225 were squared up. The floor is .184 if every untracked foul and foul tip counts as not squared (n 30,917). Balls in play were .627 (n 27,565). Foul exit speed was a median 76.6 mph (mean 76.7, sd 13.1), against 92.0 for balls in play. 64% of fouls were under 80 mph and 14% were at 90 or more. The ~.05 per foul in CALIBRATION.md v0.8 was an inference, and it was wrong by a factor of four.
+3. **Squared-up per contact was .435 by the rule above (n 52,843 tracked), or .392 as a floor, not .337.** The leaderboard's .337 (`squared_up_per_bat_contact`, qualified batters) was not reproduced by any simple variant tried on the same 226 batters in these games. Their mean was .43-.44 on tracked contact, .38-.39 with untracked contact counted as not squared, and .29-.31 counting only squared-up balls in play (each with and without a competitive-swing filter). The per-batter correlation with the leaderboard was r = .69-.75. The leaderboard counts competitive swings and its own tracked contact, so a model that applies the formula to every contact should be held to .39-.44, not .34.
+4. **So fouls were not the bulk of the model's contact gap.** Against CALIBRATION v0.8's power_chain (squared-up per foul about .62 on 43% of contact; per ball in play .835 on 57%), the league's fouls contributed .521 × .225 = .12 squared-up per contact, against the model's .27. Balls in play contributed .479 × .627 = .30, against the model's .48. Fair contact (about .18) accounted for at least as much of the gap as fouls (about .15). The fouls are too solid, and so are balls in play.
+5. **Contact depth decided fouls.** `intercept_ball_minus_batter_pos_y_inches` measured how far in front of the batter the ball was met (mean 29 in, sd 9.6). At 30-40 in, .425 of contact went foul and .490 was squared up. Deep, late contact (10-20 in) went foul .706 of the time. Far out front (40-50 in) it went foul .607 of the time, and beyond 50 in .780 with only .215 squared up. Reach from the batter (`..._x_inches`, mean 36.5 in) showed the same falling-off at both ends. Attack angle mattered at the extremes: .65-.68 foul below 0° and above 20°, .43 at 5-15°. Swing-path tilt barely mattered.
+6. **Fouls were lofted or topped.** The launch angle of tracked fouls had median 31° and p75 51°. 26% of fouls were above 50°, and those averaged 75.9 mph. In-zone contact went foul .500 of the time, out-of-zone .599. Whiffs per swing were .150 in the zone and .430 out of it, with breaking balls out of the zone at .556.
+7. **Tracking:** 81.7% of fouls carried a launch speed. Foul tips (5.5% of fouls) never did, and the rest did 86.5% of the time. 98% of fouls carried a bat speed, and 99.7% of balls in play carried a launch speed. Untracked fouls were slightly more often out of the zone (.32 against .23) and off-speed (.14 against .12), with bat speed 67.3 against 69.9 mph, so they were probably a little weaker than tracked ones. Hence the floor. No foul carried hit coordinates, so direction could not be measured.
+
+<!-- fouls.py tables: begin -->
+
+Dates (42 days with games): 2025-05-05..05-18, 2025-06-30..07-13, 2025-09-08..09-21. Pulled by `statcast/fetch_pitches.py`, measured by `statcast/fouls.py`; every rate is a share of the n beside it.
+
+Columns absent from the CSV: none.
+
+Pitches 165166; swings 78837 (whiff 18266, foul 31562, in play 29009). Foul kinds: bunt_foul_tip 7, foul 29530, foul_bunt 297, foul_tip 1728.
+
+Squared-up used effective_speed for 52807 tracked contacts and release_speed for 36.
+
+### 1. What a swing becomes
+
+| swings | whiff | foul | in play | foul / contact | n swings |
+|---|---|---|---|---|---|
+| all | 0.232 | 0.400 | 0.368 | 0.521 | 78837 |
+| fastball | 0.172 | 0.454 | 0.374 | 0.548 | 43154 |
+| breaking | 0.308 | 0.339 | 0.353 | 0.489 | 23868 |
+| offspeed | 0.299 | 0.331 | 0.370 | 0.472 | 11583 |
+| 0 strikes | 0.237 | 0.398 | 0.365 | 0.522 | 22667 |
+| 1 strikes | 0.237 | 0.394 | 0.369 | 0.516 | 26478 |
+| 2 strikes | 0.223 | 0.408 | 0.369 | 0.525 | 29692 |
+
+### 2. How much is tracked
+
+|  | n | has launch_speed | has launch_angle | has bat_speed | has both (squared-up computable) |
+|---|---|---|---|---|---|
+| fouls | 31562 | 0.817 | 0.819 | 0.980 | 0.801 |
+| fouls excl. foul_tip | 29834 | 0.865 | 0.867 | 0.979 | 0.847 |
+| foul tips | 1728 | 0.000 | 0.000 | 0.987 | 0.000 |
+| in play | 29009 | 0.997 | 0.997 | 0.953 | 0.950 |
+| whiffs | 18266 | 0.000 | 0.000 | 0.986 | 0.000 |
+
+Fouls with and without a launch_speed, by what can be seen of them (shares of each group):
+
+|  | n | 0 str | 1 str | 2 str | fastball | breaking | off-speed | in zone | foul tip | plate_z mean (ft) | |plate_x| mean (ft) | bat speed mean |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| fouls with launch_speed | 25798 | 0.282 | 0.331 | 0.387 | 0.628 | 0.253 | 0.117 | 0.768 | 0.000 | 2.524 | 0.452 | 69.9 |
+| fouls without | 5764 | 0.303 | 0.329 | 0.368 | 0.585 | 0.271 | 0.142 | 0.681 | 0.300 | 2.424 | 0.482 | 67.3 |
+
+### 3. Squared up (tracked contact only)
+
+|  | per contact | n | per ball in play | n | per foul | n | per contact, release_speed |
+|---|---|---|---|---|---|---|---|
+| all | 0.435 | 52843 | 0.627 | 27565 | 0.225 | 25278 | 0.436 |
+| fastball | 0.429 | 31209 | 0.654 | 15340 | 0.212 | 15869 | 0.430 |
+| breaking | 0.452 | 14438 | 0.607 | 8031 | 0.257 | 6407 | 0.453 |
+| offspeed | 0.421 | 7000 | 0.565 | 4069 | 0.222 | 2931 | 0.422 |
+
+The same with every swing that has a bat speed but no launch speed counted as not squared up (a floor):
+
+| per | squared up | n with bat_speed |
+|---|---|---|
+| contact | 0.392 | 58576 |
+| ball in play | 0.625 | 27659 |
+| foul | 0.184 | 30917 |
+| swing | 0.300 | 76589 |
+
+### 4. How hard (launch_speed, mph)
+
+|  | n | mean | sd | p10 | p25 | p50 | p75 | p90 | <60 | <70 | <80 | <90 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| fouls | 25798 | 76.7 | 13.1 | 62.5 | 70.3 | 76.6 | 83.7 | 93.0 | 0.076 | 0.240 | 0.640 | 0.862 |
+| in play | 28914 | 88.9 | 15.2 | 68.8 | 80.4 | 92.0 | 100.3 | 105.2 | 0.048 | 0.111 | 0.243 | 0.447 |
+
+Launch angle (deg):
+
+|  | n | mean | sd | p10 | p25 | p50 | p75 | p90 |
+|---|---|---|---|---|---|---|---|---|
+| fouls | 25858 | 23.2 | 35.8 | -33.0 | 0.0 | 31.0 | 51.0 | 64.0 |
+| in play | 28936 | 13.1 | 28.7 | -22.0 | -5.0 | 14.0 | 31.0 | 50.0 |
+
+### 5. Where fouls go
+
+Fouls carrying hit coordinates (hc_x, hc_y): 0.000 of 31562. Too few to say anything about direction; stopped here.
+
+### 6. Exit velocity by launch angle, balls in play
+
+| launch angle | n | mean EV | sd |
+|---|---|---|---|
+| <-30 | 1887 | 66.8 | 17.2 |
+| -30..-10 | 3537 | 86.3 | 15.3 |
+| -10..10 | 7239 | 92.6 | 13.7 |
+| 10..30 | 8348 | 93.7 | 12.8 |
+| 30..50 | 4947 | 89.4 | 12.8 |
+| >50 | 2955 | 82.3 | 11.7 |
+
+The same for fouls that carry a launch angle:
+
+| launch angle | n | mean EV | sd |
+|---|---|---|---|
+| <-30 | 2861 | 67.6 | 15.5 |
+| -30..-10 | 2692 | 78.6 | 15.6 |
+| -10..10 | 1926 | 84.5 | 13.8 |
+| 10..30 | 5088 | 80.0 | 12.7 |
+| 30..50 | 6389 | 76.0 | 11.9 |
+| >50 | 6842 | 75.9 | 9.1 |
+
+### 7. By pitch kind and zone
+
+| kind | zone | swings | whiff / swing | foul / contact | squared / contact | n tracked contact |
+|---|---|---|---|---|---|---|
+| all | in zone | 55853 | 0.150 | 0.500 | 0.459 | 42003 |
+| all | out of zone | 22984 | 0.430 | 0.599 | 0.343 | 10840 |
+| fastball | in zone | 33768 | 0.135 | 0.527 | 0.445 | 25809 |
+| fastball | out of zone | 9386 | 0.306 | 0.641 | 0.355 | 5400 |
+| breaking | in zone | 15117 | 0.165 | 0.460 | 0.486 | 11219 |
+| breaking | out of zone | 8751 | 0.556 | 0.586 | 0.334 | 3219 |
+| offspeed | in zone | 6822 | 0.194 | 0.450 | 0.468 | 4851 |
+| offspeed | out of zone | 4761 | 0.451 | 0.519 | 0.317 | 2149 |
+
+### 8. Contact point and swing plane (tracked contact)
+
+`intercept_ball_minus_batter_pos_y_inches` over contact: n 58563, mean 29.0, sd 9.6, p10/p50/p90 17.0 / 28.8 / 41.5.
+
+| band | n contact | foul / contact | squared / contact | n | mean EV | n | mean EV, fouls | n |
+|---|---|---|---|---|---|---|---|---|
+| <0 | 119 | 1.000 | 0.795 | 73 | 75.9 | 73 | 75.9 | 73 |
+| 0..10 | 1306 | 0.892 | 0.617 | 1052 | 79.8 | 1052 | 80.0 | 918 |
+| 10..20 | 8529 | 0.706 | 0.403 | 7408 | 79.9 | 7408 | 76.9 | 4919 |
+| 20..30 | 22209 | 0.489 | 0.409 | 20292 | 82.6 | 20292 | 74.8 | 8975 |
+| 30..40 | 18727 | 0.425 | 0.490 | 17227 | 86.1 | 17227 | 77.2 | 6472 |
+| 40..50 | 6888 | 0.607 | 0.393 | 6118 | 81.6 | 6118 | 80.0 | 3426 |
+| >50 | 785 | 0.780 | 0.215 | 662 | 71.6 | 662 | 73.6 | 491 |
+
+`intercept_ball_minus_batter_pos_x_inches` over contact: n 58563, mean 36.5, sd 6.7, p10/p50/p90 27.8 / 36.5 / 45.2.
+
+| band | n contact | foul / contact | squared / contact | n | mean EV | n | mean EV, fouls | n |
+|---|---|---|---|---|---|---|---|---|
+| <25 | 2496 | 0.671 | 0.325 | 2153 | 74.2 | 2153 | 76.3 | 1337 |
+| 25..30 | 7643 | 0.578 | 0.375 | 6829 | 80.7 | 6829 | 77.7 | 3610 |
+| 30..35 | 14087 | 0.525 | 0.454 | 12789 | 84.6 | 12789 | 77.8 | 6105 |
+| 35..40 | 16337 | 0.501 | 0.485 | 14848 | 85.5 | 14848 | 76.8 | 6729 |
+| 40..45 | 11891 | 0.508 | 0.458 | 10782 | 83.7 | 10782 | 76.3 | 4955 |
+| >45 | 6109 | 0.524 | 0.327 | 5431 | 77.8 | 5431 | 73.0 | 2538 |
+
+`attack_angle` over contact: n 58576, mean 7.8, sd 11.1, p10/p50/p90 -5.2 / 8.5 / 20.6.
+
+| band | n contact | foul / contact | squared / contact | n | mean EV | n | mean EV, fouls | n |
+|---|---|---|---|---|---|---|---|---|
+| <0 | 12108 | 0.646 | 0.410 | 10763 | 79.3 | 10763 | 75.8 | 6523 |
+| 0..5 | 9315 | 0.523 | 0.400 | 8538 | 82.5 | 8538 | 75.3 | 4107 |
+| 5..10 | 11449 | 0.439 | 0.448 | 10596 | 84.6 | 10596 | 75.7 | 4186 |
+| 10..15 | 10934 | 0.425 | 0.479 | 10045 | 85.7 | 10045 | 77.1 | 3774 |
+| 15..20 | 8201 | 0.499 | 0.465 | 7376 | 85.0 | 7376 | 79.3 | 3272 |
+| >20 | 6569 | 0.677 | 0.391 | 5525 | 80.8 | 5525 | 78.4 | 3416 |
+
+`swing_path_tilt` over contact: n 58576, mean 32.1, sd 7.2, p10/p50/p90 23.3 / 32.1 / 41.0.
+
+| band | n contact | foul / contact | squared / contact | n | mean EV | n | mean EV, fouls | n |
+|---|---|---|---|---|---|---|---|---|
+| <20 | 2389 | 0.523 | 0.500 | 2130 | 83.6 | 2130 | 78.1 | 995 |
+| 20..25 | 6456 | 0.521 | 0.450 | 5827 | 83.5 | 5827 | 77.1 | 2742 |
+| 25..30 | 13436 | 0.524 | 0.433 | 12238 | 83.4 | 12238 | 77.0 | 5866 |
+| 30..35 | 16604 | 0.518 | 0.433 | 15084 | 83.4 | 15084 | 76.7 | 7104 |
+| 35..40 | 12327 | 0.533 | 0.426 | 11101 | 83.0 | 11101 | 76.5 | 5366 |
+| >40 | 7364 | 0.555 | 0.423 | 6463 | 81.2 | 6463 | 75.7 | 3205 |
+
+<!-- fouls.py tables: end -->

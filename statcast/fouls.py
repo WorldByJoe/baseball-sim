@@ -1,5 +1,5 @@
 """
-fouls.py · v0.1 · 2026-10-01
+fouls.py · v0.2 · 2026-10-01
 
 Measures what a foul ball is, from the pitch-level CSVs that
 statcast/fetch_pitches.py caches in statcast/raw/pitches/<year>/: how often a
@@ -18,6 +18,8 @@ Definitions (the brief, 2026-10-01):
 Run:  python3 statcast/fouls.py 2025 [--dates 2025-05-05:2025-05-18,...]
 
 CHANGED
+  v0.2  first real pull: the x intercept is the ball's reach from the batter (27-45 in), banded so; squared-up
+        with untracked contact counted as not squared (a floor) and per swing
   v0.1  first build
 """
 import sys, os, csv, json, math, glob, datetime
@@ -216,6 +218,16 @@ def measure(P, header):
         rows.append((k, f3(rc), nc, f3(rb), nb, f3(rf), nf, f3(rr)))
     md += ['### 3. Squared up (tracked contact only)', ''] + table(
         ('', 'per contact', 'n', 'per ball in play', 'n', 'per foul', 'n', 'per contact, release_speed'), rows) + ['']
+    # a floor: contact with a bat speed but no launch speed (foul tips, untracked fouls) counted as not squared
+    J['squared_up_floor'] = {}
+    rows = []
+    for nm, sub in (('contact', C), ('ball in play', B), ('foul', F), ('swing', S)):
+        sub = [p for p in sub if p['bat_speed'] is not None]
+        n = len(sub); k = sum(1 for p in sub if p['sq'])
+        J['squared_up_floor'][nm] = {'n': n, 'rate': k / n if n else None}
+        rows.append((nm, f3(k / n if n else None), n))
+    md += ['The same with every swing that has a bat speed but no launch speed counted as not squared up (a floor):', ''] + table(
+        ('per', 'squared up', 'n with bat_speed'), rows) + ['']
 
     # 4. launch speed and angle, fouls vs in play
     J['launch_speed'] = {'fouls': dist([p['launch_speed'] for p in F], (60, 70, 80, 90)),
@@ -275,7 +287,7 @@ def measure(P, header):
     if not present:
         md += ['The bat-tracking contact-point fields were absent; nothing measured.', '']
     BANDS = {'intercept_ball_minus_batter_pos_y_inches': [0, 10, 20, 30, 40, 50],
-             'intercept_ball_minus_batter_pos_x_inches': [-10, -5, 0, 5, 10],
+             'intercept_ball_minus_batter_pos_x_inches': [25, 30, 35, 40, 45],
              'attack_angle': [0, 5, 10, 15, 20],
              'swing_path_tilt': [20, 25, 30, 35, 40]}
     for fld in present:
