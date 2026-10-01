@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v0.7 · 2026-09-30
+   bb_engine.js · v0.8 · 2026-09-30
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -35,7 +35,9 @@
              accuracy), per-edge systematic misses, a count lean, and the
              catcher's framing                                 (callPitch)
      SWING   timing error, vertical offset and barrel position come from the
-             misread plus his execution noise; the bat-ball collision is
+             misread plus his execution noise; a timing error also moves the
+             strike up or down the bat face when the bat's path and the
+             pitch's path are not in one plane; the bat-ball collision is
              solved as a rigid-body impulse with friction      (collide)
      FLY     the batted ball flies with drag and Magnus lift until it lands
              or reaches the fence                              (flyBatted)
@@ -49,6 +51,8 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v0.8  the contact model: a timing error moves the strike up or down the bat face
+           through the angle between bat path and pitch path (timingLift); no new constant
      v0.7  the power chain: bat speed BUILT from height, weight, swing power per kg,
            swing length and the bat (v^3 = 4pWL/mEff); the bat's mass sets the
            collision efficiency; precision worsens as bat speed squared; fitted to
@@ -59,10 +63,6 @@
      v0.5  fielding and running traits on every player; landing state for the fielding
            layer; foul pops can be caught (g.foulCatch)
      v0.4  ghostPitch can keep its flight path, for drawing the batter's expected pitch
-     v0.3  recognition = yes/no tunnelling event; MLB park/air mix; humidity;
-           batted-ball drag fitted; home runs carried to projected distance
-     v0.2  plate coverage: execution errors grow with reach off the zone
-     v0.1  first build - pitch physics, decisions, umpire, collision, flight
 ============================================================================ */
 
 var BB = (function () {
@@ -794,19 +794,45 @@ var BB = (function () {
     var oz = Math.max(0, B.zone.bot - BALL_R - z, z - B.zone.top - BALL_R);
     return Math.sqrt(ox * ox + oz * oz);
   }
+  // The bat at contact: p its path (spray angle th, rising at the attack angle
+  // al), ax its axis (level), q the perpendicular to the path in the plane the
+  // vertical offset D is measured in (pointing up).
+  function batFrame(th, al) {
+    var p = [Math.sin(th) * Math.cos(al), Math.cos(th) * Math.cos(al), Math.sin(al)];
+    var ax = [Math.cos(th), -Math.sin(th), 0];
+    var q = cross(p, ax);
+    if (q[2] < 0) q = [-q[0], -q[1], -q[2]];
+    return { p: p, ax: ax, q: q };
+  }
+  // TIMING MOVES THE STRIKE UP AND DOWN THE BAT FACE. Seen from the bat, the
+  // ball approaches along the relative velocity u = v_ball - v_bat. A bat that
+  // is early by e seconds sits v_bat*e farther along its own path, and the
+  // part of that displacement ACROSS the ball's line of approach changes where
+  // the ball meets the barrel: dD = -e * (v_bat across u). In the vertical
+  // plane that is -e * v_bat*v_pitch*sin(attack - descent)/|u|. A bat path
+  // rising more steeply than the pitch descends (the usual case) tops the ball
+  // when early and gets under it when late; a swing that matches the plane of
+  // the pitch is forgiving of timing. Pure geometry - no constant.
+  function timingLift(pitch, fr, batMph, e) {
+    var vb = batMph * MPH, V = [fr.p[0] * vb, fr.p[1] * vb, fr.p[2] * vb], vin = pitch.plate.v;
+    var uh = unit([vin[0] - V[0], vin[1] - V[1], vin[2] - V[2]]);
+    return e * dot(V, uh) * dot(uh, fr.q);    // -e * (V across u).q, and since V is perpendicular to q, (V across u).q = -(V.uh)(uh.q)
+  }
   function swing(B, pitch, gh, rf, sb, st, rng) {
     var reach = reachOf(B, pitch.plate.x, pitch.plate.z);
     var prot = (st.strikes === 2 ? 0.85 : 1)   // a shorter two-strike swing: less scatter, less speed
              * (1 + reach / (B.coverage * IN));
     var m = misreadOf(rf, pitch, gh);
     var e = -m[2] + rng.n(0, B.timingSD / 1000 * prot * rf.tp);    // + = bat early (he expected it sooner)
-    var D = -m[1] + B.undercut * IN + rng.n(0, B.barrelSD * IN * prot);   // + = ball above the barrel
-    var xAim = pitch.plate.x + m[0];
-    var dLong = (pitch.plate.x - xAim) * (-sb) + rng.n(0, B.longSD * IN * prot);   // + toward the tip
+    // his execution scatter: barrel height, position along the barrel, the tilt of this swing's path
+    var dNoise = rng.n(0, B.barrelSD * IN * prot), lNoise = rng.n(0, B.longSD * IN * prot), attack = B.attack + rng.n(0, 3);
     var batMph = B.batSpeed * (st.strikes === 2 ? 0.96 : 1);
     var omega = batMph * MPH / SWING_RADIUS;
     var theta = sb * (omega * e + C_LOC * pitch.plate.x * sb + B.pullBias * DEG);
-    var sw = { e: e, D: D, dLong: dLong, theta: theta, batMph: batMph, attack: B.attack + rng.n(0, 3), reach: reach, contact: false, why: '',
+    var D = -m[1] + B.undercut * IN + dNoise + timingLift(pitch, batFrame(theta, attack * DEG), batMph, e);   // + = ball above the barrel
+    var xAim = pitch.plate.x + m[0];
+    var dLong = (pitch.plate.x - xAim) * (-sb) + lNoise;   // + toward the tip
+    var sw = { e: e, D: D, dLong: dLong, theta: theta, batMph: batMph, attack: attack, reach: reach, contact: false, why: '',
                qSweet: B.bat ? B.bat.q : Q_SWEET };   // his bat's collision efficiency
     if (Math.abs(D) >= R_SUM) { sw.why = D > 0 ? 'under' : 'over'; return sw; }
     if (dLong > TIP_IN * IN) { sw.why = 'off the end'; return sw; }
@@ -827,11 +853,7 @@ var BB = (function () {
     return Math.max(0, (qSweet || Q_SWEET) * (1 - (d / L) * (d / L)));
   }
   function collide(pitch, sw) {
-    var al = sw.attack * DEG, th = sw.theta;
-    var p = [Math.sin(th) * Math.cos(al), Math.cos(th) * Math.cos(al), Math.sin(al)];   // bat path
-    var ax = [Math.cos(th), -Math.sin(th), 0];                                          // bat axis (level)
-    var q = cross(p, ax);
-    if (q[2] < 0) q = [-q[0], -q[1], -q[2]];
+    var fr = batFrame(sw.theta, sw.attack * DEG), p = fr.p, q = fr.q;
     var s = sw.D / R_SUM, c = Math.sqrt(1 - s * s);
     var n = [c * p[0] + s * q[0], c * p[1] + s * q[1], c * p[2] + s * q[2]];
     var vb = sw.batMph * MPH * (1 + sw.dLong / (30 * IN));
@@ -942,7 +964,7 @@ var BB = (function () {
   }
 
   return {
-    version: '0.5',
+    version: '0.8',
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
     PITCH_TYPES: PITCH_TYPES, ARCH: ARCH, TRAITS: TRAITS, AERO: AERO,
