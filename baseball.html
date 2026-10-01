@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v1.8 · 2026-10-01
+  baseball.html · v1.9 · 2026-10-01
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
@@ -38,6 +38,10 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v1.9  catcher's view in team colours: the batter's bat, box and expected-pitch
+          circle in his side's colour with the expected type at its centre; the
+          pitcher's aim circle in his side's colour with the intended type as the
+          cross-hair (Joe: the two dashed circles were hard to tell apart)
     v1.8  the dots become people: everyone walks between his stations - seat, on-deck
           circle, plate, bases, position - laid down with the schedule; sides change
           over on foot and change colour as they go; warm-up pitches; home-run trots;
@@ -51,10 +55,6 @@
     v1.5  every man moves on a ball in play (bases covered, cut-off man, pitcher
           and catcher backing up, outfielders backing up) and jogs back after;
           runners go halfway on a fly that might drop; nobody drawn past the fence
-    v1.4  Joe's third look: fouls drawn with their own ball (not the at-bat's last);
-          unassisted putouts and the pitcher covering; fielders chase playable
-          fouls; dots warm with effort; the reasoning lingers between at-bats;
-          the at-bat panel lists his day; ribbon label off the plot; dugout text upright
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -644,6 +644,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   function mix(a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]; }
   function rgbOf(hex) { return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)]; }
   var DARK = [11, 14, 20], INKC = [238, 244, 252];
+  function rgba(hex, a) { var c = rgbOf(hex); return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
   function blendDot(g, x, y, k, col, label) {   // k 0 = his team's dot, 1 = the dark field dot; between, on his way out or in
     if (k <= 0.02) return runnerDot(g, x, y, col, label);
     if (k >= 0.98) return person(g, x, y, label, 0);
@@ -981,8 +982,9 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     text(g, "CATCHER'S VIEW", 30, 52, 30, INK2);
     if (!play) { g.restore(); return; }
     var B = play.batter, P = play.pitcher, side = BB.batterSide(B, P), zb = B.zone.bot, zt = B.zone.top, ph = GEO.PLATE_HALF;
+    var TB = G.teams[play.half].col, TPc = G.teams[1 - play.half].col;   // the batter's side and the pitcher's side, by colour
     var b0 = atPlate(side * 0.58, 1.75), b1 = atPlate(side * 0.82, 0.25);
-    g.fillStyle = 'rgba(206,220,240,.06)'; g.beginPath(); g.roundRect(Math.min(b0[0], b1[0]), b0[1], Math.abs(b1[0] - b0[0]), b1[1] - b0[1], 30); g.fill();
+    g.fillStyle = rgba(TB, 0.10); g.beginPath(); g.roundRect(Math.min(b0[0], b1[0]), b0[1], Math.abs(b1[0] - b0[0]), b1[1] - b0[1], 30); g.fill();
     text(g, B.bats === 'S' ? 'switch, batting ' + (side < 0 ? 'right' : 'left') : (side < 0 ? 'right-handed' : 'left-handed'), (b0[0] + b1[0]) / 2, b1[1] - 24, 26, INK3, 'center');
     var a = atPlate(-ph, zt), b = atPlate(ph, zb);
     g.strokeStyle = INK2; g.lineWidth = 3; g.strokeRect(a[0], a[1], b[0] - a[0], b[1] - a[1]);
@@ -993,11 +995,16 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     var ua = atPlate(Math.min(xin, xout), zt + e.high * IN), ub = atPlate(Math.max(xin, xout), zb - e.low * IN);
     g.setLineDash([8, 10]); g.strokeStyle = 'rgba(206,220,240,.45)'; g.lineWidth = 2; g.strokeRect(ua[0], ua[1], ub[0] - ua[0], ub[1] - ua[1]); g.setLineDash([]);
     text(g, "umpire's zone", side > 0 ? ua[0] - 14 : ub[0] + 14, ua[1] + 26, 26, INK3, side > 0 ? 'right' : 'left');
-    var col = seg.i !== undefined ? COL[play.pa.pitches[seg.i].pitch.type] : INK2, ky = ZH - 184, kx = side < 0 ? ZW - 520 : 26;
-    [["pitcher's aim ± 1σ command", function (x, y) { g.strokeStyle = INK; g.lineWidth = 3; g.beginPath(); g.moveTo(x - 14, y); g.lineTo(x + 14, y); g.moveTo(x, y - 14); g.lineTo(x, y + 14); g.stroke(); }],
-     ["batter's expected pitch", function (x, y) { g.setLineDash([8, 6]); g.strokeStyle = INK2; g.lineWidth = 3; g.beginPath(); g.arc(x, y, 13, 0, 7); g.stroke(); g.setLineDash([]); }],
+    // the key, in the colours of the pitch under way: the pitcher's circle in his side's colour with the
+    // intended type as its cross-hair; the batter's circle in his, with the type he expects at its centre
+    var pcur = seg.i !== undefined ? play.pa.pitches[seg.i] : null, col = pcur ? COL[pcur.pitch.type] : INK2;
+    var colX = pcur && pcur.expect && COL[pcur.expect.guessType] ? COL[pcur.expect.guessType] : INK2;
+    var ky = ZH - 184, kx = side < 0 ? ZW - 520 : 26;
+    function cross(x, y, r, c) { g.strokeStyle = c; g.lineWidth = 3; g.beginPath(); g.moveTo(x - r, y); g.lineTo(x + r, y); g.moveTo(x, y - r); g.lineTo(x, y + r); g.stroke(); }
+    [["pitcher's aim ± 1σ command", function (x, y) { g.setLineDash([6, 8]); g.strokeStyle = TPc; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 15, 0, 7); g.stroke(); g.setLineDash([]); cross(x, y, 10, col); }],
+     ["batter's expected pitch", function (x, y) { g.setLineDash([8, 6]); g.strokeStyle = TB; g.lineWidth = 3; g.beginPath(); g.arc(x, y, 15, 0, 7); g.stroke(); g.setLineDash([]); g.beginPath(); g.arc(x, y, 6, 0, 7); g.fillStyle = colX; g.fill(); }],
      ['the pitch', function (x, y) { g.beginPath(); g.arc(x, y, 13, 0, 7); g.fillStyle = col; g.fill(); }],
-     ["batter's bat", function (x, y) { g.strokeStyle = 'rgba(206,220,240,.30)'; g.lineWidth = 16; g.lineCap = 'round'; g.beginPath(); g.moveTo(x - 16, y); g.lineTo(x + 16, y); g.stroke(); g.lineCap = 'butt'; }]
+     ["batter's bat", function (x, y) { g.strokeStyle = rgba(TB, 0.55); g.lineWidth = 16; g.lineCap = 'round'; g.beginPath(); g.moveTo(x - 16, y); g.lineTo(x + 16, y); g.stroke(); g.lineCap = 'butt'; }]
     ].forEach(function (it, i) { var x = kx + 14, y = ky + i * 44; it[1](x, y); text(g, it[0], x + 34, y + 9, 26, INK2); });
     var upto = seg.i === undefined ? 0 : seg.i;
     play.pa.pitches.slice(0, upto).forEach(function (p, i) {
@@ -1015,11 +1022,12 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
       path.forEach(function (q) { if (q[0] > upTo) return; var s = proj(q[1], q[2], q[3]); if (!started) { g.moveTo(s[0], s[1]); started = true; } else g.lineTo(s[0], s[1]); });
       g.stroke(); g.setLineDash([]);
     }
-    if (showGhost) { line(p._ghost.path, 99, [10, 10], INK2, 3); var ge = atPlate(p._ghost.x, p._ghost.z);
-      g.beginPath(); g.arc(ge[0], ge[1], GEO.BALL_R * PXM, 0, 7); g.strokeStyle = INK2; g.lineWidth = 3; g.setLineDash([8, 6]); g.stroke(); g.setLineDash([]); }
+    if (showGhost) { line(p._ghost.path, 99, [10, 10], rgba(TB, 0.7), 3); var ge = atPlate(p._ghost.x, p._ghost.z);
+      g.beginPath(); g.arc(ge[0], ge[1], GEO.BALL_R * PXM, 0, 7); g.strokeStyle = TB; g.lineWidth = 3; g.setLineDash([8, 6]); g.stroke(); g.setLineDash([]);
+      g.beginPath(); g.arc(ge[0], ge[1], 8, 0, 7); g.fillStyle = colX; g.fill(); }   // what he expects, where he expects it
     if (showAim) { var tg = atPlate(p.plan.target[0], p.plan.target[1]), rc = pch.cmdIn * IN * PXM;
-      g.strokeStyle = INK; g.lineWidth = 2; g.setLineDash([6, 8]); g.beginPath(); g.arc(tg[0], tg[1], rc, 0, 7); g.stroke(); g.setLineDash([]);
-      g.lineWidth = 3; g.beginPath(); g.moveTo(tg[0] - 22, tg[1]); g.lineTo(tg[0] + 22, tg[1]); g.moveTo(tg[0], tg[1] - 22); g.lineTo(tg[0], tg[1] + 22); g.stroke(); }
+      g.strokeStyle = TPc; g.lineWidth = 2; g.setLineDash([6, 8]); g.beginPath(); g.arc(tg[0], tg[1], rc, 0, 7); g.stroke(); g.setLineDash([]);
+      cross(tg[0], tg[1], 22, col); }   // what he means to throw, where he means to put it
     if (seg.kind === 'setup') { drawBat(g, play, p, side, 0); g.restore(); return; }
     var s = seg.kind === 'flight' ? clamp(tau / PACE.flight, 0, 1) : 1, tNow = s * pch.plate.t, P = p._path;
     line(P, tNow, [], col, 6);
@@ -1087,7 +1095,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     poses.forEach(function (ps) {
       var h = ps.h, d = ps.d, knob = proj(h[0], h[1], h[2]), mid = proj(h[0] + d[0] * L * 0.45, h[1] + d[1] * L * 0.45, h[2] + d[2] * L * 0.45), tp = proj(h[0] + d[0] * L, h[1] + d[1] * L, h[2] + d[2] * L);
       var wBar = Math.min(70, 2.61 * IN * FOC / Math.max(0.3, h[1] + d[1] * L * 0.7 - CAM_Y)), wHan = Math.min(34, 1.2 * IN * FOC / Math.max(0.3, h[1] - CAM_Y));
-      g.lineCap = 'round'; g.strokeStyle = 'rgba(206,220,240,' + ps.a + ')';
+      g.lineCap = 'round'; g.strokeStyle = rgba(G.teams[play.half].col, ps.a);   // his side's colour
       g.lineWidth = wHan; g.beginPath(); g.moveTo(knob[0], knob[1]); g.lineTo(mid[0], mid[1]); g.stroke();
       g.lineWidth = wBar; g.beginPath(); g.moveTo(mid[0], mid[1]); g.lineTo(tp[0], tp[1]); g.stroke();
       g.lineCap = 'butt';
