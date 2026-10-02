@@ -4,6 +4,8 @@ A trait-driven, physics-based baseball simulation. Players have latent traits; e
 
 The engine is pure JavaScript, seeded and deterministic; a whole game simulates in about 50 ms. `baseball.html` replays a game on screen: a pitch every ten seconds or so, every number shown.
 
+**Watch a game: [worldbyjoe.github.io/baseball-sim/baseball.html](https://worldbyjoe.github.io/baseball-sim/baseball.html)** (runs in the browser; nothing to install).
+
 ## Files
 
 - `bb_engine.js` — the plate appearance: plan, expect, throw, read, decide, call, swing, collide, fly. Traits and the power chain live here.
