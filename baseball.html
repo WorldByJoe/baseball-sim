@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v2.2 · 2026-10-02
+  baseball.html · v2.3 · 2026-10-02
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
@@ -38,6 +38,8 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v2.3  a bases-loaded walk or hit batsman: the man forced in from third jogs home and
+          then to the bench (he had stayed on third); the banner says the run scored (Joe)
     v2.2  engine v0.9 (the swing as a tilted circle); the catcher's-view bat swings to
           its attack angle where it met the ball
     v2.1  every throw is shown: the catcher's return after each pitch, a new ball from
@@ -52,10 +54,6 @@
           circle in his side's colour with the expected type at its centre; the
           pitcher's aim circle in his side's colour with the intended type as the
           cross-hair (Joe: the two dashed circles were hard to tell apart)
-    v1.8  the dots become people: everyone walks between his stations - seat, on-deck
-          circle, plate, bases, position - laid down with the schedule; sides change
-          over on foot and change colour as they go; warm-up pitches; home-run trots;
-          the whole bench out for a grand slam and for the win (Joe)
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -644,9 +642,10 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
         var r = play.play, res = play.pa.result, tR = play.tResolve;
         if (res === 'BB' || res === 'HBP') {   // he jogs down; anyone forced jogs ahead of him
           move(PEOPLE[play.batter.id], tR, JOG_BASE, basePt(1), 0, 'base');
-          [3, 2, 1].forEach(function (b) { var pl = play.bases[b]; if (!pl || !PEOPLE[pl.id]) return;
-            if (b < 3 && play.basesAfter[b + 1] && play.basesAfter[b + 1].id === pl.id) move(PEOPLE[pl.id], tR + 0.1 * (3 - b), JOG_BASE, basePt(b + 1), 0, 'base');
-            else if (b === 3 && !play.basesAfter[3]) { move(PEOPLE[pl.id], tR, JOG_BASE, basePt(0), 0, 'base'); move(PEOPLE[pl.id], tR + JOG_BASE, WALK, PEOPLE[pl.id].seat, 0, 'seat'); } });
+          [3, 2, 1].forEach(function (b) { var pl = play.bases[b], p = pl && PEOPLE[pl.id]; if (!p) return;
+            var to = 0; [1, 2, 3].forEach(function (q) { if (play.basesAfter[q] && play.basesAfter[q].id === pl.id) to = q; });
+            if (to > b) move(p, tR + 0.1 * (3 - b), JOG_BASE, basePt(to), 0, 'base');
+            else if (!to) { move(p, tR, JOG_BASE, basePt(0), 0, 'base'); move(p, tR + JOG_BASE, WALK, p.seat, 0, 'seat'); } });   // forced in from third: he touches the plate, then goes to the bench
         }
         if (r) {   // where the ball in play left each man
           var bb = play.pa.bb, t0 = play.tResult;
@@ -1551,8 +1550,10 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
         if (seg.kind === 'result' && seg.last) {
           var r = play.pa.result;
           if (r === 'K' && tau > 0.6) laneMain = 'Strikeout';
-          else if (r === 'BB' && tau > 0.6) laneMain = 'Walk';
-          else if (r === 'HBP' && tau > 0.6) laneMain = 'Hit by pitch';
+          else if ((r === 'BB' || r === 'HBP') && tau > 0.6) {
+            laneMain = r === 'BB' ? 'Walk' : 'Hit by pitch';
+            if (play.runs) { laneMain = r === 'BB' ? 'Bases-loaded walk' : 'Hit by pitch with the bases loaded'; laneSub = (play.bases[3] ? play.bases[3].name + ' scores' : 'a run scores') + ' · ' + G.teams[0].nick + ' ' + play.score[0] + ', ' + G.teams[1].nick + ' ' + play.score[1]; }
+          }
           else if (play.play && tau >= playDuration(play) - 0.6) { laneMain = play.desc.charAt(0).toUpperCase() + play.desc.slice(1); if (play.runs) laneSub = play.runs + ' run' + (play.runs > 1 ? 's' : '') + ' score' + (play.runs > 1 ? '' : 's'); }
         }
         // the running game's banners, over any at-bat banner once the play at the bag is made
