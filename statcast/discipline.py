@@ -1,5 +1,5 @@
 """
-discipline.py · v0.1 · 2026-10-02
+discipline.py · v0.2 · 2026-10-02
 
 Measures plate discipline from pitch-level Statcast: where pitchers put the
 ball and when batters swing at it, by count and by how far the pitch was from
@@ -19,6 +19,10 @@ with each count's average removed (a ball in play from 3-0 is worth less than
 the same ball from 0-2 only because 3-0 was already worth more), so it can value
 the model's batted balls in any count.
 
+Table 6 is the run value batters realised by swinging and by taking, by count
+and distance from the edge. It is not a clean counterfactual: batters take the
+pitches that look like balls and swing at the ones that look like strikes.
+
 Prints the tables, writes statcast/discipline_<year>.json (and the same as
 discipline_<year>.js, `var DISCIPLINE = ...`, for the jsc tools to load) and rewrites the
 tables block of the "Plate discipline" section of STATCAST_TARGETS_<year>.md.
@@ -26,6 +30,7 @@ tables block of the "Plate discipline" section of STATCAST_TARGETS_<year>.md.
   python3 statcast/discipline.py 2025-05-05:2025-09-21
 
 CHANGED
+  v0.2  table 6: the realised run value of swings against takes, by count and distance from the edge
   v0.1  first build (the targets for plate discipline)
 """
 import json, math, os, sys
@@ -194,6 +199,20 @@ def main(spec):
                       'untracked': mean([p['rv'] - cm[p['count']] + allm for p in bip if p['ev'] is None or p['la'] is None])}
     md += ['### 5. Run value per ball in play by exit velocity and launch angle (each count\'s mean removed; all balls in play %.3f, n %d)' % (allm, len(bip)), ''] + table(
         ['launch angle'] + ['%d..%d mph' % (c, d) for c, d in zip(EV_E, EV_E[1:])], rows) + ['']
+    # 6. realised run value of swings and takes, by count and distance from the edge
+    J['swing_vs_take'] = {}
+    rows = []
+    for c in COUNTS:
+        for i in range(2, 6):   # -4..-2, -2..0, 0..2, 2..4
+            sw = [p['rv'] for p in P if p['count'] == c and p['bin'] == i and p['swing'] and p['rv'] is not None]
+            tk = [p['rv'] for p in P if p['count'] == c and p['bin'] == i and not p['swing'] and p['rv'] is not None]
+            if len(sw) < 80 or len(tk) < 80:
+                continue
+            a, b = mean(sw), mean(tk)
+            J['swing_vs_take']['%s %s' % (c, BIN_NAMES[i])] = {'swing_share': len(sw) / (len(sw) + len(tk)), 'swing': a, 'take': b, 'n_swing': len(sw), 'n_take': len(tk)}
+            rows.append((c, BIN_NAMES[i], f3(len(sw) / (len(sw) + len(tk))), '%+.3f' % a, '%+.3f' % b, '%+.3f' % (a - b), '%d / %d' % (len(sw), len(tk))))
+    md += ['### 6. Run value realised by swinging and by taking, by count and distance from the edge (takes are biased toward pitches that looked like balls)', ''] + table(
+        ('count', 'edge (in)', 'swing share', 'per swing', 'per take', 'swing minus take', 'n swings / takes'), rows) + ['']
     J['dates'] = sorted(d for d in days if d)
     year = J['dates'][0][:4] if J['dates'] else '2025'
     here = os.path.dirname(os.path.abspath(__file__))

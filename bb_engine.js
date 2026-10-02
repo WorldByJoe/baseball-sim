@@ -804,8 +804,6 @@ var BB = (function () {
   // the likeliest pitch, leaning to fastballs (being beaten by a fastball
   // costs more than being fooled by a slow one), and blends his timing
   // toward the mix by how much he hedges. With two strikes he hedges more.
-  var SWING_THR = { '0-0': 0.55, '0-1': 0.50, '0-2': 0.30, '1-0': 0.55, '1-1': 0.48, '1-2': 0.30,
-                    '2-0': 0.60, '2-1': 0.50, '2-2': 0.32, '3-0': 0.92, '3-1': 0.58, '3-2': 0.33 };
   function expectPitch(B, P, sb, st) {
     var ip = intentProbs(P, st.balls, st.strikes), mix = P.pitches.map(function () { return 0; });
     for (var k = 0; k < 3; k++) {
@@ -953,15 +951,15 @@ var BB = (function () {
     var ps = PRIOR_S * (PITCH_TYPES[pitch.type].ivbSD || 4), pullS = 1 / (1 + (ps / eye) * (ps / eye));
     var real = [pitch.plate.x, pitch.plate.z, pitch.plate.t];
     var judged = [pullS * (ref.x - real[0]) + RESID_S * (gh.x - real[0]), pullS * (ref.z - real[1]) + RESID_S * (gh.z - real[1]), pullT * (gh.t - real[2])];   // how far off his judgement of a recognised pitch is
-    var g3 = [gh.x - real[0], gh.z - real[1], gh.t - real[2]], err = judged;
-    if (!detected) {
-      var launched = 1 - tc * tc, base = [launched * g3[0], launched * g3[1], launched * g3[2]];   // he launched on the pitch he expected
+    var g3 = [gh.x - real[0], gh.z - real[1], gh.t - real[2]], err = judged, launched = 1 - tc * tc;
+    var base = [launched * g3[0], launched * g3[1], launched * g3[2]];   // the pitch he expected, corrected for the break seen by the commit point
+    if (!detected) {   // he launched on the pitch he expected
       // late: he steers toward his judgement; fooled: only by what has shown itself by the last look
       var target = late ? judged : [(1 - ts * ts) * g3[0], (1 - ts * ts) * g3[1], (1 - ts * ts) * g3[2]];
       var cx = target[0] - base[0], cz = target[1] - base[1], cm = Math.sqrt(cx * cx + cz * cz), k = cm > STEER_IN * IN ? STEER_IN * IN / cm : 1;
       err = [base[0] + k * cx, base[1] + k * cz, base[2] + k * (target[2] - base[2])];
     }
-    return { tp: tp, sep: sep, pFooled: pFooled, detected: detected, late: late, pullT: pullT, pullS: pullS, err: err };
+    return { tp: tp, sep: sep, pFooled: pFooled, detected: detected, late: late, same: !!same, pullT: pullT, pullS: pullS, err: err, base: base };
   }
   function misreadOf(rf) { return rf.err; }   // [x m, z m, t s]: how far off his judgement is, judged minus real
   // A pitch of one kind as he pictures it: from this release, along this
@@ -984,17 +982,71 @@ var BB = (function () {
   }
 
   // -------------------------------------------------------------- DECIDE
-  // His decision uses his perception at the commit point (eyeSD, earlier and
-  // noisier); the swing is then steered by later tracking (barrelSD).
+  // SWING OR TAKE IS A BET ON RUNS. He swings when a swing is worth more than
+  // a take, by what each outcome is worth in this count and what he expects
+  // his swing to produce. There are no swing thresholds.
+  //   take:  a called strike (his chance it is a strike, pin) or a ball
+  //   swing: a whiff (a strike), a foul, or a ball in play
+  // COUNT_RV is what each was worth to the batting side in each count,
+  // MEASURED (statcast/discipline.py table 1, 42 days of 2025: the change in
+  // the inning's run expectancy): [ball, strike, foul, ball in play]. A whiff
+  // is worth what a called strike is; with two strikes either is the
+  // strikeout, and a foul is worth nothing. So before two strikes a swing at
+  // a sure strike risks nothing a take does not, and from 3-0 a ball in play
+  // is worth less than taking a strike: the counts' habits follow.
+  var COUNT_RV = {
+    '0-0': [0.035, -0.041, -0.041, 0.063], '0-1': [0.026, -0.055, -0.055, 0.072], '0-2': [0.018, -0.170, 0.000, 0.100],
+    '1-0': [0.061, -0.050, -0.050, 0.030], '1-1': [0.049, -0.063, -0.063, 0.050], '1-2': [0.039, -0.188, 0.000, 0.100],
+    '2-0': [0.117, -0.063, -0.063, -0.030], '2-1': [0.110, -0.074, -0.073, 0.011], '2-2': [0.097, -0.227, 0.000, 0.054],
+    '3-0': [0.127, -0.072, -0.070, -0.146], '3-1': [0.198, -0.086, -0.087, -0.028], '3-2': [0.286, -0.323, 0.000, -0.025]
+  };
+  var BIP_RV_ALL = 0.049;   // a ball in play's average over all counts (statcast/discipline.py)
+  // HIS SELF-MODEL: what his swings produce, by where he saw the pitch (inches
+  // from the zone's edge, + outside; bins centred at SELF_AT) and by his read
+  // at the commit point: 'on' = the pitch he expected, or one he has not told
+  // apart from it; 'off' = one he has recognised as something else, which his
+  // swing was not timed for. Each cell is [whiff per swing, foul per contact,
+  // run value per ball in play with the count's average removed]. MEASURED
+  // from the model itself (tools/self_model.js; balls in play valued by the
+  // league's run value for their exit speed and launch angle), so he knows
+  // what his own swings do: rerun the tool after any change to the swing.
+  var SELF_AT = [-7, -5, -3, -1, 1, 3, 5, 7.5, 10.5, 14];
+  var SELF = {
+    on:  [[0.289, 0.407, 0.027], [0.264, 0.411, 0.028], [0.283, 0.434, 0.018], [0.3, 0.431, 0.033], [0.304, 0.447, -0.013],
+          [0.385, 0.6, 0.011], [0.501, 0.64, -0.033], [0.634, 0.662, -0.032], [0.822, 0.768, -0.064], [0.924, 0.686, -0.064]],
+    off: [[0.216, 0.586, 0.016], [0.222, 0.567, 0.007], [0.243, 0.567, 0.006], [0.267, 0.548, -0.008], [0.283, 0.541, -0.009],
+          [0.385, 0.6, 0.011], [0.501, 0.64, -0.033], [0.634, 0.662, -0.032], [0.822, 0.768, -0.064], [0.924, 0.686, -0.064]]
+  };
+  var AGGR_RV = 0.2;   // runs per unit of his aggression trait, added to the swing's side of the bet: PROVISIONAL, not fitted
+  function edgeIn(B, x, z) {   // m: from the edge of the rulebook zone, + outside, - inside (to the nearest edge)
+    var dx = Math.abs(x) - ZONE_HALF, dz = Math.max((B.zone.bot - BALL_R) - z, z - (B.zone.top + BALL_R));
+    if (dx <= 0 && dz <= 0) return Math.max(dx, dz);
+    return Math.sqrt(Math.max(dx, 0) * Math.max(dx, 0) + Math.max(dz, 0) * Math.max(dz, 0));
+  }
+  function selfAt(state, eIn) {   // his expected [whiff, foul per contact, ball-in-play value] at eIn inches from the edge
+    var t = SELF[state], a = SELF_AT, n = a.length;
+    if (eIn <= a[0]) return t[0].slice();
+    if (eIn >= a[n - 1]) return t[n - 1].slice();
+    for (var i = 1; i < n; i++) if (eIn < a[i]) {
+      var w = (eIn - a[i - 1]) / (a[i] - a[i - 1]);
+      return [0, 1, 2].map(function (k) { return t[i - 1][k] + w * (t[i][k] - t[i - 1][k]); });
+    }
+  }
+  // He decides at the commit point, on what he could see by then: a pitch
+  // picked up by then as he judges it (THE PRIOR'S PULL); one not yet picked
+  // up where the pitch he expected would go, corrected only for the break
+  // that had shown itself (rf.base). Then the eye's own scatter (eyeSD,
+  // larger under time pressure). The swing is then steered by later tracking.
   function decide(B, pitch, gh, rf, st, rng) {
-    var m = misreadOf(rf), mx = m[0], mz = m[1];
+    var m = rf.detected ? rf.err : rf.base, mx = m[0], mz = m[1];
     var eye = B.eyeSD * IN * rf.tp;
     var xp = pitch.plate.x + mx + rng.n(0, eye), zp = pitch.plate.z + mz + rng.n(0, eye);
     var pin = Phi((ZONE_HALF - Math.abs(xp)) / eye) * Phi((zp - (B.zone.bot - BALL_R)) / eye) * Phi((B.zone.top + BALL_R - zp) / eye);
-    var dx = gh.x - pitch.plate.x, dz = gh.z - pitch.plate.z;
-    var onIt = Math.sqrt(dx * dx + dz * dz) < 0.08 && Math.abs(gh.t - pitch.plate.t) < 0.012;
-    var thr = SWING_THR[st.balls + '-' + st.strikes] - B.aggr - (onIt ? 0.06 : 0);
-    return { swing: pin > thr, pin: pin, thr: thr, onIt: onIt, perceived: [xp, zp], misread: [mx, mz] };
+    var state = rf.detected && !rf.same ? 'off' : 'on', o = selfAt(state, edgeIn(B, xp, zp) / IN), c = COUNT_RV[st.balls + '-' + st.strikes];
+    var takeV = pin * c[1] + (1 - pin) * c[0];
+    var swingV = o[0] * c[1] + (1 - o[0]) * (o[1] * c[2] + (1 - o[1]) * (o[2] + c[3] - BIP_RV_ALL));
+    var gain = swingV - takeV + B.aggr * AGGR_RV;
+    return { swing: gain > 0, pin: pin, gain: gain, swingV: swingV, takeV: takeV, state: state, perceived: [xp, zp], misread: [mx, mz] };
   }
 
   // ---------------------------------------------------------------- CALL
@@ -1251,7 +1303,7 @@ var BB = (function () {
     makePitcher: makePitcher, makeBatter: makeBatter, makeUmp: makeUmp, equipFielder: equipFielder, FIELD_MEANS: FIELD_MEANS,
     batOf: batOf, batSpeedOf: batSpeedOf, swingPowerOf: swingPowerOf, POWER_EXP: POWER_EXP,
     batMass: batMass, batRadius: batRadius, qAt: qAt, corOf: corOf, BAT_MODES: BAT_MODES, BAT_SHAPE: BAT_SHAPE, SWEET_IN: SWEET_IN, BAT_DEFAULT: BAT_DEFAULT,
-    flyPitch: flyPitch, flyBatted: flyBatted, spinVector: spinVector, dirOf: dirOf, aim: aim,
+    flyPitch: flyPitch, flyBatted: flyBatted, spinVector: spinVector, dirOf: dirOf, aim: aim, edgeIn: edgeIn, SELF_AT: SELF_AT, SELF: SELF, COUNT_RV: COUNT_RV,
     fatigueOf: fatigueOf, releasePoint: releasePoint, batterSide: batterSide, inZone: inZone,
     planPitch: planPitch, expectPitch: expectPitch, throwPitch: throwPitch, ghostPitch: ghostPitch,
     readFactors: readFactors, decide: decide, callPitch: callPitch, swing: swing, collide: collide,
