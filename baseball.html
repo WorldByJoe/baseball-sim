@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v2.3 · 2026-10-02
+  baseball.html · v2.5 · 2026-10-02
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
@@ -45,23 +45,20 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
-    v2.3  the broadcast: two announcers, the public-address announcer, the crowd, the
+    v2.5  the broadcast: two announcers, the public-address announcer, the crowd, the
           field and the organ, written ahead for the whole game and played on its
-          clock; v and c mute the voices and the park; silent without them
-    v2.2  the game and its schedule come from bb_schedule.js, shared with the headless
-          tools (the same segments to the millisecond); a 30 s seventh-inning stretch
+          clock; v and c mute the voices and the park; silent without them. The game
+          and its schedule come from bb_schedule.js; a 30 s seventh-inning stretch
+    v2.4  engine v1.0 (perception and pitch variety): the drawn pitch and the
+          pitcher's card carry his seam break; the drawn ghost is his picture of it
+    v2.3  a bases-loaded walk or hit batsman: the man forced in from third jogs home and
+          then to the bench (he had stayed on third); the banner says the run scored (Joe)
+    v2.2  engine v0.9 (the swing as a tilted circle); the catcher's-view bat swings to
+          its attack angle where it met the ball
     v2.1  every throw is shown: the catcher's return after each pitch, a new ball from
           the umpire, the throw in to hold the runners and back to the pitcher, the
           ball back from the bag after a steal and from the backstop after a wild
           pitch, warm-ups both ways; huddles swirl and hop; fielders jog back (Joe)
-    v2.0  the flight chart is always on screen with fixed axes at true scale (0-480 ft
-          by 0-200 ft, one foot to a pixel each way); the batter runs out every ball
-          at his own speed - through first and rounding it on a fly - and an out
-          walks back from where he stopped (Joe)
-    v1.9  catcher's view in team colours: the batter's bat, box and expected-pitch
-          circle in his side's colour with the expected type at its centre; the
-          pitcher's aim circle in his side's colour with the intended type as the
-          cross-hair (Joe: the two dashed circles were hard to tell apart)
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -151,7 +148,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   <div id="hud" class="tag"></div>
 </div>
 <!-- version tags so a browser never runs a stale engine against a new page -->
-<script src="bb_engine.js?v=0.8"></script>
+<script src="bb_engine.js?v=1.0"></script>
 <script src="bb_names.js?v=0.1"></script>
 <script src="bb_field.js?v=0.6"></script>
 <script src="bb_game.js?v=0.6"></script>
@@ -235,9 +232,9 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     if (P._moved) return;
     var rel = BB.releasePoint(P);
     P.pitches.forEach(function (q) {
-      var spd = q.velo * MPH, a = BB.aim(rel, spd, q.rpm, q.tilt, q.eff, P.armSide, [0, 0.76], env, null);
+      var spd = q.velo * MPH, a = BB.aim(rel, spd, q.rpm, q.tilt, q.eff, P.armSide, [0, 0.76], env, null, q.seam);
       var d = BB.dirOf(a.yaw, a.pit), v0 = [d[0] * spd, d[1] * spd, d[2] * spd];
-      var r = BB.flyPitch(rel, v0, BB.spinVector(d, q.rpm, q.tilt, q.eff, P.armSide), env, false), o = BB.flyPitch(rel, v0, [0, 0, 0], env, false);
+      var r = BB.flyPitch(rel, v0, BB.spinVector(d, q.rpm, q.tilt, q.eff, P.armSide), env, false, q.seam, P.armSide), o = BB.flyPitch(rel, v0, [0, 0, 0], env, false);
       q.ivb = (r.z - o.z) / IN; q.hb = (r.x - o.x) / IN * P.armSide;
     });
     P._moved = true;
@@ -565,9 +562,10 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
         var r = play.play, res = play.pa.result, tR = play.tResolve;
         if (res === 'BB' || res === 'HBP') {   // he jogs down; anyone forced jogs ahead of him
           move(PEOPLE[play.batter.id], tR, JOG_BASE, basePt(1), 0, 'base');
-          [3, 2, 1].forEach(function (b) { var pl = play.bases[b]; if (!pl || !PEOPLE[pl.id]) return;
-            if (b < 3 && play.basesAfter[b + 1] && play.basesAfter[b + 1].id === pl.id) move(PEOPLE[pl.id], tR + 0.1 * (3 - b), JOG_BASE, basePt(b + 1), 0, 'base');
-            else if (b === 3 && !play.basesAfter[3]) { move(PEOPLE[pl.id], tR, JOG_BASE, basePt(0), 0, 'base'); move(PEOPLE[pl.id], tR + JOG_BASE, WALK, PEOPLE[pl.id].seat, 0, 'seat'); } });
+          [3, 2, 1].forEach(function (b) { var pl = play.bases[b], p = pl && PEOPLE[pl.id]; if (!p) return;
+            var to = 0; [1, 2, 3].forEach(function (q) { if (play.basesAfter[q] && play.basesAfter[q].id === pl.id) to = q; });
+            if (to > b) move(p, tR + 0.1 * (3 - b), JOG_BASE, basePt(to), 0, 'base');
+            else if (!to) { move(p, tR, JOG_BASE, basePt(0), 0, 'base'); move(p, tR + JOG_BASE, WALK, p.seat, 0, 'seat'); } });   // forced in from third: he touches the plate, then goes to the bench
         }
         if (r) {   // where the ball in play left each man
           var bb = play.pa.bb, t0 = play.tResult;
@@ -1034,7 +1032,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   function atPlate(x, z) { return proj(x, GEO.Y_PLATE, z); }
   var PXM = FOC / (GEO.Y_PLATE - CAM_Y);
   function pitchPaths(play, p) {
-    if (!p._path) { p._path = BB.flyPitch(p.pitch.rel, p.pitch.v0, p.pitch.w0, env, true).path; p._ghost = BB.ghostPitch(p.pitch, p.expect, play.pitcher, env, true); }
+    if (!p._path) { p._path = BB.flyPitch(p.pitch.rel, p.pitch.v0, p.pitch.w0, env, true, p.pitch.seam, p.pitch.armSide).path; p._ghost = BB.ghostPitch(p.pitch, p.expect, play.pitcher, env, true, p.familiar); }
   }
   function drawZone(seg, tau) {
     var g = zoneG, play = seg.play;
@@ -1141,7 +1139,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
       // where the bat met the ball (or would have)
       var th = sw.theta, zc = pch.plate.z - sw.D, xs = pch.plate.x + sw.dLong * side, ys = YP + 0.3;
       var ax = [Math.cos(th), -Math.sin(th), 0], tip = [ax[0] * -side, ax[1] * -side];   // unit, toward the tip
-      var az1 = Math.atan2(tip[1], tip[0]) / DEG, el1 = sw.attack || 8;
+      var az1 = Math.atan2(tip[1], tip[0]) / DEG, el1 = (sw.attackAt !== undefined ? sw.attackAt : sw.attack) || 8;   // the bat's path where it met the ball
       // shortest sweep in azimuth
       while (az1 - az0 > 180) az1 -= 360; while (az1 - az0 < -180) az1 += 360;
       var hands1 = [xs - tip[0] * 0.6, ys - tip[1] * 0.6, zc - 0.03];
@@ -1474,8 +1472,10 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
         if (seg.kind === 'result' && seg.last) {
           var r = play.pa.result;
           if (r === 'K' && tau > 0.6) laneMain = 'Strikeout';
-          else if (r === 'BB' && tau > 0.6) laneMain = 'Walk';
-          else if (r === 'HBP' && tau > 0.6) laneMain = 'Hit by pitch';
+          else if ((r === 'BB' || r === 'HBP') && tau > 0.6) {
+            laneMain = r === 'BB' ? 'Walk' : 'Hit by pitch';
+            if (play.runs) { laneMain = r === 'BB' ? 'Bases-loaded walk' : 'Hit by pitch with the bases loaded'; laneSub = (play.bases[3] ? play.bases[3].name + ' scores' : 'a run scores') + ' · ' + G.teams[0].nick + ' ' + play.score[0] + ', ' + G.teams[1].nick + ' ' + play.score[1]; }
+          }
           else if (play.play && tau >= playDuration(play) - 0.6) { laneMain = play.desc.charAt(0).toUpperCase() + play.desc.slice(1); if (play.runs) laneSub = play.runs + ' run' + (play.runs > 1 ? 's' : '') + ' score' + (play.runs > 1 ? '' : 's'); }
         }
         // the running game's banners, over any at-bat banner once the play at the bag is made

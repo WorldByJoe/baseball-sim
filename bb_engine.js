@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v0.8 · 2026-10-01
+   bb_engine.js · v1.0 · 2026-10-02
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -23,12 +23,16 @@
              pitcher in this count, and decides how hard to sit on it
                                                                (expectPitch)
      THROW   physics flies the real pitch; command noise moves it off the
-             target, fatigue takes off speed and spin          (throwPitch)
+             target, its speed, spin and seams vary from pitch to pitch as
+             the league's do, fatigue takes off speed and spin (throwPitch)
      READ    the batter's picture of the pitch is a GHOST pitch - the same
-             release, flown with the speed and spin he EXPECTED. Recognition
-             corrects part of the difference before he commits; the rest is
-             his misread. Tunnelling falls out of this: two pitches that
-             look alike early and separate late fool him        (ghostPitch)
+             release, flown as the pitch type he EXPECTED usually flies.
+             Recognition corrects part of the difference before he commits;
+             the rest is his misread. Tunnelling falls out of this: two
+             pitches that look alike early and separate late fool him. Even
+             a pitch he recognises is judged partly from what its kind
+             usually does: a pitch that rides or drops more than most is
+             swung under or over                  (ghostPitch, readFactors)
      DECIDE  swing or take, from where he thinks the ball will cross the
              zone, the count, and whether it is the pitch he was sitting on
      CALL    a take is called by an umpire whose zone has a soft edge (his
@@ -49,6 +53,15 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v1.0  perception: a recognised pitch is judged partly from what that kind of pitch
+           usually does (the prior's pull: timing toward the expected pitch, location
+           toward the type's usual shape); the expected pitch type cannot fool him;
+           pitches vary as the league's do (spin spreads, a seam force, pitch-to-pitch
+           scatter inside the command trait)
+     v0.9  the swing is a tilted circle (Statcast swing tilt, steeper for low pitches):
+           where on it the ball is met sets spray, attack angle and bat speed; the
+           barrel dips toward its end; hands cover only part of a pitch in or out;
+           a bat-face scatter; timing, along-barrel scatter fitted to pitch-level 2025
      v0.8  the bat is a tapered wood beam: its shape gives the radius the ball meets,
            the rigid recoil about the balance point and the bending modes that drain
            a strike off the sweet spot (Nathan 2000); the ball's COR falls with speed
@@ -59,9 +72,6 @@
      v0.6  the running game's traits (jump, holdTime, popTime, block) and per-pitch
            hooks in simPA (beforePitch / afterPitch; result 'END' when the bases
            end the inning mid-count)
-     v0.5  fielding and running traits on every player; landing state for the fielding
-           layer; foul pops can be caught (g.foulCatch)
-     v0.4  ghostPitch can keep its flight path, for drawing the batter's expected pitch
 ============================================================================ */
 
 var BB = (function () {
@@ -165,10 +175,34 @@ var BB = (function () {
   var WOOD_C = 4300;      // m/s: sqrt(E/rho) of ash and maple; sets the mode frequencies
   var E_COR = [0.546, 0.51];   // the ball's own coefficient of restitution at 60 mph (the MLB specification) and at 140 mph (Nathan); linear between
   var MU_BAT = 0.5;       // ball-bat friction; caps the tangential impulse on glancing contact
-  var SWING_RADIUS = 0.6; // m: the barrel turns at (bat speed / this) rad/s near contact, so timing sets spray
-  var SWING_CURV = 0.5;   // 1/m: how sharply the barrel's path curves upward through the hitting zone - a 0.9 m circle tilted 30 deg (sin 30 / 0.9)
-  var C_LOC = 0.9;        // rad per m: an inside pitch is met farther out front and pulled
+  // THE SWING IS A TILTED CIRCLE. Near contact the sweet spot travels on an arc
+  // of radius SWING_R in a plane tilted from the ground by the batter's swing
+  // tilt (Statcast's swing_path_tilt), with the barrel below the hands. Meeting
+  // the ball further round the arc (out front) or short of it (deep) turns the
+  // bat toward the pull side by cos(tilt) of that angle and raises its path by
+  // sin(tilt) of it. Pitch-level 2025 (one week of July, 9,972 contacts): balls
+  // met out front were pulled 1.59 deg per inch and the attack angle rose 0.80
+  // deg per inch; SWING_R is the one radius that gives both within 11% at the
+  // league's tilt. The plane is steeper for low pitches: 9.4 deg per zone height.
+  var SWING_R = 0.87;     // m
+  var TILT_PER_H = 9.4;   // deg of swing tilt per zone height (0 = bottom of his zone, 1 = top); 38 deg below the zone, 21 above
+  var BAT_PEAK_M = 0.229, BAT_GAIN_EXP = 0.2;   // the barrel's speed peaks 9 in out front of his usual contact point; fitted to bat speed by contact depth (pitch-level 2025)
+  // Pitch location (pitch-level 2025, one week of July): an inside pitch was met
+  // a little further out front, 1.89 in per foot (r .10), and pulled more than
+  // that depth alone explains, 7.9 deg per foot in all; the rest is the bat
+  // face turned by the hands. And the hands only partly follow the pitch in and
+  // out: what they do not cover moves the contact along the barrel, toward the
+  // hands on an inside pitch and toward the end on an outside one. And a
+  // batter aims the sweet spot a little inside the ball, because missing off
+  // the end is worse than being jammed; so inside pitches suffer more (squared-
+  // up contact fell from .69 over the middle to .27 more than a foot inside and
+  // .44 more than a foot away, on balls struck square vertically).
+  var LOC_DEPTH = 0.157;  // m of planned contact depth per m the pitch is inside
+  var LOC_FACE = 0.29;    // rad of extra pull per m inside, at the same depth
+  var HAND_MISS = 0.3;    // share of the pitch's distance in or out that the hands do NOT cover
+  var AIM_HANDS = 1.0;    // in: how far toward the hands of the sweet spot he aims
   var TIP_IN = 6, HANDLE_IN = -14;   // how far along the barrel from the sweet spot a ball can still be struck
+  var BAT_CAP_IN = 1.0;              // in: a ball centred this far past the end still catches the rounded cap (ball radius 1.45 in)
 
   function batDiameter(shape, x) {   // in, at x in from the barrel end
     if (x <= 0) return shape[0][1];
@@ -304,7 +338,7 @@ var BB = (function () {
   // movement already matched Savant (physics_check.js).
   var AERO = { batCd: 1.142 };
 
-  function accel(v, w, env, a, cds) {
+  function accel(v, w, env, a, cds, sm) {
     var ux = v[0] - env.wind[0], uy = v[1] - env.wind[1], uz = v[2] - env.wind[2];
     var sp = Math.sqrt(ux * ux + uy * uy + uz * uz);
     var k = 0.5 * env.rho * BALL_A / BALL_M;
@@ -317,6 +351,7 @@ var BB = (function () {
       var f = k * clOf(BALL_R * cm / (sp * sp)) * sp * sp / cm;
       a[0] += f * cx; a[1] += f * cy; a[2] += f * cz;
     }
+    if (sm) { var s2 = sp * sp; a[0] += sm[0] * s2; a[2] += sm[1] * s2; }   // the seam force: sideways and vertical, growing with speed squared like lift
   }
 
   // RK4 step. Acceleration depends on velocity only, so position integrates
@@ -324,15 +359,15 @@ var BB = (function () {
   // decays (time constant R / (2e-5 * speed), Nathan).
   var A1 = [0, 0, 0], A2 = [0, 0, 0], A3 = [0, 0, 0], A4 = [0, 0, 0];
   var V2 = [0, 0, 0], V3 = [0, 0, 0], V4 = [0, 0, 0];
-  function step(p, v, w, env, dt, cds) {
+  function step(p, v, w, env, dt, cds, sm) {
     var i;
-    accel(v, w, env, A1, cds);
+    accel(v, w, env, A1, cds, sm);
     for (i = 0; i < 3; i++) V2[i] = v[i] + 0.5 * dt * A1[i];
-    accel(V2, w, env, A2, cds);
+    accel(V2, w, env, A2, cds, sm);
     for (i = 0; i < 3; i++) V3[i] = v[i] + 0.5 * dt * A2[i];
-    accel(V3, w, env, A3, cds);
+    accel(V3, w, env, A3, cds, sm);
     for (i = 0; i < 3; i++) V4[i] = v[i] + dt * A3[i];
-    accel(V4, w, env, A4, cds);
+    accel(V4, w, env, A4, cds, sm);
     for (i = 0; i < 3; i++) {
       p[i] += dt / 6 * (v[i] + 2 * V2[i] + 2 * V3[i] + V4[i]);
       v[i] += dt / 6 * (A1[i] + 2 * A2[i] + 2 * A3[i] + A4[i]);
@@ -341,15 +376,21 @@ var BB = (function () {
     w[0] *= decay; w[1] *= decay; w[2] *= decay;
   }
 
-  // A pitch flies until it crosses the front of the plate.
-  var PITCH_DT = 0.0025;
-  function flyPitch(p0, v0, w0, env, rec) {
-    var p = p0.slice(), v = v0.slice(), w = w0.slice(), t = 0;
+  // A pitch flies until it crosses the front of the plate. `seam` is the
+  // extra break the seams give this pitch, [arm side, up] in inches over a
+  // typical flight (SEAM_D), on a pitcher whose arm side is `armSide`.
+  // Seam-shifted wakes move real pitches by inches beyond what their spin
+  // explains; the spin model leaves them out, so they enter here as a force
+  // that grows with speed squared, like lift.
+  var PITCH_DT = 0.0025, SEAM_D = 16.0;   // m: release to the front of the plate for a typical extension
+  function seamForce(seam, armSide) { return seam ? [2 * seam[0] * IN / (SEAM_D * SEAM_D) * armSide, 2 * seam[1] * IN / (SEAM_D * SEAM_D)] : null; }
+  function flyPitch(p0, v0, w0, env, rec, seam, armSide) {
+    var p = p0.slice(), v = v0.slice(), w = w0.slice(), t = 0, sm = seamForce(seam, armSide || 1);
     var path = rec ? [[0, p[0], p[1], p[2]]] : null;
     var px = p[0], py = p[1], pz = p[2], pvx = v[0], pvy = v[1], pvz = v[2];
     while (p[1] > Y_PLATE && t < 3) {
       px = p[0]; py = p[1]; pz = p[2]; pvx = v[0]; pvy = v[1]; pvz = v[2];
-      step(p, v, w, env, PITCH_DT, 1); t += PITCH_DT;
+      step(p, v, w, env, PITCH_DT, 1, sm); t += PITCH_DT;
       if (rec) path.push([t, p[0], p[1], p[2]]);
     }
     var f = (py - Y_PLATE) / (py - p[1]);
@@ -410,15 +451,24 @@ var BB = (function () {
   // the breaking balls the fitted eff runs well below Savant's published
   // "active spin" (slider 0.12 vs ~0.35): this lift model credits low spin
   // factors generously, and seam-shifted-wake effects are not modelled.
+  // ivbSD: the league's spread of induced vertical break within the type, in
+  // inches (pitch-level 2025, one week of July): how much a pitch of the
+  // kind can differ from the usual, which a batter's picture of it allows for.
+  // How much pitches of a type differ, from statcast/pitch_spread.py (42 days
+  // of 2025): rpmSD is the spread of pitchers' usual spin rate, rpmW (share
+  // of his spin) and veloW (mph) the pitch-to-pitch spread within a game.
+  // seamSD (between pitchers) and seamW (pitch to pitch), [arm side, up] in
+  // inches, were FITTED (tools/fit_pitch_spread.js) so that, with the spin
+  // spreads, the model's pitches spread in movement as the league's do.
   var PITCH_TYPES = {
-    FF: { name: 'four-seam', dv: 0,     rpm: 2290, rpmSD: 130, eff: 0.85, effSD: 0.05, tilt: 25,   tiltSD: 9,  cmd: 1.00, cost: 1.00, kind: 'FB' },
-    SI: { name: 'sinker',    dv: -0.9,  rpm: 2160, rpmSD: 130, eff: 0.85, effSD: 0.05, tilt: 63,   tiltSD: 7,  cmd: 1.00, cost: 1.00, kind: 'FB' },
-    FC: { name: 'cutter',    dv: -4.8,  rpm: 2400, rpmSD: 150, eff: 0.28, effSD: 0.08, tilt: -11,  tiltSD: 12, cmd: 1.05, cost: 1.00, kind: 'FB' },
-    SL: { name: 'slider',    dv: -8.6,  rpm: 2430, rpmSD: 170, eff: 0.12, effSD: 0.05, tilt: -67,  tiltSD: 12, cmd: 1.10, cost: 1.05, kind: 'BR' },
-    ST: { name: 'sweeper',   dv: -11.5, rpm: 2600, rpmSD: 170, eff: 0.43, effSD: 0.08, tilt: -87,  tiltSD: 8,  cmd: 1.15, cost: 1.05, kind: 'BR' },
-    CU: { name: 'curveball', dv: -14.5, rpm: 2560, rpmSD: 220, eff: 0.34, effSD: 0.08, tilt: -141, tiltSD: 12, cmd: 1.20, cost: 1.05, kind: 'BR' },
-    CH: { name: 'changeup',  dv: -8.5,  rpm: 1780, rpmSD: 180, eff: 0.84, effSD: 0.06, tilt: 65,   tiltSD: 8,  cmd: 1.10, cost: 0.90, kind: 'OS' },
-    FS: { name: 'splitter',  dv: -7.8,  rpm: 1350, rpmSD: 200, eff: 0.65, effSD: 0.08, tilt: 75,   tiltSD: 10, cmd: 1.20, cost: 1.05, kind: 'OS' }
+    FF: { name: 'four-seam', dv: 0,     rpm: 2290, rpmSD: 141, rpmW: 0.031, eff: 0.85, effSD: 0.05, tilt: 25,   tiltSD: 9,  veloW: 0.90, seamSD: [2.6, 2.0], seamW: [1.0, 1.1], cmd: 1.00, cost: 1.00, ivbSD: 3.0, kind: 'FB' },
+    SI: { name: 'sinker',    dv: -0.9,  rpm: 2160, rpmSD: 132, rpmW: 0.033, eff: 0.85, effSD: 0.05, tilt: 63,   tiltSD: 7,  veloW: 0.87, seamSD: [2.0, 4.0], seamW: [1.4, 1.2], cmd: 1.00, cost: 1.00, ivbSD: 5.0, kind: 'FB' },
+    FC: { name: 'cutter',    dv: -4.8,  rpm: 2400, rpmSD: 182, rpmW: 0.029, eff: 0.28, effSD: 0.08, tilt: -11,  tiltSD: 12, veloW: 1.05, seamSD: [1.4, 2.3], seamW: [1.7, 1.7], cmd: 1.05, cost: 1.00, ivbSD: 3.9, kind: 'FB' },
+    SL: { name: 'slider',    dv: -8.6,  rpm: 2430, rpmSD: 217, rpmW: 0.030, eff: 0.12, effSD: 0.05, tilt: -67,  tiltSD: 12, veloW: 1.09, seamSD: [2.5, 3.1], seamW: [1.6, 1.9], cmd: 1.10, cost: 1.05, ivbSD: 4.0, kind: 'BR' },
+    ST: { name: 'sweeper',   dv: -11.5, rpm: 2600, rpmSD: 230, rpmW: 0.035, eff: 0.43, effSD: 0.08, tilt: -87,  tiltSD: 8,  veloW: 1.03, seamSD: [1.8, 2.5], seamW: [2.4, 2.0], cmd: 1.15, cost: 1.05, ivbSD: 4.3, kind: 'BR' },
+    CU: { name: 'curveball', dv: -14.5, rpm: 2560, rpmSD: 276, rpmW: 0.030, eff: 0.34, effSD: 0.08, tilt: -141, tiltSD: 12, veloW: 1.16, seamSD: [3.0, 3.3], seamW: [1.6, 1.6], cmd: 1.20, cost: 1.05, ivbSD: 4.7, kind: 'BR' },
+    CH: { name: 'changeup',  dv: -8.5,  rpm: 1780, rpmSD: 285, rpmW: 0.056, eff: 0.84, effSD: 0.06, tilt: 65,   tiltSD: 8,  veloW: 1.00, seamSD: [1.0, 3.4], seamW: [1.7, 2.0], cmd: 1.10, cost: 0.90, ivbSD: 5.1, kind: 'OS' },
+    FS: { name: 'splitter',  dv: -7.8,  rpm: 1350, rpmSD: 331, rpmW: 0.089, eff: 0.65, effSD: 0.08, tilt: 75,   tiltSD: 10, veloW: 0.93, seamSD: [1.6, 3.0], seamW: [2.2, 2.5], cmd: 1.20, cost: 1.05, ivbSD: 4.2, kind: 'OS' }
   };
 
   // Repertoire archetypes and their usage; `w` is how common each is.
@@ -452,7 +502,7 @@ var BB = (function () {
   // at the front of the plate - the pitcher's IDEAL. The pitch's break is
   // nearly independent of the target, so the last solve's correction is
   // cached on the pitch and the next solve starts there.
-  function aim(rel, speed, rpm, tilt, eff, armSide, target, env, cache) {
+  function aim(rel, speed, rpm, tilt, eff, armSide, target, env, cache, seam) {
     var dx = target[0] - rel[0], dy = rel[1] - Y_PLATE, dz = target[1] - rel[2];
     var dist = Math.sqrt(dx * dx + dy * dy);
     var yaw0 = Math.atan2(dx, dy), pit0 = Math.atan2(dz, dist);
@@ -461,7 +511,7 @@ var BB = (function () {
     else { yaw = yaw0; pit = pit0 + 0.5 * G * dist / (speed * speed); }
     for (var it = 0; it < 8; it++) {
       var d = dirOf(yaw, pit);
-      var hit = flyPitch(rel, [d[0] * speed, d[1] * speed, d[2] * speed], spinVector(d, rpm, tilt, eff, armSide), env, false);
+      var hit = flyPitch(rel, [d[0] * speed, d[1] * speed, d[2] * speed], spinVector(d, rpm, tilt, eff, armSide), env, false, seam, armSide);
       var ex = target[0] - hit.x, ez = target[1] - hit.z;
       if (ex * ex + ez * ez < 1e-6) break;               // within a millimetre
       yaw += ex / dist; pit += ez / dist;
@@ -493,20 +543,22 @@ var BB = (function () {
     batSpeed:   [72.0, 2.65, 62, 82],    // mph - DERIVED from the chain; this entry only scales the display bars
     barrelSD:   [0.62, 0.11, 0.40, 1.1], // in - DERIVED (motorIn x (bat speed/72)^2); display scale only
     attack:    [9, 4, -2, 20],          // deg: upward tilt of the swing path at contact
-    undercut:  [0.45, 0.25, -0.3, 1.2], // in: how far below the ball's centre he aims the barrel
-    timingSD:  [7.0, 1.2, 4.5, 11],     // ms: scatter of the bat's arrival time
-    longSD:    [2.6, 0.4, 1.5, 4.0],    // in: along-the-barrel scatter
+    swingTilt: [32.3, 3.8, 22, 44],     // deg: the tilt of his swing plane for a mid-zone pitch (2025 leaderboard swing_path_tilt: 32.3 +- 3.8)
+    faceSD:    [8, 4, 4, 20],           // deg: swing-to-swing scatter of the bat face's horizontal angle at contact, apart from timing; fitted to fair-ball spray by contact depth (pitch-level 2025)
+    undercut:  [0.55, 0.25, -0.2, 1.3], // in: how far below the ball's centre he aims the barrel (league launch angle minus attack angle averaged +10 deg)
+    timingSD:  [13.5, 2.3, 8.7, 21.2],  // ms: scatter of the bat's arrival time; fitted so contact depth within a batter has sd 9.0 in (pitch-level 2025)
+    longSD:    [3.8, 0.58, 2.2, 5.8],   // in: along-the-barrel scatter; fitted so contact struck square vertically is squared up .695 of the time (pitch-level 2025)
     spotIn:    [4.5, 0.8, 2.5, 7.5],    // in: how far a pitch must have left his expected path by the commit point for him to pick it up
     eyeSD:     [5.0, 0.9, 3.0, 7.5],    // in: zone-judgement scatter at the commit point
     aggr:      [0, 0.07, -0.2, 0.2],    // lowers his swing threshold (positive = swings more)
     commit:    [0.55, 0.12, 0.2, 0.9],  // how hard he sits on his guess (0 = pure hedger)
     fbLean:    [1.3, 0.2, 1.0, 1.9],    // how much he leans toward guessing fastball
-    pullBias:  [7, 5, -5, 19],          // deg toward his pull side
+    pullBias:  [10, 5, -2, 22],         // deg: how far round the arc his usual contact point is (fair balls pulled +6 deg on average; batters' usual depth sd 3.5 in)
     learn:     [0.35, 0.1, 0.1, 0.6],   // share of his spotting distance he can learn away in a game
     coverage:  [3.0, 0.6, 1.8, 5.0],    // in off the zone at which his swing errors have doubled (reach)
     heightIn:  [72, 2.35, 66, 80],      // in (2025 Statcast hitters: 72.0 +- 2.35)
     // pitchers when they bat (NL rules) - override the hitter entries above
-    pBatSpeed: [63, 4, 54, 72], pTimingSD: [10.5, 1.5, 7, 15], pBarrelSD: [1.7, 0.2, 1.2, 2.3],
+    pBatSpeed: [63, 4, 54, 72], pTimingSD: [20.3, 2.9, 13.5, 29], pBarrelSD: [1.7, 0.2, 1.2, 2.3],
     pSpotIn: [6.5, 1.0, 4.5, 9.5], pEyeSD: [3.6, 0.6, 2.4, 5], pAttack: [6, 4, -2, 16],
     // pitchers
     fbVeloSP:  [93.6, 2.0, 88, 100], fbVeloRP: [95.0, 2.0, 89, 102],
@@ -591,6 +643,7 @@ var BB = (function () {
                rpm: clamp(rng.n(d.rpm, d.rpmSD), d.rpm - 3 * d.rpmSD, d.rpm + 3 * d.rpmSD),
                eff: clamp(rng.n(d.eff, d.effSD), 0.03, 0.99),
                tilt: rng.n(d.tilt, d.tiltSD),
+               seam: [rng.n(0, d.seamSD[0]), rng.n(0, d.seamSD[1])],   // in: his usual seam break, arm side and up
                usage: arch.mix[k] * Math.exp(rng.n(0, 0.25)),
                cmd: d.cmd, aimCache: { ok: false } };
     });
@@ -642,6 +695,8 @@ var BB = (function () {
       // midway between belt and shoulders (Statcast averages 1.6 / 3.4 ft)
       zone: { bot: 0.263 * h * IN, top: 0.559 * h * IN }
     };
+    b.swingTilt = drawT(rng, T.swingTilt);   // drawn last, so every earlier draw keeps its place
+    b.faceSD = drawT(rng, T.faceSD);
     if (o.pos === 'C') b.framing = drawT(rng, T.framing);
     return equipFielder(rng, b, o.pos || 'DH');
   }
@@ -784,31 +839,36 @@ var BB = (function () {
     var pt = P.pitches[plan.pick], f = fatigueOf(P);
     var velo = pt.velo - 3.0 * f, rpm = pt.rpm * (1 - 0.05 * f);
     var rel = releasePoint(P);
-    var ideal = aim(rel, velo * MPH, rpm, pt.tilt, pt.eff, P.armSide, plan.target, env, pt.aimCache);
-    var cmdIn = P.command * pt.cmd * (1 + 0.6 * f);
-    var sa = cmdIn * IN / ideal.dist;                                   // command as an angle
-    var yaw = ideal.yaw + rng.n(0, sa), pit = ideal.pit + rng.n(0, sa);
+    var ideal = aim(rel, velo * MPH, rpm, pt.tilt, pt.eff, P.armSide, plan.target, env, pt.aimCache, pt.seam);
+    var cmdIn = P.command * pt.cmd * (1 + 0.6 * f), ty = PITCH_TYPES[pt.type];
+    // command is his whole location scatter at the plate; the seams' pitch-to-pitch scatter is part of it, the rest is release
+    var sx = Math.sqrt(Math.max(0, cmdIn * cmdIn - ty.seamW[0] * ty.seamW[0])) * IN / ideal.dist;   // as angles
+    var sz = Math.sqrt(Math.max(0, cmdIn * cmdIn - ty.seamW[1] * ty.seamW[1])) * IN / ideal.dist;
+    var yaw = ideal.yaw + rng.n(0, sx), pit = ideal.pit + rng.n(0, sz);
     var relA = [rel[0] + rng.n(0, 0.02), rel[1] + rng.n(0, 0.02), rel[2] + rng.n(0, 0.02)];
-    var vA = (velo + rng.n(0, 0.6)) * MPH, rpmA = rpm * (1 + rng.n(0, 0.025));
+    // pitch to pitch: speed, spin and seam scatter as the league's pitchers show within a game
+    var vA = (velo + rng.n(0, ty.veloW)) * MPH, rpmA = rpm * (1 + rng.n(0, ty.rpmW));
     var tiltA = pt.tilt + rng.n(0, 5), effA = clamp(pt.eff + rng.n(0, 0.03), 0.05, 1);
+    var seamA = [pt.seam[0] + rng.n(0, ty.seamW[0]), pt.seam[1] + rng.n(0, ty.seamW[1])];
     var d = dirOf(yaw, pit), v0 = [d[0] * vA, d[1] * vA, d[2] * vA];
     var w0 = spinVector(d, rpmA, tiltA, effA, P.armSide);
-    var fl = flyPitch(relA, v0, w0, env, false);
-    return { type: pt.type, rel: relA, v0: v0, w0: w0, mph: vA / MPH, rpm: rpmA, tilt: tiltA, eff: effA,
+    var fl = flyPitch(relA, v0, w0, env, false, seamA, P.armSide);
+    return { type: pt.type, rel: relA, v0: v0, w0: w0, seam: seamA, armSide: P.armSide, mph: vA / MPH, rpm: rpmA, tilt: tiltA, eff: effA,
              fatigue: f, cmdIn: cmdIn, plate: { x: fl.x, z: fl.z, t: fl.t, v: fl.v, w: fl.w } };
   }
 
   // ---------------------------------------------------------------- READ
-  function ghostPitch(pitch, ex, P, env, rec) {       // rec: keep the path, for drawing
-    var d = unit(pitch.v0), w = [0, 0, 0];
-    ex.blend.forEach(function (b, i) {
-      if (b < 1e-3) return;
-      var q = P.pitches[i], wi = spinVector(d, q.rpm, q.tilt, q.eff, P.armSide);
-      w[0] += b * wi[0]; w[1] += b * wi[1]; w[2] += b * wi[2];
-    });
-    var v = ex.velo * MPH;
-    var fl = flyPitch(pitch.rel, [d[0] * v, d[1] * v, d[2] * v], w, env, !!rec);
-    return { x: fl.x, z: fl.z, t: fl.t, path: fl.path };
+  // The pitch he is ready for: the one he is sitting on, pictured as a pitch
+  // that exists - not an average of the pitcher's mix - at this pitcher's
+  // speed for it, with the shape he pictures for that kind of pitch (see
+  // pictured below), while his TIMING hedges toward the rest of the mix by
+  // how little he commits (he starts the swing for the blended speed).
+  // (Until v0.9 the picture itself was a blend, a hybrid that looked like no
+  // real pitch: fastballs counted as surprises 43% of the time and were
+  // whiffed .29-.37 against .17.)
+  function ghostPitch(pitch, ex, P, env, rec, familiar) {       // rec: keep the path, for drawing
+    var q = P.pitches[ex.guess], fl = pictured(pitch, P, q, familiar || 0, env, !!rec);
+    return { x: fl.x, z: fl.z, t: fl.t * q.velo / ex.velo, path: fl.path };   // arrival as he has timed it: at the hedged speed
   }
   // RECOGNITION IS A YES/NO EVENT, WITH A SECOND LOOK. Either he picks the
   // pitch up before he commits (COMMIT_S before it reaches the plate - about
@@ -817,10 +877,10 @@ var BB = (function () {
   // only the break he could SEE by then (which grows as time squared: tc^2 of
   // the ghost-vs-real gap). The swing then flies for STEER_S more before the
   // last look that can still change the barrel's path (the visuomotor delay). By that look more of the gap has shown itself (ts^2):
-  //   picked up at commit:  he swings for the pitch it is; DETECT_RESID of
-  //                         the gap is left over
-  //   picked up late:       he redirects toward the real pitch, but the barrel
-  //                         can move no more than STEER_IN after launch
+  //   picked up at commit:  he swings for the pitch it is, as he judges it
+  //                         (see THE PRIOR'S PULL below)
+  //   picked up late:       he redirects toward that same judgement, but the
+  //                         barrel can move no more than STEER_IN after launch
   //   still fooled:         he extrapolates from the last look, so the gap that
   //                         develops after it (1 - ts^2) is left, and the
   //                         redirect is bounded the same way
@@ -835,7 +895,10 @@ var BB = (function () {
   // penalty should emerge from. A curveball that leaves the hand going up
   // has separated a long way by the commit point and is rarely missed; a
   // changeup that shares the fastball's tunnel is the one that fools him.
-  // When he guessed right the separation is tiny, and so is the damage.
+  // The pitch type he expected cannot fool him: he judges it as he judges
+  // a pitch he has picked up (until v1.0 a right guess drew the yes/no
+  // event like any other and was mostly judged 'fooled', which kept 60% of
+  // the pitch's difference from its usual shape whatever his eye).
   // (v0.2 used a proportional misread, then a saturating one; both spread
   // contact evenly across the bat face and flattened the launch angles.)
   // STEER_S is the visuomotor delay: the last look that can still change the
@@ -843,32 +906,87 @@ var BB = (function () {
   // were tried: whiffs fell to .17-.19 per swing and league K% to 16-20%).
   // STEER_IN is how far the barrel can be redirected after the swing launches
   // (late corrections of 5-10 cm are reported when the cue comes 150 ms out).
-  var COMMIT_S = 0.175, STEER_S = 0.15, STEER_IN = 3, DETECT_RESID = 0.05;
-  function readFactors(B, pitch, gh, seen, rng) {
+  // THE PRIOR'S PULL. Even a pitch he has picked up is judged partly from what
+  // he expected, as a blend of what he sees and what he was ready for: the
+  // share his expectation gets is pull = 1 / (1 + (prior spread / (eyeSD x
+  // tp))^2), larger under time pressure and with a worse eye, smaller as he
+  // gets used to the pitcher. It works differently for WHEN and for WHERE:
+  //   when:   the swing's timing is committed early, so it stays pulled
+  //           toward the pitch he expected. A batter ready for a fastball is
+  //           early on a breaking ball he has recognised and meets it out
+  //           front (pitch-level 2025: breaking balls and off-speed pitches
+  //           were met 8 in further out front than fastballs, 35-36 in
+  //           against 27-28). PRIOR_T is fitted to the 8 in.
+  //   where:  the barrel's path is steered to the pitch he has recognised,
+  //           but he predicts its last few feet from what that kind of pitch
+  //           usually does - the league's shape for the type (turning toward
+  //           this pitcher's own as he gets used to him) at this pitcher's
+  //           speed - so a pitch that rides or drops more than its kind
+  //           fools him by a share of the difference. A fastball arriving
+  //           flatter than its height implies gets swung under (pitch-level
+  //           2025: whiffs .14 to .28, squared-up .45 to .34 from the
+  //           steepest to the flattest fifth). The prior's spread is the
+  //           league's spread of the type's vertical break (ivbSD, pitch-level
+  //           2025) times PRIOR_S. PRIOR_S = 1 would be an ideal observer
+  //           whose eye at the plate is his zone judgement at the commit
+  //           point (eyeSD); it gave whiffs of .36 per swing. PRIOR_S = 2.5
+  //           (his judgement of where the ball ends up 2.5 times sharper)
+  //           was FITTED to the flat-fastball table and the fastball whiffs.
+  //           And a share RESID_S of the gap to the pitch he expected stays
+  //           in his picture of where it will be: a recognised breaking ball
+  //           is still met a little over. FITTED to the breaking-ball whiffs
+  //           (.308) and the launch angles of low breaking balls against low
+  //           fastballs (pitch-level 2025, 42 days: 7.8 against 1.8 deg).
+  var COMMIT_S = 0.175, STEER_S = 0.15, STEER_IN = 3, PRIOR_T = 5.0, PRIOR_S = 2.5, RESID_S = 0.07;
+  function readFactors(B, pitch, gh, ref, seen, same, rng) {
     var T = pitch.plate.t, tp = 0.26 / Math.max(0.12, T - 0.15);
     var tc = Math.max(0, T - COMMIT_S) / T, ts = Math.max(0, T - STEER_S) / T;
     var dx = gh.x - pitch.plate.x, dz = gh.z - pitch.plate.z, gap = Math.sqrt(dx * dx + dz * dz);
     var sep = gap * tc * tc;
     var spot = B.spotIn * IN * tp * (1 - B.learn * (1 - Math.exp(-(seen || 0) / 40)));
     var pFooled = Math.exp(-sep / spot);
-    var detected = rng.u() >= pFooled;
+    var u = rng.u(), detected = same || u >= pFooled;   // the pitch he expected cannot fool him: he judges it as he would any pitch he has picked up
     var late = !detected && rng.u() >= Math.exp(-gap * ts * ts / spot);
-    var resid = DETECT_RESID;
+    var eye = B.eyeSD * tp * (1 - B.learn * (1 - Math.exp(-(seen || 0) / 40)));   // in: how unsure his judgement of this pitch is
+    var pullT = 1 / (1 + (PRIOR_T / eye) * (PRIOR_T / eye));
+    var ps = PRIOR_S * (PITCH_TYPES[pitch.type].ivbSD || 4), pullS = 1 / (1 + (ps / eye) * (ps / eye));
+    var real = [pitch.plate.x, pitch.plate.z, pitch.plate.t];
+    var judged = [pullS * (ref.x - real[0]) + RESID_S * (gh.x - real[0]), pullS * (ref.z - real[1]) + RESID_S * (gh.z - real[1]), pullT * (gh.t - real[2])];   // how far off his judgement of a recognised pitch is
+    var g3 = [gh.x - real[0], gh.z - real[1], gh.t - real[2]], err = judged;
     if (!detected) {
-      var launched = 1 - tc * tc, want = late ? launched - DETECT_RESID : ts * ts - tc * tc;   // share of the gap he tries to steer out after launch
-      resid = launched - (gap > 0 ? Math.min(want, STEER_IN * IN / gap) : want);
+      var launched = 1 - tc * tc, base = [launched * g3[0], launched * g3[1], launched * g3[2]];   // he launched on the pitch he expected
+      // late: he steers toward his judgement; fooled: only by what has shown itself by the last look
+      var target = late ? judged : [(1 - ts * ts) * g3[0], (1 - ts * ts) * g3[1], (1 - ts * ts) * g3[2]];
+      var cx = target[0] - base[0], cz = target[1] - base[1], cm = Math.sqrt(cx * cx + cz * cz), k = cm > STEER_IN * IN ? STEER_IN * IN / cm : 1;
+      err = [base[0] + k * cx, base[1] + k * cz, base[2] + k * (target[2] - base[2])];
     }
-    return { tp: tp, sep: sep, pFooled: pFooled, detected: detected, late: late, resid: resid };
+    return { tp: tp, sep: sep, pFooled: pFooled, detected: detected, late: late, pullT: pullT, pullS: pullS, err: err };
   }
-  function misreadOf(rf, pitch, gh) {       // [x m, z m, t s]: where he is wrong, signed ghost - real
-    return [rf.resid * (gh.x - pitch.plate.x), rf.resid * (gh.z - pitch.plate.z), rf.resid * (gh.t - pitch.plate.t)];
+  function misreadOf(rf) { return rf.err; }   // [x m, z m, t s]: how far off his judgement is, judged minus real
+  // A pitch of one kind as he pictures it: from this release, along this
+  // first direction, at this pitcher's speed for it (velocity he knows), with
+  // the shape of that kind of pitch as the league throws it, turned a share
+  // `familiar` toward this pitcher's own as he gets used to him, spin and
+  // seam break alike. A batter's picture of a fastball is the league's
+  // fastball, so a pitcher whose fastball rides more than most gets it swung
+  // under.
+  function pictured(pitch, P, own, familiar, env, rec) {
+    var d = PITCH_TYPES[own.type], dir = unit(pitch.v0), v = own.velo * MPH, k = familiar;
+    var w = spinVector(dir, d.rpm + k * (own.rpm - d.rpm), d.tilt + k * (own.tilt - d.tilt), d.eff + k * (own.eff - d.eff), P.armSide);
+    var seam = own.seam ? [k * own.seam[0], k * own.seam[1]] : null;   // the league's pitches average no seam break
+    return flyPitch(pitch.rel, [dir[0] * v, dir[1] * v, dir[2] * v], w, env, rec, seam, P.armSide);
+  }
+  function typicalPitch(pitch, P, familiar, env) {   // the kind of pitch it really is, as he pictures it
+    var own = P.pitches.filter(function (q) { return q.type === pitch.type; })[0] || { type: pitch.type, velo: pitch.mph, rpm: PITCH_TYPES[pitch.type].rpm, tilt: PITCH_TYPES[pitch.type].tilt, eff: PITCH_TYPES[pitch.type].eff };
+    var fl = pictured(pitch, P, own, familiar, env, false);
+    return { x: fl.x, z: fl.z, t: fl.t };
   }
 
   // -------------------------------------------------------------- DECIDE
   // His decision uses his perception at the commit point (eyeSD, earlier and
   // noisier); the swing is then steered by later tracking (barrelSD).
   function decide(B, pitch, gh, rf, st, rng) {
-    var m = misreadOf(rf, pitch, gh), mx = m[0], mz = m[1];
+    var m = misreadOf(rf), mx = m[0], mz = m[1];
     var eye = B.eyeSD * IN * rf.tp;
     var xp = pitch.plate.x + mx + rng.n(0, eye), zp = pitch.plate.z + mz + rng.n(0, eye);
     var pin = Phi((ZONE_HALF - Math.abs(xp)) / eye) * Phi((zp - (B.zone.bot - BALL_R)) / eye) * Phi((B.zone.top + BALL_R - zp) / eye);
@@ -910,30 +1028,58 @@ var BB = (function () {
     var reach = reachOf(B, pitch.plate.x, pitch.plate.z);
     var prot = (st.strikes === 2 ? 0.85 : 1)   // a shorter two-strike swing: less scatter, less speed
              * (1 + reach / (B.coverage * IN));
-    var m = misreadOf(rf, pitch, gh);
+    var m = misreadOf(rf);
     var e = -m[2] + rng.n(0, B.timingSD / 1000 * prot * rf.tp);    // + = bat early (he expected it sooner)
     var D = -m[1] + B.undercut * IN + rng.n(0, B.barrelSD * IN * prot);   // + = ball above the barrel
     var xAim = pitch.plate.x + m[0];
-    var dLong = (pitch.plate.x - xAim) * (-sb) + rng.n(0, B.longSD * IN * prot);   // + toward the tip
-    var batMph = B.batSpeed * (st.strikes === 2 ? 0.96 : 1);
-    var omega = batMph * MPH / SWING_RADIUS;
-    var theta = sb * (omega * e + C_LOC * pitch.plate.x * sb + B.pullBias * DEG);
+    var dLong = (pitch.plate.x - xAim) * (-sb) + rng.n(0, B.longSD * IN * prot)   // + toward the tip
+              - pitch.plate.x * sb * HAND_MISS - AIM_HANDS * IN;   // what the hands did not cover (jammed inside, toward the end outside), and his aim inside the ball
+    var batMph = B.batSpeed * (st.strikes === 2 ? 0.974 : 1);   // shorter with two strikes: 70.7 against 72.6 mph on full swings (pitch-level 2025)
     var attack = B.attack + rng.n(0, 3);
-    // Timing also moves the strike up or down the ball. An early bat meets
-    // the ball out in front of the planned point, a late one deeper: the
-    // meeting point slides forward by s = v_bat e v_pitch / (v_bat + v_pitch).
-    // Out there the ball has yet to descend (it sits higher by s tan(descent))
-    // while the barrel, on its rising and curving path, is higher by
-    // s tan(attack) + SWING_CURV s^2 / 2. A swing on the pitch's plane is
-    // forgiving to first order; the curve of the arc tops the ball either
-    // way, more the further from the plan.
-    var vb = batMph * MPH, vp = norm(pitch.plate.v), descent = Math.atan2(-pitch.plate.v[2], -pitch.plate.v[1]);
+    var face = rng.n(0, (B.faceSD || TRAITS.faceSD[0]) * DEG * prot);   // the face's own horizontal scatter: hooks and slices, not misses
+    // WHERE ON THE ARC HE MEETS IT. Spray comes from how far round the arc
+    // the ball is met (pitch-level 2025: the bat's direction of travel turned
+    // 1.46 deg per inch of contact depth, r .83, and the ball's spray followed
+    // depth, r .40; at a given depth, what was left of the bat's direction
+    // barely moved the ball, r .09). So he PLANS to meet an inside pitch a
+    // little out front and an outside one a little deep (LOC_DEPTH), turns the
+    // face to pull an inside pitch (LOC_FACE), and a pull hitter meets
+    // everything a little out front (pullBias). Timing then moves the actual
+    // contact from the plan: an early bat meets the ball s = v_bat e v_pitch /
+    // (v_bat + v_pitch) further out, s / SWING_R further round the circle.
+    // From the angle round the arc: the bat faces the pull side by cos(tilt)
+    // of it (spray), and its path rises by sin(tilt) of it away from his
+    // usual contact point, where his attack angle trait and his full bat
+    // speed belong. The timing error alone moves the strike up or down the
+    // ball, because out there the ball has yet to descend (higher by
+    // s tan(descent)) while the barrel rises along its planned path (higher
+    // by s tan(attack)): a path steeper than the pitch tops a ball met out
+    // front and gets under one met deep. The arc's own curve does not add to
+    // that, because a batter keeps the barrel on the pitch's line through the
+    // zone (pitch-level 2025: launch angle minus attack angle went steadily
+    // from +20 deg on contact met deep to -12 deg out front, which is the
+    // attack-against-descent term alone). Met deep, the barrel is slower:
+    // it is still gathering speed, and keeps gathering it until about 9 in out
+    // front of his usual point (pitch-level 2025, full swings: 69.0 mph at
+    // 10-20 in of depth, 71.8 at 25-30, 73.2 at 35-40). The speed lost goes as
+    // the path he is short of that point, as a share of his swing length, to
+    // the power BAT_GAIN_EXP; his bat speed trait is the leaderboard's
+    // average over his contact, which sits 1.5% below the peak.
+    var tilt = clamp((B.swingTilt || TRAITS.swingTilt[0]) - TILT_PER_H * ((pitch.plate.z - B.zone.bot) / (B.zone.top - B.zone.bot) - 0.5), 8, 55);
+    var vb = batMph * MPH, vp = norm(pitch.plate.v), descent = Math.atan2(-pitch.plate.v[2], -pitch.plate.v[1]), tr = tilt * DEG;
     var sFwd = vb * e * vp / (vb + vp);
-    D += sFwd * (Math.tan(descent) - Math.tan(attack * DEG)) - 0.5 * SWING_CURV * sFwd * sFwd;
+    var inside = pitch.plate.x * sb;   // m toward the batter from the middle of the plate
+    var phiUsual = B.pullBias * DEG / Math.cos(tr), phiPlan = phiUsual + LOC_DEPTH * inside / SWING_R, phi = phiPlan + sFwd / SWING_R;
+    var theta = sb * (phi * Math.cos(tr) + LOC_FACE * inside) + face;
+    var attackPlan = attack + (phiPlan - phiUsual) * Math.sin(tr) / DEG, attackAt = attack + (phi - phiUsual) * Math.sin(tr) / DEG;
+    D += sFwd * (Math.tan(descent) - Math.tan(attackPlan * DEG));
+    var depth = (phi - phiUsual) * SWING_R;   // m out front of his usual contact point
+    var batAt = batMph * 1.015 * Math.pow(Math.max(0.2, 1 - Math.max(0, BAT_PEAK_M - depth) / ((B.swingLenFt || TRAITS.swingLenFt[0]) * FT)), BAT_GAIN_EXP);
     var bat = B.bat || BAT_DEFAULT;
-    var sw = { e: e, D: D, dLong: dLong, theta: theta, batMph: batMph, attack: attack, sFwd: sFwd, reach: reach, contact: false, why: '',
+    var sw = { e: e, D: D, dLong: dLong, theta: theta, batMph: batMph, batAt: batAt, attack: attack, attackAt: attackAt, tilt: tilt, side: sb,
+               sFwd: sFwd, depth: depth, reach: reach, contact: false, why: '',
                bat: bat, qSweet: bat.q };   // his bat, and its collision efficiency at the sweet spot
-    if (dLong > TIP_IN * IN) { sw.why = 'off the end'; return sw; }
+    if (dLong > (TIP_IN + BAT_CAP_IN) * IN) { sw.why = 'off the end'; return sw; }   // past the end, unless the ball still catches the rounded cap
     if (dLong < HANDLE_IN * IN) { sw.why = 'inside the hands'; return sw; }
     if (Math.abs(D) >= BALL_R + batRadius(bat, SWEET_IN - dLong / IN)) { sw.why = D > 0 ? 'under' : 'over'; return sw; }   // the barrel is thinner toward the hands
     if (Math.abs(theta) > 80 * DEG) { sw.why = e > 0 ? 'way early' : 'way late'; return sw; }
@@ -941,24 +1087,32 @@ var BB = (function () {
     return sw;
   }
 
-  // The collision, in the frame of the bat's contact point. n is the line
-  // of centres, tilted by the vertical offset D over the radius the barrel
-  // has where the ball meets it; the ball's approach along n reverses with
-  // the collision efficiency the bat shows at that point and speed (qAt);
-  // friction brings the contact point toward rolling on the bat (sphere,
-  // I = 0.4 m R^2), capped by Coulomb friction. Backspin, topspin and
-  // hook/slice all come out of the same impulse - including what the
+  // The collision, in the frame of the bat's contact point. The barrel
+  // moves along p (its direction and attack angle at contact) and points
+  // away from the batter, tilted down by his swing tilt. n is the line of
+  // centres: in the plane across the barrel, tilted from p by the vertical
+  // offset D over the radius the barrel has where the ball meets it. Because
+  // the barrel is tilted, that plane leans toward the tip: a ball struck
+  // under its centre goes up and slices toward the tip side, one struck over
+  // it goes down and hooks to the pull side. The ball's approach along n
+  // reverses with the collision efficiency the bat shows at that point and
+  // speed (qAt); friction brings the contact point toward rolling on the bat
+  // (sphere, I = 0.4 m R^2), capped by Coulomb friction. Backspin, topspin
+  // and sidespin all come out of the same impulse - including what the
   // pitch's own spin contributes.
   function collide(pitch, sw) {
     var bat = sw.bat || BAT_DEFAULT, xBar = SWEET_IN - sw.dLong / IN;   // in from the barrel end
-    var al = sw.attack * DEG, th = sw.theta;
+    var al = (sw.attackAt !== undefined ? sw.attackAt : sw.attack) * DEG, th = sw.theta, tl = (sw.tilt || 0) * DEG, side = sw.side || -1;
     var p = [Math.sin(th) * Math.cos(al), Math.cos(th) * Math.cos(al), Math.sin(al)];   // bat path
-    var ax = [Math.cos(th), -Math.sin(th), 0];                                          // bat axis (level)
-    var q = cross(p, ax);
+    var tipH = [-side * Math.cos(th), side * Math.sin(th), 0];                           // toward the tip, level
+    var up = cross(tipH, p); if (up[2] < 0) up = [-up[0], -up[1], -up[2]];
+    up = unit(up);
+    var tip = unit([Math.cos(tl) * tipH[0] - Math.sin(tl) * up[0], Math.cos(tl) * tipH[1] - Math.sin(tl) * up[1], Math.cos(tl) * tipH[2] - Math.sin(tl) * up[2]]);   // the barrel, dipped toward its end
+    var q = unit(cross(p, tip));
     if (q[2] < 0) q = [-q[0], -q[1], -q[2]];
     var s = sw.D / (BALL_R + batRadius(bat, xBar)), c = Math.sqrt(Math.max(0, 1 - s * s));
     var n = [c * p[0] + s * q[0], c * p[1] + s * q[1], c * p[2] + s * q[2]];
-    var vb = sw.batMph * MPH * (1 + sw.dLong / (30 * IN));
+    var vb = (sw.batAt || sw.batMph) * MPH * (1 + sw.dLong / (30 * IN));
     var V = [p[0] * vb, p[1] * vb, p[2] * vb];
     var vin = pitch.plate.v, win = pitch.plate.w;
     var u = [vin[0] - V[0], vin[1] - V[1], vin[2] - V[2]];
@@ -1016,9 +1170,11 @@ var BB = (function () {
       var plan = planPitch(P, B, sb, st, rng);
       var ex = expectPitch(B, P, sb, st);
       var pitch = throwPitch(P, plan, g.env, rng);
-      var gh = ghostPitch(pitch, ex, P, g.env);
-      var rf = readFactors(B, pitch, gh, seen, rng);
-      var rec = { count: st.balls + '-' + st.strikes, plan: plan, expect: ex, pitch: pitch, ghost: gh, read: rf,
+      var familiar = B.learn * (1 - Math.exp(-(seen || 0) / 40));   // how far he has got used to this pitcher's shapes
+      var gh = ghostPitch(pitch, ex, P, g.env, false, familiar);
+      var ref = typicalPitch(pitch, P, familiar, g.env);
+      var rf = readFactors(B, pitch, gh, ref, seen, P.pitches[ex.guess].type === pitch.type, rng);
+      var rec = { count: st.balls + '-' + st.strikes, plan: plan, expect: ex, pitch: pitch, ghost: gh, read: rf, familiar: familiar,
                   inZone: inZone(B, pitch.plate.x, pitch.plate.z), side: sb };
       var res, xs = pitch.plate.x * sb, z = pitch.plate.z;
       if (xs > HBP_X && z > 0.25 && z < 1.75 && rng.u() < 0.65) res = 'hbp';
@@ -1066,7 +1222,7 @@ var BB = (function () {
   }
 
   return {
-    version: '0.5',
+    version: '1.0',
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
     PITCH_TYPES: PITCH_TYPES, ARCH: ARCH, TRAITS: TRAITS, AERO: AERO,

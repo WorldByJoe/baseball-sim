@@ -1,5 +1,5 @@
 """
-fouls.py · v0.2 · 2026-10-01
+fouls.py · v0.3 · 2026-10-02
 
 Measures what a foul ball is, from the pitch-level CSVs that
 statcast/fetch_pitches.py caches in statcast/raw/pitches/<year>/: how often a
@@ -15,9 +15,20 @@ Definitions (the brief, 2026-10-01):
   squared   launch_speed >= 0.80 * (1.23 * bat_speed + 0.23 * pitch speed),
             pitch speed = effective_speed where present, else release_speed
 
+Tables 9-11 (the perception brief, 2026-10-02) are by pitch height in the
+batter's own zone, (plate_z - sz_bot) / (sz_top - sz_bot), bunts excluded:
+  9   all swings by height
+  10  pitch kind at the same height
+  11  four-seamers by vertical approach angle (VAA, at the front of the plate,
+      from vy0, vz0, ay, az) for their height, in fifths of the residual from
+      a straight-line fit of VAA on height within the group; and the same
+      within bands of release height and extension, to see how much of the
+      flat-fastball effect is the release rather than the pitch.
+
 Run:  python3 statcast/fouls.py 2025 [--dates 2025-05-05:2025-05-18,...]
 
 CHANGED
+  v0.3  tables 9-11: height, kind at a height, and the flat-fastball effect with a release control
   v0.2  first real pull: the x intercept is the ball's reach from the batter (27-45 in), banded so; squared-up
         with untracked contact counted as not squared (a floor) and per swing
   v0.1  first build
@@ -35,7 +46,9 @@ BAT_FIELDS = ('bat_speed', 'swing_length', 'attack_angle', 'attack_direction', '
               'intercept_ball_minus_batter_pos_x_inches', 'intercept_ball_minus_batter_pos_y_inches')
 WANTED = ('description', 'events', 'bb_type', 'launch_speed', 'launch_angle', 'release_speed',
           'effective_speed', 'pitch_type', 'pitch_name', 'plate_x', 'plate_z', 'zone', 'stand',
-          'p_throws', 'balls', 'strikes', 'hc_x', 'hc_y') + BAT_FIELDS
+          'p_throws', 'balls', 'strikes', 'hc_x', 'hc_y', 'sz_top', 'sz_bot', 'vy0', 'vz0', 'ay', 'az',
+          'release_pos_z', 'release_extension') + BAT_FIELDS
+BUNTS = {'foul_bunt', 'missed_bunt', 'bunt_foul_tip'}
 BEGIN, END = '<!-- fouls.py tables: begin -->', '<!-- fouls.py tables: end -->'
 SECTION = '## What a foul is (pitch level, {year}, {ndays} days)'
 
@@ -87,6 +100,17 @@ def enrich(r):
     x['sq'] = None if (ls is None or bs is None or ps is None) else (ls >= 0.80 * (1.23 * bs + 0.23 * ps))
     rs = x['release_speed']
     x['sq_release'] = None if (ls is None or bs is None or rs is None) else (ls >= 0.80 * (1.23 * bs + 0.23 * rs))
+    x['bunt'] = x['desc'] in BUNTS or 'bunt' in (r.get('des') or '').lower()
+    x['pt'] = (r.get('pitch_type') or '').strip()
+    top, bot, pz = x['sz_top'], x['sz_bot'], x['plate_z']
+    x['h'] = (pz - bot) / (top - bot) if None not in (top, bot, pz) and top > bot else None
+    vy0, vz0, ay, az = x['vy0'], x['vz0'], x['ay'], x['az']
+    x['vaa'] = None
+    if None not in (vy0, vz0, ay, az) and ay != 0:
+        q = vy0 * vy0 - 2 * ay * (50 - 17 / 12)
+        if q > 0:
+            vyf = -math.sqrt(q); t = (vyf - vy0) / ay; vzf = vz0 + az * t
+            x['vaa'] = -math.degrees(math.atan(vzf / vyf))   # negative = descending
     return x
 
 # ---------------------------------------------------------------- statistics
@@ -307,6 +331,107 @@ def measure(P, header):
             fld, d0['n'], f1(d0.get('mean')), f1(d0.get('sd')), f1(d0.get('p10')), f1(d0.get('p50')), f1(d0.get('p90'))), '']
         md += table(('band', 'n contact', 'foul / contact', 'squared / contact', 'n', 'mean EV', 'n',
                        'mean EV, fouls', 'n'), rows) + ['']
+    j2, md2 = height_tables(S)
+    J.update(j2)
+    return J, md + md2
+
+# ---------------------------------------------------------------- height and approach (tables 9-11)
+HBANDS = (('below the zone (<-0.25)', -99, -0.25), ('low edge (-0.25..0.15)', -0.25, 0.15), ('lower zone (0.15..0.5)', 0.15, 0.5),
+          ('upper zone (0.5..0.85)', 0.5, 0.85), ('high edge (0.85..1.25)', 0.85, 1.25), ('above the zone (>1.25)', 1.25, 99))
+
+def mean(v):
+    v = [a for a in v if a is not None]
+    return sum(v) / len(v) if v else None
+
+def group(sub):
+    """swings, whiff/swing, foul/contact, squared/contact (n), BIP LA, BIP GB and PU shares, BIP EV, foul LA"""
+    con = [p for p in sub if p['cls'] != 'whiff']; bip = [p for p in con if p['cls'] == 'bip']; fo = [p for p in con if p['cls'] == 'foul']
+    la = [p['launch_angle'] for p in bip if p['launch_angle'] is not None]
+    sq, nsq = rate([p['sq'] for p in con])
+    return {'swings': len(sub), 'whiff': rate([p['cls'] == 'whiff' for p in sub])[0], 'foul_of_contact': rate([p['cls'] == 'foul' for p in con])[0],
+            'squared': sq, 'n_squared': nsq, 'bip_la': mean(la), 'gb': (sum(a < 10 for a in la) / len(la)) if la else None,
+            'pu': (sum(a > 50 for a in la) / len(la)) if la else None, 'bip_ev': mean([p['launch_speed'] for p in bip]),
+            'foul_la': mean([p['launch_angle'] for p in fo])}
+
+def fit(xs, ys):
+    mx, my = sum(xs) / len(xs), sum(ys) / len(ys)
+    sxx = sum((x - mx) ** 2 for x in xs)
+    b = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / sxx if sxx else 0
+    return my - b * mx, b
+
+def fifths(sub):
+    """residual of VAA on height within sub; returns (mean VAA, slope, [(mean residual, group) x5], residuals)"""
+    a, b = fit([p['h'] for p in sub], [p['vaa'] for p in sub])
+    res = sorted(((p['vaa'] - (a + b * p['h'])), i) for i, p in enumerate(sub))
+    n = len(res); out = []
+    for k in range(5):
+        part = res[k * n // 5:(k + 1) * n // 5]
+        out.append((sum(r for r, _ in part) / len(part), [sub[i] for _, i in part]))
+    return mean([p['vaa'] for p in sub]), b, out
+
+def tercile_edges(v):
+    v = sorted(v); return v[len(v) // 3], v[2 * len(v) // 3]
+
+def height_tables(S):
+    J, md = {}, []
+    H = [p for p in S if not p['bunt'] and p['h'] is not None]
+    md += ['### 9. By pitch height (0 = bottom of the batter\'s zone, 1 = top; bunts excluded): swings %d' % len(H), '']
+    J['by_height'] = {}
+    rows = []
+    for nm, lo, hi in HBANDS:
+        g = group([p for p in H if lo <= p['h'] < hi]); J['by_height'][nm] = g
+        rows.append((nm, g['swings'], f3(g['whiff']), f3(g['foul_of_contact']), '%s (%d)' % (f3(g['squared']), g['n_squared']), f1(g['bip_la']),
+                     '%s / %s' % (f3(g['gb']), f3(g['pu'])), f1(g['bip_ev']), f1(g['foul_la'])))
+    md += table(('height', 'swings', 'whiff / swing', 'foul / contact', 'squared / contact (n)', 'BIP launch angle', 'BIP GB (<10) / PU (>50)',
+                 'BIP EV', 'foul launch angle'), rows) + ['']
+    J['kind_at_height'] = {}
+    rows = []
+    for nm, lo, hi in HBANDS[1:5]:
+        for k in KINDS:
+            g = group([p for p in H if lo <= p['h'] < hi and p['kind'] == k]); J['kind_at_height']['%s/%s' % (nm, k)] = g
+            rows.append((nm, k, g['swings'], f3(g['whiff']), f3(g['foul_of_contact']), f1(g['bip_la']), f1(g['foul_la'])))
+    md += ['### 10. Pitch kind at the same height', ''] + table(('height', 'kind', 'swings', 'whiff / swing', 'foul / contact', 'BIP launch angle',
+                                                                 'foul launch angle'), rows) + ['']
+    def ctable(title, sub, key):
+        sub = [p for p in sub if p['vaa'] is not None]
+        m, b, q = fifths(sub)
+        J[key] = {'swings': len(sub), 'vaa_mean': m, 'vaa_per_height': b, 'fifths': []}
+        rows = []
+        for i, (r, g0) in enumerate(q):
+            g = group(g0); g['residual'] = r; J[key]['fifths'].append(g)
+            rows.append((('steepest', '2', '3', '4', 'flattest')[i], '%+.2f' % r, g['swings'], f3(g['whiff']), f3(g['foul_of_contact']),
+                         '%s (%d)' % (f3(g['squared']), g['n_squared']), f1(g['bip_la']), f1(g['foul_la'])))
+        return ['%s (swings %d; VAA mean %.2f deg, %+.2f deg per zone height), in fifths of VAA residual:' % (title, len(sub), m, b), ''] + table(
+            ('VAA residual', 'mean (deg)', 'swings', 'whiff / swing', 'foul / contact', 'squared / contact (n)', 'BIP launch angle', 'foul launch angle'), rows) + ['']
+    FF = [p for p in H if p['pt'] == 'FF']
+    md += ['### 11. Four-seamers by how flat they arrive for their height', '']
+    md += ctable('Four-seamers in the upper zone and high edge (0.5..1.25)', [p for p in FF if 0.5 <= p['h'] < 1.25], 'flat_fastball_high')
+    md += ctable('Four-seamers low (0..0.5)', [p for p in FF if 0 <= p['h'] < 0.5], 'flat_fastball_low')
+    md += ctable('Breaking balls low (SL CU ST KC SV, -0.25..0.5)', [p for p in H if p['pt'] in ('SL', 'CU', 'ST', 'KC', 'SV') and -0.25 <= p['h'] < 0.5], 'flat_breaking_low')
+    # the release control: the same fifths, formed within each cell of release-height x extension terciles, pooled by fifth
+    hi = [p for p in FF if 0.5 <= p['h'] < 1.25 and p['vaa'] is not None and p['release_pos_z'] is not None and p['release_extension'] is not None]
+    e1 = tercile_edges([p['release_pos_z'] for p in hi]); e2 = tercile_edges([p['release_extension'] for p in hi])
+    cell = lambda v, e: 0 if v < e[0] else (1 if v < e[1] else 2)
+    cells = {}
+    for p in hi: cells.setdefault((cell(p['release_pos_z'], e1), cell(p['release_extension'], e2)), []).append(p)
+    pooled = [[] for _ in range(5)]; res = [[] for _ in range(5)]
+    for c in cells.values():
+        _, _, q = fifths(c)
+        for i, (r, g0) in enumerate(q): pooled[i] += g0; res[i].append((r, len(g0)))
+    J['flat_fastball_high_release_control'] = {'release_pos_z_terciles_ft': e1, 'extension_terciles_ft': e2, 'fifths': []}
+    rows = []
+    for i in range(5):
+        g = group(pooled[i]); g['residual'] = sum(r * n for r, n in res[i]) / sum(n for _, n in res[i]); J['flat_fastball_high_release_control']['fifths'].append(g)
+        rows.append((('steepest', '2', '3', '4', 'flattest')[i], '%+.2f' % g['residual'], g['swings'], f3(g['whiff']), f3(g['foul_of_contact']),
+                     '%s (%d)' % (f3(g['squared']), g['n_squared']), f1(g['bip_la']), f1(g['foul_la'])))
+    raw = J['flat_fastball_high']['fifths']; ctl = J['flat_fastball_high_release_control']['fifths']
+    surv = {k: (ctl[4][k] - ctl[0][k]) / (raw[4][k] - raw[0][k]) for k in ('whiff', 'foul_of_contact', 'squared', 'bip_la') if raw[4][k] != raw[0][k]}
+    J['flat_fastball_high_release_control']['share_surviving'] = surv
+    md += ['The same four-seamers (0.5..1.25), with the fifths formed within each of 9 cells of release height (terciles at %.2f and %.2f ft) by '
+           'extension (terciles at %.2f and %.2f ft) and pooled by fifth:' % (e1[0], e1[1], e2[0], e2[1]), ''] + table(
+        ('VAA residual', 'mean (deg)', 'swings', 'whiff / swing', 'foul / contact', 'squared / contact (n)', 'BIP launch angle', 'foul launch angle'), rows) + ['']
+    md += ['Share of the steepest-to-flattest difference that survived the release control: whiff %.2f, foul / contact %.2f, squared up %.2f, BIP launch angle %.2f.' % (
+        surv.get('whiff', 0), surv.get('foul_of_contact', 0), surv.get('squared', 0), surv.get('bip_la', 0)), '']
     return J, md
 
 # ---------------------------------------------------------------- writing

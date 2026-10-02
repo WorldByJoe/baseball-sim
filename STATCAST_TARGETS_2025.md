@@ -387,6 +387,7 @@ What the data showed, on these dates:
 5. **Contact depth decided fouls.** `intercept_ball_minus_batter_pos_y_inches` measured how far in front of the batter the ball was met (mean 29 in, sd 9.6). At 30-40 in, .425 of contact went foul and .490 was squared up. Deep, late contact (10-20 in) went foul .706 of the time. Far out front (40-50 in) it went foul .607 of the time, and beyond 50 in .780 with only .215 squared up. Reach from the batter (`..._x_inches`, mean 36.5 in) showed the same falling-off at both ends. Attack angle mattered at the extremes: .65-.68 foul below 0° and above 20°, .43 at 5-15°. Swing-path tilt barely mattered.
 6. **Fouls were lofted or topped.** The launch angle of tracked fouls had median 31° and p75 51°. 26% of fouls were above 50°, and those averaged 75.9 mph. In-zone contact went foul .500 of the time, out-of-zone .599. Whiffs per swing were .150 in the zone and .430 out of it, with breaking balls out of the zone at .556.
 7. **Tracking:** 81.7% of fouls carried a launch speed. Foul tips (5.5% of fouls) never did, and the rest did 86.5% of the time. 98% of fouls carried a bat speed, and 99.7% of balls in play carried a launch speed. Untracked fouls were slightly more often out of the zone (.32 against .23) and off-speed (.14 against .12), with bat speed 67.3 against 69.9 mph, so they were probably a little weaker than tracked ones. Hence the floor. No foul carried hit coordinates, so direction could not be measured.
+8. **Height and approach (tables 9-11, bunts excluded).** Launch angle on balls in play rose with pitch height, from -0.1° below the zone to 24.1° at the high edge, and on fouls from -9.2° to 39.3°. The foul share was lowest in the lower zone (.464) and highest above the zone (.731). At the low edge, balls in play off breaking balls came off at 8.0° against 2.0° for fastballs, while fouls off them were topped (-5.5° against +4.4°). Four-seamers in the upper zone and high edge that arrived flattest for their height were whiffed .285 of the time against .142 for the steepest, and squared up .340 against .452. Formed within bands of release height and extension, the same fifths kept all of that difference (shares 1.14-1.25), so on these dates the flat-fastball effect was not the release point. Table 9's launch angles and exit speeds ran 0.3-0.9° and 0.2-3.6 mph above the figures in the perception brief, whose scratch script kept bunted balls in play; this script drops them by the play description.
 
 <!-- fouls.py tables: begin -->
 
@@ -545,4 +546,155 @@ The same for fouls that carry a launch angle:
 | 35..40 | 12327 | 0.533 | 0.426 | 11101 | 83.0 | 11101 | 76.5 | 5366 |
 | >40 | 7364 | 0.555 | 0.423 | 6463 | 81.2 | 6463 | 75.7 | 3205 |
 
+### 9. By pitch height (0 = bottom of the batter's zone, 1 = top; bunts excluded): swings 78224
+
+| height | swings | whiff / swing | foul / contact | squared / contact (n) | BIP launch angle | BIP GB (<10) / PU (>50) | BIP EV | foul launch angle |
+|---|---|---|---|---|---|---|---|---|
+| below the zone (<-0.25) | 3893 | 0.766 | 0.627 | 0.286 (696) | -0.1 | 0.624 / 0.027 | 76.0 | -9.2 |
+| low edge (-0.25..0.15) | 15546 | 0.349 | 0.498 | 0.424 (8582) | 5.4 | 0.560 / 0.048 | 87.4 | -3.3 |
+| lower zone (0.15..0.5) | 24895 | 0.139 | 0.464 | 0.468 (19147) | 11.1 | 0.468 / 0.076 | 91.0 | 16.8 |
+| upper zone (0.5..0.85) | 22531 | 0.138 | 0.533 | 0.415 (17348) | 18.5 | 0.359 / 0.127 | 89.5 | 34.2 |
+| high edge (0.85..1.25) | 10362 | 0.268 | 0.658 | 0.408 (6503) | 24.1 | 0.285 / 0.183 | 87.9 | 39.3 |
+| above the zone (>1.25) | 997 | 0.499 | 0.731 | 0.549 (417) | 22.5 | 0.333 / 0.182 | 87.1 | 38.1 |
+
+### 10. Pitch kind at the same height
+
+| height | kind | swings | whiff / swing | foul / contact | BIP launch angle | foul launch angle |
+|---|---|---|---|---|---|---|
+| low edge (-0.25..0.15) | fastball | 3427 | 0.192 | 0.468 | 2.0 | 4.4 |
+| low edge (-0.25..0.15) | breaking | 7781 | 0.403 | 0.525 | 8.0 | -5.5 |
+| low edge (-0.25..0.15) | offspeed | 4305 | 0.377 | 0.484 | 4.6 | -7.2 |
+| lower zone (0.15..0.5) | fastball | 12533 | 0.103 | 0.476 | 9.8 | 23.7 |
+| lower zone (0.15..0.5) | breaking | 8271 | 0.172 | 0.454 | 14.0 | 10.2 |
+| lower zone (0.15..0.5) | offspeed | 4029 | 0.184 | 0.446 | 9.5 | 5.3 |
+| upper zone (0.5..0.85) | fastball | 16523 | 0.141 | 0.558 | 18.6 | 35.9 |
+| upper zone (0.5..0.85) | breaking | 4238 | 0.133 | 0.468 | 19.8 | 29.6 |
+| upper zone (0.5..0.85) | offspeed | 1700 | 0.128 | 0.467 | 14.6 | 26.0 |
+| high edge (0.85..1.25) | fastball | 9137 | 0.275 | 0.672 | 24.5 | 39.7 |
+| high edge (0.85..1.25) | breaking | 904 | 0.254 | 0.595 | 23.4 | 37.5 |
+| high edge (0.85..1.25) | offspeed | 277 | 0.130 | 0.498 | 20.3 | 31.4 |
+
+### 11. Four-seamers by how flat they arrive for their height
+
+Four-seamers in the upper zone and high edge (0.5..1.25) (swings 17623; VAA mean -4.45 deg, +1.85 deg per zone height), in fifths of VAA residual:
+
+| VAA residual | mean (deg) | swings | whiff / swing | foul / contact | squared / contact (n) | BIP launch angle | foul launch angle |
+|---|---|---|---|---|---|---|---|
+| steepest | -0.68 | 3524 | 0.142 | 0.555 | 0.452 (2688) | 20.7 | 38.4 |
+| 2 | -0.24 | 3525 | 0.182 | 0.613 | 0.410 (2558) | 23.0 | 40.1 |
+| 3 | +0.01 | 3524 | 0.205 | 0.634 | 0.413 (2440) | 22.3 | 40.1 |
+| 4 | +0.25 | 3525 | 0.226 | 0.668 | 0.379 (2370) | 26.9 | 40.9 |
+| flattest | +0.66 | 3525 | 0.285 | 0.688 | 0.340 (2149) | 27.4 | 41.6 |
+
+Four-seamers low (0..0.5) (swings 6890; VAA mean -5.39 deg, +2.14 deg per zone height), in fifths of VAA residual:
+
+| VAA residual | mean (deg) | swings | whiff / swing | foul / contact | squared / contact (n) | BIP launch angle | foul launch angle |
+|---|---|---|---|---|---|---|---|
+| steepest | -0.66 | 1378 | 0.077 | 0.450 | 0.493 (1162) | 11.2 | 26.9 |
+| 2 | -0.23 | 1378 | 0.082 | 0.467 | 0.466 (1154) | 15.1 | 33.5 |
+| 3 | +0.01 | 1378 | 0.108 | 0.504 | 0.459 (1123) | 16.2 | 32.7 |
+| 4 | +0.25 | 1378 | 0.102 | 0.516 | 0.432 (1122) | 16.0 | 34.7 |
+| flattest | +0.64 | 1378 | 0.151 | 0.552 | 0.361 (1025) | 19.0 | 36.5 |
+
+Breaking balls low (SL CU ST KC SV, -0.25..0.5) (swings 16052; VAA mean -8.22 deg, +2.53 deg per zone height), in fifths of VAA residual:
+
+| VAA residual | mean (deg) | swings | whiff / swing | foul / contact | squared / contact (n) | BIP launch angle | foul launch angle |
+|---|---|---|---|---|---|---|---|
+| steepest | -1.73 | 3210 | 0.223 | 0.491 | 0.499 (2173) | 8.9 | -7.6 |
+| 2 | -0.47 | 3210 | 0.246 | 0.482 | 0.484 (2101) | 10.9 | 1.8 |
+| 3 | +0.18 | 3211 | 0.300 | 0.457 | 0.448 (1991) | 11.2 | 7.5 |
+| 4 | +0.66 | 3210 | 0.320 | 0.492 | 0.432 (1916) | 13.6 | 8.2 |
+| flattest | +1.36 | 3211 | 0.332 | 0.489 | 0.422 (1900) | 14.7 | 10.0 |
+
+The same four-seamers (0.5..1.25), with the fifths formed within each of 9 cells of release height (terciles at 5.66 and 6.03 ft) by extension (terciles at 6.30 and 6.70 ft) and pooled by fifth:
+
+| VAA residual | mean (deg) | swings | whiff / swing | foul / contact | squared / contact (n) | BIP launch angle | foul launch angle |
+|---|---|---|---|---|---|---|---|
+| steepest | -0.53 | 3521 | 0.135 | 0.554 | 0.457 (2702) | 19.9 | 37.5 |
+| 2 | -0.18 | 3524 | 0.170 | 0.600 | 0.431 (2592) | 21.9 | 40.8 |
+| 3 | +0.01 | 3524 | 0.200 | 0.623 | 0.405 (2479) | 24.2 | 41.1 |
+| 4 | +0.20 | 3524 | 0.237 | 0.675 | 0.374 (2326) | 27.2 | 40.2 |
+| flattest | +0.50 | 3527 | 0.298 | 0.712 | 0.320 (2106) | 28.2 | 41.5 |
+
+Share of the steepest-to-flattest difference that survived the release control: whiff 1.14, foul / contact 1.19, squared up 1.22, BIP launch angle 1.25.
+
 <!-- fouls.py tables: end -->
+
+## Swing geometry (pitch level, 2025, one week)
+
+Every pitch of 2025-07-01..07-07 (27,876 pitches; 9,972 contacts with bat tracking), measured by `statcast/swing_geometry.py` (pull with `python3 statcast/fetch_pitches.py --dates 2025-07-01:2025-07-07`). These relations shaped bb_engine v0.9's swing (CALIBRATION.md, "The swing as a tilted circle"). This paragraph was written by hand.
+
+What the data showed, on these dates:
+
+1. **Contact met further out front turned the bat and raised its path.** Per inch of contact depth, the bat's direction of travel turned 1.46 deg (r .83) and its attack angle rose 0.80 deg (r .75). One circle of radius 0.87 m in a plane tilted at the league's swing tilt gives both within 11%.
+2. **The ball's spray followed depth** (1.59 deg per inch, r .40, on all balls in play; fair balls went from -13.7 deg on contact met deep to +21.2 out front). At a given depth, what was left of the bat's direction barely moved the ball (r .09).
+3. **Met deep, the bat was slower:** full swings ran 69.0 mph at 10-20 in of depth and 73.2 at 35-40.
+4. **The swing plane was steeper for low pitches:** 9.4 deg per zone height, from 38.5 below the zone to 20.7 above it.
+5. **Contact struck square vertically was squared up only .695 of the time,** and less on pitches inside (.27 beyond a foot) or away (.44).
+6. **The vertical miss ran from under the ball to over it as contact moved out front:** +17.8 to +22.9 deg below 20 in of depth, -10.7 at 40-50 in, -24.3 beyond 50.
+
+```
+pitches 27876 (2025-07-01:2025-07-07)
+
+1. CONTACT DEPTH (in in front of the batter): contacts 9972, mean 29.1, sd 9.7
+   attack angle (deg)                         mean   8.23 sd 10.39 | per inch of depth +0.797 (r 0.75), n 9972
+   bat speed (mph)                            mean  70.62 sd  7.38 | per inch of depth +0.280 (r 0.37), n 9972
+   attack direction (deg, sign as recorded)   mean   0.99 sd 17.00 | per inch of depth -1.457 (r -0.83), n 9972
+   swing path tilt (deg)                      mean  32.01 sd  6.90 | per inch of depth +0.048 (r 0.07), n 9972
+   full swings (60+ mph) by depth: n, bat speed, attack angle, vertical miss mean, its sd
+     -20..10     145   66.5    -9.5   +17.8   28.2
+      10..20    1251   69.0    -2.0   +22.9   26.6
+      20..25    1635   70.5    +3.3   +19.2   30.1
+      25..30    2008   71.8    +7.4   +15.0   33.2
+      30..35    1834   72.8   +11.7    +7.8   35.1
+      35..40    1286   73.2   +15.7    +0.6   35.0
+      40..50    1166   73.4   +19.3   -10.7   36.1
+      50..90     154   73.0   +23.6   -24.3   37.1
+   batters with 25+ contacts: 204; within-batter sd 9.0 in; between-batter sd of usual depth 3.5 in
+   depth against pitch location: -1.89 in per ft away (r -0.10)
+
+2. SWING TILT AGAINST PITCH HEIGHT (all swings with a tilt)
+   swings 13034: mean 32.2 sd 6.9; per unit of zone height -9.4 deg (r -0.55)
+     height -9.00..-0.25 n   667  tilt 38.5
+     height -0.25..0.15  n  2537  tilt 36.3
+     height  0.15..0.50  n  4137  tilt 33.6
+     height  0.50..0.85  n  3800  tilt 30.3
+     height  0.85..1.25  n  1735  tilt 25.8
+     height  1.25..9.00  n   158  tilt 20.7
+
+3. BAT SPEED BY STRIKES (full swings, 60+ mph)
+   0 strikes: n  3577  mean 72.6
+   1 strikes: n  4094  mean 72.0
+   2 strikes: n  4452  mean 70.7
+
+4. SQUARED UP AND EXIT SPEED AGAINST THE VERTICAL MISS (launch angle minus attack angle): tracked contacts 8989, miss mean 10.0 sd 34.7
+     band       n   share  squared  EV/max   foul
+      -90..-60    265  0.029   0.098   0.601   0.657
+      -60..-40    647  0.072   0.190   0.687   0.743
+      -40..-25    605  0.067   0.426   0.764   0.445
+      -25..-15    549  0.061   0.614   0.813   0.213
+      -15..-5     721  0.080   0.663   0.837   0.190
+       -5..5      837  0.093   0.695   0.848   0.211
+        5..15    1045  0.116   0.626   0.835   0.292
+       15..25     967  0.108   0.594   0.808   0.334
+       25..40    1294  0.144   0.425   0.768   0.520
+       40..60    1634  0.182   0.169   0.721   0.780
+       60..90     404  0.045   0.067   0.692   0.777
+
+5. CONTACT STRUCK SQUARE VERTICALLY (miss within 15 deg of +10), BY PITCH LOCATION: n 2849
+     away  -9.0..-1.0  ft  n   66  EV/max 0.725  squared 0.273
+     away  -1.0..-0.5  ft  n  405  EV/max 0.796  squared 0.523
+     away  -0.5..0.0   ft  n  874  EV/max 0.843  squared 0.684
+     away   0.0..0.5   ft  n  935  EV/max 0.848  squared 0.692
+     away   0.5..1.0   ft  n  479  EV/max 0.827  squared 0.616
+     away   1.0..9.0   ft  n   90  EV/max 0.761  squared 0.444
+
+6. SPRAY OF FAIR BALLS (+ = pulled): n 4484, mean +6.1, sd 24.9
+     depth -20..22  n  671  spray -13.7  sd 21.4
+     depth  22..28  n 1161  spray  -2.5  sd 22.6
+     depth  28..34  n 1284  spray +10.3  sd 22.3
+     depth  34..40  n  783  spray +19.9  sd 20.2
+     depth  40..90  n  420  spray +21.2  sd 21.4
+   all balls in play (caught fouls included): spray per inch of depth +1.59 (r 0.40)
+   spray against pitch location: -7.9 deg per ft away (r -0.13)
+```

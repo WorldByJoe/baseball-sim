@@ -12,6 +12,11 @@
    lines overlap, none outruns its air, every cue names a real event, and
    the writer is deterministic (written twice, the same).
 
+   Since engine v1.0 a game drawn after another in the same process is not
+   the one the page draws for that seed (the engine's player numbers run on),
+   so only the first seed is the page's game; the rest are valid games for
+   the timing statistics. Print a half for a seed by giving it first.
+
    Usage:
      node headless/run_node.js bb_engine.js bb_names.js bb_field.js bb_game.js bb_schedule.js bb_call.js headless/call_check.js -- SEEDS [PRINT] [JSON]
        SEEDS  comma list of seeds (default 7,48,59)
@@ -20,7 +25,7 @@
      jsc ... the same files ... headless/call_check.js -- 7,48,59 3b
 
    CHANGED
-     v0.2  drops reported by kind
+     v0.2  drops reported by kind; only the first seed is the page's game (engine v1.0)
      v0.1  first build
 ============================================================================ */
 (function (argv) {
@@ -30,7 +35,7 @@
   function mmss(t) { var m = Math.floor(t / 60), s = t - 60 * m; return m + ':' + (s < 10 ? '0' : '') + s.toFixed(1); }
   seeds.forEach(function (seed, gi) {
     var g = BBSchedule.game(seed), S = BBSchedule.build(g.G, g.PLAYER), C = BBCall.write(g, S);
-    var g2 = BBSchedule.game(seed), C2 = BBCall.write(g2, BBSchedule.build(g2.G, g2.PLAYER));   // written again from scratch: the same?
+    var g2 = g, C2 = BBCall.write(g2, BBSchedule.build(g2.G, g2.PLAYER));   // the same game written again: the same broadcast?
     var ids = {}; S.SEG.forEach(function (s) { ids[s.id] = s; });
     var bad = [];
     if (JSON.stringify(C.lines) !== JSON.stringify(C2.lines) || JSON.stringify(C.sfx) !== JSON.stringify(C2.sfx)) bad.push('not deterministic');

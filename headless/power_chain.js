@@ -1,5 +1,5 @@
 /* ============================================================================
-   power_chain.js · v0.3 · 2026-10-01
+   power_chain.js · v0.4 · 2026-10-02
 
    Checks the hitter's power chain (bb_engine v0.7) against the 2025 Statcast
    targets (STATCAST_TARGETS_2025.md). Part 1: draw a league of hitters and
@@ -10,13 +10,15 @@
    and measure what Statcast measures - squared-up rate, whiff, K%, exit
    velocity - and their correlation with bat speed - plus the league's
    pooled foul rate, launch-angle and exit-velocity spread, exit velocity by
-   batted-ball type, and how often fouls are squared up. (Statcast's squared-up
-   per contact counts fouls; per ball in play the league ran about 0.66, so the
-   league's fouls were almost never squared up.)
+   batted-ball type, and how often fouls are squared up. Statcast's squared-up
+   per contact counts fouls; pitch by pitch in 2025 it was .435 per contact,
+   .627 per ball in play and .225 per foul (STATCAST_TARGETS_2025.md).
 
    Run:  jsc ../bb_engine.js ../bb_names.js ../bb_field.js ../bb_game.js power_chain.js -- [N hitters] [PA each] [seed]
 
    CHANGED
+     v0.4  squared-up uses the bat speed at contact (bb_engine v0.9); league references for
+           squared-up per ball in play and per foul are the pitch-level 2025 figures
      v0.3  exit velocity by launch-angle band, pop-up spin, and contact along the
            barrel (share, squared-up, exit velocity by distance from the sweet spot)
      v0.2  squared-up also by Statcast's own proxy (80% of 1.23 x bat speed + 0.23 x
@@ -80,9 +82,9 @@
         if (!q.bb) return;
         con++;
         var vp = Math.sqrt(q.pitch.plate.v[0] * q.pitch.plate.v[0] + q.pitch.plate.v[1] * q.pitch.plate.v[1] + q.pitch.plate.v[2] * q.pitch.plate.v[2]) / MPH;
-        var evMax = q.swing.qSweet * vp + (1 + q.swing.qSweet) * q.swing.batMph;   // the most this bat and pitch could give
+        var batC = q.swing.batAt || q.swing.batMph, evMax = q.swing.qSweet * vp + (1 + q.swing.qSweet) * batC;   // the most this bat and pitch could give
         if (q.bb.ev >= 0.8 * evMax) squ++;
-        var sqd = q.bb.ev >= 0.8 * (1.23 * q.swing.batMph + 0.23 * vp);      // Statcast's own proxy for that maximum
+        var sqd = q.bb.ev >= 0.8 * (1.23 * batC + 0.23 * vp);      // Statcast's own proxy for that maximum
         if (sqd) squS++;
         if (q.bb.fair) { evs.push(q.bb.ev); L.ev.push(q.bb.ev); L.la.push(q.bb.la); if (sqd) sqBip++; if (q.bb.la > 50) L.puSpin.push(q.bb.spin); }
         else { L.fouls++; if (sqd) L.foulSq++; }
@@ -99,8 +101,8 @@
   print('');
   print(N + ' hitters x ' + NPA + ' PA each, measured as Statcast would (' + R.bs.length + ' with enough contact)');
   print('measurable                 model mean    sd   |  2025 mean    sd');
-  // targets: 2025 per-player Statcast, except squared-up per ball in play (FanGraphs, early 2024; no per-player spread)
-  [['squared-up per contact', 'sq', 0.337, 0.041], ['squared-up (Statcast)', 'sqS', 0.337, 0.041], ['sq-up per BIP (Statcast)', 'sqBip', 0.66, NaN], ['whiff per swing', 'whiff', 0.238, 0.060], ['K%', 'k', 0.204, 0.057], ['BB%', 'bb', 0.089, 0.031], ['exit velo avg', 'ev', 89.7, 2.2], ['EV50 (top half)', 'ev50', 100.6, 2.5], ['hard-hit (95+) share', 'hard', 0.421, 0.078]].forEach(function (m) {
+  // targets: 2025 per-player Statcast, except squared-up per ball in play (pitch-level 2025, pooled; no per-player spread)
+  [['squared-up per contact', 'sq', 0.337, 0.041], ['squared-up (Statcast)', 'sqS', 0.337, 0.041], ['sq-up per BIP (Statcast)', 'sqBip', 0.627, NaN], ['whiff per swing', 'whiff', 0.238, 0.060], ['K%', 'k', 0.204, 0.057], ['BB%', 'bb', 0.089, 0.031], ['exit velo avg', 'ev', 89.7, 2.2], ['EV50 (top half)', 'ev50', 100.6, 2.5], ['hard-hit (95+) share', 'hard', 0.421, 0.078]].forEach(function (m) {
     var s = stats(R[m[1]]); print(pad(m[0], 24) + pad(f(s.mean, 3), 12) + pad(f(s.sd, 3), 6) + '  |  ' + pad(f(m[2], 3), 8) + pad(isNaN(m[3]) ? '-' : f(m[3], 3), 6)); });
   var la = stats(L.la), ev = stats(L.ev);
   print('league, pooled              model         |  MLB');
@@ -108,7 +110,7 @@
   print(pad('fair LA mean', 24) + pad(f(la.mean, 1), 12) + '        |  ' + pad('12.5', 8));
   print(pad('fair LA sd', 24) + pad(f(la.sd, 1), 12) + '        |  ' + pad('~26', 8));
   print(pad('fair EV sd', 24) + pad(f(ev.sd, 1), 12) + '        |  ' + pad('~14', 8));
-  print(pad('sq-up per foul (Statcast)', 24) + pad(f(L.foulSq / L.fouls, 3), 12) + '        |  ' + pad('~0', 8));
+  print(pad('sq-up per foul (Statcast)', 24) + pad(f(L.foulSq / L.fouls, 3), 12) + '        |  ' + pad('0.225', 8));
   var bt = { GB: [], LD: [], FB: [], PU: [] };
   L.ev.forEach(function (x, j) { var a = L.la[j]; bt[a < 10 ? 'GB' : a < 25 ? 'LD' : a < 50 ? 'FB' : 'PU'].push(x); });
   print(pad('fair EV GB/LD/FB/PU', 24) + '  ' + ['GB', 'LD', 'FB', 'PU'].map(function (k) { return f(stats(bt[k]).mean, 1); }).join(' / ') + '  |  86 / 93 / 93 / - (2022)');
