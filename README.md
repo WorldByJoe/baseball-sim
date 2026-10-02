@@ -17,6 +17,7 @@ The engine is pure JavaScript, seeded and deterministic; a whole game simulates 
 - `statcast/` — `fetch_statcast.py` pulls the open Baseball Savant leaderboards and the MLB player list; `targets.py` turns them into per-player distributions and cross-correlations; `fetch_pitches.py` pulls pitch-level data, measured by `fouls.py` (what a foul is) and `swing_geometry.py` (the swing at contact).
 - `STATCAST_TARGETS_<year>.md` — the empirical targets: per-player distributions of the measurables, the tails, and the correlations a latent layer must reproduce without being told.
 - `CALIBRATION.md` — where the model stands against the league, what each change did, what is known to be off.
+- `TRAITS.md` — every player trait and the population it is drawn from (mean, spread, range, how drawn, where the numbers came from). Generated from `bb_engine.js` by `tools/traits_doc.py`; rerun it after any change to the traits.
 - `CLOUD_HANDOFF.md` — how to hand a step to Claude Code on the web; `docs/briefs/` holds the briefs.
 - `tts/` — text to speech on the TV's Raspberry Pi (Piper): what is installed there, how to speak a line, measured speeds and limits, and `playbyplay.py`, a script that speaks a radio call. The groundwork for announcers.
 - `sounds/` — the sounds of the park: `SOUNDS.md` describes how the crowd behaves and lists every sound file to collect.
