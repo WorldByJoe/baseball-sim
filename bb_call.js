@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_call.js · v0.2 · 2026-10-02
+   bb_call.js · v0.3 · 2026-10-02
 
    The broadcast, written ahead. Given a game and its schedule (bb_schedule.js)
    it writes everything the park will say and play: every voice line, every
@@ -35,13 +35,14 @@
    start; voice lines also carry maxDur, the air they have.
 
    CHANGED
+     v0.3  the PA gives uniform numbers; colour notes a man who wears e, pi or i
      v0.2  the timing table measured by rendering real lines; the PA paced quicker
      v0.1  first build
 ============================================================================ */
 
 var BBCall = (function () {
   'use strict';
-  var VERSION = '0.2';
+  var VERSION = '0.3';
   var IN = BB.units.IN, FT = BB.units.FT, GEO = BB.geometry;
 
   // ================================================================ TIMING
@@ -133,6 +134,12 @@ var BBCall = (function () {
       Tm.lineup.concat(Tm.bench).concat([Tm.starter]).concat(Tm.bullpen).forEach(function (p) { NAME[p.id] = { full: p.name, last: p.last || p.name.split(' ').pop() }; });
     });
     function last(id) { return NAME[id] ? NAME[id].last : 'the runner'; }
+    var NUMBER = GAME.NUMBER || {};
+    function numberWords(id) {   // 'number seven', 'number pi'
+      var n = NUMBER[id]; if (n === undefined) return '';
+      return 'number ' + (n === 'π' ? 'pi' : n === 'e' || n === 'i' ? n : num(+n));
+    }
+    function withNumber(id, name) { var w = numberWords(id); return w ? w + ', ' + name : name; }
     function ln(o) { return o.last || last(o.id); }   // a pitcher at bat is his .bat, which has no surname of its own
     function fielderName(play, pos) { var F = play.defense.filter(function (q) { return q.pos === pos; })[0]; return F ? last(F.id) : POSTO[pos]; }
     function hand(P) { return P.throws === 'R' ? 'right-hander' : 'left-hander'; }
@@ -375,8 +382,9 @@ var BBCall = (function () {
       if (seg.change) {
         var out = seg.change.out, inP = seg.change.in, k = G.plays.indexOf(play), d = pitcherDay(out, k), defHome = play.half !== HOME;
         var line = !d.pitches ? '' : d.outs ? ln(out) + ' is done: ' + inningsWords(d.outs) + ', ' + num(d.pitches) + ' pitches, ' + (d.runs ? num(d.runs) + ' run' + (d.runs > 1 ? 's' : '') : 'no runs') + ' while he was on the mound.' : ln(out) + ' is done after ' + num(d.pitches) + ' pitches.';
-        say(seg, 0.2, 'pbp', 'calm', ['A pitching change for the ' + T[1 - play.half].nick + '. ' + (line ? line + ' ' : '') + 'In comes ' + inP.name + ', a ' + hand(inP) + '.',
-                                      'A pitching change. ' + inP.name + ' comes in.'], 1, { slide: 1.5 });
+        // the PA announces him as he comes in; the booth sums up the man leaving after it
+        say(seg, 0.2, 'pa', 'calm', ['Now pitching for the ' + T[1 - play.half].nick + ', ' + withNumber(inP.id, inP.name) + '.', 'Now pitching, ' + inP.name + '.'], 1, { slide: 1 });
+        say(seg, 0.25, 'pbp', 'calm', [(line ? line + ' ' : '') + inP.last + ' is a ' + hand(inP) + '.', line, d.pitches ? ln(out) + ' threw ' + num(d.pitches) + ' pitches.' : ''], 2, { slide: 22 });
         // the crowd says goodbye: an ovation for a home pitcher who pitched well, thin applause if he was hit hard,
         // a mocking cheer for a visiting pitcher who was
         if (defHome && d.outs >= 18 && d.runs <= 1) cue(seg, 0.4, 'ovation', 1.0, 6);
@@ -384,8 +392,7 @@ var BBCall = (function () {
         else if (defHome) cue(seg, 0.4, 'applause_polite', 0.45);
         else if (d.runs >= 4) cue(seg, 0.4, 'cheer_sarcastic', 0.8);
         play_(seg, 1.2, 'organ_filler');
-        cue(seg, seg.dur - 0.2, 'pa_chime', 0.6);
-        say(seg, seg.dur + 0.6, 'pa', 'calm', ['Now pitching for the ' + T[1 - play.half].nick + ', ' + inP.name + '.'], 2, { slide: 6 });
+
       } else if (seg.pinch) {
         say(seg, 0.2, 'pbp', 'calm', [seg.pinch.batter.name + ' will pinch-hit for ' + ln(seg.pinch.forPitcher) + '.'], 1, { slide: 1 });
       }
@@ -401,7 +408,7 @@ var BBCall = (function () {
       if (play.pa.result === 'END') { /* the inning ends on the bases before he finishes: still introduced */ }
       var dp = dayPhrase(day), sit = play.outs || play.bases[1] || play.bases[2] || play.bases[3] ? ' ' + cap(outsWords(play.outs)) + (basesWords(play.bases) !== 'nobody on' ? ', ' + basesWords(play.bases) : '') + '.' : '';
       if (homeBat) {
-        say(seg, 0.4, 'pa', stk > 0.12 ? 'building' : 'calm', [(pos === 'PH' ? 'Now batting for the ' + H.nick + ', pinch-hitting, ' : 'Now batting for the ' + H.nick + ', the ' + POSW[pos] + ', ') + B.name + '.', 'Now batting, ' + B.name + '.'], 1, { slide: 2.5 });
+        say(seg, 0.4, 'pa', stk > 0.12 ? 'building' : 'calm', [(pos === 'PH' ? 'Now batting for the ' + H.nick + ', pinch-hitting, ' : 'Now batting for the ' + H.nick + ', the ' + POSW[pos] + ', ') + withNumber(B.id, B.name) + '.', 'Now batting, ' + withNumber(B.id, B.name) + '.', 'Now batting, ' + B.name + '.'], 1, { slide: 2.5 });
         if (dp || sit) say(seg, 4.0, 'pbp', stk > 0.12 ? 'building' : 'calm', [dp ? ln(B) + ', ' + dp + '.' + sit : sit.trim(), sit.trim(), dp ? cap(dp) + '.' : ''], 2, { slide: 3 });
       } else {
         say(seg, 0.4, 'pbp', 'calm', ['Here is ' + B.name + ', the ' + POSW[pos] + (dp ? ', ' + dp : '') + '.' + sit, B.name + '.' + sit, B.name + '.'], 1, { slide: 3 });
@@ -422,6 +429,11 @@ var BBCall = (function () {
     // the colour for this at-bat, most interesting first; each is used once
     function planColour(play, day, k, upto) {
       var B = play.batter, P = play.pitcher, L = [], homeBat = play.half === HOME;
+      // the three numbers nobody else in the league wears
+      var NUM_FUN = { e: ' wears e on his back: two point seven one eight, and on, the base of the natural logarithm.',
+                      'π': ' wears pi: three point one four one six, and it never ends.',
+                      i: ' wears i, the square root of minus one. An imaginary number on a very real ballplayer.' };
+      if (NUM_FUN[NUMBER[B.id]] && !used['num' + B.id]) L.push({ key: 'num' + B.id, alts: [ln(B) + NUM_FUN[NUMBER[B.id]]] });
       // his traits against the league: the one that stands out most, once a game
       if (!used['trait' + B.id] && !used['speed' + B.id] && B.pos !== 'P') {
         var Tr = BB.TRAITS, best = null;

@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_schedule.js · v0.2 · 2026-10-02
+   bb_schedule.js · v0.3 · 2026-10-02
 
    The game and its schedule, shared by the screen (baseball.html) and the
    headless tools, so the broadcast script can be written and checked
@@ -24,6 +24,7 @@
    'final'.
 
    CHANGED
+     v0.3  uniform numbers: 0 to 99, and e, pi and i, from a stream of their own
      v0.2  the seventh-inning stretch: 30 s after the top of the 7th, in games that get there
      v0.1  moved out of baseball.html v2.1 unchanged (the game, win probability,
            runners' arrival times, play durations, the schedule); event ids added
@@ -72,7 +73,23 @@ var BBSchedule = (function () {
     });
     G.plays[G.plays.length - 1].wpAfter = G.score[1] > G.score[0] ? 1 : 0;
     G.park = parkName;
-    return { seed: seed, G: G, away: away, home: home, env: env, parkName: parkName, ump: ump, PLAYER: PLAYER };
+    return { seed: seed, G: G, away: away, home: home, env: env, parkName: parkName, ump: ump, PLAYER: PLAYER, NUMBER: uniforms(seed, [away, home]) };
+  }
+
+  // Uniform numbers, by player id: 0 to 99, and for fun three more that could be
+  // drawn (Joe, 2026-10-02): e, pi and i. Each team draws its own, none twice.
+  // A separate random stream, so the game itself is untouched.
+  function uniforms(seed, teams) {
+    var r = BB.makeRng((seed ^ 0x2545f491) >>> 0), N = {};
+    teams.forEach(function (Tm) {
+      var pool = [];
+      for (var k = 0; k < 100; k++) pool.push(String(k));
+      pool.push('e', 'π', 'i');
+      Tm.lineup.concat(Tm.bench, [Tm.starter], Tm.bullpen).forEach(function (p) {
+        N[p.id] = pool.splice(Math.floor(r.u() * pool.length), 1)[0];
+      });
+    });
+    return N;
   }
 
   // ======================================================== THE SCHEDULE
@@ -153,7 +170,7 @@ var BBSchedule = (function () {
     return { SEG: SEG, total: total, segAt: segAt, playDuration: playDuration, runnerArrive: runnerArrive, ownArrive: ownArrive };
   }
 
-  return { version: '0.2', PACE: PACE, HR_BASE: HR_BASE, CELEB: CELEB, Phi: Phi, winProb: winProb, game: game, build: build };
+  return { version: '0.3', PACE: PACE, HR_BASE: HR_BASE, CELEB: CELEB, Phi: Phi, winProb: winProb, game: game, build: build };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = BBSchedule;
