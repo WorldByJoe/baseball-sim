@@ -413,6 +413,25 @@ What the step did, in these runs: bat speed came to the league's by count and ne
 - **Lost barrel control on an adjusted swing** (its vertical and along-barrel scatter growing by 1.5% and 3% per millisecond closed). Breaking-ball whiffs rose .31 → .38 and .45, while squared-up contact on off-speed pitches met far out front fell only .51 → .46 (league .32). A wider scatter bought misses before mishits, as in v0.8.
 - **The losses without the normalisation.** EV50 fell 98.1 → 97.1 at seed 3 and home runs 1.5% → 1.3%: every batter's average swing dropped below his trait.
 
+### The run-value swing decision, retried on v1.1 (2026-10-02; not kept, branch `swing-decision`)
+
+With the sitting payoff in place, the swing-or-take bet (measured count run values against the batter's self-model) was retried. `discipline_check`, 300-400 hitters × 40 PA against 120 pitchers, seed 3.
+
+**The payoff showed up in the self-model.** A ball in play off the pitch he sat on was worth about 0.05-0.06 runs in the heart of the zone; off a pitch he recognised as something else, 0.00-0.03, with more of the contact going foul (.58 against .42).
+
+**Batters stayed far too passive.**
+
+| swing rate | 0-0 | 1-1 | 2-1 | 3-1 | 0-2 | all |
+|---|---|---|---|---|---|---|
+| the bet, as built | .32 | .24 | .13 | .05 | .44 | .28 |
+| with a location prior by count | .38 | .27 | .16 | .06 | .48 | .32 |
+| location prior, eye at half its scatter | .48 | .40 | .36 | .29 | .47 | .43 |
+| league | .32 | .54 | .60 | .55 | .51 | .48 |
+
+The location prior was the league's location distribution by count (statcast/discipline.py table 3), so that an ambiguous pitch looked more like a strike where pitchers throw more strikes. Halving the eye's scatter brought zone swings to the league's (.71 against .67), but chase stayed low (.16 against .28) and first pitches were over-swung.
+
+**Why: the league's batters are more aggressive ahead in the count than a run-value bet allows.** The bet swings most at 0-0 and least in hitters' counts; the league does the reverse. The league's own realised run values (statcast/discipline.py v0.2 table 6) showed swings near the edge losing runs against takes in hitters' counts: at 2-1, -0.061 per swing at 2-0 in inside the edge and -0.136 just outside it, where batters still swung at .66 and .51 of pitches; at 2-0, swings lost 0.013 even 2-4 in inside the zone. With two strikes, swings in the zone gained 0.06-0.19 against takes, as the bet predicts. Takes are biased toward pitches that looked like balls, so the comparison flatters takes, but not enough to reverse it deep in the zone. A batter who maximises the next pitch's run value cannot reproduce the league's swing rates in hitters' counts, however good his inputs are.
+
 ## What was learned building the fielding layer
 
 - **Statcast's outfield JUMP (about 30 ft covered in the first 3 s) is the right anchor for outfielder motion.** The first fielders covered 44 ft in 3 s and caught nearly every fly ball (fly-ball BABIP .03). Slowing everyone to the jump figure fixed the outfield but let 52% of ground balls through, so infielders got their own harder acceleration and a dive reach. That's a real difference: they work from a crouch on a ball that is on them at once.
