@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v2.1 · 2026-10-01
+  baseball.html · v2.2 · 2026-10-02
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
@@ -38,6 +38,8 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v2.2  the game and its schedule come from bb_schedule.js, shared with the headless
+          tools (the same segments to the millisecond)
     v2.1  every throw is shown: the catcher's return after each pitch, a new ball from
           the umpire, the throw in to hold the runners and back to the pitcher, the
           ball back from the bag after a steal and from the backstop after a wild
@@ -54,9 +56,6 @@
           circle, plate, bases, position - laid down with the schedule; sides change
           over on foot and change colour as they go; warm-up pitches; home-run trots;
           the whole bench out for a grand slam and for the win (Joe)
-    v1.7  on the wall: wall.js is loaded when it is beside the file, the game tells
-          the stall watchdog its length, hands on through the ring at the final
-          out, and a visit with no ?seed plays a new game drawn from the clock
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -150,6 +149,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
 <script src="bb_names.js?v=0.1"></script>
 <script src="bb_field.js?v=0.6"></script>
 <script src="bb_game.js?v=0.6"></script>
+<script src="bb_schedule.js?v=0.1"></script>
 <script>
 (function () {
   'use strict';
@@ -163,16 +163,15 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   var Q = new URLSearchParams(location.search);
   var SEED = Q.has('seed') ? +Q.get('seed') : 100 + Math.floor(Date.now() / 60000) % 90000;   // no seed asked for: a new game from the clock (the HUD shows it, so it can be replayed)
   var SPEED = +Q.get('speed') || 1, SEEK = +Q.get('t') || 0;
-  var PACE = { pregame: 45, halfStart: 8, paStart: 4, setup: 3, flight: 1.8, take: 2.6, foul: 2.4, bipPad: 2.6, change: 3.5, halfEnd: 5.5, final: 40 };
+  var PACE = BBSchedule.PACE;
   // how people move, in seconds: a jog back to the dugout, the walk out to a position, seat to the
-  // on-deck circle, circle to the plate, a jog to the next bag on a walk, a home-run trot per base,
-  // and how long a huddle at the plate holds
-  var WALK = 5.0, WALK_OUT = 6.0, DECK_WALK = 3.0, PLATE_WALK = 3.0, JOG_BASE = 2.6, HR_BASE = 1.6, CELEB = 3.5;
+  // on-deck circle, circle to the plate, a jog to the next bag on a walk (the home-run trot per base
+  // and the grand-slam huddle are the schedule's)
+  var WALK = 5.0, WALK_OUT = 6.0, DECK_WALK = 3.0, PLATE_WALK = 3.0, JOG_BASE = 2.6, CELEB = BBSchedule.CELEB;
   var BASES = BBField.BASES;
   var BACKSTOP_Y = -6.5;   // m behind the plate where a wild pitch is run down: closer than a real backstop, so it stays on the drawing
 
-  function Phi(z) { var t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989422804 * Math.exp(-z * z / 2);
-    var p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; }
+  var Phi = BBSchedule.Phi;
   function f0(v) { return Math.round(v).toLocaleString(); }
   function f1(v) { return (Math.round(v * 10) / 10).toFixed(1); }
   function pct(a, b) { return b ? f1(100 * a / b) : '-'; }
@@ -188,42 +187,11 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   var ORD = ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th', '13th', '14th', '15th', '16th', '17th', '18th'];
 
   // ============================================================ THE GAME
-  var rng = BB.makeRng(SEED), teams = BBNames.teams(rng);
-  var away = BBGame.makeTeam(rng, teams[0]), home = BBGame.makeTeam(rng, teams[1]);
-  var env = BB.mlbEnv(rng), parkName = BBNames.park(rng);
-  var ump = BB.makeUmp(rng); ump.name = BBNames.fullName(BBNames.person(rng));
-  var G = BBGame.simGame(away, home, { rng: rng, env: env, ump: ump });
+  // drawn by bb_schedule.js, so the headless tools play the very same game for a seed
+  var GAME = BBSchedule.game(SEED), G = GAME.G, away = GAME.away, home = GAME.home, env = GAME.env, parkName = GAME.parkName, ump = GAME.ump, PLAYER = GAME.PLAYER;
   away.col = TEAM_COLS[hashStr(away.nick) % 6];
   home.col = TEAM_COLS[(hashStr(home.nick) + (TEAM_COLS[hashStr(home.nick) % 6] === away.col ? 1 : 0)) % 6];
   var rho0 = BB.makeEnv({ tempF: 70, elevFt: 0, rh: 0.5 }).rho;
-  var PLAYER = {};   // every man who can bat, by id (a pitcher bats as his .bat)
-  [away, home].forEach(function (Tm) { Tm.lineup.concat(Tm.bench).forEach(function (b) { PLAYER[b.id] = b; });
-    [Tm.starter].concat(Tm.bullpen).forEach(function (P) { if (P.bat) PLAYER[P.id] = P.bat; }); });
-
-  // Run expectancy by outs and base state (bits 1B=1, 2B=2, 3B=4); the rest of the
-  // game as normal noise. An estimate, labelled as one.
-  var RE = [[0.48, 0.86, 1.10, 1.44, 1.35, 1.78, 1.96, 2.29], [0.26, 0.51, 0.66, 0.90, 0.95, 1.13, 1.38, 1.54], [0.10, 0.22, 0.32, 0.43, 0.35, 0.48, 0.58, 0.75]];
-  function winProb(inning, half, outs, bases, score) {
-    if (outs >= 3) { half = 1 - half; if (half === 0) inning++; outs = 0; bases = [null, null, null, null]; }
-    var idx = (bases[1] ? 1 : 0) + (bases[2] ? 2 : 0) + (bases[3] ? 4 : 0), re = RE[Math.min(outs, 2)][idx];
-    var left = Math.max(0, 9 - inning), awayH = left, homeH = left + (half === 0 ? 1 : 0);
-    var mean = (score[1] - score[0]) + (half === 1 ? re : -re) + 0.48 * (homeH - awayH);
-    var sd = Math.sqrt(0.9 * (awayH + homeH) + 0.9);
-    return Phi(mean / sd);
-  }
-  // score before each play, runs in the half so far, win probability
-  (function () {
-    var sc = [0, 0], innRuns = 0, last = null;
-    G.plays.forEach(function (p) {
-      if (!last || last.inning !== p.inning || last.half !== p.half) innRuns = 0;
-      p.scoreBefore = sc.slice(); p.innRunsBefore = innRuns;
-      p.wpBefore = winProb(p.inning, p.half, p.outs, p.bases, sc);
-      sc = p.score.slice(); innRuns += p.runs; last = p;
-      p.wpAfter = winProb(p.inning, p.half, p.outsAfter, p.basesAfter, sc);
-    });
-    G.plays[G.plays.length - 1].wpAfter = G.score[1] > G.score[0] ? 1 : 0;
-  })();
-
   // 250-PA projections for the cards and the pre-game sheet; a separate stream
   var r2 = BB.makeRng((SEED ^ 0x5bd1e995) >>> 0), lp = [], lb = [], k;
   for (k = 0; k < 24; k++) lp.push(BB.makePitcher(r2, { role: k < 14 ? 'SP' : 'RP' }));
@@ -265,45 +233,8 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   }
 
   // ========================================================= THE SCHEDULE
-  var SEG = [], total = 0;
-  function add(kind, dur, d) { var s = d || {}; s.kind = kind; s.dur = dur; s.t0 = total; SEG.push(s); total += dur; return s; }
-  function playDuration(play) {
-    var r = play.play, bb = play.pa.bb;
-    if (!r) return 2;
-    var t = bb.hang + 1;
-    r.events.forEach(function (e) { if (e.t) t = Math.max(t, e.t); if (e.arrive) t = Math.max(t, e.arrive); });
-    (r.runners || []).forEach(function (rn) { var a = runnerArrive(r, rn, bb); t = Math.max(t, rn.gone !== undefined ? rn.gone : a); });   // a man beaten by the throw still runs it out
-    if (r.hit === 'HR') t = bb.hang * 0.3 + 4 * HR_BASE + 0.4;   // the trot: he sets off as the ball leaves and touches them all
-    return Math.min(t, 16) + 0.6;
-  }
-  add('pregame', PACE.pregame);
-  G.innings.forEach(function (inn, ii) {
-    add('halfStart', PACE.halfStart + (ii === 0 ? 6 : 0), { inn: inn });   // the first: the home side takes the field from the dugout
-    inn.plays.forEach(function (play) {
-      if (play.newPitcher) add('change', PACE.change, { play: play, change: play.newPitcher });
-      if (play.pinchHit) add('change', PACE.change, { play: play, pinch: play.pinchHit });
-      add('paStart', PACE.paStart, { play: play });
-      var n = play.pa.pitches.length;
-      play.pa.pitches.forEach(function (p, i) {
-        add('setup', PACE.setup, { play: play, i: i });
-        add('flight', PACE.flight, { play: play, i: i });
-        var last = i === n - 1, dur, running = (p.steal && !p.steal.back) || p.wild;   // a steal or a wild pitch plays out in real time
-        if (last && play.play) dur = playDuration(play) + PACE.bipPad + (play.play.hit === 'HR' && play.play.runs === 4 ? CELEB + 1.0 : 0);   // a grand slam: the bench comes out
-        else if (p.result === 'foul') dur = (p.bb ? Math.min(p.bb.hang, 3) : 0) + PACE.foul;
-        else dur = running ? 5.0 : PACE.take;
-        var sg = add('result', dur, { play: play, i: i, last: last });
-        p.tResult = sg.t0;
-        if (last) { play.tResult = sg.t0; play.tResolve = sg.t0 + (play.play ? playDuration(play) - 0.6 : running ? 2.6 : 0.4); play.tEnd = sg.t0 + dur; }
-      });
-    });
-    inn.tEnd = add('halfEnd', PACE.halfEnd, { inn: inn }).t0;
-  });
-  add('final', PACE.final);
-  function segAt(t) {
-    var lo = 0, hi = SEG.length - 1;
-    while (lo < hi) { var m = (lo + hi + 1) >> 1; if (SEG[m].t0 <= t) lo = m; else hi = m - 1; }
-    return SEG[lo];
-  }
+  // laid out by bb_schedule.js (the broadcast script is written against the same clock)
+  var SCHED = BBSchedule.build(G, PLAYER), SEG = SCHED.SEG, total = SCHED.total, segAt = SCHED.segAt, playDuration = SCHED.playDuration, runnerArrive = SCHED.runnerArrive;
 
   // ============================================================ THE CLOCK
   var T = SEEK, speed = SPEED, paused = false, lastNow = null;
@@ -450,34 +381,6 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     }
     return [pos[0], pos[1], 1];
   }
-  // When each man reaches his bag. Safe: the fielding layer's own time. Scored or
-  // put out: at his own pace (his speed, the fielding layer's running model) - and
-  // if the ball beat him he still gets there, after it. The batter runs every ball
-  // out as if it will drop, because he cannot know it won't: on a catch he has
-  // gone hard through first and rounded it, and pulls up where the catch finds him.
-  function ownArrive(rn, to, start) {
-    var pl = PLAYER[rn.id] || { speed: 27 }, st = start !== undefined ? start : (rn.start || 0.05);
-    return st + BBField.runTime(pl, (to - rn.from) * 90 * FT - (rn.lead || 0), rn.from === 0 || st >= 0.5);
-  }
-  function runnerArrive(r, rn, bb) {
-    if (rn.arrive !== undefined) return rn.arrive;
-    var ev = r.events.filter(function (e) { return e.kind === 'safe' && e.who === rn.id; })[0];
-    var th = r.events.filter(function (e) { return (e.kind === 'throw' || e.kind === 'carry') && e.to === rn.to; })[0];
-    var a;
-    if (ev && isFinite(ev.t)) a = ev.t;
-    else if (rn.to > rn.from) a = Math.max(rn.out && th ? th.arrive : 0, ownArrive(rn, rn.to));
-    else a = rn.start || 0;
-    if (r.hit === 'HR') { rn.start = bb.hang * 0.3; a = rn.start + (rn.to - rn.from) * HR_BASE; }
-    var ct = r.events.filter(function (e) { return e.kind === 'catch'; })[0];
-    if (rn.from === 0 && rn.out && ct) {
-      var t1 = ownArrive(rn, 1, 0.05);                               // his time to first, flat out
-      rn.start = 0.05; rn.to = 2; a = 0.05 + 2 * (t1 - 0.05);        // on toward second at the same pace...
-      rn.stopD = (bb && bb.fair === false ? 0.5 : 1.25) * 90 * FT;   // ...rounding first by a quarter of the way (a foul pop: he knows; half way, then watches)
-      rn.gone = ct.t;
-    }
-    rn.arrive = a; return a;
-  }
-
   // ------------------------------------------------------------ the venue
   // Dugouts, on-deck circles and bullpens sit in foul ground, parallel to the
   // lines: home on the first-base side, visitors on third. `sd` is that side.

@@ -10,7 +10,8 @@ The engine is pure JavaScript, seeded and deterministic; a whole game simulates 
 - `bb_field.js` — the ball in play: its track, the fielders' moves, throws, runners.
 - `bb_game.js` — the game: lineups, innings, managers and bullpens, the running game.
 - `bb_names.js` — fictional players, teams and parks.
-- `baseball.html` — the screen. Open it in a browser with the four `bb_*.js` files beside it; no server needed.
+- `bb_schedule.js` — the game for a seed and the screen's schedule (every segment, its time and its event id), shared by the page and the headless tools.
+- `baseball.html` — the screen. Open it in a browser with the `bb_*.js` files beside it; no server needed.
 - `headless/` — checks that run without a browser: `run_games.js` (the league line against MLB), `run_pa.js`, `physics_check.js`, `shape_check.js` (every play has the shape the screen needs), `power_chain.js` (the latent power chain and contact quality against the Statcast targets), `bat_check.js` (what the bat model makes of the wood profile). On the Mac they run under `jsc`; elsewhere `headless/run_node.js` loads the same files under Node.
 - `statcast/` — `fetch_statcast.py` pulls the open Baseball Savant leaderboards and the MLB player list; `targets.py` turns them into per-player distributions and cross-correlations.
 - `STATCAST_TARGETS_<year>.md` — the empirical targets: per-player distributions of the measurables, the tails, and the correlations a latent layer must reproduce without being told.
