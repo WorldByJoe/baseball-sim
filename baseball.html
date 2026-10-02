@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v2.4 · 2026-10-02
+  baseball.html · v2.5 · 2026-10-02
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
@@ -38,6 +38,7 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v2.5  engine v1.1 (the adjusted swing)
     v2.4  engine v1.0 (perception and pitch variety): the drawn pitch and the
           pitcher's card carry his seam break; the drawn ghost is his picture of it
     v2.3  a bases-loaded walk or hit batsman: the man forced in from third jogs home and
@@ -48,10 +49,6 @@
           the umpire, the throw in to hold the runners and back to the pitcher, the
           ball back from the bag after a steal and from the backstop after a wild
           pitch, warm-ups both ways; huddles swirl and hop; fielders jog back (Joe)
-    v2.0  the flight chart is always on screen with fixed axes at true scale (0-480 ft
-          by 0-200 ft, one foot to a pixel each way); the batter runs out every ball
-          at his own speed - through first and rounding it on a fly - and an out
-          walks back from where he stopped (Joe)
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -141,7 +138,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   <div id="hud" class="tag"></div>
 </div>
 <!-- version tags so a browser never runs a stale engine against a new page -->
-<script src="bb_engine.js?v=1.0"></script>
+<script src="bb_engine.js?v=1.1"></script>
 <script src="bb_names.js?v=0.1"></script>
 <script src="bb_field.js?v=0.6"></script>
 <script src="bb_game.js?v=0.6"></script>

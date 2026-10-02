@@ -1,5 +1,5 @@
 """
-swing_geometry.py · v0.1 · 2026-10-02
+swing_geometry.py · v0.2 · 2026-10-02
 
 Measures, from pitch-level Statcast, the swing geometry and contact relations
 the engine's swing (bb_engine v0.9) is built on: how contact depth moves the
@@ -19,6 +19,7 @@ Squared up is Statcast's rule: launch_speed >= 0.8 x (1.23 x bat_speed +
 of the plate from the batter.
 
 CHANGED
+  v0.2  table 7: bat speed by pitch kind at a contact depth, and by count (bb_engine v1.1's adjusted swing)
   v0.1  first build (the measurements behind bb_engine v0.9)
 """
 import csv, glob, math, os, statistics as st, sys, datetime
@@ -71,6 +72,9 @@ def main(spec):
                                        'intercept_ball_minus_batter_pos_x_inches', 'launch_speed', 'launch_angle', 'effective_speed', 'plate_x', 'plate_z',
                                        'sz_top', 'sz_bot', 'hc_x', 'hc_y', 'strikes')}
         g['contact'] = r['description'] in CONTACT
+        pt = r.get('pitch_type')
+        g['kind'] = 'FB' if pt in ('FF', 'SI', 'FC') else 'BR' if pt in ('SL', 'CU', 'ST', 'KC', 'SV') else 'OS' if pt in ('CH', 'FS', 'FO') else None
+        g['count'] = (r.get('balls') or '') + '-' + (r.get('strikes') or '')
         g['foul'] = r['description'] != 'hit_into_play'
         g['batter'] = r.get('batter')
         R = r['stand'] == 'R'
@@ -155,6 +159,21 @@ def main(spec):
     v = [(q['away'], q['pull']) for q in bip if q['away'] is not None]
     b, rr = reg([p[0] for p in v], [p[1] for p in v])
     print('   spray against pitch location: %+.1f deg per ft away (r %.2f)' % (b, rr))
+
+    print('\n7. BAT SPEED BY PITCH KIND AT A CONTACT DEPTH (contact swings), AND BY COUNT (all swings)')
+    for lo, hi in ((10, 20), (20, 25), (25, 30), (30, 35), (35, 40), (40, 50)):
+        cells = []
+        for k in ('FB', 'BR', 'OS'):
+            v = [q['bat_speed'] for q in con if q['kind'] == k and q['bat_speed'] and lo <= q[Y] < hi]
+            cells.append('%s %.1f (n %d)' % (k, st.mean(v), len(v)) if v else '%s -' % k)
+        print('     depth %3d..%-3d  %s' % (lo, hi, '   '.join(cells)))
+    groups = (('ahead', ('1-0', '2-0', '3-0', '2-1', '3-1')), ('even or behind', ('0-0', '0-1', '1-1')), ('two strikes', ('0-2', '1-2', '2-2', '3-2')))
+    for nm, cs in groups:
+        cells = []
+        for k in ('FB', 'BR', 'OS'):
+            v = [q['bat_speed'] for q in c if q['kind'] == k and q['bat_speed'] and q['count'] in cs]
+            cells.append('%s %.1f (n %d)' % (k, st.mean(v), len(v)) if v else '%s -' % k)
+        print('     %-15s %s' % (nm, '   '.join(cells)))
 
 
 if __name__ == '__main__':
