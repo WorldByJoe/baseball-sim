@@ -39,7 +39,7 @@
 
   CHANGED
     v2.2  the game and its schedule come from bb_schedule.js, shared with the headless
-          tools (the same segments to the millisecond)
+          tools (the same segments to the millisecond); a 30 s seventh-inning stretch
     v2.1  every throw is shown: the catcher's return after each pitch, a new ball from
           the umpire, the throw in to hold the runners and back to the pitcher, the
           ball back from the bag after a steal and from the backstop after a wild
@@ -149,7 +149,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
 <script src="bb_names.js?v=0.1"></script>
 <script src="bb_field.js?v=0.6"></script>
 <script src="bb_game.js?v=0.6"></script>
-<script src="bb_schedule.js?v=0.1"></script>
+<script src="bb_schedule.js?v=0.2"></script>
 <script>
 (function () {
   'use strict';
@@ -500,7 +500,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
       var play = sg.play, inn = sg.inn, h, sdB, sdD, batTm, defTm;
       if (sg.kind === 'halfStart') {
         h = inn.half; batTm = h; defTm = 1 - h; sdB = h ? 1 : -1; sdD = -sdB;
-        var first = inn.plays[0], D = first.defense, tEnd = si > 0 && SEG[si - 1].kind === 'halfEnd' ? SEG[si - 1].t0 : sg.t0 - 0.5;
+        var first = inn.plays[0], D = first.defense, pe = SEG[si - 1] && SEG[si - 1].kind === 'stretch' ? SEG[si - 2] : SEG[si - 1], tEnd = pe && pe.kind === 'halfEnd' ? pe.t0 : sg.t0 - 0.5;   // past the stretch to the end of the top
         // the side that was in the field comes in and sits down, in its own colours again
         if (lastDef[h]) lastDef[h].forEach(function (F, i) { var p = PEOPLE[F.id]; if (p) move(p, tEnd + 0.3 + i * 0.12, WALK, p.seat, 0, 'seat'); });
         // the side that batted goes out; a new pitcher comes from the pen
@@ -1441,7 +1441,9 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     location.replace(me + '?seed=' + (SEED + 1) + spd);
   }
   function render(t) {
-    var seg = segAt(t), tau = t - seg.t0, play = seg.play || null;
+    var seg = segAt(t), tau = t - seg.t0, stretch = seg.kind === 'stretch';
+    if (stretch) { seg = SEG[SEG.indexOf(seg) - 1]; tau = t - seg.t0; }   // the stretch holds the end of the top of the 7th on screen
+    var play = seg.play || null;
     drawOverlay(seg, tau);
     if (seg.kind === 'final' && tau >= seg.dur - 0.05) { nextGame(); return; }
     var count = '', outs = 0, bases = [], done = false, thrown = 0, laneMain = null, laneSub = null;
@@ -1480,6 +1482,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
       play = first; count = ''; outs = 0; bases = first.bases; done = false;
       laneMain = (seg.inn.half ? 'Bottom of the ' : 'Top of the ') + ORD[seg.inn.n]; laneSub = G.teams[seg.inn.half].nick + ' batting';
     }
+    if (stretch) { laneMain = 'Seventh-inning stretch'; }
     var quiet = seg.kind === 'halfStart' || seg.kind === 'halfEnd';
     // one drawing fault must never blank the screen for the rest of the game (logged once)
     function safe(name, fn) { try { fn(); } catch (err) { if (!FAULTS[name]) { FAULTS[name] = true; console.error(name, err); } } }

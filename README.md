@@ -12,7 +12,7 @@ The engine is pure JavaScript, seeded and deterministic; a whole game simulates 
 - `bb_names.js` — fictional players, teams and parks.
 - `bb_schedule.js` — the game for a seed and the screen's schedule (every segment, its time and its event id), shared by the page and the headless tools.
 - `baseball.html` — the screen. Open it in a browser with the `bb_*.js` files beside it; no server needed.
-- `headless/` — checks that run without a browser: `run_games.js` (the league line against MLB), `run_pa.js`, `physics_check.js`, `shape_check.js` (every play has the shape the screen needs), `power_chain.js` (the latent power chain and contact quality against the Statcast targets), `bat_check.js` (what the bat model makes of the wood profile). On the Mac they run under `jsc`; elsewhere `headless/run_node.js` loads the same files under Node.
+- `headless/` — checks that run without a browser: `run_games.js` (the league line against MLB), `run_pa.js`, `physics_check.js`, `shape_check.js` (every play has the shape the screen needs), `power_chain.js` (the latent power chain and contact quality against the Statcast targets), `bat_check.js` (what the bat model makes of the wood profile), `schedule_check.js` (the screen's schedule against page v2.1, event ids, the seventh-inning stretch). On the Mac they run under `jsc`; elsewhere `headless/run_node.js` loads the same files under Node.
 - `statcast/` — `fetch_statcast.py` pulls the open Baseball Savant leaderboards and the MLB player list; `targets.py` turns them into per-player distributions and cross-correlations.
 - `STATCAST_TARGETS_<year>.md` — the empirical targets: per-player distributions of the measurables, the tails, and the correlations a latent layer must reproduce without being told.
 - `CALIBRATION.md` — where the model stands against the league, what each change did, what is known to be off.
@@ -25,6 +25,7 @@ The engine is pure JavaScript, seeded and deterministic; a whole game simulates 
 ```bash
 jsc bb_engine.js bb_names.js bb_field.js bb_game.js headless/run_games.js -- 200 3 0
 node headless/run_node.js bb_engine.js bb_names.js bb_field.js bb_game.js headless/run_games.js -- 200 3 0
+node headless/run_node.js bb_engine.js bb_names.js bb_field.js bb_game.js bb_schedule.js headless/schedule_check.js -- 7 48 59
 ```
 
 The three arguments are games, seed, and innings of play-by-play to print.

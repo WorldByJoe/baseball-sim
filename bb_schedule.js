@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_schedule.js · v0.1 · 2026-10-02
+   bb_schedule.js · v0.2 · 2026-10-02
 
    The game and its schedule, shared by the screen (baseball.html) and the
    headless tools, so the broadcast script can be written and checked
@@ -14,14 +14,17 @@
    build(G, PLAYER) lays the game out on the screen's fixed clock: pregame,
    then per half halfStart, per at-bat a change (a pitching change or a
    pinch hitter, when there is one) and paStart, per pitch setup, flight and
-   result, then halfEnd, and finally final. Each segment has kind, t0, dur
+   result, then halfEnd; after the top of the 7th the seventh-inning
+   stretch (30 s); and finally final. Each segment has kind, t0, dur
    and its play / pitch index / inning, and a stable readable event id made
    from the game, not from its place in the list: 'pre', '7b.start',
    '7b.3.up' (the third man up in the bottom of the 7th walks to the plate),
    '7b.3.pitcher' / '7b.3.pinch' (a change before him), '7b.3.4.setup',
-   '7b.3.4.flight', '7b.3.4.result' (his fourth pitch), '7b.end', 'final'.
+   '7b.3.4.flight', '7b.3.4.result' (his fourth pitch), '7b.end', '7.stretch',
+   'final'.
 
    CHANGED
+     v0.2  the seventh-inning stretch: 30 s after the top of the 7th, in games that get there
      v0.1  moved out of baseball.html v2.1 unchanged (the game, win probability,
            runners' arrival times, play durations, the schedule); event ids added
 ============================================================================ */
@@ -30,7 +33,7 @@ var BBSchedule = (function () {
   'use strict';
   var FT = BB.units.FT;
   // seconds each kind of segment lasts at 1x
-  var PACE = { pregame: 45, halfStart: 8, paStart: 4, setup: 3, flight: 1.8, take: 2.6, foul: 2.4, bipPad: 2.6, change: 3.5, halfEnd: 5.5, final: 40 };
+  var PACE = { pregame: 45, halfStart: 8, paStart: 4, setup: 3, flight: 1.8, take: 2.6, foul: 2.4, bipPad: 2.6, change: 3.5, halfEnd: 5.5, stretch: 30, final: 40 };
   var HR_BASE = 1.6, CELEB = 3.5;   // a home-run trot per base; how long a grand-slam huddle at the plate holds
 
   function Phi(z) { var t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989422804 * Math.exp(-z * z / 2);
@@ -138,6 +141,8 @@ var BBSchedule = (function () {
         });
       });
       inn.tEnd = add('halfEnd', PACE.halfEnd, { inn: inn, id: hk + '.end' }).t0;
+      // the middle of the seventh: everyone stands and the organ plays "Take Me Out to the Ball Game"
+      if (inn.n === 7 && inn.half === 0) add('stretch', PACE.stretch, { inn: inn, id: '7.stretch' });
     });
     add('final', PACE.final, { id: 'final' });
     function segAt(t) {
@@ -148,7 +153,7 @@ var BBSchedule = (function () {
     return { SEG: SEG, total: total, segAt: segAt, playDuration: playDuration, runnerArrive: runnerArrive, ownArrive: ownArrive };
   }
 
-  return { version: '0.1', PACE: PACE, HR_BASE: HR_BASE, CELEB: CELEB, Phi: Phi, winProb: winProb, game: game, build: build };
+  return { version: '0.2', PACE: PACE, HR_BASE: HR_BASE, CELEB: CELEB, Phi: Phi, winProb: winProb, game: game, build: build };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = BBSchedule;
