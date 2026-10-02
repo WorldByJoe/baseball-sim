@@ -361,6 +361,23 @@ What the step did, in these runs:
 
 **What this leaves, and where it points.** The read now sends whiffs to the right pitches and puts batters under flat fastballs. Three things stand out: plate discipline (zone rate and chase rate, now the main cause of the strikeout and walk excess), contact that is still too square (squared up per contact .50-.52), and the height pattern of fouls (too few fouls on high pitches, which the league fouls up and back).
 
+### Plate discipline: measured, and a first attempt (2026-10-02; engine unchanged at v1.0)
+
+`statcast/discipline.py` measured the league's plate discipline over the same 42 days (163,411 pitches), and `headless/discipline_check.js` measured the model's the same way (400 hitters × 40 PA against 120 pitchers, seed 3). Edge distance is inches from the edge of the rulebook zone, + outside.
+
+| swing probability | 6+ in inside | 0-2 in outside | 6-9 in outside | 12+ in outside |
+|---|---|---|---|---|
+| first pitch: model / league | .78 / .54 | .27 / .26 | .05 / .09 | .00 / .04 |
+| two strikes: model / league | .92 / .95 | .48 / .68 | .12 / .32 | .02 / .08 |
+| breaking balls, all counts: model / league | .89 / .71 | .43 / .48 | .10 / .28 | .01 / .09 |
+
+What the league showed: batters took nearly half of first-pitch strikes down the middle, swung most in hitters' counts (2-1: .60), and chased breaking balls far wider than fastballs (12+ in outside: .09 against .02). Pitchers put more pitches both down the middle and far outside than the model's do: 0-0 pitches 12+ in outside were .047 of pitches (model .010), and 6+ in inside .158 (.083). Within one pitcher, pitch type and batter side, hitters'-count fastballs scattered about 7 in across and 8 in up and down; the model's 6 and 5.
+
+**Tried, and not kept:**
+
+- **Swing or take as a bet on runs.** The thresholds were replaced by the measured run value of a ball, strike, foul and ball in play in each count, against a self-model of what his own swings produce by read and location (`tools/self_model.js`, on the branch `plate-discipline-ev-attempt`). Batters swung at .24 of pitches (league .48). The model's own balls in play were worth about 0.02 runs against the league's 0.05, and the margin between swinging and taking was a few hundredths of a run, so that gap flipped most decisions. With the league's experience in place of the model's, batters swung at .31; the one-pitch bet still took most pitches in hitters' counts (2-1: .20), where the league swings most. Real batters swing there as if contact on the pitch they sit on is worth more than the location averages say; in the model, swings on a recognised other pitch were whiffed and fouled about as often as swings on the expected one, so sitting buys almost nothing.
+- **Deciding on what he could see at the commit point** (a pitch not yet picked up judged where the expected pitch would go). Chase moved .205 → .212; too few breaking balls go unrecognised at the commit point (about one in ten) for it to matter.
+
 ## What was learned building the fielding layer
 
 - **Statcast's outfield JUMP (about 30 ft covered in the first 3 s) is the right anchor for outfielder motion.** The first fielders covered 44 ft in 3 s and caught nearly every fly ball (fly-ball BABIP .03). Slowing everyone to the jump figure fixed the outfield but let 52% of ground balls through, so infielders got their own harder acceleration and a dive reach. That's a real difference: they work from a crouch on a ball that is on them at once.
@@ -380,7 +397,7 @@ What the step did, in these runs:
 
 1. **Contact: fouls are now as many as the league's but too solid, and the hardest contact is too soft.** After bb_engine v1.0 (perception; see that section above), fouls were .49-.50 of contact against .52, but squared up per contact stayed .50-.52 against .435 and per foul .36-.39 against .225; squared up per ball in play ran .64-.66 against .627. EV50 ran 98 against 100.6 and home runs 1.5% of plate appearances against 3.0. The league's high pitches went foul .66 of the time (up and back, under the ball); the model's .46-.47, with the foul share lowest in the upper zone rather than the lower zone.
 2. **Whiffs: on the right pitches now, still a few too many on fastballs; the flat-fastball launch angle is overdone.** With v1.0, fastballs were whiffed .22-.24 of swings (league .17; those he expected .17-.18, those he guessed were something else .28-.31), breaking balls .26-.31 (.31), off-speed .30-.32 (.30); overall .25-.27 against .23. Flat four-seamers were whiffed more and squared up less, as in the league, but their launch angle rose about twice as much as the league's (+12 to +17° against +6.7), and low fastballs still launched above low breaking balls (10.5-13.1° against 6.5-8.2°; league 2.0 and 8.0).
-3. **Batters are too passive, and it now shows as strikeouts and walks.** With v1.0, batters swung at .413 of pitches and chased .207 against .480 and .284, and pitchers threw .470 of pitches in the zone against .507 (a scratch run of 12,000 plate appearances; v0.9 .409, .206, .478). Once fouls came to the league's share, plate appearances lasted 3.99 pitches (league 3.88) and fewer ended with a ball in play, so K% in games ran 29.1-29.7 against 22.6 and BB% 12.7-13.0 against 8.2 (v0.9 25.4-25.6 and 10.5-10.7). The swing decision and the pitcher's choice of target are the places to look.
+3. **Batters are too passive, and it now shows as strikeouts and walks.** With v1.0, batters swung at .413 of pitches and chased .207 against .480 and .284, and pitchers threw .470 of pitches in the zone against .507. Once fouls came to the league's share, plate appearances lasted 3.99 pitches (league 3.88), so K% in games ran 29.1-29.7 against 22.6 and BB% 12.7-13.0 against 8.2. The plate-discipline measurement (section above) located it: too many swings at middle strikes early, too few at borderline pitches with two strikes and in hitters' counts, too little chase of breaking balls, and pitch locations bunched near the edges. A one-pitch run-value bet made it worse. What looks missing: a real payoff to sitting on a pitch, breaking balls that fool the batter at the commit point more often, and wider pitch locations (vertical command, waste pitches).
 4. **Home runs.** They ran 2.0% of plate appearances against 3.0%, and 11% of fly balls against 17%. See the drag proxy above; exit velocity is also too uniform.
 5. **Spray is too centred.** Centre field took 42% against 34%, opposite field 20% against 26%.
 6. **Hit-by-pitch** ran 0.4% against 1.1%.
