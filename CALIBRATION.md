@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v0.7 · 2026-10-01`
+`CALIBRATION.md · v0.8 · 2026-10-02`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -129,10 +129,10 @@ Three mechanisms, built one at a time with the whole suite after each: `run_game
 
 | power_chain, seeds 3 / 11 | v0.7 | + bat | + arc | + second look (kept) | 2025 / MLB |
 |---|---|---|---|---|---|
-| squared-up per contact, own q | .782 / .758 | .731 / – | .720 / .698 | .735 / .721 | .337 |
-| squared-up per contact, Statcast proxy | .744 / .716 | .748 / – | .738 / .716 | .752 / .737 | .337 |
-| squared-up per ball in play | .836 / .830 | .833 / – | .833 / – | .837 / .834 | ~.66 |
-| squared-up per foul | .620 / .575 | .635 / – | .608 / .572 | .631 / .603 | ~.05 (implied) |
+| squared-up per contact, own q | .782 / .758 | .731 / – | .720 / .698 | .735 / .721 | .435 (floor .392)* |
+| squared-up per contact, Statcast proxy | .744 / .716 | .748 / – | .738 / .716 | .752 / .737 | .435 (floor .392)* |
+| squared-up per ball in play | .836 / .830 | .833 / – | .833 / – | .837 / .834 | .627* |
+| squared-up per foul | .620 / .575 | .635 / – | .608 / .572 | .631 / .603 | .225 (floor .184)* |
 | whiff per swing | .243 / .252 | .248 / – | .264 / .274 | .198 / .199 | .238 |
 | K% | .215 / .255 | .215 / – | .225 / .269 | .172 / .216 | .204 |
 | exit velo avg | 93.9 / 93.3 | 93.3 / – | 93.2 / 92.7 | 93.6 / 93.2 | 89.7 |
@@ -147,6 +147,8 @@ Three mechanisms, built one at a time with the whole suite after each: `run_game
 | whiff by read: read / late / fooled | – | – | – | .06 / .42 / .31 (52 / 19 / 29% of swings) | – |
 | contact 3-6 in toward the end: share / sq-up / EV | .13 / .72 / 90.9 | .13 / .48 / 81.9 | .13 / .47 / 81.5 | .12 / .48 / 81.6 | – |
 | contact 3-6 in toward the hands: share / sq-up / EV | .12 / .43 / 82.9 | .13 / .53 / 83.9 | .12 / .53 / 84.2 | .12 / .50 / 83.3 | – |
+
+\* Revised 2026-10-02 from pitch-level Statcast (42 days of 2025; "What a foul is" in STATCAST_TARGETS_2025.md). The table first carried .337 per contact (the bat-tracking leaderboard), ~.66 per ball in play (a FanGraphs piece) and ~.05 per foul implied by the two. Squared up is Statcast's rule applied to every tracked contact; the floor counts untracked contact (foul tips, 18% of fouls) as not squared. The leaderboard's .337 was not reproduced pitch by pitch and is defined differently.
 
 | league line, seeds 3 / 11 / 29 | v0.7 | + bat | + arc | + second look (kept) | MLB |
 |---|---|---|---|---|---|
@@ -169,7 +171,26 @@ What the three steps showed, in these runs:
 2. **The arc was small and cost whiffs.** The big timing errors of fooled swings, which v0.7 had turned into solid pulled and sliced fouls, now went over the ball: whiffs +.02, fouls −.005, launch angle mean 11.6 → 10.3°. It is kept as geometry the engine had left out, but it did not make fouls glancing: the fouls it removed were the solid ones, and the swings became whiffs rather than mishits, because the vertical offset distribution is narrow and a timing error of 15 ms tops the ball by only an inch.
 3. **The second look freed the whiff budget and showed where the contact problem really is.** Whiffs fell .26 → .20 per swing and league K% 26.7 → 21.7 (MLB 22.6), home runs rose to 0.84, and the fastball whiff rate came to .19-.20 (MLB .20). But the swings that stopped whiffing became clean contact, not mishits: squared-up per contact .72 → .73, per ball in play .83, hits 9.3 per game against 8.15, BABIP .32 against .29, average .262 against .243. Fouls were unchanged at .13 per pitch and 60% squared up. Breaking balls were still whiffed on only .17-.19 of swings against .33: a slider's gap from a fastball ghost is large and visible by the commit point, so it is read and hit, where the league swings over it.
 
-What this leaves as the contact problem, now with the whiff budget out of the way: (a) **what a foul is.** The league's fouls are half of all contact and almost never squared up; the model's are 43% of contact and 60% squared up, and they are mostly timing fouls on solid contact. The pitch-level Statcast feed (the Savant search CSV carries launch speed and bat speed on fouls where tracked) would settle the real foul composition before another mechanism is built for it. (b) **Fair contact quality.** Squared-up per ball in play .83 against about .66, exit velocity 93 against 89.7, spread 10.5 against 14, ground balls at 94 mph against 86. With the collision now physical along the barrel, the remaining lever is the distribution of vertical offsets, which is motor (barrelSD 0.62 in) plus perception; the trade-off map above says a wider vertical spread buys mishits only with whiffs, so the perception part must be the kind that makes glancing contact rather than misses - a systematic height error that depends on pitch height and type (hitters under high fastballs, over low breaking balls), not a wider random one. (c) **BABIP by type** is a fielding-layer matter: ground balls fell in at .305 against .24 and fly balls at .196 against .12 at seed 3.
+What this leaves as the contact problem, now with the whiff budget out of the way: (a) **what a foul is.** The model's fouls are 43% of contact and 60% squared up, mostly timing fouls on solid contact. This was written when the league's fouls were thought to be almost never squared up; the measurement below says otherwise. (b) **Fair contact quality.** Squared-up per ball in play .83 against about .66, exit velocity 93 against 89.7, spread 10.5 against 14, ground balls at 94 mph against 86. With the collision now physical along the barrel, the remaining lever is the distribution of vertical offsets, which is motor (barrelSD 0.62 in) plus perception; the trade-off map above says a wider vertical spread buys mishits only with whiffs, so the perception part must be the kind that makes glancing contact rather than misses - a systematic height error that depends on pitch height and type (hitters under high fastballs, over low breaking balls), not a wider random one. (c) **BABIP by type** is a fielding-layer matter: ground balls fell in at .305 against .24 and fly balls at .196 against .12 at seed 3.
+
+**The league's fouls, measured (2026-10-02).** Every pitch of 552 games of 2025 (2025-05-05..05-18, 06-30..07-13, 09-08..09-21; 165,166 pitches, 78,837 swings; `statcast/fetch_pitches.py`, `statcast/fouls.py`, tables in STATCAST_TARGETS_2025.md) replaced the inference above:
+
+| league, 42 days of 2025 | value | n |
+|---|---|---|
+| fouls / contact | .521 | 60,571 contacts |
+| whiff / swing | .232 | 78,837 swings |
+| squared up per contact (floor) | .435 (.392) | 52,843 tracked |
+| squared up per ball in play | .627 | 27,565 |
+| squared up per foul (floor) | .225 (.184) | 25,278 tracked |
+| foul exit speed, mean / sd / median | 76.7 / 13.1 / 76.6 mph | 25,798 |
+| fouls under 80 mph / at 90+ | .640 / .138 | 25,798 |
+| ball-in-play exit speed, mean / sd / median | 88.9 / 15.2 / 92.0 mph | 28,914 |
+| foul / contact by contact depth: 10-20 in / 30-40 in / >50 in | .706 / .425 / .780 | 8,529 / 18,727 / 785 |
+
+1. **Fouls were half of contact, as assumed, but a fifth of them were squared up, not almost none.** They were weaker than balls in play (median 77 against 92 mph), but not mostly glancing.
+2. **The gap is not mostly fouls.** The league's fouls gave .521 × .225 = .12 squared-up per contact against the model's about .27; its balls in play gave .479 × .627 = .30 against the model's .48. Fair contact (about .18) carried at least as much of the gap as fouls (about .15), so (a) and (b) are one problem of equal halves, and the mechanism that makes contact less clean has to act on fair balls as much as on fouls.
+3. **The target per contact is .39-.44, not .34.** The model's .735-.752 is .30 above it, not .40.
+4. **Contact depth decided fouls.** Contact met late (10-20 in in front of the batter) or far out front went foul most often, and squared up least far out front. A timing error that turns into a foul is real; the model's problem is that its timing fouls are solid.
 
 ## What was learned building the fielding layer
 
@@ -188,7 +209,7 @@ What this leaves as the contact problem, now with the whiff budget out of the wa
 
 ## Known gaps, to fix with mechanisms rather than knob-turning
 
-1. **Contact is too clean, and the fouls are the bulk of it.** Partly addressed in bb_engine v0.8 (the bat as a beam, the swing's arc, the second look; see "The bat, the swing's arc and the second look" above): whiffs and K% now sit at the league's figures, but squared-up per contact runs .72-.74 against .34, per ball in play .83 against about .66, exit velocity 93 against 89.7 with spread 10.5 against 14, fouls .13 per pitch against .18 and 60% squared up where the league's almost never are. Next: the real foul composition from pitch-level Statcast, then a height-and-type-dependent perception error rather than a wider random one.
+1. **Contact is too clean, on fouls and fair balls about equally.** Partly addressed in bb_engine v0.8 (the bat as a beam, the swing's arc, the second look; see "The bat, the swing's arc and the second look" above): whiffs and K% now sit at the league's figures, but squared-up per contact runs .72-.74 against .435 (floor .39), per ball in play .83 against .627, per foul about .62 against .225, exit velocity 93 against 89.7 with spread 10.5 against 14, fouls .13 per pitch against .18. The foul composition is now measured ("The league's fouls, measured" above): fouls and fair balls each carry about half of the excess. Next: a height-and-type-dependent perception error rather than a wider random one, judged on fouls and balls in play together.
 2. **Whiff rate by pitch type.** With v0.8's second look, fastballs were whiffed on .19-.20 of swings (MLB .20) and off-speed .25-.27 (.32), but breaking balls only .17-.19 (.33): a slider's gap from the fastball ghost is large and visible by the commit point, so it is read and hit where the league swings over it. The detection function's dependence on separation, and the swing decision on breaking balls below the zone, are the places to look.
 3. **Batters are too passive.** Chase rate was 22% against 28.5%, and walks 11–12% against 8.2%.
 4. **Home runs.** They ran 2.0% of plate appearances against 3.0%, and 11% of fly balls against 17%. See the drag proxy above; exit velocity is also too uniform.
