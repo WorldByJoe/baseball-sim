@@ -1,5 +1,5 @@
 """
-targets.py · v0.2 · 2026-09-30
+targets.py · v0.3 · 2026-10-01
 
 Turns the raw Savant leaderboards and the MLB player list (statcast/raw/<year>/)
 into the empirical TARGETS for the latent-trait layer: for each measurable,
@@ -16,6 +16,7 @@ Derived proxies, labelled as such:
 Run:  python3 statcast/targets.py 2025
 
 CHANGED
+  v0.3  keeps the pitch-level section ("What a foul is", statcast/fouls.py) when it rewrites the targets file
   v0.2  the tails: top/bottom names, max in sd units against a normal's expected max, skew (Joe: do the exceptional survive a normal draw?)
   v0.1  first build (tempo read by column position: the Savant header repeats a name)
 """
@@ -260,7 +261,14 @@ def main(year):
     md.append('- base stealers\' leads: primary and secondary, overall and on attempts (ft), attempt rate per opportunity and success fraction: above')
     md.append('- catchers: pop time to second, exchange time, max-effort arm (mph): above')
     md.append('')
-    with open('STATCAST_TARGETS_%d.md' % year, 'w') as f: f.write('\n'.join(md))
+    # the pitch-level section (statcast/fouls.py) lives in the same file; keep it
+    path = 'STATCAST_TARGETS_%d.md' % year
+    kept = ''
+    if os.path.exists(path):
+        with open(path) as f: old = f.read()
+        i = old.find('\n## What a foul is')
+        if i >= 0: kept = old[i:]
+    with open(path, 'w') as f: f.write('\n'.join(md).rstrip('\n') + '\n' + kept)
     with open(os.path.join('statcast', 'targets_%d.json' % year), 'w') as f: json.dump(out, f, indent=1)
     print('wrote STATCAST_TARGETS_%d.md and statcast/targets_%d.json  (hitters %d, catchers %d, pitchers %d)' % (year, year, len(H), len(C), len(T)))
 
