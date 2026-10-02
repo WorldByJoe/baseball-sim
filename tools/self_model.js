@@ -56,7 +56,7 @@
   print('  var SELF = {');
   ['on', 'off'].forEach(function (s, si) {
     var rows = cells[s].map(function (c, k) {
-      if (c.sw < 40) {   // too few swings to measure (he lays off there): the league's figures, his prior knowledge
+      if (c.sw < 150) {   // too few swings to measure (he lays off there): the league's figures, his prior knowledge
         var L = DISCIPLINE.outcome_by_edge[k];
         return '[' + [r3(L.whiff), r3(L.foul_of_contact), r3(k === AT.length - 1 ? DISCIPLINE.outcome_by_edge[k - 1].rv_in_play : L.rv_in_play)].join(', ') + ']';
       }

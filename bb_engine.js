@@ -1012,9 +1012,9 @@ var BB = (function () {
   // what his own swings do: rerun the tool after any change to the swing.
   var SELF_AT = [-7, -5, -3, -1, 1, 3, 5, 7.5, 10.5, 14];
   var SELF = {
-    on:  [[0.289, 0.407, 0.027], [0.264, 0.411, 0.028], [0.283, 0.434, 0.018], [0.3, 0.431, 0.033], [0.304, 0.447, -0.013],
+    on:  [[0.285, 0.409, 0.051], [0.28, 0.419, 0.05], [0.276, 0.426, 0.064], [0.282, 0.431, 0.038], [0.347, 0.485, 0.019],
           [0.385, 0.6, 0.011], [0.501, 0.64, -0.033], [0.634, 0.662, -0.032], [0.822, 0.768, -0.064], [0.924, 0.686, -0.064]],
-    off: [[0.216, 0.586, 0.016], [0.222, 0.567, 0.007], [0.243, 0.567, 0.006], [0.267, 0.548, -0.008], [0.283, 0.541, -0.009],
+    off: [[0.208, 0.587, 0.026], [0.239, 0.587, 0.015], [0.227, 0.584, -0.006], [0.295, 0.575, 0.013], [0.338, 0.574, 0.031],
           [0.385, 0.6, 0.011], [0.501, 0.64, -0.033], [0.634, 0.662, -0.032], [0.822, 0.768, -0.064], [0.924, 0.686, -0.064]]
   };
   var AGGR_RV = 0.2;   // runs per unit of his aggression trait, added to the swing's side of the bet: PROVISIONAL, not fitted
@@ -1037,12 +1037,17 @@ var BB = (function () {
   // up where the pitch he expected would go, corrected only for the break
   // that had shown itself (rf.base). Then the eye's own scatter (eyeSD,
   // larger under time pressure). The swing is then steered by later tracking.
+  var LOC_AT = [-8, -5, -3, -1, 1, 3, 5, 7.5, 10.5, 15];
+  var LOC_PRIOR = {"first": [0.158, 0.127, 0.138, 0.13, 0.118, 0.095, 0.069, 0.074, 0.043, 0.047], "ahead": [0.165, 0.136, 0.147, 0.133, 0.12, 0.092, 0.067, 0.065, 0.037, 0.038], "three0": [0.185, 0.138, 0.169, 0.146, 0.109, 0.08, 0.065, 0.059, 0.027, 0.021], "even": [0.126, 0.111, 0.123, 0.124, 0.117, 0.102, 0.083, 0.088, 0.057, 0.071], "two": [0.115, 0.095, 0.113, 0.114, 0.111, 0.097, 0.082, 0.096, 0.066, 0.112]};
+  function priorGroup(st) { var b = st.balls, k = st.strikes; return k === 2 ? 'two' : b === 0 && k === 0 ? 'first' : b === 3 && k === 0 ? 'three0' : b > k ? 'ahead' : 'even'; }
   function decide(B, pitch, gh, rf, st, rng) {
     var m = rf.detected ? rf.err : rf.base, mx = m[0], mz = m[1];
     var eye = B.eyeSD * IN * rf.tp;
     var xp = pitch.plate.x + mx + rng.n(0, eye), zp = pitch.plate.z + mz + rng.n(0, eye);
-    var pin = Phi((ZONE_HALF - Math.abs(xp)) / eye) * Phi((zp - (B.zone.bot - BALL_R)) / eye) * Phi((B.zone.top + BALL_R - zp) / eye);
-    var state = rf.detected && !rf.same ? 'off' : 'on', o = selfAt(state, edgeIn(B, xp, zp) / IN), c = COUNT_RV[st.balls + '-' + st.strikes];
+    var eIn = edgeIn(B, xp, zp) / IN, sIn = eye / IN, pr = LOC_PRIOR[priorGroup(st)], num = 0, den = 0;
+    for (var i = 0; i < LOC_AT.length; i++) { var lk = pr[i] * Math.exp(-0.5 * Math.pow((eIn - LOC_AT[i]) / sIn, 2)); den += lk; if (LOC_AT[i] < 0) num += lk; }
+    var pin = den > 0 ? num / den : 0;
+    var state = rf.detected && !rf.same ? 'off' : 'on', o = selfAt(state, eIn), c = COUNT_RV[st.balls + '-' + st.strikes];
     var takeV = pin * c[1] + (1 - pin) * c[0];
     var swingV = o[0] * c[1] + (1 - o[0]) * (o[1] * c[2] + (1 - o[1]) * (o[2] + c[3] - BIP_RV_ALL));
     var gain = swingV - takeV + B.aggr * AGGR_RV;
