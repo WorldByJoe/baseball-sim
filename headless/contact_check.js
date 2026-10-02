@@ -1,9 +1,9 @@
 /* ============================================================================
-   contact_check.js · v0.1 · 2026-10-02
+   contact_check.js · v0.2 · 2026-10-02
 
    Measures the model's contact the way the league's was measured pitch by
    pitch (STATCAST_TARGETS_2025.md, "What a foul is", and the height tables
-   in docs/briefs/2026-10-02_perception_error.md), and prints each table with
+   in statcast/fouls.py v0.3, tables 9-11), and prints each table with
    the league's numbers beside it: what a swing becomes, squared-up contact,
    exit velocity and launch angle of balls in play and fouls, exit velocity by
    launch angle, contact by depth (how far in front of the plan the ball was
@@ -17,25 +17,28 @@
    Run:  jsc ../bb_engine.js ../bb_names.js ../bb_field.js ../bb_game.js contact_check.js -- [hitters] [PA each] [seed]
 
    CHANGED
+     v0.2  the height tables (statcast/fouls.py v0.3, 9-11): height, kind at a height, the
+           flat-fastball fifths; whiffs split by read (expected pitch, read, late, fooled); 120 pitchers
      v0.1  first build
 ============================================================================ */
 (function (A) {
   var N = +A[0] || 400, NPA = +A[1] || 40, SEED = +A[2] || 3, U = BB.units, MPH = U.MPH, IN = U.IN, DEG = U.DEG;
   var rng = BB.makeRng(SEED + 101), env = BB.mlbEnv(rng), ump = BB.makeUmp(rng), P = [];
-  for (var i = 0; i < 24; i++) P.push(BB.makePitcher(rng, { role: i < 14 ? 'SP' : 'RP' }));
+  for (var i = 0; i < 120; i++) P.push(BB.makePitcher(rng, { role: i % 12 < 7 ? 'SP' : 'RP' }));   // 120 pitchers: with pitch shapes as varied as the league's, a small staff skews the tables
   function kindOf(t) { return BB.PITCH_TYPES[t].kind; }
   var sw = [];   // one record per swing
   for (i = 0; i < N; i++) {
     var B = BB.makeBatter(rng, {});
     for (var k = 0; k < NPA; k++) {
-      var Pi = P[k % P.length]; Pi.load = rng.u() * Pi.stamina;
+      var Pi = P[(i * NPA + k) % P.length]; Pi.load = rng.u() * Pi.stamina;
       var res = BB.simPA(Pi, B, { env: env, ump: ump, framing: 0, seen: rng.u() * 80, rec: false }, rng);
       res.pitches.forEach(function (q) {
         if (!q.swing) return;
         var pz = q.pitch.plate.z, px = q.pitch.plate.x, h = (pz - B.zone.bot) / (B.zone.top - B.zone.bot);
-        var r = { kind: kindOf(q.pitch.type), strikes: +q.count.split('-')[1], h: h, inZone: BB.inZone(B, px, pz), contact: !!q.swing.contact,
+        var vv = q.pitch.plate.v, vaa = -Math.atan(vv[2] / vv[1]) / DEG;   // vertical approach angle at the front of the plate, negative = descending
+        var r = { type: q.pitch.type, vaa: vaa, kind: kindOf(q.pitch.type), strikes: +q.count.split('-')[1], h: h, inZone: BB.inZone(B, px, pz), contact: !!q.swing.contact,
                   bat: q.swing.batAt || q.swing.batMph, mph: q.pitch.mph, away: -px * BB.batterSide(B, Pi), depth: 29 + (q.swing.depth !== undefined ? q.swing.depth : (q.swing.sFwd || 0)) / IN, attack: q.swing.attackAt !== undefined ? q.swing.attackAt : q.swing.attack };
-        r.facePull = q.swing.theta * BB.batterSide(B, Pi) / DEG; r.why = q.swing.why; r.read = q.read.detected ? 'read' : q.read.late ? 'late' : 'fooled';
+        r.facePull = q.swing.theta * BB.batterSide(B, Pi) / DEG; r.why = q.swing.why; r.read = q.expect.guessType === q.pitch.type ? 'expected' : q.read.detected ? 'read' : q.read.late ? 'late' : 'fooled';
         // spray + = pulled: a right-handed batter, on the -x side, pulls toward -x
         if (q.bb) { r.ev = q.bb.ev; r.la = q.bb.la; r.fair = !!q.bb.fair; r.spray = q.bb.spray * BB.batterSide(B, Pi); r.sq = q.bb.ev >= 0.8 * (1.23 * r.bat + 0.23 * r.mph); }
         else if (r.contact) { r.fair = false; r.tip = true; }   // contact with no batted ball: a foul tip into the mitt
@@ -51,7 +54,7 @@
   function row(cells, w) { print(cells.map(function (c, j) { return pad(c, w[j] || 9); }).join('')); }
   var contact = sw.filter(function (r) { return r.contact; }), tracked = contact.filter(function (r) { return r.ev !== undefined; });
   var bip = tracked.filter(function (r) { return r.fair; }), fouls = tracked.filter(function (r) { return !r.fair; });
-  print('contact_check v0.1 · seed ' + SEED + ' · ' + N + ' hitters x ' + NPA + ' PA · ' + sw.length + ' swings, ' + contact.length + ' contacts');
+  print('contact_check v0.2 · seed ' + SEED + ' · ' + N + ' hitters x ' + NPA + ' PA · ' + sw.length + ' swings, ' + contact.length + ' contacts');
 
   print('\n1. WHAT A SWING BECOMES            whiff    foul  in play  foul/contact   |  league whiff foul/contact');
   var L1 = { all: [.232, .521], FB: [.172, .548], BR: [.308, .489], OS: [.299, .472], 0: [.237, .522], 1: [.237, .516], 2: [.223, .525] };
@@ -64,7 +67,13 @@
   var wh = sw.filter(function (r) { return !r.contact; }), why = {};
   wh.forEach(function (r) { var k = r.why || '?'; why[k] = (why[k] || 0) + 1; });
   print('   whiffs by cause (share of swings): ' + Object.keys(why).sort().map(function (k) { return k + ' ' + f(why[k] / sw.length); }).join('  '));
-  ['read', 'late', 'fooled'].forEach(function (k) { var s2 = sw.filter(function (r) { return r.read === k; }); print('   ' + k + ': ' + f(s2.length / sw.length, 2) + ' of swings, whiff ' + f(s2.filter(function (r) { return !r.contact; }).length / s2.length)); });
+  ['FB', 'BR', 'OS'].forEach(function (kd) {
+    var s3 = sw.filter(function (r) { return r.kind === kd; }), w3 = {};
+    s3.filter(function (r) { return !r.contact; }).forEach(function (r) { var k = (r.why || '?') + '/' + r.read; w3[k] = (w3[k] || 0) + 1; });
+    print('   ' + kd + ' whiffs by cause/read (share of ' + kd + ' swings): ' + Object.keys(w3).sort(function (a, b) { return w3[b] - w3[a]; }).slice(0, 6).map(function (k) { return k + ' ' + f(w3[k] / s3.length); }).join('  '));
+    print('      read shares: ' + ['expected', 'read', 'late', 'fooled'].map(function (k) { var q = s3.filter(function (r) { return r.read === k; }); return k + ' ' + f(q.length / s3.length, 2) + ' (whiff ' + f(q.filter(function (r) { return !r.contact; }).length / Math.max(1, q.length)) + ')'; }).join('  '));
+  });
+  ['expected', 'read', 'late', 'fooled'].forEach(function (k) { var s2 = sw.filter(function (r) { return r.read === k; }); print('   ' + k + ': ' + f(s2.length / sw.length, 2) + ' of swings, whiff ' + f(s2.filter(function (r) { return !r.contact; }).length / s2.length)); });
   var spv = bip.map(function (r) { return r.spray; });
   function slope(xs, ys) { var mx = mean(xs), my = mean(ys), sxy = 0, sxx = 0, syy = 0; for (var j = 0; j < xs.length; j++) { sxy += (xs[j] - mx) * (ys[j] - my); sxx += (xs[j] - mx) * (xs[j] - mx); syy += (ys[j] - my) * (ys[j] - my); } return [sxy / sxx, sxy / Math.sqrt(sxx * syy)]; }
   var s1 = slope(bip.map(function (r) { return r.depth; }), bip.map(function (r) { return r.facePull; })), s2 = slope(bip.map(function (r) { return r.facePull; }), spv), s3 = slope(bip.map(function (r) { return r.depth; }), spv);
@@ -139,14 +148,42 @@
   });
   print('\n7. BY PITCH HEIGHT (0 = bottom of his zone, 1 = top)');
   row(['height', 'swings', 'whiff', 'foul/contact', 'squared', 'BIP LA', 'BIP EV', 'foul LA', '| league: whiff  foul  sq   BIP LA  BIP EV  foul LA'], [12, 8, 8, 14, 9, 8, 8, 9, 52]);
-  var HB = [[-9, -0.25, '.765 .626 .286  -0.4  75.7  -9.3'], [-0.25, 0.15, '.349 .497 .423   5.1  87.2  -3.3'], [0.15, 0.5, '.139 .462 .468  10.7  90.5  16.8'],
-            [0.5, 0.85, '.138 .531 .416  18.0  88.9  34.1'], [0.85, 1.25, '.268 .653 .409  23.2  86.5  39.3'], [1.25, 9, '.503 .740 .544  23.4  83.5  38.1']];
+  var HB = [[-9, -0.25, '.766 .627 .286  -0.1  76.0  -9.2'], [-0.25, 0.15, '.349 .498 .424   5.4  87.4  -3.3'], [0.15, 0.5, '.139 .464 .468  11.1  91.0  16.8'],
+            [0.5, 0.85, '.138 .533 .415  18.5  89.5  34.2'], [0.85, 1.25, '.268 .658 .408  24.1  87.9  39.3'], [1.25, 9, '.499 .731 .549  22.5  87.1  38.1']];
   HB.forEach(function (b) {
     var s = sw.filter(function (r) { return r.h >= b[0] && r.h < b[1]; }), c = s.filter(function (r) { return r.contact; }), t = c.filter(function (r) { return r.ev !== undefined; });
     var ib = t.filter(function (r) { return r.fair; }), fb = t.filter(function (r) { return !r.fair; });
     row([f(b[0], 2) + '..' + f(b[1], 2), s.length, f(1 - c.length / s.length), f(c.filter(function (r) { return !r.fair; }).length / c.length), f(t.filter(function (r) { return r.sq; }).length / t.length),
          f(mean(ib.map(function (r) { return r.la; })), 1), f(mean(ib.map(function (r) { return r.ev; })), 1), f(mean(fb.map(function (r) { return r.la; })), 1), '|        ' + b[2]], [12, 8, 8, 14, 9, 8, 8, 9, 52]);
   });
+  function grp(s) { var c = s.filter(function (r) { return r.contact; }), t = c.filter(function (r) { return r.ev !== undefined; }), ib = t.filter(function (r) { return r.fair; }), fb = t.filter(function (r) { return !r.fair; });
+    return { n: s.length, whiff: 1 - c.length / Math.max(1, s.length), foul: c.filter(function (r) { return !r.fair; }).length / Math.max(1, c.length), sq: t.filter(function (r) { return r.sq; }).length / Math.max(1, t.length),
+             bipLA: mean(ib.map(function (r) { return r.la; })), foulLA: mean(fb.map(function (r) { return r.la; })), nt: t.length }; }
+  print('\n7a. CONTACT DEPTH BY PITCH KIND (in in front of the batter)   |  league (one week of July 2025): FB 27-28, BR 35-36, OS 34-35');
+  ['FB', 'BR', 'OS'].forEach(function (k) { var c = contact.filter(function (r) { return r.kind === k; }); print('   ' + k + ' ' + f(mean(c.map(function (r) { return r.depth; })), 1) + ' (n ' + c.length + ')'); });
+  print('\n7b. BY PITCH KIND AT A HEIGHT: launch angle of balls in play and of fouls   |  league (statcast/fouls.py v0.3, 42 days)');
+  [['low edge', -0.25, 0.15, 'BIP FB 2.0 / BR 8.0   fouls FB +4.4 / BR -5.5'], ['lower zone', 0.15, 0.5, 'BIP FB 9.8 / BR 14.0'], ['high edge', 0.85, 1.25, 'FB foul share .672, foul LA 39.7']].forEach(function (b) {
+    var a = grp(sw.filter(function (r) { return r.kind === 'FB' && r.h >= b[1] && r.h < b[2]; })), c = grp(sw.filter(function (r) { return r.kind === 'BR' && r.h >= b[1] && r.h < b[2]; }));
+    print('   ' + pad(b[0], 10) + '  BIP FB ' + f(a.bipLA, 1) + ' / BR ' + f(c.bipLA, 1) + '   fouls FB ' + f(a.foulLA, 1) + ' / BR ' + f(c.foulLA, 1) + '   FB foul share ' + f(a.foul) + '   |  ' + b[3]);
+  });
+  function vaaTable(title, pick, league) {
+    var s = sw.filter(pick); if (s.length < 50) return;
+    var xs = s.map(function (r) { return r.h; }), ys = s.map(function (r) { return r.vaa; }), mx = mean(xs), my = mean(ys), sxy = 0, sxx = 0;
+    for (var j = 0; j < s.length; j++) { sxy += (xs[j] - mx) * (ys[j] - my); sxx += (xs[j] - mx) * (xs[j] - mx); }
+    var b = sxy / sxx; s.forEach(function (r) { r.vres = r.vaa - (my + b * (r.h - mx)); });
+    s.sort(function (p, q) { return p.vres - q.vres; });
+    print('\n' + title + ' (swings ' + s.length + '; VAA mean ' + f(my, 2) + ', ' + f(b, 2) + ' deg per zone height)');
+    row(['VAA residual', 'mean', 'swings', 'whiff', 'foul/contact', 'squared', 'BIP LA', 'foul LA', '| league: whiff foul sq BIP LA foul LA'], [14, 7, 8, 7, 14, 9, 8, 8, 40]);
+    var names = ['steepest', '2', '3', '4', 'flattest'];
+    for (var k = 0; k < 5; k++) {
+      var part = s.slice(Math.floor(k * s.length / 5), Math.floor((k + 1) * s.length / 5)), gq = grp(part);
+      row([names[k], f(mean(part.map(function (r) { return r.vres; })), 2), part.length, f(gq.whiff), f(gq.foul), f(gq.sq), f(gq.bipLA, 1), f(gq.foulLA, 1), '|  ' + (league[k] || '')], [14, 7, 8, 7, 14, 9, 8, 8, 40]);
+    }
+  }
+  vaaTable('7c. FOUR-SEAMERS IN THE UPPER ZONE AND HIGH EDGE (0.5-1.25), BY HOW FLAT THEY ARRIVE FOR THEIR HEIGHT', function (r) { return r.type === 'FF' && r.h >= 0.5 && r.h < 1.25; },
+    ['.142 .555 .452 20.7 38.4', '.182 .613 .410 23.0 40.1', '.205 .634 .413 22.3 40.1', '.226 .668 .379 26.9 40.9', '.285 .688 .340 27.4 41.6']);
+  vaaTable('7d. LOW FOUR-SEAMERS (0-0.5)', function (r) { return r.type === 'FF' && r.h >= 0 && r.h < 0.5; }, ['whiff .08, squared .49, BIP LA 11.2', '', '', '', 'whiff .15, squared .36, BIP LA 19.0']);
+  vaaTable('7e. LOW BREAKING BALLS (-0.25-0.5)', function (r) { return r.kind === 'BR' && r.h >= -0.25 && r.h < 0.5; }, ['whiff .22, squared .50, foul LA -7.6', '', '', '', 'whiff .33, squared .42, foul LA +10.0']);
   print('\n8. ZONE              swings   whiff  foul/contact  squared   |  league whiff foul/contact squared');
   [['in zone', true, '.150 .500 .459'], ['out of zone', false, '.430 .599 .343']].forEach(function (g) {
     var s = sw.filter(function (r) { return r.inZone === g[1]; }), c = s.filter(function (r) { return r.contact; }), t = c.filter(function (r) { return r.ev !== undefined; });
