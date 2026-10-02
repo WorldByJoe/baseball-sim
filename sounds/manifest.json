@@ -1,0 +1,1678 @@
+{
+ "version": "0.1",
+ "date": "2026-10-02",
+ "sounds": {
+  "bed_sparse": {
+   "group": "beds",
+   "loop": true,
+   "files": [
+    {
+     "file": "beds/bed_sparse_01.ogg",
+     "dur": 60.0,
+     "lufs": -26.71,
+     "source": "https://freesound.org/people/kvgarlic/sounds/649722/",
+     "author": "kvgarlic",
+     "licence": "CC0",
+     "title": "Baseball Riverside Park AUGUST 27 2022.WAV",
+     "processing": "Freesound HQ preview (mp3), original needs a login; took 60+2 s from 368.0 s; seamless loop: last 2 s crossfaded (equal-power) into the start; stereo 44.1 kHz; loudness two-pass: I -33.70 TP -2.24 -> gain 7.24 dB, up to 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 128 kbps",
+     "note": "small-town baseball game, parents and kids; quietest stable minute (368-430 s)",
+     "doubt": "Source mentions the crack of an aluminium bat; one louder spike (~25 s) may be a bat hit inside the loop."
+    },
+    {
+     "file": "beds/bed_sparse_02.ogg",
+     "dur": 56.0,
+     "lufs": -23.09,
+     "source": "https://freesound.org/people/Pooleside/sounds/59765/",
+     "author": "Pooleside",
+     "licence": "CC-BY 4.0",
+     "title": "08lesson01.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; took 56+2 s from 1.0 s; seamless loop: last 2 s crossfaded (equal-power) into the start; stereo 44.1 kHz; loudness two-pass: I -31.11 TP -15.77 -> gain 8.11 dB; Ogg Vorbis 128 kbps",
+     "note": "minor-league ballpark: chatter, a fan, a vendor \"cold beer here\", father explaining the game (1-59 s)",
+     "doubt": "Minor-league crowd with close, intelligible speech (a father explaining the game) and a vendor; may sound repetitive when looped."
+    },
+    {
+     "file": "beds/bed_sparse_03.ogg",
+     "dur": 60.0,
+     "lufs": -23.1,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07028009",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Sport: Association rugby, Middlesex v. Gloucester, people in stands before match.",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); took 60+2 s from 110.0 s; seamless loop: last 2 s crossfaded (equal-power) into the start; stereo 44.1 kHz; loudness two-pass: I -24.40 TP -8.04 -> gain 1.40 dB; Ogg Vorbis 128 kbps",
+     "note": "rugby crowd in the stands before the match (110-172 s)",
+     "doubt": "British rugby crowd before a match, not a ballpark."
+    }
+   ]
+  },
+  "bed_normal": {
+   "group": "beds",
+   "loop": true,
+   "files": [
+    {
+     "file": "beds/bed_normal_01.ogg",
+     "dur": 60.0,
+     "lufs": -23.15,
+     "source": "https://freesound.org/people/AshFox/sounds/191917/",
+     "author": "AshFox",
+     "licence": "CC-BY 3.0",
+     "title": "WALLA Ballpark Chatter",
+     "processing": "Freesound HQ preview (mp3), original needs a login; took 60+2 s from 18.0 s; seamless loop: last 2 s crossfaded (equal-power) into the start; stereo 44.1 kHz; loudness two-pass: I -34.12 TP -15.53 -> gain 11.12 dB; Ogg Vorbis 128 kbps",
+     "note": "Rangers Ballpark plain chatter bed, no cheering (18-80 s)"
+    },
+    {
+     "file": "beds/bed_normal_02.ogg",
+     "dur": 42.0,
+     "lufs": -23.11,
+     "source": "https://freesound.org/people/craigsmith/sounds/675194/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "S14-02 Baseball walla from high in stands.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; took 42+2 s from 0.5 s; seamless loop: last 2 s crossfaded (equal-power) into the start; stereo 44.1 kHz; loudness two-pass: I -28.26 TP -9.10 -> gain 5.26 dB; Ogg Vorbis 128 kbps",
+     "note": "baseball walla from high in the stands (whole take)"
+    },
+    {
+     "file": "beds/bed_normal_03.ogg",
+     "dur": 38.0,
+     "lufs": -23.1,
+     "source": "https://freesound.org/people/vflefevre/sounds/166220/",
+     "author": "vflefevre",
+     "licence": "CC-BY 4.0",
+     "title": "Fenway Park Sep 19 2010.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; took 38+2 s from 0.5 s; seamless loop: last 2 s crossfaded (equal-power) into the start; stereo 44.1 kHz; loudness two-pass: I -34.61 TP -15.95 -> gain 11.61 dB; Ogg Vorbis 128 kbps",
+     "note": "Fenway Park: talking, pizza and hot-dog vendors (whole take)"
+    }
+   ]
+  },
+  "bed_buzz": {
+   "group": "beds",
+   "loop": true,
+   "files": [
+    {
+     "file": "beds/bed_buzz_01.ogg",
+     "dur": 60.0,
+     "lufs": -23.18,
+     "source": "https://freesound.org/people/craigsmith/sounds/438397/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "G29-37-Large Sports Crowd.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; took 60+2 s from 14.0 s; seamless loop: last 2 s crossfaded (equal-power) into the start; stereo 44.1 kHz; loudness two-pass: I -28.06 TP -21.68 -> gain 5.06 dB; Ogg Vorbis 128 kbps",
+     "note": "large baseball-type crowd, cheering and whistling (14-76 s); source has splices",
+     "doubt": "Vintage studio library recording; the author notes bad splices."
+    },
+    {
+     "file": "beds/bed_buzz_02.ogg",
+     "dur": 56.0,
+     "lufs": -23.16,
+     "source": "https://freesound.org/people/LS/sounds/22380/",
+     "author": "LS",
+     "licence": "CC-BY 3.0",
+     "title": "crowd noise.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; took 56+2 s from 0.5 s; seamless loop: last 2 s crossfaded (equal-power) into the start; stereo 44.1 kHz; loudness two-pass: I -25.04 TP -8.43 -> gain 2.04 dB; Ogg Vorbis 128 kbps",
+     "note": "crowd at a Giants game (whole take)"
+    },
+    {
+     "file": "beds/bed_buzz_03.ogg",
+     "dur": 60.0,
+     "lufs": -23.07,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07028021",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Sports Crowd: Large restless crowd builds up, outdoor sports meeting",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); took 60+2 s from 250.0 s; seamless loop: last 2 s crossfaded (equal-power) into the start; stereo 44.1 kHz; loudness two-pass: I -18.47 TP -0.05 -> gain -4.53 dB; Ogg Vorbis 128 kbps",
+     "note": "large restless crowd at an outdoor sports meeting (250-312 s)",
+     "doubt": "British crowd at an outdoor sports meeting, not a ballpark. The classifier hears possible faint music around 50-60 s (score 0.25)."
+    }
+   ]
+  },
+  "bed_rally": {
+   "group": "beds",
+   "loop": true,
+   "files": [
+    {
+     "file": "beds/bed_rally_01.ogg",
+     "dur": 60.0,
+     "lufs": -23.15,
+     "source": "https://freesound.org/people/craigsmith/sounds/486218/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "R08-38-Cheering Crowd at Sporting Event.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; took 60+2 s from 32.0 s; seamless loop: last 2 s crossfaded (equal-power) into the start; stereo 44.1 kHz; loudness two-pass: I -26.82 TP -19.87 -> gain 3.82 dB; Ogg Vorbis 128 kbps",
+     "note": "cheering crowd at a sporting event (32-94 s)",
+     "doubt": "Vintage library 'sporting event' crowd, sport unknown."
+    },
+    {
+     "file": "beds/bed_rally_02.ogg",
+     "dur": 43.0,
+     "lufs": -23.15,
+     "source": "https://freesound.org/people/craigsmith/sounds/480725/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "R08-24-Large Crowd Screaming and Whistling.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; took 43+2 s from 30.0 s; seamless loop: last 2 s crossfaded (equal-power) into the start; stereo 44.1 kHz; loudness two-pass: I -25.67 TP -16.01 -> gain 2.67 dB; Ogg Vorbis 128 kbps",
+     "note": "large crowd screaming and whistling (30-75 s)",
+     "doubt": "Vintage library crowd; screaming and whistling may be too shrill for a ballpark."
+    },
+    {
+     "file": "beds/bed_rally_03.ogg",
+     "dur": 60.0,
+     "lufs": -23.18,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07035075",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Large crowd cheering continuously.",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); took 60+2 s from 36.0 s; seamless loop: last 2 s crossfaded (equal-power) into the start; stereo 44.1 kHz; loudness two-pass: I -12.48 TP -1.89 -> gain -10.52 dB; Ogg Vorbis 128 kbps",
+     "note": "large crowd cheering continuously (36-98 s)",
+     "doubt": "BBC outdoor cheering crowd, not a ballpark."
+    }
+   ]
+  },
+  "swell_fly": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/swell_fly_01.ogg",
+     "dur": 6.5,
+     "lufs": -18.16,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07028038",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Association Football: Mild ooh from crowd, (Arsenal v. Wolves)",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 0 s, at most 6.5 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.5 s; loudness two-pass: I -19.68 TP -3.93 -> gain 1.68 dB; Ogg Vorbis 96 kbps",
+     "note": "natural rising \"ooh\" (UK football crowd); cut at 6.5 s",
+     "doubt": "UK football crowd; the rise is natural, the end is a fade."
+    },
+    {
+     "file": "crowd/swell_fly_02.ogg",
+     "dur": 6.0,
+     "lufs": -18.18,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07028005",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Sport: Association football, Derby v. Arsenal, crowd reaction of oohs, aahs, applause.",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 0.5 s, at most 6.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.5 s; loudness two-pass: I -19.37 TP -3.78 -> gain 1.37 dB; Ogg Vorbis 96 kbps",
+     "note": "rising \"ooh\" from an oohs/aahs reaction (UK football crowd)",
+     "doubt": "UK football crowd; check that it is an 'ooh' and not a cheer."
+    },
+    {
+     "file": "crowd/swell_fly_03.ogg",
+     "dur": 6.0,
+     "lufs": -18.22,
+     "source": "https://freesound.org/people/Quistard/sounds/237684/",
+     "author": "Quistard",
+     "licence": "CC-BY 3.0",
+     "title": "Football Crowd - Near miss ooh 2 - Southampton Vs Hull at Saint Mary's Stadium.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 6.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.5 s; loudness two-pass: I -25.60 TP -8.12 -> gain 7.60 dB, up to 0.5 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "near-miss \"ooh\" (UK football crowd); first 6 s"
+    }
+   ]
+  },
+  "clap_two_strike": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/clap_two_strike_01.ogg",
+     "dur": 4.0,
+     "lufs": -18.22,
+     "source": "https://freesound.org/people/jasinski/sounds/18364/",
+     "author": "jasinski",
+     "licence": "CC0",
+     "title": "bb-clapRhm.mp3",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.3 s; loudness two-pass: I -24.17 TP -7.07 -> gain 6.17 dB, up to 0.1 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "baseball crowd rhythmic claps, whole take"
+    },
+    {
+     "file": "crowd/clap_two_strike_02.ogg",
+     "dur": 5.5,
+     "lufs": -18.2,
+     "source": "https://freesound.org/people/johnnyguitar01/sounds/424793/",
+     "author": "johnnyguitar01",
+     "licence": "CC0",
+     "title": "crowd clap rhythmic.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.3 s; loudness two-pass: I -16.20 TP -1.88 -> gain -1.80 dB; Ogg Vorbis 96 kbps",
+     "note": "large audience rhythmic clapping (concert hall), whole take",
+     "doubt": "Concert-hall audience (indoor), poorly recorded per the author."
+    }
+   ]
+  },
+  "rumble_rising": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/rumble_rising_01.ogg",
+     "dur": 13.0,
+     "lufs": -18.14,
+     "source": "https://freesound.org/people/craigsmith/sounds/486199/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "R28-29-Large Crowd Quiet, Then Big Reaction.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 22.0 s, at most 13.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.5 s; loudness two-pass: I -26.62 TP -18.52 -> gain 8.62 dB; Ogg Vorbis 96 kbps",
+     "note": "quiet crowd builds into a roar; 22-35 s",
+     "doubt": "Overlaps the source section used for eruption_01 (26-35 s)."
+    },
+    {
+     "file": "crowd/rumble_rising_02.ogg",
+     "dur": 12.0,
+     "lufs": -18.14,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07057040",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Build up of cheering and whistling - July 1981 (2C9,reprocessed)",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 0 s, at most 12.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 2.0 s; loudness two-pass: I -19.98 TP -3.19 -> gain 1.98 dB; Ogg Vorbis 96 kbps",
+     "note": "build-up of cheering and whistling, first 12 s"
+    },
+    {
+     "file": "crowd/rumble_rising_03.ogg",
+     "dur": 12.0,
+     "lufs": -18.12,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07031057",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Large Crowd: Outside St. Paul's Cathedral, cheering and whistling builds up.",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 2.0 s, at most 12.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 2.0 s; loudness two-pass: I -20.50 TP -3.08 -> gain 2.50 dB, up to 0.4 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "cheering and whistling builds up, 2-14 s"
+    }
+   ]
+  },
+  "clap_rally": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/clap_rally_01.ogg",
+     "dur": 6.43,
+     "lufs": -18.19,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07028104",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Wrestling: Rhythmic stamping and slow handclap",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.5 s; loudness two-pass: I -18.48 TP 2.64 -> gain 0.48 dB, up to 4.1 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "rhythmic stamping and slow handclap (wrestling crowd), whole take",
+     "doubt": "Wrestling crowd stamping with a slow handclap."
+    },
+    {
+     "file": "crowd/clap_rally_02.ogg",
+     "dur": 10.0,
+     "lufs": -18.17,
+     "source": "https://freesound.org/people/YleArkisto/sounds/316719/",
+     "author": "YleArkisto",
+     "licence": "CC-BY 4.0",
+     "title": "Urheilukilpailut, yleisurheilu, kannustava yleisö / Large, supportive crowd, sports competition, athletics, audience cheering and clapping rhytmically in the stadium, some horns",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 30.0 s, at most 10.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -14.36 TP -1.10 -> gain -3.64 dB; Ogg Vorbis 96 kbps",
+     "note": "rhythmic clapping and cheering, athletics stadium; some horns",
+     "doubt": "Finnish athletics crowd; horns audible."
+    },
+    {
+     "file": "crowd/clap_rally_03.ogg",
+     "dur": 10.0,
+     "lufs": -18.69,
+     "source": "https://freesound.org/people/freesound/sounds/25316/",
+     "author": "freesound",
+     "licence": "CC0",
+     "title": "Rhythmic_Jumps_ses2.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 26.0 s, at most 10.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -18.22 TP 1.34 -> gain 0.22 dB, up to 2.6 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "300 people jumping/stomping in rhythm; 26-36 s",
+     "doubt": "A crowd jumping in rhythm (Freesound event), not clapping."
+    }
+   ]
+  },
+  "cheer_small": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/cheer_small_01.ogg",
+     "dur": 6.0,
+     "lufs": -18.05,
+     "source": "https://freesound.org/people/craigsmith/sounds/486219/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "R19-35-Golf Crowd Reacts to Good Shot.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 6.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -26.57 TP -9.22 -> gain 8.57 dB, up to 0.3 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "golf crowd reacts to a good shot, first 6 s"
+    },
+    {
+     "file": "crowd/cheer_small_02.ogg",
+     "dur": 6.0,
+     "lufs": -18.09,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07035067",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "100 men, single cheer.",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 0 s, at most 6.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -9.89 TP 2.32 -> gain -8.11 dB; Ogg Vorbis 96 kbps",
+     "note": "100 men, single cheer, first 6 s"
+    },
+    {
+     "file": "crowd/cheer_small_03.ogg",
+     "dur": 7.39,
+     "lufs": -18.06,
+     "source": "https://freesound.org/people/jessepash/sounds/139972/",
+     "author": "jessepash",
+     "licence": "CC0",
+     "title": "Crowd.Yay.Applause.25ppl.Short.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.5 s; loudness two-pass: I -24.57 TP -8.23 -> gain 6.57 dB; Ogg Vorbis 96 kbps",
+     "note": "~25 people cheer and applaud, whole take (indoors)",
+     "doubt": "Indoor group of about 25."
+    }
+   ]
+  },
+  "cheer_medium": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/cheer_medium_01.ogg",
+     "dur": 9.0,
+     "lufs": -18.29,
+     "source": "https://freesound.org/people/eeease/sounds/354056/",
+     "author": "eeease",
+     "licence": "CC0",
+     "title": "BaseballGameApplause.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 9.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -19.76 TP 0.43 -> gain 1.76 dB, up to 3.2 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "baseball game applause/cheer, first 9 s"
+    },
+    {
+     "file": "crowd/cheer_medium_02.ogg",
+     "dur": 9.0,
+     "lufs": -18.28,
+     "source": "https://freesound.org/people/craigsmith/sounds/480691/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "R07-29-Loud Applause and Cheering.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 9.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -27.38 TP -15.01 -> gain 9.38 dB; Ogg Vorbis 96 kbps",
+     "note": "loud applause and cheering, whistles"
+    },
+    {
+     "file": "crowd/cheer_medium_03.ogg",
+     "dur": 9.0,
+     "lufs": -18.26,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07035073",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Large crowd cheering.",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 0 s, at most 9.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -8.13 TP 2.22 -> gain -9.87 dB; Ogg Vorbis 96 kbps",
+     "note": "large crowd cheering, first 9 s"
+    },
+    {
+     "file": "crowd/cheer_medium_04.ogg",
+     "dur": 9.0,
+     "lufs": -18.2,
+     "source": "https://freesound.org/people/jasinski/sounds/18365/",
+     "author": "jasinski",
+     "licence": "CC0",
+     "title": "yells.mp3",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 9.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -23.63 TP -8.50 -> gain 5.63 dB; Ogg Vorbis 96 kbps",
+     "note": "baseball game crowd cheering, first 9 s"
+    }
+   ]
+  },
+  "cheer_big": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/cheer_big_01.ogg",
+     "dur": 12.0,
+     "lufs": -18.22,
+     "source": "https://freesound.org/people/craigsmith/sounds/480765/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "R08-54-Large Crowd Cheering at Event.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 12.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.0 s; loudness two-pass: I -27.75 TP -18.97 -> gain 9.75 dB; Ogg Vorbis 96 kbps",
+     "note": "very large crowd cheering, roaring; first 12 s"
+    },
+    {
+     "file": "crowd/cheer_big_02.ogg",
+     "dur": 12.0,
+     "lufs": -18.25,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07035074",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Large crowd cheering.",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 0 s, at most 12.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.0 s; loudness two-pass: I -8.22 TP 2.39 -> gain -9.78 dB; Ogg Vorbis 96 kbps",
+     "note": "large crowd cheering, first 12 s"
+    },
+    {
+     "file": "crowd/cheer_big_03.ogg",
+     "dur": 14.0,
+     "lufs": -18.15,
+     "source": "https://freesound.org/people/tylermyers1992/sounds/649156/",
+     "author": "tylermyers1992",
+     "licence": "CC0",
+     "title": "MLB Crowd Cheer - 09032022.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 8.0 s, at most 14.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.0 s; loudness two-pass: I -17.84 TP -4.14 -> gain -0.16 dB; Ogg Vorbis 96 kbps",
+     "note": "MLB crowd (Busch Stadium) growing cheer, 8-22 s"
+    }
+   ]
+  },
+  "eruption": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/eruption_01.ogg",
+     "dur": 14.0,
+     "lufs": -18.13,
+     "source": "https://freesound.org/people/craigsmith/sounds/486199/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "R28-29-Large Crowd Quiet, Then Big Reaction.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 26.0 s, at most 14.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.5 s; loudness two-pass: I -26.95 TP -18.52 -> gain 8.95 dB; Ogg Vorbis 96 kbps",
+     "note": "big crowd reaction out of quiet, 26-40 s"
+    },
+    {
+     "file": "crowd/eruption_02.ogg",
+     "dur": 14.0,
+     "lufs": -18.23,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07013070",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Football League match, goal scored.",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 0 s, at most 14.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.5 s; loudness two-pass: I -8.53 TP 2.24 -> gain -9.47 dB; Ogg Vorbis 96 kbps",
+     "note": "football league goal scored, first 14 s",
+     "doubt": "Football goal: may contain chanting or words."
+    },
+    {
+     "file": "crowd/eruption_03.ogg",
+     "dur": 14.0,
+     "lufs": -18.21,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07013071",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Football League match, goal scored.",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 0 s, at most 14.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.5 s; loudness two-pass: I -8.14 TP 2.35 -> gain -9.86 dB; Ogg Vorbis 96 kbps",
+     "note": "football league goal scored, first 14 s",
+     "doubt": "Football goal: may contain chanting or words."
+    }
+   ]
+  },
+  "applause_polite": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/applause_polite_01.ogg",
+     "dur": 8.0,
+     "lufs": -19.06,
+     "source": "https://freesound.org/people/craigsmith/sounds/479967/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "R19-34-Golf Crowd Applauds.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 8.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -27.84 TP -5.47 -> gain 9.84 dB, up to 5.4 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "golf crowd applauds, first 8 s"
+    },
+    {
+     "file": "crowd/applause_polite_02.ogg",
+     "dur": 8.0,
+     "lufs": -19.07,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07011360",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "County cricket match in Kent. Mild applause for resumption of play.",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 0 s, at most 8.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -19.31 TP 2.16 -> gain 1.31 dB, up to 4.5 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "county cricket, mild applause, first 8 s",
+     "doubt": "English county cricket crowd."
+    },
+    {
+     "file": "crowd/applause_polite_03.ogg",
+     "dur": 8.0,
+     "lufs": -18.4,
+     "source": "https://freesound.org/people/AshFox/sounds/191918/",
+     "author": "AshFox",
+     "licence": "CC-BY 3.0",
+     "title": "WALLA Ballpark Applause Short 05",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 8.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -24.28 TP -4.55 -> gain 6.28 dB, up to 2.7 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "ballpark applause (Rangers Ballpark), first 8 s"
+    }
+   ]
+  },
+  "ovation": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/ovation_01.ogg",
+     "dur": 15.0,
+     "lufs": -18.21,
+     "source": "https://freesound.org/people/craigsmith/sounds/480684/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "R02-08-Applause and Cheering.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 15.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.5 s; loudness two-pass: I -27.90 TP -12.46 -> gain 9.90 dB; Ogg Vorbis 96 kbps",
+     "note": "crowd cheering and applauding, steady; first 15 s"
+    },
+    {
+     "file": "crowd/ovation_02.ogg",
+     "dur": 15.0,
+     "lufs": -18.16,
+     "source": "https://freesound.org/people/craigsmith/sounds/480689/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "R07-08-Applause and Whistles.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 15.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.5 s; loudness two-pass: I -25.60 TP -12.06 -> gain 7.60 dB; Ogg Vorbis 96 kbps",
+     "note": "applause and whistles, first 15 s"
+    },
+    {
+     "file": "crowd/ovation_03.ogg",
+     "dur": 15.0,
+     "lufs": -18.23,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=00008039",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Cricket ovation",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 0 s, at most 15.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.5 s; loudness two-pass: I -28.56 TP -15.00 -> gain 10.56 dB; Ogg Vorbis 96 kbps",
+     "note": "cricket ovation, first 15 s (mono source)",
+     "doubt": "Mono BBC news-tape source."
+    }
+   ]
+  },
+  "groan_small": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/groan_small_01.ogg",
+     "dur": 1.92,
+     "lufs": -18.04,
+     "source": "https://freesound.org/people/Nox_Sound/sounds/752706/",
+     "author": "Nox_Sound",
+     "licence": "CC0",
+     "title": "Voice_Crowd_Small_Expression_Awww_Stereo",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.2 s; loudness two-pass: I -18.99 TP -4.08 -> gain 0.99 dB; Ogg Vorbis 96 kbps",
+     "note": "small crowd \"awww\"",
+     "doubt": "Small studio group, not a stadium."
+    },
+    {
+     "file": "crowd/groan_small_02.ogg",
+     "dur": 1.86,
+     "lufs": -18.1,
+     "source": "https://freesound.org/people/tim.kahn/sounds/336998/",
+     "author": "tim.kahn",
+     "licence": "CC-BY 4.0",
+     "title": "awww 01.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.2 s; loudness two-pass: I -13.19 TP -0.25 -> gain -4.81 dB; Ogg Vorbis 96 kbps",
+     "note": "group \"aww\" in disappointment",
+     "doubt": "Small group, not a stadium."
+    },
+    {
+     "file": "crowd/groan_small_03.ogg",
+     "dur": 4.63,
+     "lufs": -18.05,
+     "source": "https://freesound.org/people/mrrap4food/sounds/619007/",
+     "author": "mrrap4food",
+     "licence": "CC0",
+     "title": "crowd `oh - - disappointed.mp3",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.3 s; loudness two-pass: I -16.26 TP -3.72 -> gain -1.74 dB; Ogg Vorbis 96 kbps",
+     "note": "crowd \"oh\" disappointed"
+    }
+   ]
+  },
+  "groan_big": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/groan_big_01.ogg",
+     "dur": 8.0,
+     "lufs": -18.06,
+     "source": "https://freesound.org/people/craigsmith/sounds/675066/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "S30-19 Unhappy baseball crowd.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 8.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -18.10 TP -4.73 -> gain 0.10 dB; Ogg Vorbis 96 kbps",
+     "note": "unhappy baseball crowd, first 8 s"
+    },
+    {
+     "file": "crowd/groan_big_02.ogg",
+     "dur": 6.01,
+     "lufs": -18.13,
+     "source": "https://freesound.org/people/unchaz/sounds/150956/",
+     "author": "unchaz",
+     "licence": "CC-BY 4.0",
+     "title": "Disappointed_Crowd",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.3 s; loudness two-pass: I -14.87 TP 2.59 -> gain -3.13 dB, up to 0.5 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "disappointed crowd (~40 people)"
+    }
+   ]
+  },
+  "letdown": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/letdown_01.ogg",
+     "dur": 12.0,
+     "lufs": -18.1,
+     "source": "https://freesound.org/people/AshFox/sounds/191916/",
+     "author": "AshFox",
+     "licence": "CC-BY 3.0",
+     "title": "WALLA Ballpark Cheer Short Foul",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 3.0 s, at most 12.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.0 s; loudness two-pass: I -24.06 TP -7.40 -> gain 6.06 dB; Ogg Vorbis 96 kbps",
+     "note": "ballpark: cheer rises then turns to disappointment (foul ball), 3-15 s",
+     "doubt": "Cut point (3-15 s) chosen from the loudness curve, not by ear."
+    },
+    {
+     "file": "crowd/letdown_02.ogg",
+     "dur": 11.0,
+     "lufs": -18.18,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07013079",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Local football match, near miss.",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 0 s, at most 11.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.0 s; loudness two-pass: I -13.93 TP 2.55 -> gain -4.07 dB; Ogg Vorbis 96 kbps",
+     "note": "local football match, near miss: rise and fall"
+    },
+    {
+     "file": "crowd/letdown_03.ogg",
+     "dur": 10.0,
+     "lufs": -18.25,
+     "source": "https://freesound.org/people/Quistard/sounds/237683/",
+     "author": "Quistard",
+     "licence": "CC-BY 3.0",
+     "title": "Football Crowd - Near Miss ooh - Southampton Vs Hull at Saint Mary's Stadium.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 10.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.0 s; loudness two-pass: I -20.68 TP -1.22 -> gain 2.68 dB, up to 2.5 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "near-miss \"ooh\" collapsing (UK football crowd), first 10 s"
+    }
+   ]
+  },
+  "murmur_stunned": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/murmur_stunned_01.ogg",
+     "dur": 15.0,
+     "lufs": -22.32,
+     "source": "https://freesound.org/people/craigsmith/sounds/438384/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "G28-24-Whispering Crowd Walla.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 15.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.5 s; loudness two-pass: I -32.79 TP -7.22 -> gain 12.22 dB, up to 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "very quiet murmuring crowd walla, first 15 s",
+     "doubt": "Whispering crowd; ends below target (see LUFS)."
+    },
+    {
+     "file": "crowd/murmur_stunned_02.ogg",
+     "dur": 15.0,
+     "lufs": -18.07,
+     "source": "https://freesound.org/people/craigsmith/sounds/480760/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "R08-37-Large Group Murmur.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 5.0 s, at most 15.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.5 s; loudness two-pass: I -28.47 TP -15.66 -> gain 10.47 dB; Ogg Vorbis 96 kbps",
+     "note": "large group murmur, 5-20 s"
+    },
+    {
+     "file": "crowd/murmur_stunned_03.ogg",
+     "dur": 8.36,
+     "lufs": -18.93,
+     "source": "https://freesound.org/people/mglennsound/sounds/678671/",
+     "author": "mglennsound",
+     "licence": "CC0",
+     "title": "AF Crowd Suprised Murmur 1.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.5 s; loudness two-pass: I -37.91 TP -15.11 -> gain 19.91 dB, up to 5.8 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "crowd surprised murmur"
+    }
+   ]
+  },
+  "pocket_visitors": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/pocket_visitors_01.ogg",
+     "dur": 7.09,
+     "lufs": -18.12,
+     "source": "https://freesound.org/people/jayfrosting/sounds/728774/",
+     "author": "jayfrosting",
+     "licence": "CC0",
+     "title": "rodeo audio cheer distant",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.5 s; loudness two-pass: I -25.93 TP -11.33 -> gain 7.93 dB; Ogg Vorbis 96 kbps",
+     "note": "rodeo crowd cheering from across the field (distant)",
+     "doubt": "Rodeo crowd across a field."
+    },
+    {
+     "file": "crowd/pocket_visitors_02.ogg",
+     "dur": 8.0,
+     "lufs": -18.03,
+     "source": "https://freesound.org/people/craigsmith/sounds/675103/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "S12-03 Small group men cheering; encouraging.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 8.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -24.53 TP -10.92 -> gain 6.53 dB; Ogg Vorbis 96 kbps",
+     "note": "small group of men cheering, encouraging; first 8 s"
+    },
+    {
+     "file": "crowd/pocket_visitors_03.ogg",
+     "dur": 7.61,
+     "lufs": -18.01,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07018024",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Six men cheering. (Farcical.)",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.5 s; loudness two-pass: I -12.03 TP 2.22 -> gain -5.97 dB; Ogg Vorbis 96 kbps",
+     "note": "six men cheering"
+    }
+   ]
+  },
+  "ooh_wince": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/ooh_wince_01.ogg",
+     "dur": 3.51,
+     "lufs": -18.04,
+     "source": "https://freesound.org/people/mglennsound/sounds/678666/",
+     "author": "mglennsound",
+     "licence": "CC0",
+     "title": "AF Crowd Oof Wince 1.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.3 s; loudness two-pass: I -22.15 TP -6.25 -> gain 4.15 dB; Ogg Vorbis 96 kbps",
+     "note": "crowd \"oof\" wince"
+    },
+    {
+     "file": "crowd/ooh_wince_02.ogg",
+     "dur": 3.76,
+     "lufs": -18.02,
+     "source": "https://freesound.org/people/mglennsound/sounds/678667/",
+     "author": "mglennsound",
+     "licence": "CC0",
+     "title": "AF Crowd Oof Wince 2.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.3 s; loudness two-pass: I -24.77 TP -7.75 -> gain 6.77 dB, up to 0.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "crowd \"oof\" wince"
+    },
+    {
+     "file": "crowd/ooh_wince_03.ogg",
+     "dur": 2.31,
+     "lufs": -17.98,
+     "source": "https://freesound.org/people/jbledger1984/sounds/613179/",
+     "author": "jbledger1984",
+     "licence": "CC0",
+     "title": "\"OOOH\" group of males sound",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.3 s; loudness two-pass: I -15.78 TP 0.11 -> gain -2.22 dB; Ogg Vorbis 96 kbps",
+     "note": "group of men \"OOOH\" empathising"
+    }
+   ]
+  },
+  "boo_short": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/boo_short_01.ogg",
+     "dur": 5.0,
+     "lufs": -18.05,
+     "source": "https://freesound.org/people/craigsmith/sounds/480795/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "R08-34-Men Booing.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 5.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -26.15 TP -13.88 -> gain 8.15 dB; Ogg Vorbis 96 kbps",
+     "note": "men booing, medium group; first 5 s"
+    },
+    {
+     "file": "crowd/boo_short_02.ogg",
+     "dur": 5.0,
+     "lufs": -18.07,
+     "source": "https://freesound.org/people/craigsmith/sounds/480745/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "R07-20-Chorus of Boos.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 5.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -25.40 TP -15.21 -> gain 7.40 dB; Ogg Vorbis 96 kbps",
+     "note": "chorus of boos, first 5 s"
+    },
+    {
+     "file": "crowd/boo_short_03.ogg",
+     "dur": 5.0,
+     "lufs": -17.98,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07018035",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Twelve men booing. (Farcical.)",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 0 s, at most 5.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -12.14 TP 1.31 -> gain -5.86 dB; Ogg Vorbis 96 kbps",
+     "note": "twelve men booing, first 5 s"
+    },
+    {
+     "file": "crowd/boo_short_04.ogg",
+     "dur": 2.13,
+     "lufs": -18.0,
+     "source": "https://freesound.org/people/Nox_Sound/sounds/752707/",
+     "author": "Nox_Sound",
+     "licence": "CC0",
+     "title": "Voice_Crowd_Small_Expression_Boo_Stereo",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.3 s; loudness two-pass: I -15.02 TP -2.00 -> gain -2.98 dB; Ogg Vorbis 96 kbps",
+     "note": "small crowd boo"
+    }
+   ]
+  },
+  "boo_long": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/boo_long_01.ogg",
+     "dur": 15.0,
+     "lufs": -18.12,
+     "source": "https://freesound.org/people/craigsmith/sounds/675060/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "S30-06 Baseball crowd yells at umpire.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 15.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.5 s; loudness two-pass: I -16.14 TP -2.50 -> gain -1.86 dB; Ogg Vorbis 96 kbps",
+     "note": "baseball crowd yells at umpire, first 15 s"
+    },
+    {
+     "file": "crowd/boo_long_02.ogg",
+     "dur": 15.0,
+     "lufs": -19.52,
+     "source": "https://freesound.org/people/craigsmith/sounds/438395/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "G28-35-Crowd Booing.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 15.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.5 s; loudness two-pass: I -26.26 TP -4.20 -> gain 8.26 dB, up to 5.1 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "booing (fight crowd), first 15 s",
+     "doubt": "Fight crowd; a little under target."
+    },
+    {
+     "file": "crowd/boo_long_03.ogg",
+     "dur": 15.0,
+     "lufs": -18.09,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07028045",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Association Football: Booing as player is sent off, (Arsenal v. Wolves)",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 0 s, at most 15.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.5 s; loudness two-pass: I -17.27 TP -1.14 -> gain -0.73 dB; Ogg Vorbis 96 kbps",
+     "note": "football crowd booing as a player is sent off, first 15 s",
+     "doubt": "UK football crowd, may contain whistles/words."
+    },
+    {
+     "file": "crowd/boo_long_04.ogg",
+     "dur": 15.0,
+     "lufs": -18.06,
+     "source": "https://freesound.org/people/mglennsound/sounds/678539/",
+     "author": "mglennsound",
+     "licence": "CC0",
+     "title": "AF Crowd Boo Hiss Nat end .wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 15.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.5 s; loudness two-pass: I -18.09 TP -2.55 -> gain 0.09 dB; Ogg Vorbis 96 kbps",
+     "note": "crowd booing and hissing, first 15 s"
+    }
+   ]
+  },
+  "cheer_sarcastic": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/cheer_sarcastic_01.ogg",
+     "dur": 10.17,
+     "lufs": -26.84,
+     "source": "https://freesound.org/people/HenKonen/sounds/757174/",
+     "author": "HenKonen",
+     "licence": "CC0",
+     "title": "Applause, loose, sarcastic",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.5 s; loudness two-pass: I -40.88 TP -10.37 -> gain 15.37 dB, up to 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "loose, sarcastic applause (layered)",
+     "doubt": "Staged sarcastic applause (layered), sparse and well under target; a real ballpark mock cheer is a big ironic cheer, so a cheer_medium may serve better."
+    },
+    {
+     "file": "crowd/cheer_sarcastic_02.ogg",
+     "dur": 5.19,
+     "lufs": -18.08,
+     "source": "https://freesound.org/people/xtrgamr/sounds/329331/",
+     "author": "xtrgamr",
+     "licence": "CC-BY 4.0",
+     "title": "Crowd Woos.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.3 s; loudness two-pass: I -28.62 TP -10.09 -> gain 10.62 dB, up to 1.5 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "crowd \"woo\", not very excited",
+     "doubt": "Small group 'woo', staged."
+    },
+    {
+     "file": "crowd/cheer_sarcastic_03.ogg",
+     "dur": 2.97,
+     "lufs": -18.12,
+     "source": "https://freesound.org/people/xtrgamr/sounds/239594/",
+     "author": "xtrgamr",
+     "licence": "CC-BY 4.0",
+     "title": "unimpressedyay_01.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.3 s; loudness two-pass: I -11.47 TP 2.56 -> gain -6.53 dB; Ogg Vorbis 96 kbps",
+     "note": "unimpressed crowd clapping and \"yay\" (layered)",
+     "doubt": "One person layered into a crowd (Garage Band)."
+    }
+   ]
+  },
+  "ooh_close_foul": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/ooh_close_foul_01.ogg",
+     "dur": 6.0,
+     "lufs": -18.17,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07028039",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Association Football: Large ooh and applause from crowd, (Arsenal v. Wolves)",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 0 s, at most 6.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 2.0 s; loudness two-pass: I -19.17 TP -0.98 -> gain 1.17 dB, up to 1.2 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "large \"ooh\" (applause cut by the fade), first 6 s"
+    },
+    {
+     "file": "crowd/ooh_close_foul_02.ogg",
+     "dur": 7.0,
+     "lufs": -18.17,
+     "source": "https://sound-effects.bbcrewind.co.uk/search?q=07028006",
+     "author": "BBC",
+     "licence": "BBC RemArc",
+     "title": "Sport: Association football, Derby v. Arsenal, crowd reaction of oohs and aahs.",
+     "processing": "BBC Sound Effects WAV (44.1 kHz original); from 0.5 s, at most 7.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 2.0 s; loudness two-pass: I -20.27 TP -4.75 -> gain 2.27 dB; Ogg Vorbis 96 kbps",
+     "note": "\"ooh\" from an oohs/aahs reaction, 0.5-7.5 s"
+    },
+    {
+     "file": "crowd/ooh_close_foul_03.ogg",
+     "dur": 2.81,
+     "lufs": -17.96,
+     "source": "https://freesound.org/people/CHallSmith/sounds/870650/",
+     "author": "CHallSmith",
+     "licence": "CC0",
+     "title": "Group Ooh 1",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.5 s; loudness two-pass: I -14.62 TP -0.77 -> gain -3.38 dB; Ogg Vorbis 96 kbps",
+     "note": "group \"ooh\" (loop group)",
+     "doubt": "Loop-group 'ooh', the author calls it 'somewhat surreal'."
+    }
+   ]
+  },
+  "foul_souvenir": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/foul_souvenir_01.ogg",
+     "dur": 8.0,
+     "lufs": -18.03,
+     "source": "https://freesound.org/people/craigsmith/sounds/482798/",
+     "author": "craigsmith",
+     "licence": "CC0",
+     "title": "R27-22-Medium Group Talk and Cheer.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 8.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -28.70 TP -16.42 -> gain 10.70 dB; Ogg Vorbis 96 kbps",
+     "note": "medium group talk then cheer, first 8 s",
+     "doubt": "Generic talk-then-cheer; no scramble."
+    },
+    {
+     "file": "crowd/foul_souvenir_02.ogg",
+     "dur": 8.0,
+     "lufs": -18.02,
+     "source": "https://freesound.org/people/thankzalotz/sounds/652571/",
+     "author": "thankzalotz",
+     "licence": "CC0",
+     "title": "Cheers.m4a",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 8.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -17.71 TP -1.47 -> gain -0.29 dB; Ogg Vorbis 96 kbps",
+     "note": "cheering in a baseball setting, first 8 s",
+     "doubt": "Generic baseball cheer; no scramble."
+    }
+   ]
+  },
+  "shout_charge": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/shout_charge_01.ogg",
+     "dur": 7.0,
+     "lufs": -18.15,
+     "source": "https://freesound.org/people/AshFox/sounds/191928/",
+     "author": "AshFox",
+     "licence": "CC-BY 3.0",
+     "title": "WALLA_Ballpark Organ Cheering Charge",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 13.0 s, at most 7.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -19.46 TP -2.55 -> gain 1.46 dB; Ogg Vorbis 96 kbps",
+     "note": "ballpark crowd answers the organ \"Charge!\", 13-20 s (organ tail may bleed in)",
+     "doubt": "The stadium organ's 'Charge!' plays just before this cut and the classifier still hears music in it (0.27): organ bleed likely. Cut chosen from the classifier, not by ear; confirm the crowd actually shouts."
+    },
+    {
+     "file": "crowd/shout_charge_02.ogg",
+     "dur": 6.5,
+     "lufs": -18.18,
+     "source": "https://freesound.org/people/AshFox/sounds/191928/",
+     "author": "AshFox",
+     "licence": "CC-BY 3.0",
+     "title": "WALLA_Ballpark Organ Cheering Charge",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 37.5 s, at most 6.5 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -31.38 TP -12.37 -> gain 13.38 dB, up to 2.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "second \"Charge!\" answer, 37.5-44 s",
+     "doubt": "Second answer in the same recording; classifier hears some music (0.17); position guessed, may contain little or no 'Charge!'."
+    }
+   ]
+  },
+  "clap_letsgo": {
+   "group": "crowd",
+   "loop": false,
+   "files": [
+    {
+     "file": "crowd/clap_letsgo_01.ogg",
+     "dur": 12.0,
+     "lufs": -19.21,
+     "source": "https://freesound.org/people/AshFox/sounds/191926/",
+     "author": "AshFox",
+     "licence": "CC-BY 3.0",
+     "title": "WALLA Ballpark Let's Go Rangers",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 12.0 s, at most 12.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.8 s; loudness two-pass: I -30.24 TP -6.37 -> gain 11.37 dB, up to 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "ballpark chant \"Let's go Rangers!\" with claps, 12-24 s",
+     "doubt": "The chant names the Rangers ('Let's go Rangers!')."
+    }
+   ]
+  },
+  "bat_solid": {
+   "group": "field",
+   "loop": false,
+   "files": [
+    {
+     "file": "field/bat_solid_01.ogg",
+     "dur": 0.8,
+     "lufs": -32.36,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/162863/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Bat Hit 1 FF103.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.8 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -30.4 LUFS, peak -1.9 dBFS -> gain 6.90 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "bat slam, close",
+     "doubt": "Florentine Films foley; solid/medium/weak sorted by the descriptions only."
+    },
+    {
+     "file": "field/bat_solid_02.ogg",
+     "dur": 0.6,
+     "lufs": -28.95,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/162867/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Bat Hit 4 FF100.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -32.4 LUFS, peak -3.6 dBFS -> gain 8.60 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "bat hit, close"
+    },
+    {
+     "file": "field/bat_solid_03.ogg",
+     "dur": 0.6,
+     "lufs": -28.75,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/162884/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Bat Hit 6 FF098.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -37.9 LUFS, peak -8.7 dBFS -> gain 13.70 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "bat hit, close"
+    },
+    {
+     "file": "field/bat_solid_04.ogg",
+     "dur": 0.6,
+     "lufs": -26.75,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/162882/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Bat Hit 8 FF096.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -33.1 LUFS, peak -6.1 dBFS -> gain 11.10 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "bat hit, close"
+    },
+    {
+     "file": "field/bat_solid_05.ogg",
+     "dur": 0.6,
+     "lufs": -27.05,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/162886/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Bat Hit 9 FF095.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -36.1 LUFS, peak -8.9 dBFS -> gain 13.90 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "bat hit, close"
+    },
+    {
+     "file": "field/bat_solid_06.ogg",
+     "dur": 0.55,
+     "lufs": -31.15,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/162885/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Bat Hit 18 FF086.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -32.8 LUFS, peak -2.1 dBFS -> gain 7.10 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "bat hit, close"
+    }
+   ]
+  },
+  "bat_medium": {
+   "group": "field",
+   "loop": false,
+   "files": [
+    {
+     "file": "field/bat_medium_01.ogg",
+     "dur": 0.6,
+     "lufs": -33.23,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/162868/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Bat Hit 3 FF101.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -33.3 LUFS, peak -2.8 dBFS -> gain 7.80 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "bat hit, medium distance"
+    },
+    {
+     "file": "field/bat_medium_02.ogg",
+     "dur": 0.5,
+     "lufs": -28.35,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/162862/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Bat Hit 2 FF102.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.5 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -34.8 LUFS, peak -5.6 dBFS -> gain 10.60 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "quick bat hit, close"
+    },
+    {
+     "file": "field/bat_medium_03.ogg",
+     "dur": 0.6,
+     "lufs": -26.83,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/162877/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Bat Hit 11 FF093.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -35.3 LUFS, peak -11.0 dBFS -> gain 16.00 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "bat hit, close"
+    },
+    {
+     "file": "field/bat_medium_04.ogg",
+     "dur": 0.6,
+     "lufs": -26.45,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/162876/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Bat Hit 12 FF092.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -31.3 LUFS, peak -5.0 dBFS -> gain 10.00 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "bat hit, close"
+    }
+   ]
+  },
+  "bat_weak": {
+   "group": "field",
+   "loop": false,
+   "files": [
+    {
+     "file": "field/bat_weak_01.ogg",
+     "dur": 0.6,
+     "lufs": -24.75,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/162878/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Bat Hit 10 FF094.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -34.2 LUFS, peak -8.4 dBFS -> gain 13.40 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "soft bat hit, close",
+     "doubt": "Described as a 'soft bat hit'; may still sound clean rather than jammed."
+    },
+    {
+     "file": "field/bat_weak_02.ogg",
+     "dur": 0.6,
+     "lufs": -29.78,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/162874/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Bat Hit 10 FF094.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -41.3 LUFS, peak -13.5 dBFS -> gain 18.50 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "soft bat hit, close (second take)",
+     "doubt": "Same take name as bat_weak_01 (second upload); may be near-identical."
+    }
+   ]
+  },
+  "foul_tip": {
+   "group": "field",
+   "loop": false,
+   "files": [
+    {
+     "file": "field/foul_tip_01.ogg",
+     "dur": 0.5,
+     "lufs": -25.15,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/164525/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Glove Catch 10 FF005.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.5 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -31 LUFS, peak -4.8 dBFS -> gain 9.80 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "quick glove catch, high pitch, light smack",
+     "doubt": "A light glove catch standing in for a foul tip (no bat tick)."
+    },
+    {
+     "file": "field/foul_tip_02.ogg",
+     "dur": 0.5,
+     "lufs": -25.15,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/164534/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Glove Catch 11 FF004.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.5 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -36.8 LUFS, peak -9.3 dBFS -> gain 14.30 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "quick glove catch, soft light smack, high pitch",
+     "doubt": "A light glove catch standing in for a foul tip (no bat tick)."
+    },
+    {
+     "file": "field/foul_tip_03.ogg",
+     "dur": 0.5,
+     "lufs": -24.35,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/164532/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Glove Catch 8 FF007.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.5 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -43.6 LUFS, peak -17.9 dBFS -> gain 22.90 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "quick glove catch, high, no smack",
+     "doubt": "A light glove catch standing in for a foul tip (no bat tick)."
+    }
+   ]
+  },
+  "mitt_pop": {
+   "group": "field",
+   "loop": false,
+   "files": [
+    {
+     "file": "field/mitt_pop_01.ogg",
+     "dur": 0.6,
+     "lufs": -27.25,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/164526/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Glove Catch 2 FF013.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -24.2 LUFS, peak 0.0 dBFS -> gain 5.00 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "close-up glove catch, hard smack"
+    },
+    {
+     "file": "field/mitt_pop_02.ogg",
+     "dur": 0.6,
+     "lufs": -26.95,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/164528/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Glove Catch 4 FF011.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -23.9 LUFS, peak 0.0 dBFS -> gain 5.00 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "low-pitch glove catch, hard smack"
+    },
+    {
+     "file": "field/mitt_pop_03.ogg",
+     "dur": 0.6,
+     "lufs": -25.15,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/164529/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Glove Catch 5 FF010.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -22.2 LUFS, peak 0.0 dBFS -> gain 4.20 dB, 5.2 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "glove catch, medium-high pitch, hard smack"
+    },
+    {
+     "file": "field/mitt_pop_04.ogg",
+     "dur": 0.6,
+     "lufs": -26.15,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/164499/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Glove Catch 1 FF014.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -35.7 LUFS, peak -8.4 dBFS -> gain 13.40 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "glove catch, quick smack"
+    },
+    {
+     "file": "field/mitt_pop_05.ogg",
+     "dur": 0.6,
+     "lufs": -29.25,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/164536/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Glove Catch 12 FF003.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -28.3 LUFS, peak 0.0 dBFS -> gain 5.00 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "glove catch, soft smack, loud, high pitch"
+    },
+    {
+     "file": "field/mitt_pop_06.ogg",
+     "dur": 0.6,
+     "lufs": -28.25,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/164527/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Glove Catch 3 FF012.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -26.3 LUFS, peak 0.0 dBFS -> gain 5.00 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "glove catch, medium smack"
+    }
+   ]
+  },
+  "glove_catch": {
+   "group": "field",
+   "loop": false,
+   "files": [
+    {
+     "file": "field/glove_catch_01.ogg",
+     "dur": 0.7,
+     "lufs": -25.85,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/164530/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Glove Catch 6 FF009.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.7 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -22.8 LUFS, peak 0.0 dBFS -> gain 4.80 dB, 5.8 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "low-pitch glove catch, soft smack"
+    },
+    {
+     "file": "field/glove_catch_02.ogg",
+     "dur": 0.7,
+     "lufs": -28.15,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/164531/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Glove Catch 7 FF008.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.7 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -35.1 LUFS, peak -5.4 dBFS -> gain 10.40 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "glove catch, distant, soft/medium"
+    },
+    {
+     "file": "field/glove_catch_03.ogg",
+     "dur": 0.8,
+     "lufs": -27.85,
+     "source": "https://freesound.org/people/martinimeniscus/sounds/164533/",
+     "author": "martinimeniscus",
+     "licence": "CC0",
+     "title": "Glove Catch 9 FF006.aif",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.8 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -25.4 LUFS, peak 0.0 dBFS -> gain 5.00 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "glove catch, low pitch, drawn-out smack"
+    },
+    {
+     "file": "field/glove_catch_04.ogg",
+     "dur": 0.6,
+     "lufs": -23.05,
+     "source": "https://freesound.org/people/SocializedArtist45/sounds/266594/",
+     "author": "SocializedArtist45",
+     "licence": "CC-BY 3.0",
+     "title": "Baseball Hitting Glove.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.03 s; loudness short shot: momentary-max -20.9 LUFS, peak 0.0 dBFS -> gain 2.90 dB, 3.9 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "ball tossed into a glove"
+    }
+   ]
+  },
+  "ball_wall": {
+   "group": "field",
+   "loop": false,
+   "files": [
+    {
+     "file": "field/ball_wall_01.ogg",
+     "dur": 0.8,
+     "lufs": -22.38,
+     "source": "https://freesound.org/people/velcronator/sounds/733141/",
+     "author": "velcronator",
+     "licence": "CC0",
+     "title": "Hitting a padded wall Single Shot",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.8 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.05 s; loudness short shot: momentary-max -21.7 LUFS, peak -0.4 dBFS -> gain 3.70 dB, 4.3 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "hitting a padded wall"
+    },
+    {
+     "file": "field/ball_wall_02.ogg",
+     "dur": 1.0,
+     "lufs": -20.1,
+     "source": "https://freesound.org/people/cemagar/sounds/120357/",
+     "author": "cemagar",
+     "licence": "CC-BY 3.0",
+     "title": "wall ball.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0.6 s, at most 1.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.05 s; loudness short shot: momentary-max -11.6 LUFS, peak 0.0 dBFS -> gain -6.40 dB, 0.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "ball against a wall, first hit",
+     "doubt": "Small ball on a hard wall (not a padded outfield wall)."
+    },
+    {
+     "file": "field/ball_wall_03.ogg",
+     "dur": 0.6,
+     "lufs": -22.56,
+     "source": "https://freesound.org/people/JaenKleynhans/sounds/267882/",
+     "author": "JaenKleynhans",
+     "licence": "CC0",
+     "title": "Bouncing Ball.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.6 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.05 s; loudness short shot: momentary-max -22.3 LUFS, peak 0.0 dBFS -> gain 4.30 dB, 5.3 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "ball hitting a wall, first impact",
+     "doubt": "Small ball on a hard wall (not a padded outfield wall)."
+    }
+   ]
+  },
+  "ball_dirt": {
+   "group": "field",
+   "loop": false,
+   "files": [
+    {
+     "file": "field/ball_dirt_01.ogg",
+     "dur": 0.9,
+     "lufs": -26.0,
+     "source": "https://freesound.org/people/NathanaelBray/sounds/650982/",
+     "author": "NathanaelBray",
+     "licence": "CC0",
+     "title": "Bouncy Ball Bouncing on Muddy Pavement",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 0.9 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.05 s; loudness short shot: momentary-max -27.6 LUFS, peak -0.7 dBFS -> gain 5.70 dB, 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "bouncy ball on muddy pavement",
+     "doubt": "Bouncy ball on muddy pavement, not a baseball on dirt."
+    },
+    {
+     "file": "field/ball_dirt_02.ogg",
+     "dur": 1.0,
+     "lufs": -19.61,
+     "source": "https://freesound.org/people/Luisa_Sanchez/sounds/813419/",
+     "author": "Luisa_Sanchez",
+     "licence": "CC0",
+     "title": "Ball bounce",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0.8 s, at most 1.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.05 s; loudness short shot: momentary-max -18.1 LUFS, peak -0.7 dBFS -> gain 0.10 dB, 0.4 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "ball bounce (sports ball)",
+     "doubt": "Generic sports-ball bounce; surface unknown."
+    }
+   ]
+  },
+  "slide": {
+   "group": "field",
+   "loop": false,
+   "files": [
+    {
+     "file": "field/slide_01.ogg",
+     "dur": 1.3,
+     "lufs": -20.59,
+     "source": "https://freesound.org/people/SocializedArtist45/sounds/266596/",
+     "author": "SocializedArtist45",
+     "licence": "CC-BY 3.0",
+     "title": "Sliding to Base.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 1.5 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.1 s; loudness short shot: momentary-max -17.8 LUFS, peak -0.5 dBFS -> gain -0.20 dB, 0.3 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "foot sliding across dirt"
+    },
+    {
+     "file": "field/slide_02.ogg",
+     "dur": 1.5,
+     "lufs": -18.57,
+     "source": "https://freesound.org/people/FocusBay/sounds/210867/",
+     "author": "FocusBay",
+     "licence": "CC0",
+     "title": "Falling In Dirt.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 1.5 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.2 s; loudness two-pass: I -18.27 TP 1.80 -> gain 0.27 dB, up to 3.1 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "stumble and fall onto dirt with a little slide"
+    },
+    {
+     "file": "field/slide_03.ogg",
+     "dur": 1.16,
+     "lufs": -21.77,
+     "source": "https://freesound.org/people/Joao_Janz/sounds/504383/",
+     "author": "Joao_Janz",
+     "licence": "CC0",
+     "title": "Boots Gravel Feet Slide  1_5",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.1 s; loudness short shot: momentary-max -36.7 LUFS, peak -17.8 dBFS -> gain 18.70 dB, 1.9 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "boots sliding on gravel",
+     "doubt": "Boots on gravel."
+    }
+   ]
+  },
+  "bat_drop": {
+   "group": "field",
+   "loop": false,
+   "files": [
+    {
+     "file": "field/bat_drop_01.ogg",
+     "dur": 1.5,
+     "lufs": -20.75,
+     "source": "https://freesound.org/people/deleted_user_7146007/sounds/383459/",
+     "author": "deleted_user_7146007",
+     "licence": "CC0",
+     "title": "Dropping Aluminum Baseball Bat",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 1.5 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.2 s; loudness two-pass: I -29.26 TP -5.38 -> gain 10.38 dB, up to 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "aluminium bat dropped (first impact)",
+     "doubt": "Aluminium bat (MLB bats are wood)."
+    },
+    {
+     "file": "field/bat_drop_02.ogg",
+     "dur": 1.0,
+     "lufs": -22.01,
+     "source": "https://freesound.org/people/designerschoice/sounds/858912/",
+     "author": "designerschoice",
+     "licence": "CC-BY 4.0",
+     "title": "SPRTField-Samsung Galaxy Smartphone, CU_Bat, Baseball, Aluminum, Drop, Clatter_Nicholas Judy_TDC",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 1.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.2 s; loudness short shot: momentary-max -15.4 LUFS, peak -3.6 dBFS -> gain -2.60 dB, 0.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "aluminium bat drop, first drop",
+     "doubt": "Aluminium bat (MLB bats are wood)."
+    },
+    {
+     "file": "field/bat_drop_03.ogg",
+     "dur": 1.5,
+     "lufs": -21.94,
+     "source": "https://freesound.org/people/casemundy/sounds/384834/",
+     "author": "casemundy",
+     "licence": "CC-BY 4.0",
+     "title": "Bat dropping on concrete.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 1.5 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.2 s; loudness two-pass: I -28.05 TP -4.76 -> gain 9.76 dB, up to 6.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "aluminium bat drops on concrete",
+     "doubt": "Aluminium bat on concrete (MLB bats are wood)."
+    }
+   ]
+  },
+  "ump_strike": {
+   "group": "field",
+   "loop": false,
+   "files": [
+    {
+     "file": "field/ump_strike_01.ogg",
+     "dur": 1.7,
+     "lufs": -18.04,
+     "source": "https://freesound.org/people/jcookvoice/sounds/625473/",
+     "author": "jcookvoice",
+     "licence": "CC0",
+     "title": "American Baseball The Umpire.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 8.35 s, at most 1.7 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.1 s; loudness two-pass: I -6.76 TP 3.21 -> gain -11.24 dB; Ogg Vorbis 96 kbps",
+     "note": "voice actor: \"Strike three, you're out\" (cut at silences, 8.35-10.05 s)",
+     "doubt": "Voice actor (CC0). Cut at silences; which phrase is which follows the description's order, not checked by ear."
+    }
+   ]
+  },
+  "ump_out_safe": {
+   "group": "field",
+   "loop": false,
+   "files": [
+    {
+     "file": "field/ump_out_safe_01.ogg",
+     "dur": 2.0,
+     "lufs": -18.1,
+     "source": "https://freesound.org/people/jcookvoice/sounds/625473/",
+     "author": "jcookvoice",
+     "licence": "CC0",
+     "title": "American Baseball The Umpire.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 1.75 s, at most 2.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.1 s; loudness two-pass: I -0.78 TP 3.81 -> gain -17.22 dB; Ogg Vorbis 96 kbps",
+     "note": "voice actor: \"Safe!\" (1.75-3.75 s)",
+     "doubt": "Voice actor (CC0). Cut at silences; phrase order from the description."
+    },
+    {
+     "file": "field/ump_out_safe_02.ogg",
+     "dur": 2.7,
+     "lufs": -18.13,
+     "source": "https://freesound.org/people/jcookvoice/sounds/625473/",
+     "author": "jcookvoice",
+     "licence": "CC0",
+     "title": "American Baseball The Umpire.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 4.75 s, at most 2.7 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.1 s; loudness two-pass: I -1.74 TP 3.40 -> gain -16.26 dB; Ogg Vorbis 96 kbps",
+     "note": "voice actor: \"You're out!\" (4.75-7.45 s)",
+     "doubt": "Voice actor (CC0). Cut at silences; phrase order from the description."
+    },
+    {
+     "file": "field/ump_out_safe_03.ogg",
+     "dur": 0.9,
+     "lufs": -19.45,
+     "source": "https://freesound.org/people/jcookvoice/sounds/625473/",
+     "author": "jcookvoice",
+     "licence": "CC0",
+     "title": "American Baseball The Umpire.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 11.3 s, at most 0.9 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.1 s; loudness short shot: momentary-max -0.9 LUFS, peak 0.0 dBFS -> gain -17.10 dB, 0.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "voice actor: \"Safe!\" (11.3-12.2 s)",
+     "doubt": "Voice actor (CC0). Cut at silences; phrase order from the description."
+    }
+   ]
+  },
+  "pa_chime": {
+   "group": "park",
+   "loop": false,
+   "files": [
+    {
+     "file": "park/pa_chime_01.ogg",
+     "dur": 4.92,
+     "lufs": -18.06,
+     "source": "https://freesound.org/people/uair01/sounds/57771/",
+     "author": "uair01",
+     "licence": "CC-BY 3.0",
+     "title": "ding_dong_ding.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.3 s; loudness two-pass: I -16.64 TP -0.97 -> gain -1.36 dB; Ogg Vorbis 96 kbps",
+     "note": "station ding-dong announcement chime (field recording)"
+    },
+    {
+     "file": "park/pa_chime_02.ogg",
+     "dur": 1.17,
+     "lufs": -20.54,
+     "source": "https://freesound.org/people/chungus43A/sounds/720565/",
+     "author": "chungus43A",
+     "licence": "CC0",
+     "title": "GO Transit Station PA chime",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.1 s; loudness short shot: momentary-max -6.3 LUFS, peak -0.3 dBFS -> gain -11.70 dB, 0.0 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "station PA chime (recreated in Audacity)",
+     "doubt": "Synthetic recreation of a Toronto GO Transit station chime; a little under target."
+    },
+    {
+     "file": "park/pa_chime_03.ogg",
+     "dur": 2.79,
+     "lufs": -17.95,
+     "source": "https://freesound.org/people/MatthewWong/sounds/361564/",
+     "author": "MatthewWong",
+     "licence": "CC0",
+     "title": "Ding Dong",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.2 s; loudness two-pass: I -6.45 TP 2.60 -> gain -11.55 dB; Ogg Vorbis 96 kbps",
+     "note": "ding dong chime"
+    }
+   ]
+  },
+  "vendor": {
+   "group": "park",
+   "loop": false,
+   "files": [
+    {
+     "file": "park/vendor_01.ogg",
+     "dur": 7.77,
+     "lufs": -18.04,
+     "source": "https://freesound.org/people/jdbingle/sounds/784896/",
+     "author": "jdbingle",
+     "licence": "CC0",
+     "title": "Beer Sale At the Game",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, to the end; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 0.5 s; loudness two-pass: I -9.31 TP -0.04 -> gain -8.69 dB; Ogg Vorbis 96 kbps",
+     "note": "vendor calls \"Cold beer!\" at a pro baseball game, crowd behind"
+    }
+   ]
+  },
+  "fireworks": {
+   "group": "park",
+   "loop": false,
+   "files": [
+    {
+     "file": "park/fireworks_01.ogg",
+     "dur": 8.0,
+     "lufs": -18.1,
+     "source": "https://freesound.org/people/Mr%20Sensible/sounds/14742/",
+     "author": "Mr Sensible",
+     "licence": "CC0",
+     "title": "Shells1.mp3",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 8.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.0 s; loudness two-pass: I -13.38 TP 0.74 -> gain -4.62 dB; Ogg Vorbis 96 kbps",
+     "note": "large firework shells, launch and burst; first 8 s"
+    },
+    {
+     "file": "park/fireworks_02.ogg",
+     "dur": 8.0,
+     "lufs": -19.96,
+     "source": "https://freesound.org/people/wagneric/sounds/611943/",
+     "author": "wagneric",
+     "licence": "CC0",
+     "title": "Suburban_Fireworks1.wav",
+     "processing": "Freesound HQ preview (mp3), original needs a login; from 0 s, at most 8.0 s; mono 44.1 kHz; leading silence trimmed (-45 dB); fade in 10 ms, fade out 1.0 s; loudness two-pass: I -16.68 TP 3.23 -> gain -1.32 dB, up to 2.9 dB peak limiting at -1 dBFS; Ogg Vorbis 96 kbps",
+     "note": "suburban 4th of July fireworks, first 8 s",
+     "doubt": "Suburban backyard fireworks; a little under target."
+    }
+   ]
+  }
+ }
+}
