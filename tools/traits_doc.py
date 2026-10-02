@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-traits_doc.py · v0.1 · 2026-10-02
+traits_doc.py · v0.2 · 2026-10-02
 
 Writes TRAITS.md, the list of every player trait and how the population of
 players is drawn, straight from bb_engine.js: the TRAITS table (mean, spread,
@@ -16,6 +16,7 @@ beyond "normal, clipped to its range" is written in DRAWN below; when the
 engine draws a trait differently, change it here too.
 
 CHANGED
+  v0.2  pitch types: each pitcher's seam break, and how pitches vary from pitch to pitch (engine v1.0)
   v0.1  first build
 """
 import os, re, sys
@@ -104,8 +105,8 @@ def parse_pitch_types(src):
     b = block(src, '  var PITCH_TYPES = {', '\n  };')
     out = []
     for code, body in re.findall(r'(\w\w):\s*\{([^}]*)\}', b):
-        d = dict(re.findall(r"(\w+):\s*('[^']*'|-?[0-9.]+)", body))
-        out.append((code, {k: v.strip("'") for k, v in d.items()}))
+        d = dict(re.findall(r"(\w+):\s*(\[[^\]]*\]|'[^']*'|-?[0-9.]+)", body))
+        out.append((code, {k: v.strip("'") for k, v in d.items()}))   # arrays stay as their source text, e.g. '[2.6, 2.0]'
     if len(out) < 6:
         sys.exit('PITCH_TYPES did not parse')
     return out
@@ -167,11 +168,17 @@ def main():
     for pos, d in fm.items():
         w('| %s | %s |' % (pos, ' | '.join(('%+g' % d[k]) if k in d else '' for k in keys)))
     w('\n## Pitch types\n')
-    w('Each pitcher\'s version of a pitch is drawn from these league figures (`PITCH_TYPES`): speed is his fastball speed plus the offset (and, for every pitch but the fastballs, a further normal(0, 1.0 mph) of his own); spin rate and spin efficiency are normal with the spread shown (spin rate clipped to 3 spreads, efficiency to 0.03-0.99); tilt is normal. A pitch thrown varies again around his version (speed 0.6 mph, spin 2.5%, tilt 5 deg, efficiency 0.03), and his command sets where it goes.\n')
-    w('| type | name | kind | speed offset (mph) | spin (rpm) | spin efficiency | tilt (deg) | command factor |')
-    w('|---|---|---|---|---|---|---|---|')
+    w('Each pitcher\'s version of a pitch is drawn from these league figures (`PITCH_TYPES`): speed is his fastball speed plus the offset (and, for every pitch but the fastballs, a further normal(0, 1.0 mph) of his own); spin rate and spin efficiency are normal with the spread shown (spin rate clipped to 3 spreads, efficiency to 0.03-0.99); tilt is normal; his seam break (extra movement the spin does not explain, toward his arm side and up, in inches) is normal around 0 with the spread shown.\n')
+    w('| type | name | kind | speed offset (mph) | spin (rpm) | spin efficiency | tilt (deg) | seam break sd, arm side / up (in) | command factor |')
+    w('|---|---|---|---|---|---|---|---|---|')
+    pair = lambda v: ' / '.join(x.strip() for x in v.strip('[]').split(',')) if v else ''
     for code, d in pt:
-        w('| %s | %s | %s | %s | %s ± %s | %s ± %s | %s ± %s | %s |' % (code, d.get('name', ''), d.get('kind', ''), d.get('dv', ''), d.get('rpm', ''), d.get('rpmSD', ''), d.get('eff', ''), d.get('effSD', ''), d.get('tilt', ''), d.get('tiltSD', ''), d.get('cmd', '')))
+        w('| %s | %s | %s | %s | %s ± %s | %s ± %s | %s ± %s | %s | %s |' % (code, d.get('name', ''), d.get('kind', ''), d.get('dv', ''), d.get('rpm', ''), d.get('rpmSD', ''), d.get('eff', ''), d.get('effSD', ''), d.get('tilt', ''), d.get('tiltSD', ''), pair(d.get('seamSD')), d.get('cmd', '')))
+    w('\nA pitch thrown varies again around his version, by these spreads within a game, plus tilt 5 deg and efficiency 0.03 for every type. His command trait is his whole location scatter at the plate: the seams\' pitch-to-pitch scatter is part of it, not added to it.\n')
+    w('| type | speed (mph) | spin (share of his rpm) | seam break, arm side / up (in) |')
+    w('|---|---|---|---|')
+    for code, d in pt:
+        w('| %s | %s | %s | %s |' % (code, d.get('veloW', ''), d.get('rpmW', ''), pair(d.get('seamW'))))
     w('\n## Repertoires\n')
     w('A pitcher is one of these archetypes, picked with the weight shown (`ARCH`); his usage of each pitch is the mix times a lognormal factor (log-sd 0.25), renormalized. Relievers keep their best two pitches (60%) or three.\n')
     w('| archetype | weight | mix |')
