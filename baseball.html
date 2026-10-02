@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v2.2 · 2026-10-02
+  baseball.html · v2.3 · 2026-10-02
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
@@ -29,7 +29,14 @@
   bases, park air and umpire; the batter's and pitcher's trait cards with
   250-PA projections; this at-bat's pitches. A pre-game screen shows both
   lineups and starters first. Keys: space pauses, arrows skip a plate
-  appearance, up and down arrows change speed, g draws a new game.
+  appearance, up and down arrows change speed, g draws a new game, v mutes
+  the announcers, c the crowd, the field sounds and the organ.
+
+  The broadcast: at load the whole game's call is written ahead (bb_call.js)
+  and played on the clock (bb_sound.js): the announcers from the speech
+  server on the Pi (tts/speech_server.py), the crowd and the field from
+  sounds/ (sounds/manifest.js lists them), the organ synthesised. Without
+  the server or the files the page plays exactly as before, silently.
 
   Layout in design px of a 3840 x 2160 screen scaled to the window. Data
   rows are the wall's 30 px floor (below its 37 px sofa floor, the price of
@@ -38,6 +45,9 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v2.3  the broadcast: two announcers, the public-address announcer, the crowd, the
+          field and the organ, written ahead for the whole game and played on its
+          clock; v and c mute the voices and the park; silent without them
     v2.2  the game and its schedule come from bb_schedule.js, shared with the headless
           tools (the same segments to the millisecond); a 30 s seventh-inning stretch
     v2.1  every throw is shown: the catcher's return after each pitch, a new ball from
@@ -52,10 +62,6 @@
           circle in his side's colour with the expected type at its centre; the
           pitcher's aim circle in his side's colour with the intended type as the
           cross-hair (Joe: the two dashed circles were hard to tell apart)
-    v1.8  the dots become people: everyone walks between his stations - seat, on-deck
-          circle, plate, bases, position - laid down with the schedule; sides change
-          over on foot and change colour as they go; warm-up pitches; home-run trots;
-          the whole bench out for a grand slam and for the win (Joe)
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -150,6 +156,11 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
 <script src="bb_field.js?v=0.6"></script>
 <script src="bb_game.js?v=0.6"></script>
 <script src="bb_schedule.js?v=0.2"></script>
+<script src="bb_call.js?v=0.2"></script>
+<script src="bb_organ.js?v=0.1"></script>
+<script src="bb_sound.js?v=0.1"></script>
+<!-- the park's sound files, when they are beside the page; without it the game plays silently -->
+<script src="sounds/manifest.js"></script>
 <script>
 (function () {
   'use strict';
@@ -235,6 +246,10 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   // ========================================================= THE SCHEDULE
   // laid out by bb_schedule.js (the broadcast script is written against the same clock)
   var SCHED = BBSchedule.build(G, PLAYER), SEG = SCHED.SEG, total = SCHED.total, segAt = SCHED.segAt, playDuration = SCHED.playDuration, runnerArrive = SCHED.runnerArrive;
+  // the broadcast, written ahead for the whole game, and its player; neither may ever stop the picture
+  var CALL = null, SOUND = null;
+  try { CALL = BBCall.write(GAME, SCHED); SOUND = BBSound.create({ call: CALL, SEG: SEG, segAt: segAt, seed: SEED, base: 'sounds/' }); }
+  catch (err) { console.error('broadcast', err); SOUND = null; }
 
   // ============================================================ THE CLOCK
   var T = SEEK, speed = SPEED, paused = false, lastNow = null;
@@ -245,6 +260,8 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     else if (e.key === 'ArrowLeft') { for (var q = i - 1; q >= 0; q--) if (SEG[q].kind === 'paStart' || SEG[q].kind === 'halfStart') { T = SEG[q].t0; break; } }
     else if (e.key === 'ArrowUp') { speed = Math.min(16, speed * 2); declareBudget(); e.preventDefault(); }       // powers of two, 1/4x to 16x (Joe)
     else if (e.key === 'ArrowDown') { speed = Math.max(0.25, speed / 2); declareBudget(); e.preventDefault(); }
+    else if (e.key === 'v' && SOUND) SOUND.toggle('voice');
+    else if (e.key === 'c' && SOUND) SOUND.toggle('crowd');
     else if (e.key === 'g') location.replace(location.pathname + '?seed=' + (SEED + 1) + (speed !== 1 ? '&speed=' + speed : ''));
     else if (e.key === 'p' && s.kind === 'pregame') T = s.t0 + s.dur;
   });
@@ -1502,9 +1519,14 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     });
     lane(laneMain, laneSub);
     var spd = speed >= 1 ? speed.toFixed(2).replace(/\.?0+$/, '') : '1/' + Math.round(1 / speed);
-    EL.hud.innerHTML = '<span class="fig hot">' + (paused ? '❚❚' : '▶') + ' ' + spd + '×</span>&nbsp;&nbsp;&nbsp;seed ' + SEED + ' · space pause · ↑ ↓ speed · ← → at-bat · g new game';
+    EL.hud.innerHTML = '<span class="fig hot">' + (paused ? '❚❚' : '▶') + ' ' + spd + '×</span>&nbsp;&nbsp;&nbsp;seed ' + SEED + ' · space pause · ↑ ↓ speed · ← → at-bat · g new game' + soundWords();
   }
 
+  function soundWords() {   // the two sound keys, and what is off
+    if (!SOUND) return '';
+    var st = SOUND.state();
+    return ' · v voices' + (st.voice ? (st.server ? '' : ' (no server)') : ' off') + ' · c crowd' + (st.crowd ? (st.files ? '' : ' (no files)') : ' off');
+  }
   function init() {
     var f = setup('field', FW, FH, 0, 0); fieldC = f.c; fieldG = f.g; bg = null;
     var z = setup('zone', ZW, ZH, ZX, ZY); zoneC = z.c; zoneG = z.g;
@@ -1517,11 +1539,12 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     lastNow = now;
     if (T > total) T = total - 0.01;
     render(T);
+    if (SOUND) try { SOUND.update(T, speed, paused); } catch (err) { if (!FAULTS.sound) { FAULTS.sound = true; console.error('sound', err); } }
     requestAnimationFrame(frame);
   }
   render(T);
   requestAnimationFrame(frame);
-  window.BALLGAME = { G: G, SEG: SEG, seek: function (t) { T = t; }, total: total, PEOPLE: PEOPLE, stateAt: stateAt, THROWS: THROWS };
+  window.BALLGAME = { G: G, SEG: SEG, seek: function (t) { T = t; }, total: total, PEOPLE: PEOPLE, stateAt: stateAt, THROWS: THROWS, CALL: CALL, SOUND: SOUND };
   // The wall's stall watchdog asks how long this URL may be held: one whole game at
   // this speed (per run) plus a few seconds to build and lay it out (once).
   function declareBudget() { window.WALL_SECONDS_PER_RUN = Math.round(total / (speed || SPEED)); window.WALL_SECONDS_ONCE = 5; }
