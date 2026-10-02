@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v2.1 · 2026-10-01
+  baseball.html · v2.2 · 2026-10-02
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
@@ -38,6 +38,8 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v2.2  engine v0.9 (the swing as a tilted circle); the catcher's-view bat swings to
+          its attack angle where it met the ball
     v2.1  every throw is shown: the catcher's return after each pitch, a new ball from
           the umpire, the throw in to hold the runners and back to the pitcher, the
           ball back from the bag after a steal and from the backstop after a wild
@@ -54,9 +56,6 @@
           circle, plate, bases, position - laid down with the schedule; sides change
           over on foot and change colour as they go; warm-up pitches; home-run trots;
           the whole bench out for a grand slam and for the win (Joe)
-    v1.7  on the wall: wall.js is loaded when it is beside the file, the game tells
-          the stall watchdog its length, hands on through the ring at the final
-          out, and a visit with no ?seed plays a new game drawn from the clock
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -146,7 +145,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   <div id="hud" class="tag"></div>
 </div>
 <!-- version tags so a browser never runs a stale engine against a new page -->
-<script src="bb_engine.js?v=0.8"></script>
+<script src="bb_engine.js?v=0.9"></script>
 <script src="bb_names.js?v=0.1"></script>
 <script src="bb_field.js?v=0.6"></script>
 <script src="bb_game.js?v=0.6"></script>
@@ -1221,7 +1220,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
       // where the bat met the ball (or would have)
       var th = sw.theta, zc = pch.plate.z - sw.D, xs = pch.plate.x + sw.dLong * side, ys = YP + 0.3;
       var ax = [Math.cos(th), -Math.sin(th), 0], tip = [ax[0] * -side, ax[1] * -side];   // unit, toward the tip
-      var az1 = Math.atan2(tip[1], tip[0]) / DEG, el1 = sw.attack || 8;
+      var az1 = Math.atan2(tip[1], tip[0]) / DEG, el1 = (sw.attackAt !== undefined ? sw.attackAt : sw.attack) || 8;   // the bat's path where it met the ball
       // shortest sweep in azimuth
       while (az1 - az0 > 180) az1 -= 360; while (az1 - az0 < -180) az1 += 360;
       var hands1 = [xs - tip[0] * 0.6, ys - tip[1] * 0.6, zc - 0.03];

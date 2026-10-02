@@ -546,3 +546,82 @@ The same for fouls that carry a launch angle:
 | >40 | 7364 | 0.555 | 0.423 | 6463 | 81.2 | 6463 | 75.7 | 3205 |
 
 <!-- fouls.py tables: end -->
+
+## Swing geometry (pitch level, 2025, one week)
+
+Every pitch of 2025-07-01..07-07 (27,876 pitches; 9,972 contacts with bat tracking), measured by `statcast/swing_geometry.py` (pull with `python3 statcast/fetch_pitches.py --dates 2025-07-01:2025-07-07`). These relations shaped bb_engine v0.9's swing (CALIBRATION.md, "The swing as a tilted circle"). This paragraph was written by hand.
+
+What the data showed, on these dates:
+
+1. **Contact met further out front turned the bat and raised its path.** Per inch of contact depth, the bat's direction of travel turned 1.46 deg (r .83) and its attack angle rose 0.80 deg (r .75). One circle of radius 0.87 m in a plane tilted at the league's swing tilt gives both within 11%.
+2. **The ball's spray followed depth** (1.59 deg per inch, r .40, on all balls in play; fair balls went from -13.7 deg on contact met deep to +21.2 out front). At a given depth, what was left of the bat's direction barely moved the ball (r .09).
+3. **Met deep, the bat was slower:** full swings ran 69.0 mph at 10-20 in of depth and 73.2 at 35-40.
+4. **The swing plane was steeper for low pitches:** 9.4 deg per zone height, from 38.5 below the zone to 20.7 above it.
+5. **Contact struck square vertically was squared up only .695 of the time,** and less on pitches inside (.27 beyond a foot) or away (.44).
+6. **The vertical miss ran from under the ball to over it as contact moved out front:** +17.8 to +22.9 deg below 20 in of depth, -10.7 at 40-50 in, -24.3 beyond 50.
+
+```
+pitches 27876 (2025-07-01:2025-07-07)
+
+1. CONTACT DEPTH (in in front of the batter): contacts 9972, mean 29.1, sd 9.7
+   attack angle (deg)                         mean   8.23 sd 10.39 | per inch of depth +0.797 (r 0.75), n 9972
+   bat speed (mph)                            mean  70.62 sd  7.38 | per inch of depth +0.280 (r 0.37), n 9972
+   attack direction (deg, sign as recorded)   mean   0.99 sd 17.00 | per inch of depth -1.457 (r -0.83), n 9972
+   swing path tilt (deg)                      mean  32.01 sd  6.90 | per inch of depth +0.048 (r 0.07), n 9972
+   full swings (60+ mph) by depth: n, bat speed, attack angle, vertical miss mean, its sd
+     -20..10     145   66.5    -9.5   +17.8   28.2
+      10..20    1251   69.0    -2.0   +22.9   26.6
+      20..25    1635   70.5    +3.3   +19.2   30.1
+      25..30    2008   71.8    +7.4   +15.0   33.2
+      30..35    1834   72.8   +11.7    +7.8   35.1
+      35..40    1286   73.2   +15.7    +0.6   35.0
+      40..50    1166   73.4   +19.3   -10.7   36.1
+      50..90     154   73.0   +23.6   -24.3   37.1
+   batters with 25+ contacts: 204; within-batter sd 9.0 in; between-batter sd of usual depth 3.5 in
+   depth against pitch location: -1.89 in per ft away (r -0.10)
+
+2. SWING TILT AGAINST PITCH HEIGHT (all swings with a tilt)
+   swings 13034: mean 32.2 sd 6.9; per unit of zone height -9.4 deg (r -0.55)
+     height -9.00..-0.25 n   667  tilt 38.5
+     height -0.25..0.15  n  2537  tilt 36.3
+     height  0.15..0.50  n  4137  tilt 33.6
+     height  0.50..0.85  n  3800  tilt 30.3
+     height  0.85..1.25  n  1735  tilt 25.8
+     height  1.25..9.00  n   158  tilt 20.7
+
+3. BAT SPEED BY STRIKES (full swings, 60+ mph)
+   0 strikes: n  3577  mean 72.6
+   1 strikes: n  4094  mean 72.0
+   2 strikes: n  4452  mean 70.7
+
+4. SQUARED UP AND EXIT SPEED AGAINST THE VERTICAL MISS (launch angle minus attack angle): tracked contacts 8989, miss mean 10.0 sd 34.7
+     band       n   share  squared  EV/max   foul
+      -90..-60    265  0.029   0.098   0.601   0.657
+      -60..-40    647  0.072   0.190   0.687   0.743
+      -40..-25    605  0.067   0.426   0.764   0.445
+      -25..-15    549  0.061   0.614   0.813   0.213
+      -15..-5     721  0.080   0.663   0.837   0.190
+       -5..5      837  0.093   0.695   0.848   0.211
+        5..15    1045  0.116   0.626   0.835   0.292
+       15..25     967  0.108   0.594   0.808   0.334
+       25..40    1294  0.144   0.425   0.768   0.520
+       40..60    1634  0.182   0.169   0.721   0.780
+       60..90     404  0.045   0.067   0.692   0.777
+
+5. CONTACT STRUCK SQUARE VERTICALLY (miss within 15 deg of +10), BY PITCH LOCATION: n 2849
+     away  -9.0..-1.0  ft  n   66  EV/max 0.725  squared 0.273
+     away  -1.0..-0.5  ft  n  405  EV/max 0.796  squared 0.523
+     away  -0.5..0.0   ft  n  874  EV/max 0.843  squared 0.684
+     away   0.0..0.5   ft  n  935  EV/max 0.848  squared 0.692
+     away   0.5..1.0   ft  n  479  EV/max 0.827  squared 0.616
+     away   1.0..9.0   ft  n   90  EV/max 0.761  squared 0.444
+
+6. SPRAY OF FAIR BALLS (+ = pulled): n 4484, mean +6.1, sd 24.9
+     depth -20..22  n  671  spray -13.7  sd 21.4
+     depth  22..28  n 1161  spray  -2.5  sd 22.6
+     depth  28..34  n 1284  spray +10.3  sd 22.3
+     depth  34..40  n  783  spray +19.9  sd 20.2
+     depth  40..90  n  420  spray +21.2  sd 21.4
+   all balls in play (caught fouls included): spray per inch of depth +1.59 (r 0.40)
+   spray against pitch location: -7.9 deg per ft away (r -0.13)
+```

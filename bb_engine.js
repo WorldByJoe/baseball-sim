@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v0.8 · 2026-10-01
+   bb_engine.js · v0.9 · 2026-10-02
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -49,6 +49,10 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v0.9  the swing is a tilted circle (Statcast swing tilt, steeper for low pitches):
+           where on it the ball is met sets spray, attack angle and bat speed; the
+           barrel dips toward its end; hands cover only part of a pitch in or out;
+           a bat-face scatter; timing, along-barrel scatter fitted to pitch-level 2025
      v0.8  the bat is a tapered wood beam: its shape gives the radius the ball meets,
            the rigid recoil about the balance point and the bending modes that drain
            a strike off the sweet spot (Nathan 2000); the ball's COR falls with speed
@@ -61,7 +65,6 @@
            end the inning mid-count)
      v0.5  fielding and running traits on every player; landing state for the fielding
            layer; foul pops can be caught (g.foulCatch)
-     v0.4  ghostPitch can keep its flight path, for drawing the batter's expected pitch
 ============================================================================ */
 
 var BB = (function () {
@@ -165,10 +168,34 @@ var BB = (function () {
   var WOOD_C = 4300;      // m/s: sqrt(E/rho) of ash and maple; sets the mode frequencies
   var E_COR = [0.546, 0.51];   // the ball's own coefficient of restitution at 60 mph (the MLB specification) and at 140 mph (Nathan); linear between
   var MU_BAT = 0.5;       // ball-bat friction; caps the tangential impulse on glancing contact
-  var SWING_RADIUS = 0.6; // m: the barrel turns at (bat speed / this) rad/s near contact, so timing sets spray
-  var SWING_CURV = 0.5;   // 1/m: how sharply the barrel's path curves upward through the hitting zone - a 0.9 m circle tilted 30 deg (sin 30 / 0.9)
-  var C_LOC = 0.9;        // rad per m: an inside pitch is met farther out front and pulled
+  // THE SWING IS A TILTED CIRCLE. Near contact the sweet spot travels on an arc
+  // of radius SWING_R in a plane tilted from the ground by the batter's swing
+  // tilt (Statcast's swing_path_tilt), with the barrel below the hands. Meeting
+  // the ball further round the arc (out front) or short of it (deep) turns the
+  // bat toward the pull side by cos(tilt) of that angle and raises its path by
+  // sin(tilt) of it. Pitch-level 2025 (one week of July, 9,972 contacts): balls
+  // met out front were pulled 1.59 deg per inch and the attack angle rose 0.80
+  // deg per inch; SWING_R is the one radius that gives both within 11% at the
+  // league's tilt. The plane is steeper for low pitches: 9.4 deg per zone height.
+  var SWING_R = 0.87;     // m
+  var TILT_PER_H = 9.4;   // deg of swing tilt per zone height (0 = bottom of his zone, 1 = top); 38 deg below the zone, 21 above
+  var BAT_PEAK_M = 0.229, BAT_GAIN_EXP = 0.2;   // the barrel's speed peaks 9 in out front of his usual contact point; fitted to bat speed by contact depth (pitch-level 2025)
+  // Pitch location (pitch-level 2025, one week of July): an inside pitch was met
+  // a little further out front, 1.89 in per foot (r .10), and pulled more than
+  // that depth alone explains, 7.9 deg per foot in all; the rest is the bat
+  // face turned by the hands. And the hands only partly follow the pitch in and
+  // out: what they do not cover moves the contact along the barrel, toward the
+  // hands on an inside pitch and toward the end on an outside one. And a
+  // batter aims the sweet spot a little inside the ball, because missing off
+  // the end is worse than being jammed; so inside pitches suffer more (squared-
+  // up contact fell from .69 over the middle to .27 more than a foot inside and
+  // .44 more than a foot away, on balls struck square vertically).
+  var LOC_DEPTH = 0.157;  // m of planned contact depth per m the pitch is inside
+  var LOC_FACE = 0.29;    // rad of extra pull per m inside, at the same depth
+  var HAND_MISS = 0.3;    // share of the pitch's distance in or out that the hands do NOT cover
+  var AIM_HANDS = 1.0;    // in: how far toward the hands of the sweet spot he aims
   var TIP_IN = 6, HANDLE_IN = -14;   // how far along the barrel from the sweet spot a ball can still be struck
+  var BAT_CAP_IN = 1.0;              // in: a ball centred this far past the end still catches the rounded cap (ball radius 1.45 in)
 
   function batDiameter(shape, x) {   // in, at x in from the barrel end
     if (x <= 0) return shape[0][1];
@@ -493,20 +520,22 @@ var BB = (function () {
     batSpeed:   [72.0, 2.65, 62, 82],    // mph - DERIVED from the chain; this entry only scales the display bars
     barrelSD:   [0.62, 0.11, 0.40, 1.1], // in - DERIVED (motorIn x (bat speed/72)^2); display scale only
     attack:    [9, 4, -2, 20],          // deg: upward tilt of the swing path at contact
-    undercut:  [0.45, 0.25, -0.3, 1.2], // in: how far below the ball's centre he aims the barrel
-    timingSD:  [7.0, 1.2, 4.5, 11],     // ms: scatter of the bat's arrival time
-    longSD:    [2.6, 0.4, 1.5, 4.0],    // in: along-the-barrel scatter
+    swingTilt: [32.3, 3.8, 22, 44],     // deg: the tilt of his swing plane for a mid-zone pitch (2025 leaderboard swing_path_tilt: 32.3 +- 3.8)
+    faceSD:    [8, 4, 4, 20],           // deg: swing-to-swing scatter of the bat face's horizontal angle at contact, apart from timing; fitted to fair-ball spray by contact depth (pitch-level 2025)
+    undercut:  [0.55, 0.25, -0.2, 1.3], // in: how far below the ball's centre he aims the barrel (league launch angle minus attack angle averaged +10 deg)
+    timingSD:  [13.5, 2.3, 8.7, 21.2],  // ms: scatter of the bat's arrival time; fitted so contact depth within a batter has sd 9.0 in (pitch-level 2025)
+    longSD:    [3.8, 0.58, 2.2, 5.8],   // in: along-the-barrel scatter; fitted so contact struck square vertically is squared up .695 of the time (pitch-level 2025)
     spotIn:    [4.5, 0.8, 2.5, 7.5],    // in: how far a pitch must have left his expected path by the commit point for him to pick it up
     eyeSD:     [5.0, 0.9, 3.0, 7.5],    // in: zone-judgement scatter at the commit point
     aggr:      [0, 0.07, -0.2, 0.2],    // lowers his swing threshold (positive = swings more)
     commit:    [0.55, 0.12, 0.2, 0.9],  // how hard he sits on his guess (0 = pure hedger)
     fbLean:    [1.3, 0.2, 1.0, 1.9],    // how much he leans toward guessing fastball
-    pullBias:  [7, 5, -5, 19],          // deg toward his pull side
+    pullBias:  [10, 5, -2, 22],         // deg: how far round the arc his usual contact point is (fair balls pulled +6 deg on average; batters' usual depth sd 3.5 in)
     learn:     [0.35, 0.1, 0.1, 0.6],   // share of his spotting distance he can learn away in a game
     coverage:  [3.0, 0.6, 1.8, 5.0],    // in off the zone at which his swing errors have doubled (reach)
     heightIn:  [72, 2.35, 66, 80],      // in (2025 Statcast hitters: 72.0 +- 2.35)
     // pitchers when they bat (NL rules) - override the hitter entries above
-    pBatSpeed: [63, 4, 54, 72], pTimingSD: [10.5, 1.5, 7, 15], pBarrelSD: [1.7, 0.2, 1.2, 2.3],
+    pBatSpeed: [63, 4, 54, 72], pTimingSD: [20.3, 2.9, 13.5, 29], pBarrelSD: [1.7, 0.2, 1.2, 2.3],
     pSpotIn: [6.5, 1.0, 4.5, 9.5], pEyeSD: [3.6, 0.6, 2.4, 5], pAttack: [6, 4, -2, 16],
     // pitchers
     fbVeloSP:  [93.6, 2.0, 88, 100], fbVeloRP: [95.0, 2.0, 89, 102],
@@ -642,6 +671,8 @@ var BB = (function () {
       // midway between belt and shoulders (Statcast averages 1.6 / 3.4 ft)
       zone: { bot: 0.263 * h * IN, top: 0.559 * h * IN }
     };
+    b.swingTilt = drawT(rng, T.swingTilt);   // drawn last, so every earlier draw keeps its place
+    b.faceSD = drawT(rng, T.faceSD);
     if (o.pos === 'C') b.framing = drawT(rng, T.framing);
     return equipFielder(rng, b, o.pos || 'DH');
   }
@@ -914,26 +945,54 @@ var BB = (function () {
     var e = -m[2] + rng.n(0, B.timingSD / 1000 * prot * rf.tp);    // + = bat early (he expected it sooner)
     var D = -m[1] + B.undercut * IN + rng.n(0, B.barrelSD * IN * prot);   // + = ball above the barrel
     var xAim = pitch.plate.x + m[0];
-    var dLong = (pitch.plate.x - xAim) * (-sb) + rng.n(0, B.longSD * IN * prot);   // + toward the tip
-    var batMph = B.batSpeed * (st.strikes === 2 ? 0.96 : 1);
-    var omega = batMph * MPH / SWING_RADIUS;
-    var theta = sb * (omega * e + C_LOC * pitch.plate.x * sb + B.pullBias * DEG);
+    var dLong = (pitch.plate.x - xAim) * (-sb) + rng.n(0, B.longSD * IN * prot)   // + toward the tip
+              - pitch.plate.x * sb * HAND_MISS - AIM_HANDS * IN;   // what the hands did not cover (jammed inside, toward the end outside), and his aim inside the ball
+    var batMph = B.batSpeed * (st.strikes === 2 ? 0.974 : 1);   // shorter with two strikes: 70.7 against 72.6 mph on full swings (pitch-level 2025)
     var attack = B.attack + rng.n(0, 3);
-    // Timing also moves the strike up or down the ball. An early bat meets
-    // the ball out in front of the planned point, a late one deeper: the
-    // meeting point slides forward by s = v_bat e v_pitch / (v_bat + v_pitch).
-    // Out there the ball has yet to descend (it sits higher by s tan(descent))
-    // while the barrel, on its rising and curving path, is higher by
-    // s tan(attack) + SWING_CURV s^2 / 2. A swing on the pitch's plane is
-    // forgiving to first order; the curve of the arc tops the ball either
-    // way, more the further from the plan.
-    var vb = batMph * MPH, vp = norm(pitch.plate.v), descent = Math.atan2(-pitch.plate.v[2], -pitch.plate.v[1]);
+    var face = rng.n(0, (B.faceSD || TRAITS.faceSD[0]) * DEG * prot);   // the face's own horizontal scatter: hooks and slices, not misses
+    // WHERE ON THE ARC HE MEETS IT. Spray comes from how far round the arc
+    // the ball is met (pitch-level 2025: the bat's direction of travel turned
+    // 1.46 deg per inch of contact depth, r .83, and the ball's spray followed
+    // depth, r .40; at a given depth, what was left of the bat's direction
+    // barely moved the ball, r .09). So he PLANS to meet an inside pitch a
+    // little out front and an outside one a little deep (LOC_DEPTH), turns the
+    // face to pull an inside pitch (LOC_FACE), and a pull hitter meets
+    // everything a little out front (pullBias). Timing then moves the actual
+    // contact from the plan: an early bat meets the ball s = v_bat e v_pitch /
+    // (v_bat + v_pitch) further out, s / SWING_R further round the circle.
+    // From the angle round the arc: the bat faces the pull side by cos(tilt)
+    // of it (spray), and its path rises by sin(tilt) of it away from his
+    // usual contact point, where his attack angle trait and his full bat
+    // speed belong. The timing error alone moves the strike up or down the
+    // ball, because out there the ball has yet to descend (higher by
+    // s tan(descent)) while the barrel rises along its planned path (higher
+    // by s tan(attack)): a path steeper than the pitch tops a ball met out
+    // front and gets under one met deep. The arc's own curve does not add to
+    // that, because a batter keeps the barrel on the pitch's line through the
+    // zone (pitch-level 2025: launch angle minus attack angle went steadily
+    // from +20 deg on contact met deep to -12 deg out front, which is the
+    // attack-against-descent term alone). Met deep, the barrel is slower:
+    // it is still gathering speed, and keeps gathering it until about 9 in out
+    // front of his usual point (pitch-level 2025, full swings: 69.0 mph at
+    // 10-20 in of depth, 71.8 at 25-30, 73.2 at 35-40). The speed lost goes as
+    // the path he is short of that point, as a share of his swing length, to
+    // the power BAT_GAIN_EXP; his bat speed trait is the leaderboard's
+    // average over his contact, which sits 1.5% below the peak.
+    var tilt = clamp((B.swingTilt || TRAITS.swingTilt[0]) - TILT_PER_H * ((pitch.plate.z - B.zone.bot) / (B.zone.top - B.zone.bot) - 0.5), 8, 55);
+    var vb = batMph * MPH, vp = norm(pitch.plate.v), descent = Math.atan2(-pitch.plate.v[2], -pitch.plate.v[1]), tr = tilt * DEG;
     var sFwd = vb * e * vp / (vb + vp);
-    D += sFwd * (Math.tan(descent) - Math.tan(attack * DEG)) - 0.5 * SWING_CURV * sFwd * sFwd;
+    var inside = pitch.plate.x * sb;   // m toward the batter from the middle of the plate
+    var phiUsual = B.pullBias * DEG / Math.cos(tr), phiPlan = phiUsual + LOC_DEPTH * inside / SWING_R, phi = phiPlan + sFwd / SWING_R;
+    var theta = sb * (phi * Math.cos(tr) + LOC_FACE * inside) + face;
+    var attackPlan = attack + (phiPlan - phiUsual) * Math.sin(tr) / DEG, attackAt = attack + (phi - phiUsual) * Math.sin(tr) / DEG;
+    D += sFwd * (Math.tan(descent) - Math.tan(attackPlan * DEG));
+    var depth = (phi - phiUsual) * SWING_R;   // m out front of his usual contact point
+    var batAt = batMph * 1.015 * Math.pow(Math.max(0.2, 1 - Math.max(0, BAT_PEAK_M - depth) / ((B.swingLenFt || TRAITS.swingLenFt[0]) * FT)), BAT_GAIN_EXP);
     var bat = B.bat || BAT_DEFAULT;
-    var sw = { e: e, D: D, dLong: dLong, theta: theta, batMph: batMph, attack: attack, sFwd: sFwd, reach: reach, contact: false, why: '',
+    var sw = { e: e, D: D, dLong: dLong, theta: theta, batMph: batMph, batAt: batAt, attack: attack, attackAt: attackAt, tilt: tilt, side: sb,
+               sFwd: sFwd, depth: depth, reach: reach, contact: false, why: '',
                bat: bat, qSweet: bat.q };   // his bat, and its collision efficiency at the sweet spot
-    if (dLong > TIP_IN * IN) { sw.why = 'off the end'; return sw; }
+    if (dLong > (TIP_IN + BAT_CAP_IN) * IN) { sw.why = 'off the end'; return sw; }   // past the end, unless the ball still catches the rounded cap
     if (dLong < HANDLE_IN * IN) { sw.why = 'inside the hands'; return sw; }
     if (Math.abs(D) >= BALL_R + batRadius(bat, SWEET_IN - dLong / IN)) { sw.why = D > 0 ? 'under' : 'over'; return sw; }   // the barrel is thinner toward the hands
     if (Math.abs(theta) > 80 * DEG) { sw.why = e > 0 ? 'way early' : 'way late'; return sw; }
@@ -941,24 +1000,32 @@ var BB = (function () {
     return sw;
   }
 
-  // The collision, in the frame of the bat's contact point. n is the line
-  // of centres, tilted by the vertical offset D over the radius the barrel
-  // has where the ball meets it; the ball's approach along n reverses with
-  // the collision efficiency the bat shows at that point and speed (qAt);
-  // friction brings the contact point toward rolling on the bat (sphere,
-  // I = 0.4 m R^2), capped by Coulomb friction. Backspin, topspin and
-  // hook/slice all come out of the same impulse - including what the
+  // The collision, in the frame of the bat's contact point. The barrel
+  // moves along p (its direction and attack angle at contact) and points
+  // away from the batter, tilted down by his swing tilt. n is the line of
+  // centres: in the plane across the barrel, tilted from p by the vertical
+  // offset D over the radius the barrel has where the ball meets it. Because
+  // the barrel is tilted, that plane leans toward the tip: a ball struck
+  // under its centre goes up and slices toward the tip side, one struck over
+  // it goes down and hooks to the pull side. The ball's approach along n
+  // reverses with the collision efficiency the bat shows at that point and
+  // speed (qAt); friction brings the contact point toward rolling on the bat
+  // (sphere, I = 0.4 m R^2), capped by Coulomb friction. Backspin, topspin
+  // and sidespin all come out of the same impulse - including what the
   // pitch's own spin contributes.
   function collide(pitch, sw) {
     var bat = sw.bat || BAT_DEFAULT, xBar = SWEET_IN - sw.dLong / IN;   // in from the barrel end
-    var al = sw.attack * DEG, th = sw.theta;
+    var al = (sw.attackAt !== undefined ? sw.attackAt : sw.attack) * DEG, th = sw.theta, tl = (sw.tilt || 0) * DEG, side = sw.side || -1;
     var p = [Math.sin(th) * Math.cos(al), Math.cos(th) * Math.cos(al), Math.sin(al)];   // bat path
-    var ax = [Math.cos(th), -Math.sin(th), 0];                                          // bat axis (level)
-    var q = cross(p, ax);
+    var tipH = [-side * Math.cos(th), side * Math.sin(th), 0];                           // toward the tip, level
+    var up = cross(tipH, p); if (up[2] < 0) up = [-up[0], -up[1], -up[2]];
+    up = unit(up);
+    var tip = unit([Math.cos(tl) * tipH[0] - Math.sin(tl) * up[0], Math.cos(tl) * tipH[1] - Math.sin(tl) * up[1], Math.cos(tl) * tipH[2] - Math.sin(tl) * up[2]]);   // the barrel, dipped toward its end
+    var q = unit(cross(p, tip));
     if (q[2] < 0) q = [-q[0], -q[1], -q[2]];
     var s = sw.D / (BALL_R + batRadius(bat, xBar)), c = Math.sqrt(Math.max(0, 1 - s * s));
     var n = [c * p[0] + s * q[0], c * p[1] + s * q[1], c * p[2] + s * q[2]];
-    var vb = sw.batMph * MPH * (1 + sw.dLong / (30 * IN));
+    var vb = (sw.batAt || sw.batMph) * MPH * (1 + sw.dLong / (30 * IN));
     var V = [p[0] * vb, p[1] * vb, p[2] * vb];
     var vin = pitch.plate.v, win = pitch.plate.w;
     var u = [vin[0] - V[0], vin[1] - V[1], vin[2] - V[2]];
@@ -1066,7 +1133,7 @@ var BB = (function () {
   }
 
   return {
-    version: '0.5',
+    version: '0.9',
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
     PITCH_TYPES: PITCH_TYPES, ARCH: ARCH, TRAITS: TRAITS, AERO: AERO,

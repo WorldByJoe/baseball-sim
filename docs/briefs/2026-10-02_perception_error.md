@@ -3,29 +3,32 @@ You are working in the repository WorldByJoe/baseball-sim (private; it should be
 ## What this project is (read before touching anything)
 A trait-driven, physics-based baseball simulation. Players have latent traits; every statistic EMERGES from traits + physics + noise. Outcomes are never tuned; the only knobs are trait distributions (TRAITS in bb_engine.js) and labelled physical constants; a gap between model and league is a missing mechanism. Every change is judged on the whole metric suite across several seeds, never on one number.
 
-Read, in this order: README.md; CALIBRATION.md - the v0.8 section ("The bat, the swing's arc and the second look"), its block "The league's fouls, measured (2026-10-02)", and "Known gaps" 1-2; STATCAST_TARGETS_2025.md, the section "What a foul is (pitch level, 2025, 42 days)"; bb_engine.js - the header, then READ (ghostPitch, readFactors, misreadOf), DECIDE (decide), SWING (swing, including the arc term) and the collision (collide), and the hitter rows of TRAITS (motorIn, barrelSD, timingSD, undercut, spotIn, eyeSD, commit); headless/power_chain.js and headless/run_games.js; statcast/fouls.py.
+Read, in this order: README.md; CALIBRATION.md - the v0.8 section ("The bat, the swing's arc and the second look"), its block "The league's fouls, measured (2026-10-02)", the v0.9 section ("The swing as a tilted circle", which this brief now starts from), and "Known gaps" 1-2; STATCAST_TARGETS_2025.md, the section "Swing geometry (pitch level, 2025, one week)"; STATCAST_TARGETS_2025.md, the section "What a foul is (pitch level, 2025, 42 days)"; bb_engine.js - the header, then READ (ghostPitch, readFactors, misreadOf), DECIDE (decide), SWING (swing: the tilted circle, where on it the ball is met, the timing term in the vertical offset) and the collision (collide, with the barrel tilted), and the hitter rows of TRAITS (motorIn, barrelSD, timingSD, longSD, faceSD, swingTilt, undercut, spotIn, eyeSD, commit); headless/power_chain.js, headless/contact_check.js (the model in the league's pitch-level tables, including the vertical miss by contact depth) and headless/run_games.js; statcast/fouls.py and statcast/swing_geometry.py.
 
 ## Step 0 - prove the tooling
   node headless/run_node.js bb_engine.js bb_names.js bb_field.js bb_game.js headless/power_chain.js -- 500 40 3
   node headless/run_node.js bb_engine.js bb_names.js bb_field.js bb_game.js headless/run_games.js -- 200 3 0
   python3 statcast/fetch_pitches.py && python3 statcast/fouls.py 2025
-The engine is seeded, so power_chain at seed 3 must reproduce the "+ second look (kept)" column of the v0.8 table in CALIBRATION.md (squared-up per contact .735, Statcast proxy .752, per ball in play .837, per foul .631, whiff .198, K% .172, EV 93.6, EV50 101.1, hard-hit .539), and run_games the kept league line at seed 3 (runs 4.66, AVG/OBP/SLG .266/.339/.449). The pitch pull takes about 7 minutes and caches under statcast/raw/pitches/2025/ (git-ignored). If any number differs, stop and find out why before modelling.
+The engine is seeded, so power_chain at seed 3 must reproduce the v0.9 column of CALIBRATION.md's "The swing as a tilted circle" (squared-up per contact by the Statcast proxy .564, per ball in play .677, per foul .401, whiff .258, K% .211, EV 87.5, EV50 98.0, hard-hit .369), and run_games its league line at seed 3 (runs 4.07, AVG/OBP/SLG .247/.330/.400, K% 25.4). The pitch pull takes about 7 minutes and caches under statcast/raw/pitches/2025/ (git-ignored). If any number differs, stop and find out why before modelling.
 
 ## The problem, in numbers
-Measured on 42 days of 2025 (552 games; CALIBRATION.md "The league's fouls, measured"), against the model at v0.8 (power_chain, seeds 3 / 11):
+Measured on 42 days of 2025 (552 games; CALIBRATION.md "The league's fouls, measured"), against the model at v0.9 (power_chain and contact_check, seeds 3 / 11):
 
-| | model v0.8 | league 2025 |
+| | model v0.9 | league 2025 |
 |---|---|---|
-| squared up per contact (Statcast rule) | .752 / .737 | .435 (floor .392) |
-| squared up per ball in play | .837 / .834 | .627 |
-| squared up per foul | .631 / .603 | .225 (floor .184) |
-| fouls / contact | .43 | .521 |
-| fair exit velocity, mean / sd | 93.6 / 10.5 | 88.9 / 15.2 |
-| fair EV at launch angle -10..10 | 98.4 | 92.6 |
-| whiff per swing | .198 | .232 |
-| whiff by kind FB / BR / OS | .19 / .17 / .27 | .172 / .308 / .299 |
+| squared up per contact (Statcast rule) | .564 / .557 | .435 (floor .392) |
+| squared up per ball in play | .677 / .679 | .627 |
+| squared up per foul | .401 / .389 | .225 (floor .184) |
+| fouls / contact | .41 / .42 | .521 |
+| fair exit velocity, mean / sd | 87.5 / 14.3 | 88.9 / 15.2 |
+| EV50 | 98.0 | 100.6 |
+| vertical miss (launch angle minus attack angle), mean / sd | +6 / 28 | +10.0 / 34.7 |
+| vertical miss on contact met deep / out front | +4 / +1 | +20 / -12 |
+| whiff per swing | .258 / .275 | .232 |
+| whiff by kind FB / BR / OS | .29 / .22 / .27 | .172 / .308 / .299 |
+| whiff in the upper zone / high edge | .29 / .41 | .138 / .268 |
 
-The excess of clean contact is split about evenly between fouls and balls in play, so the mechanism has to make BOTH less clean. v0.8 showed that a wider random vertical scatter buys mishits only with whiffs. The candidate CALIBRATION.md names is a systematic error: one that depends on where the pitch is and what it does, so the same batter is reliably under some pitches and over others.
+v0.9 brought balls in play to the league's quality by the swing's geometry; what is left is in fouls (too solid, too few), in the tails of the vertical miss, in the hardest contact (EV50), and in whiffs on fastballs and high pitches. The vertical miss on contact met deep against out front is the signature of a speed misjudgment (late and under, early and over) that the model lacks on pitches it reads. v0.8 showed that a wider random vertical scatter buys mishits only with whiffs. The candidate CALIBRATION.md names is a systematic error: one that depends on where the pitch is and what it does, so the same batter is reliably under some pitches and over others.
 
 ## What the league does (the targets for the mechanism)
 These were measured with a scratch script on the same 42 days. Step 1 below makes them reproducible. Height is (plate_z - sz_bot) / (sz_top - sz_bot): 0 at the bottom of the batter's zone, 1 at the top. Bunts are excluded. Launch angles are means.
@@ -67,7 +70,7 @@ Two confounds to keep in mind. Flat-VAA pitchers are also the better pitchers, a
 Add tables A, B and C to statcast/fouls.py (bump it to v0.3). C gets one extra table within release-height bands. Write them into the "What a foul is" section of STATCAST_TARGETS_2025.md, or a new section "Height and approach (pitch level, 2025, 42 days)" written the same way, and into fouls_2025.json. The numbers above must come out the same. If they don't, the script is right and this brief is wrong: say so.
 
 ## Step 2 - measure the model the same way
-Add the same three tables to headless/power_chain.js (bump to v0.4). Height relative to the batter's own zone (B.zone.bot / B.zone.top); kinds from PITCH_TYPES; VAA from pitch.plate.v; the residual against the model's own fit. Also change power_chain's MLB reference column from .66 / ~0 to the measured .627 per ball in play, .225 per foul and .435 per contact, and fix its header comment, which still says the league's fouls were almost never squared up. Record the v0.8 baseline. Part of A and B is geometry the engine already has: the swing's attack angle against the pitch's descent, and the arc term. So the baseline shows how much of the height pattern already emerges and how much is left for perception. Report that split before building anything.
+Add the same three tables to headless/power_chain.js (bump to v0.5). Height relative to the batter's own zone (B.zone.bot / B.zone.top); kinds from PITCH_TYPES; VAA from pitch.plate.v; the residual against the model's own fit. (v0.4 already carries the pitch-level references .627 and .225 and squares up against the bat speed at contact.) Record the v0.9 baseline. Part of A and B is geometry the engine already has: the swing's attack angle against the pitch's descent, the tilt that steepens for low pitches, and the barrel tilted in the collision. So the baseline shows how much of the height pattern already emerges and how much is left for perception. Report that split before building anything.
 
 ## Step 3 - the mechanism, physics and perception first
 Build one at a time, run the full suite after each, keep what helps and delete what doesn't.
@@ -88,14 +91,14 @@ Build one at a time, run the full suite after each, keep what helps and delete w
   - A: model BIP and foul launch angles rise with height, at no less than half the league's slope.
   - A: the foul share is U-shaped, lowest in the lower zone.
   - C: whiff and foul share rise, and squared up falls, from steepest to flattest fastballs, in the league's direction and at least half its size.
-- **Hold:**
-  - whiff per swing .20-.26 (.232)
-  - K% .19-.25
-  - EV50 99-102
-  - BABIP .27-.33
+- **Toward the league, from v0.9's figures in brackets:**
+  - whiff per swing .20-.26 (.232; v0.9 .26-.28), fastball whiffs toward .17 (v0.9 .29-.32)
+  - K% .19-.25 (v0.9 .21-.27 in power_chain, 25.5 in games)
+  - EV50 99-102 (v0.9 98.0)
+  - BABIP .27-.33 (v0.9 .33)
 - **Watch, don't chase:**
-  - breaking-ball whiffs (.17 against .308; Known gap 2)
-  - GB/LD/FB/PU mix
+  - breaking-ball whiffs (v0.9 .22-.23 against .308; Known gap 2)
+  - GB/LD/FB/PU mix (v0.9 42/21/25/12 against 43/24/24/9: keep it)
   - pop-up spin (Known gap 7)
 
 If a step improves some of these and worsens others, report the trade-off plainly.
@@ -103,8 +106,8 @@ If a step improves some of these and worsens others, report the trade-off plainl
 ## Deliverables
 - statcast/fouls.py v0.3 and the new tables in STATCAST_TARGETS_2025.md and fouls_2025.json.
 - headless/power_chain.js v0.4.
-- bb_engine.js v0.9 with the mechanism, its header CHANGED entry, and comments that explain the perception in plain English. Change the script tag in baseball.html to `bb_engine.js?v=0.9`; that is the only change allowed in baseball.html. Do not touch bb_field.js or bb_game.js.
-- CALIBRATION.md v0.9: a section "### Perception: the predicted drop (bb_engine v0.9; date)". It carries before/after/target tables for the acceptance metrics, tables A and C for the model beside the league, the league line across the three seeds, and what was tried and rejected, all in the past tense and scoped to those runs. Update Known gaps 1 and 2.
+- bb_engine.js v1.0 with the mechanism, its header CHANGED entry, and comments that explain the perception in plain English. Change the script tag in baseball.html to `bb_engine.js?v=1.0`; that is the only change allowed in baseball.html. Do not touch bb_field.js or bb_game.js.
+- CALIBRATION.md v1.0: a section "### Perception: the predicted drop (bb_engine v1.0; date)". It carries before/after/target tables for the acceptance metrics, tables A and C for the model beside the league, the league line across the three seeds, and what was tried and rejected, all in the past tense and scoped to those runs. Update Known gaps 1 and 2.
 
 ## House rules
 Headers and CHANGED lists on every code file (at most five lines; drop the oldest). Delete old code; never comment it out. Comments change with the code. No Node-only APIs or Math.random in the engine or the headless scripts; they must still run under jsc on the Mac. Numbers with their n. Findings in the past tense, scoped. Work on the branch you are given (or `perception-error` from main if none is given); commits end with the `Co-Authored-By` line in use on this repo. Open a pull request against main whose description carries the before/after table, ending with `🤖 Generated with [Claude Code](https://claude.com/claude-code)`. Do NOT merge.
@@ -112,7 +115,7 @@ Headers and CHANGED lists on every code file (at most five lines; drop the oldes
 ## Your report (under 60 lines)
 1. Step 0: whether the baselines reproduced.
 2. Step 1: whether tables A-C reproduced, and how much of C survived the release-height control.
-3. Step 2: how much of A and C the v0.8 model already showed.
+3. Step 2: how much of A and C the v0.9 model already showed.
 4. The mechanism in plain English, with any new trait or constant and where its value came from.
 5. The before/after/target table across seeds, and what was tried and rejected.
 6. The PR link, the exact commands to reproduce, and open questions for the owner.

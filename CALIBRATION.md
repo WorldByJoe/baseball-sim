@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v0.8 · 2026-10-02`
+`CALIBRATION.md · v0.9 · 2026-10-02`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -192,6 +192,79 @@ What this leaves as the contact problem, now with the whiff budget out of the wa
 3. **The target per contact is .39-.44, not .34.** The model's .735-.752 is .30 above it, not .40.
 4. **Contact depth decided fouls.** Contact met late (10-20 in in front of the batter) or far out front went foul most often, and squared up least far out front. A timing error that turns into a foul is real; the model's problem is that its timing fouls are solid.
 
+### The swing as a tilted circle (bb_engine v0.9; 2026-10-02)
+
+The contact step after the foul measurement. One week of pitch-level 2025 (2025-07-01..07-07, 27,876 pitches, 9,972 contacts with bat tracking; `statcast/swing_geometry.py`, tables in STATCAST_TARGETS_2025.md "Swing geometry") gave the shape of a real swing at contact. A new diagnostic, `headless/contact_check.js`, measured the model in the same tables as the league. Runs: `contact_check` 400 hitters × 40 PA and `power_chain` v0.4 500 × 40 at seeds 3 and 11; `run_games` 200 games at seeds 3, 11 and 29; `shape_check` 20 games; all under jsc.
+
+**What the league showed.** Contact depth (how far in front of the batter the ball was met) averaged 29.1 in, sd 9.7; 9.0 of that within a batter and 3.5 between batters. Met further out front, the bat's direction turned 1.46 deg per inch (r .83), its attack angle rose 0.80 deg per inch (r .75), and the ball was pulled 1.59 deg per inch (r .40). Full swings were slower when met deep: 69.0 mph at 10-20 in, 71.8 at 25-30, 73.2 at 35-40. The swing's tilt (Statcast's swing_path_tilt) was 32.2 deg, steeper for low pitches, 9.4 deg per zone height (38.5 below the zone, 20.7 above it), and batters differed by 3.8. Contact struck square vertically (launch angle within 15 deg of 10 above the attack angle) was still squared up only .695 of the time, and less on pitches inside or away: .27 more than a foot inside, .44 more than a foot away. The vertical miss (launch angle minus attack angle) went steadily from +20 deg on contact met deep to -12 deg out front.
+
+**What was built, each piece measured against the league:**
+
+1. **The swing is a tilted circle.** The sweet spot travels on an arc of radius `SWING_R` = 0.87 m in a plane tilted by the batter's swing tilt (new trait `swingTilt`, 32.3 ± 3.8 deg, the 2025 leaderboard; steeper for low pitches by `TILT_PER_H` = 9.4 deg per zone height). Where on the arc the ball is met sets the bat's horizontal direction (cos tilt of the angle round the arc) and its attack angle (sin tilt of it). With the league's tilt, one radius gave the bat's turn and the attack angle's rise per inch of depth within 11% of the league's. A timing error moves contact round the arc; v0.8 had turned the whole bat by the bat's angular speed times the timing error, which over-stated spray by the ratio (bat + pitch speed) / pitch speed, about 1.8.
+2. **Where he plans to meet the ball.** An inside pitch was planned a little out front (`LOC_DEPTH`, 1.89 in per foot) with the face turned further to pull (`LOC_FACE`, the rest of the league's 7.9 deg per foot); a pull hitter's usual contact point is out front (`pullBias`, now 10 ± 5 deg, which put the batters' usual depth sd at about 3.5 in, as the league's). The old `C_LOC` (0.9 rad/m) moved spray about twice as much as the league's location effect and was deleted.
+3. **The barrel dips toward its end** by the swing tilt, so a ball struck under its centre goes up and slices toward the tip side, and one struck over it goes down and hooks to the pull side.
+4. **The bat is slower met deep**: speed short of a peak 9 in out front of his usual point, as the path short of it over his swing length, to the power 0.2 (`BAT_PEAK_M`, `BAT_GAIN_EXP`), from the league's bat speed by depth; two-strike swings 0.974 of full (league 70.7 against 72.6 mph). His `batSpeed` trait is the leaderboard average over his contact, 1.5% below the peak.
+5. **The hands cover only part of a pitch in or out** (`HAND_MISS` = 0.3 of the distance moves the contact along the barrel) and he aims the sweet spot 1 in inside the ball (`AIM_HANDS`); a ball centred up to 1 in past the end still catches the rounded cap (`BAT_CAP_IN`).
+6. **A bat-face scatter** (new trait `faceSD`, 8 ± 4 deg): the face's own horizontal scatter, apart from timing.
+7. **Refitted traits**, each to its own measurement: `timingSD` 7 → 13.5 ms (contact depth within a batter, sd 8.7 in the model against 9.0; pitchers batting scaled with it), `longSD` 2.6 → 3.8 in (squared-up on contact struck square vertically, .72-.74 against .695), `undercut` 0.45 → 0.55 in (the vertical miss's mean, +6 against +10).
+
+| power_chain, seeds 3 / 11 | v0.8 | v0.9 | league |
+|---|---|---|---|
+| squared up per contact, Statcast proxy | .752 / .737 | .564 / .557 | .435 (floor .392) |
+| squared up per ball in play | .837 / .834 | .677 / .679 | .627 |
+| squared up per foul | .631 / .603 | .401 / .389 | .225 (floor .184) |
+| whiff per swing | .198 / .199 | .258 / .275 | .232 (pitch level) |
+| K% | .172 / .216 | .211 / .265 | .204 |
+| exit velocity, mean | 93.6 / 93.2 | 87.5 / 87.4 | 88.9 (pitch level), 89.7 (leaderboard) |
+| EV50 | 101.1 / 100.7 | 98.0 / 97.9 | 100.6 |
+| hard-hit share | .539 / .520 | .369 / .367 | .421 |
+| fair EV sd | 10.5 | 14.3 / 14.2 | 15.2 |
+| fair launch angle mean / sd | 10.5 / 28.1 | 15.0 / 26.0, 14.6 / 26.4 | 13.1 / 28.7 |
+| fair EV GB / LD / FB / PU | 93.7 / 97.5 / 93.4 / 84.2 | 88.6 / 90.2 / 86.5 / 77.1 | 86 / 93 / 93 / - |
+| whiff by kind FB / BR / OS | .19 / .17 / .27 | .29 / .22 / .27, .32 / .23 / .28 | .172 / .308 / .299 |
+| pop-up spin, median rpm | 7350 | 6859 / 6741 | a few thousand |
+
+| contact_check, seeds 3 / 11 | v0.8 | v0.9 | league |
+|---|---|---|---|
+| fouls / contact | .425 | .410 / .422 | .521 |
+| foul exit velocity, median | 90.4 | 76.5-77.8 | 76.6 |
+| contact depth sd, within a batter | 5.0 | 8.7 / 8.7 | 9.0 |
+| attack angle at contact, sd | 6.9 | 9.7 / 9.5 | 10.4 |
+| vertical miss, mean / sd | +3.5 / 27.2 | +6.2 / 27.9, +5.8 / 28.7 | +10.0 / 34.7 |
+| fair-ball spray, mean / sd (+ = pulled) | - | +7.7 / 20.0, +8.0 / 20.2 | +6.1 / 24.9 |
+
+| league line, seeds 3 / 11 / 29 | v0.8 | v0.9 | MLB |
+|---|---|---|---|
+| runs | 4.66 / 4.47 / 4.34 | 4.07 / 4.11 / 3.98 | 4.39 |
+| hits | 9.43 / 9.32 / 9.03 | 8.63 / 8.79 / 8.68 | 8.15 |
+| doubles | 2.18 / 2.36 / 2.17 | 2.01 / 2.10 / 2.04 | 1.60 |
+| home runs | 0.90 / 0.84 / 0.77 | 0.67 / 0.62 / 0.63 | 1.12 |
+| strikeouts | 8.79 / 8.53 / 8.51 | 10.01 / 10.21 / 9.99 | 8.40 |
+| walks | 3.84 / 3.87 / 4.11 | 4.23 / 4.28 / 4.13 | 3.10 |
+| AVG / OBP / SLG, seed 3 | .266 / .339 / .449 | .247 / .330 / .400 | .243 / .312 / .399 |
+| BABIP | .330 / .324 / .316 | .327 / .331 / .330 | .291 |
+| K% | 22.2 / 21.5 / 21.5 | 25.4 / 25.6 / 25.4 | 22.6 |
+| HR% | 2.3 / 2.1 / 1.9 | 1.7 / 1.6 / 1.6 | 3.0 |
+| GB / LD / FB / PU %, seed 3 | 52 / 17 / 18 / 14 | 42 / 21 / 25 / 12 | 43 / 24 / 24 / 9 |
+| BABIP GB / LD / FB / PU, seed 3 | .305 / .803 / .196 / .009 | .257 / .738 / .247 / .010 | .24 / .68 / .12 / .02 |
+
+What the step did, in these runs:
+
+1. **Balls in play came to the league's quality.** Squared up per ball in play fell .84 → .68 (league .63), the exit-velocity spread widened 10.5 → 14.3 (15.2), fouls came off at the league's median speed (77), and the batted-ball mix went from 52/17/18/14 to 42/21/25/12 against 43/24/24/9. Batting average and slugging came to the league's (.247 / .400 against .243 / .399).
+2. **The best contact got too soft.** EV50 fell to 98.0 (100.6), the hard-hit share to .37 (.42), fly balls to 86.5 mph against 93, and home runs to 1.6% of plate appearances (3.0).
+3. **Whiffs rose** .20 → .26-.28 and league K% 21.7 → 25.5. Fastballs were whiffed .29-.32 against .17 and breaking balls .22-.23 against .31, and the high zone carried most of it (whiff .29 / .41 in the upper zone and high edge against .14 / .27). Swings on pitches read late or fooled whiffed .47 and .38-.45, as in v0.8; read swings .12-.13 (v0.8 .06), mostly from the wider timing and along-barrel scatter.
+4. **Fouls became half right.** They now came off at the league's speed but were still squared up .39-.40 against .225, and were .41-.42 of contact against .52.
+
+**Tried and rejected:**
+
+- **The arc's own curve in the vertical offset** (v0.8's SWING_CURV term). It made contact met either deep or out front topped. The league's vertical miss instead went steadily from under the ball (deep) to over it (out front), which the attack-against-descent term alone gives. Deleted.
+- **A bat path at an angle to its face** (the bat travelling at an angle to where the ball goes). Exit speed on square contact barely depended on that angle (EV/max .866 / .871 / .860 / .823 for 0-10 / 10-20 / 20-30 / 30-45 deg). Not built.
+- **A wider late correction** (`STEER_IN` 3 → 4 and 5 in). Whiffs on late reads moved .48 → .41-.39 and overall whiffs barely moved. Left at 3.
+- **A face scatter of 14-22 deg.** It brought fouls to half of contact, but made them solid (squared up .45-.50) and flattened the spray's dependence on depth (the turned faces went foul and dropped out of the fair balls). Kept at 8 deg, the value that left the fair-ball spray by depth near the league's.
+- **Partial grip in the collision's friction** (a share of the rolling impulse). At 0.6 it brought mean exit velocity to 88.9, the hard-hit share to .41, pop-up speed to 81 and pop-up spin to 3,500 rpm, but BABIP to .37, K% to 28.0 and fly-ball backspin to 800 rpm. A lower friction coefficient (0.25, 0.15) barely moved anything until it was very low. Neither kept.
+
+**What this leaves, and where it points.** The physical shape of contact now follows the league's swing geometry. What remains points at perception, the next step's subject (`docs/briefs/2026-10-02_perception_error.md`). The league's vertical miss went from +20 deg on contact met deep to -12 out front; the model's from +4 to +1. A batter who misjudges a pitch's speed is late and under it, or early and over it, at once. That error would put the missing tails into the vertical miss (league sd 34.7, model 28), make fouls weak and frequent, and is where the fastball and high-zone whiffs live.
+
 ## What was learned building the fielding layer
 
 - **Statcast's outfield JUMP (about 30 ft covered in the first 3 s) is the right anchor for outfielder motion.** The first fielders covered 44 ft in 3 s and caught nearly every fly ball (fly-ball BABIP .03). Slowing everyone to the jump figure fixed the outfield but let 52% of ground balls through, so infielders got their own harder acceleration and a dive reach. That's a real difference: they work from a crouch on a ball that is on them at once.
@@ -209,11 +282,11 @@ What this leaves as the contact problem, now with the whiff budget out of the wa
 
 ## Known gaps, to fix with mechanisms rather than knob-turning
 
-1. **Contact is too clean, on fouls and fair balls about equally.** Partly addressed in bb_engine v0.8 (the bat as a beam, the swing's arc, the second look; see "The bat, the swing's arc and the second look" above): whiffs and K% now sit at the league's figures, but squared-up per contact runs .72-.74 against .435 (floor .39), per ball in play .83 against .627, per foul about .62 against .225, exit velocity 93 against 89.7 with spread 10.5 against 14, fouls .13 per pitch against .18. The foul composition is now measured ("The league's fouls, measured" above): fouls and fair balls each carry about half of the excess. Next: a height-and-type-dependent perception error rather than a wider random one, judged on fouls and balls in play together.
-2. **Whiff rate by pitch type.** With v0.8's second look, fastballs were whiffed on .19-.20 of swings (MLB .20) and off-speed .25-.27 (.32), but breaking balls only .17-.19 (.33): a slider's gap from the fastball ghost is large and visible by the commit point, so it is read and hit where the league swings over it. The detection function's dependence on separation, and the swing decision on breaking balls below the zone, are the places to look.
+1. **Contact: balls in play are right, fouls are too solid and too few, and the hardest contact is too soft.** After bb_engine v0.9 (the swing as a tilted circle; see that section above), squared up per ball in play ran .68 against .627, the exit-velocity spread 14.3 against 15.2, and the batted-ball mix 42/21/25/12 against 43/24/24/9. Fouls came off at the league's median speed but were squared up .39-.40 against .225 and were .41-.42 of contact against .52; EV50 ran 98 against 100.6 and home runs 1.6% of plate appearances against 3.0. Next: the perception error (`docs/briefs/2026-10-02_perception_error.md`): the league's vertical miss went from +20 deg on contact met deep to -12 out front, the model's from +4 to +1.
+2. **Whiffs: too many on fastballs and high pitches, too few on breaking balls.** With v0.9, fastballs were whiffed on .29-.32 of swings (league .17), breaking balls .22-.23 (.31) and off-speed .27-.28 (.30); the upper zone and high edge .29 / .41 (.14 / .27). League K% ran 25.5 against 22.6. Swings on pitches read late or fooled carried most of the whiffs (.47 and .38-.45), as in v0.8; read swings .12-.13. The same perception error is the place to look, with the detection function's dependence on separation for breaking balls.
 3. **Batters are too passive.** Chase rate was 22% against 28.5%, and walks 11–12% against 8.2%.
 4. **Home runs.** They ran 2.0% of plate appearances against 3.0%, and 11% of fly balls against 17%. See the drag proxy above; exit velocity is also too uniform.
 5. **Spray is too centred.** Centre field took 42% against 34%, opposite field 20% against 26%.
 6. **Hit-by-pitch** ran 0.4% against 1.1%.
-7. **Glancing contact makes implausible spin.** Pop-ups came off at a median 7,400 rpm in v0.8's measurement (`power_chain` v0.3), where real ones run a few thousand; the bat model did not touch the tangential (friction) part of the collision, which is still full rolling under a Coulomb cap of 0.5. Check it against Nathan's measured batted-ball spin, including the ball's tangential compliance.
+7. **Glancing contact makes implausible spin.** Pop-ups came off at a median 6,700-6,900 rpm in v0.9 (`power_chain` v0.4), where real ones run a few thousand. A partial grip (a share of the rolling impulse) fixed the spin and the pop-ups' exit speed but raised BABIP to .37 and cut fly-ball backspin to 800 rpm; a lower friction coefficient did little (see v0.9, tried and rejected). The tangential part of the collision still needs measured batted-ball spin by launch angle to be judged.
 8. **Not built yet:** fielding, base running and every hit or out on balls in play; foul pop-ups caught; the game loop; managers and bullpens; fatigue recovery between innings; warm-up pitches; NL/AL rules; names.
