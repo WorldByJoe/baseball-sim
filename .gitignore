@@ -3,3 +3,5 @@ Zipped/
 *.png
 .claude/
 statcast/raw/pitches/
+tts/voices/
+*.wav

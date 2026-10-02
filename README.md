@@ -16,6 +16,7 @@ The engine is pure JavaScript, seeded and deterministic; a whole game simulates 
 - `STATCAST_TARGETS_<year>.md` — the empirical targets: per-player distributions of the measurables, the tails, and the correlations a latent layer must reproduce without being told.
 - `CALIBRATION.md` — where the model stands against the league, what each change did, what is known to be off.
 - `CLOUD_HANDOFF.md` — how to hand a step to Claude Code on the web; `docs/briefs/` holds the briefs.
+- `tts/` — text to speech on the TV's Raspberry Pi (Piper): what is installed there, how to speak a line, measured speeds and limits, and `playbyplay.py`, a script that speaks a radio call. The groundwork for announcers.
 
 ## Running the checks
 
