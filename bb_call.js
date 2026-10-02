@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_call.js · v0.1 · 2026-10-02
+   bb_call.js · v0.2 · 2026-10-02
 
    The broadcast, written ahead. Given a game and its schedule (bb_schedule.js)
    it writes everything the park will say and play: every voice line, every
@@ -35,12 +35,13 @@
    start; voice lines also carry maxDur, the air they have.
 
    CHANGED
+     v0.2  the timing table measured by rendering real lines; the PA paced quicker
      v0.1  first build
 ============================================================================ */
 
 var BBCall = (function () {
   'use strict';
-  var VERSION = '0.1';
+  var VERSION = '0.2';
   var IN = BB.units.IN, FT = BB.units.FT, GEO = BB.geometry;
 
   // ================================================================ TIMING
@@ -55,12 +56,15 @@ var BBCall = (function () {
   };
   // How long a line lasts: per role a lead-in, seconds per word at that role's pace
   // for each energy, and a margin that nine lines in ten fall within; plus the
-  // pauses between sentences (tts/energy.json) and the PA's echo tail. Provisional:
-  // a first fit to one rendered game; tts/speech_server.py --dry-run measures it.
+  // pauses between sentences (tts/energy.json) and the PA's echo tail. Measured on
+  // 2026-10-02 by rendering 1,130 of this writer's own lines from three games, every
+  // energy for each role, with the default voices (tts/voices.json): the table that
+  // tts/speech_server.py --dry-run prints. (The PA's lead-in fits below zero: its
+  // lines are mostly long name lists, where the per-word figure carries the pauses.)
   var TIMING = {
-    pbp:    { lead: 0.15, margin: 0.40, spw: { calm: 0.284, building: 0.263, excited: 0.242, peak: 0.231, deflated: 0.295 } },
-    colour: { lead: 0.25, margin: 0.60, spw: { calm: 0.312, building: 0.288, excited: 0.260, peak: 0.240, deflated: 0.317 } },
-    pa:     { lead: 0.70, margin: 0.20, spw: { calm: 0.357, building: 0.340, excited: 0.323, peak: 0.323, deflated: 0.357 } }
+    pbp:    { lead: 0.22, margin: 0.44, spw: { calm: 0.282, building: 0.268, excited: 0.252, peak: 0.241, deflated: 0.279 } },
+    colour: { lead: 0.21, margin: 0.79, spw: { calm: 0.302, building: 0.309, excited: 0.285, peak: 0.273, deflated: 0.314 } },
+    pa:     { lead: -1.06, margin: 0.44, spw: { calm: 0.545, building: 0.533, excited: 0.522, peak: 0.517, deflated: 0.549 } }
   };
   var GAP = { calm: 0.45, building: 0.30, excited: 0.15, peak: 0.10, deflated: 0.50 };   // the server's pause between sentences
   var AIR = 0.25;       // a breath between one line and the next
@@ -398,9 +402,9 @@ var BBCall = (function () {
       var dp = dayPhrase(day), sit = play.outs || play.bases[1] || play.bases[2] || play.bases[3] ? ' ' + cap(outsWords(play.outs)) + (basesWords(play.bases) !== 'nobody on' ? ', ' + basesWords(play.bases) : '') + '.' : '';
       if (homeBat) {
         say(seg, 0.4, 'pa', stk > 0.12 ? 'building' : 'calm', [(pos === 'PH' ? 'Now batting for the ' + H.nick + ', pinch-hitting, ' : 'Now batting for the ' + H.nick + ', the ' + POSW[pos] + ', ') + B.name + '.', 'Now batting, ' + B.name + '.'], 1, { slide: 2.5 });
-        if (dp || sit) say(seg, 4.0, 'pbp', stk > 0.12 ? 'building' : 'calm', [dp ? ln(B) + ', ' + dp + '.' + sit : sit.trim(), sit.trim()], 2, { slide: 2 });
+        if (dp || sit) say(seg, 4.0, 'pbp', stk > 0.12 ? 'building' : 'calm', [dp ? ln(B) + ', ' + dp + '.' + sit : sit.trim(), sit.trim(), dp ? cap(dp) + '.' : ''], 2, { slide: 3 });
       } else {
-        say(seg, 0.4, 'pbp', 'calm', ['Here is ' + B.name + ', the ' + POSW[pos] + (dp ? ', ' + dp : '') + '.' + sit, B.name + '.' + sit, B.name + '.'], 1, { slide: 1 });
+        say(seg, 0.4, 'pbp', 'calm', ['Here is ' + B.name + ', the ' + POSW[pos] + (dp ? ', ' + dp : '') + '.' + sit, B.name + '.' + sit, B.name + '.'], 1, { slide: 3 });
       }
       // the home crowd urges its batters on late; the organ calls the charge
       var late = play.inning >= 6, diff = play.scoreBefore[1] - play.scoreBefore[0], risp = play.bases[2] || play.bases[3], on = [1, 2, 3].filter(function (b) { return play.bases[b]; }).length;
@@ -636,7 +640,8 @@ var BBCall = (function () {
         say(seg, Math.max(0.8, fieldE.t), 'pbp', 'excited', [fielderName(play, fieldE.who) + ' cannot handle it!'], 1);
       } else if (r.hit === '1B' || r.hit === '2B' || r.hit === '3B') {
         var land = bb.kind === 'wall' ? 'Off the wall!' : r.type === 'GB' ? 'And it is through!' : r.hit !== '1B' && Math.abs(bb.spray) > 9 && Math.abs(bb.spray) < 32 ? 'Into the gap!' : 'It drops in!';
-        say(seg, Math.max(0.9, Math.min(bb.landT || 1, 4)), 'pbp', homeBat ? 'excited' : 'building', [land], 1);
+        var tLand = r.type === 'GB' ? (fieldE ? fieldE.t - 0.6 : 1.6) : Math.min(bb.landT || 1, 4);   // a grounder is 'through' as it reaches the outfield
+        say(seg, Math.max(0.9, tLand), 'pbp', homeBat ? 'excited' : 'building', [land], 1, { slide: 0.8 });
       }
       // the resolution: the play's own description, the runners and the score
       var scored = r.runners.filter(function (rn) { return !rn.out && rn.to >= 4 && rn.from > 0; }).map(function (rn) { return last(rn.id); });

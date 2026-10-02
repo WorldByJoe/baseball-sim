@@ -1,12 +1,13 @@
 /* ============================================================================
-   call_check.js · v0.1 · 2026-10-02
+   call_check.js · v0.2 · 2026-10-02
 
    Runs the broadcast writer (bb_call.js) over whole games headless and
    prints the broadcast against the schedule: each voice line with its
    event, start, estimated length and the air it had (maxDur); the sound
    and organ cues; every line dropped. Then, over all the games: the share
-   of at-bats with colour, the share of lines dropped or shortened, speech
-   per minute, and the most crowded stretch (the minute with the most
+   of at-bats with colour, the share of lines dropped or shortened (all, and
+   by kind: the calls, lines that should be said, colour, the count fillers),
+   speech per minute, and the most crowded stretch (the minute with the most
    speech). It also checks what can be checked mechanically: no two voice
    lines overlap, none outruns its air, every cue names a real event, and
    the writer is deterministic (written twice, the same).
@@ -19,11 +20,12 @@
      jsc ... the same files ... headless/call_check.js -- 7,48,59 3b
 
    CHANGED
+     v0.2  drops reported by kind
      v0.1  first build
 ============================================================================ */
 (function (argv) {
   var seeds = (argv[0] || '7,48,59').split(',').map(Number), show = argv[1] || 'none', asJson = argv[2] === 'json';
-  var tot = { pas: 0, col: 0, lines: 0, dropped: 0, cands: 0, shortened: 0, speech: 0, min: 0, bad: 0 }, worst = { n: 0 };
+  var tot = { pas: 0, col: 0, lines: 0, dropped: 0, cands: 0, shortened: 0, speech: 0, min: 0, bad: 0, byP: {}, candP: {} }, worst = { n: 0 };
   function pad(s, n) { s = String(s); while (s.length < n) s += ' '; return s; }
   function mmss(t) { var m = Math.floor(t / 60), s = t - 60 * m; return m + ':' + (s < 10 ? '0' : '') + s.toFixed(1); }
   seeds.forEach(function (seed, gi) {
@@ -45,6 +47,8 @@
     print('seed ' + seed + ': ' + g.G.teams[0].name + ' ' + g.G.score[0] + ', ' + g.G.teams[1].name + ' ' + g.G.score[1] + ' | ' + mmss(S.total) + ' | ' + st.lines + ' lines (' + st.words + ' words, ' + (st.speech / 60).toFixed(1) + ' min of speech, ' +
           (st.speech / S.total * 100).toFixed(0) + '% of the game) | dropped ' + st.dropped + ' of ' + st.candidates + ' candidates, shortened ' + st.shortened + ' | at-bats with colour ' + st.pasWithColour + ' of ' + st.pas +
           ' | ' + C.sfx.length + ' sounds, ' + C.organ.length + ' organ cues' + (bad.length ? ' | PROBLEMS: ' + bad.slice(0, 5).join('; ') : ''));
+    C.dropped.forEach(function (d) { tot.byP[d.prio] = (tot.byP[d.prio] || 0) + 1; });
+    C.lines.forEach(function (l) { tot.candP[l.prio] = (tot.candP[l.prio] || 0) + 1; });
     tot.pas += st.pas; tot.col += st.pasWithColour; tot.lines += st.lines; tot.dropped += st.dropped; tot.cands += st.candidates; tot.shortened += st.shortened; tot.speech += st.speech; tot.min += mins; tot.bad += bad.length;
     if (asJson && gi === 0) print(JSON.stringify({ seed: seed, version: C.version, lines: C.lines.map(function (l) { return { id: l.id, t: l.t, role: l.role, text: l.text, pace: l.pace, energy: l.energy, maxDur: l.maxDur }; }) }));
     if (show === 'none') return;
@@ -64,5 +68,5 @@
   });
   print('');
   print('over ' + seeds.length + ' games: at-bats with colour ' + (100 * tot.col / tot.pas).toFixed(0) + '% | lines dropped ' + (100 * tot.dropped / tot.cands).toFixed(0) + '% of candidates, shortened ' + (100 * tot.shortened / tot.cands).toFixed(0) + '% | speech ' +
-        (tot.speech / tot.min).toFixed(0) + ' s a minute | most crowded minute: ' + worst.n.toFixed(0) + ' s of speech from ' + worst.event + ' (seed ' + worst.seed + ', ' + mmss(worst.t) + ') | ' + (tot.bad ? tot.bad + ' PROBLEMS' : 'no problems'));
+        (tot.speech / tot.min).toFixed(0) + ' s a minute | dropped by kind: ' + [1, 2, 3, 4].map(function (k) { var d = tot.byP[k] || 0, n = d + (tot.candP[k] || 0); return ['', 'calls', 'should-say', 'colour', 'count fillers'][k] + ' ' + (n ? (100 * d / n).toFixed(0) : 0) + '%'; }).join(', ') + ' | most crowded minute: ' + worst.n.toFixed(0) + ' s of speech from ' + worst.event + ' (seed ' + worst.seed + ', ' + mmss(worst.t) + ') | ' + (tot.bad ? tot.bad + ' PROBLEMS' : 'no problems'));
 })(typeof arguments !== 'undefined' ? Array.prototype.slice.call(arguments) : []);
