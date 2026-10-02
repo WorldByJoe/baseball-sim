@@ -18,7 +18,8 @@
 
    CHANGED
      v0.2  the height tables (statcast/fouls.py v0.3, 9-11): height, kind at a height, the
-           flat-fastball fifths; whiffs split by read (expected pitch, read, late, fooled); 120 pitchers
+           flat-fastball fifths; whiffs split by read (expected pitch, read, late, fooled); 120 pitchers;
+           bat speed by pitch kind at a depth and by count (statcast/swing_geometry.py v0.2 table 7)
      v0.1  first build
 ============================================================================ */
 (function (A) {
@@ -36,7 +37,7 @@
         if (!q.swing) return;
         var pz = q.pitch.plate.z, px = q.pitch.plate.x, h = (pz - B.zone.bot) / (B.zone.top - B.zone.bot);
         var vv = q.pitch.plate.v, vaa = -Math.atan(vv[2] / vv[1]) / DEG;   // vertical approach angle at the front of the plate, negative = descending
-        var r = { type: q.pitch.type, vaa: vaa, kind: kindOf(q.pitch.type), strikes: +q.count.split('-')[1], h: h, inZone: BB.inZone(B, px, pz), contact: !!q.swing.contact,
+        var r = { type: q.pitch.type, vaa: vaa, kind: kindOf(q.pitch.type), strikes: +q.count.split('-')[1], balls: +q.count.split('-')[0], h: h, inZone: BB.inZone(B, px, pz), contact: !!q.swing.contact,
                   bat: q.swing.batAt || q.swing.batMph, mph: q.pitch.mph, away: -px * BB.batterSide(B, Pi), depth: 29 + (q.swing.depth !== undefined ? q.swing.depth : (q.swing.sFwd || 0)) / IN, attack: q.swing.attackAt !== undefined ? q.swing.attackAt : q.swing.attack };
         r.facePull = q.swing.theta * BB.batterSide(B, Pi) / DEG; r.why = q.swing.why; r.read = q.expect.guessType === q.pitch.type ? 'expected' : q.read.detected ? 'read' : q.read.late ? 'late' : 'fooled';
         // spray + = pulled: a right-handed batter, on the -x side, pulls toward -x
@@ -188,5 +189,18 @@
   [['in zone', true, '.150 .500 .459'], ['out of zone', false, '.430 .599 .343']].forEach(function (g) {
     var s = sw.filter(function (r) { return r.inZone === g[1]; }), c = s.filter(function (r) { return r.contact; }), t = c.filter(function (r) { return r.ev !== undefined; });
     row([g[0], s.length, f(1 - c.length / s.length), f(c.filter(function (r) { return !r.fair; }).length / c.length), f(t.filter(function (r) { return r.sq; }).length / t.length), '   |  ' + g[2]], [16, 9, 8, 14, 9, 30]);
+  });
+  print('\n9. BAT SPEED (mph) BY PITCH KIND AT A CONTACT DEPTH (contact swings), AND BY COUNT (all swings)   |  league: statcast/swing_geometry.py v0.2 table 7');
+  var BL = { '10..20': [67.0, 63.8, 64.3], '20..25': [70.0, 67.9, 68.3], '25..30': [71.7, 69.8, 70.3], '30..35': [73.1, 71.2, 71.8], '35..40': [74.3, 72.1, 72.5], '40..50': [74.7, 72.7, 73.0],
+             ahead: [71.9, 70.9, 72.4], even: [70.2, 69.6, 71.4], two: [68.9, 68.3, 69.7] };
+  function batOf(s) { return f(s.reduce(function (a, r) { return a + r.bat; }, 0) / Math.max(1, s.length), 1); }
+  [[10, 20], [20, 25], [25, 30], [30, 35], [35, 40], [40, 50]].forEach(function (b) {
+    var key = b[0] + '..' + b[1];
+    print(pad('depth ' + key, 16) + ['FB', 'BR', 'OS'].map(function (k) { return pad(k + ' ' + batOf(sw.filter(function (r) { return r.kind === k && r.contact && r.depth >= b[0] && r.depth < b[1]; })), 10); }).join('') +
+          '   |  ' + BL[key].map(function (v) { return v.toFixed(1); }).join(' / '));
+  });
+  [['ahead', function (r) { return r.strikes < 2 && r.balls > r.strikes; }], ['even', function (r) { return r.strikes < 2 && r.balls <= r.strikes; }], ['two', function (r) { return r.strikes === 2; }]].forEach(function (g) {
+    print(pad(g[0] === 'two' ? 'two strikes' : g[0] === 'even' ? 'even or behind' : 'ahead', 16) + ['FB', 'BR', 'OS'].map(function (k) { return pad(k + ' ' + batOf(sw.filter(function (r) { return r.kind === k && g[1](r); })), 10); }).join('') +
+          '   |  ' + BL[g[0]].map(function (v) { return v.toFixed(1); }).join(' / '));
   });
 })(typeof arguments !== 'undefined' ? arguments : []);

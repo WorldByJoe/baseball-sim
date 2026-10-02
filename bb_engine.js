@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v1.0 · 2026-10-02
+   bb_engine.js · v1.1 · 2026-10-02
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -39,7 +39,8 @@
              accuracy), per-edge systematic misses, a count lean, and the
              catcher's framing                                 (callPitch)
      SWING   timing error, vertical offset and barrel position come from the
-             misread plus his execution noise; the bat-ball collision is
+             misread plus his execution noise; a swing he had to alter for a
+             pitch he did not time is slower; the bat-ball collision is
              solved as a rigid-body impulse with friction      (collide)
      FLY     the batted ball flies with drag and Magnus lift until it lands
              or reaches the fence                              (flyBatted)
@@ -53,6 +54,9 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v1.1  the adjusted swing: closing the gap between the arrival he planned and the
+           real one costs bat speed, so the pitch he sat on gets his full swing; effort
+           by count; his bat speed trait stays his average over his swings
      v1.0  perception: a recognised pitch is judged partly from what that kind of pitch
            usually does (the prior's pull: timing toward the expected pitch, location
            toward the type's usual shape); the expected pitch type cannot fool him;
@@ -69,9 +73,6 @@
            swing length and the bat (v^3 = 4pWL/mEff); the bat's mass sets the
            collision efficiency; precision worsens as bat speed squared; fitted to
            the 2025 Statcast marginals, correlations left as tests
-     v0.6  the running game's traits (jump, holdTime, popTime, block) and per-pitch
-           hooks in simPA (beforePitch / afterPitch; result 'END' when the bases
-           end the inning mid-count)
 ============================================================================ */
 
 var BB = (function () {
@@ -1024,17 +1025,37 @@ var BB = (function () {
     var oz = Math.max(0, B.zone.bot - BALL_R - z, z - B.zone.top - BALL_R);
     return Math.sqrt(ox * ox + oz * oz);
   }
+  // How hard he swings by the count. FITTED so the model's bat speed by count
+  // follows the league's (pitch-level 2025, 42 days: fastballs 72.0 mph ahead,
+  // 70.5 even or behind, 68.9 with two strikes); part of the two-strike drop
+  // already comes from his wider hedge, which the adjusted swing pays for.
+  var SWING_EFFORT = { ahead: 1.017, even: 1.0, two: 0.982 };
+  var ADJ_PER_MS = 0.0014;   // share of his bat speed lost per ms of timing he closes by altering the swing
+  var SWING_NORM = 0.978;    // the average of effort x adjustment over the league's swings, MEASURED from the model (seeds 3, 11, 29: 0.977-0.978)
+  function effortGroup(st) { return st.strikes === 2 ? 'two' : st.balls > st.strikes ? 'ahead' : 'even'; }
   function swing(B, pitch, gh, rf, sb, st, rng) {
     var reach = reachOf(B, pitch.plate.x, pitch.plate.z);
     var prot = (st.strikes === 2 ? 0.85 : 1)   // a shorter two-strike swing: less scatter, less speed
              * (1 + reach / (B.coverage * IN));
     var m = misreadOf(rf);
+    // THE ADJUSTED SWING. He planned his swing for the pitch he expected,
+    // arriving when he timed it (the ghost). Whatever part of the gap between
+    // that plan and the real arrival he closes - waiting on a slower pitch
+    // than he timed, or hurrying for a faster one - he closes by altering the
+    // swing, and it costs bat speed: ADJ_PER_MS of his speed per ms closed,
+    // FITTED to the league's bat speed on breaking and off-speed pitches
+    // against fastballs met at the same depth (pitch-level 2025, 42 days: about
+    // 2 mph slower). The pitch he sat on and got is met with his full swing.
+    var adjMs = Math.max(0, Math.abs(gh.t - pitch.plate.t) - Math.abs(m[2])) * 1000;
     var e = -m[2] + rng.n(0, B.timingSD / 1000 * prot * rf.tp);    // + = bat early (he expected it sooner)
     var D = -m[1] + B.undercut * IN + rng.n(0, B.barrelSD * IN * prot);   // + = ball above the barrel
     var xAim = pitch.plate.x + m[0];
     var dLong = (pitch.plate.x - xAim) * (-sb) + rng.n(0, B.longSD * IN * prot)   // + toward the tip
               - pitch.plate.x * sb * HAND_MISS - AIM_HANDS * IN;   // what the hands did not cover (jammed inside, toward the end outside), and his aim inside the ball
-    var batMph = B.batSpeed * (st.strikes === 2 ? 0.974 : 1);   // shorter with two strikes: 70.7 against 72.6 mph on full swings (pitch-level 2025)
+    // His effort follows the count (SWING_EFFORT), and an adjusted swing is
+    // slower; SWING_NORM keeps his average over his swings at his bat speed
+    // trait, which is what the leaderboard measures.
+    var batMph = B.batSpeed * SWING_EFFORT[effortGroup(st)] * Math.max(0.7, 1 - ADJ_PER_MS * adjMs) / SWING_NORM;
     var attack = B.attack + rng.n(0, 3);
     var face = rng.n(0, (B.faceSD || TRAITS.faceSD[0]) * DEG * prot);   // the face's own horizontal scatter: hooks and slices, not misses
     // WHERE ON THE ARC HE MEETS IT. Spray comes from how far round the arc
@@ -1076,7 +1097,7 @@ var BB = (function () {
     var depth = (phi - phiUsual) * SWING_R;   // m out front of his usual contact point
     var batAt = batMph * 1.015 * Math.pow(Math.max(0.2, 1 - Math.max(0, BAT_PEAK_M - depth) / ((B.swingLenFt || TRAITS.swingLenFt[0]) * FT)), BAT_GAIN_EXP);
     var bat = B.bat || BAT_DEFAULT;
-    var sw = { e: e, D: D, dLong: dLong, theta: theta, batMph: batMph, batAt: batAt, attack: attack, attackAt: attackAt, tilt: tilt, side: sb,
+    var sw = { e: e, D: D, dLong: dLong, theta: theta, batMph: batMph, batAt: batAt, adjMs: adjMs, attack: attack, attackAt: attackAt, tilt: tilt, side: sb,
                sFwd: sFwd, depth: depth, reach: reach, contact: false, why: '',
                bat: bat, qSweet: bat.q };   // his bat, and its collision efficiency at the sweet spot
     if (dLong > (TIP_IN + BAT_CAP_IN) * IN) { sw.why = 'off the end'; return sw; }   // past the end, unless the ball still catches the rounded cap
@@ -1222,7 +1243,7 @@ var BB = (function () {
   }
 
   return {
-    version: '1.0',
+    version: '1.1',
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
     PITCH_TYPES: PITCH_TYPES, ARCH: ARCH, TRAITS: TRAITS, AERO: AERO,
