@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v1.9 · 2026-10-01
+  baseball.html · v2.0 · 2026-10-01
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
@@ -38,6 +38,10 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v2.0  the flight chart is always on screen with fixed axes at true scale (0-480 ft
+          by 0-200 ft, one foot to a pixel each way); the batter runs out every ball
+          at his own speed - through first and rounding it on a fly - and an out
+          walks back from where he stopped (Joe)
     v1.9  catcher's view in team colours: the batter's bat, box and expected-pitch
           circle in his side's colour with the expected type at its centre; the
           pitcher's aim circle in his side's colour with the intended type as the
@@ -52,9 +56,6 @@
     v1.6  the running game on screen: a runner going with the pitch, the catcher's
           throw, safe or out at the bag, wild pitches skipping to the backstop;
           bases and outs follow each pitch; foul chases stay on reachable ground
-    v1.5  every man moves on a ball in play (bases covered, cut-off man, pitcher
-          and catcher backing up, outfielders backing up) and jogs back after;
-          runners go halfway on a fly that might drop; nobody drawn past the fence
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -193,6 +194,9 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   away.col = TEAM_COLS[hashStr(away.nick) % 6];
   home.col = TEAM_COLS[(hashStr(home.nick) + (TEAM_COLS[hashStr(home.nick) % 6] === away.col ? 1 : 0)) % 6];
   var rho0 = BB.makeEnv({ tempF: 70, elevFt: 0, rh: 0.5 }).rho;
+  var PLAYER = {};   // every man who can bat, by id (a pitcher bats as his .bat)
+  [away, home].forEach(function (Tm) { Tm.lineup.concat(Tm.bench).forEach(function (b) { PLAYER[b.id] = b; });
+    [Tm.starter].concat(Tm.bullpen).forEach(function (P) { if (P.bat) PLAYER[P.id] = P.bat; }); });
 
   // Run expectancy by outs and base state (bits 1B=1, 2B=2, 3B=4); the rest of the
   // game as normal noise. An estimate, labelled as one.
@@ -266,6 +270,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     if (!r) return 2;
     var t = bb.hang + 1;
     r.events.forEach(function (e) { if (e.t) t = Math.max(t, e.t); if (e.arrive) t = Math.max(t, e.arrive); });
+    (r.runners || []).forEach(function (rn) { var a = runnerArrive(r, rn, bb); t = Math.max(t, rn.gone !== undefined ? rn.gone : a); });   // a man beaten by the throw still runs it out
     if (r.hit === 'HR') t = bb.hang * 0.3 + 4 * HR_BASE + 0.4;   // the trot: he sets off as the ball leaves and touches them all
     return Math.min(t, 16) + 0.6;
   }
@@ -388,6 +393,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     if (t <= start) { var l0 = lead > 4 ? 3.5 + (lead - 3.5) * clamp((t - 0.05) / 1.5, 0, 1) : lead;   // halfway: he jogs out there while the ball is up
       return [from[0] + (nx[0] - from[0]) / dn * l0, from[1] + (nx[1] - from[1]) / dn * l0]; }
     var f = clamp((t - start) / Math.max(0.2, r.arrive - start), 0, 1), L = 90 * FT, d0 = lead + f * ((r.to - r.from) * L - lead), acc = 0;
+    if (r.stopD !== undefined) d0 = Math.min(d0, r.stopD);   // as far as he goes before he pulls up
     for (var b = r.from; b < r.to; b++) {
       var A = BASES[b], Bp = BASES[b + 1];
       if (d0 <= acc + L) { var u = (d0 - acc) / L; return [A[0] + (Bp[0] - A[0]) * u, A[1] + (Bp[1] - A[1]) * u]; }
@@ -442,14 +448,31 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     }
     return [pos[0], pos[1], 1];
   }
+  // When each man reaches his bag. Safe: the fielding layer's own time. Scored or
+  // put out: at his own pace (his speed, the fielding layer's running model) - and
+  // if the ball beat him he still gets there, after it. The batter runs every ball
+  // out as if it will drop, because he cannot know it won't: on a catch he has
+  // gone hard through first and rounded it, and pulls up where the catch finds him.
+  function ownArrive(rn, to, start) {
+    var pl = PLAYER[rn.id] || { speed: 27 }, st = start !== undefined ? start : (rn.start || 0.05);
+    return st + BBField.runTime(pl, (to - rn.from) * 90 * FT - (rn.lead || 0), rn.from === 0 || st >= 0.5);
+  }
   function runnerArrive(r, rn, bb) {
     if (rn.arrive !== undefined) return rn.arrive;
     var ev = r.events.filter(function (e) { return e.kind === 'safe' && e.who === rn.id; })[0];
-    var th = r.events.filter(function (e) { return e.kind === 'throw' && e.to === rn.to; })[0];
-    var a = ev && isFinite(ev.t) ? ev.t : th ? th.arrive : (rn.start || 0) + (rn.to - rn.from) * 3.7;
+    var th = r.events.filter(function (e) { return (e.kind === 'throw' || e.kind === 'carry') && e.to === rn.to; })[0];
+    var a;
+    if (ev && isFinite(ev.t)) a = ev.t;
+    else if (rn.to > rn.from) a = Math.max(rn.out && th ? th.arrive : 0, ownArrive(rn, rn.to));
+    else a = rn.start || 0;
     if (r.hit === 'HR') { rn.start = bb.hang * 0.3; a = rn.start + (rn.to - rn.from) * HR_BASE; }
     var ct = r.events.filter(function (e) { return e.kind === 'catch'; })[0];
-    if (rn.from === 0 && rn.out && ct) { rn.to = 1; rn.start = 0.05; a = ct.t + 4; rn.gone = ct.t; }   // the batter runs it out until the catch
+    if (rn.from === 0 && rn.out && ct) {
+      var t1 = ownArrive(rn, 1, 0.05);                               // his time to first, flat out
+      rn.start = 0.05; rn.to = 2; a = 0.05 + 2 * (t1 - 0.05);        // on toward second at the same pace...
+      rn.stopD = (bb && bb.fair === false ? 0.5 : 1.25) * 90 * FT;   // ...rounding first by a quarter of the way (a foul pop: he knows; half way, then watches)
+      rn.gone = ct.t;
+    }
     rn.arrive = a; return a;
   }
 
@@ -512,7 +535,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   function penMound(sd) { return along(penOf(sd), homeU(sd, -100), 0); }
   function clusterPt(c, j) { var a = j * 2.39996, r = 1.6 + 1.1 * Math.sqrt(j); return [fx(c[0] + r * Math.sin(a)), fy(c[1] + r * Math.cos(a))]; }   // a huddle, in metres about c
   function who(pl, team, label) { return PEOPLE[pl.id] || (PEOPLE[pl.id] = { id: pl.id, team: team, label: label, moves: [], seat: null }); }
-  function placeAt(p, t, pt, k, st) { p.moves.push({ t0: t, t1: t, a: pt, b: pt, ka: k, kb: k, st: st }); }
+  function placeAt(p, t, pt, k, st) { move(p, t, 0, pt, k, st); }   // he is here now (a walk under way stops)
   function inward(team) { var b = dugoutOf(team ? 1 : -1), dx = HX - b.cx, dy = (HY - 600) - b.cy, L = Math.hypot(dx, dy); return [dx / L, dy / L]; }   // out of the dugout, toward the infield
   function stateAt(p, t) {   // null before he has appeared; else { p, k, moving, st }
     var M = p.moves, m = null;
@@ -615,6 +638,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
         var slam = r && r.hit === 'HR' && r.runs === 4, j = 0, hc = [sdB * 2.2, 2.4], tC = 0;
         if (slam) { var bat = r.runners.filter(function (q) { return q.from === 0; })[0]; tC = play.tResult + runnerArrive(r, bat, play.pa.bb); }
         walksOf(play).forEach(function (w) { var p = PEOPLE[w.id]; if (!p) return;
+          placeAt(p, w.t, [fx(w.from[0]), fy(w.from[1])], 0, 'base');   // where he stopped: short of first, rounding it, at a bag, at home
           if (slam && w.from === BASES[0]) move(p, w.t, 1.4, clusterPt(hc, j++), 0, 'huddle');
           else move(p, w.t, WALK, p.seat, 0, 'seat'); });
         if (slam) {   // the bench streams out to meet him at the plate, then everyone goes back
@@ -790,6 +814,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     // the venue, always
     [-1, 1].forEach(function (sd) { var Tm = G.teams[sd < 0 ? 0 : 1]; drawBox(g, dugoutOf(sd), Tm.nick.toUpperCase()); var dk = deckOf(sd);
       g.beginPath(); g.arc(dk[0], dk[1], 30, 0, 7); g.lineWidth = 2; g.strokeStyle = INK3; g.stroke(); });
+    profileFrame(g);
     if (!play) { [-1, 1].forEach(function (sd) { drawPen(g, sd, null); }); return; }
     var half = play.half, batTeam = G.teams[half], defTeam = G.teams[1 - half], TC = batTeam.col;
     var sdBat = half === 1 ? 1 : -1, sdDef = -sdBat;
@@ -937,19 +962,33 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   }
 
   // Side view of the flight, lower left: distance along the ground against
-  // height, with the fence and its wall at this spray angle. Drawn as far as
-  // the ball has gone: the flight solid, then its bounces and roll dashed
-  // (as on the field) until a fielder has it at tHeld.
+  // height, at TRUE SCALE on FIXED axes - one foot to a pixel each way, 0-480 ft
+  // out and 0-200 ft up - so a high ball looks high and a liner looks flat, and
+  // one at-bat can be held against the next. Over 150 games the highest ball
+  // went 182 ft up and the longest flew 451 ft, so nothing is cut off. The frame
+  // is always there; the ball is drawn as far as it has gone, with the fence and
+  // wall at its spray angle: the flight solid, then bounces and roll dashed (as
+  // on the field) until a fielder has it at tHeld.
+  var PF = { x0: 150, y0: 1636, dmax: 480, hmax: 200 };   // origin on the canvas; axis ends in feet (1 px per ft); the top-right corner clears the visitors' dugout
+  function pfPt(dFt, hFt) { return [PF.x0 + dFt, PF.y0 - hFt]; }
+  function profileFrame(g) {
+    var x0 = PF.x0, y0 = PF.y0, w = PF.dmax, h = PF.hmax;
+    text(g, 'FLIGHT', x0, y0 - h - 36, 30, INK2);
+    g.strokeStyle = 'rgba(206,220,240,.10)'; g.lineWidth = 2; g.beginPath();
+    [50, 100, 150, 200].forEach(function (k) { g.moveTo(x0, y0 - k); g.lineTo(x0 + w, y0 - k); });
+    [100, 200, 300, 400].forEach(function (k) { g.moveTo(x0 + k, y0); g.lineTo(x0 + k, y0 - h); });
+    g.stroke();
+    g.strokeStyle = INK3; g.lineWidth = 2; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x0 + w, y0); g.moveTo(x0, y0); g.lineTo(x0, y0 - h); g.stroke();
+    [0, 100, 200, 300, 400].forEach(function (k) { text(g, k === 400 ? '400 ft' : String(k), x0 + k, y0 + 30, 26, INK3, k === 0 ? 'left' : 'center'); });
+    [100, 200].forEach(function (k) { text(g, k + ' ft', x0 + w - 6, y0 - k + 28, 26, INK3, 'right'); });   // at the far end, just under its line: pop-ups go up the near end
+  }
   function drawProfile(g, bb, upto, col, track, tHeld, tb) {
-    var x0 = 150, y0 = 1600, w = 480, h = 230, P = bb.path, Gd = track ? track.ground : [];
+    var P = bb.path, Gd = track ? track.ground : [];
     var fd = BB.fenceAt(env, Math.max(-45, Math.min(45, bb.spray))) / FT;
-    if (track && track._rmax === undefined) { var rm = 0; Gd.forEach(function (q) { if (q[0] <= tHeld) rm = Math.max(rm, Math.hypot(q[1], q[2])); }); track._rmax = rm / FT; }
-    var L = P[P.length - 1], dmax = Math.max(Math.hypot(L[1], L[2]) / FT, fd, track ? track._rmax : 0) * 1.06, hmax = Math.max(bb.apex * 1.15, 40);
-    function px(q) { return [x0 + Math.hypot(q[1], q[2]) / FT / dmax * w, y0 - q[3] / FT / hmax * h]; }
-    text(g, 'FLIGHT', x0, y0 - h - 22, 30, INK2);
-    g.strokeStyle = INK3; g.lineWidth = 2; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x0 + w, y0); g.stroke();
-    var fxp = x0 + fd / dmax * w;
-    g.strokeStyle = 'rgba(238,244,252,.7)'; g.lineWidth = 4; g.beginPath(); g.moveTo(fxp, y0); g.lineTo(fxp, y0 - env.wallFt / hmax * h); g.stroke();
+    function px(q) { return pfPt(Math.hypot(q[1], q[2]) / FT, q[3] / FT); }
+    g.save(); g.beginPath(); g.rect(PF.x0, PF.y0 - PF.hmax - 4, PF.dmax + 4, PF.hmax + 8); g.clip();
+    var fe = pfPt(fd, 0);
+    g.strokeStyle = 'rgba(238,244,252,.7)'; g.lineWidth = 4; g.beginPath(); g.moveTo(fe[0], fe[1]); g.lineTo(fe[0], fe[1] - env.wallFt); g.stroke();
     g.strokeStyle = col; g.lineWidth = 4; g.beginPath();
     var last = null;
     P.forEach(function (q, i) { if (q[0] > upto) return; var s = px(q); if (i === 0) g.moveTo(s[0], s[1]); else g.lineTo(s[0], s[1]); last = s; });
@@ -961,9 +1000,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
       g.stroke(); g.setLineDash([]);
     }
     if (last) { g.beginPath(); g.arc(last[0], last[1], 7, 0, 7); g.fillStyle = INK; g.fill(); }
-    text(g, '0', x0, y0 + 32, 30, INK3, 'left');
-    text(g, f0(dmax / 1.06) + ' ft', x0 + w, y0 + 32, 30, INK3, 'right');
-    text(g, f0(hmax) + ' ft', x0 - 10, y0 - h + 10, 26, INK3, 'right');
+    g.restore();
   }
 
   // ===================================================== CATCHER'S VIEW
