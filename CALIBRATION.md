@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v2.6 · 2026-10-03`
+`CALIBRATION.md · v2.7 · 2026-10-03`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -818,6 +818,35 @@ Joe: "a deeper trait upon which power, strength and speed depend." Each position
 - **Result:** loadings 0.95 (swing power), 0.50 (sprint), 0.41 (arm), and −0.39 sd of sprint per 20 lb. Among the picks: power/kg ~ sprint .46, power/kg ~ arm .26-.30, sprint ~ arm .36-.39, weight ~ sprint −.36. The test, not fitted: bat speed ~ sprint +.04 (league +.09) and bat speed ~ arm +.18 (+.18). So nearly all of a hitter's power per kg is his athleticism; the proxy's other parts (his bat, his weight) carry the rest of its scatter.
 - **The league line held** (seeds 3, 11, 29 × 200 games against engine v2.5): runs 3.66-3.95 against 3.73-3.87, BABIP .260-.264 against .256-.259, HR% 3.1-3.6 against 3.0-3.3, K% and BB% unchanged.
 
+## The league (bb_league v0.1, 2026-10-03)
+
+Joe: minor leaguers face minor-league pitchers, so a good minor leaguer should hit worse when he is promoted; build a big minor-league program headless and pull the best into the majors. `bb_league.js` builds thirty organisations, each with a major-league club and a club at each level below (Triple-A, Double-A, High-A, Single-A, Rookie), every club a standing roster of 26 drawn at its level by the farm. Each level plays its own schedule; at the end of a season each organisation swaps men between adjacent levels when a man below outscores a man above (its scouts' estimate, standardised over the world, plus his season against his own level shrunk by playing time; at most two hitters, two starters and two relievers per boundary). Nobody ages or develops yet. `tools/build_stable.sh 1 3 60` played three seasons of 60 games a club (16,200 games, 12 minutes) and wrote the stable the screen loads.
+
+The levels in the third season:
+
+| level | wOBA | K% | BB% | HR% | runs/team-game | hitters' bat speed | starters' four-seam |
+|---|---|---|---|---|---|---|---|
+| majors | .305 | 19.9 | 8.9 | 3.4 | 4.06 | 71.2 | 94.1 |
+| Triple-A | .295 | 21.7 | 9.6 | 2.9 | 3.78 | 70.1 | 93.8 |
+| Double-A | .284 | 22.2 | 10.2 | 2.3 | 3.45 | 69.1 | 93.7 |
+| High-A | .289 | 21.4 | 10.6 | 2.3 | 3.62 | 68.6 | 93.0 |
+| Single-A | .283 | 23.4 | 10.7 | 1.9 | 3.42 | 68.1 | 93.5 |
+| Rookie | .280 | 24.5 | 11.6 | 1.6 | 3.29 | 67.4 | 92.9 |
+
+The promotion drop (hitters with 100+ PA in the season before and the season after):
+
+| move | n | before | after | drop | good seasons that stayed: before → after |
+|---|---|---|---|---|---|
+| Triple-A to the majors | 68 | .341 | .303 | .037 | .339 → .319 |
+| Double-A to Triple-A | 74 | .345 | .306 | .038 | .335 → .307 |
+| High-A to Double-A | 81 | .325 | .300 | .026 | .333 → .308 |
+| Single-A to High-A | 69 | .323 | .292 | .031 | .323 → .305 |
+| Rookie to Single-A | 71 | .322 | .288 | .035 | .323 → .304 |
+
+- **The drop has two parts.** Hitters who stayed at a level after a good season (30+ points over its mean) fell back about .020 the next year: the regression any selected season shows. The promoted fell .026-.038, so about .006-.018 of the drop is the better pitching above. From Triple-A to the majors: .037, of which about .017 is the step up and .020 the regression.
+- **But the levels themselves run the wrong way.** The majors out-hit Triple-A here (.305 against .295) while the league measured alike shows Triple-A out-hitting the majors (2025: OBP .347 against .309, SLG .420 against .403) and walking far more (10.8% against 7.8%; the model's Triple-A 9.6). Hitters step down the levels faster than pitchers: the starters' four-seam speed falls 1.2 mph from the majors to Rookie ball, where the bat speed falls 3.8. The farm judges pitchers by PITCHER_VALUE, which values velocity at almost nothing (open mystery 5), so the pitchers it leaves for the levels below are nearly as good as the majors'. The step-up part of the promotion drop is small for the same reason.
+- The first build let any hitter catch (shortstops and centre fielders caught, with no catcher's arm or blocking), and its games scored a fifth fewer runs; only catchers catch now.
+
 ## What was learned building the fielding layer
 
 - **Statcast's outfield JUMP (about 30 ft covered in the first 3 s) is the right anchor for outfielder motion.** The first fielders covered 44 ft in 3 s and caught nearly every fly ball (fly-ball BABIP .03). Slowing everyone to the jump figure fixed the outfield but let 52% of ground balls through, so infielders got their own harder acceleration and a dive reach. That's a real difference: they work from a crouch on a ball that is on them at once.
@@ -845,6 +874,7 @@ Where the model and the league disagree and no believable mechanism has been bui
 6. **Triple-A's BABIP** is .026 above the majors'; the model's level 2 matches its level 1. Triple-A's hitters also chase less than the majors' (the model's chase a little more).
 7. **Errors** 0.8 a game against 0.55; **steals** 0.55-0.66 against 0.47.
 8. From before: K% ~ release height has the wrong sign (+.16 against −.22), BB% ~ arm angle is flat (+.20 in the league), uphill swings cost too many whiffs (attack ~ whiff +.66 against +.53), bat speed ~ whiff is under half the league's (+.26 to +.35 against +.69), liners at 15-20 deg carry 10-20 ft too far.
+10. **Down the levels the pitchers stay too good** (the league, bb_league v0.1): the majors out-hit Triple-A (.305 against .295) where the real Triple-A out-hits the majors and walks 3 points more; promotion from Triple-A costs a hitter about .017 beyond regression to the mean. Same root as 5.
 9. **Swings far off the plate** run below the league's (9+ in outside: .00-.02 of pitches at 0-0 against .04-.06) since batters check their swings; chase .258 against .283.
 
 ## Known gaps, to fix with mechanisms rather than knob-turning
