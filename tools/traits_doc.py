@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-traits_doc.py · v0.6 · 2026-10-03
+traits_doc.py · v0.7 · 2026-10-03
 
 Writes TRAITS.md, the list of every player trait and how the population of
 players is drawn, straight from bb_engine.js: the TRAITS table (mean, spread,
@@ -16,10 +16,10 @@ beyond "normal, clipped to its range" is written in DRAWN below; when the
 engine draws a trait differently, change it here too.
 
 CHANGED
+  v0.7  defence in the farm (engine v2.1)
   v0.6  the pro pool: best of six, the levels, the open question re-answered (engine v2.0)
   v0.5  the farm: the tables are the population; spin talent; a first answer to the open question (engine v1.8)
   v0.4  the pitcher's body and delivery traits; the repertoire library replaces the archetypes (engine v1.6)
-  v0.3  two-axis command; each type's command factor and plate scatter; pitchers' aiming habits (engine v1.4)
   v0.1  first build
 """
 import os, re, sys
@@ -213,7 +213,7 @@ def main():
     w('- **Umpires with one strong habit:** %.0f%% (see `umpQuirk`).' % (100 * float(quirk.group(1))))
     w('- **Strike zone:** not drawn; from height, bottom 0.263 x height, top 0.559 x height.')
     w('\n## The farm\n')
-    w('The tables above are the POOL: the frequency distribution of the traits among all professional players, majors and minors (the project\'s goal since 2026-10-03 is that distribution and how it meets the physics to give the statistics we measure). Each roster spot goes to the best of `FARM_N` = 6 candidates drawn from it (since engine v2.0; 4 in v1.8-v1.9), as the scouts judge them: `HITTER_VALUE` and `PITCHER_VALUE`, the expected wOBA the engine itself gives each trait (tools/hitter_value.js, tools/pitcher_value.js), with `SCOUT_SD` of judgement error. The majors are therefore an extreme-value sample of the pool. Where a trait is measured, its pool was fitted (tools/fit_population.js) so that the majors have the league\'s value; the hand-set skills keep their pool spread, and the farm narrows it.\n')
+    w('The tables above are the POOL: the frequency distribution of the traits among all professional players, majors and minors (the project\'s goal since 2026-10-03 is that distribution and how it meets the physics to give the statistics we measure). Each roster spot goes to the best of `FARM_N` = 6 candidates drawn from it (since engine v2.0; 4 in v1.8-v1.9), as the scouts judge them: `HITTER_VALUE` and `PITCHER_VALUE`, the expected wOBA the engine itself gives each trait (tools/hitter_value.js, tools/pitcher_value.js), plus for a position player the runs his fielding saves at his position (`FIELD_VALUE`, tools/field_value.js; engine v2.1), with `SCOUT_SD` of judgement error. The majors are therefore an extreme-value sample of the pool. Where a trait is measured, its pool was fitted (tools/fit_population.js) so that the majors have the league\'s value; the hand-set skills keep their pool spread, and the farm narrows it.\n')
     w('**Levels** (engine v2.0): the candidate the scouts rank k-th of six plays at level k - 1 the majors, 2 Triple-A, down to 6 rookie ball (`makeBatter(rng, {level: k})`). The levels below the majors are predictions; Triple-A is measured (statcast/levels.py) and compared in headless/level_check.js.\n')
     w('\n## Open questions\n')
     w('- **A player below average in every category** (Joe, 2026-10-02, for later): how should the game handle a player on a team who is below average in every trait? With traits drawn independently, such players occur by chance (for k independent traits, about 1 in 2^k players is below the mean in all of them), and real rosters are the selected top of a much larger population, so they would be rare there. Not yet decided. Answer from the farm (engine v2.0, best of six): below the pool average in all seven of bat speed, eye, timing, pitch spotting, barrel control, along-barrel control and patience, 0.78% of the pool but 0.01% of the major leaguers (five categories: 3.1% against 0.18%). Such a player can still reach the majors on the scouts\' error, about 1 in 10,000 (1 in 3,000 at best of four, v1.8).')

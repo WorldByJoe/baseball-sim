@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v2.0a · 2026-10-03`
+`CALIBRATION.md · v2.1 · 2026-10-03`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -674,6 +674,24 @@ At level 1 with best of six, the suite (seeds 3, 11, 29): runs 3.88-4.00 per tea
 
 Caveats for the level comparison: the pool is static, while Triple-A's players are younger (26.9 against 28.3) and some are still developing; a club also keeps veterans in Triple-A as cover, so it is not purely the second-best of six. Triple-A's ball and the Pacific Coast League's parks carry differently (HR% for the International League alone: 2.81).
 
+### Defence in the farm (bb_engine v2.1, field_value v0.1, fit_population v0.2; 2026-10-03)
+
+The Triple-A test (v2.0) found the model's defence did not step down with level: the farm picked position players on their bat alone, and the fielding traits were drawn the same at every level, so the model's level-2 BABIP sat below its level 1 while Triple-A's sat .026 above the majors'. Runs: `tools/field_value.js` (3,000 balls in play × 400 test fielders per position, seed 5), `tools/fit_population.js`, `tools/fit_swing_policy.js` (three passes), the suite at seeds 3, 11 and 29, `headless/level_check.js` (400 games at levels 1, 2, 3 and 6 for each seed).
+
+**What a fielder is worth, measured by the engine.** `tools/field_value.js` plays the engine's own balls in play (picked hitters against picked pitchers) through a defence of average fielders with one test fielder from the pool at the position, the same balls with the same random numbers in every trial, and regresses the run value allowed per ball (single .74, double 1.05, triple 1.32, reached on error .74, above an out) on his traits. R2 .92-.98 at every position. One sd of each trait, in runs per 1,000 balls in play: at shortstop reaction 2.7, route 2.1, transfer 1.1, speed 0.7, arm 0.6; in the outfield route 2.7-3.1, speed 1.9-2.2, reaction 1.3-1.6; at first base everything under 1.1. One sd of fielding came to 0.09-0.10 runs a game at shortstop and in the outfield, 0.04 at first base, against 0.18 for one sd of hitting.
+
+**What was built.** The scouts judge a position player in runs per game: his expected wOBA over 4.2 plate appearances (wOBA scale 1.23) plus the runs his fielding saves at his position over the 25 balls in play a team allows (`FIELD_VALUE`); a designated hitter and a catcher by the bat alone (framing and throwing not valued yet). A player drawn without a position is now a major leaguer at a random lineup position, so the tools see the same mix the games do (the swing thresholds had been fitted on designated hitters, picked on hitting alone, and walks fell half a point until this was changed). The pool was refitted with the picks drawn across the nine lineup positions: sprint speed so the major leaguers run the league's 27.34 ± 1.35 ft/s (2025 Statcast hitters; pool 27.18 ± 1.30), and the other fielding traits keeping their calibrated means among them (pool reaction 0.476 s against 0.461 among the major leaguers, route 0.890 against 0.899).
+
+| | v2.0 | v2.1 | league |
+|---|---|---|---|
+| runs per team-game | 3.88-4.00 | 3.77-3.91 | 4.39 |
+| BABIP | .272-.276 | .262-.268 | .291 |
+| K% / BB% / HR% | 21.1-21.6 / 7.9-8.3 / 3.0-3.3 | 20.5-21.3 / 7.8-7.9 / 3.1-3.5 | 22.6 / 8.2 / 3.0 |
+| stolen bases per team-game | 0.53-0.59 | 0.67-0.79 | 0.47 |
+| BABIP, levels 1 / 2 / 3 / 6 | .276 / .264 / .261 / .251 | .265 / .265 / .274 / .273 | majors .289, Triple-A .315 |
+
+What it did, in these runs: the better gloves went where they count, so BABIP in the majors fell about .008 and runs about 0.1; defence now steps down with level, holding BABIP level from level 1 to 2 while contact softens (hard-hit .406 to .361) and raising it below; and the major leaguers run the league's measured speed, which raised steals above the league's (the steal decisions were set when runners averaged 27.0 ft/s). What it left: Triple-A's BABIP is still .050 above the model's level 2. If the pool held a wider range of fielders than the majors' (its spreads are the majors' calibrated ones), or the scouts weighed defence more, the levels would separate further.
+
 ### How far swings miss: measured (2026-10-03; engine unchanged at v2.0)
 
 Statcast records a whiff's **miss distance**: the gap at closest approach between the ball and the barrel half of the bat (label to tip). `statcast/misses.py` measured it over the 42 days of 2025 (78,224 swings) and `headless/miss_check.js` measures the model's swings the same way (picked hitters × 40 PA against the engine's pitchers).
@@ -722,5 +740,5 @@ So the swing's scatter along the barrel, contact quality, the read of a pitch's 
 5. **Spray is too centred.** Centre field took 42% against 34%, opposite field 20% against 26%; fair-ball spray sd 20 deg against 25 in every band of contact depth. With the fielding measured (v1.5) this is where the missing doubles are: balls down the lines.
 6. **Hit-by-pitch: closed** in v1.4 (1.01% against 1.1%) once command was measured.
 7. **Glancing contact makes implausible spin.** Pop-ups came off at a median 6,700-6,900 rpm in v0.9 (`power_chain` v0.4), where real ones run a few thousand. A partial grip (a share of the rolling impulse) fixed the spin and the pop-ups' exit speed but raised BABIP to .37 and cut fly-ball backspin to 800 rpm; a lower friction coefficient did little (see v0.9, tried and rejected). The tangential part of the collision still needs measured batted-ball spin by launch angle to be judged.
-8. **The levels below the majors (v2.0, the Triple-A test).** The hitters step down as Triple-A's do; the pitchers' speed steps down a sixth as much (velocity is not valued: gap 2); defence does not step down at all (BABIP: the farm ignores fielding); discipline steps down where Triple-A's does not (chase).
+8. **The levels below the majors (v2.0, the Triple-A test).** The hitters step down as Triple-A's do; the pitchers' speed steps down a sixth as much (velocity is not valued: gap 2); defence steps down too little (v2.1: the farm values fielding now, and BABIP holds from level 1 to 2 where Triple-A's rises .026); discipline steps down where Triple-A's does not (chase). Steals run above the league's since the major leaguers run its measured speed (v2.1).
 9. **Not built yet:** fielding, base running and every hit or out on balls in play; foul pop-ups caught; the game loop; managers and bullpens; fatigue recovery between innings; warm-up pitches; NL/AL rules; names.
