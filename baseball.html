@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v4.1 · 2026-10-03
+  baseball.html · v4.2 · 2026-10-03
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
@@ -45,6 +45,7 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v4.2  engine v2.6 (athleticism)
     v4.1  the manager's moves (bb_game v0.9): intentional walks, throws over to first (the
           runner diving back, or picked off), late defensive changes and double switches,
           with the men walking on and off; at-bats with no pitch are drawn
@@ -59,7 +60,6 @@
           schedule from bb_schedule.js; a seventh-inning stretch; uniform numbers on the cards
     v3.8  engine v2.4: a checked swing and a half swing are named on the call and in the batter's line;
           exit velo to the whole mph (it ran into the card's edge)
-    v3.7  engine v2.3, bb_field v0.8 (the bat's face and path): the bat is drawn square to its face
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -149,7 +149,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   <div id="hud" class="tag"></div>
 </div>
 <!-- version tags so a browser never runs a stale engine against a new page -->
-<script src="bb_engine.js?v=2.5"></script>
+<script src="bb_engine.js?v=2.6"></script>
 <script src="bb_names.js?v=0.1"></script>
 <script src="bb_field.js?v=0.8"></script>
 <script src="bb_game.js?v=0.9"></script>
