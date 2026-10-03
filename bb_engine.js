@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v2.5 · 2026-10-03
+   bb_engine.js · v2.6 · 2026-10-03
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -66,6 +66,9 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v2.6  ATHLETICISM (Joe): one deep trait, drawn first, beneath a hitter's swing power,
+           arm strength and sprint speed (sprint speed also falls with body mass); the
+           loadings fitted so the farm's picks have the league's correlations among them
      v2.5  for the game's new manoeuvres (bb_game v0.9): a pitcher's move to first
            (pickMove, drawn last); a plate appearance can end before a pitch when the
            bases end the inning (a pickoff); the swing's circle exported for the screen
@@ -81,9 +84,6 @@
            half as fast off the plate, a batter reads half of a pitch's motion by his commit
            look (DIR_READ), sitting on a fastball readies his eye for any of the pitcher's
            fastballs, he leans harder to guessing one; spotting, barrel scatter refitted
-     v2.1  defence in the farm: the scouts judge a position player by the runs his bat makes
-           and the runs his glove saves at his position (FIELD_VALUE, from the engine itself:
-           tools/field_value.js); the pool's fielding traits refitted
 ============================================================================ */
 
 var BB = (function () {
@@ -580,29 +580,30 @@ var BB = (function () {
     // is the population too: its mean moved (tools/fit_population.js) so the
     // farm's picks keep the mean it was calibrated to when every drawn hitter
     // counted as a major leaguer, its spread as it was set - the farm narrows it.
-    weightLb:   [201.1, 16.7, 155, 300], // lb: scatter about the height line (mean at 72 in, + 5.25 per inch)
+    weightLb:   [202.4, 16.4, 155, 300], // lb: scatter about the height line (mean at 72 in, + 5.25 per inch)
     armIdx:     [1.0, 0.03, 0.9, 1.1],   // arm length over 0.44 x height: limb proportion (reach, plate coverage)
-    swingLenFt: [7.263, 0.382, 6.2, 8.6], // ft: the bat head's path to contact, about the height line (0.047 per inch; r = .27)
+    swingLenFt: [7.262, 0.384, 6.2, 8.6], // ft: the bat head's path to contact, about the height line (0.047 per inch; r = .27)
     batOz:      [31.8, 0.6, 29, 35],     // oz: the bat he swings (plus 0.6 oz per 50 lb of hitter)
-    swingPower: [25.681, 0.084, 10, 60],  // W/kg at 206 lb, lognormal with this log-sd; falls as weight^CHAIN.powerExp
+    swingPower: [25.445, 0.087, 10, 60],  // W/kg at 206 lb, lognormal with this log-sd; falls as weight^CHAIN.powerExp
     motorIn:    [0.894, 0.14, 0.56, 1.4], // in: vertical bat-to-ball scatter AT 72 MPH; grows as bat speed squared (impulse variability); x1.4 in v2.2 (the miss table)
     batSpeed:   [72.0, 2.65, 62, 82],    // mph - DERIVED from the chain; this entry only scales the display bars
     barrelSD:   [0.62, 0.11, 0.40, 1.1], // in - DERIVED (motorIn x (bat speed/72)^2); display scale only
-    attack:    [9.917, 3.556, -2, 20],          // deg: upward tilt of the swing path at contact
-    swingTilt: [31.552, 3.793, 22, 44],     // deg: the tilt of his swing plane for a mid-zone pitch (2025 leaderboard swing_path_tilt: 32.3 +- 3.8)
-    faceSD:    [8.039, 4, 4, 20],           // deg: swing-to-swing scatter of the bat face's horizontal angle about its path at contact; fitted to fair-ball spray by contact depth (pitch-level 2025)
-    undercut:  [0.575, 0.25, -0.2, 1.3], // in: how far below the ball's centre he aims the barrel (league launch angle minus attack angle averaged +10 deg)
-    timingSD:  [13.916, 2.3, 8.7, 21.2],  // ms: scatter of the bat's arrival time; fitted so contact depth within a batter has sd 9.0 in (pitch-level 2025)
-    longSD:    [3.44, 0.51, 1.9, 5.1],   // in: along-the-barrel scatter; fitted so contact struck square vertically is squared up .695 of the time (pitch-level 2025), then x0.88 with the aim toward the hands (v2.2: the miss table's tail past the end)
-    spotIn:    [4.981, 0.87, 2.7, 8.1],     // in: how far a pitch must have left his expected path by the commit point for him to pick it up; x1.09 in v2.2 (the miss table)
-    eyeSD:     [5.437, 0.9, 3.0, 7.5],    // in: zone-judgement scatter at the commit point
+    attack:    [9.983, 3.583, -2, 20],          // deg: upward tilt of the swing path at contact
+    athletic:  [0, 1, -4, 4],                // standard normal: the deep trait beneath swing power, arm strength and sprint speed (ATHLETIC, v2.6)
+    swingTilt: [31.616, 3.885, 22, 44],     // deg: the tilt of his swing plane for a mid-zone pitch (2025 leaderboard swing_path_tilt: 32.3 +- 3.8)
+    faceSD:    [8.094, 4, 4, 20],           // deg: swing-to-swing scatter of the bat face's horizontal angle about its path at contact; fitted to fair-ball spray by contact depth (pitch-level 2025)
+    undercut:  [0.571, 0.25, -0.2, 1.3], // in: how far below the ball's centre he aims the barrel (league launch angle minus attack angle averaged +10 deg)
+    timingSD:  [13.933, 2.3, 8.7, 21.2],  // ms: scatter of the bat's arrival time; fitted so contact depth within a batter has sd 9.0 in (pitch-level 2025)
+    longSD:    [3.439, 0.51, 1.9, 5.1],   // in: along-the-barrel scatter; fitted so contact struck square vertically is squared up .695 of the time (pitch-level 2025), then x0.88 with the aim toward the hands (v2.2: the miss table's tail past the end)
+    spotIn:    [4.987, 0.87, 2.7, 8.1],     // in: how far a pitch must have left his expected path by the commit point for him to pick it up; x1.09 in v2.2 (the miss table)
+    eyeSD:     [5.421, 0.9, 3.0, 7.5],    // in: zone-judgement scatter at the commit point
     aggr:      [0.018, 0.07, -0.2, 0.2],    // lowers his swing threshold (positive = swings more)
-    commit:    [0.546, 0.12, 0.2, 0.9],  // how hard he sits on his guess (0 = pure hedger)
-    fbLean:    [1.828, 0.58, 1.0, 3.6],   // how much he leans toward guessing fastball: x his mix's fastball share; its excess over 1 x2.9 in v2.2 (the miss table)
+    commit:    [0.545, 0.12, 0.2, 0.9],  // how hard he sits on his guess (0 = pure hedger)
+    fbLean:    [1.82, 0.58, 1.0, 3.6],   // how much he leans toward guessing fastball: x his mix's fastball share; its excess over 1 x2.9 in v2.2 (the miss table)
     pullBias:  [2.433, 5, -12, 14],          // deg: how far round the arc his usual contact point is, which sets his bat's path there; mean fitted (v2.3) so the path points as Statcast's attack direction does (square to centre); spread: batters' usual depth sd 3.5 in
-    learn:     [0.34, 0.1, 0.1, 0.6],   // share of his spotting distance he can learn away in a game
-    coverage:  [6.228, 1.26, 3.8, 10.5],   // in off the zone at which his swing errors have doubled (reach); x2.1 in v2.2, fitted to the league's whiffs and misses by reach
-    heightIn:  [71.19, 2.43, 66, 80],   // in: the population (the picked hitters: 72.0 +- 2.35, 2025 Statcast)
+    learn:     [0.339, 0.1, 0.1, 0.6],   // share of his spotting distance he can learn away in a game
+    coverage:  [6.232, 1.26, 3.8, 10.5],   // in off the zone at which his swing errors have doubled (reach); x2.1 in v2.2, fitted to the league's whiffs and misses by reach
+    heightIn:  [71.37, 2.38, 66, 80],   // in: the population (the picked hitters: 72.0 +- 2.35, 2025 Statcast)
     // pitchers when they bat (NL rules) - override the hitter entries above
     pBatSpeed: [63, 4, 54, 72], pTimingSD: [20.3, 2.9, 13.5, 29], pBarrelSD: [2.38, 0.28, 1.7, 3.2],
     pSpotIn: [7.05, 1.09, 4.9, 10.3], pEyeSD: [3.6, 0.6, 2.4, 5], pAttack: [6, 4, -2, 16],
@@ -610,19 +611,19 @@ var BB = (function () {
     // THE PITCHER'S BODY AND DELIVERY (v1.6, statcast/pitcher_chain.py, 2025): his release point is built from
     // his height and arm slot (see THE DELIVERY), his pitches' movement turns with his slot, and his repertoire
     // leans with it; four-seam speed does not follow his body in the majors (r .09 with height, .05 with weight)
-    pHeightIn: [74.76, 2.1, 68, 82],   // in: the population (the picks: 74.7 ± 2.1, 2025 pitchers)
+    pHeightIn: [74.75, 2.1, 68, 82],   // in: the population (the picks: 74.7 ± 2.1, 2025 pitchers)
     pWeightLb: [214, 18.8, 160, 300], // lb: scatter about the height line (214 + 4.2 per inch over 74.7)
-    armAngle:  [37.71, 12.57, -5, 80],  // deg: his arm slot, the arm's angle above horizontal from the shoulder to the ball at release (Statcast arm angle); the population (picks 37.7 ± 12.8)
-    fbVeloSP:  [93.56, 2.17, 88, 101], fbVeloRP: [94.46, 2.38, 89, 103],   // mph: four-seam speed of the POPULATION; the farm's picks have the league's (2025: starters 94.06 ± 2.16, relievers 95.05 ± 2.37)
-    spinTalent: [-0.13, 1, -3.5, 3.5],    // sd units: his spin per mph against the type's league mean, shared across his pitches (PITCH_TYPES spinRho)
+    armAngle:  [37.72, 12.6, -5, 80],  // deg: his arm slot, the arm's angle above horizontal from the shoulder to the ball at release (Statcast arm angle); the population (picks 37.7 ± 12.8)
+    fbVeloSP:  [93.61, 2.19, 88, 101], fbVeloRP: [94.5, 2.43, 89, 103],   // mph: four-seam speed of the POPULATION; the farm's picks have the league's (2025: starters 94.06 ± 2.16, relievers 95.05 ± 2.37)
+    spinTalent: [-0.12, 1, -3.5, 3.5],    // sd units: his spin per mph against the type's league mean, shared across his pitches (PITCH_TYPES spinRho)
     // command: his scatter at the plate about the target, across and up and down, for a four-seamer. These are the
     // POPULATION's (v1.8), fitted (tools/fit_population.js) so the farm's picks have the league's, measured from 3-0
     // four-seamers about each pitcher's own 3-0 mean (statcast/locations.py; starters 7.2 / 8.4 in, relievers
     // 8.4 / 8.2; the spread between pitchers 7% and 11% of the mean; the two axes not strongly linked)
-    cmdXSP:    [7.54, 0.57, 5.4, 9.4],   // in: scatter about the target across the plate, starters
-    cmdZSP:    [8.98, 1, 5.6, 11.4],  // in: scatter about the target up and down, starters
-    cmdXRP:    [8.85, 0.66, 6.4, 10.8],  // in: across, relievers (pitchers under 40 pitches a game)
-    cmdZRP:    [8.69, 0.97, 5.4, 11.0],  // in: up and down, relievers
+    cmdXSP:    [7.53, 0.55, 5.4, 9.4],   // in: scatter about the target across the plate, starters
+    cmdZSP:    [8.96, 0.97, 5.6, 11.4],  // in: scatter about the target up and down, starters
+    cmdXRP:    [8.84, 0.66, 6.4, 10.8],  // in: across, relievers (pitchers under 40 pitches a game)
+    cmdZRP:    [8.72, 0.95, 5.4, 11.0],  // in: up and down, relievers
     staminaSP: [95, 10, 70, 120],    staminaRP: [28, 6, 15, 45],        // pitches before fatigue bites
     // umpires
     umpSD:     [1.4, 0.25, 0.9, 2.2], // in: the soft edge of his zone (his accuracy)
@@ -632,13 +633,13 @@ var BB = (function () {
     // catchers
     framing:   [0, 0.35, -0.8, 0.8],  // in: how much he widens the edges
     // fielding and running (Statcast-shaped; position means in FIELD_MEANS)
-    speed:     [27.241, 0.999, 22, 31],   // ft/s sprint speed
-    react:     [0.465, 0.06, 0.25, 0.70],   // s: reading the ball and taking the first step; with bb_field's acceleration, Statcast's outfield jump (33.9 +- 1.9 ft)
-    route:     [0.889, 0.04, 0.75, 1.0],    // straight-line share of the path he actually runs
+    speed:     [27, 1.016, 22, 31],   // ft/s sprint speed
+    react:     [0.464, 0.06, 0.25, 0.70],   // s: reading the ball and taking the first step; with bb_field's acceleration, Statcast's outfield jump (33.9 +- 1.9 ft)
+    route:     [0.888, 0.04, 0.75, 1.0],    // straight-line share of the path he actually runs
     glove:     [0.982, 0.008, 0.94, 0.999],// clean-play rate on a routine chance
-    armMph:    [84.775, 3.5, 70, 100],    // throw speed
-    armAcc:    [0.605, 0.15, 0.25, 1.3],// m: throw scatter at 40 m
-    transfer:  [0.689, 0.08, 0.45, 1.0],    // s: glove to release
+    armMph:    [83.907, 3.5, 70, 100],    // throw speed
+    armAcc:    [0.607, 0.15, 0.25, 1.3],// m: throw scatter at 40 m
+    transfer:  [0.688, 0.08, 0.45, 1.0],    // s: glove to release
     runAggr:   [0, 0.15, -0.4, 0.4],  // s: shifts the margin he demands before taking a base (negative = bolder)
     // the running game (Statcast-shaped)
     jump:      [0.22, 0.08, 0.05, 0.5],    // s: a runner's break on the pitcher's first move
@@ -657,13 +658,29 @@ var BB = (function () {
     LF: { speed: 0.2, armMph: 1 }, CF: { speed: 1.3, armMph: 2 }, RF: { speed: 0.2, armMph: 4 },
     DH: { speed: -0.5, armMph: -3 }, P: { speed: -1.5, armMph: -3, react: 0.15, glove: -0.02 }
   };
-  function drawField(rng, key, pos, T) {
-    var t = TRAITS[key], m = FIELD_MEANS[pos] || {}, off = m[key] || 0;
+  // ATHLETICISM (v2.6, Joe: "a deeper trait upon which power, strength and speed
+  // depend"). A position player's athleticism `athletic` is one standard normal,
+  // drawn before anything else about him. His swing power (per kg), his arm
+  // strength and his sprint speed are each drawn as their own normal loaded on
+  // it - x = loading * athletic + the rest, his own - so each keeps its own
+  // spread, and sprint speed also falls with body mass (heavier men run
+  // slower). The loadings are FITTED (tools/fit_population.js) so the hitters the
+  // farm picks have the league's correlations among the three (2025, qualified
+  // hitters: power/kg ~ sprint +.46, power/kg ~ arm +.29, sprint ~ arm +.37) and
+  // weight ~ sprint (-.37); one shared trait fits all three pairs at once. Bat
+  // speed ~ sprint (+.09) and bat speed ~ arm (+.18) are left as the test.
+  // Pitchers' fielding is drawn as before.
+  var ATHLETIC = { power: 0.949, speed: 0.496, arm: 0.410, weightSpeed: -0.387 };
+  function loaded(rng, a, lam, extra, extraVar) { return lam * a + (extra || 0) + Math.sqrt(Math.max(0, 1 - lam * lam - (extraVar || 0))) * rng.n(0, 1); }   // a standard normal sharing `a`
+  function drawField(rng, key, pos, o) {
+    var t = TRAITS[key], m = FIELD_MEANS[pos] || {}, off = m[key] || 0, a = o && o.athletic;
+    if (a !== undefined && key === 'speed') return clamp(t[0] + off + t[1] * loaded(rng, a, ATHLETIC.speed, ATHLETIC.weightSpeed * (o.weightLb - 206) / 20, ATHLETIC.weightSpeed * ATHLETIC.weightSpeed), t[2], t[3]);
+    if (a !== undefined && key === 'armMph') return clamp(t[0] + off + t[1] * loaded(rng, a, ATHLETIC.arm), t[2], t[3]);
     return clamp(rng.n(t[0] + off, t[1]), t[2], t[3]);
   }
   function equipFielder(rng, o, pos) {
     o.pos = pos;
-    ['speed', 'react', 'route', 'glove', 'armMph', 'armAcc', 'transfer', 'runAggr', 'jump'].forEach(function (k) { o[k] = drawField(rng, k, pos); });
+    ['speed', 'react', 'route', 'glove', 'armMph', 'armAcc', 'transfer', 'runAggr', 'jump'].forEach(function (k) { o[k] = drawField(rng, k, pos, o); });
     if (pos === 'C') { o.popTime = drawField(rng, 'popTime', pos); o.block = drawField(rng, 'block', pos); }
     return o;
   }
@@ -683,8 +700,11 @@ var BB = (function () {
   // (tools/fit_population.js): -0.25. (Before the farm, drawn hitters were the
   // league and the fit gave -0.45; selection on value trims the slow end of
   // bat speed, so the population needs less of a weight penalty.)
-  var CHAIN = { powerExp: -0.320 };
-  function swingPowerOf(rng, weightLb) { var t = TRAITS.swingPower; return clamp(t[0] * Math.pow(weightLb / 206, CHAIN.powerExp) * Math.exp(rng.n(0, t[1])), t[2], t[3]); }
+  var CHAIN = { powerExp: -0.314 };
+  function swingPowerOf(rng, weightLb, athletic) {   // per kg; loaded on his athleticism when he has one
+    var t = TRAITS.swingPower, z = athletic === undefined ? rng.n(0, 1) : loaded(rng, athletic, ATHLETIC.power);
+    return clamp(t[0] * Math.pow(weightLb / 206, CHAIN.powerExp) * Math.exp(t[1] * z), t[2], t[3]);
+  }
 
   var nextId = 1;
 
@@ -834,6 +854,7 @@ var BB = (function () {
   function drawBatter(rng, o) {
     o = o || {};
     var T = TRAITS, pb = !!o.pitcher;
+    var ath = pb ? undefined : drawT(rng, T.athletic);   // his athleticism, first: power, arm and speed are drawn on it
     var r = rng.u(), style = rng.n(0, 1);
     var bats = o.bats || (pb ? (r < 0.72 ? 'R' : r < 0.95 ? 'L' : 'S') : (r < 0.55 ? 'R' : r < 0.90 ? 'L' : 'S'));
     var h = drawT(rng, T.heightIn);
@@ -842,11 +863,11 @@ var BB = (function () {
     var armIdx = drawT(rng, T.armIdx);
     var swingLen = clamp(T.swingLenFt[0] + 0.047 * (h - 72) + T.swingLenFt[1] * (STYLE.swingLen * style + Math.sqrt(1 - STYLE.swingLen * STYLE.swingLen) * rng.n(0, 1)), T.swingLenFt[2], T.swingLenFt[3]);
     var bat = batOf(clamp(T.batOz[0] + 0.012 * (w - 206) + rng.n(0, T.batOz[1]), T.batOz[2], T.batOz[3]), 34);
-    var power = swingPowerOf(rng, w);
+    var power = swingPowerOf(rng, w, ath);
     var batSpeed = pb ? drawT(rng, T.pBatSpeed) : batSpeedOf(power, w, swingLen, bat);   // pitchers at the plate keep their own weak draw
     var motor = drawT(rng, pb ? T.pBarrelSD : T.motorIn);
     var b = {
-      id: nextId++, name: o.name || '', bats: bats, heightIn: h, isPitcher: pb,
+      id: nextId++, name: o.name || '', bats: bats, heightIn: h, isPitcher: pb, athletic: ath,
       weightLb: w, armIdx: armIdx, swingLenFt: swingLen, bat: bat, swingPower: power, motorIn: motor,
       batSpeed: batSpeed,
       attack:   pb ? drawT(rng, T.pAttack) : styled(rng, T.attack, style, STYLE.attack),
@@ -1580,13 +1601,13 @@ var BB = (function () {
   }
 
   return {
-    version: '2.5',
+    version: '2.6',
     SWING: { R: SWING_R, tiltPerH: TILT_PER_H },
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
     PITCH_TYPES: PITCH_TYPES, REPERTOIRES: REPERTOIRES, TRAITS: TRAITS, AERO: AERO,
     makeRng: makeRng, makeEnv: makeEnv, mlbEnv: mlbEnv, MLB_PARKS: MLB_PARKS, fenceAt: fenceAt,
-    makePitcher: makePitcher, makeBatter: makeBatter, drawBatter: drawBatter, hitterValue: hitterValue, fieldValue: fieldValue, playerValue: playerValue, FIELD_VALUE: FIELD_VALUE, STYLE: STYLE, drawPitcher: drawPitcher, pitcherValue: pitcherValue, pitcherFeatures: pitcherFeatures, FARM_N: FARM_N, CHAIN: CHAIN, makeUmp: makeUmp, FACE_PATH: FACE_PATH, CHECK: { effortSD: EFFORT_SD, at: CHECK_IN, hold: HOLD_P, slow: CHECK_SLOW }, checkChance: checkChance, equipFielder: equipFielder, FIELD_MEANS: FIELD_MEANS,
+    makePitcher: makePitcher, makeBatter: makeBatter, ATHLETIC: ATHLETIC, drawBatter: drawBatter, hitterValue: hitterValue, fieldValue: fieldValue, playerValue: playerValue, FIELD_VALUE: FIELD_VALUE, STYLE: STYLE, drawPitcher: drawPitcher, pitcherValue: pitcherValue, pitcherFeatures: pitcherFeatures, FARM_N: FARM_N, CHAIN: CHAIN, makeUmp: makeUmp, FACE_PATH: FACE_PATH, CHECK: { effortSD: EFFORT_SD, at: CHECK_IN, hold: HOLD_P, slow: CHECK_SLOW }, checkChance: checkChance, equipFielder: equipFielder, FIELD_MEANS: FIELD_MEANS,
     batOf: batOf, batSpeedOf: batSpeedOf, swingPowerOf: swingPowerOf,
     batMass: batMass, batRadius: batRadius, qAt: qAt, corOf: corOf, BAT_MODES: BAT_MODES, BAT_SHAPE: BAT_SHAPE, SWEET_IN: SWEET_IN, BAT_DEFAULT: BAT_DEFAULT,
     flyPitch: flyPitch, flyBatted: flyBatted, spinVector: spinVector, dirOf: dirOf, aim: aim, SWING_THR: SWING_THR, ZONE_HALF: ZONE_HALF, PLAN_LOC: PLAN_LOC,

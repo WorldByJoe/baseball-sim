@@ -1,5 +1,5 @@
 /* ============================================================================
-   fit_population.js · v0.4 · 2026-10-03
+   fit_population.js · v0.5 · 2026-10-03
 
    Fits the hitters' POPULATION in bb_engine.js's TRAITS so that the ones the
    farm picks (makeBatter: the best of FARM_N candidates by the scouts'
@@ -32,7 +32,18 @@
    (2025 Statcast hitters), and the other fielding traits keep their
    calibrated means among the picks (each net of its position's offset).
 
+   ATHLETICISM (v0.5, engine v2.6): the loadings of swing power, sprint speed
+   and arm strength on the shared athleticism (ATHLETIC), and sprint speed's on
+   body mass, so the picks have the league's power/kg ~ sprint +.462, power/kg ~
+   arm +.292, sprint ~ arm +.366 (2025 qualified hitters; power/kg is Savant's
+   proxy, bat speed cubed over swing length per kg, computed the same way on the
+   picks) and weight ~ sprint -.373. One shared trait implies loadings from any
+   three pairwise correlations (l_s^2 = r_ps r_sa / r_pa, and so on); each round
+   moves the population's loadings by the ratio of the league's implied loadings
+   to the picks'.
+
    CHANGED
+     v0.5  athleticism's loadings (engine v2.6)
      v0.4  pullBias's target 1 deg (engine v2.3: the bat's path square to centre, the face pulls)
      v0.3  skill targets for engine v2.2 (the swing's reach and read)
      v0.2  picks across positions; the fielding traits (bb_engine v2.1)
@@ -45,6 +56,18 @@
   var FSK = { react: 0.45, route: 0.90, glove: 0.982, armMph: 85, armAcc: 0.6, transfer: 0.68 }, SPEED = [27.34, 1.35];
   function net(b, t) { return b[t] - ((BB.FIELD_MEANS[b.pos] || {})[t] || 0); }
   var TG = { h: [72.0, 2.35], w: [206.3, 19.9], L: [7.32, 0.39], v: [71.2, 2.70] };
+  // athleticism: the league's correlations (2025 qualified hitters) and the loadings one shared trait implies from them
+  // (the league's arm strength comes from throws by infielders and outfielders, so the pairs with arm are taken
+  // over the picked men who are neither catchers nor designated hitters)
+  function athCorr(S) {
+    function pk(b) { return Math.pow(b.batSpeed, 3) / b.swingLenFt / (b.weightLb * 0.4536); }
+    var F = S.filter(function (b) { return b.pos !== 'C' && b.pos !== 'DH'; });
+    function col(X, f) { return X.map(f); }
+    return { ps: r(col(S, pk), col(S, function (b) { return b.speed; })), pa: r(col(F, pk), col(F, function (b) { return b.armMph; })), sa: r(col(F, function (b) { return b.speed; }), col(F, function (b) { return b.armMph; })),
+             ws: r(col(S, function (b) { return b.weightLb; }), col(S, function (b) { return b.speed; })), vs: r(col(S, function (b) { return b.batSpeed; }), col(S, function (b) { return b.speed; })), va: r(col(F, function (b) { return b.batSpeed; }), col(F, function (b) { return b.armMph; })) };
+  }
+  function implied(c) { if (c.ps <= 0 || c.pa <= 0 || c.sa <= 0) return null; return { p: Math.sqrt(c.ps * c.pa / c.sa), s: Math.sqrt(c.ps * c.sa / c.pa), a: Math.sqrt(c.pa * c.sa / c.ps) }; }
+  var LT = implied({ ps: 0.462, pa: 0.292, sa: 0.366 });
   function mean(v) { return v.reduce(function (a, b) { return a + b; }, 0) / v.length; }
   function sd(v) { var m = mean(v); return Math.sqrt(v.reduce(function (a, b) { return a + (b - m) * (b - m); }, 0) / v.length); }
   function r(x, y) { var mx = mean(x), my = mean(y), a = 0, b = 0, c = 0; for (var i = 0; i < x.length; i++) { a += (x[i] - mx) * (y[i] - my); b += (x[i] - mx) * (x[i] - mx); c += (y[i] - my) * (y[i] - my); } return a / Math.sqrt(b * c); }
@@ -69,7 +92,7 @@
   // (v0.3: motorIn x1.4, longSD x0.88, coverage x2.1, spotIn x1.09 and the fastball lean's excess x2.9, the engine v2.2 refit to the miss table)
   var SK0 = { motorIn: 0.87, timingSD: 13.5, longSD: 3.35, faceSD: 8, undercut: 0.55, attack: 9, pullBias: 1, coverage: 6.3, spotIn: 4.9,
               eyeSD: 5.0, aggr: 0, commit: 0.55, fbLean: 1.87, learn: 0.35, swingTilt: 32.3 };
-  print('fit_population v0.4 · ' + ROUNDS + ' rounds x ' + NPICK + ' picks (best of ' + BB.FARM_N + ')');
+  print('fit_population v0.5 · ' + ROUNDS + ' rounds x ' + NPICK + ' picks (best of ' + BB.FARM_N + ')');
   for (var k = 0; k < ROUNDS; k++) {
     var m = moments(sample(SEED + k).S);
     print('round ' + k + ': weight ~ bat speed ' + m.rwv.toFixed(2) + ' (exponent ' + BB.CHAIN.powerExp.toFixed(3) + '); picked height ' + m.h[0].toFixed(2) + ' ± ' + m.h[1].toFixed(2) + '  weight ' + m.w[0].toFixed(1) + ' ± ' + m.w[1].toFixed(1) + '  swing length ' + m.L[0].toFixed(3) + ' ± ' + m.L[1].toFixed(3) + '  bat speed ' + m.v[0].toFixed(2) + ' ± ' + m.v[1].toFixed(2));
@@ -88,6 +111,13 @@
     Object.keys(FSK).forEach(function (t) { T[t][0] += 0.8 * (FSK[t] - mean(Sk.map(function (b) { return net(b, t); }))); });
     var sp = Sk.map(function (b) { return b.speed; });
     T.speed[0] += 0.8 * (SPEED[0] - mean(sp)); T.speed[1] *= Math.pow(SPEED[1] / sd(sp), 0.8);
+    var at = athCorr(Sk), AT = BB.ATHLETIC;
+    print('   athleticism among the picked: power/kg ~ sprint ' + at.ps.toFixed(3) + ' (.462), power/kg ~ arm ' + at.pa.toFixed(3) + ' (.292), sprint ~ arm ' + at.sa.toFixed(3) + ' (.366), weight ~ sprint ' + at.ws.toFixed(3) + ' (-.373); loadings ' + AT.power.toFixed(3) + ' / ' + AT.speed.toFixed(3) + ' / ' + AT.arm.toFixed(3) + ', weight ' + AT.weightSpeed.toFixed(3));
+    // what each pair has beyond the shared trait (positions, weight, the farm's choosing, the proxy's other parts) is
+    // held as measured; the shared trait supplies the rest of the league's correlation
+    var tp = { ps: 0.462 - (at.ps - AT.power * AT.speed), pa: 0.292 - (at.pa - AT.power * AT.arm), sa: 0.366 - (at.sa - AT.speed * AT.arm) }, Ln = implied(tp);
+    if (Ln) { AT.power += 0.6 * (Math.min(0.95, Ln.p) - AT.power); AT.speed += 0.6 * (Math.min(0.95, Ln.s) - AT.speed); AT.arm += 0.6 * (Math.min(0.95, Ln.a) - AT.arm); }
+    AT.weightSpeed += 0.8 * (-0.373 - at.ws);
   }
   var Sf = sample(SEED + 301).S;
   print('fielders, picked mean (net of position) against the calibrated mean: ' + Object.keys(FSK).map(function (t) { return t + ' ' + mean(Sf.map(function (b) { return net(b, t); })).toFixed(3) + '/' + FSK[t]; }).join(', ') +
@@ -129,6 +159,8 @@
     print('  ' + (q[0] + '                  ').slice(0, 18) + mp[q[1]][0].toFixed(2) + ' ± ' + mp[q[1]][1].toFixed(2) + '         ' + m2[q[1]][0].toFixed(2) + ' ± ' + m2[q[1]][1].toFixed(2) + '            ' + TG[q[1]][0] + ' ± ' + TG[q[1]][1]);
   });
   var S = fin.S;
+  var atF = athCorr(S);
+  print('  athleticism among the picked: power/kg ~ sprint ' + atF.ps.toFixed(2) + ' (league .46), power/kg ~ arm ' + atF.pa.toFixed(2) + ' (.29), sprint ~ arm ' + atF.sa.toFixed(2) + ' (.37), weight ~ sprint ' + atF.ws.toFixed(2) + ' (-.37); unfitted: bat speed ~ sprint ' + atF.vs.toFixed(2) + ' (.09), bat speed ~ arm ' + atF.va.toFixed(2) + ' (.18)');
   print('  correlations among the picked: weight ~ bat speed ' + r(S.map(function (b) { return b.weightLb; }), S.map(function (b) { return b.batSpeed; })).toFixed(2) + ' (league .53), height ~ bat speed ' + r(S.map(function (b) { return b.heightIn; }), S.map(function (b) { return b.batSpeed; })).toFixed(2) + ' (.45), swing length ~ bat speed ' + r(S.map(function (b) { return b.swingLenFt; }), S.map(function (b) { return b.batSpeed; })).toFixed(2) + ' (.58)');
   print('');
   function e(k, d) { return k + ': [' + T[k].map(function (x, i) { return i < 2 ? (+x.toFixed(d)) : x; }).join(', ') + ']'; }
@@ -137,6 +169,8 @@
   print('    ' + e('swingLenFt', 3));
   print('    ' + e('swingPower', 3));
   print('    CHAIN.powerExp = ' + BB.CHAIN.powerExp.toFixed(3));
+  print('    ATHLETIC = { power: ' + BB.ATHLETIC.power.toFixed(3) + ', speed: ' + BB.ATHLETIC.speed.toFixed(3) + ', arm: ' + BB.ATHLETIC.arm.toFixed(3) + ', weightSpeed: ' + BB.ATHLETIC.weightSpeed.toFixed(3) + ' }');
+  print('    ' + e('speed', 3) + '   ' + e('armMph', 3));
   ['fbVeloSP', 'fbVeloRP', 'cmdXSP', 'cmdZSP', 'cmdXRP', 'cmdZRP', 'armAngle', 'pHeightIn', 'spinTalent'].forEach(function (k2) { print('    ' + e(k2, 2)); });
   SKILLS.forEach(function (k2) { print('    ' + e(k2, 3)); });
   ['speed'].concat(Object.keys(FSK)).forEach(function (k2) { print('    ' + e(k2, 3)); });
