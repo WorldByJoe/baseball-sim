@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_game.js · v0.7 · 2026-10-02
+   bb_game.js · v0.8 · 2026-10-03
 
    A whole game: two teams, nine innings or more, lineups that turn over,
    pitchers who tire and get replaced, managers with their own habits.
@@ -32,6 +32,8 @@
    switches, injuries, weather that changes during a game.
 
    CHANGED
+     v0.8  a team can be drawn from a level of the pro pool (o.level: 1 the majors,
+           2 Triple-A ... 6 rookie ball; bb_engine v2.0)
      v0.7  a pitch past the catcher is rarer per pitch in the dirt (0.4 of before):
            with the measured command (engine v1.4) four times as many pitches
            bounce, as many as in the league
@@ -41,7 +43,6 @@
      v0.5  the snapshot carries route too, so the screen can judge a foul chase
      v0.4  the defence snapshot carries each man's react and speed, so the screen
            can show the men a ball beats breaking for it
-     v0.3  each play notes who is warming in either bullpen
 ============================================================================ */
 
 var BBGame = (function () {
@@ -62,15 +63,15 @@ var BBGame = (function () {
   function makeTeam(rng, o) {
     o = o || {};
     var t = { city: o.city, nick: o.nick, name: o.city + ' ' + o.nick }, taken = {};
-    var players = POS.map(function (pos) { return named(rng, BB.makeBatter(rng, { pos: pos }), taken); });
+    var players = POS.map(function (pos) { return named(rng, BB.makeBatter(rng, { pos: pos, level: o.level }), taken); });
     players.sort(function (a, b) { return batScore(b) - batScore(a); });
     // 3-4-2-1-5-6-7-8-9 by quality
     var slots = [3, 4, 2, 1, 5, 6, 7, 8, 9], order = [];
     players.forEach(function (p, i) { order[slots[i] - 1] = p; });
     t.lineup = order;
-    t.bench = [0, 1, 2].map(function () { return named(rng, BB.makeBatter(rng, { pos: 'DH' }), taken); });
+    t.bench = [0, 1, 2].map(function () { return named(rng, BB.makeBatter(rng, { pos: 'DH', level: o.level }), taken); });
     function pitcher(role) {
-      var p = named(rng, BB.makePitcher(rng, { role: role }), taken);
+      var p = named(rng, BB.makePitcher(rng, { role: role, level: o.level }), taken);
       p.bat = BB.makeBatter(rng, { pitcher: true, pos: 'P' }); p.bat.name = p.name; p.bat.id = p.id;
       p.warm = 0; p.used = false; p.pitchesToday = 0;
       return p;

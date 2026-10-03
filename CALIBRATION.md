@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v1.9 · 2026-10-03`
+`CALIBRATION.md · v2.0a · 2026-10-03`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -637,6 +637,67 @@ What the step did, in these runs: selection on value produced part of the league
 
 What it left: uphill swings cost the model's hitters more whiffs and strikeouts than the league's (+.66-.74 against +.47-.53), and bat speed ~ whiff is still under half the league's.
 
+### The pro pool, level by level (bb_engine v2.0, bb_game v0.8; 2026-10-03)
+
+Joe (2026-10-03): major leaguers come from an extreme-value distribution - each is the maximum of a sampling from a normal pool - and the farm is a filter for the best. The goal is now the pool itself: the frequency distribution of the traits among all professional players, majors and minors, and how those latent traits meet the physics to give the statistics we measure. Runs: `tools/fit_population.js` (8 rounds × 6,000 picks), `tools/fit_swing_policy.js` (three passes), the suite at seeds 3, 11 and 29, `headless/level_check.js` (400 games per level at seeds 3, 11 and 29), `statcast/levels.py` on 42 days of 2025 for each level (the majors 165,166 pitches, Triple-A 162,471).
+
+**What was built.** `FARM_N` went from 4 to 6, and the pool was refitted so the majors keep the league's measured traits. The pool hitter now swings 68.2 ± 3.1 mph against the major leaguer's 71.1 ± 2.7, and stands 70.9 in against 71.9. LEVELS: the six candidates for a roster spot are ranked by the scouts' judgement and the k-th best plays at level k (`makeBatter` / `makePitcher` with `level`, `makeTeam` passes it on), 1 the majors, 2 Triple-A, down to 6 rookie ball - roughly an organisation's six levels, each about a roster deep. The majors are fitted; every level below is a prediction.
+
+**Triple-A, measured alike** (`statcast/levels.py`; Savant's minor-league search, Hawk-Eye in every Triple-A park). Against the majors over the same 42 days: K% 22.5 both; BB% 10.8 against 7.8; HR% 2.85 against 3.14; BABIP .315 against .289; hard-hit .375 against .419 and the hardest half of batted balls 99.1 against 100.6 mph; whiffs per swing .244 against .234; four-seam speed 92.9 against 94.1 mph (starters) and 94.1 against 95.0 (relievers); arm angle the same; batters 26.9 years against 28.3. Bat speed is not published for Triple-A. **Triple-A's recorded zone is the automated system's**: its sz_top averaged 3.20 ft against the majors' 3.43 (2.9 in lower; sz_bot the same), so a zone rate on each league's own zone is not comparable - on one zone (sz_bot plus the majors' mean zone height) Triple-A's was .502 against .510, so its pitchers' locations are nearly the majors' and most of its extra walks come from the smaller called zone.
+
+**The model, level by level** (three seeds; level 2 played with the umpire's zone top lowered 2.9 in, Triple-A's; the seeds agreed within 0.2 points of K% and BB% and .005 of any rate):
+
+| | MLB | level 1 | Triple-A | level 2 | 3 | 4 | 5 | 6 |
+|---|---|---|---|---|---|---|---|---|
+| K% | 22.5 | 21.4 | 22.5 | 21.7 | 23.6 | 24.5 | 25.9 | 27.0 |
+| BB% | 7.8 | 8.2 | 10.8 | 9.2 (7.6 on the majors' zone) | 7.8 | 7.7 | 7.7 | 7.5 |
+| HR% | 3.14 | 3.27 | 2.85 | 2.53 | 2.05 | 1.64 | 1.37 | 1.03 |
+| BABIP | .289 | .276 | .315 | .264 | .261 | .261 | .255 | .251 |
+| chase | .283 | .276 | .264 | .293 | .306 | .315 | .329 | .346 |
+| whiffs per swing | .234 | .254 | .244 | .267 | .274 | .280 | .294 | .308 |
+| hard-hit 95+ | .419 | .404 | .375 | .358 | .314 | .283 | .245 | .196 |
+| hardest half (mph) | 100.6 | 100.4 | 99.1 | 98.7 | 97.3 | 96.3 | 95.1 | 93.6 |
+| four-seam, starters (mph) | 94.1 | 93.9 | 92.9 | 93.7 | 93.6 | 93.4 | 93.2 | 93.0 |
+| four-seam, relievers (mph) | 95.0 | 95.1 | 94.1 | 94.8 | 94.6 | 94.5 | 94.2 | 93.9 |
+| bat speed (mph) | 71.2 | 71.2 | - | 69.6 | 68.7 | 67.8 | 66.8 | 65.5 |
+| runs per team-game | 4.39 | 3.99 | - | 3.46 | 2.88 | 2.63 | 2.36 | 2.07 |
+
+What the Triple-A test showed, in these runs (nothing in the model was fitted to Triple-A):
+- **The hitters' step down matched.** From level 1 to 2 hard-hit fell .046 (Triple-A .044 below the majors), the hardest half 1.7 mph (1.5), whiffs per swing rose .013 (.010), and K% stayed level as it did in the league.
+- **The pitchers' step down was a sixth of Triple-A's.** Four-seam speed fell 0.2-0.3 mph from level 1 to 2 against Triple-A's 0.9-1.2. The scouts' PITCHER_VALUE hardly values speed (v1.8), so the farm hardly sorts on it - the same gap as the slow fastballs whiffed too often (known gap 2), seen here from outside the majors.
+- **Defence did not step down.** Triple-A's BABIP is .026 above the majors'; the model's level 2 is .012 below its level 1, because the farm picks hitters on hitting alone and the fielders' traits do not change with level.
+- **Discipline stepped down the wrong way.** Triple-A's hitters chased less than the majors' (.264 against .283, perhaps partly the automated zone); the model's level 2 chased more (.293 against .276), because the scouts value eye and patience strongly.
+- **Walks: the zone explained half the gap.** On Triple-A's zone the model's level 2 walked 9.2% against 10.8 (7.6 on the majors' zone).
+- Home runs fell twice as much as Triple-A's from the majors (−0.74 points against −0.29), with hard contact falling about as Triple-A's.
+
+At level 1 with best of six, the suite (seeds 3, 11, 29): runs 3.88-4.00 per team-game (4.39), K% 21.1-21.6 (22.6), BB% 7.9-8.3 (8.2), HR% 3.0-3.3 (3.0), BABIP .272-.276 (.291), AVG .232-.239 (.243), SLG .371-.383 (.399); among 500 major leaguers × 40 PA, bat speed ~ whiff +.26 to +.41 (+.69; v1.9 +.25 to +.30), ~ K% +.16 to +.28 (+.58), EV50 100.5-100.7 (100.6). **Joe's open question at best of six:** below the pool average in all seven categories, 0.78% of the pool and 0.01% of major leaguers (about 1 in 10,000); in five, 3.1% against 0.18%.
+
+Caveats for the level comparison: the pool is static, while Triple-A's players are younger (26.9 against 28.3) and some are still developing; a club also keeps veterans in Triple-A as cover, so it is not purely the second-best of six. Triple-A's ball and the Pacific Coast League's parks carry differently (HR% for the International League alone: 2.81).
+
+### How far swings miss: measured (2026-10-03; engine unchanged at v2.0)
+
+Statcast records a whiff's **miss distance**: the gap at closest approach between the ball and the barrel half of the bat (label to tip). `statcast/misses.py` measured it over the 42 days of 2025 (78,224 swings) and `headless/miss_check.js` measures the model's swings the same way (picked hitters × 40 PA against the engine's pitchers).
+
+| share of swings | whiff | miss 0-1 in | 1-3 in | 3-6 in | 6+ in | median miss |
+|---|---|---|---|---|---|---|
+| fastballs, league | .174 | .099 | .060 | .010 | .004 | 0.9 in |
+| fastballs, model | .235 | .097 | .071 | .034 | .033 | 1.4 in |
+| breaking, league | .310 | .067 | .087 | .064 | .091 | 3.0 in |
+| breaking, model | .241 | .102 | .066 | .032 | .041 | 1.4 in |
+| off-speed, league | .301 | .058 | .108 | .072 | .063 | 2.6 in |
+| off-speed, model | .212 | .078 | .058 | .031 | .044 | 1.7 in |
+
+- **The league's fastball whiffs are near misses**, and they grow with speed while the misses stay small: four-seamers under 92 mph whiffed .139 with a median miss of 0.7 in; 98+ whiffed .248 with a median of 0.8. Beyond 3 in: .006 and .013 of swings.
+- **The model's fastball whiffs carry a big-miss tail**: 6.7% of swings missed by more than 3 in (league 1.4%), about the whole of its excess whiffs. 60% of those big misses were along the barrel - past the end or inside the hands - on pitches the batter expected: the along-barrel scatter (`longSD` 3.8 in, plus the hands' share of the pitch's distance in or out) gave contact along the barrel an sd of 6.3 in. The vertical scatter was already about the league's (sd 2.1 in on expected fastballs).
+- **The model's breaking and off-speed whiffs miss by too little**: fooled swings are corrected for the curve already seen as if the batter read its direction perfectly, so they end a couple of inches off, where the league's run to a foot; and batters were fooled on 1% of breaking-ball swings.
+
+**What was tried (not kept).** In scratch copies of the engine, a grid over the along-barrel scatter, how much of a pitch's sideways and vertical motion the batter reads by his commit look (`DIR_READ`, 1 now), pitch spotting, late steering, the fastball lean and a "looking fastball" rule (sitting on a fastball readies him for all of the pitcher's fastballs). Three findings:
+1. Narrowing the along-barrel scatter to the league's miss tail (0.45 of now) brought fastball whiffs to .18-.19, but squared-up contact rose from .54 to .67 and EV50 from 100.4 to 102.2-102.8, with HR% 4.3-4.5: the along-barrel scatter is what holds the model's contact quality down. Geometry alone (a vertical scatter that makes whiffs near misses, squared up within about 1.6 in of centre) gives about .6 squared-up per contact against the league's .435, so the rest of the league's mishits come from somewhere the model lacks - along the barrel without misses (jammed contact?) or in the collision.
+2. Reading 40-55% of the motion (`DIR_READ` 0.4-0.55), with the looking-fastball rule and a fastball lean three times today's, put breaking-ball misses beyond 3 in at the league's .155 and the four-seam speed slope at the league's without fitting it (.149 / .200 / .248 against .139 / .191 / .248, one seed). But the looking-fastball rule makes every fastball the pitch he sat on, and the swing decision's sitting thresholds then had him swing at fastballs far more than at breaking balls in the same place (.89 against .48 at the middle of the zone; league .76 against .71): swings by pitch kind went from rms .13 to .18.
+3. The direction read alone kept decisions right (rms .125) and brought breaking balls to .287 and off-speed to .269, but fastball whiffs rose to .261.
+
+So the swing's scatter along the barrel, contact quality, the read of a pitch's motion and the decision's sitting term have to be rebuilt together; one at a time each trades one gap for another. This is where velocity's value is decided too: the model's slow fastballs are whiffed too often because of along-barrel misses that do not depend on speed.
+
 ## What was learned building the fielding layer
 
 - **Statcast's outfield JUMP (about 30 ft covered in the first 3 s) is the right anchor for outfielder motion.** The first fielders covered 44 ft in 3 s and caught nearly every fly ball (fly-ball BABIP .03). Slowing everyone to the jump figure fixed the outfield but let 52% of ground balls through, so infielders got their own harder acceleration and a dive reach. That's a real difference: they work from a crouch on a ball that is on them at once.
@@ -655,10 +716,11 @@ What it left: uphill swings cost the model's hitters more whiffs and strikeouts 
 ## Known gaps, to fix with mechanisms rather than knob-turning
 
 1. **Contact: fouls are as many as the league's but too solid; the hardest contact is still a little soft.** (Balls in play falling in too often was fielding, closed in v1.5: BABIP .265-.277 against .291.) After bb_engine v1.1 (the adjusted swing; see that section above), fouls were .49-.50 of contact against .52, but squared up per contact stayed .49-.52 against .435 and per foul .36-.39 against .225. Mean exit velocity on balls in play came to the league's (88.1-88.9 against 88.9), but EV50 ran 98.9-99.2 against 100.6 and home runs 1.7-1.9% of plate appearances against 3.0. BABIP ran .349-.359 against .291 with v1.3, which carried batting average to .275-.284 (.243) and slugging to .453-.465 (.399) once strikeouts came to the league's. Off-speed pitches met far out front were still squared up .51-.54 of the time against .32. The league's high pitches went foul .66 of the time; the model's .46-.47, with the foul share lowest in the upper zone rather than the lower zone.
-2. **Whiffs: right in total, turned over by pitch kind.** With v1.3 (fooled-swing contact), whiffs ran .229-.259 per swing against .232 and K% 23.4-23.8 against 22.6. Fastballs were whiffed .23-.26 (.17), breaking balls .23-.27 (.31) and off-speed .20-.22 (.30): batters chased breaking balls far outside too rarely, and fastballs chased outside the zone missed too often (.45 at 2-4 in against .31). Flat four-seamers were whiffed more and squared up less, as in the league, but their launch angle rose about twice as much as the league's, and low fastballs still launched above low breaking balls. **Velocity (measured 2026-10-03, v1.9):** four-seamers swung at, by release speed, under 92 mph to 100+: league whiffs .138 → .319 with exit velocity on balls in play flat (91.3 → 89.6) and expected wOBA on contact flat (.414 → .393); the model's whiffs .212 → .328 (the slow fastballs missed far too often, so the slope is two-thirds of the league's) with contact as flat as the league's. Fouls per four-seam swing: league .47-.50, model .33-.35. So velocity's value runs through whiffs on slow and medium fastballs, and that is where the model is off - which is also why the scouts' PITCHER_VALUE hardly values speed (v1.8).
+2. **Whiffs: right in total, turned over by pitch kind** (diagnosed by miss distance, 2026-10-03: see that section - fastballs carry a big along-barrel miss tail the league does not have, breaking balls too few big misses). With v1.3 (fooled-swing contact), whiffs ran .229-.259 per swing against .232 and K% 23.4-23.8 against 22.6. Fastballs were whiffed .23-.26 (.17), breaking balls .23-.27 (.31) and off-speed .20-.22 (.30): batters chased breaking balls far outside too rarely, and fastballs chased outside the zone missed too often (.45 at 2-4 in against .31). Flat four-seamers were whiffed more and squared up less, as in the league, but their launch angle rose about twice as much as the league's, and low fastballs still launched above low breaking balls. **Velocity (measured 2026-10-03, v1.9):** four-seamers swung at, by release speed, under 92 mph to 100+: league whiffs .138 → .319 with exit velocity on balls in play flat (91.3 → 89.6) and expected wOBA on contact flat (.414 → .393); the model's whiffs .212 → .328 (the slow fastballs missed far too often, so the slope is two-thirds of the league's) with contact as flat as the league's. Fouls per four-seam swing: league .47-.50, model .33-.35. So velocity's value runs through whiffs on slow and medium fastballs, and that is where the model is off - which is also why the scouts' PITCHER_VALUE hardly values speed (v1.8).
 3. **Plate discipline: swings follow the league by count, not by pitch kind.** With v1.4 swing rates by count and distance from the zone matched the league's within .023 rms, pitch locations matched the league's band by band, and walks came to 8.4-8.5% against 8.2. By pitch kind the model still over-swung fastballs outside the zone and under-swung breaking balls (rms .15). Chase ran .257 against .283.
 4. **Home runs: closed** in v1.5 (3.1-3.2% against 3.0%) once the batted-ball drag was refitted to the league's carry by exit velocity and launch angle. Liners at 15-20 deg still carry 10-20 ft too far.
 5. **Spray is too centred.** Centre field took 42% against 34%, opposite field 20% against 26%; fair-ball spray sd 20 deg against 25 in every band of contact depth. With the fielding measured (v1.5) this is where the missing doubles are: balls down the lines.
 6. **Hit-by-pitch: closed** in v1.4 (1.01% against 1.1%) once command was measured.
 7. **Glancing contact makes implausible spin.** Pop-ups came off at a median 6,700-6,900 rpm in v0.9 (`power_chain` v0.4), where real ones run a few thousand. A partial grip (a share of the rolling impulse) fixed the spin and the pop-ups' exit speed but raised BABIP to .37 and cut fly-ball backspin to 800 rpm; a lower friction coefficient did little (see v0.9, tried and rejected). The tangential part of the collision still needs measured batted-ball spin by launch angle to be judged.
-8. **Not built yet:** fielding, base running and every hit or out on balls in play; foul pop-ups caught; the game loop; managers and bullpens; fatigue recovery between innings; warm-up pitches; NL/AL rules; names.
+8. **The levels below the majors (v2.0, the Triple-A test).** The hitters step down as Triple-A's do; the pitchers' speed steps down a sixth as much (velocity is not valued: gap 2); defence does not step down at all (BABIP: the farm ignores fielding); discipline steps down where Triple-A's does not (chase).
+9. **Not built yet:** fielding, base running and every hit or out on balls in play; foul pop-ups caught; the game loop; managers and bullpens; fatigue recovery between innings; warm-up pitches; NL/AL rules; names.
