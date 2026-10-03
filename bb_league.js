@@ -46,8 +46,11 @@ var BBLeague = (function () {
   'use strict';
   var LEVELS = [{ key: 'MLB', name: 'Major League' }, { key: 'AAA', name: 'Triple-A' }, { key: 'AA', name: 'Double-A' },
                 { key: 'A+', name: 'High-A' }, { key: 'A', name: 'Single-A' }, { key: 'Rk', name: 'Rookie' }];
-  // ages by level, mean and spread (set by hand from the usual shape of a system: the majors about 28, Rookie ball about 20)
-  var AGE = [[28.6, 3.6], [26.6, 2.8], [24.2, 1.8], [22.6, 1.6], [21.3, 1.5], [20.0, 1.5]];
+  // ages by level, mean and spread, hitters and pitchers: the majors and Triple-A measured (statcast/levels.py, 2025:
+  // hitters 28.3 +- 3.7 and 26.9 +- 3.0, pitchers 29.4 +- 3.9 and 27.6 +- 3.3); the levels below set by hand from the
+  // usual shape of a system (Rookie ball about 20)
+  var AGE = [[28.3, 3.7], [26.9, 3.0], [24.2, 1.8], [22.6, 1.6], [21.3, 1.5], [20.0, 1.5]];
+  var AGE_P = [[29.4, 3.9], [27.6, 3.3], [24.6, 1.9], [23.0, 1.7], [21.6, 1.6], [20.3, 1.6]];
   // linear weights of the plate appearance (FanGraphs, about 2024)
   var W = { BB: 0.69, HBP: 0.72, '1B': 0.88, '2B': 1.25, '3B': 1.58, HR: 2.03 };
   var PROMO_MARGIN = 0.25, PERF_W = 0.8, SHRINK_PA = 250;
@@ -61,7 +64,9 @@ var BBLeague = (function () {
       nm.teams.forEach(function (tn, li) {
         var R = BBGame.makeRoster(rng, { city: tn.city, nick: tn.nick, level: li + 1 });
         R.org = oi; R.games = 0; R.w = 0; R.l = 0;
-        R.hitters.concat(R.starters, R.relievers).forEach(function (p) { p.age = Math.round(Math.max(18, Math.min(40, rng.n(AGE[li][0], AGE[li][1])))); p.stats = []; p.org = oi; });
+        R.hitters.forEach(function (p) { p.age = Math.round(Math.max(18, Math.min(40, rng.n(AGE[li][0], AGE[li][1])))); });
+        R.starters.concat(R.relievers).forEach(function (p) { p.age = Math.round(Math.max(18, Math.min(41, rng.n(AGE_P[li][0], AGE_P[li][1])))); });
+        R.hitters.concat(R.starters, R.relievers).forEach(function (p) { p.stats = []; p.org = oi; });
         org.clubs.push(R);
       });
       U.orgs.push(org);
