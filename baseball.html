@@ -49,7 +49,7 @@
           field and the organ, written ahead for the whole game and played on its
           clock; v and c mute the voices and the park; silent without them. The game
           and its schedule come from bb_schedule.js; a 30 s seventh-inning stretch;
-          the batter's card shows his uniform number (Joe)
+          the batter's and pitcher's cards show their uniform numbers (Joe)
     v2.5  engine v1.1 (the adjusted swing)
     v2.4  engine v1.0 (perception and pitch variety): the drawn pitch and the
           pitcher's card carry his seam break; the drawn ghost is his picture of it
@@ -1363,7 +1363,8 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     if (!play) { setHTML(EL.pcard, ''); return; }
     var p = play.pitcher, h = [], s = projPitcher(p); movement(p);
     var load = play.load + thrown, st = p.stamina, xf = (load - 0.7 * st) / (0.45 * st), f = xf <= 0 ? 0 : Math.min(1.5, xf * xf);
-    h.push('<div><span class="name">' + esc(p.name) + '</span>&nbsp;&nbsp;<span class="key">' + (p.throws === 'R' ? 'RHP' : 'LHP') + ' · ' + p.arch + '</span></div>');
+    var pcol = G.teams[1 - play.half].col, pnum = GAME.NUMBER && GAME.NUMBER[p.id] !== undefined ? '<span class="name" style="font-style:normal;color:' + pcol + '">' + esc(GAME.NUMBER[p.id]) + '</span>&nbsp;&nbsp;' : '';   // his uniform number, in the fielding side's colour
+    h.push('<div>' + pnum + '<span class="name">' + esc(p.name) + '</span>&nbsp;&nbsp;<span class="key">' + (p.throws === 'R' ? 'RHP' : 'LHP') + ' · ' + p.arch + '</span></div>');
     h.push('<div style="display:flex;gap:calc(30*var(--wu));margin-top:calc(10*var(--wu))"><table>');
     h.push('<tr class="tag"><td colspan="2">pitch</td><td>mph</td><td>↕ in</td><td>↔ in</td><td>use</td></tr>');
     p.pitches.forEach(function (q) {
