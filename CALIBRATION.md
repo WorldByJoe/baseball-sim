@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v1.5 · 2026-10-02`
+`CALIBRATION.md · v1.6 · 2026-10-02`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -552,6 +552,39 @@ With strikeouts and walks at the league's, balls in play fell for hits .35 of th
 Hits on balls in play by launch angle (bip_check, three seeds; league in brackets): below −10 deg .100-.107 (.122), −10 to 0 .133-.149 (.249), 0-10 .547-.562 (.482), 10-20 .699-.717 (.691), 20-30 .389-.410 (.350), 30-40 .130-.134 (.109), 40-50 .055-.061 (.044).
 
 What the step did, in these runs: hits, home runs, walks, strikeouts and double plays all came to the league's, and runs to within half a run, with BABIP .02 below the league's. That BABIP came out a little LOW once the fielding was measured is worth noting: the old excess of hits had been hiding a home-run shortfall and a carry deficit. What it left: doubles a third short, most of them balls down the lines (the model's spray is narrower than the league's, sd 20 against 25 deg: a contact gap), grounders at −10 to 0 deg falling half as often as the league's, liners at 15-20 deg carrying 10-20 ft long (the spin's shape with launch angle), two-out runners from second scoring .71 against .83, and errors a third high.
+
+### The pitcher's chain (bb_engine v1.6; 2026-10-02)
+
+Until v1.6 a pitcher's fastball speed, release point and repertoire were set by hand and drawn independently of each other, and each pitch's spin direction scattered about its type's mean on its own. Runs: `statcast/pitcher_chain.py` (422 pitchers with 150+ pitches, 42 days of 2025, with the MLB Stats API heights and the arm-angle leaderboard), `headless/pitcher_chain_check.js` (3,000 pitchers drawn; 300 of them each faced 300 batters, seeds 3 and 11), `tools/fit_pitch_spread.js` v0.2, `run_games` and the rest of the suite at seeds 3, 11 and 29.
+
+**What the league showed.** A pitcher's release point is his shoulder (0.705 of his height up, sd 0.037) plus his arm as a lever (shoulder to ball 0.372 of his height, sd 0.016) at his arm angle (37.7 ± 12.8 deg), plus where he stands on the rubber (0.14 ± 0.63 ft toward his arm side); the lever reproduces Statcast's arm angle exactly (r 1.00). Extension rose 0.065 ft per inch of height (r .33). Four-seam speed did not follow height (r .09) or weight (.05) in the majors; starters threw 94.1 ± 2.2 mph and relievers 95.1 ± 2.4. Every type's movement direction turned with the arm slot (four-seam −0.79 deg per deg of arm angle, sinker −0.93, curveball −1.03, changeup −0.88; the slider barely, −0.11), and at the average slot the directions were the engine's fitted tilts within 4 deg. Four-seam active spin rose a little with the slot (+0.12 points per deg). Spin rose 18.2 rpm per mph (r .31), and a pitcher's spin per mph carried from his four-seamer to his sinker (r .81) and partly to his slider (.36), curveball (.15) and changeup (.19). Low slots carried more sinkers (.75 of pitchers against .41 at high slots) and sweepers (.44 against .17), high slots more curveballs (.53 against .36); starters used 4.8 pitch types of 3% or more, relievers 3.8.
+
+**What was built.** Height, weight and arm angle are traits; the release point is built from them by the lever; each pitch's tilt is its type's plus the measured turn per degree of slot plus a residual spread read from spin axes (`tiltArm`, `tiltSD`); spin efficiency follows the slot (`effArm`); spin follows speed for the fastballs and a shared spin talent across a pitcher's pitches (`spinRho`); speeds are the measured starter and reliever distributions. A pitcher's repertoire is now a league pitcher's: drawn from the 422 measured mixes of pitchers in his role with a slot near his (`REPERTOIRES`, written into the engine by `statcast/pitcher_chain.py`); the six hand-set archetypes are gone. The seam spreads between pitchers were refitted with the engine's own pitchers (`fit_pitch_spread.js` v0.2: the slot now carries much of the spread, so the four-seamer's seam spread fell from [2.6, 2.0] to [0.9, 1.3] in), and the swing thresholds refitted (rms by count .021).
+
+| | model | league |
+|---|---|---|
+| arm angle (deg) | 37.8 ± 12.7 | 37.7 ± 12.8 |
+| release height (ft) | 5.77 ± 0.49 | 5.78 ± 0.44 |
+| extension (ft) | 6.44 ± 0.41 | 6.41 |
+| four-seam IVB / HB (in) | 15.5 ± 2.4 / 7.2 ± 3.5 | 15.4 ± 2.6 / 7.8 ± 3.4 |
+| four-seam IVB ~ arm angle | .61-.62 | .73 (pitch level), .71 (leaderboard) |
+| release height ~ arm angle | .80-.81 | .82, .76 |
+| release height ~ height | .32-.33 | .20 |
+| extension ~ height | .28-.33 | .33 |
+| four-seam spin ~ speed | .29-.30 | .31, .27 |
+| spin per mph, four-seam ~ slider | .39 | .36 |
+
+**The unfitted test: does stuff turn into outcomes?** (300 pitchers × 300 batters, seeds 3 and 11; league among qualified pitchers, whose larger samples attenuate less): K% ~ fastball speed .35-.37 (league .52), whiff ~ speed .34-.37 (.56), whiff ~ spin .27-.38 (.36): the model's harder and higher-spin throwers missed more bats, a little less strongly than the league's. Two came out wrong: K% ~ release height +.16-.17 against the league's −.22 (lower releases strike out more in the league; the model's batter pictures every pitch from its true release point, so a low release cannot fool him - a real batter's sense of how steeply the ball should come in is probably tuned to the typical release), and BB% ~ arm angle near 0 against +.20 (command is independent of slot in the model; not measured). The release-height result is not the pitch mix: breaking-ball share was unrelated to release height in both (model .03-.04, league .08 among 124 pitchers with 100+ plate appearances) and holding it left the correlation where it was (model +.08 to +.14, league −.26). K% spread between pitchers 5.0-5.5 points against 4.5.
+
+| | v1.5 | v1.6 | league |
+|---|---|---|---|
+| swing curves by pitch kind, rms | .15 | .117 | |
+| K% / BB% | 21.0-21.4 / 7.8-8.8 | 21.1-21.9 / 8.1-8.2 | 22.6 / 8.2 |
+| HR% | 3.1-3.2 | 2.9-3.2 | 3.0 |
+| runs per team-game | 3.81-4.14 | 3.73-3.99 | 4.39 |
+| BABIP | .265-.277 | .266-.274 | .291 |
+
+What the step did, in these runs: the hand-set pitcher traits (speed, release point, repertoire) became measured ones and a chain that reproduces the league's correlations among them; the game line did not move beyond the seeds' spread, and the swing curves by pitch kind came closer (more sinkers, cutters and sweepers, as the league throws).
 
 ## What was learned building the fielding layer
 

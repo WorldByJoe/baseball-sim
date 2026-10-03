@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v1.5 · 2026-10-02
+   bb_engine.js · v1.6 · 2026-10-02
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -23,9 +23,10 @@
      EXPECT  the batter forms his guess from the scouting report on this
              pitcher in this count, and decides how hard to sit on it
                                                                (expectPitch)
-     THROW   physics flies the real pitch; his command (measured, 7-8 in per
-             axis) scatters it about the target, its speed, spin and seams vary
-             from pitch to pitch as the league's do, fatigue takes off speed and
+     THROW   physics flies the real pitch from his release point (built from
+             his height and arm slot); his command (measured, 7-8 in per axis)
+             scatters it about the target, its speed, spin and seams vary from
+             pitch to pitch as the league's do, fatigue takes off speed and
              spin                                              (throwPitch)
      READ    the batter's picture of the pitch is a GHOST pitch - the same
              release, flown as the pitch type he EXPECTED usually flies.
@@ -59,6 +60,10 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v1.6  the pitcher's chain: height and arm slot build his release point, his slot turns
+           his pitches' movement and spin efficiency, spin follows speed and a spin talent,
+           his repertoire is a league pitcher's of similar slot and role (the hand-set
+           archetypes are gone); speeds measured; seam spreads and swing thresholds refitted
      v1.5  for the fielding layer (bb_field v0.7): fielders take their first step in 0.45 s
            (Statcast's outfield jump), and the batted-ball drag is refitted to how far the
            league's balls carried by exit velocity and launch angle
@@ -72,9 +77,6 @@
      v1.2  the swing policy: thresholds per count and read (the pitch he sat on, or one
            he recognised as something else), fitted to the league's swing curves by
            count; he decides on what he could see at the commit point
-     v1.1  the adjusted swing: closing the gap between the arrival he planned and the
-           real one costs bat speed, so the pitch he sat on gets his full swing; effort
-           by count; his bat speed trait stays his average over his swings
 ============================================================================ */
 
 var BB = (function () {
@@ -463,6 +465,18 @@ var BB = (function () {
   // the breaking balls the fitted eff runs well below Savant's published
   // "active spin" (slider 0.12 vs ~0.35): this lift model credits low spin
   // factors generously, and seam-shifted-wake effects are not modelled.
+  // effArm: the share of spin that is active changes this much (relative) per
+  // degree of arm angle (Savant active spin against arm angle, 2025: four-seam
+  // +0.12 points per deg, r .17; cutter +0.22; slider +0.11; sweeper -0.10).
+  // tiltArm: how the type's movement direction turns per degree of arm angle
+  // above the league's average slot (37.7 deg): a higher slot gives a more
+  // upright spin, a lower one more run (statcast/pitcher_chain.py, from each
+  // pitcher's average movement). tiltSD is the spread left between pitchers at
+  // the same slot, read from their spin axes (FC and SL keep a hand-set 12: a
+  // mostly gyro spin has a poorly defined axis). spinRho: how far a pitcher's
+  // spin on this type follows his four-seamer's (per mph; sinker .81, slider
+  // .36, curveball .15, changeup .19 measured; cutter, sweeper, splitter
+  // assumed like the sinker, slider and changeup).
   // ivbSD: the league's spread of induced vertical break within the type, in
   // inches (pitch-level 2025, one week of July): how much a pitch of the
   // kind can differ from the usual, which a batter's picture of it allows for.
@@ -473,25 +487,15 @@ var BB = (function () {
   // inches, were FITTED (tools/fit_pitch_spread.js) so that, with the spin
   // spreads, the model's pitches spread in movement as the league's do.
   var PITCH_TYPES = {
-    FF: { name: 'four-seam', dv: 0,     rpm: 2290, rpmSD: 141, rpmW: 0.031, eff: 0.85, effSD: 0.05, tilt: 25,   tiltSD: 9,  veloW: 0.90, seamSD: [2.6, 2.0], seamW: [1.0, 1.1], cmd: [1.00, 1.00], plateW: [1.9, 1.6], cost: 1.00, ivbSD: 3.0, kind: 'FB' },
-    SI: { name: 'sinker',    dv: -0.9,  rpm: 2160, rpmSD: 132, rpmW: 0.033, eff: 0.85, effSD: 0.05, tilt: 63,   tiltSD: 7,  veloW: 0.87, seamSD: [2.0, 4.0], seamW: [1.4, 1.2], cmd: [1.06, 0.92], plateW: [1.8, 2.1], cost: 1.00, ivbSD: 5.0, kind: 'FB' },
-    FC: { name: 'cutter',    dv: -4.8,  rpm: 2400, rpmSD: 182, rpmW: 0.029, eff: 0.28, effSD: 0.08, tilt: -11,  tiltSD: 12, veloW: 1.05, seamSD: [1.4, 2.3], seamW: [1.7, 1.7], cmd: [1.03, 0.97], plateW: [2.0, 2.2], cost: 1.00, ivbSD: 3.9, kind: 'FB' },
-    SL: { name: 'slider',    dv: -8.6,  rpm: 2430, rpmSD: 217, rpmW: 0.030, eff: 0.12, effSD: 0.05, tilt: -67,  tiltSD: 12, veloW: 1.09, seamSD: [2.5, 3.1], seamW: [1.6, 1.9], cmd: [1.10, 1.11], plateW: [2.0, 2.3], cost: 1.05, ivbSD: 4.0, kind: 'BR' },
-    ST: { name: 'sweeper',   dv: -11.5, rpm: 2600, rpmSD: 230, rpmW: 0.035, eff: 0.43, effSD: 0.08, tilt: -87,  tiltSD: 8,  veloW: 1.03, seamSD: [1.8, 2.5], seamW: [2.4, 2.0], cmd: [1.21, 1.09], plateW: [2.6, 2.6], cost: 1.05, ivbSD: 4.3, kind: 'BR' },
-    CU: { name: 'curveball', dv: -14.5, rpm: 2560, rpmSD: 276, rpmW: 0.030, eff: 0.34, effSD: 0.08, tilt: -141, tiltSD: 12, veloW: 1.16, seamSD: [3.0, 3.3], seamW: [1.6, 1.6], cmd: [1.10, 1.22], plateW: [2.1, 2.4], cost: 1.05, ivbSD: 4.7, kind: 'BR' },
-    CH: { name: 'changeup',  dv: -8.5,  rpm: 1780, rpmSD: 285, rpmW: 0.056, eff: 0.84, effSD: 0.06, tilt: 65,   tiltSD: 8,  veloW: 1.00, seamSD: [1.0, 3.4], seamW: [1.7, 2.0], cmd: [1.10, 1.08], plateW: [2.1, 2.6], cost: 0.90, ivbSD: 5.1, kind: 'OS' },
-    FS: { name: 'splitter',  dv: -7.8,  rpm: 1350, rpmSD: 331, rpmW: 0.089, eff: 0.65, effSD: 0.08, tilt: 75,   tiltSD: 10, veloW: 0.93, seamSD: [1.6, 3.0], seamW: [2.2, 2.5], cmd: [1.08, 1.18], plateW: [2.5, 2.9], cost: 1.05, ivbSD: 4.2, kind: 'OS' }
+    FF: { name: 'four-seam', dv: 0,     rpm: 2290, rpmSD: 141, rpmW: 0.031, eff: 0.85, effSD: 0.05, effArm: 0.0013, tilt: 25,   tiltSD: 6.8, tiltArm: -0.79, spinRho: 1.00,  veloW: 0.90, seamSD: [0.9, 1.3], seamW: [1.0, 1.1], cmd: [1.00, 1.00], plateW: [1.9, 1.6], cost: 1.00, ivbSD: 3.0, kind: 'FB' },
+    SI: { name: 'sinker',    dv: -0.9,  rpm: 2160, rpmSD: 132, rpmW: 0.033, eff: 0.85, effSD: 0.05, effArm: 0.0006, tilt: 63,   tiltSD: 7.6, tiltArm: -0.93, spinRho: 0.81,  veloW: 0.87, seamSD: [1.2, 2.2], seamW: [1.4, 1.2], cmd: [1.06, 0.92], plateW: [1.8, 2.1], cost: 1.00, ivbSD: 5.0, kind: 'FB' },
+    FC: { name: 'cutter',    dv: -4.8,  rpm: 2400, rpmSD: 182, rpmW: 0.029, eff: 0.28, effSD: 0.08, effArm: 0.0048, tilt: -11,  tiltSD: 12, tiltArm: -0.76, spinRho: 0.81, veloW: 1.05, seamSD: [0.0, 2.2], seamW: [1.7, 1.7], cmd: [1.03, 0.97], plateW: [2.0, 2.2], cost: 1.00, ivbSD: 3.9, kind: 'FB' },
+    SL: { name: 'slider',    dv: -8.6,  rpm: 2430, rpmSD: 217, rpmW: 0.030, eff: 0.12, effSD: 0.05, effArm: 0.0035, tilt: -67,  tiltSD: 12, tiltArm: -0.11, spinRho: 0.36, veloW: 1.09, seamSD: [2.1, 3.3], seamW: [1.6, 1.9], cmd: [1.10, 1.11], plateW: [2.0, 2.3], cost: 1.05, ivbSD: 4.0, kind: 'BR' },
+    ST: { name: 'sweeper',   dv: -11.5, rpm: 2600, rpmSD: 230, rpmW: 0.035, eff: 0.43, effSD: 0.08, effArm: -0.0020, tilt: -87,  tiltSD: 14.5, tiltArm: -0.35, spinRho: 0.36,  veloW: 1.03, seamSD: [1.2, 0.0], seamW: [2.4, 2.0], cmd: [1.21, 1.09], plateW: [2.6, 2.6], cost: 1.05, ivbSD: 4.3, kind: 'BR' },
+    CU: { name: 'curveball', dv: -14.5, rpm: 2560, rpmSD: 276, rpmW: 0.030, eff: 0.34, effSD: 0.08, effArm: 0.0006, tilt: -141, tiltSD: 12, tiltArm: -1.03, spinRho: 0.15, veloW: 1.16, seamSD: [1.7, 3.6], seamW: [1.6, 1.6], cmd: [1.10, 1.22], plateW: [2.1, 2.4], cost: 1.05, ivbSD: 4.7, kind: 'BR' },
+    CH: { name: 'changeup',  dv: -8.5,  rpm: 1780, rpmSD: 285, rpmW: 0.056, eff: 0.84, effSD: 0.06, effArm: -0.0005, tilt: 65,   tiltSD: 10.2, tiltArm: -0.88, spinRho: 0.19,  veloW: 1.00, seamSD: [0.0, 1.1], seamW: [1.7, 2.0], cmd: [1.10, 1.08], plateW: [2.1, 2.6], cost: 0.90, ivbSD: 5.1, kind: 'OS' },
+    FS: { name: 'splitter',  dv: -7.8,  rpm: 1350, rpmSD: 331, rpmW: 0.089, eff: 0.65, effSD: 0.08, effArm: 0.0014, tilt: 75,   tiltSD: 13.4, tiltArm: -0.98, spinRho: 0.19, veloW: 0.93, seamSD: [1.5, 1.4], seamW: [2.2, 2.5], cmd: [1.08, 1.18], plateW: [2.5, 2.9], cost: 1.05, ivbSD: 4.2, kind: 'OS' }
   };
-
-  // Repertoire archetypes and their usage; `w` is how common each is.
-  var ARCH = [
-    { name: 'power fastball-slider', w: 0.28, mix: { FF: 0.52, SL: 0.30, CH: 0.12, CU: 0.06 } },
-    { name: 'sinker-slider',         w: 0.16, mix: { SI: 0.45, SL: 0.30, CH: 0.15, FF: 0.10 } },
-    { name: 'four-pitch',            w: 0.20, mix: { FF: 0.40, SL: 0.20, CU: 0.20, CH: 0.20 } },
-    { name: 'cutter',                w: 0.10, mix: { FF: 0.38, FC: 0.30, CU: 0.17, CH: 0.15 } },
-    { name: 'sweeper',               w: 0.14, mix: { SI: 0.30, FF: 0.18, ST: 0.37, CH: 0.15 } },
-    { name: 'splitter',              w: 0.12, mix: { FF: 0.50, FS: 0.30, SL: 0.20 } }
-  ];
 
   // Spin vector for a pitch leaving along unit direction `dir`. The movement
   // direction m is built from the tilt, made perpendicular to the flight, and
@@ -573,7 +577,13 @@ var BB = (function () {
     pBatSpeed: [63, 4, 54, 72], pTimingSD: [20.3, 2.9, 13.5, 29], pBarrelSD: [1.7, 0.2, 1.2, 2.3],
     pSpotIn: [6.5, 1.0, 4.5, 9.5], pEyeSD: [3.6, 0.6, 2.4, 5], pAttack: [6, 4, -2, 16],
     // pitchers
-    fbVeloSP:  [93.6, 2.0, 88, 100], fbVeloRP: [95.0, 2.0, 89, 102],
+    // THE PITCHER'S BODY AND DELIVERY (v1.6, statcast/pitcher_chain.py, 2025): his release point is built from
+    // his height and arm slot (see THE DELIVERY), his pitches' movement turns with his slot, and his repertoire
+    // leans with it; four-seam speed does not follow his body in the majors (r .09 with height, .05 with weight)
+    pHeightIn: [74.7, 2.1, 68, 82],   // in (2025 pitchers)
+    pWeightLb: [214, 18.8, 160, 300], // lb: scatter about the height line (214 + 4.2 per inch over 74.7)
+    armAngle:  [37.7, 12.8, -5, 80],  // deg: his arm slot, the arm's angle above horizontal from the shoulder to the ball at release (Statcast arm angle)
+    fbVeloSP:  [94.06, 2.16, 88, 101], fbVeloRP: [95.05, 2.37, 89, 103],   // mph: four-seam speed, 2025 starters / relievers (40+ / under 40 pitches a game)
     // command: his scatter at the plate about the target, across and up and down, for a four-seamer; measured from
     // 3-0 four-seamers about each pitcher's own 3-0 mean (statcast/locations.py; starters 7.2 / 8.4 in, relievers
     // 8.4 / 8.2); the spread between pitchers is 7% and 11% of the mean, and the two axes are not strongly linked
@@ -582,7 +592,6 @@ var BB = (function () {
     cmdXRP:    [8.4, 0.60, 6.4, 10.8],  // in: across, relievers (pitchers under 40 pitches a game)
     cmdZRP:    [8.2, 0.90, 5.4, 11.0],  // in: up and down, relievers
     staminaSP: [95, 10, 70, 120],    staminaRP: [28, 6, 15, 45],        // pitches before fatigue bites
-    relHt:     [5.85, 0.4, 4.8, 6.8], relSide: [1.9, 0.5, 0.8, 3.2], ext: [6.4, 0.35, 5.6, 7.4],   // ft
     // umpires
     umpSD:     [1.4, 0.25, 0.9, 2.2], // in: the soft edge of his zone (his accuracy)
     umpEdge:   [0, 0.45, -1.2, 1.2],  // in: systematic miss per edge (positive = calls that edge wide)
@@ -645,32 +654,125 @@ var BB = (function () {
 
   var nextId = 1;
 
+  // THE DELIVERY (v1.6, statcast/pitcher_chain.py). His release point is his
+  // shoulder plus his arm as a lever at his arm angle: the shoulder 0.705 of his
+  // height up (sd 0.037), shoulder to ball 0.372 of his height (sd 0.016); the
+  // release side adds where he stands on the rubber (0.14 +- 0.63 ft toward his
+  // arm side); extension is 1.58 + 0.065 ft per inch of height (+- 0.39 ft).
+  // A four-seamer, sinker or cutter thrown harder spins more, 18.2 rpm per mph.
+  var SHOULDER_H = [0.705, 0.037], ARM_LEVER = [0.372, 0.016], REL_SIDE0 = [0.14, 0.63], EXT_H = [1.58, 0.065, 0.39];
+  var ARM_MEAN = 37.7, FB_MEAN = 94.45, SPIN_PER_MPH = 18.2, FB_SD = 2.3;
+  // HIS REPERTOIRE is a league pitcher's: drawn from the 2025 repertoires of
+  // pitchers in his role with an arm slot near his (a Gaussian weight with
+  // REP_BAND deg of width, set by hand), so the sinker-sweeper low slots and
+  // the four-seam-curveball high slots, and how many pitches each role
+  // carries (starters 4.8 types of 3% or more, relievers 3.8), are the
+  // league's. A little lognormal scatter (USAGE_SD) makes each mix his own.
+  // ---- REPERTOIRES: written by statcast/pitcher_chain.py; do not edit by hand ----
+  // 2025 pitch-level Statcast: every pitcher with 150+ pitches, as [arm angle (deg), 0 starter / 1 reliever,
+  // percent of his pitches of each type FF SI FC SL ST CU CH FS (types under 3% dropped, the rest renormalized)]. 422 pitchers.
+  var REPERTOIRES = [
+    [-60,1,0,79,0,21,0,0,0,0], [-24,1,17,78,5,0,0,0,0,0], [-6,1,14,33,0,0,33,0,19,0], [-4,1,20,34,0,0,41,0,5,0], [4,1,36,25,0,0,39,0,0,0], [5,1,8,25,0,27,34,0,6,0], [9,0,41,4,0,48,0,0,7,0], [11,1,9,29,0,0,8,55,0,0],
+    [11,1,15,28,20,0,31,0,0,5], [12,1,30,18,15,0,32,0,4,0], [13,1,41,0,14,0,5,0,40,0], [15,0,48,18,0,23,0,0,11,0], [15,0,31,18,0,0,0,26,24,0], [16,1,0,12,40,48,0,0,0,0], [16,0,62,0,0,0,34,0,4,0], [16,1,39,25,0,16,10,0,10,0],
+    [16,1,8,55,0,3,18,0,9,7], [16,0,46,6,0,5,28,0,14,0], [16,1,9,32,0,49,0,0,10,0], [17,1,52,22,0,0,19,0,7,0], [17,1,0,43,8,7,0,33,10,0], [18,1,60,0,0,0,0,0,0,40], [18,1,0,60,0,40,0,0,0,0], [18,0,28,36,0,12,0,0,24,0],
+    [18,0,4,41,0,0,40,0,0,15], [19,1,48,14,0,34,0,0,4,0], [19,1,0,32,0,0,39,29,0,0], [19,0,50,16,0,20,0,0,13,0], [20,0,32,18,6,0,0,28,16,0], [20,0,33,0,16,32,0,0,19,0], [20,1,56,0,0,44,0,0,0,0], [20,0,18,35,5,0,42,0,0,0],
+    [21,1,48,0,0,0,0,0,52,0], [21,0,32,12,8,0,0,41,8,0], [22,0,7,34,9,0,27,0,24,0], [22,0,44,17,9,0,8,0,22,0], [22,0,10,45,0,0,14,0,31,0], [22,1,51,9,6,0,34,0,0,0], [22,1,25,16,0,12,29,18,0,0], [22,0,0,39,6,0,0,36,18,0],
+    [23,0,42,16,0,14,0,11,17,0], [23,0,43,17,11,0,12,9,0,8], [23,0,28,14,8,34,0,0,16,0], [23,1,29,10,20,0,0,21,0,20], [23,0,24,0,37,17,0,0,22,0], [23,1,48,0,0,38,0,0,15,0], [24,0,38,11,0,6,15,5,11,14], [24,0,22,13,22,7,0,10,27,0],
+    [24,0,10,24,22,0,10,24,9,0], [24,0,52,0,0,15,0,12,21,0], [25,0,47,21,0,10,15,0,7,0], [25,0,12,41,7,31,9,0,0,0], [25,0,42,3,0,10,31,0,13,0], [25,1,15,33,9,0,22,0,0,21], [25,0,53,7,0,10,0,21,8,0], [26,1,52,16,12,0,12,0,8,0],
+    [26,1,18,25,0,0,27,25,5,0], [26,0,52,15,0,9,12,4,0,9], [26,0,8,26,7,0,26,12,19,0], [26,1,44,0,0,27,0,0,29,0], [26,1,0,10,35,0,15,40,0,0], [26,0,40,9,0,28,0,17,5,0], [26,0,22,32,0,4,20,0,22,0], [26,1,66,0,0,34,0,0,0,0],
+    [26,0,22,25,7,0,20,10,15,0], [27,0,17,21,26,0,15,0,21,0], [27,1,3,21,0,0,52,0,24,0], [27,0,51,3,10,31,0,0,5,0], [27,0,38,21,3,6,0,26,5,0], [27,1,39,15,11,0,31,0,4,0], [27,0,51,0,0,25,0,24,0,0], [27,1,49,27,0,24,0,0,0,0],
+    [28,0,31,4,18,0,12,30,5,0], [28,0,21,22,41,0,0,9,7,0], [28,0,20,13,30,0,21,0,16,0], [28,0,10,30,11,0,21,15,13,0], [28,0,37,20,0,0,23,10,10,0], [28,0,41,12,0,12,4,25,6,0], [28,1,6,50,0,0,33,0,11,0], [29,1,0,56,0,41,0,0,3,0],
+    [29,0,38,11,0,18,8,10,0,15], [29,0,33,30,0,0,31,6,0,0], [29,1,0,47,0,0,53,0,0,0], [29,1,7,35,0,0,25,21,0,11], [29,1,21,45,0,34,0,0,0,0], [29,0,53,0,0,23,12,4,8,0], [29,0,0,50,0,15,0,0,34,0], [29,0,35,4,0,16,15,0,31,0],
+    [29,0,52,0,0,26,0,16,6,0], [30,0,8,34,0,26,0,0,31,0], [30,1,0,29,0,58,0,0,14,0], [30,0,19,43,0,14,6,0,18,0], [30,1,0,45,0,30,25,0,0,0], [30,1,0,54,0,13,0,15,18,0], [30,1,12,43,0,0,19,10,16,0], [30,1,24,27,14,26,0,6,3,0],
+    [30,0,43,8,7,10,9,10,12,0], [30,1,46,0,14,0,0,0,40,0], [30,0,28,15,0,12,5,19,19,0], [31,1,38,16,15,31,0,0,0,0], [31,1,38,25,0,8,0,0,28,0], [31,1,37,18,0,0,46,0,0,0], [31,0,18,21,14,20,0,16,11,0], [31,1,0,57,19,0,0,13,11,0],
+    [31,0,63,0,0,16,0,20,0,0], [31,1,27,20,0,17,0,37,0,0], [31,0,21,6,23,0,0,20,0,29], [31,1,33,0,0,40,0,0,27,0], [32,0,51,0,0,21,0,0,28,0], [32,1,4,44,15,0,38,0,0,0], [32,0,44,13,0,0,24,11,8,0], [32,1,20,30,0,0,0,11,40,0],
+    [32,1,15,34,4,38,9,0,0,0], [32,0,10,46,14,0,5,17,4,3], [32,0,47,0,0,39,0,5,9,0], [32,1,5,33,0,0,45,0,18,0], [32,1,49,12,0,0,22,0,0,17], [32,1,32,9,7,45,0,0,7,0], [32,1,12,0,0,0,0,0,88,0], [32,1,13,63,0,7,0,0,18,0],
+    [32,0,21,26,15,16,0,0,23,0], [32,1,14,59,0,21,0,0,5,0], [32,1,4,64,12,18,0,0,3,0], [32,1,27,21,9,0,25,0,18,0], [32,0,49,0,0,33,0,0,0,18], [32,1,19,31,13,27,0,0,0,11], [32,0,29,13,0,5,33,0,20,0], [33,1,45,6,11,0,38,0,0,0],
+    [33,0,43,8,0,39,0,0,11,0], [33,1,36,0,0,0,4,22,0,37], [33,1,35,9,0,55,0,0,0,0], [33,1,22,16,0,12,11,0,39,0], [33,0,18,37,12,0,18,0,15,0], [33,0,27,16,10,0,15,16,16,0], [33,0,20,19,11,14,12,20,0,4], [33,0,36,26,9,0,9,12,9,0],
+    [33,0,49,0,0,27,0,12,12,0], [33,0,32,16,11,13,9,0,18,0], [33,0,0,39,15,23,0,11,0,13], [33,1,67,10,0,0,24,0,0,0], [33,0,46,13,0,11,0,14,15,0], [33,1,6,56,0,9,26,0,0,3], [33,0,22,25,43,5,0,0,5,0], [34,0,33,7,11,0,27,22,0,0],
+    [34,1,5,30,25,0,18,0,0,23], [34,1,33,6,0,5,0,0,0,56], [34,0,38,10,0,0,20,13,20,0], [34,1,23,24,0,49,0,0,4,0], [34,1,12,27,0,7,37,0,5,12], [34,0,9,16,30,0,25,7,12,0], [34,1,42,0,0,0,27,0,30,0], [34,0,48,0,0,34,0,6,12,0],
+    [34,1,52,0,36,0,12,0,0,0], [34,0,11,22,0,20,0,23,24,0], [35,1,45,0,0,21,0,0,34,0], [35,1,44,0,0,56,0,0,0,0], [35,1,0,58,0,0,0,26,16,0], [35,0,17,18,0,15,0,27,0,24], [35,1,0,36,13,0,0,50,0,0], [35,0,0,33,28,0,26,0,13,0],
+    [35,0,31,17,12,0,22,0,17,0], [35,1,23,19,19,0,30,0,8,0], [35,0,25,19,23,4,11,11,9,0], [35,1,45,0,0,55,0,0,0,0], [35,1,6,51,0,28,14,0,0,0], [35,0,43,7,0,0,18,12,20,0], [35,1,54,0,0,46,0,0,0,0], [35,1,10,25,0,12,13,25,15,0],
+    [36,0,31,16,4,38,0,0,11,0], [36,0,7,12,38,4,20,18,0,0], [36,1,10,16,35,0,21,4,13,0], [36,0,34,17,26,0,18,0,4,0], [36,0,52,0,0,8,0,0,0,40], [36,0,19,29,0,0,0,12,40,0], [36,0,43,0,0,0,21,0,0,36], [36,1,42,0,0,45,0,0,0,13],
+    [36,1,4,37,27,6,8,0,18,0], [36,1,37,0,0,23,24,0,0,16], [36,1,77,0,0,20,0,0,0,3], [36,0,32,5,13,22,0,14,0,15], [36,0,33,0,0,40,0,14,12,0], [36,1,15,49,0,37,0,0,0,0], [36,0,26,25,0,17,0,6,26,0], [36,1,30,16,21,28,0,6,0,0],
+    [36,0,10,44,0,22,0,9,16,0], [36,0,45,0,15,4,0,24,12,0], [36,1,24,17,0,32,0,13,14,0], [36,0,0,27,29,35,0,0,9,0], [37,0,18,28,14,6,0,16,18,0], [37,1,67,0,0,0,33,0,0,0], [37,1,31,8,0,36,0,0,0,25], [37,1,70,0,0,0,8,0,0,21],
+    [37,1,35,0,0,51,0,0,13,0], [37,1,15,0,0,39,5,0,41,0], [37,1,29,0,34,16,21,0,0,0], [37,1,22,40,0,27,0,8,3,0], [37,1,12,34,9,4,0,0,41,0], [37,0,32,11,4,25,0,4,22,0], [37,0,41,0,0,34,0,9,16,0], [38,0,40,5,0,9,22,0,25,0],
+    [38,0,46,0,5,16,0,13,19,0], [38,1,0,50,0,50,0,0,0,0], [38,1,46,0,16,17,0,14,6,0], [38,1,27,22,0,33,4,0,15,0], [38,0,9,44,0,6,0,29,0,12], [38,0,34,20,0,14,16,7,8,0], [38,0,17,12,0,36,17,0,19,0], [38,0,57,0,0,7,0,15,0,21],
+    [39,1,54,0,0,26,0,0,20,0], [39,0,17,35,5,26,0,0,18,0], [39,0,54,0,0,8,0,16,22,0], [39,1,20,35,0,45,0,0,0,0], [39,0,32,0,16,41,0,11,0,0], [39,1,0,48,0,30,0,0,22,0], [39,0,30,21,18,4,21,0,6,0], [39,1,45,0,0,0,0,37,0,17],
+    [39,1,75,0,0,0,0,25,0,0], [39,1,18,0,5,0,0,77,0,0], [39,0,46,5,17,22,0,0,10,0], [39,0,26,19,0,26,4,0,0,25], [39,0,36,0,16,15,0,20,13,0], [40,0,52,0,0,36,0,0,0,12], [40,0,41,5,0,5,19,0,30,0], [40,0,24,15,12,14,8,8,18,0],
+    [40,1,24,9,0,24,6,33,5,0], [40,1,38,9,0,31,0,0,22,0], [40,1,28,13,19,20,0,3,17,0], [40,1,29,0,31,0,19,0,0,21], [40,1,52,0,0,48,0,0,0,0], [40,0,29,10,8,0,11,25,17,0], [40,0,43,10,0,16,0,24,7,0], [40,0,23,27,0,17,0,16,16,0],
+    [40,0,41,0,0,19,0,16,0,24], [40,0,14,33,31,0,0,13,10,0], [40,0,48,0,0,8,32,0,13,0], [40,0,16,27,0,16,27,0,14,0], [40,1,0,31,39,9,0,0,21,0], [41,1,30,23,26,0,21,0,0,0], [41,1,11,23,30,0,18,5,13,0], [41,0,51,0,9,12,0,0,0,28],
+    [41,1,40,16,0,24,0,11,9,0], [41,0,17,15,11,0,22,10,0,25], [41,1,56,0,5,15,0,0,23,0], [41,1,55,0,0,22,0,4,0,20], [41,0,36,20,0,10,0,34,0,0], [41,0,10,24,30,12,0,4,0,20], [41,1,46,5,0,11,0,31,6,0], [41,0,35,18,0,21,0,15,11,0],
+    [41,1,49,0,0,51,0,0,0,0], [41,0,46,11,13,0,0,6,24,0], [41,0,0,15,47,11,0,18,9,0], [41,1,11,35,0,54,0,0,0,0], [41,0,28,16,0,30,0,22,4,0], [41,0,42,5,10,15,0,3,25,0], [41,0,53,7,21,0,0,18,0,0], [41,0,55,0,0,0,0,12,0,33],
+    [41,1,31,16,33,0,0,0,0,20], [41,0,38,0,0,36,5,0,0,21], [41,1,29,0,0,21,28,0,23,0], [42,1,46,0,0,38,0,0,16,0], [42,1,38,0,17,0,0,0,45,0], [42,0,0,47,0,0,0,33,20,0], [42,0,34,0,0,33,0,9,24,0], [42,0,47,0,0,11,0,24,18,0],
+    [42,1,51,5,0,44,0,0,0,0], [42,1,58,0,30,6,0,0,6,0], [42,0,13,40,0,9,0,10,27,0], [42,1,52,0,0,26,23,0,0,0], [42,1,58,0,21,0,0,0,0,21], [42,1,30,23,0,29,0,0,18,0], [42,0,10,14,41,6,0,20,0,9], [42,0,35,10,0,30,0,8,17,0],
+    [42,0,0,11,44,25,0,20,0,0], [43,0,47,4,0,19,0,24,6,0], [43,1,17,15,33,0,22,14,0,0], [43,0,14,42,0,0,0,9,35,0], [43,1,0,66,0,26,0,0,8,0], [43,1,15,11,7,0,46,0,21,0], [43,0,6,43,8,10,19,0,15,0], [43,0,28,22,0,19,0,12,0,18],
+    [43,0,39,0,7,23,7,0,24,0], [43,0,54,0,0,20,0,0,26,0], [43,0,39,8,10,0,0,16,0,27], [43,0,45,0,0,36,0,13,6,0], [44,1,15,50,0,0,35,0,0,0], [44,0,27,21,12,0,0,29,10,0], [44,0,31,25,27,0,4,0,13,0], [44,0,30,17,0,23,0,20,11,0],
+    [44,1,21,16,0,38,0,0,25,0], [44,0,44,16,0,6,0,11,0,22], [44,0,46,12,12,0,8,11,10,0], [44,0,43,11,0,30,0,0,16,0], [44,0,51,0,4,13,0,21,12,0], [44,0,15,20,30,7,0,8,0,20], [44,0,63,0,0,16,0,16,5,0], [44,0,50,0,0,26,0,0,25,0],
+    [45,0,30,13,21,8,7,16,4,0], [45,1,0,46,0,0,27,0,0,28], [45,0,67,0,0,0,0,33,0,0], [45,1,23,17,27,0,0,18,0,14], [45,0,0,48,14,31,0,0,7,0], [45,0,30,16,0,18,0,13,22,0], [45,1,0,46,0,18,0,0,35,0], [45,1,72,12,0,0,0,0,16,0],
+    [45,0,31,0,0,38,0,20,12,0], [45,1,30,21,25,25,0,0,0,0], [45,0,37,8,0,27,0,0,0,28], [45,0,48,0,0,26,0,15,11,0], [45,0,32,7,23,0,6,0,0,31], [45,1,30,8,0,20,13,21,8,0], [45,0,46,0,0,28,0,10,0,16], [46,1,55,5,0,40,0,0,0,0],
+    [46,1,25,0,0,27,0,0,0,48], [46,0,4,38,24,0,0,8,26,0], [46,1,29,18,14,0,0,18,21,0], [46,1,25,0,0,65,0,10,0,0], [46,0,40,10,0,27,0,9,15,0], [46,0,16,18,26,0,11,16,13,0], [46,1,31,0,0,53,0,0,17,0], [46,1,34,0,19,0,29,18,0,0],
+    [46,1,22,52,0,0,0,25,0,0], [46,0,25,0,37,0,17,5,15,0], [47,1,45,4,0,51,0,0,0,0], [47,1,49,0,0,16,0,32,4,0], [47,0,37,6,15,0,16,12,13,0], [47,1,0,46,0,21,0,12,22,0], [47,1,47,17,0,22,0,0,13,0], [47,1,43,0,0,16,0,20,21,0],
+    [47,0,39,8,0,17,0,13,25,0], [47,0,0,44,19,29,0,8,0,0], [47,0,29,11,10,20,0,17,13,0], [47,0,36,5,25,0,0,4,29,0], [47,0,28,12,12,16,8,0,0,24], [47,0,22,21,14,0,17,18,8,0], [47,0,30,0,0,34,0,29,7,0], [47,0,39,0,0,30,0,10,21,0],
+    [47,0,41,7,9,7,0,13,23,0], [47,0,45,0,5,0,20,9,20,0], [48,1,45,4,0,31,0,20,0,0], [48,1,57,0,7,0,0,0,36,0], [48,1,43,14,0,15,16,0,12,0], [48,1,37,0,0,0,55,0,8,0], [48,1,70,0,0,15,0,15,0,0], [48,0,45,0,0,22,10,14,0,9],
+    [48,1,48,6,16,0,0,5,26,0], [48,1,22,13,0,39,20,0,6,0], [49,0,51,5,0,0,21,9,14,0], [49,0,43,0,8,24,0,17,8,0], [49,1,56,0,3,0,0,0,40,0], [49,1,26,15,0,0,0,0,0,60], [49,0,44,5,0,7,20,0,24,0], [49,0,46,5,0,25,16,0,8,0],
+    [49,1,32,0,0,19,0,15,34,0], [49,0,29,24,0,12,0,0,34,0], [49,0,54,0,0,0,0,14,5,26], [49,0,34,0,11,22,0,10,23,0], [49,1,21,0,4,40,0,35,0,0], [49,1,80,0,0,5,0,0,15,0], [49,0,51,0,0,22,0,7,20,0], [50,1,0,44,0,3,0,23,0,30],
+    [50,0,27,18,0,30,0,0,26,0], [50,1,58,0,0,17,12,0,0,13], [50,1,3,49,0,9,0,24,15,0], [51,1,0,0,71,29,0,0,0,0], [51,1,45,18,0,12,0,0,26,0], [51,0,25,13,14,15,0,8,24,0], [51,1,18,41,0,42,0,0,0,0], [51,1,45,0,21,7,0,28,0,0],
+    [51,1,56,0,0,44,0,0,0,0], [52,1,48,14,0,11,0,28,0,0], [52,0,12,44,0,36,0,0,9,0], [52,0,46,0,0,41,4,9,0,0], [52,1,39,0,0,48,0,13,0,0], [52,0,49,0,0,24,0,5,23,0], [52,1,51,0,15,34,0,0,0,0], [53,1,67,0,0,33,0,0,0,0],
+    [53,1,41,33,0,17,0,0,0,10], [53,1,57,0,12,0,0,27,0,4], [53,0,62,0,0,34,0,3,0,0], [53,1,53,15,0,25,0,0,7,0], [53,1,0,7,82,7,4,0,0,0], [53,0,35,0,0,16,0,31,18,0], [53,0,41,0,0,10,0,19,30,0], [53,1,52,0,0,43,0,0,0,4],
+    [53,0,49,0,0,14,0,12,25,0], [54,0,37,4,19,5,0,0,35,0], [54,0,29,12,0,26,14,9,9,0], [54,0,62,0,15,12,0,11,0,0], [54,0,43,0,0,26,8,15,8,0], [54,0,7,11,20,11,0,15,0,35], [54,0,35,24,32,0,5,3,0,0], [55,0,39,0,0,27,12,14,8,0],
+    [55,1,48,0,0,52,0,0,0,0], [55,0,43,5,28,0,0,13,0,12], [55,1,35,0,0,20,8,0,0,37], [55,1,49,0,0,22,0,0,29,0], [55,1,58,0,5,0,5,21,10,0], [55,1,0,0,51,49,0,0,0,0], [55,0,26,17,27,0,11,5,14,0], [56,0,60,7,0,18,0,10,0,5],
+    [56,0,35,0,0,41,0,17,0,7], [56,1,40,0,0,15,13,31,0,0], [56,0,40,0,0,10,0,27,23,0], [56,0,30,26,0,21,0,23,0,0], [56,0,22,29,0,35,0,14,0,0], [56,0,49,0,7,0,20,24,0,0], [57,0,55,0,0,0,18,18,9,0], [57,0,26,0,21,15,0,18,20,0],
+    [57,0,39,21,0,12,0,16,11,0], [57,1,47,0,0,45,0,7,0,0], [57,1,14,22,46,0,19,0,0,0], [58,0,19,21,19,8,0,13,19,0], [58,0,44,13,0,29,0,14,0,0], [58,1,54,0,20,6,0,20,0,0], [59,1,48,0,12,37,0,0,4,0], [61,0,51,0,24,18,0,0,0,7],
+    [62,0,59,0,0,9,0,23,0,9], [62,1,42,0,0,52,0,6,0,0], [63,0,45,0,10,21,0,11,0,13], [64,1,45,0,22,9,0,19,5,0], [65,1,57,0,0,36,0,0,7,0], [66,1,49,0,0,24,0,0,0,26]
+  ];
+  // ---- REPERTOIRES: end ----
+  var REP_TYPES = ['FF', 'SI', 'FC', 'SL', 'ST', 'CU', 'CH', 'FS'], REP_BAND = 5, USAGE_SD = 0.15;
+  function drawRepertoire(rng, arm, role) {
+    var rp = role === 'RP' ? 1 : 0;
+    var w = REPERTOIRES.map(function (r) { return r[1] === rp ? Math.exp(-0.5 * Math.pow((r[0] - arm) / REP_BAND, 2)) : 0; });
+    var r = REPERTOIRES[rng.pickW(w)], mix = {};
+    REP_TYPES.forEach(function (t, i) { if (r[i + 2] > 0) mix[t] = r[i + 2] / 100; });
+    return mix;
+  }
+  function repertoireName(mix) {      // for the screen: 'sinker-sweeper', or 'four-pitch' and up
+    var ts = Object.keys(mix).sort(function (a, b) { return mix[b] - mix[a]; }), big = ts.filter(function (t) { return mix[t] >= 0.10; });
+    if (big.length >= 4) return ['', '', '', '', 'four', 'five', 'six', 'seven'][Math.min(big.length, 7)] + '-pitch';
+    return ts.slice(0, 2).map(function (t) { return PITCH_TYPES[t].name; }).join('-');
+  }
+
   function makePitcher(rng, o) {
     o = o || {};
     var T = TRAITS, role = o.role || 'SP';
     var throws = o.throws || (rng.u() < 0.28 ? 'L' : 'R');
     var armSide = throws === 'R' ? -1 : 1;
-    var arch = ARCH[rng.pickW(ARCH.map(function (a) { return a.w; }))];
-    var fb = drawT(rng, role === 'SP' ? T.fbVeloSP : T.fbVeloRP);
-    var types = Object.keys(arch.mix).sort(function (a, b) { return arch.mix[b] - arch.mix[a]; });
-    if (role === 'RP') types = types.slice(0, rng.u() < 0.6 ? 2 : 3);   // relievers carry their best two or three
+    var h = drawT(rng, T.pHeightIn), arm = drawT(rng, T.armAngle);
+    var wt = clamp(T.pWeightLb[0] + 4.2 * (h - T.pHeightIn[0]) + rng.n(0, T.pWeightLb[1]), T.pWeightLb[2], T.pWeightLb[3]);
+    var mix = drawRepertoire(rng, arm, role);
+    var fb = drawT(rng, role === 'SP' ? T.fbVeloSP : T.fbVeloRP), spinZ = rng.n(0, 1);
+    var types = Object.keys(mix).sort(function (a, b) { return mix[b] - mix[a]; });
     var pitches = types.map(function (k) {
-      var d = PITCH_TYPES[k];
+      var d = PITCH_TYPES[k], fbk = d.kind === 'FB';
+      var sdSpin = fbk ? Math.sqrt(Math.max(0, d.rpmSD * d.rpmSD - Math.pow(SPIN_PER_MPH * FB_SD, 2))) : d.rpmSD;   // the spread left once speed has had its say
+      var rpm = d.rpm + (fbk ? SPIN_PER_MPH * (fb - FB_MEAN) : 0) + sdSpin * (d.spinRho * spinZ + Math.sqrt(1 - d.spinRho * d.spinRho) * rng.n(0, 1));
       return { type: k,
                velo: fb + d.dv + (d.dv === 0 ? 0 : rng.n(0, 1.0)),
-               rpm: clamp(rng.n(d.rpm, d.rpmSD), d.rpm - 3 * d.rpmSD, d.rpm + 3 * d.rpmSD),
-               eff: clamp(rng.n(d.eff, d.effSD), 0.03, 0.99),
-               tilt: rng.n(d.tilt, d.tiltSD),
+               rpm: clamp(rpm, d.rpm - 3 * d.rpmSD, d.rpm + 3 * d.rpmSD),
+               eff: clamp(d.eff * (1 + d.effArm * (arm - ARM_MEAN)) + rng.n(0, d.effSD), 0.03, 0.99),   // a higher slot spins a four-seamer more cleanly
+               tilt: d.tilt + d.tiltArm * (arm - ARM_MEAN) + rng.n(0, d.tiltSD),   // his slot turns the movement
                seam: [rng.n(0, d.seamSD[0]), rng.n(0, d.seamSD[1])],   // in: his usual seam break, arm side and up
-               usage: arch.mix[k] * Math.exp(rng.n(0, 0.25)),
+               usage: mix[k] * Math.exp(rng.n(0, USAGE_SD)),
                habit: [rng.n(0, PLAN_LOC.habit[k][0]), rng.n(0, PLAN_LOC.habit[k][1])],   // his own aim for it: in toward his arm side, share of the zone
                aimCache: { ok: false } };
     });
     var u = normalize(pitches.map(function (p) { return p.usage; }));
     pitches.forEach(function (p, i) { p.usage = u[i]; });
+    var hFt = h / 12, sa = arm * DEG;
+    var shoulder = hFt * clamp(rng.n(SHOULDER_H[0], SHOULDER_H[1]), 0.6, 0.8), lever = hFt * clamp(rng.n(ARM_LEVER[0], ARM_LEVER[1]), 0.32, 0.42);
     var P = equipFielder(rng, {
-      id: nextId++, name: o.name || '', role: role, throws: throws, armSide: armSide, arch: arch.name,
-      rel: { ht: drawT(rng, T.relHt), side: drawT(rng, T.relSide), ext: drawT(rng, T.ext) },
+      id: nextId++, name: o.name || '', role: role, throws: throws, armSide: armSide, arch: repertoireName(mix),
+      heightIn: h, weightLb: wt, armAngle: arm,
+      rel: { ht: shoulder + lever * Math.sin(sa), side: rng.n(REL_SIDE0[0], REL_SIDE0[1]) + lever * Math.cos(sa), ext: clamp(EXT_H[0] + EXT_H[1] * h + rng.n(0, EXT_H[2]), 5.2, 7.8) },
       cmd: [drawT(rng, role === 'SP' ? T.cmdXSP : T.cmdXRP), drawT(rng, role === 'SP' ? T.cmdZSP : T.cmdZRP)],
       stamina: drawT(rng, role === 'SP' ? T.staminaSP : T.staminaRP),
       holdTime: drawT(rng, T.holdTime),
@@ -1048,8 +1150,8 @@ var BB = (function () {
   // policy, not a bet: the league's batters swing more in hitters' counts than
   // the next pitch's run value pays for (discipline.py table 6).
   var SWING_THR = {
-    '0-0': [0.36, 1.19], '0-1': [0.10, 0.74], '0-2': [0.09, 0.33], '1-0': [0.21, 0.96], '1-1': [0.09, 0.64], '1-2': [0.07, 0.31],
-    '2-0': [0.33, 1.04], '2-1': [0.10, 0.63], '2-2': [0.04, 0.36], '3-0': [0.92, 0.92], '3-1': [0.37, 0.37], '3-2': [0.05, 0.38]
+    '0-0': [0.32, 1.15], '0-1': [0.09, 0.70], '0-2': [0.08, 0.32], '1-0': [0.22, 0.93], '1-1': [0.09, 0.63], '1-2': [0.06, 0.28],
+    '2-0': [0.26, 1.00], '2-1': [0.08, 0.60], '2-2': [0.04, 0.30], '3-0': [0.88, 1.14], '3-1': [0.24, 0.62], '3-2': [0.04, 0.35]
   };
   function decide(B, pitch, gh, rf, st, rng) {
     var m = rf.detected ? rf.err : rf.base, mx = m[0], mz = m[1];
@@ -1307,10 +1409,10 @@ var BB = (function () {
   }
 
   return {
-    version: '1.5',
+    version: '1.6',
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
-    PITCH_TYPES: PITCH_TYPES, ARCH: ARCH, TRAITS: TRAITS, AERO: AERO,
+    PITCH_TYPES: PITCH_TYPES, REPERTOIRES: REPERTOIRES, TRAITS: TRAITS, AERO: AERO,
     makeRng: makeRng, makeEnv: makeEnv, mlbEnv: mlbEnv, MLB_PARKS: MLB_PARKS, fenceAt: fenceAt,
     makePitcher: makePitcher, makeBatter: makeBatter, makeUmp: makeUmp, equipFielder: equipFielder, FIELD_MEANS: FIELD_MEANS,
     batOf: batOf, batSpeedOf: batSpeedOf, swingPowerOf: swingPowerOf, POWER_EXP: POWER_EXP,
