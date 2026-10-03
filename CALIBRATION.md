@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v1.7 · 2026-10-03`
+`CALIBRATION.md · v1.8 · 2026-10-03`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -591,6 +591,30 @@ What the step did, in these runs: the hand-set pitcher traits (speed, release po
 **Pitchers work around power.** Among 2025 hitters who saw 400+ pitches (175, pitch-level), the share of pitches in the zone fell 0.0038 per mph of the hitter's average bat speed (r −.34; −.35 against the hardest half of his batted balls), while the model's pitchers aimed the same way at everyone (slope +0.0005). Now every target's distance from the zone's centre is scaled by 1 + 0.021 per mph of the hitter's bat speed above 71.2 (the league's mean over hitters' tracked swings): slope −0.0036 to −0.0037, r −.35 to −.37. With nothing fitted to it, walks against bat speed went from −.05 to +.05 to +.12 (two seeds, 100 PA per hitter; league +.17 among qualified hitters). Game line (200 games × seeds 3, 11, 29): BB% 7.9-8.3, K% 20.6-21.2, HR% 3.0-3.2, runs 3.65-3.98.
 
 **What selection would do** (`tools/hitter_value.js`, not in the game yet). In the league, bat speed correlated +.69 with whiff, +.58 with K% and −.52 with squared-up contact among qualified hitters; in the model, whose traits are drawn independently, +.06 to +.09, +.03 to +.06 and −.13 to −.20. The tool draws hitters, lets each face 300 plate appearances against the engine's pitchers, values them by Statcast's expected wOBA (walks .69, hit batsmen .72, every ball in play the league's expected wOBA on contact for its exit velocity and launch angle, `statcast/bip.py` table 6), and keeps the best. Keeping the top half or quarter by value raised bat speed ~ whiff to +.23 to +.28, ~ K% to +.23 to +.28 and ~ squared-up to −.24 to −.34 (three seeds, 1,500 hitters each); harder selection did not raise them further (top 5%: +.13 to +.17). It also narrowed K% between hitters from .086-.092 to .059-.076 (league .057). So selection on value - the major leagues as the top of a larger pool - produced about 40% of the league's bat-speed-to-whiff link and most of its narrower spread from traits that are independent before selection; the rest has to be a trade-off within the hitter. In the model the traits worth most per sd of expected wOBA were weight and swing power (bat speed's ingredients), eye (−20 points per sd of scatter), swing length, aggression (−15: swinging more costs), along-barrel and timing scatter, and pulling (−9).
+
+### The farm: the majors as the top of a larger pool (bb_engine v1.8; 2026-10-03)
+
+Joe (2026-10-02): drawing the full range of traits creates players who would never make the majors, and bending the model to match MLB while they are in the mix causes a different kind of trouble. Until v1.8 every drawn player counted as a major leaguer, and the trait distributions had been set or fitted at that level. Runs: `tools/hitter_value.js` (three fits of 1,500 population hitters × 300 PA), `tools/pitcher_value.js` (three fits of 1,000 population pitchers × 300 PA), `tools/fit_population.js`, the suite at seeds 3, 11 and 29, `headless/pitcher_chain_check.js`.
+
+**What was built.** TRAITS are now the population. Each roster spot (and each player any tool draws) goes to the best of `FARM_N` = 4 candidates of his position or role, as the scouts judge them: `HITTER_VALUE` and `PITCHER_VALUE`, linear estimates of the expected wOBA the engine itself gives a player's traits (regressions over population players each facing 300 plate appearances, valued by Statcast's weights and the league's expected wOBA on contact), plus `SCOUT_SD` = 0.015 of judgement error; `FARM_N` and `SCOUT_SD` are set by hand. The population was fitted (`tools/fit_population.js`) so the picks have the league's measured values: hitters' height (72.0 ± 2.35 in), weight (206.3 ± 19.9 lb), swing length (7.32 ± 0.39 ft) and bat speed (71.2 ± 2.70 mph, each hitter's mean over his tracked swings), with weight ~ bat speed .53 (the chain's weight exponent came to −0.25 from −0.45: selection trims the slow end of bat speed); pitchers' speed by role, command on both axes, arm angle, height, and a spin talent averaging Savant's means. The hand-set hitter skills (eye, pitch spotting, timing, barrel control, aggression...) had their population means moved so the picks keep the means they were calibrated to when every drawn hitter counted, and their population spreads left for the farm to narrow (for example eye scatter 5.36 in the population, 5.0 among the picks). The population hitter is about 2 mph slower (69.0 ± 3.1) and three-quarters of an inch shorter than the picked one.
+
+**What the scouts value.** For hitters (R2 .69-.71 against 300-PA expected wOBA): bat speed (+31 wOBA points per sd), eye scatter (−20), aggression (−15: swinging more costs), along-barrel and timing scatter, undercut, pulling, learning. For pitchers the features explained only 11-13% (300 batters are mostly luck; the rest about 40% of the true spread): command across (+11 per sd) and up and down (+6) dominated, and four-seam speed was worth only 1-2 points - the model's harder throwers strike out more but give up harder contact, while in the league speed also spoils contact (a model gap). So the farm improves picked pitchers' command more than their speed (population starters 93.7 mph, picks 94.0).
+
+| | v1.7 | v1.8 | league |
+|---|---|---|---|
+| bat speed ~ whiff (power_chain, 500 picks × 40 PA) | .01 | .17-.24 | .69 |
+| bat speed ~ K% | −.03 | .11-.20 | .58 |
+| bat speed ~ squared-up | −.04 | −.12 to −.28 | −.52 |
+| bat speed ~ BB% | −.08 | .01-.12 | .17 |
+| EV avg / EV50 | 88.9 / 99.7 | 89.6 / 100.7 | 89.7 / 100.6 |
+| K% / BB% (run_games) | 20.6-21.2 / 7.9-8.3 | 21.1-21.2 / 8.0-8.3 | 22.6 / 8.2 |
+| HR% | 3.0-3.2 | 3.3-3.5 | 3.0 |
+| AVG / OBP / SLG | .23 / .30 / .37 | .237-.242 / .308-.309 / .380-.398 | .243 / .312 / .399 |
+| runs per team-game | 3.65-3.98 | 4.08-4.38 | 4.39 |
+
+**Joe's open question (a player below average in everything).** Below the population average in all seven of bat speed, eye, timing, pitch spotting, barrel control, along-barrel control and patience: 0.88% of the population (as independent traits would give, 0.5^7), 0.03% of the farm's picks; in five of them, 3.3% against 0.29%. He can still reach the majors on the scouts' error, about one in 3,000.
+
+What the step did, in these runs: selection on value produced part of the league's power-against-contact link from traits that are independent in the population, brought the hardest contact to the league's, and put runs and the slash line at the league's. What it left: bat speed ~ whiff at a third of the league's (the rest should be a trade-off within the hitter - how hard he chooses to swing), the pitchers' speed undervalued by the model, and home runs a little high.
 
 ## What was learned building the fielding layer
 

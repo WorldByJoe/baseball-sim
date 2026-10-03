@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-traits_doc.py · v0.4 · 2026-10-02
+traits_doc.py · v0.5 · 2026-10-03
 
 Writes TRAITS.md, the list of every player trait and how the population of
 players is drawn, straight from bb_engine.js: the TRAITS table (mean, spread,
@@ -16,6 +16,7 @@ beyond "normal, clipped to its range" is written in DRAWN below; when the
 engine draws a trait differently, change it here too.
 
 CHANGED
+  v0.5  the farm: the tables are the population; spin talent; a first answer to the open question (engine v1.8)
   v0.4  the pitcher's body and delivery traits; the repertoire library replaces the archetypes (engine v1.6)
   v0.3  two-axis command; each type's command factor and plate scatter; pitchers' aiming habits (engine v1.4)
   v0.2  pitch types: each pitcher's seam break, and how pitches vary from pitch to pitch (engine v1.0)
@@ -43,6 +44,7 @@ DRAWN = {
     'fbVeloSP': 'normal, clipped; starters', 'fbVeloRP': 'normal, clipped; relievers',
     'pHeightIn': 'normal, clipped; the root of the pitcher\'s chain', 'pWeightLb': 'normal about the height line, clipped',
     'armAngle': 'normal, clipped; sets his release point, turns his pitches\' movement, picks his repertoire',
+    'spinTalent': 'normal, clipped; shared across his pitches (PITCH_TYPES spinRho)',
     'cmdXSP': 'normal, clipped; starters', 'cmdZSP': 'normal, clipped; starters', 'cmdXRP': 'normal, clipped; relievers', 'cmdZRP': 'normal, clipped; relievers',
     'staminaSP': 'normal, clipped; starters', 'staminaRP': 'normal, clipped; relievers',
     'umpEdge': 'drawn separately for each of the four edges',
@@ -57,7 +59,7 @@ DRAWN = {
 # Units for traits whose comment in the engine does not start with one.
 UNITS = {'pBatSpeed': 'mph', 'pTimingSD': 'ms', 'pBarrelSD': 'in', 'pSpotIn': 'in', 'pEyeSD': 'in', 'pAttack': 'deg',
          'fbVeloSP': 'mph', 'fbVeloRP': 'mph', 'cmdXSP': 'in', 'cmdZSP': 'in', 'cmdXRP': 'in', 'cmdZRP': 'in', 'staminaSP': 'pitches', 'staminaRP': 'pitches',
-         'pHeightIn': 'in', 'pWeightLb': 'lb', 'armAngle': 'deg', 'speed': 'ft/s', 'armMph': 'mph', 'armIdx': 'ratio', 'aggr': 'share', 'commit': 'share',
+         'pHeightIn': 'in', 'pWeightLb': 'lb', 'armAngle': 'deg', 'spinTalent': 'sd', 'speed': 'ft/s', 'armMph': 'mph', 'armIdx': 'ratio', 'aggr': 'share', 'commit': 'share',
          'fbLean': 'factor', 'learn': 'share', 'route': 'share', 'glove': 'share', 'block': 'share'}
 GROUPS = [('hitters', 'Hitters'), ('pitchers when they bat', 'Pitchers when they bat (NL rules)'), ('pitchers', 'Pitchers'), ('umpires', 'Umpires'),
           ('catchers', 'Catchers'), ('fielding and running', 'Fielding and running (every player)'), ('the running game', 'The running game')]
@@ -209,8 +211,10 @@ def main():
     w('- **Throwing hand, pitchers:** left %.0f%%.' % (100 * float(throws.group(1))))
     w('- **Umpires with one strong habit:** %.0f%% (see `umpQuirk`).' % (100 * float(quirk.group(1))))
     w('- **Strike zone:** not drawn; from height, bottom 0.263 x height, top 0.559 x height.')
+    w('\n## The farm\n')
+    w('Since engine v1.8 the tables above are the POPULATION. Each roster spot goes to the best of `FARM_N` candidates drawn from it, as the scouts judge them: `HITTER_VALUE` and `PITCHER_VALUE`, the expected wOBA the engine itself gives each trait (tools/hitter_value.js, tools/pitcher_value.js), with `SCOUT_SD` of judgement error. Where a trait is measured, its population was fitted (tools/fit_population.js) so that the picks have the league\'s value; the hand-set skills keep their population spread, and the farm narrows it.\n')
     w('\n## Open questions\n')
-    w('- **A player below average in every category** (Joe, 2026-10-02, for later): how should the game handle a player on a team who is below average in every trait? With traits drawn independently, such players occur by chance (for k independent traits, about 1 in 2^k players is below the mean in all of them), and real rosters are the selected top of a much larger population, so they would be rare there. Not yet decided.')
+    w('- **A player below average in every category** (Joe, 2026-10-02, for later): how should the game handle a player on a team who is below average in every trait? With traits drawn independently, such players occur by chance (for k independent traits, about 1 in 2^k players is below the mean in all of them), and real rosters are the selected top of a much larger population, so they would be rare there. Not yet decided. First answer from the farm (engine v1.8): below the population average in all seven of bat speed, eye, timing, pitch spotting, barrel control, along-barrel control and patience, 0.88% of the population but 0.03% of the hitters the farm picks (five categories: 3.3% against 0.29%). Such a player can still slip through on the scouts\' error, about 1 in 3,000.')
     open(OUT, 'w').write('\n'.join(L) + '\n')
     print('wrote %s: %d traits, %d positions, %d pitch types, %d repertoires' % (OUT, len(rows), len(fm), len(pt), len(reps)))
 
