@@ -1,5 +1,5 @@
 /* ============================================================================
-   fit_population.js · v0.1 · 2026-10-03
+   fit_population.js · v0.2 · 2026-10-03
 
    Fits the hitters' POPULATION in bb_engine.js's TRAITS so that the ones the
    farm picks (makeBatter: the best of FARM_N candidates by the scouts'
@@ -26,18 +26,29 @@
 
    Run:  jsc bb_engine.js tools/fit_population.js -- [rounds] [picks per round] [seed]
 
+   FIELDERS (v0.2): the picks are drawn across the nine lineup positions, since
+   the farm now judges a position player by his glove too (bb_engine v2.1);
+   sprint speed is fitted so the picks run the league's 27.34 ± 1.35 ft/s
+   (2025 Statcast hitters), and the other fielding traits keep their
+   calibrated means among the picks (each net of its position's offset).
+
    CHANGED
+     v0.2  picks across positions; the fielding traits (bb_engine v2.1)
      v0.1  first build (bb_engine v1.8)
 ============================================================================ */
 (function (A) {
   var ROUNDS = +A[0] || 8, NPICK = +A[1] || 6000, SEED = +A[2] || 5, T = BB.TRAITS;
+  var POS9 = ['C', '1B', '2B', 'SS', '3B', 'LF', 'CF', 'RF', 'DH'];
+  // the fielding traits' calibrated means (net of position) and the league's sprint speed among hitters (2025)
+  var FSK = { react: 0.45, route: 0.90, glove: 0.982, armMph: 85, armAcc: 0.6, transfer: 0.68 }, SPEED = [27.34, 1.35];
+  function net(b, t) { return b[t] - ((BB.FIELD_MEANS[b.pos] || {})[t] || 0); }
   var TG = { h: [72.0, 2.35], w: [206.3, 19.9], L: [7.32, 0.39], v: [71.2, 2.70] };
   function mean(v) { return v.reduce(function (a, b) { return a + b; }, 0) / v.length; }
   function sd(v) { var m = mean(v); return Math.sqrt(v.reduce(function (a, b) { return a + (b - m) * (b - m); }, 0) / v.length); }
   function r(x, y) { var mx = mean(x), my = mean(y), a = 0, b = 0, c = 0; for (var i = 0; i < x.length; i++) { a += (x[i] - mx) * (y[i] - my); b += (x[i] - mx) * (x[i] - mx); c += (y[i] - my) * (y[i] - my); } return a / Math.sqrt(b * c); }
   function sample(seed) {
     var rng = BB.makeRng(seed), S = [], P = [];
-    for (var i = 0; i < NPICK; i++) { S.push(BB.makeBatter(rng, {})); if (i < NPICK / 2) P.push(BB.drawBatter(rng, {})); }
+    for (var i = 0; i < NPICK; i++) { S.push(BB.makeBatter(rng, { pos: POS9[i % 9] })); if (i < NPICK / 2) P.push(BB.drawBatter(rng, { pos: POS9[i % 9] })); }
     return { S: S, P: P };
   }
   function moments(S) {
@@ -55,7 +66,7 @@
   // (fixed here: TRAITS now holds the population, so reading the targets from it would shift them again on every refit)
   var SK0 = { motorIn: 0.62, timingSD: 13.5, longSD: 3.8, faceSD: 8, undercut: 0.55, attack: 9, pullBias: 10, coverage: 3.0, spotIn: 4.5,
               eyeSD: 5.0, aggr: 0, commit: 0.55, fbLean: 1.3, learn: 0.35, swingTilt: 32.3 };
-  print('fit_population v0.1 · ' + ROUNDS + ' rounds x ' + NPICK + ' picks (best of ' + BB.FARM_N + ')');
+  print('fit_population v0.2 · ' + ROUNDS + ' rounds x ' + NPICK + ' picks (best of ' + BB.FARM_N + ')');
   for (var k = 0; k < ROUNDS; k++) {
     var m = moments(sample(SEED + k).S);
     print('round ' + k + ': weight ~ bat speed ' + m.rwv.toFixed(2) + ' (exponent ' + BB.CHAIN.powerExp.toFixed(3) + '); picked height ' + m.h[0].toFixed(2) + ' ± ' + m.h[1].toFixed(2) + '  weight ' + m.w[0].toFixed(1) + ' ± ' + m.w[1].toFixed(1) + '  swing length ' + m.L[0].toFixed(3) + ' ± ' + m.L[1].toFixed(3) + '  bat speed ' + m.v[0].toFixed(2) + ' ± ' + m.v[1].toFixed(2));
@@ -71,7 +82,13 @@
       if (t === 'swingTilt') T[t][1] *= Math.pow(3.8 / sd(v), 0.8);
       if (t === 'attack') T[t][1] *= Math.pow(3.51 / sd(v), 0.8);      // the leaderboard's attack angle spread, 2025 (its mean stays the calibrated one)
     });
+    Object.keys(FSK).forEach(function (t) { T[t][0] += 0.8 * (FSK[t] - mean(Sk.map(function (b) { return net(b, t); }))); });
+    var sp = Sk.map(function (b) { return b.speed; });
+    T.speed[0] += 0.8 * (SPEED[0] - mean(sp)); T.speed[1] *= Math.pow(SPEED[1] / sd(sp), 0.8);
   }
+  var Sf = sample(SEED + 301).S;
+  print('fielders, picked mean (net of position) against the calibrated mean: ' + Object.keys(FSK).map(function (t) { return t + ' ' + mean(Sf.map(function (b) { return net(b, t); })).toFixed(3) + '/' + FSK[t]; }).join(', ') +
+        '; sprint speed ' + mean(Sf.map(function (b) { return b.speed; })).toFixed(2) + ' ± ' + sd(Sf.map(function (b) { return b.speed; })).toFixed(2) + ' (league 27.34 ± 1.35)');
   print('skills, picked mean against the calibrated mean: ' + SKILLS.map(function (t) { var v = sample(SEED + 300).S.map(function (b) { return t === 'coverage' ? b[t] / b.armIdx : b[t]; }); return t + ' ' + mean(v).toFixed(3) + '/' + SK0[t]; }).join(', '));
   // PITCHERS: the picked starters and relievers have the league's speed, command, slot and height, and Savant's mean spin
   var TP = { SP: { v: [94.06, 2.16], cx: [7.2, 0.52], cz: [8.4, 0.92] }, RP: { v: [95.05, 2.37], cx: [8.4, 0.60], cz: [8.2, 0.90] }, arm: [37.7, 12.8], h: [74.7, 2.1] };
@@ -119,4 +136,5 @@
   print('    CHAIN.powerExp = ' + BB.CHAIN.powerExp.toFixed(3));
   ['fbVeloSP', 'fbVeloRP', 'cmdXSP', 'cmdZSP', 'cmdXRP', 'cmdZRP', 'armAngle', 'pHeightIn', 'spinTalent'].forEach(function (k2) { print('    ' + e(k2, 2)); });
   SKILLS.forEach(function (k2) { print('    ' + e(k2, 3)); });
+  ['speed'].concat(Object.keys(FSK)).forEach(function (k2) { print('    ' + e(k2, 3)); });
 })(typeof arguments !== 'undefined' ? arguments : []);

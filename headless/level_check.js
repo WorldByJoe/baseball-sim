@@ -1,5 +1,5 @@
 /* ============================================================================
-   level_check.js · v0.1 · 2026-10-03
+   level_check.js · v0.2 · 2026-10-03
 
    The pro pool, level by level (bb_engine v2.0: the candidate the scouts rank
    k-th of six plays at level k). Part 1: the traits at each level beside the
@@ -18,6 +18,7 @@
          (LEVEL 1-6; 'traits' adds part 1)
 
    CHANGED
+     v0.2  fielding traits by level (bb_engine v2.1: the farm values defence)
      v0.1  first build
 ============================================================================ */
 (function (A) {
@@ -31,13 +32,14 @@
     var rng0 = BB.makeRng(SEED + 1000), M = 3000;
     var HT = [['bat speed (mph)', function (b) { return b.batSpeed; }, 2], ['height (in)', function (b) { return b.heightIn; }, 1], ['weight (lb)', function (b) { return b.weightLb; }, 0],
               ['recognition eyeSD', function (b) { return b.eyeSD; }, 2], ['pitch spotting (in)', function (b) { return b.spotIn; }, 2], ['timing sd (ms)', function (b) { return b.timingSD; }, 1],
-              ['along-barrel sd', function (b) { return b.longSD; }, 2], ['swing aggression', function (b) { return b.aggr; }, 3], ['attack angle', function (b) { return b.attack; }, 1]];
+              ['along-barrel sd', function (b) { return b.longSD; }, 2], ['swing aggression', function (b) { return b.aggr; }, 3], ['attack angle', function (b) { return b.attack; }, 1],
+              ['sprint speed (ft/s)', function (b) { return b.speed; }, 2], ['fielder reaction (s)', function (b) { return b.react; }, 3], ['fielder route', function (b) { return b.route; }, 3]];
     var PT = [['four-seam SP (mph)', function (p) { return p.fbVelo; }, 2, 'SP'], ['four-seam RP (mph)', function (p) { return p.fbVelo; }, 2, 'RP'],
               ['command x SP (in)', function (p) { return p.cmd[0]; }, 2, 'SP'], ['command z SP (in)', function (p) { return p.cmd[1]; }, 2, 'SP'], ['arm angle', function (p) { return p.armAngle; }, 1, 'SP']];
     var cols = ['pool'].concat([1, 2, 3, 4, 5, 6].map(function (k) { return 'level ' + k; }));
     print('PART 1 - the traits by level (' + M + ' draws each; level 1 the majors, 2 Triple-A ... 6 rookie ball)');
     print(pad('', 22) + cols.map(function (c) { return pad(c, 15); }).join(''));
-    var Hs = [null, 1, 2, 3, 4, 5, 6].map(function (k) { var S = []; for (var i = 0; i < M; i++) S.push(k ? BB.makeBatter(rng0, { level: k }) : BB.drawBatter(rng0, {})); return S; });
+    var Hs = [null, 1, 2, 3, 4, 5, 6].map(function (k) { var S = []; for (var i = 0; i < M; i++) S.push(k ? BB.makeBatter(rng0, { level: k }) : BB.drawBatter(rng0, { pos: ['C', '1B', '2B', 'SS', '3B', 'LF', 'CF', 'RF', 'DH'][i % 9] })); return S; });
     HT.forEach(function (t) { print(pad(t[0], 22) + Hs.map(function (S) { return pad(ms(S.map(t[1]), t[2]), 15); }).join('')); });
     var Ps = {};
     ['SP', 'RP'].forEach(function (rl) { Ps[rl] = [null, 1, 2, 3, 4, 5, 6].map(function (k) { var S = []; for (var i = 0; i < M / 2; i++) S.push(k ? BB.makePitcher(rng0, { role: rl, level: k }) : BB.drawPitcher(rng0, { role: rl })); return S; }); });
