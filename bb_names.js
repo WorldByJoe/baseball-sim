@@ -150,7 +150,7 @@ var BBNames = (function () {
     for (;;) {
       var o = ORIGINS[rng.pickW(ORIGINS.map(function (x) { return x.w; }))];
       var p = { first: pick(rng, o.first), last: pick(rng, o.last), origin: o.key };
-      if (!BLOCK[p.first + ' ' + p.last]) return p;
+      if (!BLOCK[p.first + ' ' + p.last] && p.first !== p.last) return p;   // and never 'Brooks Brooks' (a few names are in both pools)
     }
   }
   function fullName(p) { return p.first + ' ' + p.last; }
