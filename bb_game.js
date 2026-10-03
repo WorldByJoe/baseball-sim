@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_game.js · v0.9 · 2026-10-03
+   bb_game.js · v1.0 · 2026-10-03
 
    A whole game: two teams, nine innings or more, lineups that turn over,
    pitchers who tire and get replaced, managers with their own habits.
@@ -37,18 +37,20 @@
 
    Not here yet: pinch-runners, injuries, weather that changes during a game.
 
+   STANDING ROSTERS (v1.0, for bb_league.js): makeRoster draws a club's
+   twenty-six (thirteen hitters - two catchers, a utility infielder, a fourth
+   outfielder - five starters, eight relievers) and its manager once;
+   teamFromRoster sets the day's team from it: the best fielder the roster has at
+   each position (the farm's own value at that position), the best remaining bat
+   at DH, the rest on the bench, the next man in the five-man rotation.
+
    CHANGED
+     v1.0  standing rosters for a league: makeRoster, teamFromRoster
      v0.9  intentional walks (signalled, 2017-2022 rule), pickoffs, late defensive
            substitutions and NL double switches; a bench of four drawn for their
            positions; the pinch-hitter is the best bat on the bench
      v0.8  a team can be drawn from a level of the pro pool (o.level: 1 the majors,
            2 Triple-A ... 6 rookie ball; bb_engine v2.0)
-     v0.7  a pitch past the catcher is rarer per pitch in the dirt (0.4 of before):
-           with the measured command (engine v1.4) four times as many pitches
-           bounce, as many as in the league
-     v0.6  the running game: steals decided and timed pitch by pitch, wild pitches
-           and passed balls from where the pitch crosses against the catcher's
-           blocking; a third out on the bases ends a PA uncharged ('END')
 ============================================================================ */
 
 var BBGame = (function () {
@@ -107,6 +109,47 @@ var BBGame = (function () {
     t.manager = { hook: Math.min(0.85, Math.max(0.3, rng.n(0.5, 0.12))), warmAt: 0.2,
                   ibb: Math.max(0.02, rng.n(IBB_GAP[0], IBB_GAP[1])), glove: Math.max(0, rng.n(GLOVE_BAR[0], GLOVE_BAR[1])) };
     return t;
+  }
+
+  // --------------------------------------------------- standing rosters
+  var ROSTER_POS = ['C', 'C', '1B', '2B', 'SS', '3B', 'SS', 'LF', 'CF', 'RF', 'CF', '1B', 'DH'];   // a club's thirteen hitters, by the position each was found for
+  function makeRoster(rng, o) {
+    o = o || {};
+    var lv = o.level || 1, taken = {}, R = { city: o.city, nick: o.nick, name: o.city + ' ' + o.nick, level: lv };
+    R.hitters = ROSTER_POS.map(function (pos) { var b = named(rng, BB.makeBatter(rng, { pos: pos, level: lv }), taken); b.homePos = pos; return b; });
+    function pitcher(role) {
+      var p = named(rng, BB.makePitcher(rng, { role: role, level: lv }), taken);
+      p.bat = BB.makeBatter(rng, { pitcher: true, pos: 'P' }); p.bat.name = p.name; p.bat.id = p.id;
+      return p;
+    }
+    R.starters = [0, 1, 2, 3, 4].map(function () { return pitcher('SP'); });
+    R.relievers = [0, 1, 2, 3, 4, 5, 6, 7].map(function () { return pitcher('RP'); });
+    R.manager = { hook: Math.min(0.85, Math.max(0.3, rng.n(0.5, 0.12))), warmAt: 0.2,
+                  ibb: Math.max(0.02, rng.n(IBB_GAP[0], IBB_GAP[1])), glove: Math.max(0, rng.n(GLOVE_BAR[0], GLOVE_BAR[1])) };
+    return R;
+  }
+  // The day's team: the scarce positions filled first, each by the best man the roster has who can play there (a catcher
+  // catches, a shortstop plays short: only catchers have a catcher's arm and blocking, and the first build that let anyone
+  // catch scored a fifth fewer runs); the best remaining bat at DH; the rest on the bench (each keeps the position he was
+  // found for as the one he can cover). gameNo turns the rotation.
+  var ELIG = { C: ['C'], SS: ['SS'], '2B': ['2B', 'SS'], '3B': ['3B', 'SS'], CF: ['CF'], LF: ['LF', 'CF', 'RF'], RF: ['RF', 'CF', 'LF'], '1B': ['1B', '3B', 'DH', 'C', 'LF', 'RF'] };
+  function teamFromRoster(R, gameNo) {
+    var free = R.hitters.slice(), byPos = {};
+    ['C', 'SS', 'CF', '2B', '3B', 'RF', 'LF', '1B'].forEach(function (pos) {
+      var best = null; free.forEach(function (b) { if (ELIG[pos].indexOf(b.homePos) < 0) return; var v = BB.playerValue(b, pos); if (!best || v > best.v) best = { b: b, v: v }; });
+      if (!best) free.forEach(function (b) { var v = BB.playerValue(b, pos); if (!best || v > best.v) best = { b: b, v: v }; });   // nobody suited left: the best of the rest
+      free.splice(free.indexOf(best.b), 1); best.b.pos = pos; byPos[pos] = best.b;
+    });
+    var dh = free.slice().sort(function (a, b) { return BB.hitterValue(b) - BB.hitterValue(a); })[0];
+    free.splice(free.indexOf(dh), 1); dh.pos = 'DH'; byPos.DH = dh;
+    var players = POS.map(function (pos) { return byPos[pos]; }).sort(function (a, b) { return batScore(b) - batScore(a); });
+    var slots = [3, 4, 2, 1, 5, 6, 7, 8, 9], order = [];
+    players.forEach(function (p, i) { order[slots[i] - 1] = p; });
+    free.forEach(function (b) { b.pos = b.homePos === 'DH' ? '1B' : b.homePos; b.benchPos = b.pos; });
+    function fresh(p) { p.load = 0; p.used = false; p.pitchesToday = 0; p.warm = 0; return p; }   // a day's rest between games
+    var pen = R.relievers.map(fresh).sort(function (a, b) { return b.pitches[0].velo - a.pitches[0].velo; });
+    return { city: R.city, nick: R.nick, name: R.name, level: R.level, lineup: order, bench: free, starter: fresh(R.starters[(gameNo || 0) % R.starters.length]),
+             bullpen: pen, closer: pen[0], manager: R.manager };
   }
 
   // ------------------------------------------------------------ the game
@@ -458,7 +501,7 @@ var BBGame = (function () {
     return out.join('\n');
   }
 
-  return { version: '0.9', makeTeam: makeTeam, canPlay: canPlay, simGame: simGame, line: line, playByPlay: playByPlay, newStats: newStats };
+  return { version: '1.0', makeTeam: makeTeam, makeRoster: makeRoster, teamFromRoster: teamFromRoster, canPlay: canPlay, simGame: simGame, line: line, playByPlay: playByPlay, newStats: newStats };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = BBGame;

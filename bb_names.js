@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_names.js · v0.1 · 2026-09-29
+   bb_names.js · v0.2 · 2026-10-03
 
    Names for players, umpires, teams and ballparks, drawn from the engine's
    seeded random numbers so a seed replays the same people.
@@ -13,7 +13,15 @@
    surnames that point at one real player (a random pairing must never
    reproduce a real person).
 
+   A LEAGUE (v0.2, for bb_league.js): thirty organisations, each with a
+   major-league club and five minor-league clubs. Joe (2026-10-03): the majors
+   take larger cities and compelling animals or icons (a big city may have a
+   real MLB club; the world is fictional), the minors smaller cities and more
+   obscure ones. No nickname here belongs to a real major-league club in any
+   sport or to a current minor-league baseball club we know of.
+
    CHANGED
+     v0.2  league(): thirty organisations, each a major-league club and five minor-league clubs
      v0.1  first build - ~2,000 first-by-last combinations per origin pool
 ============================================================================ */
 
@@ -76,6 +84,50 @@ var BBNames = (function () {
                'Owls', 'Condors', 'Sentinels', 'Voyagers', 'Beacons', 'Anglers', 'Coyotes', 'Ironworkers', 'Nighthawks',
                'Sandpipers', 'Bison', 'Grizzlies', 'Wolves', 'Harriers', 'Kestrels', 'Rattlers', 'Ospreys', 'Mudcats',
                'Thunderbirds', 'Surveyors', 'Engineers', 'Prospectors', 'Keelboats', 'Loggers', 'Cyclones', 'Steelheads'];
+  // the league (v0.2): big cities and compelling names for the majors; small cities and obscure ones below
+  var MAJOR_CITIES = ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Philadelphia', 'Phoenix', 'San Antonio', 'San Diego',
+                      'Dallas', 'Atlanta', 'Miami', 'Boston', 'Seattle', 'Denver', 'Detroit', 'Minneapolis', 'St. Louis',
+                      'Baltimore', 'Pittsburgh', 'Cleveland', 'Washington', 'Toronto', 'Montréal', 'Kansas City', 'Tampa',
+                      'Las Vegas', 'Portland', 'Nashville', 'Charlotte', 'San Francisco'];
+  var MAJOR_NICKS = ['Condors', 'Orcas', 'Thunderbirds', 'Stallions', 'Bison', 'Pumas', 'Wolverines', 'Rattlers', 'Cobras',
+                     'Vipers', 'Ospreys', 'Barracudas', 'Leopards', 'Elk', 'Moose', 'Stags', 'Typhoons', 'Comets', 'Meteors',
+                     'Mastodons', 'Kodiaks', 'Sentinels', 'Harriers', 'Peregrines', 'Mustangs', 'Bighorns', 'Hammerheads',
+                     'Stingrays', 'Glaciers', 'Ironclads', 'Dreadnoughts', 'Griffins', 'Cougars', 'Sabercats'];
+  var MINOR_CITIES = ['Bozeman', 'Missoula', 'Tupelo', 'Kalamazoo', 'Dubuque', 'Muncie', 'Pueblo', 'Casper', 'Bend', 'Yakima',
+                      'Elko', 'Ames', 'Stillwater', 'Lawrence', 'Paducah', 'Joplin', 'Texarkana', 'Hattiesburg', 'Valdosta',
+                      'Dothan', 'Florence', 'Asheville', 'Roanoke', 'Lynchburg', 'Altoona', 'Utica', 'Bangor', 'Keene',
+                      'Ithaca', 'Erie', 'Sandusky', 'Marquette', 'Duluth', 'Fargo', 'Bismarck', 'Rapid City', 'Cheyenne',
+                      'Laramie', 'Flagstaff', 'Prescott', 'Yuma', 'Las Cruces', 'Amarillo', 'Abilene', 'Lubbock', 'Tyler',
+                      'Waco', 'Lake Charles', 'Houma', 'Gadsden', 'Macon', 'Athens', 'Augusta', 'Spartanburg', 'Wilmington',
+                      'Hagerstown', 'Cumberland', 'Morgantown', 'Wheeling', 'Zanesville', 'Lima', 'Kokomo', 'Terre Haute',
+                      'Champaign', 'Peoria', 'Moline', 'Waterloo', 'Mankato', 'Eau Claire', 'Oshkosh', 'Traverse City',
+                      'Saginaw', 'Bay City', 'Elmira', 'Binghamton', 'Scranton', 'Reading', 'Lancaster', 'Frederick',
+                      'Salisbury', 'Dover', 'New Bedford', 'Pittsfield', 'Rutland', 'Concord', 'Lewiston', 'Brattleboro',
+                      'Grand Junction', 'Durango', 'Pocatello', 'Twin Falls', 'Idaho Falls', 'Walla Walla', 'Medford',
+                      'Eureka', 'Chico', 'Redding', 'Visalia', 'Modesto', 'Stockton', 'Bakersfield', 'Fresno', 'Salinas',
+                      'San Luis Obispo', 'Santa Rosa', 'Klamath Falls', "Coeur d'Alene", 'Helena', 'Great Falls', 'Billings',
+                      'Sheridan', 'Gillette', 'Scottsbluff', 'Kearney', 'Grand Island', 'Salina', 'Hutchinson', 'Dodge City',
+                      'Enid', 'Lawton', 'Muskogee', 'Fort Smith', 'Jonesboro', 'Pine Bluff', 'Greenville', 'Meridian',
+                      'Natchez', 'Monroe', 'Alexandria', 'Beaumont', 'Victoria', 'Laredo', 'San Angelo', 'Odessa', 'Roswell',
+                      'Farmington', 'Gallup', 'Kingman', 'Hilo', 'Juneau', 'Fairbanks', 'Sitka', 'Thunder Bay', 'Sudbury',
+                      'Moncton', 'Saint John', 'Kingston', 'Peterborough', 'Lethbridge', 'Kamloops', 'Nanaimo', 'Brandon',
+                      'Regina', 'Saskatoon', 'Red Deer', 'Medicine Hat', 'Prince George', 'Trois-Rivières', 'Sherbrooke',
+                      'Charlottetown', 'Fredericton'];
+  var MINOR_NICKS = ['Pikas', 'Axolotls', 'Mudpuppies', 'Hellbenders', 'Shrikes', 'Gars', 'Bowfins', 'Paddlefish', 'Newts',
+                     'Voles', 'Shrews', 'Kingsnakes', 'Horned Toads', 'Tarantulas', 'Ringtails', 'Coatis', 'Sculpins',
+                     'Nightjars', 'Grackles', 'Muskrats', 'Weasels', 'Stoats', 'Salamanders', 'Cicadas', 'Katydids',
+                     'Dragonflies', 'Sunfish', 'Crappies', 'Bullfrogs', 'Peepers', 'Mayflies', 'Box Turtles', 'Armadillos',
+                     'Javelinas', 'Pronghorns', 'Marmots', 'Ptarmigans', 'Puffins', 'Killdeer', 'Moles', 'Possums', 'Skunks',
+                     'Porcupines', 'Lampreys', 'Sturgeon', 'Mudskippers', 'Water Striders', 'Stoneflies', 'Chuckwallas',
+                     'Gila Monsters', 'Jackrabbits', 'Prairie Dogs', 'Pocket Gophers', 'Burrowing Owls', 'Whippoorwills',
+                     'Bobwhites', 'Woodcocks', 'Snipes', 'Egrets', 'Ibises', 'Cormorants', 'Grebes', 'Coots', 'Mergansers',
+                     'Teals', 'Lungfish', 'Hagfish', 'Tadpoles', 'Toads', 'Walleyes', 'Muskies', 'Pickerel', 'Smelts',
+                     'Alewives', 'Minnows', 'Darters', 'Chubs', 'Luna Moths', 'Orb Weavers', 'Scorpions', 'Centipedes',
+                     'Millipedes', 'Tinkers', 'Millers', 'Coopers', 'Sawyers', 'Lamplighters', 'Riverboats', 'Haymakers',
+                     'Gaslights', 'Brakemen', 'Switchmen', 'Linemen', 'Ploughboys', 'Canners', 'Smelters', 'Quarrymen',
+                     'Glassblowers', 'Tanners', 'Chandlers', 'Wheelwrights', 'Blacksmiths', 'Cobblers', 'Bargemen',
+                     'Ferrymen', 'Drovers', 'Sodbusters', 'Rainmakers', 'Stargazers', 'Tumbleweeds', 'Windmills',
+                     'Pumpjacks', 'Paddlewheels', 'Telegraphs', 'Sternwheelers', 'Ice Cutters', 'Hop Pickers', 'Cranberries'];
   var PARK_A = ['Riverside', 'Union', 'Harbor', 'Summit', 'Liberty', 'Founders', 'Heritage', 'Lakeshore', 'Granite',
                 'Meridian', 'Northgate', 'Canal', 'Prairie', 'Ironbridge', 'Cedar'];
   var PARK_B = ['Field', 'Park', 'Stadium', 'Ballpark', 'Grounds'];
@@ -90,7 +142,7 @@ var BBNames = (function () {
    'Kyle Tucker', 'Bryce Harper', 'Mitch Keller', 'Logan Webb', 'Evan Carter', 'Mason Miller', 'Tyler Anderson',
    'Zach Wheeler', 'Cody Bellinger', 'Brandon Crawford', 'Drew Pomeranz', 'Andrew Miller', 'Adam Wainwright',
    'Paul Goldschmidt', 'Matt Carpenter', 'Josh Donaldson', 'Clayton Kershaw', 'Walker Buehler', 'Chase Anderson',
-   'Brady Singer', 'Hunter Pence', 'Kevin Pillar', 'Garrett Richards', 'Brandon Morrow', 'Trevor Bauer'
+   'Brady Singer', 'Hunter Pence', 'Kevin Pillar', 'Garrett Richards', 'Brandon Morrow', 'Trevor Bauer', 'Aaron Boone'
   ].forEach(function (n) { BLOCK[n] = true; });
 
   function pick(rng, a) { return a[Math.floor(rng.u() * a.length)]; }
@@ -111,8 +163,26 @@ var BBNames = (function () {
     return [{ city: c1, nick: n1 }, { city: c2, nick: n2 }];
   }
   function park(rng) { return pick(rng, PARK_A) + ' ' + pick(rng, PARK_B); }
+  // A league of nOrg organisations: each a major-league club (a big city, a compelling name) and one club at each of
+  // the five levels below (small cities, obscure names). Every city once; a nickname once per level, and once in the
+  // whole league while the list lasts.
+  function league(rng, nOrg) {
+    function deal(list, n) { var a = list.slice(), out = []; for (var i = 0; i < n; i++) { if (!a.length) a = list.slice(); out.push(a.splice(Math.floor(rng.u() * a.length), 1)[0]); } return out; }
+    var mc = deal(MAJOR_CITIES, nOrg), mn = deal(MAJOR_NICKS, nOrg), lc = deal(MINOR_CITIES, 5 * nOrg), pool = MINOR_NICKS.slice(), orgs = [];
+    var levelNicks = [];
+    for (var lv = 0; lv < 5; lv++) {   // nicknames: unique within a level, drawn from what the league has not used yet
+      var row = [];
+      for (var k = 0; k < nOrg; k++) {
+        var avail = pool.filter(function (x) { return row.indexOf(x) < 0; }); if (!avail.length) { pool = MINOR_NICKS.slice(); avail = pool.filter(function (x) { return row.indexOf(x) < 0; }); }
+        var nk = avail[Math.floor(rng.u() * avail.length)]; row.push(nk); pool.splice(pool.indexOf(nk), 1);
+      }
+      levelNicks.push(row);
+    }
+    for (var o = 0; o < nOrg; o++) orgs.push({ teams: [{ city: mc[o], nick: mn[o] }].concat([0, 1, 2, 3, 4].map(function (lv) { return { city: lc[o * 5 + lv], nick: levelNicks[lv][o] }; })) });
+    return orgs;
+  }
 
-  return { person: person, fullName: fullName, teams: teams, park: park };
+  return { person: person, fullName: fullName, teams: teams, park: park, league: league };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = BBNames;
