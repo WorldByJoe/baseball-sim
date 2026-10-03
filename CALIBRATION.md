@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v2.2 · 2026-10-03`
+`CALIBRATION.md · v2.3 · 2026-10-03`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -674,6 +674,26 @@ At level 1 with best of six, the suite (seeds 3, 11, 29): runs 3.88-4.00 per tea
 
 Caveats for the level comparison: the pool is static, while Triple-A's players are younger (26.9 against 28.3) and some are still developing; a club also keeps veterans in Triple-A as cover, so it is not purely the second-best of six. Triple-A's ball and the Pacific Coast League's parks carry differently (HR% for the International League alone: 2.81).
 
+### The contact rebuild, stage 2: the bat's face and its path (bb_engine v2.3, bb_field v0.8; 2026-10-03)
+
+Joe (2026-10-03): keep building believable relationships between traits and outcomes, don't overtune to Statcast, and leave what seems off as a mystery until the whole model is built. So this stage fits one trait to its own measurement and one physical constant, and lists what is left under "Open mysteries" below. Runs: `statcast/bat_direction.py`, `headless/spray_check.js` (600 hitters × 60 PA), a 4 × 4 grid in a scratch engine, the value and fielding refits, `tools/fit_population.js`, the suite at seeds 3, 11 and 29, `headless/level_check.js`, `headless/contact_score.js`, `headless/bip_check.js`.
+
+**What the league's bat does.** Statcast records each tracked swing's attack direction, the sweet spot's horizontal direction of travel at contact (its sign + toward the opposite field; turned here to + pulled). Over 2025's 42 days: all swings +0.4 ± 19.0 deg, balls in play −0.5 ± 12.3; hitters' own means +0.3 ± 4.3 (155 hitters with 200+ tracked swings), within a hitter 18.2. The league's bat meets the ball square to centre field. The model's bat pointed 9 deg to the pull side (hitters' means +9.0 ± 5.4), from `pullBias` (10 deg, set when the only target was the spray of fair balls, which the pulled fouls had truncated). Yet a ball met with a square path goes about 14 deg to the pull side in the league (spray = 14.4 + 1.5 × the bat's pull direction on square contact), while the model's collision sent it nearly where the path pointed.
+
+**What was built.** The bat's face and its path are now separate. The path is the barrel's direction of travel, which Statcast measures; the face is the way its hitting surface points, square to the barrel, and it is the face that sends the ball: the contact normal is built from the face, the barrel's velocity from the path. With the hands still moving at contact the barrel does not travel square to itself, so the face points `FACE_PATH` = 9 deg further to the pull side than the path, and the face's swing-to-swing scatter (`faceSD`) and the turn for an inside pitch (`LOC_FACE`) are the face's, not the path's (the path's scatter within a hitter came to 16.7 deg, the league's 18.2; with the face scatter on the path it had been 19.7). `pullBias` was refitted so the path points as Statcast's attack direction does (major leaguers' mean 1 deg); `FACE_PATH` is the one constant fitted to the ball's spray. The infielders now shade by the path's pull plus the face's; the screen draws the bat square to its face. The scouts' values, fielding values and the pool were refitted.
+
+| (spray_check, seed 5; + pulled) | v2.2 | v2.3 | league |
+|---|---|---|---|
+| bat direction, all swings | 9.3 ± 20.9 | 1.2 ± 17.9 | 0.4 ± 19.0 |
+| bat direction, balls in play | 6.1 ± 11.8 | −1.3 ± 10.9 | −0.5 ± 12.3 |
+| hitters' own means | 9.0 ± 5.4 | 1.0 ± 5.1 | 0.3 ± 4.3 |
+| spray: ground balls / liners / flies | 9.4 / 4.4 / −2.2 | 8.5 / 5.4 / −1.6 | 15.4 / 5.7 / −2.8 |
+| squared-up per contact / per foul (contact_score) | .510 / .342 | .477 / .288 | .435 / .225 |
+| runs per team-game (seeds 3, 11, 29) | 3.77-4.00 | 3.52-3.81 | 4.39 |
+| K% / BB% / HR% | 20.5-21.2 / 8.3-8.8 / 2.9-3.5 | 21.1-21.6 / 8.4-8.8 / 2.8-3.2 | 22.6 / 8.2 / 3.0 |
+
+What it did, in these runs: the bat now meets the ball square to centre, as the league's does, liners and fly balls go where the league's go, and contact came nearer the league's squared-up rate without being fitted to it (the face's scatter about the path makes more contact a little off square). Ground balls go less to the pull side than the league's, runs fell about 0.15 a game, and fouls on square contact stayed at .31: left as mysteries.
+
 ### The contact rebuild, stage 1: the swing's reach and read (bb_engine v2.2; 2026-10-03)
 
 Joe asked for the contact rebuild after the miss-distance diagnosis. **The scorecard.** `headless/contact_score.js` measures, in one table with one score, every target of what a swing becomes: whiffs, fouls and miss distances by pitch kind (A), squared-up per contact, ball in play and foul (B), the vertical miss of contact - launch angle minus attack angle - by band with its foul and squared-up shares (C), and whiffs and misses beyond 3 in by how far outside the zone the pitch crossed, for each kind (D; `statcast/misses.py` v0.2). **Familiarity, fixed in every tool.** In games a batter has seen the pitcher a median 9 times when he swings (mean 12.6, 90th percentile 28); the check and fit tools had drawn 0-80 uniformly, so they measured batters far more used to the pitcher than in a game, and their whiffs ran about .03 under the games'. They now draw 40 × u × u pitches at the start of each plate appearance. Runs: random and local searches over seven constants in scratch copies of the engine (contact_score, 600 hitters × 40 PA, seed 5); a read grid checked in 300 games; the chain (`tools/hitter_value.js`, `tools/pitcher_value.js`, `tools/fit_population.js`, `tools/fit_swing_policy.js`); the suite at seeds 3, 11 and 29; `headless/level_check.js` at levels 1 and 2.
@@ -761,6 +781,19 @@ So the swing's scatter along the barrel, contact quality, the read of a pitch's 
 4. **Extra innings 14–18% (vs 8%)** follow from low scoring.
 5. **Not built yet:** pickoffs, intentional walks, defensive substitutions and double switches, situational positioning (infield in, no-doubles), the infield-fly rule; the cut-off man is a timing rule rather than a moving player. (Steals, wild pitches and passed balls: built 2026-09-30, see above.)
 6. **A low line drive can only be fielded once it lands.** `intercept` walks the ground track and `catchChance` looks only at the landing point, so a liner that passes an infielder at chest height goes through untouched (about one in 30 games passed within a metre of a man who had time to react). Measured while checking Joe's "balls roll past the fielder" report: in 30 games, 60 balls passed within the drawn dot's radius (1.8 m) of a man who did not field them; 52 were the pitcher and 48 passed before that man's reaction time was up, which is a comebacker, not a defect. The screen now shows the late lunge.
+
+## Open mysteries (Joe, 2026-10-03: left until the whole model is built)
+
+Where the model and the league disagree and no believable mechanism has been built for it yet. They are recorded, not tuned away; each may close when a missing piece of the model arrives, and the deeper tuning waits until then. (Engine v2.3, seeds 3, 11 and 29 unless noted.)
+
+1. **Runs are low:** 3.5-3.8 per team-game against 4.39, with BABIP .254-.262 against .291 and doubles 1.1-1.2 against 1.6.
+2. **Ground balls are pulled less** than the league's (8.5 deg against 15.4), with the bat meeting them a little more toward the opposite field than the league's (−6.0 against −3.1).
+3. **Fouls on square contact:** .31 of contact struck square vertically goes foul, against .21; the model's fouls are mostly balls met out front and pulled foul, the league's mostly glancing contact at ordinary depth. Glancing contact itself is rarer than the league's (launch minus attack angle beyond 40 deg: about .12 of contact against .23).
+4. **In-zone contact** .80 against .85 in games: breaking balls in the zone are missed too often and those that dive out of it too rarely (fooled swings do not gather on the pitches that leave the zone).
+5. **Slow fastballs are missed too often** (four-seamers under 92 mph .18-.20 against .139), so the scouts value speed less than the league's results would, and one level down the pitchers' speed steps down a third to a half as much as Triple-A's.
+6. **Triple-A's BABIP** is .026 above the majors'; the model's level 2 matches its level 1. Triple-A's hitters also chase less than the majors' (the model's chase a little more).
+7. **Errors** 0.8 a game against 0.55; **steals** 0.6-0.7 against 0.47.
+8. From before: K% ~ release height has the wrong sign (+.16 against −.22), BB% ~ arm angle is flat (+.20 in the league), uphill swings cost too many whiffs (attack ~ whiff +.66 against +.53), bat speed ~ whiff is under half the league's (+.26 to +.35 against +.69), liners at 15-20 deg carry 10-20 ft too far.
 
 ## Known gaps, to fix with mechanisms rather than knob-turning
 
