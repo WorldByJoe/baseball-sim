@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-traits_doc.py · v0.3 · 2026-10-02
+traits_doc.py · v0.4 · 2026-10-02
 
 Writes TRAITS.md, the list of every player trait and how the population of
 players is drawn, straight from bb_engine.js: the TRAITS table (mean, spread,
 range and the comment beside each entry), the position offsets (FIELD_MEANS),
-the pitch types (PITCH_TYPES) and the repertoires (ARCH). Run it after any
+the pitch types (PITCH_TYPES) and the repertoire library (REPERTOIRES). Run it after any
 change to those tables, so the list never drifts from the engine:
 
   python3 tools/traits_doc.py
@@ -16,6 +16,7 @@ beyond "normal, clipped to its range" is written in DRAWN below; when the
 engine draws a trait differently, change it here too.
 
 CHANGED
+  v0.4  the pitcher's body and delivery traits; the repertoire library replaces the archetypes (engine v1.6)
   v0.3  two-axis command; each type's command factor and plate scatter; pitchers' aiming habits (engine v1.4)
   v0.2  pitch types: each pitcher's seam break, and how pitches vary from pitch to pitch (engine v1.0)
   v0.1  first build
@@ -40,6 +41,8 @@ DRAWN = {
     'pTimingSD': 'replaces timingSD for a pitcher batting', 'pBarrelSD': 'replaces motorIn for a pitcher batting',
     'pSpotIn': 'replaces spotIn for a pitcher batting', 'pEyeSD': 'replaces eyeSD for a pitcher batting', 'pAttack': 'replaces attack for a pitcher batting',
     'fbVeloSP': 'normal, clipped; starters', 'fbVeloRP': 'normal, clipped; relievers',
+    'pHeightIn': 'normal, clipped; the root of the pitcher\'s chain', 'pWeightLb': 'normal about the height line, clipped',
+    'armAngle': 'normal, clipped; sets his release point, turns his pitches\' movement, picks his repertoire',
     'cmdXSP': 'normal, clipped; starters', 'cmdZSP': 'normal, clipped; starters', 'cmdXRP': 'normal, clipped; relievers', 'cmdZRP': 'normal, clipped; relievers',
     'staminaSP': 'normal, clipped; starters', 'staminaRP': 'normal, clipped; relievers',
     'umpEdge': 'drawn separately for each of the four edges',
@@ -54,7 +57,7 @@ DRAWN = {
 # Units for traits whose comment in the engine does not start with one.
 UNITS = {'pBatSpeed': 'mph', 'pTimingSD': 'ms', 'pBarrelSD': 'in', 'pSpotIn': 'in', 'pEyeSD': 'in', 'pAttack': 'deg',
          'fbVeloSP': 'mph', 'fbVeloRP': 'mph', 'cmdXSP': 'in', 'cmdZSP': 'in', 'cmdXRP': 'in', 'cmdZRP': 'in', 'staminaSP': 'pitches', 'staminaRP': 'pitches',
-         'relHt': 'ft', 'relSide': 'ft', 'ext': 'ft', 'speed': 'ft/s', 'armMph': 'mph', 'armIdx': 'ratio', 'aggr': 'share', 'commit': 'share',
+         'pHeightIn': 'in', 'pWeightLb': 'lb', 'armAngle': 'deg', 'speed': 'ft/s', 'armMph': 'mph', 'armIdx': 'ratio', 'aggr': 'share', 'commit': 'share',
          'fbLean': 'factor', 'learn': 'share', 'route': 'share', 'glove': 'share', 'block': 'share'}
 GROUPS = [('hitters', 'Hitters'), ('pitchers when they bat', 'Pitchers when they bat (NL rules)'), ('pitchers', 'Pitchers'), ('umpires', 'Umpires'),
           ('catchers', 'Catchers'), ('fielding and running', 'Fielding and running (every player)'), ('the running game', 'The running game')]
@@ -113,11 +116,11 @@ def parse_pitch_types(src):
     return out
 
 
-def parse_arch(src):
-    b = block(src, '  var ARCH = [', '\n  ];')
-    out = []
-    for name, w, mix in re.findall(r"name:\s*'([^']*)',\s*w:\s*([0-9.]+),\s*mix:\s*\{([^}]*)\}", b):
-        out.append((name, float(w), re.findall(r'(\w+):\s*([0-9.]+)', mix)))
+def parse_reps(src):
+    b = block(src, '  var REPERTOIRES = [', '\n  ];')
+    out = [[float(x) for x in m.split(',')] for m in re.findall(r'\[([-0-9.,]+)\]', b)]
+    if len(out) < 50:
+        sys.exit('REPERTOIRES did not parse')
     return out
 
 
@@ -136,7 +139,7 @@ def main():
     rows = parse_traits(src)
     fm = parse_field_means(src)
     pt = parse_pitch_types(src)
-    arch = parse_arch(src)
+    reps = parse_reps(src)
     bats = re.search(r"pb \? \(r < ([0-9.]+) \? 'R' : r < ([0-9.]+) \? 'L' : 'S'\) : \(r < ([0-9.]+) \? 'R' : r < ([0-9.]+) \? 'L' : 'S'\)", src)
     throws = re.search(r"rng\.u\(\) < ([0-9.]+) \? 'L' : 'R'", src)
     quirk = re.search(r'if \(rng\.u\(\) < ([0-9.]+)\) \{\s*var names = \[', src)
@@ -190,11 +193,16 @@ def main():
     w('| across (in) | ' + ' | '.join(a for _, a, _ in hab) + ' |')
     w('| height (zone share) | ' + ' | '.join(b for _, _, b in hab) + ' |')
     w('\n## Repertoires\n')
-    w('A pitcher is one of these archetypes, picked with the weight shown (`ARCH`); his usage of each pitch is the mix times a lognormal factor (log-sd 0.25), renormalized. Relievers keep their best two pitches (60%) or three.\n')
-    w('| archetype | weight | mix |')
-    w('|---|---|---|')
-    for name, wt, mix in arch:
-        w('| %s | %s | %s |' % (name, num(wt), ', '.join('%s %s' % (k, v) for k, v in mix)))
+    w('A pitcher\'s repertoire is a league pitcher\'s (`REPERTOIRES`, statcast/pitcher_chain.py): drawn from the %d pitchers of 2025 (150+ pitches) in his role, weighted by how near their arm slot is to his (Gaussian, 5 deg wide); his usage of each pitch is that mix times a lognormal factor (log-sd 0.15), renormalized. Summary of the library, by role and slot (share of pitchers carrying each type, and the average number of types):\n' % len(reps))
+    TY = ['FF', 'SI', 'FC', 'SL', 'ST', 'CU', 'CH', 'FS']
+    w('| role | arm slot | pitchers | types | ' + ' | '.join(TY) + ' |')
+    w('|---|---|---|---|' + '---|' * len(TY))
+    for rl, rn in ((0, 'starters'), (1, 'relievers')):
+        for lo, hi, sn in ((-99, 33, 'under 33 deg'), (33, 43, '33-43 deg'), (43, 99, 'over 43 deg')):
+            q = [r for r in reps if r[1] == rl and lo <= r[0] < hi]
+            if not q:
+                continue
+            w('| %s | %s | %d | %.1f | %s |' % (rn, sn, len(q), sum(sum(1 for v in r[2:] if v > 0) for r in q) / len(q), ' | '.join('%.2f' % (sum(1 for r in q if r[2 + i] > 0) / len(q)) for i in range(len(TY)))))
     r1, r2, r3, r4 = (float(bats.group(i)) for i in range(1, 5))
     w('\n## Other draws\n')
     w('- **Batting hand, position players:** right %.0f%%, left %.0f%%, switch %.0f%%. **Pitchers batting:** right %.0f%%, left %.0f%%, switch %.0f%%.' % (100 * r3, 100 * (r4 - r3), 100 * (1 - r4), 100 * r1, 100 * (r2 - r1), 100 * (1 - r2)))
@@ -204,7 +212,7 @@ def main():
     w('\n## Open questions\n')
     w('- **A player below average in every category** (Joe, 2026-10-02, for later): how should the game handle a player on a team who is below average in every trait? With traits drawn independently, such players occur by chance (for k independent traits, about 1 in 2^k players is below the mean in all of them), and real rosters are the selected top of a much larger population, so they would be rare there. Not yet decided.')
     open(OUT, 'w').write('\n'.join(L) + '\n')
-    print('wrote %s: %d traits, %d positions, %d pitch types, %d repertoires' % (OUT, len(rows), len(fm), len(pt), len(arch)))
+    print('wrote %s: %d traits, %d positions, %d pitch types, %d repertoires' % (OUT, len(rows), len(fm), len(pt), len(reps)))
 
 
 if __name__ == '__main__':

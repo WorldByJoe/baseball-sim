@@ -1,12 +1,15 @@
 /* ============================================================================
-   fit_pitch_spread.js · v0.1 · 2026-10-02
+   fit_pitch_spread.js · v0.2 · 2026-10-02
 
    Fits the seam-break spreads in bb_engine.js's PITCH_TYPES (seamSD between
    pitchers, seamW pitch to pitch; [arm side, up] in inches) so that the
    model's pitches of each type spread in movement as the league's do
-   (statcast/pitch_spread.py, 42 days of 2025). The spin spreads (rpmSD,
-   effSD, tiltSD, rpmW and the engine's fixed eff and tilt scatter) are taken
-   as they stand; the seam break makes up the rest, independently, so
+   (statcast/pitch_spread.py, 42 days of 2025). Between pitchers, the model's
+   pitchers are drawn by the engine itself (makePitcher: arm slot, release
+   point, speed, spin and tilt as the chain builds them); pitch to pitch,
+   the spin spreads (rpmW and the engine's fixed eff and tilt scatter) are
+   taken around a typical pitcher. The seam break makes up the rest,
+   independently, so
      seam spread = sqrt(league spread^2 - spin-only spread^2) / k
    where k is the movement one inch of seam break gives on this flight. Where
    the spin spread alone already exceeds the league's, the seam spread is 0.
@@ -17,6 +20,8 @@
    Paste the printed seamSD and seamW into PITCH_TYPES.
 
    CHANGED
+     v0.2  between pitchers: real draws from makePitcher, so the arm slot's turn of the
+           movement and the release point's variation count (bb_engine v1.6)
      v0.1  first build (bb_engine v1.0)
 ============================================================================ */
 (function () {
@@ -29,7 +34,27 @@
   function sd(v) { var m = 0; v.forEach(function (x) { m += x; }); m /= v.length; var s = 0; v.forEach(function (x) { s += (x - m) * (x - m); }); return Math.sqrt(s / v.length); }
   var Z = []; for (var i = 0; i < N; i++) { var z = []; for (var j = 0; j < 12; j++) z.push(rng.n(0, 1)); Z.push(z); }
   // movement [IVB, HB] of N draws: between pitchers (their usual pitch) or pitch to pitch (around the typical pitcher)
+  // between pitchers: the engine's own pitchers who throw type t, each throwing his usual pitch from his release
+  var PIT = {};
+  function pitchersWith(t) {
+    if (PIT[t]) return PIT[t];
+    var r = BB.makeRng(11), out = [];
+    while (out.length < 900) { var Pp = BB.makePitcher(r, { role: 'SP' }), q = Pp.pitches.filter(function (x) { return x.type === t; })[0]; if (q) out.push({ P: Pp, q: q, z: [r.n(0, 1), r.n(0, 1)] }); }
+    return (PIT[t] = out);
+  }
+  function spreadBetween(t, seamSD) {
+    var iv = [], hb = [];
+    pitchersWith(t).forEach(function (o) {
+      var rel = BB.releasePoint(o.P), sp = o.q.velo * U.MPH, seam = [seamSD[0] * o.z[0], seamSD[1] * o.z[1]];
+      var a = BB.aim(rel, sp, o.q.rpm, o.q.tilt, o.q.eff, o.P.armSide, [0, 0.75], env, null);
+      var dir = BB.dirOf(a.yaw, a.pit), v0 = [dir[0] * sp, dir[1] * sp, dir[2] * sp];
+      var fl = BB.flyPitch(rel, v0, BB.spinVector(dir, o.q.rpm, o.q.tilt, o.q.eff, o.P.armSide), env, false, seam, o.P.armSide), none = BB.flyPitch(rel, v0, [0, 0, 0], env, false);
+      iv.push((fl.z - none.z) / IN); hb.push((fl.x - none.x) / IN * o.P.armSide);
+    });
+    return [sd(iv), sd(hb)];
+  }
   function spread(t, within, seamSD) {
+    if (!within) return spreadBetween(t, seamSD);
     var d = BB.PITCH_TYPES[t], mph = 94 + d.dv, sp = mph * U.MPH;
     var a = BB.aim(rel0, sp, d.rpm, d.tilt, d.eff, -1, [0, 0.75], env, null), iv = [], hb = [];
     Z.forEach(function (z) {
@@ -52,7 +77,7 @@
     return { L: L, spin: spin, seam: seam, got: spread(t, within, seam) };
   }
   function f2(v) { return v.map(function (x) { return x.toFixed(2); }).join(' / '); }
-  print('fit_pitch_spread v0.1: movement spread [IVB / HB] in inches; seam [arm side, up]');
+  print('fit_pitch_spread v0.2: movement spread [IVB / HB] in inches; seam [arm side, up]');
   print('type  BETWEEN PITCHERS: league | spin only | seamSD -> model   ||   PITCH TO PITCH: league | spin only | seamW -> model');
   Object.keys(LEAGUE).forEach(function (t) {
     var b = fit(t, false), w = fit(t, true);
