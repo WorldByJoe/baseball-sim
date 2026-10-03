@@ -1,5 +1,5 @@
 /* ============================================================================
-   contact_score.js · v0.2 · 2026-10-03
+   contact_score.js · v0.3 · 2026-10-03
 
    The contact scorecard: every measured target of what a swing becomes, in
    one table with one score, for rebuilding the swing's contact (scatter
@@ -22,6 +22,7 @@
    Run:  jsc bb_engine.js statcast/misses_2025.js headless/contact_score.js -- [hitters] [PA each] [seed]
 
    CHANGED
+     v0.3  check: each swing's bat speed against the hitter's own mean (statcast/misses.py v0.3)
      v0.2  familiarity as in games: 40 x u x u pitches of this pitcher seen at the start of each PA (games: median 9 at a swing, mean 12.6; was uniform to 60-80)
      v0.1  first build
 ============================================================================ */
@@ -35,12 +36,14 @@
     var a = Math.max(0, s.dLong - BB.SWEET_IN * IN, -half * IN - s.dLong), gp = Math.max(0, Math.abs(s.D) - r);
     return Math.max(0, Math.sqrt(gp * gp + a * a) - BALL_R) / IN;
   }
+  var DEV = [];
   for (i = 0; i < N; i++) {
-    var B = BB.makeBatter(rng, {});
+    var B = BB.makeBatter(rng, {}), mine = [];
     for (var k = 0; k < NPA; k++) {
       var Pi = P[(i * NPA + k) % P.length]; Pi.load = rng.u() * Pi.stamina;
       BB.simPA(Pi, B, { env: env, ump: ump, framing: 0, seen: 40 * rng.u() * rng.u(), rec: false }, rng).pitches.forEach(function (q) {
         if (!q.swing) return;
+        mine.push(q.swing.batAt || q.swing.batMph);
         var s = q.swing, r = { kind: KIND[q.pitch.type], type: q.pitch.type, mph: q.pitch.mph, contact: !!s.contact, reach: s.reach / IN };
         if (!s.contact) r.miss = gap(s);
         else if (q.bb) { var bat = s.batAt || s.batMph; r.ev = q.bb.ev; r.vm = q.bb.la - (s.attackAt !== undefined ? s.attackAt : s.attack); r.fair = !!q.bb.fair; r.sq = q.bb.ev >= 0.8 * (1.23 * bat + 0.23 * q.pitch.mph); }
@@ -48,6 +51,7 @@
         sw.push(r);
       });
     }
+    var mb = mine.reduce(function (a, b) { return a + b; }, 0) / mine.length; mine.forEach(function (b) { DEV.push(b - mb); });
   }
   var D = [];   // [label, model, league]
   function f3(v) { return isFinite(v) ? v.toFixed(3) : '  -  '; }
@@ -82,7 +86,7 @@
   });
   var ss = 0; D.forEach(function (d) { ss += (d[1] - d[2]) * (d[1] - d[2]); });
   var groups = { 'A misses by kind': D.slice(0, 18), 'B squared-up': D.slice(18, 21), 'C vertical miss': D.slice(21, nC), 'D by reach': D.slice(nC) };
-  print('contact_score v0.2 · ' + N + ' hitters x ' + NPA + ' PA · seed ' + SEED + ' · ' + sw.length + ' swings');
+  print('contact_score v0.3 · ' + N + ' hitters x ' + NPA + ' PA · seed ' + SEED + ' · ' + sw.length + ' swings');
   Object.keys(groups).forEach(function (g) {
     var G = groups[g], e = 0; G.forEach(function (d) { e += (d[1] - d[2]) * (d[1] - d[2]); });
     print('  ' + g + ': rms ' + Math.sqrt(e / G.length).toFixed(4));
@@ -93,5 +97,9 @@
     return b + ' ' + f3(s.filter(function (r) { return !r.contact; }).length / s.length) + '/' + f3(MISSES.ff_by_speed[b].whiff);
   });
   print('  check (unfitted), four-seam whiff by speed, model/league: ' + ff.join('  '));
+  DEV.sort(function (a, b) { return a - b; });
+  var BD = MISSES.bat_dev, qs = [0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99];
+  print('  check, bat speed against the hitter\'s own mean (mph), model/league: ' + qs.map(function (p) { return 'p' + Math.round(100 * p) + ' ' + DEV[Math.floor(p * (DEV.length - 1))].toFixed(1) + '/' + BD.q[String(p)].toFixed(1); }).join('  ') +
+        '   >10 below ' + f3(DEV.filter(function (x) { return x < -10; }).length / DEV.length) + '/' + f3(BD.below10));
   print('  SCORE (rms over all ' + D.length + ') ' + Math.sqrt(ss / D.length).toFixed(4));
 })(typeof arguments !== 'undefined' ? arguments : []);
