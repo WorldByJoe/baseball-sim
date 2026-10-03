@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v0.7 · 2026-10-02
+   bb_field.js · v0.8 · 2026-10-03
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -32,6 +32,7 @@
    doubles are approximate; the cut-off man is a timing rule, not a player.
 
    CHANGED
+     v0.8  infielders shade by how far a batter pulls: his path's pull plus the face's (engine v2.3)
      v0.7  outfielders move as Statcast's jump shows, stand where the league's did, and
            catch as often as the league's by exit velocity and launch angle; bounces lose
            more the steeper they land (measured); runners read the race with error and are
@@ -47,7 +48,6 @@
      v0.4  unassisted putouts: the man who covers a base runs the ball there
            himself; a first baseman far off the bag throws to the pitcher covering
            and waits for him (Joe saw a throw to an empty bag). Events 'carry', 'cover'
-     v0.3  a third-out catch carries its runner list too (every play has one shape)
 ============================================================================ */
 
 var BBField = (function () {
@@ -118,7 +118,7 @@ var BBField = (function () {
         F.at = polar(spot[0] + 3 * dv, a);
         return;
       }
-      var turn = side * Math.max(0, batter.pullBias) * s[2];
+      var turn = side * Math.max(0, batter.pullBias + BB.FACE_PATH) * s[2];   // how far he pulls: his path's pull plus the face's (engine v2.3)
       var ang = s[2] ? Math.max(-40, Math.min(40, s[1] + turn)) : s[1];
       F.std = polar(s[0], s[1]);
       F.at = polar(s[0] + (s[2] ? 1.5 * dv : 0), ang);
@@ -512,7 +512,7 @@ var BBField = (function () {
     return best.c.p > 0 && rng.u() < best.c.p ? best : null;
   }
 
-  return { version: '0.6', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
+  return { version: '0.8', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };
