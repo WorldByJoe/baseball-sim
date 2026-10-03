@@ -1,8 +1,9 @@
-<!-- trait_map.html · v1.3 · 2026-10-02
+<!-- trait_map.html · v1.4 · 2026-10-02
      The trait path map: distal traits -> proximate abilities -> the engine's stages
      (with every constant and where its value came from) -> statistics against the league.
      Keep it in step with bb_engine.js; publish to the same artifact URL.
      CHANGED
+       v1.4  engine v1.4: the pitcher's plan and command measured; aiming habits; wild pitches
        v1.3  engine v1.3: direction read, fitted swing policy, swing effort by count, run numbers
        v1.0  first version (engine v1.0), source kept in the repo from v1.3 on -->
 <meta charset="utf-8">
@@ -87,7 +88,7 @@ td.basis { color: var(--muted); }
 
 <div class="wrap">
   <div class="text">
-    <div class="eyebrow">Ballgame · engine v1.3 · 2 October 2026</div>
+    <div class="eyebrow">Ballgame · engine v1.4 · 2 October 2026</div>
     <h1>How a player's traits become the statistics we measure</h1>
     <p>Every statistic in Ballgame emerges from traits meeting physics, perception and noise. The map runs left to right: who the players are (distal), what they can do on a pitch (proximate), the engine's stages for every pitch with the constants inside them, and the statistics measured against the 2025 league. Each parameter carries a mark for where its value came from.</p>
     <p class="hint">Hover or tap any box to trace its paths; tap again to release. Tap a class below to light up every parameter of that kind. The ledger under the map lists them all.</p>
@@ -107,11 +108,11 @@ td.basis { color: var(--muted); }
 
   <div class="text">
     <h2>Reading it for the joint fit</h2>
-    <p>The amber marks are the knobs that were chosen while watching outcomes; they are the first candidates for the sensitivity analysis. The red marks were set by judgement and nothing yet ties them to a measurement; several of them sit in the pitcher's plan and arm (the intent table, target margins, command, fastball speed), which is where walks and the zone rate go wrong. Green, blue and indigo values are tied to measurements or physics and should move only if their own measurement changes. A statistic that no amber or red knob upstream can move points at a missing mechanism.</p>
+    <p>The amber marks are the knobs that were chosen while watching outcomes; they are the first candidates for the sensitivity analysis. The red marks were set by judgement and nothing yet ties them to a measurement; several of them sit in the pitcher's arm and repertoire (fastball speed, release point, the archetypes) and in the fielders' reach and the runners' margins, which is where hits on balls in play and triples go wrong. Green, blue and indigo values are tied to measurements or physics and should move only if their own measurement changes. A statistic that no amber or red knob upstream can move points at a missing mechanism.</p>
   </div>
 
   <div class="table-wrap"><table id="ledger"><thead><tr><th>Parameter</th><th>Where it acts</th><th>Value</th><th>Basis</th></tr></thead><tbody></tbody></table></div>
-  <p class="hint">Sources: bb_engine.js v1.3, bb_field.js and bb_game.js; CALIBRATION.md v1.3; league figures from statcast/fouls.py, discipline.py, pitch_spread.py and run_games over seeds 3, 11 and 29. Fielding and the game layer are shown coarsely.</p>
+  <p class="hint">Sources: bb_engine.js v1.4, bb_field.js and bb_game.js v0.7; CALIBRATION.md v1.4; league figures from statcast/fouls.py, discipline.py, pitch_spread.py, locations.py and run_games over seeds 3, 11 and 29. Fielding and the game layer are shown coarsely.</p>
 </div>
 
 <script>
@@ -146,6 +147,7 @@ td.basis { color: var(--muted); }
     ['d_shape', 0, null, 'Spin efficiency and tilt', 'per type', 'F', 'Each type\'s typical efficiency and tilt were fitted so its average movement matches Savant\'s within 0.1 in. Their spreads between pitchers were set by hand.'],
     ['d_seam', 0, null, 'Seam break', 'per pitcher, and per pitch', 'F', 'Movement the spin does not explain (seam-shifted wakes), zero on average. Its spreads were fitted so each type\'s movement spread matches the league\'s, between pitchers and pitch to pitch (v1.0).'],
     ['d_scatter', 0, null, 'Pitch-to-pitch speed, spin', '0.9-1.2 mph; 3-9% of spin', 'M', 'Within-game spreads per type, pitch-level 2025 (v1.0).'],
+    ['d_habit', 0, null, 'Aiming habits', 'per pitch: ~2 in, 0.1-0.17 of the zone', 'M', 'Each pitcher\'s own aim for each of his pitches, around the league\'s aim point: the spread between pitchers of their mean location for a type, sampling removed (statcast/locations.py, v1.4).'],
     ['d_ump', 0, 'UMPIRE AND CATCHER', 'Umpire\'s zone', 'soft edge 1.4 in, edge habits', 'H', 'Accuracy, a systematic miss per edge, one strong habit for some, and a zone that swells when the pitcher is behind. Set by hand.'],
     ['d_framing', 0, null, 'Catcher framing', '± 0.35 in at the edges', 'H', 'How much he widens the edges. Set by hand.'],
     ['d_catcher', 0, null, 'Catcher arm and blocking', 'pop time 1.95 s', 'M', 'Statcast-shaped pop time and blocking.'],
@@ -169,42 +171,46 @@ td.basis { color: var(--muted); }
     ['p_fblean', 1, null, 'Fastball lean', '1.3', 'H', 'How much he leans toward guessing fastball. Set by hand.'],
     ['p_aggr', 1, null, 'Aggression', '± 0.07 on the threshold', 'H', 'Lowers his swing threshold. Set by hand.'],
     ['p_move', 1, 'PITCHER', 'Pitch movement', 'spin and seams through the flight', 'D', 'Emerges from spin, seam break and the flight physics. Checked against Savant\'s averages and the league\'s spreads.'],
-    ['p_command', 1, null, 'Command', '4.0 in per axis (starters)', 'H', 'His whole location scatter at the plate, seams included. Not yet measured: the league\'s within-pitcher fastball scatter in hitters\' counts ran about 7 in across and 8 up and down; the model\'s 6 and 5.'],
+    ['p_command', 1, null, 'Command', '7.2 across, 8.4 up and down (in)', 'M', 'Two traits: his whole scatter at the plate about the target, starters (relievers 8.4 / 8.2). Read from 3-0 four-seamers about each pitcher\'s own 3-0 mean; it agrees with the published miss from the catcher\'s glove (about 10-11 in). Pitchers differ by 7% and 11%. Each type has its measured factor (v1.4).'],
     ['p_stamina', 1, null, 'Stamina', '95 pitches (starters)', 'H', 'Pitches before fatigue bites. Set by hand.'],
-    ['p_paggr', 1, null, 'Pitcher aggression', '± 0.08 on intent', 'H', 'Shifts his intent from expanding toward attacking. Set by hand.'],
     ['p_hold', 1, null, 'Time to the plate', '1.35 s with a man on', 'M', 'Statcast-shaped.'],
 
-    ['e_zone', 3, 'ON THE PITCH', 'Zone rate', '.480-.485 vs .509', 'near', 'Share of pitches in the rulebook zone. Too few pitches far outside or down the middle: the pitcher\'s location plan is set by hand.'],
-    ['e_swing', 3, null, 'Swing and chase', '.47 / .32 vs .48 / .28', 'near', 'Swings per pitch, and swings at pitches outside the zone; the swing rate by count follows the league\'s within .03.'],
-    ['e_swingk', 3, null, 'Swings by pitch kind', 'rms .17 against the league', 'off', 'Fastballs are chased too often far outside, breaking balls too rarely.'],
-    ['e_whiff', 3, null, 'Whiffs per swing', '.23-.26 vs .232', 'match', 'In the zone .14-.17 against .150; outside .40-.43 against .430.'],
-    ['e_whiffk', 3, null, 'Whiffs by pitch kind', 'fastball .23-.26 vs .17', 'off', 'Breaking balls .23-.27 against .31; off-speed .20-.22 against .30. The kinds turned over in v1.3.'],
-    ['e_foul', 3, null, 'Fouls per contact', '.47-.50 vs .52', 'near', 'Share of contact that goes foul.'],
-    ['e_depth', 3, null, 'Contact depth by kind', '28 / 34 in vs 27.5 / 35.5', 'match', 'How far in front of the batter fastballs and breaking balls are met.'],
-    ['e_flat', 3, null, 'Flat-fastball effect', 'whiff +.08 vs +.14', 'near', 'Steepest to flattest fifth of upper-zone four-seamers; launch angle rises about twice as much as the league\'s.'],
-    ['e_sq', 3, null, 'Squared-up contact', '.51 vs .435', 'off', 'Statcast\'s rule, per contact; fouls .37 against .225.'],
-    ['e_ev', 3, null, 'Exit velocity', 'EV50 99.2-99.6 vs 100.6 mph', 'near', 'Mean on balls in play 88.5 against 88.9; topped balls keep too much speed (82.6 against 66.8 below −30 deg).'],
-    ['e_la', 3, null, 'Batted-ball mix', '43/20/25/12 vs 43/24/24/9', 'near', 'Ground balls, line drives, fly balls and pop-ups, percent.'],
-    ['e_spray', 3, null, 'Spray', '+6.3°, sd 21 vs +6.1°, 25', 'near', 'Fair-ball direction, + pulled.'],
+    ['e_zone', 3, 'ON THE PITCH', 'Zone rate', '.501 vs .509', 'match', 'Share of pitches in the rulebook zone. Where pitches went matched the league\'s band by band, within about .02, in every group of counts and for every pitch kind; pitches in the dirt 3.2% against 3.1%.'],
+    ['e_swing', 3, null, 'Swing and chase', '.46 / .26 vs .48 / .28', 'near', 'Swings per pitch, and swings at pitches outside the zone; the swing rate by count follows the league\'s within .023.'],
+    ['e_swingk', 3, null, 'Swings by pitch kind', 'rms .15 against the league', 'off', 'Fastballs are chased too often far outside, breaking balls too rarely.'],
+    ['e_whiff', 3, null, 'Whiffs per swing', '.22-.24 vs .232', 'match', 'In the zone .13-.16 against .150.'],
+    ['e_whiffk', 3, null, 'Whiffs by pitch kind', 'fastball .22-.25 vs .17', 'off', 'Breaking balls .21-.24 against .31; off-speed .19-.21 against .30.'],
+    ['e_foul', 3, null, 'Fouls per contact', '.46-.47 vs .52', 'near', 'Share of contact that goes foul.'],
+    ['e_depth', 3, null, 'Contact depth by kind', '27.6 / 33.3 in vs 27.5 / 35.5', 'match', 'How far in front of the batter fastballs and breaking balls are met.'],
+    ['e_flat', 3, null, 'Flat-fastball effect', 'whiff +.15 vs +.14', 'near', 'Steepest to flattest fifth of upper-zone four-seamers; squared up falls .09 against .11, but launch angle rises 21 deg against 7.'],
+    ['e_sq', 3, null, 'Squared-up contact', '.51-.53 vs .435', 'off', 'Statcast\'s rule, per contact; fouls .36-.38 against .225.'],
+    ['e_ev', 3, null, 'Exit velocity', 'EV50 99.3 vs 100.6 mph', 'near', 'Mean on balls in play 88.5-89.0 against 88.9; topped balls keep too much speed.'],
+    ['e_la', 3, null, 'Batted-ball mix', '44/20/25/11 vs 43/24/24/9', 'near', 'Ground balls, line drives, fly balls and pop-ups, percent.'],
+    ['e_spray', 3, null, 'Spray', '+6°, sd 20 vs +6.1°, 25', 'near', 'Fair-ball direction, + pulled.'],
     ['e_move', 3, null, 'Pitch movement spread', 'within 0.4 in, 6 of 8 types', 'match', 'Spread of induced break per type; the cutter and splitter were off by 0.6-1.0 in.'],
-    ['e_k', 3, 'IN THE PLATE APPEARANCE', 'Strikeout rate', '23.4-23.8% vs 22.6%', 'match', '200 games at each of three seeds.'],
-    ['e_bb', 3, null, 'Walk rate', '6.3-6.5% vs 8.2%', 'off', 'Pitchers find the zone too easily; their location plan is hand-set.'],
+    ['e_k', 3, 'IN THE PLATE APPEARANCE', 'Strikeout rate', '21.3-21.5% vs 22.6%', 'near', '200 games at each of three seeds.'],
+    ['e_bb', 3, null, 'Walk rate', '8.4-8.5% vs 8.2%', 'match', 'From measured command and aim, with no tuned constant (v1.4).'],
+    ['e_hbp', 3, null, 'Hit by pitch', '1.01% vs 1.1%', 'match', 'Per plate appearance; 0.40% before command was measured.'],
     ['e_hr', 3, null, 'Home-run rate', '2.1% vs 3.0%', 'off', 'Per plate appearance.'],
-    ['e_babip', 3, null, 'BABIP', '.349-.359 vs .291', 'off', 'Batting average on balls in play; fly balls .26 against .12, ground balls .32 against .24.'],
-    ['e_avg', 3, null, 'AVG / SLG', '.275-.284 / .453-.465', 'off', 'League .243 / .399; carried by BABIP once strikeouts came right.'],
-    ['e_runs', 3, 'IN THE GAME', 'Runs per team-game', '4.40-4.66 vs 4.39', 'match', '200 games at each of three seeds.'],
-    ['e_triples', 3, null, 'Triples per team-game', '0.76-0.86 vs 0.14', 'off', 'Balls in the gaps get past outfielders, and runners decide with perfect knowledge of the fielding.'],
-    ['e_dp', 3, null, 'Double plays', '0.67-0.77 vs 0.72', 'match', 'Per team-game.'],
-    ['e_sb', 3, null, 'Stolen bases', '0.49-0.57 vs 0.47', 'near', 'Per team-game.'],
-    ['e_extra', 3, null, 'Extra-inning games', '11-11.5% vs about 8%', 'off', 'Per game.'],
-    ['e_pitchers', 3, null, 'Pitchers used', '4.1-4.2 vs 4.2', 'match', 'Per team-game.']
+    ['e_babip', 3, null, 'BABIP', '.349-.353 vs .291', 'off', 'Batting average on balls in play; fly balls .26 against .12, ground balls .31 against .24.'],
+    ['e_avg', 3, null, 'AVG / SLG', '.282-.285 / .465-.466', 'off', 'League .243 / .399, carried by BABIP.'],
+    ['e_runs', 3, 'IN THE GAME', 'Runs per team-game', '4.88-5.11 vs 4.39', 'off', 'More men on base, and too many hits on balls in play driving them in.'],
+    ['e_triples', 3, null, 'Triples per team-game', '0.78-0.84 vs 0.14', 'off', 'Balls in the gaps get past outfielders, and runners decide with perfect knowledge of the fielding.'],
+    ['e_dp', 3, null, 'Double plays', '0.79 vs 0.72', 'near', 'Per team-game.'],
+    ['e_sb', 3, null, 'Stolen bases', '0.54-0.61 vs 0.47', 'near', 'Per team-game.'],
+    ['e_wp', 3, null, 'Wild pitches', '0.29-0.35 vs 0.36', 'match', 'Per team-game.'],
+    ['e_extra', 3, null, 'Extra-inning games', '8.5-10.5% vs about 8%', 'near', 'Per game.'],
+    ['e_pitchers', 3, null, 'Pitchers used', '4.1-4.3 vs 4.2', 'match', 'Per team-game.']
   ];
   // stages: [id, label, gloss, chips: [name, value, class, description]]
   var S = [
-    ['s_plan', 'Plan', 'the pitcher picks an intent, a pitch and a target', [
-      ['Intent table', 'by count', 'H', 'Chances of attacking, working the edge or expanding in each count: behavioural norms written by hand, shifted by his aggression.'],
-      ['Pitch-type weights', 'by intent', 'H', 'Multipliers on his usage by intent and batter side. Set by hand.'],
-      ['Target margins', 'in, edge, out', 'H', 'Attack about 7 cm inside the edge, edge 1.5-2 cm inside, expand 7-7.5 cm outside, plus 2 cm of jitter. Set by hand.']]],
+    ['s_plan', 'Plan', 'the pitcher picks a pitch and a target', [
+      ['Type by side', 'league use', 'M', 'Use of each type against same- and opposite-side batters over its overall share (changeups 0.43 to same-side, 1.46 to opposite). statcast/locations.py, v1.4.'],
+      ['Kind by count', 'league use', 'M', 'Use of fastballs, breaking balls and off-speed in each count over their share against that side (3-0: fastballs 1.7, breaking 0.13).'],
+      ['Aim points', 'type × side', 'M', 'The league\'s mean location for each type against each side, inches toward his arm side and share of the zone height.'],
+      ['Count shift', 'kind × side × count', 'M', 'How the count moves the aim: with two strikes breaking balls go lower and farther away, fastballs higher.'],
+      ['Target spread', 'within a count', 'M', 'What is left of a pitcher\'s scatter within a count once his command is taken out: 1.5-5 in. Targets hardly move within a count.'],
+      ['Repeat lean', '× 1.13, then × 0.98', 'M', 'The same type again after a change is 1.13 times as likely as usage, side and count predict; after two alike, 0.98. (Until v1.4 the engine penalised repeats.)']]],
     ['s_expect', 'Expect', "the batter's guess from the scouting report", [
       ['Scouting report', 'his habits', 'D', 'The pitcher\'s own mix in this count to this side, averaged over his intents.'],
       ['Two-strike hedge', 'commit × 0.6', 'H', 'With two strikes he sits less hard on his guess. Set by hand.']]],
@@ -212,7 +218,8 @@ td.basis { color: var(--muted); }
       ['Drag and lift', 'Nathan', 'P', 'Coefficients from Alan Nathan\'s trajectory calculator; lift saturates with the spin factor.'],
       ['Spin decay', 'Nathan', 'P', 'Time constant R / (2e-5 × speed).'],
       ['Seam force', 'grows as speed²', 'P', 'The seam break enters as a force that grows with speed squared, like lift (v1.0).'],
-      ['Fatigue', 'from 70% of stamina', 'H', 'Nothing until 70% of stamina, then rising as a square: about −1.3 mph and +27% scatter at his stamina. Set by hand.']]],
+      ['Fatigue', 'from 70% of stamina', 'F', 'Nothing until 70% of stamina, then rising as a square: −0.4 mph by pitches 76-90 and −1.3 mph at his stamina, as league starters lost 0.4 mph by pitches 76-90. Command barely moves (FATIGUE_CMD 0.1): their scatter did not grow within 4% (v1.4).'],
+      ['plateW', 'per type', 'D', 'The scatter the pitch-to-pitch speed, spin and seam variation make on their own, taken out of command so command stays his whole scatter (tools/plate_scatter.js).']]],
     ['s_read', 'Read', 'recognise the pitch, then judge where and when', [
       ['COMMIT_S 0.175 s', 'tunnel point', 'M', 'When he commits: about 24 ft out, where Baseball Prospectus measures pitch tunnels.'],
       ['STEER_S 0.15 s', 'last look', 'M', 'The visuomotor delay, the hitting literature\'s last 150 ms. 110 and 130 ms were tried and dropped whiffs and K% well below the league.'],
@@ -256,20 +263,21 @@ td.basis { color: var(--muted); }
     ['s_game', 'Game', 'managers and the bullpen', [
       ["Starter's hook", 'mean 0.5', 'O', 'Lowered until starters stopped going eight innings.'],
       ['Relief changes', 'dozen pitches', 'O', 'Relievers swapped between innings after about a dozen pitches; set while fixing starters\' innings.'],
-      ['NL rules', 'pinch-hitting', 'H', 'When the manager pinch-hits for the pitcher, and the NL lineup rules. Set by hand.']]]
+      ['NL rules', 'pinch-hitting', 'H', 'When the manager pinch-hits for the pitcher, and the NL lineup rules. Set by hand.'],
+      ['Past the catcher', 'by height band', 'O', 'The chance a pitch gets by the catcher, by where it crosses, against his blocking: set by hand in proportion and scaled to the league\'s wild pitches per game, now that the share of pitches in the dirt is the league\'s (bb_game v0.7).']]]
   ];
   var E = [
     ['d_height', 'd_weight'], ['d_height', 'd_swinglen'], ['d_weight', 'd_bat'], ['d_weight', 'd_power'],
     ['d_weight', 'p_batspeed'], ['d_swinglen', 'p_batspeed'], ['d_power', 'p_batspeed'], ['d_bat', 'p_batspeed'], ['d_arm', 'p_cover'],
     ['d_spin', 'p_move'], ['d_shape', 'p_move'], ['d_seam', 'p_move'], ['d_scatter', 'p_move'],
-    ['d_fbvelo', 's_throw'], ['d_release', 's_throw'], ['d_rep', 's_plan'], ['d_rep', 's_expect'], ['d_ump', 's_call'], ['d_framing', 's_call'],
+    ['d_fbvelo', 's_throw'], ['d_habit', 's_plan'], ['d_release', 's_throw'], ['d_rep', 's_plan'], ['d_rep', 's_expect'], ['d_ump', 's_call'], ['d_framing', 's_call'],
     ['d_field', 's_field'], ['d_run', 's_field'], ['d_catcher', 's_field'],
     ['p_batspeed', 'p_barrel'],
     ['p_batspeed', 's_swing'], ['p_batspeed', 's_collide'], ['p_barrel', 's_swing'], ['p_timing', 's_swing'], ['p_long', 's_swing'], ['p_face', 's_swing'],
     ['p_undercut', 's_swing'], ['p_attack', 's_swing'], ['p_tilt', 's_swing'], ['p_pull', 's_swing'], ['p_cover', 's_swing'],
     ['p_eye', 's_read'], ['p_eye', 's_decide'], ['p_spot', 's_read'], ['p_learn', 's_read'], ['p_commit', 's_expect'], ['p_fblean', 's_expect'], ['p_aggr', 's_decide'],
-    ['p_move', 's_throw'], ['p_move', 's_read'], ['p_command', 's_throw'], ['p_stamina', 's_throw'], ['p_stamina', 's_game'], ['p_paggr', 's_plan'], ['p_hold', 's_field'],
-    ['s_plan', 'e_zone'], ['s_plan', 'e_swingk'], ['s_read', 'e_swingk'], ['s_decide', 'e_swingk'], ['s_read', 'e_whiffk'], ['s_swing', 'e_whiffk'], ['s_field', 'e_avg'], ['s_collide', 'e_avg'], ['s_plan', 'e_bb'], ['s_throw', 'e_zone'], ['s_throw', 'e_move'], ['s_decide', 'e_swing'], ['s_decide', 'e_k'], ['s_decide', 'e_bb'],
+    ['p_move', 's_throw'], ['p_move', 's_read'], ['p_command', 's_throw'], ['p_stamina', 's_throw'], ['p_stamina', 's_game'], ['p_hold', 's_field'],
+    ['s_plan', 'e_zone'], ['s_plan', 'e_hbp'], ['s_throw', 'e_hbp'], ['s_throw', 'e_wp'], ['s_game', 'e_wp'], ['s_throw', 'e_bb'], ['s_plan', 'e_swingk'], ['s_read', 'e_swingk'], ['s_decide', 'e_swingk'], ['s_read', 'e_whiffk'], ['s_swing', 'e_whiffk'], ['s_field', 'e_avg'], ['s_collide', 'e_avg'], ['s_plan', 'e_bb'], ['s_throw', 'e_zone'], ['s_throw', 'e_move'], ['s_decide', 'e_swing'], ['s_decide', 'e_k'], ['s_decide', 'e_bb'],
     ['s_read', 'e_whiff'], ['s_read', 'e_flat'], ['s_read', 'e_depth'], ['s_read', 'e_k'], ['s_call', 'e_k'], ['s_call', 'e_bb'],
     ['s_swing', 'e_whiff'], ['s_swing', 'e_depth'], ['s_swing', 'e_sq'], ['s_swing', 'e_spray'], ['s_swing', 'e_foul'],
     ['s_collide', 'e_sq'], ['s_collide', 'e_ev'], ['s_collide', 'e_foul'], ['s_collide', 'e_la'], ['s_fly', 'e_hr'],
