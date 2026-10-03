@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v2.4 · 2026-10-03
+   bb_engine.js · v2.5 · 2026-10-03
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -66,6 +66,9 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v2.5  for the game's new manoeuvres (bb_game v0.9): a pitcher's move to first
+           (pickMove, drawn last); a plate appearance can end before a pitch when the
+           bases end the inning (a pickoff); the swing's circle exported for the screen
      v2.4  every swing's effort varies (EFFORT_SD 5% of his bat speed), and a batter whose
            last look shows the pitch well off the plate tries to check his swing: he holds
            up half the time, else the bat comes through slowed - both measured from the
@@ -81,9 +84,6 @@
      v2.1  defence in the farm: the scouts judge a position player by the runs his bat makes
            and the runs his glove saves at his position (FIELD_VALUE, from the engine itself:
            tools/field_value.js); the pool's fielding traits refitted
-     v2.0  the pro pool: FARM_N 6 (the majors are the best of six), and LEVELS - the
-           candidate ranked k-th of six by the scouts plays at level k (2 Triple-A ...
-           6 rookie ball); population refitted
 ============================================================================ */
 
 var BB = (function () {
@@ -643,6 +643,7 @@ var BB = (function () {
     // the running game (Statcast-shaped)
     jump:      [0.22, 0.08, 0.05, 0.5],    // s: a runner's break on the pitcher's first move
     holdTime:  [1.35, 0.10, 1.05, 1.7],    // s: a pitcher's first move to the mitt with a man on
+    pickMove:  [0, 0.06, -0.15, 0.15],     // s: how much sooner (-) or later than the league's his throw over beats a runner back to first; not measured (Statcast does not time the move), sized so pickoffs per game come out near the league's
     popTime:   [1.95, 0.08, 1.7, 2.3],     // s: a catcher's mitt to the glove at second base
     block:     [0.75, 0.10, 0.4, 0.98]     // share of balls in the dirt a catcher keeps in front of him
   };
@@ -811,6 +812,7 @@ var BB = (function () {
       holdTime: drawT(rng, T.holdTime),
       pitches: pitches, load: 0
     }, 'P');
+    P.pickMove = drawT(rng, T.pickMove);   // drawn last, so every earlier draw keeps its place
     P.command = Math.sqrt((P.cmd[0] * P.cmd[0] + P.cmd[1] * P.cmd[1]) / 2);   // one number for the screen: his scatter per axis
     P.fbVelo = fb; P.spinZ = spinZ;    // kept for the scouts
     return P;
@@ -1507,7 +1509,8 @@ var BB = (function () {
   // --------------------------------------------------- one plate appearance
   // g = { env, ump, framing, seen (pitches of this pitcher already read), runnersOn, rec,
   //       foulCatch (optional: bb -> true when the defence catches a foul pop),
-  //       beforePitch (optional: st -> anything the running game wants noted on the pitch),
+  //       beforePitch (optional: st -> anything the running game wants noted on the pitch;
+  //                    {abort:true} when the bases ended the inning before it),
   //       afterPitch (optional: (rec, end) -> {abort:true} when the bases ended the
   //                   inning mid-count; `end` names how this pitch ends the PA, or null) }
   // A PA ended from the bases returns result 'END': no plate appearance is charged.
@@ -1517,6 +1520,7 @@ var BB = (function () {
     var log = [], seen = g.seen || 0;
     for (;;) {
       var before = g.beforePitch ? g.beforePitch(st) : null;
+      if (before && before.abort) return { result: 'END', pitches: log };   // the bases ended the inning before this pitch (a pickoff)
       var plan = planPitch(P, B, sb, st, rng);
       var ex = expectPitch(B, P, sb, st);
       var pitch = throwPitch(P, plan, g.env, rng);
@@ -1576,7 +1580,8 @@ var BB = (function () {
   }
 
   return {
-    version: '2.4',
+    version: '2.5',
+    SWING: { R: SWING_R, tiltPerH: TILT_PER_H },
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
     PITCH_TYPES: PITCH_TYPES, REPERTOIRES: REPERTOIRES, TRAITS: TRAITS, AERO: AERO,

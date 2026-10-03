@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_schedule.js · v0.3 · 2026-10-02
+   bb_schedule.js · v0.4 · 2026-10-03
 
    The game and its schedule, shared by the screen (baseball.html) and the
    headless tools, so the broadcast script can be written and checked
@@ -21,9 +21,13 @@
    '7b.3.up' (the third man up in the bottom of the 7th walks to the plate),
    '7b.3.pitcher' / '7b.3.pinch' (a change before him), '7b.3.4.setup',
    '7b.3.4.flight', '7b.3.4.result' (his fourth pitch), '7b.end', '7.stretch',
-   'final'.
+   'final'. A throw over to first before his fourth pitch is '7b.3.4.pickoff1'
+   (a second, '...pickoff2'; with no pitch after it, numbered past his last);
+   an intentional walk, '7b.3.ibb'.
 
    CHANGED
+     v0.4  the manager's moves (bb_game v0.9): an 'ibb' segment for an intentional walk,
+           a 'pickoff' segment for each throw over, a longer change for a double switch
      v0.3  uniform numbers: 0 to 99, and e, pi and i, from a stream of their own
      v0.2  the seventh-inning stretch: 30 s after the top of the 7th, in games that get there
      v0.1  moved out of baseball.html v2.1 unchanged (the game, win probability,
@@ -34,7 +38,8 @@ var BBSchedule = (function () {
   'use strict';
   var FT = BB.units.FT;
   // seconds each kind of segment lasts at 1x
-  var PACE = { pregame: 45, halfStart: 8, paStart: 4, setup: 3, flight: 1.8, take: 2.6, foul: 2.4, bipPad: 2.6, change: 3.5, halfEnd: 5.5, stretch: 30, final: 40 };
+  var PACE = { pregame: 45, halfStart: 8, paStart: 4, setup: 3, flight: 1.8, take: 2.6, foul: 2.4, bipPad: 2.6, change: 3.5, halfEnd: 5.5, stretch: 30, final: 40,
+               ibb: 5.0, pickoff: 3.4, dswitch: 2.5 };   // an intentional walk (the sign, the jog to first); a throw over and back; a double switch's extra time
   var HR_BASE = 1.6, CELEB = 3.5;   // a home-run trot per base; how long a grand-slam huddle at the plate holds
 
   function Phi(z) { var t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989422804 * Math.exp(-z * z / 2);
@@ -140,12 +145,20 @@ var BBSchedule = (function () {
       inn.plays.forEach(function (play, ab) {
         var pk = hk + '.' + (ab + 1);
         play.key = pk;
-        if (play.newPitcher) add('change', PACE.change, { play: play, change: play.newPitcher, id: pk + '.pitcher' });
+        if (play.newPitcher) add('change', PACE.change + (play.newPitcher.doubleSwitch ? PACE.dswitch : 0), { play: play, change: play.newPitcher, id: pk + '.pitcher' });
         if (play.pinchHit) add('change', PACE.change, { play: play, pinch: play.pinchHit, id: pk + '.pinch' });
         add('paStart', PACE.paStart, { play: play, id: pk + '.up' });
         var n = play.pa.pitches.length;
+        function pickoffs(list, i, qk) {   // throws over before pitch i (i = n: none followed)
+          (list || []).forEach(function (e, k) { var sg = add('pickoff', PACE.pickoff, { play: play, i: i, k: k, pick: e, id: qk + '.pickoff' + (k + 1) }); e.t0 = sg.t0; });
+        }
+        if (play.ibb) {   // the manager signals; he jogs to first, anyone forced ahead of him
+          var ib = add('ibb', PACE.ibb, { play: play, last: true, id: pk + '.ibb' });
+          play.tResult = ib.t0; play.tResolve = ib.t0 + 0.8; play.tEnd = ib.t0 + PACE.ibb;
+        }
         play.pa.pitches.forEach(function (p, i) {
           var qk = pk + '.' + (i + 1);
+          pickoffs(p.pickoffs, i, qk);
           add('setup', PACE.setup, { play: play, i: i, id: qk + '.setup' });
           add('flight', PACE.flight, { play: play, i: i, id: qk + '.flight' });
           var last = i === n - 1, dur, running = (p.steal && !p.steal.back) || p.wild;   // a steal or a wild pitch plays out in real time
@@ -154,8 +167,13 @@ var BBSchedule = (function () {
           else dur = running ? 5.0 : PACE.take;
           var sg = add('result', dur, { play: play, i: i, last: last, id: qk + '.result' });
           p.tResult = sg.t0;
-          if (last) { play.tResult = sg.t0; play.tResolve = sg.t0 + (play.play ? playDuration(play) - 0.6 : running ? 2.6 : 0.4); play.tEnd = sg.t0 + dur; }
+          if (last && !play.pa.pickoffsEnd) { play.tResult = sg.t0; play.tResolve = sg.t0 + (play.play ? playDuration(play) - 0.6 : running ? 2.6 : 0.4); play.tEnd = sg.t0 + dur; }
         });
+        if (play.pa.pickoffsEnd) {   // picked off for the third out, no pitch after: the last throw ends the half
+          pickoffs(play.pa.pickoffsEnd, n, pk + '.' + (n + 1));
+          var lastPk = SEG[SEG.length - 1]; lastPk.last = true;
+          play.tResult = lastPk.t0; play.tResolve = lastPk.t0 + 1.4; play.tEnd = lastPk.t0 + lastPk.dur;
+        }
       });
       inn.tEnd = add('halfEnd', PACE.halfEnd, { inn: inn, id: hk + '.end' }).t0;
       // the middle of the seventh: everyone stands and the organ plays "Take Me Out to the Ball Game"
