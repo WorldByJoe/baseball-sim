@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v3.7 · 2026-10-03
+  baseball.html · v3.8 · 2026-10-03
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
@@ -38,11 +38,12 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v3.8  engine v2.4: a checked swing and a half swing are named on the call and in the batter's line;
+          exit velo to the whole mph (it ran into the card's edge)
     v3.7  engine v2.3, bb_field v0.8 (the bat's face and path): the bat is drawn square to its face
     v3.6  engine v2.2 (the swing's reach and read)
     v3.5  engine v2.1 (defence in the farm)
     v3.4  engine v2.0, bb_game v0.8 (the pro pool: every major leaguer is the best of six)
-    v3.3  engine v1.9 (a hitter's swing style)
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -132,7 +133,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   <div id="hud" class="tag"></div>
 </div>
 <!-- version tags so a browser never runs a stale engine against a new page -->
-<script src="bb_engine.js?v=2.3"></script>
+<script src="bb_engine.js?v=2.4"></script>
 <script src="bb_names.js?v=0.1"></script>
 <script src="bb_field.js?v=0.8"></script>
 <script src="bb_game.js?v=0.8"></script>
@@ -1190,7 +1191,9 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     if (seg.kind === 'result' && tau < 2.2) {
       var call = p.result === 'ball' ? 'BALL' : p.result === 'called_strike' ? 'STRIKE' : p.result === 'swinging_strike' ? 'SWING AND MISS' : p.result === 'foul' ? 'FOUL' : p.result === 'hbp' ? 'HIT BY PITCH' : p.result === 'hr' ? 'HOME RUN' : 'IN PLAY';
       text(g, call, ZCX, 120, 51, INK, 'center');
-      if (p.call) text(g, f0(100 * p.call.p) + '% strike from this umpire', ZCX, 158, 26, INK2, 'center');
+      // one line under the call (a second would sit on the zone's top edge)
+      if (p.call) text(g, f0(100 * p.call.p) + '% strike from this umpire' + (p.decide && p.decide.checked ? ' · he checked his swing' : ''), ZCX, 158, 26, INK2, 'center');
+      else if (p.swing && p.swing.check) text(g, 'a half swing: he tried to hold up', ZCX, 158, 26, INK2, 'center');
     }
     g.restore();
   }
@@ -1367,7 +1370,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
       var sat = ex.guessType === pch.type;
       line('read', sat && rf.sep / IN < 1.5 ? 'the pitch he was sitting on' : f1(rf.sep / IN) + ' in off his picture at the commit point');
       if (!(sat && rf.sep / IN < 1.5)) line('', '→ <span class="hot">' + (rf.detected ? 'picked it up' : 'fooled') + '</span> (' + f0(100 * rf.pFooled) + '% odds of being fooled)');
-      if (L.decide) line('judged', f0(100 * L.decide.pin) + '% a strike; he swings above ' + f0(100 * L.decide.thr) + '%');
+      if (L.decide) line('judged', f0(100 * L.decide.pin) + '% a strike; he swings above ' + f0(100 * L.decide.thr) + '%' + (L.decide.checked ? ' → <span class="hot">checks his swing</span>' : L.swing && L.swing.check ? ' → <span class="hot">tries to hold up: ' + f0(100 * (1 - L.swing.check)) + '% of his swing</span>' : ''));
       if (L.swing) { var sw = L.swing;
         line('swing', f1(Math.abs(sw.e) * 1000) + ' ms ' + (sw.e > 0 ? 'early' : 'late') + ' · barrel ' + f1(Math.abs(sw.D) / IN) + ' in ' + (sw.D > 0 ? 'under' : 'over') + ' · ' + f1(Math.abs(sw.dLong) / IN) + ' in to the ' + (sw.dLong > 0 ? 'tip' : 'hands') + (sw.contact ? '' : ' → <span class="hot">' + esc(sw.why) + '</span>')); }
       else if (L.call) line('call', (L.call.strike ? 'strike' : 'ball') + ' (' + f0(100 * L.call.p) + '% odds of a strike from this umpire)');
@@ -1425,7 +1428,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     h.push(statRow('home run', pct(s.HR, s.pa) + '%'));
     h.push(statRow('whiff', pct(s.wh, s.sw) + '%'));
     h.push(statRow('chase', pct(s.ch, s.oz) + '%'));
-    h.push(statRow('exit velo', (s.nev ? f1(s.ev / s.nev) : '-') + ' mph'));
+    h.push(statRow('exit velo', (s.nev ? f0(s.ev / s.nev) : '-') + ' mph'));   // whole mph: '93.3 mph' ran into the card's edge on the wall
     h.push('</table></div>');
     setHTML(EL.bcard, h.join(''));
   }
