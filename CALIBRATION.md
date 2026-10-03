@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v1.8 · 2026-10-03`
+`CALIBRATION.md · v1.9 · 2026-10-03`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -616,6 +616,27 @@ Joe (2026-10-02): drawing the full range of traits creates players who would nev
 
 What the step did, in these runs: selection on value produced part of the league's power-against-contact link from traits that are independent in the population, brought the hardest contact to the league's, and put runs and the slash line at the league's. What it left: bat speed ~ whiff at a third of the league's (the rest should be a trade-off within the hitter - how hard he chooses to swing), the pitchers' speed undervalued by the model, and home runs a little high.
 
+### A hitter's swing style (bb_engine v1.9; 2026-10-03)
+
+**Within a hitter, harder swings do not miss more.** Pitch-level 2025 (73,960 swings with bat speed): against each hitter's own mean, his swings 6-9 mph slower were whiffed .294 of the time and those 6-9 mph faster .140, squared up a little more often: slow swings are the ones he altered for a pitch he did not time (the model's adjusted swing). So the league's bat speed ~ whiff +.69 is a difference between hitters, not a cost of effort.
+
+**Between hitters, pull-and-lift is a style.** Among 2025's qualified hitters (145, swing-path and batting leaderboards): attack angle ~ pull% +.66, ~ fly-ball% +.68, ~ whiff +.53; swing length ~ attack angle +.33, ~ pull% +.34, ~ whiff +.51; pull% ~ the swing's horizontal direction −.71; but contact depth ~ attack angle only +.17 - uphill swingers pull more because they aim to, not because they meet the ball farther out front. In the model those traits were independent: attack ~ pull% +.18, pull% ~ fly-ball% +.13, swing length ~ whiff +.10. The model already made uphill swingers miss more (attack ~ whiff +.69) and lift more (+.73).
+
+**What was built.** One latent style per hitter, shared by his attack angle, pull bias and swing length with loadings 0.80, 0.82 and 0.41 (`STYLE`, from the three league correlations among them: their products), each trait keeping its own marginal. The population was refitted (`tools/fit_population.js`, now holding attack angle's spread at the leaderboard's 3.51 deg and the skills' calibrated means fixed in the tool - the first refit read them from TRAITS, which by then held the population, and shifted them a second time), and the swing thresholds refitted.
+
+| (picked hitters, 250 PA each, seeds 3 and 11) | v1.8 | v1.9 | league |
+|---|---|---|---|
+| attack angle ~ pull% | +.18 | +.57 to +.65 | +.66 |
+| pull% ~ fly-ball% | +.13 | +.34 to +.39 | +.55 |
+| swing length ~ whiff | +.10 | +.36 to +.38 | +.51 |
+| attack angle ~ whiff / K% | +.69 / +.71 | +.66-.71 / +.70-.74 | +.53 / +.47 |
+| bat speed ~ whiff (power_chain) | .17-.24 | .25-.30 | .69 |
+| bat speed ~ BB% | .01-.12 | .08-.15 | .17 |
+| K% / BB% / HR% (run_games) | 21.1-21.2 / 8.0-8.3 / 3.3-3.5 | 20.7-21.8 / 8.0-8.4 / 3.3-3.6 | 22.6 / 8.2 / 3.0 |
+| runs per team-game | 4.08-4.38 | 4.04-4.12 | 4.39 |
+
+What it left: uphill swings cost the model's hitters more whiffs and strikeouts than the league's (+.66-.74 against +.47-.53), and bat speed ~ whiff is still under half the league's.
+
 ## What was learned building the fielding layer
 
 - **Statcast's outfield JUMP (about 30 ft covered in the first 3 s) is the right anchor for outfielder motion.** The first fielders covered 44 ft in 3 s and caught nearly every fly ball (fly-ball BABIP .03). Slowing everyone to the jump figure fixed the outfield but let 52% of ground balls through, so infielders got their own harder acceleration and a dive reach. That's a real difference: they work from a crouch on a ball that is on them at once.
@@ -634,7 +655,7 @@ What the step did, in these runs: selection on value produced part of the league
 ## Known gaps, to fix with mechanisms rather than knob-turning
 
 1. **Contact: fouls are as many as the league's but too solid; the hardest contact is still a little soft.** (Balls in play falling in too often was fielding, closed in v1.5: BABIP .265-.277 against .291.) After bb_engine v1.1 (the adjusted swing; see that section above), fouls were .49-.50 of contact against .52, but squared up per contact stayed .49-.52 against .435 and per foul .36-.39 against .225. Mean exit velocity on balls in play came to the league's (88.1-88.9 against 88.9), but EV50 ran 98.9-99.2 against 100.6 and home runs 1.7-1.9% of plate appearances against 3.0. BABIP ran .349-.359 against .291 with v1.3, which carried batting average to .275-.284 (.243) and slugging to .453-.465 (.399) once strikeouts came to the league's. Off-speed pitches met far out front were still squared up .51-.54 of the time against .32. The league's high pitches went foul .66 of the time; the model's .46-.47, with the foul share lowest in the upper zone rather than the lower zone.
-2. **Whiffs: right in total, turned over by pitch kind.** With v1.3 (fooled-swing contact), whiffs ran .229-.259 per swing against .232 and K% 23.4-23.8 against 22.6. Fastballs were whiffed .23-.26 (.17), breaking balls .23-.27 (.31) and off-speed .20-.22 (.30): batters chased breaking balls far outside too rarely, and fastballs chased outside the zone missed too often (.45 at 2-4 in against .31). Flat four-seamers were whiffed more and squared up less, as in the league, but their launch angle rose about twice as much as the league's, and low fastballs still launched above low breaking balls.
+2. **Whiffs: right in total, turned over by pitch kind.** With v1.3 (fooled-swing contact), whiffs ran .229-.259 per swing against .232 and K% 23.4-23.8 against 22.6. Fastballs were whiffed .23-.26 (.17), breaking balls .23-.27 (.31) and off-speed .20-.22 (.30): batters chased breaking balls far outside too rarely, and fastballs chased outside the zone missed too often (.45 at 2-4 in against .31). Flat four-seamers were whiffed more and squared up less, as in the league, but their launch angle rose about twice as much as the league's, and low fastballs still launched above low breaking balls. **Velocity (measured 2026-10-03, v1.9):** four-seamers swung at, by release speed, under 92 mph to 100+: league whiffs .138 → .319 with exit velocity on balls in play flat (91.3 → 89.6) and expected wOBA on contact flat (.414 → .393); the model's whiffs .212 → .328 (the slow fastballs missed far too often, so the slope is two-thirds of the league's) with contact as flat as the league's. Fouls per four-seam swing: league .47-.50, model .33-.35. So velocity's value runs through whiffs on slow and medium fastballs, and that is where the model is off - which is also why the scouts' PITCHER_VALUE hardly values speed (v1.8).
 3. **Plate discipline: swings follow the league by count, not by pitch kind.** With v1.4 swing rates by count and distance from the zone matched the league's within .023 rms, pitch locations matched the league's band by band, and walks came to 8.4-8.5% against 8.2. By pitch kind the model still over-swung fastballs outside the zone and under-swung breaking balls (rms .15). Chase ran .257 against .283.
 4. **Home runs: closed** in v1.5 (3.1-3.2% against 3.0%) once the batted-ball drag was refitted to the league's carry by exit velocity and launch angle. Liners at 15-20 deg still carry 10-20 ft too far.
 5. **Spray is too centred.** Centre field took 42% against 34%, opposite field 20% against 26%; fair-ball spray sd 20 deg against 25 in every band of contact depth. With the fielding measured (v1.5) this is where the missing doubles are: balls down the lines.
