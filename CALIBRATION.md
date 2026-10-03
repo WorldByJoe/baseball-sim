@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v2.4 · 2026-10-03`
+`CALIBRATION.md · v2.5 · 2026-10-03`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -788,6 +788,27 @@ Statcast records a whiff's **miss distance**: the gap at closest approach betwee
 
 So the swing's scatter along the barrel, contact quality, the read of a pitch's motion and the decision's sitting term have to be rebuilt together; one at a time each trades one gap for another. This is where velocity's value is decided too: the model's slow fastballs are whiffed too often because of along-barrel misses that do not depend on speed.
 
+## The manager's moves (engine v2.5, bb_game v0.9, 2026-10-03)
+
+Joe asked for intentional walks, pickoffs, defensive substitutions and double switches before the minor-league program, so the minors have them too. The league's counts come from the MLB Stats API team totals (pitching group), per team-game:
+
+| | 2019 | 2022 | 2025 | model (3 × 200 games) |
+|---|---|---|---|---|
+| intentional walks | .155 | .098 | .114 | .105-.122 |
+| pickoffs (by the pitcher) | .051 | .046 | .066 | .048-.065 |
+| throws over to first | not public | not public | | 1.03 (about one assumed) |
+| defensive substitutions | not counted | | | .26-.29 |
+| double switches, per NL team-game | not counted | | | .42-.46 |
+
+- **The intentional walk** is signalled (the 2017-2022 rule: no pitches). The manager puts a hitter on with first base open and a man in scoring position, late (the 7th on, or with the pitcher on deck and two out) and close, when the next hitter is weaker by more than his own bar, `ibb` (expected wOBA: the scouts' `hitterValue`; mean .075, sd .025, plus .03 with nobody out, less .015 from the 9th). The bar's mean was sized to the league's count; every other piece is the situation.
+- **The pickoff.** With a man on first and second open the pitcher throws over before a pitch with a chance that rises with the runner's threat to steal (his own odds of making it) and falls by half after each throw. The runner is back if his dive beats the throw: half his `jump` plus a 3.5 m primary lead at 6 m/s, against `PK_T` (0.915 s) plus the pitcher's new `pickMove` trait (sd 0.06 s), with scatter on both. `PK_T` sets how often a throw gets him (about 5%), `PK_RATE` how often pitchers throw; neither the move nor the throws are timed publicly, so both are sized to the league's pickoffs and an assumed throw a game. 1.2% of throws get away (a base, now and then two). A third out on a pickoff ends the plate appearance before a pitch (the batter leads off next inning, as after a caught stealing).
+- **The bench** is four men drawn for a catcher, a utility infielder (short, second, third), a fourth outfielder and a first baseman, from the level below the team's: a regular is the best of the farm's six candidates, a bench man the next best. Letting the better of a starter and a bench man start made four positions the best of twelve and raised runs by about half a run a game, so it was taken out. The NL pinch-hitter is now the best bat on the bench (the backup catcher last).
+- **Late defence.** From the 8th, with a lead of one to three, a bench man replaces a fielder (not the catcher) when the runs his glove saves over the innings left (`FIELD_VALUE` × 25/9 balls in play an inning) beat the runs the bat costs over the plate appearances left (expected wOBA × 4.2/9 an inning ÷ 1.23), by the manager's own bar `glove` (mean .012 runs).
+- **The double switch (NL).** Bringing in a pitcher whose spot bats among the next two, with two or more men on the bench, the manager also takes out the fielder whose turn is furthest off; the new pitcher bats in his spot and a bench man who can play his position in the pitcher's.
+- **The league line held** (three seeds × 200 games against the same runs on main): runs 3.73-3.87 against 3.80-4.03, BB% 8.0-8.9 against 8.2-8.6 (it now counts intentional walks), K% and HR% within noise.
+- **Not modelled:** the first baseman holding a runner on at the bag (the fielding layer plays him at his usual depth, so a pickoff shows him hurrying over); pinch-runners; balks (.025-.037 a team-game).
+- The plays now record the outs and bases a batter came up to; a steal or a pickoff during his at-bat had leaked into them, so a caught stealing in an at-bat changed the outs his introduction gave.
+
 ## What was learned building the fielding layer
 
 - **Statcast's outfield JUMP (about 30 ft covered in the first 3 s) is the right anchor for outfielder motion.** The first fielders covered 44 ft in 3 s and caught nearly every fly ball (fly-ball BABIP .03). Slowing everyone to the jump figure fixed the outfield but let 52% of ground balls through, so infielders got their own harder acceleration and a dive reach. That's a real difference: they work from a crouch on a ball that is on them at once.
@@ -800,7 +821,7 @@ So the swing's scatter along the barrel, contact quality, the read of a pitch's 
 2. **Triples: closed** in v1.5 (0.09-0.10 vs 0.14) with the measured outfield jump, positioning and bounces; runners now read the race with error.
 3. **Double plays: closed** in bb_field v0.5 (0.75 vs 0.72) once the throw to second had to wait for the covering man. Fielder's choices (about 5% of balls in play) are still worth a look.
 4. **Extra innings 14–18% (vs 8%)** follow from low scoring.
-5. **Not built yet:** pickoffs, intentional walks, defensive substitutions and double switches, situational positioning (infield in, no-doubles), the infield-fly rule; the cut-off man is a timing rule rather than a moving player. (Steals, wild pitches and passed balls: built 2026-09-30, see above.)
+5. **Not built yet:** situational positioning (infield in, no-doubles, the first baseman holding a runner), the infield-fly rule, pinch-runners, balks; the cut-off man is a timing rule rather than a moving player. (Steals, wild pitches and passed balls: built 2026-09-30; pickoffs, intentional walks, defensive substitutions and double switches: 2026-10-03, see above.)
 6. **A low line drive can only be fielded once it lands.** `intercept` walks the ground track and `catchChance` looks only at the landing point, so a liner that passes an infielder at chest height goes through untouched (about one in 30 games passed within a metre of a man who had time to react). Measured while checking Joe's "balls roll past the fielder" report: in 30 games, 60 balls passed within the drawn dot's radius (1.8 m) of a man who did not field them; 52 were the pitcher and 48 passed before that man's reaction time was up, which is a comebacker, not a defect. The screen now shows the late lunge.
 
 ## Open mysteries (Joe, 2026-10-03: left until the whole model is built)

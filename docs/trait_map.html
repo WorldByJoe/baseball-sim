@@ -1,14 +1,14 @@
-<!-- trait_map.html · v2.5 · 2026-10-03
+<!-- trait_map.html · v2.6 · 2026-10-03
      The trait path map: distal traits -> proximate abilities -> the engine's stages
      (with every constant and where its value came from) -> statistics against the league.
      Keep it in step with bb_engine.js; publish to the same artifact URL.
      CHANGED
+       v2.6  engine v2.5, bb_game v0.9: the pitcher's move to first; the manager's moves (intentional walks, pickoffs, defensive changes, double switches)
        v2.5  engine v2.4: swing-to-swing effort and checked swings
        v2.4  engine v2.3: the bat's face and its path; bat direction at contact; open mysteries named
        v2.3  engine v2.2: the contact rebuild's first stage - reach, the read, looking fastball, miss distance by reach
        v2.2  engine v2.1: defence in the farm; the hitter's arm length gets its own id (it shared d_arm with arm slot)
        v2.1  miss distance measured: the league's whiffs against the model's, by pitch kind
-       v2.0  engine v2.0: the pro pool - best of six, the levels, the Triple-A test
        v1.0  first version (engine v1.0), source kept in the repo from v1.3 on -->
 <meta charset="utf-8">
 <title>Ballgame Trait Map</title>
@@ -305,7 +305,11 @@ td.basis { color: var(--muted); }
     ['s_game', 'Game', 'managers and the bullpen', [
       ["Starter's hook", 'mean 0.5', 'O', 'Lowered until starters stopped going eight innings.'],
       ['Relief changes', 'dozen pitches', 'O', 'Relievers swapped between innings after about a dozen pitches; set while fixing starters\' innings.'],
-      ['NL rules', 'pinch-hitting', 'H', 'When the manager pinch-hits for the pitcher, and the NL lineup rules. Set by hand.'],
+      ['NL rules', 'pinch-hitting', 'H', 'When the manager pinch-hits for the pitcher (the best bat on the bench), and the NL lineup rules. Set by hand.'],
+      ['Intentional walk', 'gap .075 wOBA', 'O', 'The manager\'s bar: the expected-wOBA gap to the next hitter he needs, with first base open and a man in scoring position, late and close. Its mean sized to the league\'s .10-.16 a team-game (bb_game v0.9).'],
+      ['Throw over', 'PK_T 0.915 s + move', 'O', 'A throw over beats a runner back when it is quicker than half his jump plus a 3.5 m lead at 6 m/s; the pitcher\'s pickMove (sd 0.06 s) moves it. Sized to the league\'s .05 pickoffs a team-game; the throws (about one a game) are assumed.'],
+      ['Late defence', 'glove bar .012 runs', 'O', 'From the 8th with a one- to three-run lead: a bench glove in when the runs it saves over the innings left beat the bat it costs, by the manager\'s bar. Not measured: .26-.29 a team-game.'],
+      ['Double switch', 'his spot due in two', 'H', 'NL: a new pitcher whose spot bats among the next two takes the spot of the fielder whose turn is furthest off. Set by hand: .42-.46 an NL team-game.'],
       ['Past the catcher', 'by height band', 'O', 'The chance a pitch gets by the catcher, by where it crosses, against his blocking: set by hand in proportion and scaled to the league\'s wild pitches per game, now that the share of pitches in the dirt is the league\'s (bb_game v0.7).']]]
   ];
   var E = [

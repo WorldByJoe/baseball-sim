@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_call.js · v0.3 · 2026-10-02
+   bb_call.js · v0.4 · 2026-10-03
 
    The broadcast, written ahead. Given a game and its schedule (bb_schedule.js)
    it writes everything the park will say and play: every voice line, every
@@ -35,6 +35,8 @@
    start; voice lines also carry maxDur, the air they have.
 
    CHANGED
+     v0.4  the manager's moves (bb_game v0.9): intentional walks, throws over to first,
+           defensive changes and double switches are called
      v0.3  the PA gives uniform numbers; colour notes a man who wears e, pi or i
      v0.2  the timing table measured by rendering real lines; the PA paced quicker
      v0.1  first build
@@ -42,7 +44,7 @@
 
 var BBCall = (function () {
   'use strict';
-  var VERSION = '0.3';
+  var VERSION = '0.4';
   var IN = BB.units.IN, FT = BB.units.FT, GEO = BB.geometry;
 
   // ================================================================ TIMING
@@ -156,6 +158,7 @@ var BBCall = (function () {
       if (r === 'END') return null;
       if (r === 'K') return { word: 'strikeout', ab: true };
       if (r === 'BB') return { word: 'walk' };
+      if (r === 'IBB') return { word: 'intentional walk' };
       if (r === 'HBP') return { word: 'hit by pitch' };
       var h = pl.hit, W = { '1B': 'single', '2B': 'double', '3B': 'triple', HR: 'home run' };
       if (W[h]) return { word: W[h], ab: true, hit: true };
@@ -299,6 +302,8 @@ var BBCall = (function () {
       if (k === 'halfStart') writeHalfStart(seg);
       else if (k === 'change') writeChange(seg);
       else if (k === 'paStart') writePAStart(seg);
+      else if (k === 'pickoff') writePickoff(seg);
+      else if (k === 'ibb') writeIBB(seg);
       else if (k === 'setup') writeSetup(seg);
       else if (k === 'flight') writeFlight(seg);
       else if (k === 'result') writeResult(seg, nextSeg);
@@ -314,7 +319,7 @@ var BBCall = (function () {
       var late = clamp((play.inning - 1) / 8, 0, 1), close = Math.exp(-diff / 2.5);
       var a = 0.16 + 0.24 * close + 0.22 * late * close + (play.inning === 1 ? 0.06 : 0);
       if (diff >= 6) a = Math.min(a, 0.2);
-      if (seg.play && seg.i !== undefined && seg.kind !== 'paStart') {
+      if (seg.play && seg.i !== undefined && seg.kind !== 'paStart' && play.pa.pitches[seg.i]) {
         var p = play.pa.pitches[seg.i], c = p.count.split('-').map(Number), bases = p.bases || play.bases;
         a += 0.3 * clamp(stakesOf(play, play.outs, bases) / 0.25, 0, 1);
         if (c[1] === 2) a += 0.05; if (c[0] === 3) a += 0.05;
@@ -340,6 +345,12 @@ var BBCall = (function () {
         return;
       }
       say(seg, 0.6, 'pbp', inn.n >= 8 && Math.abs(sc[1] - sc[0]) <= 2 ? 'building' : 'calm', [where + '. ' + lead + leadoff, where + '.'], 1, { slide: 1 });
+      if (first.defSubs) {   // the PA announces a home change; the booth notes a visiting one
+        var dsW = first.defSubs.map(function (d) { return d.in.name + ' in ' + POSTO[d.pos] + ', replacing ' + d.out.name; }).join('; and ');
+        var dsS = first.defSubs.map(function (d) { return d.in.name + ' in ' + POSTO[d.pos]; }).join(', and ');
+        if (inn.half === 0) say(seg, 3.0, 'pa', 'calm', ['A defensive change for the ' + H.nick + ': ' + dsW + '.', 'Defensive change: ' + dsS + '.', 'A defensive change for the ' + H.nick + '.'], 1, { slide: 4 });
+        else say(seg, 3.0, 'pbp', 'calm', ['The ' + A.nick + ' make a defensive change: ' + dsW + '.', 'A defensive change: ' + dsS + '.', 'A defensive change for the ' + A.nick + '.'], 1, { slide: 4 });
+      }
       // colour in the break: the chance of winning, once a half at most and only when it has a story
       var wp = first.wpBefore, pct = Math.round(wp * 20) * 5;
       if (inn.n >= 4 && !wpSaidHalf[inn.n] && (inn.n % 3 === 1 || Math.abs(wp - 0.5) > 0.3)) {
@@ -385,6 +396,8 @@ var BBCall = (function () {
         // the PA announces him as he comes in; the booth sums up the man leaving after it
         say(seg, 0.2, 'pa', 'calm', ['Now pitching for the ' + T[1 - play.half].nick + ', ' + withNumber(inP.id, inP.name) + '.', 'Now pitching, ' + inP.name + '.'], 1, { slide: 1 });
         say(seg, 0.25, 'pbp', 'calm', [(line ? line + ' ' : '') + inP.last + ' is a ' + hand(inP) + '.', line, d.pitches ? ln(out) + ' threw ' + num(d.pitches) + ' pitches.' : ''], 2, { slide: 22 });
+        var dsw = seg.change.doubleSwitch;
+        if (dsw) say(seg, 0.3, 'pbp', 'calm', ['And a double switch: ' + dsw.in.name + ' takes over in ' + POSTO[dsw.pos] + ' for ' + ln(dsw.out) + ', and ' + inP.last + ' will bat ' + ORDW[dsw.slotP + 1] + '.', 'A double switch, with ' + dsw.in.name + ' in ' + POSTO[dsw.pos] + '.'], 1, { slide: 24 });
         // the crowd says goodbye: an ovation for a home pitcher who pitched well, thin applause if he was hit hard,
         // a mocking cheer for a visiting pitcher who was
         if (defHome && d.outs >= 18 && d.runs <= 1) cue(seg, 0.4, 'ovation', 1.0, 6);
@@ -396,6 +409,27 @@ var BBCall = (function () {
       } else if (seg.pinch) {
         say(seg, 0.2, 'pbp', 'calm', [seg.pinch.batter.name + ' will pinch-hit for ' + ln(seg.pinch.forPitcher) + '.'], 1, { slide: 1 });
       }
+    }
+
+    // ------------------------------------------------------- the throw over
+    function writePickoff(seg) {
+      var play = seg.play, e = seg.pick, rn = GAME.PLAYER[e.id] || { name: 'the runner', last: 'the runner' }, defHome = play.half !== HOME;
+      cue(seg, 1.9, 'glove_catch', 0.8);
+      if (e.out) {
+        say(seg, 1.2, 'pbp', defHome ? 'excited' : 'deflated', ['Throw over... and he has him! ' + rn.name + ' is picked off first' + (seg.last ? ', and that ends the inning.' : '.'), 'Picked off!'], 1, { slide: 1 });
+        cue(seg, 2.2, defHome ? 'cheer_medium' : 'groan_small', 0.9);
+      } else if (e.error) {
+        say(seg, 1.2, 'pbp', defHome ? 'deflated' : 'excited', ['Throw over, and it gets away! ' + ln(rn) + ' goes to ' + (e.to === 3 ? 'third.' : 'second.'), 'The throw gets away!'], 1, { slide: 1 });
+        cue(seg, 2.3, defHome ? 'groan_small' : 'cheer_small', 0.8);
+      } else {
+        say(seg, 1.0, 'pbp', 'calm', [pick(seg.id, ['Throw over to first. ' + ln(rn) + ' is back.', 'A look, and a throw to first. Back in time.', 'He keeps ' + ln(rn) + ' close with a throw over.']), 'Throw over. Back.'], 2, { slide: 1.5 });
+        if (e.margin < 0.05) cands.push({ seg: seg, t: seg.t0 + 2.6, role: 'colour', energy: 'calm', alts: ['That was close at first.'], prio: 3, slide: 1, until: seg.t0 + seg.dur, n: cands.length });
+      }
+    }
+    function writeIBB(seg) {
+      var play = seg.play, B = play.batter;
+      say(seg, 0.3, 'pbp', 'calm', ['They will put ' + ln(B) + ' on intentionally' + (play.runs ? ', and that forces in a run.' : '. First base is open, and they would rather pitch to the next man.'), 'An intentional walk to ' + ln(B) + '.'], 1, { slide: 3 });
+      cue(seg, 1.0, play.half === HOME ? 'boo_short' : 'applause_polite', 0.5);
     }
 
     // ------------------------------------------------------------ at-bats

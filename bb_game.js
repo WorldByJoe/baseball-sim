@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_game.js · v0.8 · 2026-10-03
+   bb_game.js · v0.9 · 2026-10-03
 
    A whole game: two teams, nine innings or more, lineups that turn over,
    pitchers who tire and get replaced, managers with their own habits.
@@ -28,10 +28,19 @@
    so recognition improves through the game (bb_engine readFactors). The
    penalty is an OUTPUT to be measured, not a rule.
 
-   Not here yet: pickoffs, intentional walks, defensive substitutions, double
-   switches, injuries, weather that changes during a game.
+   THE MANAGER'S OTHER MOVES (v0.9). Two more traits: `ibb`, the gap in expected
+   wOBA between this hitter and the next that he needs before he puts a man on
+   intentionally, and `glove`, the runs a defensive change must gain before he
+   makes it. The bench is four men drawn for a catcher, a utility infielder, a
+   fourth outfielder and a first baseman, from the level below the team's. Pitchers throw over to first; NL
+   managers double-switch.
+
+   Not here yet: pinch-runners, injuries, weather that changes during a game.
 
    CHANGED
+     v0.9  intentional walks (signalled, 2017-2022 rule), pickoffs, late defensive
+           substitutions and NL double switches; a bench of four drawn for their
+           positions; the pinch-hitter is the best bat on the bench
      v0.8  a team can be drawn from a level of the pro pool (o.level: 1 the majors,
            2 Triple-A ... 6 rookie ball; bb_engine v2.0)
      v0.7  a pitch past the catcher is rarer per pitch in the dirt (0.4 of before):
@@ -40,14 +49,25 @@
      v0.6  the running game: steals decided and timed pitch by pitch, wild pitches
            and passed balls from where the pitch crosses against the catcher's
            blocking; a third out on the bases ends a PA uncharged ('END')
-     v0.5  the snapshot carries route too, so the screen can judge a foul chase
-     v0.4  the defence snapshot carries each man's react and speed, so the screen
-           can show the men a ball beats breaking for it
 ============================================================================ */
 
 var BBGame = (function () {
   'use strict';
   var POS = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH'];
+  var BENCH = ['C', 'SS', 'CF', '1B'];   // a backup catcher, a utility infielder, a fourth outfielder, a first baseman
+  var CAN = { C: ['C'], SS: ['SS', '2B', '3B'], CF: ['CF', 'LF', 'RF'], '1B': ['1B'] };   // where a bench man can play, by what he was drawn for
+  function canPlay(b, pos) { return (CAN[b.benchPos] || [b.pos]).indexOf(pos) >= 0; }
+  // the manager's two other habits (drawn, not measured; sized so the league's rates come out)
+  var IBB_GAP = [0.075, 0.025];   // expected-wOBA gap to the next hitter he needs before an intentional walk
+  var GLOVE_BAR = [0.012, 0.008]; // runs a defensive change must gain over the innings left
+  // what a game holds, for the manager's sums (as the farm's: bb_engine playerValue)
+  var BIP_INN = 25 / 9, PA_INN = 4.2 / 9, WOBA_SCALE = 1.23;
+  // pickoffs: a throw over beats the runner back when its time (PK_T plus the
+  // pitcher's pickMove) is shorter than his: half his jump (his read of the move)
+  // plus his primary lead at diving speed. PK_T and PK_RATE are sized so pickoffs
+  // and throws per game come out near the league's (2019/2022: 0.05 pickoffs per
+  // team-game; throws over are not counted publicly - about one a game is assumed).
+  var PK_T = 0.915, PK_LEAD = 3.5, V_BACK = 6.0, PK_RATE = 0.042, PK_ERR = 0.012;
 
   function named(rng, o, taken) {      // no two men on a roster share a surname
     var p;
@@ -64,12 +84,16 @@ var BBGame = (function () {
     o = o || {};
     var t = { city: o.city, nick: o.nick, name: o.city + ' ' + o.nick }, taken = {};
     var players = POS.map(function (pos) { return named(rng, BB.makeBatter(rng, { pos: pos, level: o.level }), taken); });
+    // the bench, drawn for its positions from the level below: a regular is the best of
+    // the farm's six candidates, a bench man the next best (the starters stay the ones
+    // the pool is fitted to; letting the better of starter and bench man start made
+    // four positions the best of twelve, and runs rose by half a run a game)
+    t.bench = BENCH.map(function (pos) { var b = named(rng, BB.makeBatter(rng, { pos: pos, level: Math.min(BB.FARM_N, (o.level || 1) + 1) }), taken); b.benchPos = pos; return b; });
     players.sort(function (a, b) { return batScore(b) - batScore(a); });
     // 3-4-2-1-5-6-7-8-9 by quality
     var slots = [3, 4, 2, 1, 5, 6, 7, 8, 9], order = [];
     players.forEach(function (p, i) { order[slots[i] - 1] = p; });
     t.lineup = order;
-    t.bench = [0, 1, 2].map(function () { return named(rng, BB.makeBatter(rng, { pos: 'DH', level: o.level }), taken); });
     function pitcher(role) {
       var p = named(rng, BB.makePitcher(rng, { role: role, level: o.level }), taken);
       p.bat = BB.makeBatter(rng, { pitcher: true, pos: 'P' }); p.bat.name = p.name; p.bat.id = p.id;
@@ -80,7 +104,8 @@ var BBGame = (function () {
     t.bullpen = [0, 1, 2, 3, 4, 5, 6].map(function () { return pitcher('RP'); });
     t.bullpen.sort(function (a, b) { return b.pitches[0].velo - a.pitches[0].velo; });
     t.closer = t.bullpen[0];
-    t.manager = { hook: Math.min(0.85, Math.max(0.3, rng.n(0.5, 0.12))), warmAt: 0.2 };
+    t.manager = { hook: Math.min(0.85, Math.max(0.3, rng.n(0.5, 0.12))), warmAt: 0.2,
+                  ibb: Math.max(0.02, rng.n(IBB_GAP[0], IBB_GAP[1])), glove: Math.max(0, rng.n(GLOVE_BAR[0], GLOVE_BAR[1])) };
     return t;
   }
 
@@ -109,6 +134,7 @@ var BBGame = (function () {
         var D = def.defense, sb = BB.batterSide(B, P);
         BBField.positionDefense(D, B, sb);
         var seenOwn = bat.seen[P.id + ':' + B.id] || 0, seenTeam = bat.seenTeam[P.id] || 0;
+        var outsAtPA = outs, basesAtPA = bases.slice();   // the play records the state he came up to (a steal or a pickoff during the at-bat changes it)
         var caughtFoul = null, S = G.stats[half], SD = G.stats[1 - half];
         // THE RUNNING GAME, pitch by pitch. A runner on first (or on second with
         // third open and fewer than two out) weighs his own time to the bag - his
@@ -119,8 +145,33 @@ var BBGame = (function () {
         // catcher a step. A pitch the catcher cannot hold - in the dirt, wide, over
         // his head, judged against his blocking - sends every runner up a base.
         // A third out on the bases mid-count ends the PA without charging one.
-        var going = null, paRuns = 0, C = def.catcher, basesAtPitch = null, BASE = 90 * BB.units.FT;
+        var going = null, paRuns = 0, C = def.catcher, basesAtPitch = null, BASE = 90 * BB.units.FT, pickN = 0, pickLog = [];
+        // THE PICKOFF. With a man on first and second open the pitcher throws over now
+        // and then: more often the more the runner threatens to steal (his own odds of
+        // making it, as he weighs them below), less after each throw. The runner is off
+        // at his primary lead; he is back if his dive beats the throw - his read of the
+        // move (half his jump) and his lead at diving speed against the pitcher's move
+        // and throw (PK_T + pickMove), with scatter on both. A wild throw over gives him
+        // second, now and then third.
+        function pickoffs() {
+          while (bases[1] && !bases[2]) {
+            var pl = bases[1], tRun = pl.jump + BBField.stealTime(pl, BASE - BBField.LEAD_STEAL), tBall = P.holdTime + C.popTime;
+            var threat = Phi((tBall + 0.15 - tRun) / 0.2), pThrow = PK_RATE * (0.3 + threat) * Math.pow(0.55, pickN);
+            if (rng.u() >= pThrow) return null;
+            pickN++;
+            var back = 0.5 * pl.jump + PK_LEAD / V_BACK + rng.n(0, 0.09), ball = PK_T + (P.pickMove || 0) + rng.n(0, 0.07);
+            var ev = { id: pl.id, from: 1, basesBefore: bases.slice(), outsBefore: outs, error: rng.u() < PK_ERR };
+            ev.out = !ev.error && back > ball; ev.margin = +(ball - back).toFixed(3);
+            pickLog.push(ev);
+            if (ev.out) { bases[1] = null; outs++; S.po++; SD.pko++; }
+            else if (ev.error) { bases[1] = null; var to = rng.u() < 0.25 && !bases[3] ? 3 : 2; bases[to] = pl; ev.to = to; SD.e++; G.errors[1 - half]++; }
+            ev.basesAfter = bases.slice(); ev.outsAfter = outs;
+            if (outs >= 3) return { abort: true };
+          }
+          return null;
+        }
         function beforePitch(st) {
+          var ab = pickoffs(); if (ab) return ab;
           basesAtPitch = bases.slice(); going = null;
           if (st.balls === 3) return null;                                    // ball four is a free base anyway
           var from = bases[1] && !bases[2] ? 1 : bases[2] && !bases[3] && outs < 2 ? 2 : 0;
@@ -135,7 +186,8 @@ var BBGame = (function () {
         }
         function afterPitch(rec, end) {
           var res = rec.result, pk = rec.pitch.plate, hit = res === 'in_play' || res === 'hr' || (res === 'foul' && end === 'BIP');
-          rec.bases = basesAtPitch;
+          rec.bases = basesAtPitch; rec.outsAt = outs;   // after any pickoff, before this pitch's steal
+          if (pickLog.length) { rec.pickoffs = pickLog; pickLog = []; }
           if (going && hit) rec.going = going.from;                            // he was running on contact
           else if (going && res === 'foul') rec.steal = { id: going.id, from: going.from, back: true };
           else if (going && !((end === 'BB' || end === 'HBP') && going.from === 1) && !(end === 'K' && outs >= 2)) {
@@ -169,23 +221,33 @@ var BBGame = (function () {
           if (rec.steal || rec.wild) { rec.basesAfter = bases.slice(); rec.outsAfter = outs; }
           return (!end && outs >= 3) ? { abort: true } : null;
         }
-        var pa = BB.simPA(P, B, { env: env, ump: ump, framing: def.catcher.framing || 0, seen: seenOwn + 0.25 * (seenTeam - seenOwn),
-                                  runnersOn: !!(bases[1] || bases[2] || bases[3]), rec: true,
-                                  foulCatch: function (bb) { caughtFoul = BBField.foulCatch(bb, D, env, rng); return !!caughtFoul; },
-                                  beforePitch: beforePitch, afterPitch: afterPitch }, rng);
+        // THE INTENTIONAL WALK (signalled, the 2017-2022 rule: no pitches). With first
+        // base open and a man in scoring position, late (or with the pitcher on deck and
+        // two out), close, the manager puts this hitter on when the next one is clearly
+        // weaker: the scouts' expected-wOBA gap between the two clears his own bar.
+        var pa;
+        if (walkHim(def, bat, B, bases, outs, inning, G.score[1 - half] - G.score[half])) pa = { result: 'IBB', pitches: [] };
+        else {
+          pa = BB.simPA(P, B, { env: env, ump: ump, framing: def.catcher.framing || 0, seen: seenOwn + 0.25 * (seenTeam - seenOwn),
+                                runnersOn: !!(bases[1] || bases[2] || bases[3]), rec: true,
+                                foulCatch: function (bb) { caughtFoul = BBField.foulCatch(bb, D, env, rng); return !!caughtFoul; },
+                                beforePitch: beforePitch, afterPitch: afterPitch }, rng);
+          if (pickLog.length) pa.pickoffsEnd = pickLog;   // thrown over, with no pitch after: the inning ended on the bases
+        }
         var n = pa.pitches.length;
         bat.seen[P.id + ':' + B.id] = seenOwn + n; bat.seenTeam[P.id] = seenTeam + n;
         P.pitchesToday += n; G.pitches += n;
-        var play = { inning: inning, half: half, outs: outs, bases: bases.slice(), batter: B, pitcher: P, pa: pa, count: pa.pitches[n - 1].count,
+        var play = { inning: inning, half: half, outs: outsAtPA, bases: basesAtPA, batter: B, pitcher: P, pa: pa, count: n ? pa.pitches[n - 1].count : '0-0',
                      defense: D.map(function (F) { return { pos: F.pos, id: F.pl.id, name: F.pl.name, at: F.at.slice(), std: F.std.slice(), react: F.pl.react, speed: F.pl.speed, route: F.pl.route }; }),
                      pitchCount: P.pitchesToday - n, load: P.load - n, seen: seenOwn + 0.25 * (seenTeam - seenOwn),
-                     newPitcher: def.justChanged || null, pinchHit: bat.justPinch || null,
+                     newPitcher: def.justChanged || null, pinchHit: bat.justPinch || null, defSubs: def.justSubs || null, ibb: pa.result === 'IBB' || null,
                      warming: def.warming ? { id: def.warming.id, name: def.warming.name } : null,
                      warmingBat: bat.warming ? { id: bat.warming.id, name: bat.warming.name } : null };
-        def.justChanged = null; bat.justPinch = null;
+        def.justChanged = null; bat.justPinch = null; def.justSubs = null;
         var r = pa.result, runs = paRuns;
         if (r !== 'END') S.pa++;
-        if (r === 'END') { play.desc = 'caught stealing, inning over'; bat.idx--; }   // no plate appearance: he leads off next inning
+        if (r === 'END') { play.desc = pa.pickoffsEnd ? 'picked off, inning over' : 'caught stealing, inning over'; bat.idx--; }   // no plate appearance: he leads off next inning
+        else if (r === 'IBB') { S.bb++; S.ibb++; play.desc = 'intentional walk'; runs += advanceForced(bases, B); }
         else if (r === 'K') { outs++; S.ab++; S.k++; play.desc = 'strikeout' + (pa.pitches[n - 1].result === 'called_strike' ? ' looking' : ' swinging') + (pa.pitches[n - 1].steal && !pa.pitches[n - 1].steal.safe ? ', runner thrown out' : ''); }
         else if (r === 'BB' || r === 'HBP') {
           if (r === 'BB') S.bb++; else S.hbp++;
@@ -231,7 +293,7 @@ var BBGame = (function () {
   }
 
   function newStats() {
-    return { pa: 0, ab: 0, r: 0, h: 0, d: 0, t: 0, hr: 0, bb: 0, hbp: 0, k: 0, sf: 0, rbi: 0, roe: 0, e: 0, dp: 0, sb: 0, cs: 0, wp: 0, pb: 0, GB: 0, LD: 0, FB: 0, PU: 0 };
+    return { pa: 0, ab: 0, r: 0, h: 0, d: 0, t: 0, hr: 0, bb: 0, ibb: 0, hbp: 0, k: 0, sf: 0, rbi: 0, roe: 0, e: 0, dp: 0, sb: 0, cs: 0, po: 0, pko: 0, wp: 0, pb: 0, GB: 0, LD: 0, FB: 0, PU: 0, subs: 0, dswitch: 0 };
   }
   function Phi(z) { var t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989422804 * Math.exp(-z * z / 2);
     var p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; }
@@ -254,7 +316,10 @@ var BBGame = (function () {
     if (B === null) {                       // the pitcher's spot (NL)
       var P = st.pitcher, f = BB.fatigueOf(P), M = st.team.manager;
       var ph = inning >= 6 && st.bench.length && (f >= M.hook - 0.15 || diff < 0);
-      if (ph) { B = st.bench.shift(); st.order[st.idx % 9] = B; st.pinchHitFor = P; st.justPinch = { batter: B, forPitcher: P }; }
+      if (ph) {   // the best bat on the bench; the backup catcher last
+        var pick = st.bench.slice().sort(function (a, b) { return (b.benchPos === 'C' ? -1 : 0) - (a.benchPos === 'C' ? -1 : 0) || BB.hitterValue(b) - BB.hitterValue(a); })[0];
+        st.bench.splice(st.bench.indexOf(pick), 1); B = pick; st.order[st.idx % 9] = B; st.pinchHitFor = P; st.justPinch = { batter: B, forPitcher: P };
+      }
       else B = P.bat;
     }
     st.idx++;
@@ -282,6 +347,64 @@ var BBGame = (function () {
     }
     if (def.warming) { def.warming.load += 3; def.warmHalves++; }   // warming up costs pitches
     if (def.warming && def.warmHalves > 3) { def.warming = null; }  // sat down; the load stays
+    lateDefence(def, T, inning, lead);
+  }
+  // LATE DEFENCE. Protecting a lead of one to three from the 8th on, the manager sends
+  // a bench glove out for a starter when the runs the glove saves over the innings left
+  // outweigh the runs the bat costs in the plate appearances left (the farm's own sums:
+  // FIELD_VALUE per ball in play, expected wOBA per plate appearance), by his own bar.
+  // The catcher stays.
+  function lateDefence(def, T, inning, lead) {
+    if (inning < 8 || lead < 1 || lead > 3 || !def.bench.length) return;
+    var left = Math.max(1, 10 - inning), subs = [];
+    def.defense.forEach(function (F, fi) {
+      if (F.pos === 'P' || F.pos === 'C' || subs.length >= 2) return;
+      var best = null;
+      def.bench.forEach(function (b) {
+        if (!canPlay(b, F.pos) || subs.some(function (q) { return q.in === b; })) return;
+        var gain = (BB.fieldValue(F.pl, F.pos) - BB.fieldValue(b, F.pos)) * BIP_INN * left, cost = (BB.hitterValue(F.pl) - BB.hitterValue(b)) * PA_INN * left / WOBA_SCALE;
+        if (!best || gain - cost > best.net) best = { b: b, net: gain - cost };
+      });
+      if (best && best.net > T.manager.glove) subs.push({ fi: fi, in: best.b, net: best.net });
+    });
+    subs.forEach(function (q) { substitute(def, q.fi, q.in); });
+  }
+  // a bench man takes a fielder's place: his position, his spot in the order; the man he replaces is done
+  function substitute(def, fi, b) {
+    var F = def.defense[fi], out = F.pl, slot = def.order.indexOf(out);
+    b.pos = F.pos; def.bench.splice(def.bench.indexOf(b), 1);
+    if (slot >= 0) def.order[slot] = b;
+    def.defense[fi] = { pos: F.pos, pl: b, at: F.at, std: F.std };
+    (def.justSubs = def.justSubs || []).push({ out: out, in: b, pos: F.pos, slot: slot });
+    return { out: out, in: b, pos: F.pos, slot: slot };
+  }
+  // THE DOUBLE SWITCH (NL). Bringing in a pitcher whose spot would bat within the next
+  // two, the manager also changes a fielder whose turn is furthest off - the man who
+  // batted last, as near as the bench allows: the new pitcher bats in that man's spot
+  // and the bench man in the pitcher's, playing that man's position.
+  function doubleSwitch(def) {
+    if (def.rules !== 'NL' || def.bench.length < 2) return null;   // keeps a bat on the bench for the pitcher's spot
+    var ps = def.order.indexOf(null); if (ps < 0) return null;
+    if ((ps - def.idx % 9 + 9) % 9 > 1) return null;   // his spot is not among the next two
+    for (var back = 1; back <= 5; back++) {
+      var j = (def.idx - back + 18) % 9, X = def.order[j]; if (!X || j === ps) continue;
+      var fi = -1; def.defense.forEach(function (F, k) { if (F.pl === X) fi = k; }); if (fi < 0 || def.defense[fi].pos === 'C') continue;
+      var pos = def.defense[fi].pos, b = def.bench.filter(function (q) { return canPlay(q, pos); }).sort(function (p, q) { return BB.fieldValue(p, pos) - BB.fieldValue(q, pos); })[0];
+      if (!b) continue;
+      var sw = substitute(def, fi, b); def.justSubs = null;   // reported with the pitching change instead
+      def.order[ps] = b; def.order[j] = null;
+      return { out: sw.out, in: b, pos: pos, slotIn: ps, slotP: j };
+    }
+    return null;
+  }
+  // THE INTENTIONAL WALK: is this the man to put on?
+  function walkHim(def, bat, B, bases, outs, inning, lead) {
+    if (bases[1] || !(bases[2] || bases[3]) || lead < -1 || lead > 2) return false;
+    var N = bat.order[bat.idx % 9], pitcherNext = N === null;
+    if (pitcherNext) N = bat.pitcher.bat;
+    if (inning < 7 && !(pitcherNext && outs === 2)) return false;
+    var gap = BB.hitterValue(B) - BB.hitterValue(N), bar = def.team.manager.ibb + (outs === 0 ? 0.03 : 0) - (inning >= 9 ? 0.015 : 0);
+    return gap > bar;
   }
   function endHalf(def, bat) {
     def.pitcher.load = Math.max(0, def.pitcher.load - 0.75);         // a rest between innings recovers a little
@@ -312,6 +435,7 @@ var BBGame = (function () {
     if (!def.warming) R.load += 4;          // came in cold: he throws his warm-up pitches anyway
     def.warming = null; def.warmHalves = 0;
     setPitcher(def, R);
+    var ds = doubleSwitch(def); if (ds) def.justChanged.doubleSwitch = ds;
   }
 
   // ----------------------------------------------------------- reports
@@ -334,7 +458,7 @@ var BBGame = (function () {
     return out.join('\n');
   }
 
-  return { version: '0.1', makeTeam: makeTeam, simGame: simGame, line: line, playByPlay: playByPlay, newStats: newStats };
+  return { version: '0.9', makeTeam: makeTeam, canPlay: canPlay, simGame: simGame, line: line, playByPlay: playByPlay, newStats: newStats };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = BBGame;
