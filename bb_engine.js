@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v1.1 · 2026-10-02
+   bb_engine.js · v1.2 · 2026-10-02
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -34,7 +34,8 @@
              usually does: a pitch that rides or drops more than most is
              swung under or over                  (ghostPitch, readFactors)
      DECIDE  swing or take, from where he thinks the ball will cross the
-             zone, the count, and whether it is the pitch he was sitting on
+             zone at the commit point, the count, and whether it is the pitch
+             he was sitting on: a policy fitted to the league's swing curves
      CALL    a take is called by an umpire whose zone has a soft edge (his
              accuracy), per-edge systematic misses, a count lean, and the
              catcher's framing                                 (callPitch)
@@ -54,6 +55,9 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v1.2  the swing policy: thresholds per count and read (the pitch he sat on, or one
+           he recognised as something else), fitted to the league's swing curves by
+           count; he decides on what he could see at the commit point
      v1.1  the adjusted swing: closing the gap between the arrival he planned and the
            real one costs bat speed, so the pitch he sat on gets his full swing; effort
            by count; his bat speed trait stays his average over his swings
@@ -69,10 +73,6 @@
      v0.8  the bat is a tapered wood beam: its shape gives the radius the ball meets,
            the rigid recoil about the balance point and the bending modes that drain
            a strike off the sweet spot (Nathan 2000); the ball's COR falls with speed
-     v0.7  the power chain: bat speed BUILT from height, weight, swing power per kg,
-           swing length and the bat (v^3 = 4pWL/mEff); the bat's mass sets the
-           collision efficiency; precision worsens as bat speed squared; fitted to
-           the 2025 Statcast marginals, correlations left as tests
 ============================================================================ */
 
 var BB = (function () {
@@ -804,8 +804,6 @@ var BB = (function () {
   // the likeliest pitch, leaning to fastballs (being beaten by a fastball
   // costs more than being fooled by a slow one), and blends his timing
   // toward the mix by how much he hedges. With two strikes he hedges more.
-  var SWING_THR = { '0-0': 0.55, '0-1': 0.50, '0-2': 0.30, '1-0': 0.55, '1-1': 0.48, '1-2': 0.30,
-                    '2-0': 0.60, '2-1': 0.50, '2-2': 0.32, '3-0': 0.92, '3-1': 0.58, '3-2': 0.33 };
   function expectPitch(B, P, sb, st) {
     var ip = intentProbs(P, st.balls, st.strikes), mix = P.pitches.map(function () { return 0; });
     for (var k = 0; k < 3; k++) {
@@ -953,15 +951,15 @@ var BB = (function () {
     var ps = PRIOR_S * (PITCH_TYPES[pitch.type].ivbSD || 4), pullS = 1 / (1 + (ps / eye) * (ps / eye));
     var real = [pitch.plate.x, pitch.plate.z, pitch.plate.t];
     var judged = [pullS * (ref.x - real[0]) + RESID_S * (gh.x - real[0]), pullS * (ref.z - real[1]) + RESID_S * (gh.z - real[1]), pullT * (gh.t - real[2])];   // how far off his judgement of a recognised pitch is
-    var g3 = [gh.x - real[0], gh.z - real[1], gh.t - real[2]], err = judged;
-    if (!detected) {
-      var launched = 1 - tc * tc, base = [launched * g3[0], launched * g3[1], launched * g3[2]];   // he launched on the pitch he expected
+    var g3 = [gh.x - real[0], gh.z - real[1], gh.t - real[2]], err = judged, launched = 1 - tc * tc;
+    var base = [launched * g3[0], launched * g3[1], launched * g3[2]];   // the pitch he expected, corrected for the break seen by the commit point
+    if (!detected) {   // he launched on the pitch he expected
       // late: he steers toward his judgement; fooled: only by what has shown itself by the last look
       var target = late ? judged : [(1 - ts * ts) * g3[0], (1 - ts * ts) * g3[1], (1 - ts * ts) * g3[2]];
       var cx = target[0] - base[0], cz = target[1] - base[1], cm = Math.sqrt(cx * cx + cz * cz), k = cm > STEER_IN * IN ? STEER_IN * IN / cm : 1;
       err = [base[0] + k * cx, base[1] + k * cz, base[2] + k * (target[2] - base[2])];
     }
-    return { tp: tp, sep: sep, pFooled: pFooled, detected: detected, late: late, pullT: pullT, pullS: pullS, err: err };
+    return { tp: tp, sep: sep, pFooled: pFooled, detected: detected, late: late, same: !!same, pullT: pullT, pullS: pullS, err: err, base: base };
   }
   function misreadOf(rf) { return rf.err; }   // [x m, z m, t s]: how far off his judgement is, judged minus real
   // A pitch of one kind as he pictures it: from this release, along this
@@ -984,17 +982,32 @@ var BB = (function () {
   }
 
   // -------------------------------------------------------------- DECIDE
-  // His decision uses his perception at the commit point (eyeSD, earlier and
-  // noisier); the swing is then steered by later tracking (barrelSD).
+  // THE SWING POLICY. He decides at the commit point, on what he could see by
+  // then: a pitch already picked up, as he judges it (THE PRIOR'S PULL); one
+  // not yet picked up, where the pitch he expected would go, corrected only
+  // for the break that had shown itself (rf.base); then his eye's scatter
+  // (eyeSD, larger under time pressure). From that he judges his chance it is
+  // a strike (pin) and swings when it passes his threshold for the count,
+  // less his aggression. The threshold also depends on his read: 'on' when it
+  // is the pitch he was sitting on, or one he has not told apart from it;
+  // 'off' when he has recognised something else, which early in the count he
+  // mostly lets go. SWING_THR is [on, off] per count, FITTED to the league's
+  // swing probability by distance from the zone edge in each count
+  // (statcast/discipline.py table 2b; tools/fit_swing_policy.js). A swing
+  // policy, not a bet: the league's batters swing more in hitters' counts than
+  // the next pitch's run value pays for (discipline.py table 6).
+  var SWING_THR = {
+    '0-0': [0.35, 1.20], '0-1': [0.10, 0.76], '0-2': [0.17, 0.17], '1-0': [0.19, 0.99], '1-1': [0.10, 0.66], '1-2': [0.08, 0.23],
+    '2-0': [0.29, 1.06], '2-1': [0.10, 0.65], '2-2': [0.03, 0.35], '3-0': [0.88, 1.14], '3-1': [0.18, 0.72], '3-2': [0.03, 0.34]
+  };
   function decide(B, pitch, gh, rf, st, rng) {
-    var m = misreadOf(rf), mx = m[0], mz = m[1];
+    var m = rf.detected ? rf.err : rf.base, mx = m[0], mz = m[1];
     var eye = B.eyeSD * IN * rf.tp;
     var xp = pitch.plate.x + mx + rng.n(0, eye), zp = pitch.plate.z + mz + rng.n(0, eye);
     var pin = Phi((ZONE_HALF - Math.abs(xp)) / eye) * Phi((zp - (B.zone.bot - BALL_R)) / eye) * Phi((B.zone.top + BALL_R - zp) / eye);
-    var dx = gh.x - pitch.plate.x, dz = gh.z - pitch.plate.z;
-    var onIt = Math.sqrt(dx * dx + dz * dz) < 0.08 && Math.abs(gh.t - pitch.plate.t) < 0.012;
-    var thr = SWING_THR[st.balls + '-' + st.strikes] - B.aggr - (onIt ? 0.06 : 0);
-    return { swing: pin > thr, pin: pin, thr: thr, onIt: onIt, perceived: [xp, zp], misread: [mx, mz] };
+    var state = rf.detected && !rf.same ? 'off' : 'on';
+    var thr = SWING_THR[st.balls + '-' + st.strikes][state === 'on' ? 0 : 1] - B.aggr;
+    return { swing: pin > thr, pin: pin, thr: thr, state: state, perceived: [xp, zp], misread: [mx, mz] };
   }
 
   // ---------------------------------------------------------------- CALL
@@ -1243,7 +1256,7 @@ var BB = (function () {
   }
 
   return {
-    version: '1.1',
+    version: '1.2',
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
     PITCH_TYPES: PITCH_TYPES, ARCH: ARCH, TRAITS: TRAITS, AERO: AERO,
@@ -1251,7 +1264,7 @@ var BB = (function () {
     makePitcher: makePitcher, makeBatter: makeBatter, makeUmp: makeUmp, equipFielder: equipFielder, FIELD_MEANS: FIELD_MEANS,
     batOf: batOf, batSpeedOf: batSpeedOf, swingPowerOf: swingPowerOf, POWER_EXP: POWER_EXP,
     batMass: batMass, batRadius: batRadius, qAt: qAt, corOf: corOf, BAT_MODES: BAT_MODES, BAT_SHAPE: BAT_SHAPE, SWEET_IN: SWEET_IN, BAT_DEFAULT: BAT_DEFAULT,
-    flyPitch: flyPitch, flyBatted: flyBatted, spinVector: spinVector, dirOf: dirOf, aim: aim,
+    flyPitch: flyPitch, flyBatted: flyBatted, spinVector: spinVector, dirOf: dirOf, aim: aim, SWING_THR: SWING_THR, ZONE_HALF: ZONE_HALF,
     fatigueOf: fatigueOf, releasePoint: releasePoint, batterSide: batterSide, inZone: inZone,
     planPitch: planPitch, expectPitch: expectPitch, throwPitch: throwPitch, ghostPitch: ghostPitch,
     readFactors: readFactors, decide: decide, callPitch: callPitch, swing: swing, collide: collide,

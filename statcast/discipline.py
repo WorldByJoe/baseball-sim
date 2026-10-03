@@ -1,5 +1,5 @@
 """
-discipline.py · v0.2 · 2026-10-02
+discipline.py · v0.3 · 2026-10-02
 
 Measures plate discipline from pitch-level Statcast: where pitchers put the
 ball and when batters swing at it, by count and by how far the pitch was from
@@ -30,6 +30,7 @@ tables block of the "Plate discipline" section of STATCAST_TARGETS_<year>.md.
   python3 statcast/discipline.py 2025-05-05:2025-09-21
 
 CHANGED
+  v0.3  table 2b: swing probability by distance from the edge for each of the twelve counts (the swing policy's targets)
   v0.2  table 6: the realised run value of swings against takes, by count and distance from the edge
   v0.1  first build (the targets for plate discipline)
 """
@@ -152,6 +153,12 @@ def main(spec):
         cv = curve([p for p in P if p['kind'] == k]); J['swing_by_edge'][k] = cv
         rows.append([k + ' (all counts)'] + ['%s' % f3(v) for v, n in cv])
     md += ['### 2. Swing probability by distance from the zone edge (in, + outside)', ''] + table(['counts'] + BIN_NAMES, rows) + ['']
+    J['swing_by_edge_count'] = {}
+    rows = []
+    for c in COUNTS:
+        cv = curve([p for p in P if p['count'] == c]); J['swing_by_edge_count'][c] = cv
+        rows.append([c] + ['%s' % f3(v) if n >= 30 else '' for v, n in cv])
+    md += ['Table 2b. The same for each count (blank where fewer than 30 pitches):', ''] + table(['count'] + BIN_NAMES, rows) + ['']
 
     # 3. where pitches go: share of pitches in each distance band, by count group and kind
     J['location_by_edge'] = {}
