@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v2.8 · 2026-10-02
+  baseball.html · v2.9 · 2026-10-02
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
@@ -38,13 +38,13 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v2.9  engine v1.5, bb_field v0.7 (the fielding measured): a fielder's first step defaults
+          to 0.45 s like the model's
     v2.8  engine v1.4 (the pitcher's plan, measured command): the command circle is an
           ellipse, across and up and down, kept off the key
     v2.7  engine v1.3 (fooled-swing contact)
     v2.6  engine v1.2 (the swing policy fitted to the league's swing curves)
     v2.5  engine v1.1 (the adjusted swing)
-    v2.4  engine v1.0 (perception and pitch variety): the drawn pitch and the
-          pitcher's card carry his seam break; the drawn ghost is his picture of it
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -134,9 +134,9 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   <div id="hud" class="tag"></div>
 </div>
 <!-- version tags so a browser never runs a stale engine against a new page -->
-<script src="bb_engine.js?v=1.4"></script>
+<script src="bb_engine.js?v=1.5"></script>
 <script src="bb_names.js?v=0.1"></script>
-<script src="bb_field.js?v=0.6"></script>
+<script src="bb_field.js?v=0.7"></script>
 <script src="bb_game.js?v=0.7"></script>
 <script>
 (function () {
@@ -840,7 +840,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     }
     var lg = lungeOf(play);
     function at(F, t) {
-      var re = F.react || 0.7, p = F.at, tt = Math.min(t, tSettle);
+      var re = F.react || 0.45, p = F.at, tt = Math.min(t, tSettle);
       if (fld && F.pos === fld.who) {
         var u = clamp((t - re) / Math.max(0.3, fld.t - re), 0, 1); u = u * u * (3 - 2 * u); p = lerp(F.at, fld.at, u);
         var rv = runEvs[F.pos]; if (rv && t > rv.t) p = lerp(fld.at, BASES[rv.to], clamp((t - rv.t) / Math.max(0.2, rv.arrive - rv.t), 0, 1));
@@ -869,7 +869,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   // A foul the defence can get near: the man with the best chance runs for it.
   // The engine's foulCatch already decided whether he made it (a catch is a
   // play, drawn as one); this is the try. Landing in the seats: nobody moves.
-  function plOf(F) { return { pos: F.pos, speed: F.speed || 27, react: F.react || 0.7, route: F.route || 1, glove: 1 }; }
+  function plOf(F) { return { pos: F.pos, speed: F.speed || 27, react: F.react || 0.45, route: F.route || 1, glove: 1 }; }
   function foulChase(play, p) {
     if (p._chase !== undefined) return p._chase;
     var bb = p.bb, out = null;
@@ -945,7 +945,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     var wildC = seg.kind === 'result' && !!pitch.wild;   // a wild pitch: the catcher goes to the backstop
     function fielderAt(F, t) {
       if (plan) return plan(F, t);
-      var re = F.react || 0.7;
+      var re = F.react || 0.45;
       function sm(x) { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); }
       if (stealCover && F.pos === stealCover) { var sp0 = lerp(F.at, BASES[stl.to], sm(t / 1.3)); return t > 3.5 ? lerp(BASES[stl.to], F.at, sm((t - 3.5) / 1.4)) : sp0; }   // to the bag; back once he has thrown it to the pitcher
       if (wildC && F.pos === 'C') { var bk = [pitch.pitch.plate.x * 4, BACKSTOP_Y + 1.8], wp0 = lerp(F.at, bk, sm((t - 0.3) / 1.2)); return t > 2.5 ? lerp(bk, F.at, sm((t - 2.5) / 1.8)) : wp0; }   // runs it down at the backstop, throws it in, walks back

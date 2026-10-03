@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v0.6 · 2026-09-30
+   bb_field.js · v0.7 · 2026-10-02
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -32,6 +32,11 @@
    doubles are approximate; the cut-off man is a timing rule, not a player.
 
    CHANGED
+     v0.7  outfielders move as Statcast's jump shows, stand where the league's did, and
+           catch as often as the league's by exit velocity and launch angle; bounces lose
+           more the steeper they land (measured); runners read the race with error and are
+           sent by the outs (fitted to extra bases taken); a runner thrown out on a clean
+           hit to the outfield no longer costs the batter his hit
      v0.6  the running game: stealTime from a moving lead, a runner going with the
            pitch is 9 m down the line at contact (o.going); accessible() marks the
            foul ground a man can reach - foul pops in the seats are nobody's
@@ -43,9 +48,6 @@
            himself; a first baseman far off the bag throws to the pitcher covering
            and waits for him (Joe saw a throw to an empty bag). Events 'carry', 'cover'
      v0.3  a third-out catch carries its runner list too (every play has one shape)
-     v0.2  home runs carry runner and event lists like every other play (the
-           screen went blank on the first homer without them)
-     v0.1  first build
 ============================================================================ */
 
 var BBField = (function () {
@@ -55,16 +57,32 @@ var BBField = (function () {
   var BASE = 90 * FT, H2 = BASE / Math.SQRT2;
   var BASES = [[0, 0], [H2, H2], [0, 2 * H2], [-H2, H2], [0, 0]];   // home, 1st, 2nd, 3rd, home again
   var REACH = 1.2;     // m: glove plus a dive
-  // Outfield acceleration and the react trait together reproduce Statcast's
-  // average outfield JUMP: ~30 ft covered in the first 3 s after contact.
-  // An infielder works from a crouch with short, explosive steps and a dive,
-  // so he accelerates harder and reaches farther for a ground ball.
-  var ACC_OF = 3.5, ACC_IF = 5.5, ACC_R = 4.5;   // m/s^2 (a runner's 4.5 puts the average home-to-first at 4.4 s, Statcast's average; 5.5 was tried and inflated BABIP to .315)
+  // A fielder's acceleration and the react trait together reproduce Statcast's
+  // average outfield JUMP: 33.9 ft covered toward the ball in the first 3 s
+  // after the pitch is RELEASED (2025 leaderboard), about 2.6 s after contact:
+  // 0.45 s to the first step, 5.5 m/s^2, a route 0.90 of straight gives 33.7 ft.
+  // (Until v0.7 outfielders reacted in 0.70 s and accelerated at 3.5 m/s^2, set
+  // to "30 ft in 3 s" counted from contact; they covered 18 ft in the jump's
+  // window, and fly balls to 300-400 ft fell in twice as often as the league's.)
+  var ACC_F = 5.5, ACC_R = 4.5;   // m/s^2 (a runner's 4.5 puts the average home-to-first at 4.4 s, Statcast's average; 5.5 was tried and inflated BABIP to .315)
   var REACH_GB = 1.5;  // m: a dive or full extension for a grounder
-  var LEAD = 3.5;      // m: a runner's lead when the ball is hit
+  var LEAD = 4.66;     // m: a runner's lead when the ball is hit: Statcast's average secondary lead, 15.3 ft (2025, runners on first)
   var TAG = 0.25;      // s: catch and apply a tag
   var SAFETY = 0.30;   // s: the margin a runner wants before taking second (plus his own runAggr)
-  var SAFETY_FAR = 0.50;   // s: and before third or home, where the coach holds him up
+  // Taking third or home: he and the coach read the race with READ_SD s of
+  // error (set by hand) and send him when the read beats SAFETY_FAR for the
+  // outs (plus his own runAggr), so a runner is sometimes thrown out and
+  // sometimes held when he would have made it. SAFETY_FAR was fitted to how
+  // often the league's runners took the extra base on a single or a double
+  // with none, one and two out (statcast/baserunning.py): a runner on second
+  // scored on a single .36 / .51 / .83 of the time, and .02-.03 were thrown out.
+  var SAFETY_FAR = [0.6, 0.5, 0.2], READ_SD = 0.25;   // s, by outs
+  // How sure a throw's arrival is: 0.15 s for an infield throw, and more the
+  // longer it is beyond 40 m (footwork, a hop, the catcher moving for it); set
+  // by hand, so runners are thrown out at third and home about as often as
+  // the league's (1-5% of chances).
+  var RACE_SD = 0.15, RACE_SD_M = 0.005;   // s, s per m beyond 40 m
+  function raceSD(from, to) { return RACE_SD + RACE_SD_M * Math.max(0, dist(from, BASES[to]) - 40); }
   var PIVOT = 0.35;    // s: catch, pivot and release on a double-play relay
   var STD_AIR = BB.makeEnv({ fence: [9999, 9999, 9999, 9999, 9999] });
 
@@ -79,20 +97,31 @@ var BBField = (function () {
 
   // ------------------------------------------------------------ positions
   // Standard spots (ft from home, degrees from the centre-field line, + toward
-  // right field) and how much each rotates with the hitter's pull side. A
-  // first rule until positioning gets its own layer: turn toward his pull
-  // side in proportion to his pull bias, never past 40 degrees, and play
-  // deeper for more bat speed. Pre-2023 rules: shifts are allowed.
-  var STD = { P: [60.5, 0, 0], C: [-4.5, 0, 0], '1B': [110, 36, 0.2], '2B': [150, 15, 1.0], SS: [150, -13, 1.0],
-              '3B': [115, -34, 0.8], LF: [285, -27, 0.6], CF: [315, 0, 0.6], RF: [285, 27, 0.6] };
+  // right field). Infielders turn toward the hitter's pull side in proportion
+  // to his pull bias (never past 40 degrees): pre-2023 rules, shifts allowed.
+  // Outfielders stand where the league's did in 2025 (Statcast fielder
+  // positioning, eight teams, every pitch): the pull-side corner 300 ft out at
+  // 26 deg, the opposite corner 291 ft at 28 deg, centre 323 ft shaded 1.7 deg
+  // toward the opposite field - they do NOT turn toward his pull side. Everyone
+  // plays deeper for more bat speed (outfielders 3 ft per mph, set by hand so
+  // the depth varies about as much as the league's, sd 9-12 ft).
+  var STD = { P: [60.5, 0, 0], C: [-4.5, 0, 0], '1B': [110, 36, 0.2], '2B': [150, 15, 1.0], SS: [150, -13, 1.0], '3B': [115, -34, 0.8] };
+  var OF_SPOT = { pull: [300, 26], oppo: [291, 28], CF: [323, -1.7] };   // ft, deg toward the pull side
   function positionDefense(D, batter, side) {
+    var dv = batter.batSpeed - BB.TRAITS.batSpeed[0];
     D.forEach(function (F) {
-      var s = STD[F.pos], of = F.pos.length === 2 && F.pos[1] === 'F';
+      var s = STD[F.pos], spot;
+      if (isOF(F.pos)) {
+        spot = F.pos === 'CF' ? OF_SPOT.CF : (F.pos === 'LF') === (side < 0) ? OF_SPOT.pull : OF_SPOT.oppo;   // a right-handed hitter pulls to left
+        var a = F.pos === 'CF' ? side * spot[1] : (F.pos === 'LF' ? -1 : 1) * spot[1];
+        F.std = polar(spot[0], a);
+        F.at = polar(spot[0] + 3 * dv, a);
+        return;
+      }
       var turn = side * Math.max(0, batter.pullBias) * s[2];
-      var deep = s[2] ? (batter.batSpeed - BB.TRAITS.batSpeed[0]) * (of ? 5 : 1.5) : 0;
       var ang = s[2] ? Math.max(-40, Math.min(40, s[1] + turn)) : s[1];
       F.std = polar(s[0], s[1]);
-      F.at = polar(s[0] + deep, ang);
+      F.at = polar(s[0] + (s[2] ? 1.5 * dv : 0), ang);
     });
   }
   function makeDefense(players) {         // players: array of {pos, ...traits}
@@ -102,7 +131,7 @@ var BBField = (function () {
   // -------------------------------------------------------------- motion
   function isOF(pos) { return pos === 'LF' || pos === 'CF' || pos === 'RF'; }
   function moveTime(pl, d) {              // a fielder, from his first step
-    var v = pl.speed * FT, a = isOF(pl.pos) ? ACC_OF : ACC_IF; d = Math.max(0, d) / pl.route;
+    var v = pl.speed * FT, a = ACC_F; d = Math.max(0, d) / pl.route;
     var t = d < v * v / (2 * a) ? Math.sqrt(2 * d / a) : v / (2 * a) + d / v;
     return pl.react + t;
   }
@@ -115,8 +144,13 @@ var BBField = (function () {
   // A steal starts from a moving secondary lead: he is already walking off
   // the bag at about 3 m/s when the pitcher commits to the plate.
   var LEAD_STEAL = 3.7, V_SECONDARY = 3.0;   // m, m/s
-  function stealTime(pl, d) {
-    var v = pl.speed * FT, v0 = V_SECONDARY, dAcc = (v * v - v0 * v0) / (2 * ACC_R);
+  // A runner who breaks on contact is shuffling at his secondary lead, slower
+  // than a man walking off on a steal: V_CONTACT, fitted to the league's double
+  // plays per game (the forced runner's race to second).
+  var V_CONTACT = 1.5;   // m/s
+  function stealTime(pl, d, v0) {
+    var v = pl.speed * FT; v0 = v0 === undefined ? V_SECONDARY : v0;
+    var dAcc = (v * v - v0 * v0) / (2 * ACC_R);
     return d < dAcc ? (Math.sqrt(v0 * v0 + 2 * ACC_R * d) - v0) / ACC_R : (v - v0) / ACC_R + (d - dAcc) / v;
   }
   // The part of foul ground a fielder can reach: in front of the backstop and
@@ -170,12 +204,25 @@ var BBField = (function () {
   }
 
   // ---------------------------------------------------------- the track
+  // A bounce: the ball keeps BOUNCE_E of its speed into the ground and
+  // BOUNCE_KF of its speed along it, less BOUNCE_C times its speed into the
+  // ground (the friction and the ploughing grow with how hard it lands), and
+  // never less than BOUNCE_FLOOR. KF and C were fitted, with E held at 0.45 on
+  // dirt and 0.35 on grass, to the share of speed a baseball kept bouncing off
+  // a skinned infield (.57 at 25 deg, .49 at 35 deg) and natural grass (.44,
+  // .32), measured at 31 and 40 m/s (Brosnan, McNitt & Schlossberg 2007, J.
+  // Testing & Evaluation 35(6)). The floor is set by hand: steeper than those
+  // tests, the friction would stop the ball dead. (Until v0.7 every bounce kept
+  // 0.50 / 0.72 on dirt and 0.42 / 0.62 on grass whatever the angle: a hard
+  // ball topped into the dirt hopped 60 ft high over the infield.)
+  var BOUNCE_E = { dirt: 0.45, grass: 0.35 }, BOUNCE_KF = 0.76, BOUNCE_C = { dirt: 0.35, grass: 0.65 }, BOUNCE_FLOOR = 0.2;
   // Bounces and the roll after the ball comes down. Samples [t, x, y, z, speed].
   function groundTrack(x, y, vx, vy, vz, t0, env, out) {
     var t = t0, groundRule = false;
     for (var b = 0; b < 10; b++) {
-      var dirt = onDirt(x, y), e = dirt ? 0.50 : 0.42, kf = dirt ? 0.72 : 0.62;
-      vz = -e * vz; vx *= kf; vy *= kf;
+      var srf = onDirt(x, y) ? 'dirt' : 'grass', vn = -vz, vh = Math.hypot(vx, vy);
+      var kh = vh > 0 ? Math.max(BOUNCE_FLOOR, BOUNCE_KF - BOUNCE_C[srf] * vn / vh) : 0;
+      vz = BOUNCE_E[srf] * vn; vx *= kh; vy *= kh;
       if (vz < 1.0) break;
       var fl = BB.flyBatted([x, y, BALL_R], [vx, vy, vz], [0, 0, 0], env, true);
       var vh = Math.hypot(vx, vy);
@@ -214,11 +261,16 @@ var BBField = (function () {
   }
 
   // ------------------------------------------------------ the fielders
-  // Can he get under it? Margin = time to spare at the landing point.
+  // Can he get under it? Margin = time to spare at the landing point. He has
+  // an even chance when he gets there CATCH_SET s before the ball, with 0.2 s
+  // of spread either way: fitted so balls in the air are caught as often as
+  // the league's at each launch angle and exit velocity (statcast/bip.py,
+  // headless/bip_check.js; 0.15 s, where -0.05 had been set by hand).
+  var CATCH_SET = 0.15;
   function catchChance(F, T) {
     var L = T.land, m = L.t - moveTime(F.pl, dist(F.at, [L.x, L.y]) - REACH);
     if (T.kind === 'wall' && L.z > 2.6) return { m: m, p: 0 };
-    return { m: m, p: Phi((m + 0.05) / 0.2) * (1 - 0.6 * (1 - F.pl.glove)) };
+    return { m: m, p: Phi((m - CATCH_SET) / 0.2) * (1 - 0.6 * (1 - F.pl.glove)) };
   }
   // The first point on the ground track he can reach.
   function intercept(F, T) {
@@ -327,7 +379,7 @@ var BBField = (function () {
       if (r.base === 0) return;
       var isForced = forced(i);
       if (r.going) r.start = 0.05;                                       // already running with the pitch
-      else if (twoOut || (!flyBall && isForced)) r.start = 0.05;        // goes on contact
+      else if (twoOut || (!flyBall && isForced)) { r.start = 0.05; r.onContact = true; }   // goes on contact
       else if (!flyBall) {                                                // unforced on a grounder: read the ball
         var to = r.base + 1, tRun = 0.05 + runTime(r.pl, BASE - LEAD, false);
         var tBall = ballTo(to, ic.t, ic.at).t + TAG;
@@ -337,8 +389,14 @@ var BBField = (function () {
       else r.start = landed;                                             // a routine fly: holds at the bag, ready to tag
     });
     function leadOf(r) { return r.going ? 9 : r.midway ? BASE / 2 : (r.base > 0 && r.start !== null && r.start < 0.5 ? LEAD : 0); }   // a man going with the pitch is 9 m down the line at contact
+    // A man who breaks on contact - with two outs, or forced on a grounder - is
+    // already moving off his secondary lead, as on a steal. With fewer than
+    // two outs an unforced runner freezes at his lead to see the ball caught
+    // or through, and starts from there at rest.
     function arrive(r, to) {
-      return r.start + runTime(r.pl, (to - r.base) * BASE - leadOf(r), (r.start >= 0.5 && !r.midway) || r.base === 0);
+      var d = (to - r.base) * BASE - leadOf(r);
+      if (r.base > 0 && r.start !== null && r.start < 0.5 && !r.midway && r.onContact) return r.start + stealTime(r.pl, d, V_CONTACT);
+      return r.start + runTime(r.pl, d, (r.start >= 0.5 && !r.midway) || r.base === 0);
     }
     // how far each goes: lead runner first, nobody passes the man ahead
     var ahead = 5;
@@ -349,7 +407,7 @@ var BBField = (function () {
       while (to + 1 < ahead && to < 4) {
         var next = to + 1, tRun = arrive(r, next);
         var tBall = ballTo(next, tField, fieldAt).t + TAG;
-        if (tRun + (next >= 3 ? SAFETY_FAR : SAFETY) + r.pl.runAggr < tBall) to = next; else break;
+        if (next >= 3 ? tBall - tRun + rng.n(0, READ_SD) > SAFETY_FAR[Math.min(outs, 2)] + r.pl.runAggr : tRun + SAFETY + r.pl.runAggr < tBall) to = next; else break;
       }
       if (T.groundRule) to = Math.min(4, r.base + 2);
       r.target = Math.min(to, ahead - 1); ahead = r.target;
@@ -362,7 +420,7 @@ var BBField = (function () {
       var isForce = r.base === 0 ? true : (forced(i) && r.target === r.base + 1);
       var tRun = arrive(r, r.target), way = ballTo(r.target, tField, fieldAt);
       var tBall = way.t + (isForce ? 0 : TAG);
-      var p = Phi((tRun - tBall) / 0.15), w = p * (r.target === 4 ? 1.4 : 1), pRelay = 0;
+      var p = Phi((tRun - tBall) / raceSD(fieldAt, r.target)), w = p * (r.target === 4 ? 1.4 : 1), pRelay = 0;
       // the lead runner at second is worth going for only when it is a likely
       // out; then the relay's chance at the batter counts too (expected outs)
       if (isForce && r.target === 2 && r.base === 1 && outs < 2) {
@@ -403,7 +461,12 @@ var BBField = (function () {
     } else out.desc = clean ? (Ff.pos + ' holds the ball') : 'muffed by ' + Ff.pos;
 
     // what it was
-    var batR = R[R.length - 1], anyForceOut = R.some(function (r) { return r.out && r.base > 0; });
+    // A runner retired by an infielder, or forced, makes it a fielder's choice;
+    // a runner thrown out trying for an extra base on a clean hit to the
+    // outfield leaves the batter his hit (until v0.7 that was scored a
+    // fielder's choice, and the batter lost the hit).
+    var batR = R[R.length - 1], runnerOut = R.some(function (r) { return r.out && r.base > 0; });
+    var anyForceOut = runnerOut && (!isOF(Ff.pos) || (play && play.force));
     if (!batR.out) {
       var wouldBeOut = false;
       if (!clean || out.error) {                          // would a clean play have got him?
@@ -419,9 +482,10 @@ var BBField = (function () {
       var where = Ff.pos, kind = out.type === 'GB' ? 'ground ball' : out.type === 'LD' ? 'line drive' : 'fly ball';
       out.desc = (out.hit === 'OUT' ? out.desc : (out.hit === '1B' ? 'single' : out.hit === '2B' ? 'double' : out.hit === '3B' ? 'triple' : out.hit === 'HR' ? 'inside-the-park home run' : out.desc) + ', ' + kind + ' to ' + where + (play && !play.r.out && play.r.base !== 0 ? ', ' + out.desc : ''));
     }
-    // runs: none score if the third out is a force
-    var thirdOutForce = outs + out.outsMade >= 3 && (batR.out || anyForceOut);
-    R.forEach(function (r) { if (!r.out && r.target >= 4 && !thirdOutForce) { out.runs++; if (!out.error && !out.dp) out.rbi++; } });
+    // runs: none score if the third out is the batter or a force; on a tag play a run counts if it crossed first
+    var third = outs + out.outsMade >= 3, thirdOutForce = third && (batR.out || (play && play.r.out && play.force));
+    var tagAt = third && !thirdOutForce && play && play.r.out ? play.tBall : Infinity;
+    R.forEach(function (r) { if (!r.out && r.target >= 4 && !thirdOutForce && arrive(r, 4) < tagAt) { out.runs++; if (!out.error && !out.dp) out.rbi++; } });
     finish();
     return out;
 
