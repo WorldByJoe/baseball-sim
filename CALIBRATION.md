@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v1.3 · 2026-10-02`
+`CALIBRATION.md · v1.4 · 2026-10-02`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -491,6 +491,35 @@ What the step did, in these runs: strikeouts and whiffs per swing came to the le
 
 **The swing curves by pitch kind did not follow** (rms .17, as in v1.2). With the direction read, poorer pitch spotting improved them (spotIn ×3: .097) for a point or two of K% (26.1) and about half a run (3.83); left for the joint fit, since spotIn is set by hand.
 
+### The pitcher's plan, measured (bb_engine v1.4, bb_game v0.7; 2026-10-02)
+
+Until v1.4 a pitcher chose an intent from a hand-set table (attack, edge or expand, by count), aimed at hand-set margins from the edges, and missed by a hand-set command of 4.0 in per axis (4.6 for relievers). Runs: `statcast/locations.py` (42 days of pitch-level 2025, 163,967 pitches), `run_games` 200 games at seeds 3, 11 and 29, `contact_check` 400 × 40 at the same seeds, `discipline_check` seed 3, `power_chain` seeds 3 and 11, `shape_check` (1,097 plays, 0 bad), and a hit-by-pitch count over 16,000 plate appearances (seed 5).
+
+**What the league showed.**
+- **Command is about twice what the model had.** A pitcher's 3-0 four-seamers, where the target is about as fixed as it gets, scattered 7.5 in across and 8.3 in up and down about his own 3-0 mean (starters 7.2 / 8.4, relievers 8.4 / 8.2). In other counts the scatter was only a little larger (0-0: 8.3 / 9.2), so most of a pitch's distance from where it was aimed is execution. That agrees with the published miss distances from the catcher's glove (Inside Edge about 11 in; OpenCommand 9.9 in; a per-axis scatter s gives a mean miss of 1.25 s).
+- **Pitchers differ less than expected.** Beyond sampling, the spread of command between pitchers was 7% of the mean across and 11% up and down, and the two axes were not strongly linked (raw r −0.09).
+- **Targets move with the count but hardly within it.** With command taken out, a pitcher's targets within a count spread 1.5-5 in. The count shifted the aim (with two strikes, breaking balls to same-side batters went 4 in farther away and 0.18 of the zone lower; fastballs went 0.18-0.25 of the zone higher), and each pitcher's own aim for a type sat about 2 in across and 0.10-0.17 of the zone in height from the league's.
+- **Pitchers do not avoid repeating a pitch.** After a change the next pitch was the same type 1.13 times as often as usage, side and count predict; after two alike, 0.98. The engine had penalised repeats (×0.7 and ×0.42).
+- **Fatigue hardly touched command within a start.** Starters' four-seamers scattered as much at pitches 76-90 as in their first 25 (within 4%), and lost 0.4 mph. Managers take tired pitchers out, so this is only the decline the league allows.
+
+**What was built.** Command is two traits, across and up and down, drawn from the measured means and spreads, with each type's factor measured against the four-seamer's (`cmd`) and the part of the scatter the pitch-to-pitch speed, spin and seams already make taken out of the release-angle error (`plateW`, `tools/plate_scatter.js`). The pitcher picks a pitch from his usage times the league's use of the type against this side and of its kind in this count, with the measured repeat factors. He aims at the league's mean location for that type and side, moved by the count's shift, his own habit for the type (drawn once) and the small within-count spread. All of it comes from `PLAN_LOC`, written into the engine by `statcast/locations.py`. The intent table, the target margins and the pitcher-aggression trait are gone; the intent is now only a name for where he aimed (for the screen). Fatigue's cost to command came down from 0.6 to 0.1 of the fatigue level (`FATIGUE_CMD`). With four times as many pitches in the dirt, bb_game's chance of a pitch getting past the catcher came down to 0.4 of its old value per pitch in each band (set by hand in proportion, scaled to the league's wild pitches per game). The 24 swing thresholds were refitted to the same league curves (rms by count .023, as before).
+
+| | v1.3 | v1.4 | league |
+|---|---|---|---|
+| in zone (discipline_check, seed 3) | .485 | .501 | .509 |
+| swing / chase | .472 / .316 | .457 / .257 | .479 / .283 |
+| pitches below 0.15 m (in the dirt) | 0.8% | 3.2% | 3.1% |
+| BB% (run_games) | 6.3-6.5 | 8.4-8.5 | 8.2 |
+| K% | 23.4-23.8 | 21.3-21.5 | 22.6 |
+| hit by pitch, per PA | 0.40% | 1.01% | 1.1% |
+| wild pitches per team-game | 0.38-0.43 | 0.29-0.35 | 0.36 |
+| whiff per swing (contact_check) | .229-.259 | .220-.242 | .232 |
+| runs per team-game | 4.40-4.66 | 4.88-5.11 | 4.39 |
+| AVG / OBP / SLG | .275-.284 / .322-.333 / .453-.465 | .282-.285 / .349-.351 / .465-.466 | .243 / .312 / .399 |
+| BABIP | .349-.359 | .349-.353 | .291 |
+
+What the step did, in these runs: where pitches went came to the league's band by band (the share in each distance band from the zone edge within about .02 for every group of counts and every pitch kind), and with them walks and hit batsmen, from measured command and aim rather than any tuned constant. Strikeouts fell a point below the league's. Runs rose half a run above it: more men on base, and the same excess of hits on balls in play (BABIP .35) driving them in. The zone rate in hitters' counts ran a little low (2-0 .553 against .603), and the swing curves by pitch kind were still off (rms .15), since what a batter does with a breaking ball is perception, not the plan.
+
 ## What was learned building the fielding layer
 
 - **Statcast's outfield JUMP (about 30 ft covered in the first 3 s) is the right anchor for outfielder motion.** The first fielders covered 44 ft in 3 s and caught nearly every fly ball (fly-ball BABIP .03). Slowing everyone to the jump figure fixed the outfield but let 52% of ground balls through, so infielders got their own harder acceleration and a dive reach. That's a real difference: they work from a crouch on a ball that is on them at once.
@@ -510,9 +539,9 @@ What the step did, in these runs: strikeouts and whiffs per swing came to the le
 
 1. **Contact: fouls are as many as the league's but too solid; the hardest contact is still a little soft, and balls in play fall in too often.** After bb_engine v1.1 (the adjusted swing; see that section above), fouls were .49-.50 of contact against .52, but squared up per contact stayed .49-.52 against .435 and per foul .36-.39 against .225. Mean exit velocity on balls in play came to the league's (88.1-88.9 against 88.9), but EV50 ran 98.9-99.2 against 100.6 and home runs 1.7-1.9% of plate appearances against 3.0. BABIP ran .349-.359 against .291 with v1.3, which carried batting average to .275-.284 (.243) and slugging to .453-.465 (.399) once strikeouts came to the league's. Off-speed pitches met far out front were still squared up .51-.54 of the time against .32. The league's high pitches went foul .66 of the time; the model's .46-.47, with the foul share lowest in the upper zone rather than the lower zone.
 2. **Whiffs: right in total, turned over by pitch kind.** With v1.3 (fooled-swing contact), whiffs ran .229-.259 per swing against .232 and K% 23.4-23.8 against 22.6. Fastballs were whiffed .23-.26 (.17), breaking balls .23-.27 (.31) and off-speed .20-.22 (.30): batters chased breaking balls far outside too rarely, and fastballs chased outside the zone missed too often (.45 at 2-4 in against .31). Flat four-seamers were whiffed more and squared up less, as in the league, but their launch angle rose about twice as much as the league's, and low fastballs still launched above low breaking balls.
-3. **Plate discipline: swings follow the league by count, not by pitch kind; walks now too few.** With v1.2, swing rates by count and distance from the zone matched the league's within 0.014-0.032 rms, and walks fell to 6.1-6.5% against 8.2. By pitch kind the model over-swung fastballs outside the zone and under-swung breaking balls everywhere. Pitch locations remain the pitcher's side of the gap: .480 of pitches in the zone against .509, and too few pitches far outside or down the middle, so batters met more borderline balls and chased .323 against .283.
+3. **Plate discipline: swings follow the league by count, not by pitch kind.** With v1.4 swing rates by count and distance from the zone matched the league's within .023 rms, pitch locations matched the league's band by band, and walks came to 8.4-8.5% against 8.2. By pitch kind the model still over-swung fastballs outside the zone and under-swung breaking balls (rms .15). Chase ran .257 against .283.
 4. **Home runs.** They ran 2.0% of plate appearances against 3.0%, and 11% of fly balls against 17%. See the drag proxy above; exit velocity is also too uniform.
 5. **Spray is too centred.** Centre field took 42% against 34%, opposite field 20% against 26%.
-6. **Hit-by-pitch** ran 0.4% against 1.1%.
+6. **Hit-by-pitch: closed** in v1.4 (1.01% against 1.1%) once command was measured.
 7. **Glancing contact makes implausible spin.** Pop-ups came off at a median 6,700-6,900 rpm in v0.9 (`power_chain` v0.4), where real ones run a few thousand. A partial grip (a share of the rolling impulse) fixed the spin and the pop-ups' exit speed but raised BABIP to .37 and cut fly-ball backspin to 800 rpm; a lower friction coefficient did little (see v0.9, tried and rejected). The tangential part of the collision still needs measured batted-ball spin by launch angle to be judged.
 8. **Not built yet:** fielding, base running and every hit or out on balls in play; foul pop-ups caught; the game loop; managers and bullpens; fatigue recovery between innings; warm-up pitches; NL/AL rules; names.

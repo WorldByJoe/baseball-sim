@@ -89,4 +89,4 @@
   var keys = COUNTS, lines = [];
   for (var j = 0; j < keys.length; j += 6) lines.push('    ' + keys.slice(j, j + 6).map(function (k) { return "'" + k + "': [" + out[k][0].toFixed(2) + ', ' + out[k][1].toFixed(2) + ']'; }).join(', '));
   print('  var SWING_THR = {\n' + lines.join(',\n') + '\n  };');
-})(arguments);
+})(typeof arguments !== 'undefined' ? arguments : []);   // jsc keeps its command-line arguments at top level only

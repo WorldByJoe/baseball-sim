@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-traits_doc.py · v0.2 · 2026-10-02
+traits_doc.py · v0.3 · 2026-10-02
 
 Writes TRAITS.md, the list of every player trait and how the population of
 players is drawn, straight from bb_engine.js: the TRAITS table (mean, spread,
@@ -16,6 +16,7 @@ beyond "normal, clipped to its range" is written in DRAWN below; when the
 engine draws a trait differently, change it here too.
 
 CHANGED
+  v0.3  two-axis command; each type's command factor and plate scatter; pitchers' aiming habits (engine v1.4)
   v0.2  pitch types: each pitcher's seam break, and how pitches vary from pitch to pitch (engine v1.0)
   v0.1  first build
 """
@@ -39,7 +40,7 @@ DRAWN = {
     'pTimingSD': 'replaces timingSD for a pitcher batting', 'pBarrelSD': 'replaces motorIn for a pitcher batting',
     'pSpotIn': 'replaces spotIn for a pitcher batting', 'pEyeSD': 'replaces eyeSD for a pitcher batting', 'pAttack': 'replaces attack for a pitcher batting',
     'fbVeloSP': 'normal, clipped; starters', 'fbVeloRP': 'normal, clipped; relievers',
-    'commandSP': 'normal, clipped; starters', 'commandRP': 'normal, clipped; relievers',
+    'cmdXSP': 'normal, clipped; starters', 'cmdZSP': 'normal, clipped; starters', 'cmdXRP': 'normal, clipped; relievers', 'cmdZRP': 'normal, clipped; relievers',
     'staminaSP': 'normal, clipped; starters', 'staminaRP': 'normal, clipped; relievers',
     'umpEdge': 'drawn separately for each of the four edges',
     'umpQuirk': 'one umpire in three: added to (or taken from) one edge picked at random',
@@ -52,9 +53,9 @@ DRAWN = {
 }
 # Units for traits whose comment in the engine does not start with one.
 UNITS = {'pBatSpeed': 'mph', 'pTimingSD': 'ms', 'pBarrelSD': 'in', 'pSpotIn': 'in', 'pEyeSD': 'in', 'pAttack': 'deg',
-         'fbVeloSP': 'mph', 'fbVeloRP': 'mph', 'commandSP': 'in', 'commandRP': 'in', 'staminaSP': 'pitches', 'staminaRP': 'pitches',
+         'fbVeloSP': 'mph', 'fbVeloRP': 'mph', 'cmdXSP': 'in', 'cmdZSP': 'in', 'cmdXRP': 'in', 'cmdZRP': 'in', 'staminaSP': 'pitches', 'staminaRP': 'pitches',
          'relHt': 'ft', 'relSide': 'ft', 'ext': 'ft', 'speed': 'ft/s', 'armMph': 'mph', 'armIdx': 'ratio', 'aggr': 'share', 'commit': 'share',
-         'fbLean': 'factor', 'learn': 'share', 'pAggr': 'share', 'route': 'share', 'glove': 'share', 'block': 'share'}
+         'fbLean': 'factor', 'learn': 'share', 'route': 'share', 'glove': 'share', 'block': 'share'}
 GROUPS = [('hitters', 'Hitters'), ('pitchers when they bat', 'Pitchers when they bat (NL rules)'), ('pitchers', 'Pitchers'), ('umpires', 'Umpires'),
           ('catchers', 'Catchers'), ('fielding and running', 'Fielding and running (every player)'), ('the running game', 'The running game')]
 
@@ -169,16 +170,25 @@ def main():
         w('| %s | %s |' % (pos, ' | '.join(('%+g' % d[k]) if k in d else '' for k in keys)))
     w('\n## Pitch types\n')
     w('Each pitcher\'s version of a pitch is drawn from these league figures (`PITCH_TYPES`): speed is his fastball speed plus the offset (and, for every pitch but the fastballs, a further normal(0, 1.0 mph) of his own); spin rate and spin efficiency are normal with the spread shown (spin rate clipped to 3 spreads, efficiency to 0.03-0.99); tilt is normal; his seam break (extra movement the spin does not explain, toward his arm side and up, in inches) is normal around 0 with the spread shown.\n')
-    w('| type | name | kind | speed offset (mph) | spin (rpm) | spin efficiency | tilt (deg) | seam break sd, arm side / up (in) | command factor |')
-    w('|---|---|---|---|---|---|---|---|---|')
+    w('| type | name | kind | speed offset (mph) | spin (rpm) | spin efficiency | tilt (deg) | seam break sd, arm side / up (in) | command factor, across / up (vs four-seam) | plate scatter of its own, across / up (in) |')
+    w('|---|---|---|---|---|---|---|---|---|---|')
     pair = lambda v: ' / '.join(x.strip() for x in v.strip('[]').split(',')) if v else ''
     for code, d in pt:
-        w('| %s | %s | %s | %s | %s ± %s | %s ± %s | %s ± %s | %s | %s |' % (code, d.get('name', ''), d.get('kind', ''), d.get('dv', ''), d.get('rpm', ''), d.get('rpmSD', ''), d.get('eff', ''), d.get('effSD', ''), d.get('tilt', ''), d.get('tiltSD', ''), pair(d.get('seamSD')), d.get('cmd', '')))
-    w('\nA pitch thrown varies again around his version, by these spreads within a game, plus tilt 5 deg and efficiency 0.03 for every type. His command trait is his whole location scatter at the plate: the seams\' pitch-to-pitch scatter is part of it, not added to it.\n')
+        w('| %s | %s | %s | %s | %s ± %s | %s ± %s | %s ± %s | %s | %s | %s |' % (code, d.get('name', ''), d.get('kind', ''), d.get('dv', ''), d.get('rpm', ''), d.get('rpmSD', ''), d.get('eff', ''), d.get('effSD', ''), d.get('tilt', ''), d.get('tiltSD', ''), pair(d.get('seamSD')), pair(d.get('cmd')), pair(d.get('plateW'))))
+    w('\nA pitch thrown varies again around his version, by these spreads within a game, plus tilt 5 deg and efficiency 0.03 for every type. His command (two traits, across and up and down, times the type\'s factor) is his whole scatter at the plate about the target: the scatter these pitch-to-pitch spreads make on their own (the last column, tools/plate_scatter.js) is part of it, not added to it.\n')
     w('| type | speed (mph) | spin (share of his rpm) | seam break, arm side / up (in) |')
     w('|---|---|---|---|')
     for code, d in pt:
         w('| %s | %s | %s | %s |' % (code, d.get('veloW', ''), d.get('rpmW', ''), pair(d.get('seamW'))))
+    m = re.search(r"habit:\s*(\{[^\n]*\})", src)
+    if not m:
+        sys.exit('traits_doc: PLAN_LOC.habit not found in bb_engine.js')
+    hab = re.findall(r"'(\w+)':\[([-0-9.]+),([-0-9.]+)\]", m.group(1))
+    w('Each pitcher also has his own aim for each of his pitches, normal around the league\'s aim point (`PLAN_LOC.habit`, statcast/locations.py): the spread between pitchers, across (in toward his arm side) and in height (share of the batter\'s zone).\n')
+    w('| type | ' + ' | '.join(t for t, _, _ in hab) + ' |')
+    w('|---|' + '---|' * len(hab))
+    w('| across (in) | ' + ' | '.join(a for _, a, _ in hab) + ' |')
+    w('| height (zone share) | ' + ' | '.join(b for _, _, b in hab) + ' |')
     w('\n## Repertoires\n')
     w('A pitcher is one of these archetypes, picked with the weight shown (`ARCH`); his usage of each pitch is the mix times a lognormal factor (log-sd 0.25), renormalized. Relievers keep their best two pitches (60%) or three.\n')
     w('| archetype | weight | mix |')
