@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v1.9 · 2026-10-03`
+`CALIBRATION.md · v2.0 · 2026-10-03`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -637,6 +637,43 @@ What the step did, in these runs: selection on value produced part of the league
 
 What it left: uphill swings cost the model's hitters more whiffs and strikeouts than the league's (+.66-.74 against +.47-.53), and bat speed ~ whiff is still under half the league's.
 
+### The pro pool, level by level (bb_engine v2.0, bb_game v0.8; 2026-10-03)
+
+Joe (2026-10-03): major leaguers come from an extreme-value distribution - each is the maximum of a sampling from a normal pool - and the farm is a filter for the best. The goal is now the pool itself: the frequency distribution of the traits among all professional players, majors and minors, and how those latent traits meet the physics to give the statistics we measure. Runs: `tools/fit_population.js` (8 rounds × 6,000 picks), `tools/fit_swing_policy.js` (three passes), the suite at seeds 3, 11 and 29, `headless/level_check.js` (400 games per level at seeds 3, 11 and 29), `statcast/levels.py` on 42 days of 2025 for each level (the majors 165,166 pitches, Triple-A 162,471).
+
+**What was built.** `FARM_N` went from 4 to 6, and the pool was refitted so the majors keep the league's measured traits. The pool hitter now swings 68.2 ± 3.1 mph against the major leaguer's 71.1 ± 2.7, and stands 70.9 in against 71.9. LEVELS: the six candidates for a roster spot are ranked by the scouts' judgement and the k-th best plays at level k (`makeBatter` / `makePitcher` with `level`, `makeTeam` passes it on), 1 the majors, 2 Triple-A, down to 6 rookie ball - roughly an organisation's six levels, each about a roster deep. The majors are fitted; every level below is a prediction.
+
+**Triple-A, measured alike** (`statcast/levels.py`; Savant's minor-league search, Hawk-Eye in every Triple-A park). Against the majors over the same 42 days: K% 22.5 both; BB% 10.8 against 7.8; HR% 2.85 against 3.14; BABIP .315 against .289; hard-hit .375 against .419 and the hardest half of batted balls 99.1 against 100.6 mph; whiffs per swing .244 against .234; four-seam speed 92.9 against 94.1 mph (starters) and 94.1 against 95.0 (relievers); arm angle the same; batters 26.9 years against 28.3. Bat speed is not published for Triple-A. **Triple-A's recorded zone is the automated system's**: its sz_top averaged 3.20 ft against the majors' 3.43 (2.9 in lower; sz_bot the same), so a zone rate on each league's own zone is not comparable - on one zone (sz_bot plus the majors' mean zone height) Triple-A's was .502 against .510, so its pitchers' locations are nearly the majors' and most of its extra walks come from the smaller called zone.
+
+**The model, level by level** (three seeds; level 2 played with the umpire's zone top lowered 2.9 in, Triple-A's; the seeds agreed within 0.2 points of K% and BB% and .005 of any rate):
+
+| | MLB | level 1 | Triple-A | level 2 | 3 | 4 | 5 | 6 |
+|---|---|---|---|---|---|---|---|---|
+| K% | 22.5 | 21.4 | 22.5 | 21.7 | 23.6 | 24.5 | 25.9 | 27.0 |
+| BB% | 7.8 | 8.2 | 10.8 | 9.2 (7.6 on the majors' zone) | 7.8 | 7.7 | 7.7 | 7.5 |
+| HR% | 3.14 | 3.27 | 2.85 | 2.53 | 2.05 | 1.64 | 1.37 | 1.03 |
+| BABIP | .289 | .276 | .315 | .264 | .261 | .261 | .255 | .251 |
+| chase | .283 | .276 | .264 | .293 | .306 | .315 | .329 | .346 |
+| whiffs per swing | .234 | .254 | .244 | .267 | .274 | .280 | .294 | .308 |
+| hard-hit 95+ | .419 | .404 | .375 | .358 | .314 | .283 | .245 | .196 |
+| hardest half (mph) | 100.6 | 100.4 | 99.1 | 98.7 | 97.3 | 96.3 | 95.1 | 93.6 |
+| four-seam, starters (mph) | 94.1 | 93.9 | 92.9 | 93.7 | 93.6 | 93.4 | 93.2 | 93.0 |
+| four-seam, relievers (mph) | 95.0 | 95.1 | 94.1 | 94.8 | 94.6 | 94.5 | 94.2 | 93.9 |
+| bat speed (mph) | 71.2 | 71.2 | - | 69.6 | 68.7 | 67.8 | 66.8 | 65.5 |
+| runs per team-game | 4.39 | 3.99 | - | 3.46 | 2.88 | 2.63 | 2.36 | 2.07 |
+
+What the Triple-A test showed, in these runs (nothing in the model was fitted to Triple-A):
+- **The hitters' step down matched.** From level 1 to 2 hard-hit fell .046 (Triple-A .044 below the majors), the hardest half 1.7 mph (1.5), whiffs per swing rose .013 (.010), and K% stayed level as it did in the league.
+- **The pitchers' step down was a sixth of Triple-A's.** Four-seam speed fell 0.2-0.3 mph from level 1 to 2 against Triple-A's 0.9-1.2. The scouts' PITCHER_VALUE hardly values speed (v1.8), so the farm hardly sorts on it - the same gap as the slow fastballs whiffed too often (known gap 2), seen here from outside the majors.
+- **Defence did not step down.** Triple-A's BABIP is .026 above the majors'; the model's level 2 is .012 below its level 1, because the farm picks hitters on hitting alone and the fielders' traits do not change with level.
+- **Discipline stepped down the wrong way.** Triple-A's hitters chased less than the majors' (.264 against .283, perhaps partly the automated zone); the model's level 2 chased more (.293 against .276), because the scouts value eye and patience strongly.
+- **Walks: the zone explained half the gap.** On Triple-A's zone the model's level 2 walked 9.2% against 10.8 (7.6 on the majors' zone).
+- Home runs fell twice as much as Triple-A's from the majors (−0.74 points against −0.29), with hard contact falling about as Triple-A's.
+
+At level 1 with best of six, the suite (seeds 3, 11, 29): runs 3.88-4.00 per team-game (4.39), K% 21.1-21.6 (22.6), BB% 7.9-8.3 (8.2), HR% 3.0-3.3 (3.0), BABIP .272-.276 (.291), AVG .232-.239 (.243), SLG .371-.383 (.399); among 500 major leaguers × 40 PA, bat speed ~ whiff +.26 to +.41 (+.69; v1.9 +.25 to +.30), ~ K% +.16 to +.28 (+.58), EV50 100.5-100.7 (100.6). **Joe's open question at best of six:** below the pool average in all seven categories, 0.78% of the pool and 0.01% of major leaguers (about 1 in 10,000); in five, 3.1% against 0.18%.
+
+Caveats for the level comparison: the pool is static, while Triple-A's players are younger (26.9 against 28.3) and some are still developing; a club also keeps veterans in Triple-A as cover, so it is not purely the second-best of six. Triple-A's ball and the Pacific Coast League's parks carry differently (HR% for the International League alone: 2.81).
+
 ## What was learned building the fielding layer
 
 - **Statcast's outfield JUMP (about 30 ft covered in the first 3 s) is the right anchor for outfielder motion.** The first fielders covered 44 ft in 3 s and caught nearly every fly ball (fly-ball BABIP .03). Slowing everyone to the jump figure fixed the outfield but let 52% of ground balls through, so infielders got their own harder acceleration and a dive reach. That's a real difference: they work from a crouch on a ball that is on them at once.
@@ -661,4 +698,5 @@ What it left: uphill swings cost the model's hitters more whiffs and strikeouts 
 5. **Spray is too centred.** Centre field took 42% against 34%, opposite field 20% against 26%; fair-ball spray sd 20 deg against 25 in every band of contact depth. With the fielding measured (v1.5) this is where the missing doubles are: balls down the lines.
 6. **Hit-by-pitch: closed** in v1.4 (1.01% against 1.1%) once command was measured.
 7. **Glancing contact makes implausible spin.** Pop-ups came off at a median 6,700-6,900 rpm in v0.9 (`power_chain` v0.4), where real ones run a few thousand. A partial grip (a share of the rolling impulse) fixed the spin and the pop-ups' exit speed but raised BABIP to .37 and cut fly-ball backspin to 800 rpm; a lower friction coefficient did little (see v0.9, tried and rejected). The tangential part of the collision still needs measured batted-ball spin by launch angle to be judged.
-8. **Not built yet:** fielding, base running and every hit or out on balls in play; foul pop-ups caught; the game loop; managers and bullpens; fatigue recovery between innings; warm-up pitches; NL/AL rules; names.
+8. **The levels below the majors (v2.0, the Triple-A test).** The hitters step down as Triple-A's do; the pitchers' speed steps down a sixth as much (velocity is not valued: gap 2); defence does not step down at all (BABIP: the farm ignores fielding); discipline steps down where Triple-A's does not (chase).
+9. **Not built yet:** fielding, base running and every hit or out on balls in play; foul pop-ups caught; the game loop; managers and bullpens; fatigue recovery between innings; warm-up pitches; NL/AL rules; names.

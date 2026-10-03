@@ -1,9 +1,11 @@
 """
-fetch_pitches.py · v0.1 · 2026-10-01
+fetch_pitches.py · v0.2 · 2026-10-03
 
 Pulls pitch-level Statcast (Baseball Savant's search CSV, no account) one day
 per request into statcast/raw/pitches/<year>/<date>.csv, for measuring what a
-foul ball is (statcast/fouls.py). The server caps a response near 25,000 rows
+foul ball is (statcast/fouls.py). With --level AAA it pulls Triple-A instead
+(Savant's minor-league search; Hawk-Eye in every Triple-A park) into
+statcast/raw/pitches_aaa/<year>/, for testing the pro pool one level down. The server caps a response near 25,000 rows
 and a day of MLB is about 4,500-5,000 pitches, so a day never hits the cap; a
 response that comes close is reported. Every day is cached (an off day as a
 header-only file), so a rerun fetches nothing twice. Polite: a pause between
@@ -11,12 +13,14 @@ requests, and up to four retries with backoff.
 
 Run:  python3 statcast/fetch_pitches.py                      # the default plan
       python3 statcast/fetch_pitches.py --dates 2025-05-05:2025-05-18,2025-07-01
+      python3 statcast/fetch_pitches.py --level AAA            # Triple-A, the same plan
 
 Default plan (2025 regular season, six weeks spread across the year):
   2025-05-05..05-18, 2025-06-30..07-13 (ends before the All-Star break),
   2025-09-08..09-21.
 
 CHANGED
+  v0.2  --level AAA: Triple-A from the minor-league search
   v0.1  first build
 """
 import sys, os, time, datetime, urllib.request
@@ -26,6 +30,10 @@ URL = ('https://baseballsavant.mlb.com/statcast_search/csv?all=true&type=details
        '&player_type=batter&game_date_gt={d}&game_date_lt={d}&hfSea={y}%7C&hfGT=R%7C'
        '&min_pitches=0&min_results=0&group_by=name&sort_col=pitches'
        '&player_event_sort=api_p_release_speed&sort_order=desc')
+URL_AAA = ('https://baseballsavant.mlb.com/statcast-search-minors/csv?all=true&type=details&minors=true'
+           '&player_type=batter&game_date_gt={d}&game_date_lt={d}&hfSea={y}%7C&hfGT=R%7C&hfLevel=AAA%7C'
+           '&min_pitches=0&min_results=0&group_by=name&sort_col=pitches'
+           '&player_event_sort=api_p_release_speed&sort_order=desc')
 DEFAULT = '2025-05-05:2025-05-18,2025-06-30:2025-07-13,2025-09-08:2025-09-21'
 CAP = 25000                  # rows; the server truncates near here
 PAUSE = 2.0                  # seconds between requests
@@ -47,11 +55,11 @@ def get(url):
     with urllib.request.urlopen(req, timeout=180) as r:
         return r.read()
 
-def fetch_day(d, outdir):
+def fetch_day(d, outdir, url_fmt=URL):
     path = os.path.join(outdir, d.isoformat() + '.csv')
     if os.path.exists(path):
         return 'cached', path
-    url = URL.format(d=d.isoformat(), y=d.year)
+    url = url_fmt.format(d=d.isoformat(), y=d.year)
     for attempt in range(5):
         try:
             data = get(url); break
@@ -73,10 +81,11 @@ def main(argv):
     if '--dates' in argv:
         spec = argv[argv.index('--dates') + 1]
     days = parse_dates(spec)
+    aaa = '--level' in argv and argv[argv.index('--level') + 1].upper() == 'AAA'
     total = 0
     for d in days:
-        outdir = os.path.join('statcast', 'raw', 'pitches', str(d.year)); os.makedirs(outdir, exist_ok=True)
-        status, path = fetch_day(d, outdir)
+        outdir = os.path.join('statcast', 'raw', 'pitches_aaa' if aaa else 'pitches', str(d.year)); os.makedirs(outdir, exist_ok=True)
+        status, path = fetch_day(d, outdir, URL_AAA if aaa else URL)
         rows = 0
         if path:
             with open(path, encoding='utf-8') as f: rows = max(0, sum(1 for _ in f) - 1)
