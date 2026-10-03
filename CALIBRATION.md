@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v1.2 · 2026-10-02`
+`CALIBRATION.md · v1.3 · 2026-10-02`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -463,6 +463,34 @@ What the step did, in these runs: the batters swung like the league's in every c
 
 **Tried and rejected: perception fitted to the curves by kind.** The eye's scatter (×0.6-1.4) and how readily he spots a pitch leaving his expected path (spotIn ×1-3) were searched with the thresholds refitted at each point. Poorer spotting brought the curves by kind close (error 0.164 → 0.040-0.055 rms at spotIn ×2-3), but whiffs rose to .37-.42 per swing and K% to 36-43%. In the model a swing fooled at the commit point nearly always misses; the league's batters chase breaking balls far wider and still whiff on them only .31. What a fooled swing produces is the place to look.
 
+### Fooled-swing contact: the ball's direction (bb_engine v1.3; 2026-10-02)
+
+In v1.2 a swing on a pitch picked up late or never recognised missed .81 of the time, even down the middle of the zone, and making more breaking balls fool the batter (as the league's swing curves by pitch kind ask) sent whiffs on breaking balls in the heart of the zone to .36 against the league's .10. Runs: `contact_check` and a whiff table by pitch kind and location (400 hitters × 40 PA against 120 pitchers, seeds 3, 11, 29), `power_chain` 500 × 40 at seeds 3 and 11, `run_games` 200 games at seeds 3, 11 and 29, `shape_check` 10 games (1,088 plays, 0 bad). League whiffs by pitch kind and distance from the zone edge came from the 42 days of pitch-level 2025 (breaking balls: .100 in the heart, .474 at 2-4 in outside, .935 beyond 9 in).
+
+**What was built.** A fooled batter extrapolates from what he sees. Until v1.3 he read only where the ball was across and up and down, and assumed the expected pitch's curve from there: with most break coming late, that left him about 60% of the gap off (10 in or more on a slider read as a fastball), farther than any late steering reaches. He now reads the direction the ball is travelling as well, which the eye does well for motion across its view, so only the curve still to come fools him: (1 - f)^2 of the gap from a look at a share f of the flight, about 16% at the commit point. Its speed toward him, which the eye reads poorly, still fools his timing as before. There is no new constant; a share of the direction read was searched and the best value was all of it.
+
+| share of direction read (pitch spotting as set) | 0 (v1.2) | 0.4 | 0.7 | all |
+|---|---|---|---|---|
+| whiffs by pitch kind and location, rms against the league | .086 | .074 | .072 | .073 |
+| K% (200 games, seed 3) | 29.1 | 27.9 | 25.9 | 24.1 |
+| runs per team-game | 3.68 | 3.82 | 4.31 | 4.40 |
+
+| | v1.2 | v1.3 | league |
+|---|---|---|---|
+| whiff per swing (contact_check) | .285-.301 | .229-.259 | .232 |
+| whiff, fastball / breaking / off-speed | .259-.275 / .320-.359 / .400-.447 | .230-.260 / .231-.267 / .201-.217 | .172 / .308 / .299 |
+| whiff in / out of the zone | .191-.207 / .457-.479 | .137-.168 / .398-.428 | .150 / .430 |
+| late or fooled swings that missed (seed 3) | .81 | .26 | |
+| K% / BB% (run_games) | 29.1-29.5 / 6.1-6.5 | 23.4-23.8 / 6.3-6.5 | 22.6 / 8.2 |
+| runs per team-game | 3.84-3.92 | 4.40-4.66 | 4.39 |
+| AVG / OBP / SLG | .252-.254 / .301-.303 / .414-.423 | .275-.284 / .322-.333 / .453-.465 | .243 / .312 / .399 |
+| BABIP | .348-.350 | .349-.359 | .291 |
+| EV50 (power_chain, seeds 3 / 11) | 99.3 / 99.8 | 99.2 / 99.6 | 100.6 |
+
+What the step did, in these runs: strikeouts and whiffs per swing came to the league's, and runs to the league's average. By location, whiffs on breaking balls tracked the league's closely outside the zone (.42 against .47 at 2-4 in, .57 against .59 at 4-6). The pitch kinds turned over: breaking and off-speed whiffs ran below the league's and fastball whiffs above it. Breaking balls were low overall because batters chased them far outside so rarely (49 swings beyond 9 in out of 6,022, against 5% in the league); fastballs because a fastball chased outside the zone still missed too often (.45 at 2-4 in against .31). With more balls in play, the excess of hits on them (BABIP .35) carried batting average to .28 and slugging to .46.
+
+**The swing curves by pitch kind did not follow** (rms .17, as in v1.2). With the direction read, poorer pitch spotting improved them (spotIn ×3: .097) for a point or two of K% (26.1) and about half a run (3.83); left for the joint fit, since spotIn is set by hand.
+
 ## What was learned building the fielding layer
 
 - **Statcast's outfield JUMP (about 30 ft covered in the first 3 s) is the right anchor for outfielder motion.** The first fielders covered 44 ft in 3 s and caught nearly every fly ball (fly-ball BABIP .03). Slowing everyone to the jump figure fixed the outfield but let 52% of ground balls through, so infielders got their own harder acceleration and a dive reach. That's a real difference: they work from a crouch on a ball that is on them at once.
@@ -480,8 +508,8 @@ What the step did, in these runs: the batters swung like the league's in every c
 
 ## Known gaps, to fix with mechanisms rather than knob-turning
 
-1. **Contact: fouls are as many as the league's but too solid; the hardest contact is still a little soft, and balls in play fall in too often.** After bb_engine v1.1 (the adjusted swing; see that section above), fouls were .49-.50 of contact against .52, but squared up per contact stayed .49-.52 against .435 and per foul .36-.39 against .225. Mean exit velocity on balls in play came to the league's (88.1-88.9 against 88.9), but EV50 ran 98.9-99.2 against 100.6 and home runs 1.7-1.9% of plate appearances against 3.0. BABIP ran .336-.339 against .291. Off-speed pitches met far out front were still squared up .51-.54 of the time against .32. The league's high pitches went foul .66 of the time; the model's .46-.47, with the foul share lowest in the upper zone rather than the lower zone.
-2. **Whiffs: too many per swing, off-speed above all, and fooled swings nearly always miss.** With v1.2's swing policy, whiffs ran .285-.301 per swing against .232: fastballs .26-.28 (.17), breaking balls .32-.36 (.31), off-speed .40-.45 (.30); K% 29.1-29.5 against 22.6. The league's batters chased breaking balls far wider than the model's yet whiffed on them only .31; making more breaking balls fool the batter at the commit point (as the league's swing curves by pitch kind ask) sent whiffs to .37-.42. Flat four-seamers were whiffed more and squared up less, as in the league, but their launch angle rose about twice as much as the league's, and low fastballs still launched above low breaking balls.
+1. **Contact: fouls are as many as the league's but too solid; the hardest contact is still a little soft, and balls in play fall in too often.** After bb_engine v1.1 (the adjusted swing; see that section above), fouls were .49-.50 of contact against .52, but squared up per contact stayed .49-.52 against .435 and per foul .36-.39 against .225. Mean exit velocity on balls in play came to the league's (88.1-88.9 against 88.9), but EV50 ran 98.9-99.2 against 100.6 and home runs 1.7-1.9% of plate appearances against 3.0. BABIP ran .349-.359 against .291 with v1.3, which carried batting average to .275-.284 (.243) and slugging to .453-.465 (.399) once strikeouts came to the league's. Off-speed pitches met far out front were still squared up .51-.54 of the time against .32. The league's high pitches went foul .66 of the time; the model's .46-.47, with the foul share lowest in the upper zone rather than the lower zone.
+2. **Whiffs: right in total, turned over by pitch kind.** With v1.3 (fooled-swing contact), whiffs ran .229-.259 per swing against .232 and K% 23.4-23.8 against 22.6. Fastballs were whiffed .23-.26 (.17), breaking balls .23-.27 (.31) and off-speed .20-.22 (.30): batters chased breaking balls far outside too rarely, and fastballs chased outside the zone missed too often (.45 at 2-4 in against .31). Flat four-seamers were whiffed more and squared up less, as in the league, but their launch angle rose about twice as much as the league's, and low fastballs still launched above low breaking balls.
 3. **Plate discipline: swings follow the league by count, not by pitch kind; walks now too few.** With v1.2, swing rates by count and distance from the zone matched the league's within 0.014-0.032 rms, and walks fell to 6.1-6.5% against 8.2. By pitch kind the model over-swung fastballs outside the zone and under-swung breaking balls everywhere. Pitch locations remain the pitcher's side of the gap: .480 of pitches in the zone against .509, and too few pitches far outside or down the middle, so batters met more borderline balls and chased .323 against .283.
 4. **Home runs.** They ran 2.0% of plate appearances against 3.0%, and 11% of fly balls against 17%. See the drag proxy above; exit velocity is also too uniform.
 5. **Spray is too centred.** Centre field took 42% against 34%, opposite field 20% against 26%.
