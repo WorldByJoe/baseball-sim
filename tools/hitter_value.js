@@ -1,5 +1,5 @@
 /* ============================================================================
-   hitter_value.js · v0.1 · 2026-10-03
+   hitter_value.js · v0.2 · 2026-10-03
 
    What makes a hitter valuable in the model, and what selecting the best of
    them does. Draws N hitters (makeBatter), lets each face K plate appearances
@@ -16,6 +16,9 @@
    Run:  jsc bb_engine.js statcast/bip_2025.js tools/hitter_value.js -- [N] [K] [Q] [seed]
 
    CHANGED
+     v0.2  draws from the population (BB.drawBatter) when the engine has one; the
+           regression uses bat speed rather than its ingredients, and prints the
+           HITTER_VALUE literal (the scouts' estimate) for bb_engine.js
      v0.1  first build
 ============================================================================ */
 (function (A) {
@@ -24,9 +27,10 @@
   for (var i = 0; i < 120; i++) P.push(BB.makePitcher(rng, { role: i % 12 < 7 ? 'SP' : 'RP' }));
   function band(v, E) { for (var i = 0; i < E.length - 1; i++) if (v >= E[i] && v < E[i + 1]) return i; return -1; }
   function xw(bb) { var i = band(bb.ev, X.ev_edges), j = band(bb.la, X.la_edges); var v = i >= 0 && j >= 0 ? X.grid[i][j] : null; return v === null ? (bb.ev < 40 ? 0.05 : X.mean) : v; }
-  var TR = ['batSpeed', 'weightLb', 'heightIn', 'swingLenFt', 'swingPower', 'motorIn', 'barrelSD', 'timingSD', 'longSD', 'faceSD', 'undercut', 'attack', 'swingTilt', 'pullBias', 'coverage', 'spotIn', 'eyeSD', 'aggr', 'commit', 'fbLean', 'learn'];
+  var TR = ['batSpeed', 'heightIn', 'motorIn', 'timingSD', 'longSD', 'faceSD', 'undercut', 'attack', 'swingTilt', 'pullBias', 'coverage', 'spotIn', 'eyeSD', 'aggr', 'commit', 'fbLean', 'learn'];
+  var draw = BB.drawBatter || BB.makeBatter;   // the population, before any selection
   for (i = 0; i < N; i++) {
-    var B = BB.makeBatter(rng, {}), pa = 0, w = 0, k = 0, bb = 0, sw = 0, wh = 0, con = 0, sq = 0, evs = [];
+    var B = draw(rng, {}), pa = 0, w = 0, k = 0, bb = 0, sw = 0, wh = 0, con = 0, sq = 0, evs = [];
     for (var j = 0; j < K; j++) {
       var Pi = P[(i * 7 + j) % P.length]; Pi.load = rng.u() * 0.7 * Pi.stamina;
       var res = BB.simPA(Pi, B, { env: env, ump: ump, framing: 0, seen: rng.u() * 60, rec: false }, rng);
@@ -69,6 +73,11 @@
   print('1. WHAT MAKES A HITTER VALUABLE   correlation with value   weight in the regression (wOBA points per sd)');
   var order = TR.map(function (t, j) { return j; }).sort(function (x, y) { return Math.abs(beta[y + 1]) - Math.abs(beta[x + 1]); });
   order.forEach(function (j) { print('   ' + (TR[j] + '              ').slice(0, 14) + '       ' + f2(r(col(H, TR[j]), yv)) + '                  ' + (beta[j + 1] >= 0 ? '+' : '') + (1000 * beta[j + 1]).toFixed(1)); });
+  // the scouts' estimate in raw trait units, for bb_engine.js HITTER_VALUE
+  var raw = {}, c0 = beta[0];
+  TR.forEach(function (t, j) { raw[t] = beta[j + 1] / sg[j]; c0 -= raw[t] * mu[j]; });
+  print('');
+  print('  var HITTER_VALUE = { c0: ' + c0.toFixed(4) + ', w: { ' + TR.map(function (t) { return t + ': ' + raw[t].toPrecision(4); }).join(', ') + ' } };');
   // selection: the top Q by value; the correlations at several strengths of selection
   var sorted = H.slice().sort(function (x, y) { return y.v - x.v; });
   print('');
