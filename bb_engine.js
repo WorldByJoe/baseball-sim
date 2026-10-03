@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v1.3 · 2026-10-02
+   bb_engine.js · v1.4 · 2026-10-02
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -16,15 +16,17 @@
    of league-average traits reproduces an MLB league line.
 
    STAGES, in the order they run on every pitch:
-     PLAN    the pitcher picks an intent (attack / edge / expand), a pitch
-             type and a target, from the count, the batter's side and what
-             he has just thrown                                (planPitch)
+     PLAN    the pitcher picks a pitch type from his usage, the batter's side,
+             the count and what he has just thrown, and a target: the league's
+             aim point for that type, side and count, moved by his own habits
+             (measured, statcast/locations.py)                 (planPitch)
      EXPECT  the batter forms his guess from the scouting report on this
              pitcher in this count, and decides how hard to sit on it
                                                                (expectPitch)
-     THROW   physics flies the real pitch; command noise moves it off the
-             target, its speed, spin and seams vary from pitch to pitch as
-             the league's do, fatigue takes off speed and spin (throwPitch)
+     THROW   physics flies the real pitch; his command (measured, 7-8 in per
+             axis) scatters it about the target, its speed, spin and seams vary
+             from pitch to pitch as the league's do, fatigue takes off speed and
+             spin                                              (throwPitch)
      READ    the batter's picture of the pitch is a GHOST pitch - the same
              release, flown as the pitch type he EXPECTED usually flies.
              Recognition corrects part of the difference before he commits;
@@ -57,6 +59,10 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v1.4  the pitcher's plan, measured: command is two traits (across, up and down)
+           read from 3-0 four-seamers, about twice the old hand-set value; aim points,
+           count shifts, habits, kind by count and repeats from the league's locations;
+           the intent table is gone; fatigue barely touches command; thresholds refitted
      v1.3  fooled-swing contact: a batter fooled at the commit point reads the ball's
            direction across and up and down, so only the curve still to come fools
            him there (its speed toward him still does); swing thresholds refitted
@@ -71,10 +77,6 @@
            toward the type's usual shape); the expected pitch type cannot fool him;
            pitches vary as the league's do (spin spreads, a seam force, pitch-to-pitch
            scatter inside the command trait)
-     v0.9  the swing is a tilted circle (Statcast swing tilt, steeper for low pitches):
-           where on it the ball is met sets spray, attack angle and bat speed; the
-           barrel dips toward its end; hands cover only part of a pitch in or out;
-           a bat-face scatter; timing, along-barrel scatter fitted to pitch-level 2025
 ============================================================================ */
 
 var BB = (function () {
@@ -446,7 +448,11 @@ var BB = (function () {
   // degrees from straight up toward the pitcher's ARM side (a four-seamer
   // rides up and runs arm-side; a curveball dives glove-side). `eff` is the
   // fraction of spin that is transverse. `dv` is mph below the fastball.
-  // `cmd` scales the pitcher's command (breaking balls are harder to locate);
+  // `cmd` scales the pitcher's command [across, up and down] for the type: each
+  // type's scatter within pitcher and count against the four-seamer's
+  // (statcast/locations.py table 3). `plateW` [in] is the part of a pitch's
+  // scatter at the plate that its pitch-to-pitch speed, spin, seam and release
+  // variation make on their own (tools/plate_scatter.js, from this engine);
   // `cost` scales the fatigue load of throwing one.
   // Speeds and spin rates: Baseball Savant pitch-type averages, 2023-25.
   // `eff` and `tilt` were FITTED (headless/physics_check.js) so a typical
@@ -464,14 +470,14 @@ var BB = (function () {
   // inches, were FITTED (tools/fit_pitch_spread.js) so that, with the spin
   // spreads, the model's pitches spread in movement as the league's do.
   var PITCH_TYPES = {
-    FF: { name: 'four-seam', dv: 0,     rpm: 2290, rpmSD: 141, rpmW: 0.031, eff: 0.85, effSD: 0.05, tilt: 25,   tiltSD: 9,  veloW: 0.90, seamSD: [2.6, 2.0], seamW: [1.0, 1.1], cmd: 1.00, cost: 1.00, ivbSD: 3.0, kind: 'FB' },
-    SI: { name: 'sinker',    dv: -0.9,  rpm: 2160, rpmSD: 132, rpmW: 0.033, eff: 0.85, effSD: 0.05, tilt: 63,   tiltSD: 7,  veloW: 0.87, seamSD: [2.0, 4.0], seamW: [1.4, 1.2], cmd: 1.00, cost: 1.00, ivbSD: 5.0, kind: 'FB' },
-    FC: { name: 'cutter',    dv: -4.8,  rpm: 2400, rpmSD: 182, rpmW: 0.029, eff: 0.28, effSD: 0.08, tilt: -11,  tiltSD: 12, veloW: 1.05, seamSD: [1.4, 2.3], seamW: [1.7, 1.7], cmd: 1.05, cost: 1.00, ivbSD: 3.9, kind: 'FB' },
-    SL: { name: 'slider',    dv: -8.6,  rpm: 2430, rpmSD: 217, rpmW: 0.030, eff: 0.12, effSD: 0.05, tilt: -67,  tiltSD: 12, veloW: 1.09, seamSD: [2.5, 3.1], seamW: [1.6, 1.9], cmd: 1.10, cost: 1.05, ivbSD: 4.0, kind: 'BR' },
-    ST: { name: 'sweeper',   dv: -11.5, rpm: 2600, rpmSD: 230, rpmW: 0.035, eff: 0.43, effSD: 0.08, tilt: -87,  tiltSD: 8,  veloW: 1.03, seamSD: [1.8, 2.5], seamW: [2.4, 2.0], cmd: 1.15, cost: 1.05, ivbSD: 4.3, kind: 'BR' },
-    CU: { name: 'curveball', dv: -14.5, rpm: 2560, rpmSD: 276, rpmW: 0.030, eff: 0.34, effSD: 0.08, tilt: -141, tiltSD: 12, veloW: 1.16, seamSD: [3.0, 3.3], seamW: [1.6, 1.6], cmd: 1.20, cost: 1.05, ivbSD: 4.7, kind: 'BR' },
-    CH: { name: 'changeup',  dv: -8.5,  rpm: 1780, rpmSD: 285, rpmW: 0.056, eff: 0.84, effSD: 0.06, tilt: 65,   tiltSD: 8,  veloW: 1.00, seamSD: [1.0, 3.4], seamW: [1.7, 2.0], cmd: 1.10, cost: 0.90, ivbSD: 5.1, kind: 'OS' },
-    FS: { name: 'splitter',  dv: -7.8,  rpm: 1350, rpmSD: 331, rpmW: 0.089, eff: 0.65, effSD: 0.08, tilt: 75,   tiltSD: 10, veloW: 0.93, seamSD: [1.6, 3.0], seamW: [2.2, 2.5], cmd: 1.20, cost: 1.05, ivbSD: 4.2, kind: 'OS' }
+    FF: { name: 'four-seam', dv: 0,     rpm: 2290, rpmSD: 141, rpmW: 0.031, eff: 0.85, effSD: 0.05, tilt: 25,   tiltSD: 9,  veloW: 0.90, seamSD: [2.6, 2.0], seamW: [1.0, 1.1], cmd: [1.00, 1.00], plateW: [1.9, 1.6], cost: 1.00, ivbSD: 3.0, kind: 'FB' },
+    SI: { name: 'sinker',    dv: -0.9,  rpm: 2160, rpmSD: 132, rpmW: 0.033, eff: 0.85, effSD: 0.05, tilt: 63,   tiltSD: 7,  veloW: 0.87, seamSD: [2.0, 4.0], seamW: [1.4, 1.2], cmd: [1.06, 0.92], plateW: [1.8, 2.1], cost: 1.00, ivbSD: 5.0, kind: 'FB' },
+    FC: { name: 'cutter',    dv: -4.8,  rpm: 2400, rpmSD: 182, rpmW: 0.029, eff: 0.28, effSD: 0.08, tilt: -11,  tiltSD: 12, veloW: 1.05, seamSD: [1.4, 2.3], seamW: [1.7, 1.7], cmd: [1.03, 0.97], plateW: [2.0, 2.2], cost: 1.00, ivbSD: 3.9, kind: 'FB' },
+    SL: { name: 'slider',    dv: -8.6,  rpm: 2430, rpmSD: 217, rpmW: 0.030, eff: 0.12, effSD: 0.05, tilt: -67,  tiltSD: 12, veloW: 1.09, seamSD: [2.5, 3.1], seamW: [1.6, 1.9], cmd: [1.10, 1.11], plateW: [2.0, 2.3], cost: 1.05, ivbSD: 4.0, kind: 'BR' },
+    ST: { name: 'sweeper',   dv: -11.5, rpm: 2600, rpmSD: 230, rpmW: 0.035, eff: 0.43, effSD: 0.08, tilt: -87,  tiltSD: 8,  veloW: 1.03, seamSD: [1.8, 2.5], seamW: [2.4, 2.0], cmd: [1.21, 1.09], plateW: [2.6, 2.6], cost: 1.05, ivbSD: 4.3, kind: 'BR' },
+    CU: { name: 'curveball', dv: -14.5, rpm: 2560, rpmSD: 276, rpmW: 0.030, eff: 0.34, effSD: 0.08, tilt: -141, tiltSD: 12, veloW: 1.16, seamSD: [3.0, 3.3], seamW: [1.6, 1.6], cmd: [1.10, 1.22], plateW: [2.1, 2.4], cost: 1.05, ivbSD: 4.7, kind: 'BR' },
+    CH: { name: 'changeup',  dv: -8.5,  rpm: 1780, rpmSD: 285, rpmW: 0.056, eff: 0.84, effSD: 0.06, tilt: 65,   tiltSD: 8,  veloW: 1.00, seamSD: [1.0, 3.4], seamW: [1.7, 2.0], cmd: [1.10, 1.08], plateW: [2.1, 2.6], cost: 0.90, ivbSD: 5.1, kind: 'OS' },
+    FS: { name: 'splitter',  dv: -7.8,  rpm: 1350, rpmSD: 331, rpmW: 0.089, eff: 0.65, effSD: 0.08, tilt: 75,   tiltSD: 10, veloW: 0.93, seamSD: [1.6, 3.0], seamW: [2.2, 2.5], cmd: [1.08, 1.18], plateW: [2.5, 2.9], cost: 1.05, ivbSD: 4.2, kind: 'OS' }
   };
 
   // Repertoire archetypes and their usage; `w` is how common each is.
@@ -565,10 +571,15 @@ var BB = (function () {
     pSpotIn: [6.5, 1.0, 4.5, 9.5], pEyeSD: [3.6, 0.6, 2.4, 5], pAttack: [6, 4, -2, 16],
     // pitchers
     fbVeloSP:  [93.6, 2.0, 88, 100], fbVeloRP: [95.0, 2.0, 89, 102],
-    commandSP: [4.0, 0.6, 2.6, 6.5],  commandRP: [4.6, 0.7, 3.0, 7.5],   // in: location scatter per axis at the plate
+    // command: his scatter at the plate about the target, across and up and down, for a four-seamer; measured from
+    // 3-0 four-seamers about each pitcher's own 3-0 mean (statcast/locations.py; starters 7.2 / 8.4 in, relievers
+    // 8.4 / 8.2); the spread between pitchers is 7% and 11% of the mean, and the two axes are not strongly linked
+    cmdXSP:    [7.2, 0.52, 5.4, 9.4],   // in: scatter about the target across the plate, starters
+    cmdZSP:    [8.4, 0.92, 5.6, 11.4],  // in: scatter about the target up and down, starters
+    cmdXRP:    [8.4, 0.60, 6.4, 10.8],  // in: across, relievers (pitchers under 40 pitches a game)
+    cmdZRP:    [8.2, 0.90, 5.4, 11.0],  // in: up and down, relievers
     staminaSP: [95, 10, 70, 120],    staminaRP: [28, 6, 15, 45],        // pitches before fatigue bites
     relHt:     [5.85, 0.4, 4.8, 6.8], relSide: [1.9, 0.5, 0.8, 3.2], ext: [6.4, 0.35, 5.6, 7.4],   // ft
-    pAggr:     [0, 0.08, -0.2, 0.2],  // shifts his intent from expanding toward attacking
     // umpires
     umpSD:     [1.4, 0.25, 0.9, 2.2], // in: the soft edge of his zone (his accuracy)
     umpEdge:   [0, 0.45, -1.2, 1.2],  // in: systematic miss per edge (positive = calls that edge wide)
@@ -648,19 +659,21 @@ var BB = (function () {
                tilt: rng.n(d.tilt, d.tiltSD),
                seam: [rng.n(0, d.seamSD[0]), rng.n(0, d.seamSD[1])],   // in: his usual seam break, arm side and up
                usage: arch.mix[k] * Math.exp(rng.n(0, 0.25)),
-               cmd: d.cmd, aimCache: { ok: false } };
+               habit: [rng.n(0, PLAN_LOC.habit[k][0]), rng.n(0, PLAN_LOC.habit[k][1])],   // his own aim for it: in toward his arm side, share of the zone
+               aimCache: { ok: false } };
     });
     var u = normalize(pitches.map(function (p) { return p.usage; }));
     pitches.forEach(function (p, i) { p.usage = u[i]; });
-    return equipFielder(rng, {
+    var P = equipFielder(rng, {
       id: nextId++, name: o.name || '', role: role, throws: throws, armSide: armSide, arch: arch.name,
       rel: { ht: drawT(rng, T.relHt), side: drawT(rng, T.relSide), ext: drawT(rng, T.ext) },
-      command: drawT(rng, role === 'SP' ? T.commandSP : T.commandRP),
+      cmd: [drawT(rng, role === 'SP' ? T.cmdXSP : T.cmdXRP), drawT(rng, role === 'SP' ? T.cmdZSP : T.cmdZRP)],
       stamina: drawT(rng, role === 'SP' ? T.staminaSP : T.staminaRP),
       holdTime: drawT(rng, T.holdTime),
-      aggr: drawT(rng, T.pAggr),
       pitches: pitches, load: 0
     }, 'P');
+    P.command = Math.sqrt((P.cmd[0] * P.cmd[0] + P.cmd[1] * P.cmd[1]) / 2);   // one number for the screen: his scatter per axis
+    return P;
   }
 
   function makeBatter(rng, o) {
@@ -732,86 +745,102 @@ var BB = (function () {
   }
 
   // --------------------------------------------------------------- PLAN
-  // How a pitcher approaches each count: probabilities of ATTACK (in the
-  // zone with margin), EDGE (on the corner), EXPAND (off the plate to get a
-  // chase). These are behavioural norms of the league, shifted per pitcher
-  // by his aggression trait.
-  var INTENTS = ['attack', 'edge', 'expand'];
-  var INTENT = {
-    '0-0': [0.25, 0.65, 0.10], '1-0': [0.40, 0.55, 0.05], '2-0': [0.65, 0.35, 0.00], '3-0': [0.90, 0.10, 0.00],
-    '0-1': [0.15, 0.60, 0.25], '1-1': [0.25, 0.60, 0.15], '2-1': [0.45, 0.50, 0.05], '3-1': [0.70, 0.30, 0.00],
-    '0-2': [0.05, 0.35, 0.60], '1-2': [0.05, 0.45, 0.50], '2-2': [0.10, 0.60, 0.30], '3-2': [0.35, 0.60, 0.05]
+  // What a pitcher throws and where he aims it, as the league's pitchers do
+  // (v1.4, statcast/locations.py, 42 days of 2025). He picks a pitch from his
+  // usage, weighted by how the league uses that type against this side of
+  // batter and that kind of pitch in this count. Each type has the league's
+  // aim point against same- and opposite-side batters; the count moves it
+  // (with two strikes breaking balls go lower and farther away, fastballs
+  // higher); his own habits move it a little more, and within a count his
+  // target still varies a little (the spread left once his command is taken
+  // out of his scatter). His command then scatters the pitch about the target,
+  // and command, measured from 3-0 four-seamers, is most of a pitch's distance
+  // from where it was aimed: 7-8 in per axis, a mean miss of about 10 in.
+  // ---- PLAN_LOC: written by statcast/locations.py; do not edit by hand ----
+  // 2025, 42 days of pitch-level Statcast. aim: league mean location by type and side of batter, [in toward
+  // his arm side, share of the zone height]; shift: the count's move from it, by kind and side; spread: sd of
+  // his targets within a count with his command taken out, by kind; habit: sd between pitchers of their own
+  // aim for a type; sideUse: use of a type against same / opposite-side batters over its share; countUse:
+  // use of fastballs, breaking balls, off-speed by count over their share against that side; repeat: the
+  // chance of the same type again after a change / after two alike, over what usage predicts.
+  var PLAN_LOC = {
+    aim: {'FF':{'same':[-1.9,0.666],'opp':[1.5,0.706]},'SI':{'same':[1.8,0.427],'opp':[1.7,0.471]},'FC':{'same':[-5.7,0.419],'opp':[-2.2,0.546]},'SL':{'same':[-6.6,0.177],'opp':[-1.5,0.185]},'ST':{'same':[-7.8,0.205],'opp':[-0.2,0.245]},'CU':{'same':[-4.6,0.102],'opp':[0.4,0.127]},'CH':{'same':[0.3,0.082],'opp':[5.6,0.137]},'FS':{'same':[0.6,0.031],'opp':[4.3,0.095]}},
+    shift: {'FB':{'same':{'0-0':[0.0,-0.018],'0-1':[0.2,-0.007],'0-2':[-1.3,0.183],'1-0':[0.5,-0.039],'1-1':[0.2,-0.014],'1-2':[-1.2,0.112],'2-0':[0.4,-0.041],'2-1':[0.5,-0.046],'2-2':[-0.5,0.028],'3-0':[0.5,-0.055],'3-1':[0.5,-0.047],'3-2':[0.5,-0.038]},'opp':{'0-0':[0.3,-0.053],'0-1':[-0.5,0.051],'0-2':[1.0,0.253],'1-0':[-0.1,-0.075],'1-1':[-0.7,0.002],'1-2':[0.2,0.15],'2-0':[0.6,-0.081],'2-1':[-0.2,-0.052],'2-2':[-0.5,0.06],'3-0':[0.7,-0.068],'3-1':[0.5,-0.07],'3-2':[-0.4,-0.081]}},'BR':{'same':{'0-0':[1.8,0.108],'0-1':[-0.6,-0.033],'0-2':[-4.2,-0.185],'1-0':[1.8,0.081],'1-1':[0.5,0.018],'1-2':[-2.9,-0.135],'2-0':[2.4,0.074],'2-1':[2.1,0.078],'2-2':[-0.6,-0.032],'3-0':[0.4,0.023],'3-1':[1.7,0.05],'3-2':[2.2,0.059]},'opp':{'0-0':[1.1,0.127],'0-1':[0.2,-0.032],'0-2':[-2.1,-0.306],'1-0':[1.1,0.108],'1-1':[0.1,0.036],'1-2':[-1.6,-0.19],'2-0':[1.0,0.117],'2-1':[0.7,0.086],'2-2':[-1.1,-0.079],'3-0':[0.1,0.003],'3-1':[0.3,0.084],'3-2':[-0.1,0.054]}},'OS':{'same':{'0-0':[0.4,0.134],'0-1':[0.1,0.006],'0-2':[-0.6,-0.165],'1-0':[0.2,0.082],'1-1':[0.3,0.015],'1-2':[-0.5,-0.09],'2-0':[0.3,0.075],'2-1':[-0.2,0.04],'2-2':[0.2,-0.016],'3-0':[0.0,-0.003],'3-1':[0.2,0.04],'3-2':[0.0,0.059]},'opp':{'0-0':[-0.5,0.102],'0-1':[0.5,-0.043],'0-2':[2.5,-0.168],'1-0':[-1.0,0.066],'1-1':[-0.8,0.016],'1-2':[1.5,-0.091],'2-0':[-1.2,0.059],'2-1':[-1.0,0.077],'2-2':[-0.1,-0.04],'3-0':[-0.2,0.017],'3-1':[-0.7,0.074],'3-2':[-1.6,0.057]}}},
+    spread: {'FB':{'0-0':[3.5,0.181],'0-1':[4.1,0.191],'0-2':[4.2,0.231],'1-0':[3.1,0.164],'1-1':[3.8,0.192],'1-2':[3.9,0.239],'2-0':[1.9,0.154],'2-1':[2.6,0.148],'2-2':[3.5,0.185],'3-0':[1.3,0.065],'3-1':[1.5,0.113],'3-2':[1.7,0.119]},'BR':{'0-0':[3.1,0.178],'0-1':[3.4,0.181],'0-2':[4.5,0.238],'1-0':[1.7,0.111],'1-1':[2.6,0.139],'1-2':[3.6,0.217],'2-0':[3.0,0.138],'2-1':[0.8,0.0],'2-2':[3.4,0.195],'3-0':[3.0,0.138],'3-1':[0.0,0.075],'3-2':[0.7,0.029]},'OS':{'0-0':[2.8,0.197],'0-1':[2.9,0.181],'0-2':[2.6,0.24],'1-0':[2.1,0.136],'1-1':[2.6,0.174],'1-2':[2.7,0.202],'2-0':[0.0,0.103],'2-1':[0.0,0.128],'2-2':[1.8,0.164],'3-0':[0.0,0.103],'3-1':[4.1,0.163],'3-2':[0.0,0.0]}},
+    habit: {'FF':[1.6,0.104],'SI':[2.4,0.114],'FC':[2.1,0.173],'SL':[2.1,0.139],'ST':[1.9,0.117],'CU':[2.0,0.131],'CH':[1.9,0.11],'FS':[1.9,0.119]},
+    sideUse: {'FF':[0.87,1.1],'SI':[1.4,0.67],'FC':[0.96,1.03],'SL':[1.29,0.76],'ST':[1.43,0.66],'CU':[0.71,1.24],'CH':[0.43,1.46],'FS':[0.72,1.23]},
+    countUse: {'same':{'0-0':[1.12,0.92,0.44],'0-1':[0.91,1.14,1.02],'0-2':[0.7,1.35,1.58],'1-0':[1.13,0.84,0.76],'1-1':[0.92,1.08,1.24],'1-2':[0.75,1.26,1.7],'2-0':[1.3,0.61,0.56],'2-1':[1.07,0.9,0.98],'2-2':[0.89,1.04,1.74],'3-0':[1.66,0.14,0.11],'3-1':[1.4,0.48,0.44],'3-2':[1.14,0.76,1.14]},'opp':{'0-0':[1.08,1.08,0.67],'0-1':[0.89,0.92,1.41],'0-2':[0.83,1.2,1.2],'1-0':[1.06,0.87,1.02],'1-1':[0.9,0.96,1.33],'1-2':[0.82,1.2,1.21],'2-0':[1.27,0.69,0.69],'2-1':[1.04,0.92,1.01],'2-2':[0.9,1.15,1.08],'3-0':[1.77,0.13,0.11],'3-1':[1.38,0.57,0.56],'3-2':[1.13,0.93,0.73]}},
+    repeat: [1.13,0.98]
   };
-  function intentProbs(P, balls, strikes) {
-    var t = INTENT[balls + '-' + strikes].slice();
-    t[0] = Math.max(0, t[0] + P.aggr); t[2] = Math.max(0, t[2] - P.aggr);
-    return normalize(t);
-  }
+  // ---- PLAN_LOC: end ----
+  var KINDS = ['FB', 'BR', 'OS'];
+  function sideKey(P, sb) { return sb === P.armSide ? 'same' : 'opp'; }   // right-on-right or left-on-left is 'same'
 
-  // Weight on each of the pitcher's pitches, before sampling. `last` is the
+  // Weight on each of the pitcher's pitches before sampling. `last` is the
   // pitch types he just threw to this batter (null when a batter is
   // modelling him: a scouting report knows his count and platoon habits,
-  // not his next sequence). Returns weights plus the reasons that moved them.
-  function typeWeights(P, sb, intent, last) {
-    var same = sb === P.armSide;        // right-on-right or left-on-left
+  // not his next sequence); the league throws the same pitch again a little
+  // more often than its usage predicts after a change, as often after two alike.
+  function typeWeights(P, sb, st, last) {
+    var side = sideKey(P, sb), si = side === 'same' ? 0 : 1, cu = PLAN_LOC.countUse[side][st.balls + '-' + st.strikes];
     return P.pitches.map(function (pt) {
-      var k = PITCH_TYPES[pt.type].kind, t = pt.type, m = pt.usage;
-      if (intent === 'attack') m *= k === 'FB' ? 1.6 : 0.7;
-      else if (intent === 'expand') m *= k === 'FB' ? (t === 'FF' ? 0.9 : 0.6) : 1.5;
-      if (same) { if (k === 'BR' || t === 'FC') m *= 1.3; else if (k === 'OS') m *= 0.55; }
-      else { if (k === 'OS') m *= 1.45; else if (t === 'ST') m *= 0.6; else if (t === 'SL') m *= 0.85; }
-      if (last && last[0] === t) m *= last[1] === t ? 0.42 : 0.7;   // a third straight one is rare
+      var t = pt.type, m = pt.usage * PLAN_LOC.sideUse[t][si] * cu[KINDS.indexOf(PITCH_TYPES[t].kind)];
+      if (last && last[0] === t) m *= last[1] === t ? PLAN_LOC.repeat[1] : PLAN_LOC.repeat[0];
       return m;
     });
   }
 
-  // Where each pitch type is aimed, by intent. Margins are metres inside
-  // (positive) or outside (negative) the plate edge / zone edge.
-  function targetFor(P, B, sb, type, intent, rng) {
-    var a = P.armSide, glove = -a;
-    var mH = intent === 'attack' ? 0.07 + 0.004 * (P.command - 7) : intent === 'edge' ? 0.015 : -0.07;
-    var mV = intent === 'attack' ? 0.08 : intent === 'edge' ? 0.02 : -0.075;
-    var side, vert;
-    switch (type) {
-      case 'FF': side = rng.u() < 0.5 ? glove : a; vert = 'high'; break;
-      case 'SI': side = a; vert = 'low'; break;
-      case 'FC': side = glove; vert = 'mid'; break;
-      case 'SL': case 'ST': side = glove; vert = 'low'; break;
-      case 'CU': side = 0; vert = 'low'; break;
-      default:   side = a; vert = 'low';                     // CH, FS
-    }
-    var x = side === 0 ? 0 : side * (PLATE_HALF - mH);
-    if (intent === 'attack' && PITCH_TYPES[type].kind === 'FB') x *= 0.5;   // a get-me-over fastball
-    var z = vert === 'low' ? B.zone.bot + mV : vert === 'high' ? B.zone.top - mV : B.zone.bot + 0.45 * (B.zone.top - B.zone.bot);
-    return [x + rng.n(0, 0.02), z + rng.n(0, 0.02)];
+  // His target [x, z] in metres for pitch `pt`, and the centre and spread it is
+  // drawn from. Positions in PLAN_LOC are inches toward his arm side and shares
+  // of the batter's zone height.
+  function targetFor(P, B, sb, pt, st, rng) {
+    var side = sideKey(P, sb), c = st.balls + '-' + st.strikes, k = PITCH_TYPES[pt.type].kind;
+    var a = PLAN_LOC.aim[pt.type][side], sh = PLAN_LOC.shift[k][side][c], sp = PLAN_LOC.spread[k][c], h = B.zone.top - B.zone.bot;
+    var mx = a[0] + sh[0] + pt.habit[0], mz = a[1] + sh[1] + pt.habit[1];
+    var xa = mx + rng.n(0, sp[0]), zf = mz + rng.n(0, sp[1]);
+    return { target: [P.armSide * xa * IN, B.zone.bot + zf * h],
+             centre: [P.armSide * mx * IN, B.zone.bot + mz * h], spread: [sp[0] * IN, sp[1] * h] };
+  }
+
+  // The intent, named from where he aims (for the screen; nothing downstream
+  // reads it): ATTACK inside the zone by 2 in or more, EDGE within 2 in of the
+  // edge either way, EXPAND farther out. intentProbs gives the chance of each
+  // for the pitch he chose, from the spread his target was drawn from.
+  var INTENTS = ['attack', 'edge', 'expand'], EDGE_BAND = 2 * IN;
+  function boxP(c, s, lo, hi) { return Phi((hi - c) / s) - Phi((lo - c) / s); }
+  function intentProbs(B, centre, spread) {
+    var sx = Math.max(spread[0], 1e-4), sz = Math.max(spread[1], 1e-4), lo = B.zone.bot - BALL_R, hi = B.zone.top + BALL_R, m = EDGE_BAND;
+    var inner = boxP(centre[0], sx, -ZONE_HALF + m, ZONE_HALF - m) * boxP(centre[1], sz, lo + m, hi - m);
+    var outer = boxP(centre[0], sx, -ZONE_HALF - m, ZONE_HALF + m) * boxP(centre[1], sz, lo - m, hi + m);
+    return [inner, outer - inner, 1 - outer];
+  }
+  function intentOf(B, t) {
+    var lo = B.zone.bot - BALL_R, hi = B.zone.top + BALL_R, m = EDGE_BAND, ax = Math.abs(t[0]);
+    if (ax <= ZONE_HALF - m && t[1] >= lo + m && t[1] <= hi - m) return 'attack';
+    if (ax <= ZONE_HALF + m && t[1] >= lo - m && t[1] <= hi + m) return 'edge';
+    return 'expand';
   }
 
   function planPitch(P, B, sb, st, rng) {
-    var ip = intentProbs(P, st.balls, st.strikes);
-    var intent = INTENTS[rng.pickW(ip)];
-    var w = typeWeights(P, sb, intent, st.last);
-    var i = rng.pickW(w);
-    var type = P.pitches[i].type;
+    var w = typeWeights(P, sb, st, st.last);
+    var i = rng.pickW(w), pt = P.pitches[i], type = pt.type;
+    var tg = targetFor(P, B, sb, pt, st, rng), intent = intentOf(B, tg.target);
     var why = [st.balls + '-' + st.strikes + ': ' + intent];
     if (sb === P.armSide) why.push('same-side hitter'); else why.push('opposite-side hitter');
     if (st.last.length && st.last[0] === type) why.push('repeats the ' + PITCH_TYPES[type].name);
     else if (st.last.length) why.push('off the ' + PITCH_TYPES[st.last[0]].name);
-    return { intent: intent, intentP: ip, probs: normalize(w), pick: i, type: type,
-             target: targetFor(P, B, sb, type, intent, rng), why: why };
+    return { intent: intent, intentP: intentProbs(B, tg.centre, tg.spread), probs: normalize(w), pick: i, type: type,
+             target: tg.target, why: why };
   }
 
   // -------------------------------------------------------------- EXPECT
   // The batter's scouting-report picture of what comes next: the pitcher's
-  // mix in this count to this side, averaged over his intents. He sits on
+  // mix in this count to this side (his weights without his sequence). He sits on
   // the likeliest pitch, leaning to fastballs (being beaten by a fastball
   // costs more than being fooled by a slow one), and blends his timing
   // toward the mix by how much he hedges. With two strikes he hedges more.
   function expectPitch(B, P, sb, st) {
-    var ip = intentProbs(P, st.balls, st.strikes), mix = P.pitches.map(function () { return 0; });
-    for (var k = 0; k < 3; k++) {
-      var w = normalize(typeWeights(P, sb, INTENTS[k], null));
-      for (var i = 0; i < mix.length; i++) mix[i] += ip[k] * w[i];
-    }
+    var mix = normalize(typeWeights(P, sb, st, null));
     var g = 0, best = -1;
     mix.forEach(function (p, i) {
       var s = p * (PITCH_TYPES[P.pitches[i].type].kind === 'FB' ? B.fbLean : 1);
@@ -828,8 +857,12 @@ var BB = (function () {
 
   // --------------------------------------------------------------- THROW
   // Fatigue: nothing until 70% of his stamina, then it climbs as a square.
-  // At his stamina he has lost ~1.3 mph and ~27% of his command; at 1.15x
-  // stamina, 3 mph and 60%.
+  // At his stamina he has lost ~1.3 mph and ~4% of his command; at 1.15x
+  // stamina, 3 mph and 10%. League starters lost 0.4 mph by pitches 76-90 of
+  // a game (the model: about the same) and their four-seamers scattered no
+  // more than in their first 25, within 4% (statcast/locations.py table 11);
+  // managers take a tired pitcher out, so the league shows only the decline it lets happen.
+  var FATIGUE_CMD = 0.1;
   function fatigueOf(P) {
     var s = P.stamina, x = (P.load - 0.7 * s) / (0.45 * s);
     return x <= 0 ? 0 : Math.min(1.5, x * x);
@@ -841,10 +874,11 @@ var BB = (function () {
     var velo = pt.velo - 3.0 * f, rpm = pt.rpm * (1 - 0.05 * f);
     var rel = releasePoint(P);
     var ideal = aim(rel, velo * MPH, rpm, pt.tilt, pt.eff, P.armSide, plan.target, env, pt.aimCache, pt.seam);
-    var cmdIn = P.command * pt.cmd * (1 + 0.6 * f), ty = PITCH_TYPES[pt.type];
-    // command is his whole location scatter at the plate; the seams' pitch-to-pitch scatter is part of it, the rest is release
-    var sx = Math.sqrt(Math.max(0, cmdIn * cmdIn - ty.seamW[0] * ty.seamW[0])) * IN / ideal.dist;   // as angles
-    var sz = Math.sqrt(Math.max(0, cmdIn * cmdIn - ty.seamW[1] * ty.seamW[1])) * IN / ideal.dist;
+    var ty = PITCH_TYPES[pt.type], cmdIn = [P.cmd[0] * ty.cmd[0] * (1 + FATIGUE_CMD * f), P.cmd[1] * ty.cmd[1] * (1 + FATIGUE_CMD * f)];
+    // command is his whole scatter at the plate about the target; the pitch-to-pitch speed, spin, seam and
+    // release scatter below make up plateW of it, the release angle the rest
+    var sx = Math.sqrt(Math.max(0, cmdIn[0] * cmdIn[0] - ty.plateW[0] * ty.plateW[0])) * IN / ideal.dist;   // as angles
+    var sz = Math.sqrt(Math.max(0, cmdIn[1] * cmdIn[1] - ty.plateW[1] * ty.plateW[1])) * IN / ideal.dist;
     var yaw = ideal.yaw + rng.n(0, sx), pit = ideal.pit + rng.n(0, sz);
     var relA = [rel[0] + rng.n(0, 0.02), rel[1] + rng.n(0, 0.02), rel[2] + rng.n(0, 0.02)];
     // pitch to pitch: speed, spin and seam scatter as the league's pitchers show within a game
@@ -1010,8 +1044,8 @@ var BB = (function () {
   // policy, not a bet: the league's batters swing more in hitters' counts than
   // the next pitch's run value pays for (discipline.py table 6).
   var SWING_THR = {
-    '0-0': [0.33, 1.18], '0-1': [0.09, 0.75], '0-2': [0.09, 0.30], '1-0': [0.19, 1.01], '1-1': [0.11, 0.64], '1-2': [0.06, 0.28],
-    '2-0': [0.26, 1.03], '2-1': [0.09, 0.70], '2-2': [0.04, 0.35], '3-0': [0.94, 0.95], '3-1': [0.16, 0.72], '3-2': [0.03, 0.34]
+    '0-0': [0.36, 1.19], '0-1': [0.10, 0.74], '0-2': [0.09, 0.33], '1-0': [0.21, 0.96], '1-1': [0.09, 0.64], '1-2': [0.07, 0.31],
+    '2-0': [0.33, 1.04], '2-1': [0.10, 0.63], '2-2': [0.04, 0.36], '3-0': [0.92, 0.92], '3-1': [0.37, 0.37], '3-2': [0.05, 0.38]
   };
   function decide(B, pitch, gh, rf, st, rng) {
     var m = rf.detected ? rf.err : rf.base, mx = m[0], mz = m[1];
@@ -1269,7 +1303,7 @@ var BB = (function () {
   }
 
   return {
-    version: '1.3',
+    version: '1.4',
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
     PITCH_TYPES: PITCH_TYPES, ARCH: ARCH, TRAITS: TRAITS, AERO: AERO,
@@ -1277,7 +1311,7 @@ var BB = (function () {
     makePitcher: makePitcher, makeBatter: makeBatter, makeUmp: makeUmp, equipFielder: equipFielder, FIELD_MEANS: FIELD_MEANS,
     batOf: batOf, batSpeedOf: batSpeedOf, swingPowerOf: swingPowerOf, POWER_EXP: POWER_EXP,
     batMass: batMass, batRadius: batRadius, qAt: qAt, corOf: corOf, BAT_MODES: BAT_MODES, BAT_SHAPE: BAT_SHAPE, SWEET_IN: SWEET_IN, BAT_DEFAULT: BAT_DEFAULT,
-    flyPitch: flyPitch, flyBatted: flyBatted, spinVector: spinVector, dirOf: dirOf, aim: aim, SWING_THR: SWING_THR, ZONE_HALF: ZONE_HALF,
+    flyPitch: flyPitch, flyBatted: flyBatted, spinVector: spinVector, dirOf: dirOf, aim: aim, SWING_THR: SWING_THR, ZONE_HALF: ZONE_HALF, PLAN_LOC: PLAN_LOC,
     fatigueOf: fatigueOf, releasePoint: releasePoint, batterSide: batterSide, inZone: inZone,
     planPitch: planPitch, expectPitch: expectPitch, throwPitch: throwPitch, ghostPitch: ghostPitch,
     readFactors: readFactors, decide: decide, callPitch: callPitch, swing: swing, collide: collide,

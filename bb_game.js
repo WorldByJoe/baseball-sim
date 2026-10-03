@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_game.js · v0.6 · 2026-09-30
+   bb_game.js · v0.7 · 2026-10-02
 
    A whole game: two teams, nine innings or more, lineups that turn over,
    pitchers who tire and get replaced, managers with their own habits.
@@ -28,11 +28,13 @@
    so recognition improves through the game (bb_engine readFactors). The
    penalty is an OUTPUT to be measured, not a rule.
 
-   Not here yet: steals, wild pitches and passed balls, pickoffs, intentional
-   walks, defensive substitutions, double switches, injuries, weather that
-   changes during a game.
+   Not here yet: pickoffs, intentional walks, defensive substitutions, double
+   switches, injuries, weather that changes during a game.
 
    CHANGED
+     v0.7  a pitch past the catcher is rarer per pitch in the dirt (0.4 of before):
+           with the measured command (engine v1.4) four times as many pitches
+           bounce, as many as in the league
      v0.6  the running game: steals decided and timed pitch by pitch, wild pitches
            and passed balls from where the pitch crosses against the catcher's
            blocking; a third out on the bases ends a PA uncharged ('END')
@@ -40,9 +42,6 @@
      v0.4  the defence snapshot carries each man's react and speed, so the screen
            can show the men a ball beats breaking for it
      v0.3  each play notes who is warming in either bullpen
-     v0.2  each play snapshots the defence, pitch count and fatigue, and notes a
-           pitching change or pinch-hitter, so the screen can replay the game
-     v0.1  first build
 ============================================================================ */
 
 var BBGame = (function () {
@@ -152,9 +151,11 @@ var BBGame = (function () {
           }
           // a pitch the catcher cannot hold
           if (!hit && res !== 'hbp' && res !== 'foul' && (bases[1] || bases[2] || bases[3])) {
-            // bounced (0.5% of pitches), below the knees (8%), wide or over his head (rare), or an ordinary one he simply misses
+            // bounced (3.1% of pitches, as in the league), below the knees (7.7%), wide or over his head (1.3%), or an ordinary
+            // one he simply misses. The chances are set by hand in proportion and scaled so wild pitches per game come out
+            // as the league's with the league's share of pitches in each band (statcast/locations.py; engine v1.4)
             var low = pk.z < 0.35, wide = Math.abs(pk.x) > 0.6 || pk.z > 1.9, brk = /^(CU|SL|ST|FS)$/.test(rec.pitch.type);
-            var pPast = (pk.z < 0.15 ? 0.6 : low ? 0.19 : wide ? 0.2 : 0.006) * (brk ? 1.4 : 1) * (1 - C.block);
+            var pPast = (pk.z < 0.15 ? 0.24 : low ? 0.076 : wide ? 0.08 : 0.006) * (brk ? 1.4 : 1) * (1 - C.block);
             if (rng.u() < pPast) {
               var moved = [];
               if (bases[3]) { paRuns++; moved.push(3); bases[3] = null; }
