@@ -853,9 +853,9 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   // strides and now and then steps out of the box; runners lead off and get back.
   // All of it is a function of the clock, so a seek lands on the same frame.
   function smooth(x) { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); }
-  function mix(h) { h ^= h >>> 16; h = Math.imul(h, 0x7feb352d); h ^= h >>> 15; h = Math.imul(h, 0x846ca68b); return (h ^ h >>> 16) >>> 0; }   // hashStr's neighbours are near-equal: scatter the bits
+  function hashMix(h) { h ^= h >>> 16; h = Math.imul(h, 0x7feb352d); h ^= h >>> 15; h = Math.imul(h, 0x846ca68b); return (h ^ h >>> 16) >>> 0; }   // hashStr's neighbours are near-equal: scatter the bits
   function wander(key, t, amp) {   // a slow drift about his spot, metres
-    var h = mix(hashStr(String(key))), a = h % 628 / 100, b = (h >>> 9) % 628 / 100, c = (h >>> 18) % 628 / 100;
+    var h = hashMix(hashStr(String(key))), a = h % 628 / 100, b = (h >>> 9) % 628 / 100, c = (h >>> 18) % 628 / 100;
     return [amp * (0.6 * Math.sin(t * 0.23 + a) + 0.4 * Math.sin(t * 0.71 + b)), amp * (0.6 * Math.sin(t * 0.19 + c) + 0.4 * Math.sin(t * 0.67 + a + c))];
   }
   function setPhase(seg, tau) {   // 0 at ease between pitches, 1 set for the pitch
@@ -883,7 +883,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   // the box and back in (more often after a foul and with two strikes)
   function stepsOut(play, i) {
     var q = play.pa.pitches[i]; if (!q || i >= play.pa.pitches.length - 1) return 0;
-    var h = mix(hashStr(SEED + ':' + G.plays.indexOf(play) + ':' + i)), pct = 22 + (q.result === 'foul' ? 25 : 0) + (q.count && q.count[2] === '2' ? 10 : 0);
+    var h = hashMix(hashStr(SEED + ':' + G.plays.indexOf(play) + ':' + i)), pct = 22 + (q.result === 'foul' ? 25 : 0) + (q.count && q.count[2] === '2' ? 10 : 0);
     return h % 100 < pct ? 1 + (h >>> 8) % 1000 / 1000 : 0;   // 0, or 1-2: how far
   }
   function batterSpot(play, seg, tau, tAbs, side) {
