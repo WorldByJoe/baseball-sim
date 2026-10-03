@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v1.8 · 2026-10-03`
+`CALIBRATION.md · v1.9 · 2026-10-03`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -615,6 +615,27 @@ Joe (2026-10-02): drawing the full range of traits creates players who would nev
 **Joe's open question (a player below average in everything).** Below the population average in all seven of bat speed, eye, timing, pitch spotting, barrel control, along-barrel control and patience: 0.88% of the population (as independent traits would give, 0.5^7), 0.03% of the farm's picks; in five of them, 3.3% against 0.29%. He can still reach the majors on the scouts' error, about one in 3,000.
 
 What the step did, in these runs: selection on value produced part of the league's power-against-contact link from traits that are independent in the population, brought the hardest contact to the league's, and put runs and the slash line at the league's. What it left: bat speed ~ whiff at a third of the league's (the rest should be a trade-off within the hitter - how hard he chooses to swing), the pitchers' speed undervalued by the model, and home runs a little high.
+
+### A hitter's swing style (bb_engine v1.9; 2026-10-03)
+
+**Within a hitter, harder swings do not miss more.** Pitch-level 2025 (73,960 swings with bat speed): against each hitter's own mean, his swings 6-9 mph slower were whiffed .294 of the time and those 6-9 mph faster .140, squared up a little more often: slow swings are the ones he altered for a pitch he did not time (the model's adjusted swing). So the league's bat speed ~ whiff +.69 is a difference between hitters, not a cost of effort.
+
+**Between hitters, pull-and-lift is a style.** Among 2025's qualified hitters (145, swing-path and batting leaderboards): attack angle ~ pull% +.66, ~ fly-ball% +.68, ~ whiff +.53; swing length ~ attack angle +.33, ~ pull% +.34, ~ whiff +.51; pull% ~ the swing's horizontal direction −.71; but contact depth ~ attack angle only +.17 - uphill swingers pull more because they aim to, not because they meet the ball farther out front. In the model those traits were independent: attack ~ pull% +.18, pull% ~ fly-ball% +.13, swing length ~ whiff +.10. The model already made uphill swingers miss more (attack ~ whiff +.69) and lift more (+.73).
+
+**What was built.** One latent style per hitter, shared by his attack angle, pull bias and swing length with loadings 0.80, 0.82 and 0.41 (`STYLE`, from the three league correlations among them: their products), each trait keeping its own marginal. The population was refitted (`tools/fit_population.js`, now holding attack angle's spread at the leaderboard's 3.51 deg and the skills' calibrated means fixed in the tool - the first refit read them from TRAITS, which by then held the population, and shifted them a second time), and the swing thresholds refitted.
+
+| (picked hitters, 250 PA each, seeds 3 and 11) | v1.8 | v1.9 | league |
+|---|---|---|---|
+| attack angle ~ pull% | +.18 | +.57 to +.65 | +.66 |
+| pull% ~ fly-ball% | +.13 | +.34 to +.39 | +.55 |
+| swing length ~ whiff | +.10 | +.36 to +.38 | +.51 |
+| attack angle ~ whiff / K% | +.69 / +.71 | +.66-.71 / +.70-.74 | +.53 / +.47 |
+| bat speed ~ whiff (power_chain) | .17-.24 | .25-.30 | .69 |
+| bat speed ~ BB% | .01-.12 | .08-.15 | .17 |
+| K% / BB% / HR% (run_games) | 21.1-21.2 / 8.0-8.3 / 3.3-3.5 | 20.7-21.8 / 8.0-8.4 / 3.3-3.6 | 22.6 / 8.2 / 3.0 |
+| runs per team-game | 4.08-4.38 | 4.04-4.12 | 4.39 |
+
+What it left: uphill swings cost the model's hitters more whiffs and strikeouts than the league's (+.66-.74 against +.47-.53), and bat speed ~ whiff is still under half the league's.
 
 ## What was learned building the fielding layer
 

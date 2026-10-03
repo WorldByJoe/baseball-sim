@@ -15,7 +15,9 @@
    selection would - except that each hand-set skill's population MEAN is
    moved so the picked hitters keep the mean it was calibrated to when every
    drawn hitter counted as a major leaguer (its spread stays the population's,
-   so the farm narrows it). Prints the new TRAITS entries to paste.
+   so the farm narrows it); swingTilt (32.3 ± 3.8) and attack angle's spread
+   (3.51 deg) are measured, so their spreads are held too. Prints the new
+   TRAITS entries to paste.
 
    PITCHERS the same way: the picked starters and relievers have the league's
    four-seam speed (94.06 ± 2.16 / 95.05 ± 2.37 mph) and command (7.2 / 8.4 and
@@ -49,8 +51,10 @@
   // major leaguer: their picked means are held where they were calibrated, the population's spread is left for the
   // farm to narrow. swingTilt is measured (32.3 ± 3.8), so its spread is held too.
   var SKILLS = ['motorIn', 'timingSD', 'longSD', 'faceSD', 'undercut', 'attack', 'pullBias', 'coverage', 'spotIn', 'eyeSD', 'aggr', 'commit', 'fbLean', 'learn', 'swingTilt'];
-  var SK0 = {}; SKILLS.forEach(function (t) { SK0[t] = T[t][0]; });
-  if (A[3]) SKILLS.forEach(function (t) { SK0[t] = +JSON.parse(A[3])[t] || SK0[t]; });   // targets passed in when refitting
+  // the means these skills were calibrated to at engine v1.7, when every drawn hitter counted as a major leaguer
+  // (fixed here: TRAITS now holds the population, so reading the targets from it would shift them again on every refit)
+  var SK0 = { motorIn: 0.62, timingSD: 13.5, longSD: 3.8, faceSD: 8, undercut: 0.55, attack: 9, pullBias: 10, coverage: 3.0, spotIn: 4.5,
+              eyeSD: 5.0, aggr: 0, commit: 0.55, fbLean: 1.3, learn: 0.35, swingTilt: 32.3 };
   print('fit_population v0.1 · ' + ROUNDS + ' rounds x ' + NPICK + ' picks (best of ' + BB.FARM_N + ')');
   for (var k = 0; k < ROUNDS; k++) {
     var m = moments(sample(SEED + k).S);
@@ -65,6 +69,7 @@
       var v = Sk.map(function (b) { return t === 'coverage' ? b[t] / b.armIdx : b[t]; });   // coverage is drawn, then scaled by arm length
       T[t][0] += 0.8 * (SK0[t] - mean(v));
       if (t === 'swingTilt') T[t][1] *= Math.pow(3.8 / sd(v), 0.8);
+      if (t === 'attack') T[t][1] *= Math.pow(3.51 / sd(v), 0.8);      // the leaderboard's attack angle spread, 2025 (its mean stays the calibrated one)
     });
   }
   print('skills, picked mean against the calibrated mean: ' + SKILLS.map(function (t) { var v = sample(SEED + 300).S.map(function (b) { return t === 'coverage' ? b[t] / b.armIdx : b[t]; }); return t + ' ' + mean(v).toFixed(3) + '/' + SK0[t]; }).join(', '));

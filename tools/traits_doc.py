@@ -38,6 +38,7 @@ DRAWN = {
     'batSpeed': 'NOT drawn: built from the chain, v^3 = 4 x power x weight x swing length / bat effective mass; this entry only scales the display bars',
     'barrelSD': 'NOT drawn: motorIn x (bat speed / 72)^2; display scale only',
     'coverage': 'normal, clipped, then x armIdx',
+    'attack': 'normal, clipped; shares the swing style (STYLE loading 0.80)', 'pullBias': 'normal, clipped; shares the swing style (STYLE loading 0.82)',
     'pBatSpeed': 'normal, clipped; replaces the chain for a pitcher batting',
     'pTimingSD': 'replaces timingSD for a pitcher batting', 'pBarrelSD': 'replaces motorIn for a pitcher batting',
     'pSpotIn': 'replaces spotIn for a pitcher batting', 'pEyeSD': 'replaces eyeSD for a pitcher batting', 'pAttack': 'replaces attack for a pitcher batting',
