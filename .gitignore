@@ -5,3 +5,4 @@ Zipped/
 statcast/raw/pitches/
 tts/voices/
 *.wav
+__pycache__/
