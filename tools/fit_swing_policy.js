@@ -1,5 +1,5 @@
 /* ============================================================================
-   fit_swing_policy.js · v0.1 · 2026-10-02
+   fit_swing_policy.js · v0.3 · 2026-10-03
 
    Fits bb_engine.js's SWING_THR, the batter's swing threshold for each count
    and read ([on, off]: the pitch he sat on or has not told apart from it, and
@@ -22,6 +22,8 @@
    Run:  jsc bb_engine.js bb_names.js bb_field.js bb_game.js statcast/discipline_2025.js tools/fit_swing_policy.js -- [hitters] [PA each] [seed]
 
    CHANGED
+     v0.3  a swing counts by its chance of surviving his check at the last look (engine v2.4)
+     v0.2  familiarity as in games: 40 x u x u pitches of this pitcher seen at the start of each PA (games: median 9 at a swing, mean 12.6; was uniform to 60-80)
      v0.1  first build (bb_engine v1.2)
 ============================================================================ */
 (function (A) {
@@ -39,10 +41,12 @@
     var B = BB.makeBatter(rng, {});
     for (var k = 0; k < NPA; k++) {
       var Pi = P[(i * NPA + k) % P.length]; Pi.load = rng.u() * Pi.stamina;
-      BB.simPA(Pi, B, { env: env, ump: ump, framing: 0, seen: rng.u() * 80, rec: false }, rng).pitches.forEach(function (q) {
+      BB.simPA(Pi, B, { env: env, ump: ump, framing: 0, seen: 40 * rng.u() * rng.u(), rec: false }, rng).pitches.forEach(function (q) {
         if (!q.decide) return;
         var c = rec[q.count] = rec[q.count] || [[], []], b = binOf(edgeIn(B, q.pitch.plate.x, q.pitch.plate.z));
-        c[q.decide.state === 'on' ? 0 : 1].push([b, q.decide.pin + B.aggr, BB.PITCH_TYPES[q.pitch.type].kind]);   // he swings when pin + aggr > threshold
+        // he swings when pin + aggr > threshold - unless his last look puts it well off the plate and he holds up (engine v2.4)
+        var w = BB.checkChance ? 1 - BB.CHECK.hold * BB.checkChance(B, q.read, q.pitch) : 1;   // the chance the swing survives his check
+        c[q.decide.state === 'on' ? 0 : 1].push([b, q.decide.pin + B.aggr, BB.PITCH_TYPES[q.pitch.type].kind, w]);
       });
     }
   }
@@ -51,8 +55,10 @@
   COUNTS.forEach(function (cnt) {
     var L = DISCIPLINE.swing_by_edge_count[cnt], c = rec[cnt] || [[], []];
     // per state and band: the sorted values, so the share above a threshold is one binary search
-    var sorted = [0, 1].map(function (s) { var by = EDGES.slice(1).map(function () { return []; }); c[s].forEach(function (r) { by[r[0]].push(r[1]); }); by.forEach(function (v) { v.sort(function (a, b) { return a - b; }); }); return by; });
-    function above(v, t) { var lo = 0, hi = v.length; while (lo < hi) { var mid = (lo + hi) >> 1; if (v[mid] > t) hi = mid; else lo = mid + 1; } return v.length - lo; }
+    // per state and band: the values sorted, with the weight (the chance the swing survives his check) summed from the top
+    var sorted = [0, 1].map(function (s) { var by = EDGES.slice(1).map(function () { return []; }); c[s].forEach(function (r) { by[r[0]].push([r[1], r[3]]); });
+      return by.map(function (v) { v.sort(function (a, b) { return a[0] - b[0]; }); var suf = new Array(v.length + 1); suf[v.length] = 0; for (var j = v.length - 1; j >= 0; j--) suf[j] = suf[j + 1] + v[j][1]; v.suf = suf; return v; }); });
+    function above(v, t) { var lo = 0, hi = v.length; while (lo < hi) { var mid = (lo + hi) >> 1; if (v[mid][0] > t) hi = mid; else lo = mid + 1; } return v.suf[lo]; }
     function err(tOn, tOff) {
       var e = 0;
       for (var b = 0; b < 10; b++) {
@@ -78,7 +84,7 @@
   var KN = { FB: 'fastball', BR: 'breaking', OS: 'offspeed' }, kindErr = 0, kindTot = 0;
   ['FB', 'BR', 'OS'].forEach(function (kd) {
     var sw = EDGES.slice(1).map(function () { return 0; }), n = sw.slice();
-    COUNTS.forEach(function (cnt) { var c = rec[cnt]; if (!c) return; [0, 1].forEach(function (st) { c[st].forEach(function (r) { if (r[2] !== kd) return; n[r[0]]++; if (r[1] > out[cnt][st]) sw[r[0]]++; }); }); });
+    COUNTS.forEach(function (cnt) { var c = rec[cnt]; if (!c) return; [0, 1].forEach(function (st) { c[st].forEach(function (r) { if (r[2] !== kd) return; n[r[0]]++; if (r[1] > out[cnt][st]) sw[r[0]] += r[3]; }); }); });
     var L = DISCIPLINE.swing_by_edge[KN[kd]];
     for (var b = 0; b < 10; b++) if (n[b] >= 20) { kindErr += L[b][1] * Math.pow(sw[b] / n[b] - L[b][0], 2); kindTot += L[b][1]; }
     print('  ' + KN[kd] + ' (all counts)   model ' + sw.map(function (x, b) { return n[b] ? (x / n[b]).toFixed(2) : ' -  '; }).join(' ') + '\n' + '                          league ' + L.map(function (x) { return x[0].toFixed(2); }).join(' '));
@@ -89,4 +95,4 @@
   var keys = COUNTS, lines = [];
   for (var j = 0; j < keys.length; j += 6) lines.push('    ' + keys.slice(j, j + 6).map(function (k) { return "'" + k + "': [" + out[k][0].toFixed(2) + ', ' + out[k][1].toFixed(2) + ']'; }).join(', '));
   print('  var SWING_THR = {\n' + lines.join(',\n') + '\n  };');
-})(arguments);
+})(typeof arguments !== 'undefined' ? arguments : []);   // jsc keeps its command-line arguments at top level only

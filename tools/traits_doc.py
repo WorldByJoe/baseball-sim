@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-traits_doc.py · v0.2 · 2026-10-02
+traits_doc.py · v0.8 · 2026-10-03
 
 Writes TRAITS.md, the list of every player trait and how the population of
 players is drawn, straight from bb_engine.js: the TRAITS table (mean, spread,
 range and the comment beside each entry), the position offsets (FIELD_MEANS),
-the pitch types (PITCH_TYPES) and the repertoires (ARCH). Run it after any
+the pitch types (PITCH_TYPES) and the repertoire library (REPERTOIRES). Run it after any
 change to those tables, so the list never drifts from the engine:
 
   python3 tools/traits_doc.py
@@ -16,7 +16,10 @@ beyond "normal, clipped to its range" is written in DRAWN below; when the
 engine draws a trait differently, change it here too.
 
 CHANGED
-  v0.2  pitch types: each pitcher's seam break, and how pitches vary from pitch to pitch (engine v1.0)
+  v0.8  engine v2.2 (the swing's reach and read refitted)
+  v0.7  defence in the farm (engine v2.1)
+  v0.6  the pro pool: best of six, the levels, the open question re-answered (engine v2.0)
+  v0.5  the farm: the tables are the population; spin talent; a first answer to the open question (engine v1.8)
   v0.1  first build
 """
 import os, re, sys
@@ -35,11 +38,15 @@ DRAWN = {
     'batSpeed': 'NOT drawn: built from the chain, v^3 = 4 x power x weight x swing length / bat effective mass; this entry only scales the display bars',
     'barrelSD': 'NOT drawn: motorIn x (bat speed / 72)^2; display scale only',
     'coverage': 'normal, clipped, then x armIdx',
+    'attack': 'normal, clipped; shares the swing style (STYLE loading 0.80)', 'pullBias': 'normal, clipped; shares the swing style (STYLE loading 0.82)',
     'pBatSpeed': 'normal, clipped; replaces the chain for a pitcher batting',
     'pTimingSD': 'replaces timingSD for a pitcher batting', 'pBarrelSD': 'replaces motorIn for a pitcher batting',
     'pSpotIn': 'replaces spotIn for a pitcher batting', 'pEyeSD': 'replaces eyeSD for a pitcher batting', 'pAttack': 'replaces attack for a pitcher batting',
     'fbVeloSP': 'normal, clipped; starters', 'fbVeloRP': 'normal, clipped; relievers',
-    'commandSP': 'normal, clipped; starters', 'commandRP': 'normal, clipped; relievers',
+    'pHeightIn': 'normal, clipped; the root of the pitcher\'s chain', 'pWeightLb': 'normal about the height line, clipped',
+    'armAngle': 'normal, clipped; sets his release point, turns his pitches\' movement, picks his repertoire',
+    'spinTalent': 'normal, clipped; shared across his pitches (PITCH_TYPES spinRho)',
+    'cmdXSP': 'normal, clipped; starters', 'cmdZSP': 'normal, clipped; starters', 'cmdXRP': 'normal, clipped; relievers', 'cmdZRP': 'normal, clipped; relievers',
     'staminaSP': 'normal, clipped; starters', 'staminaRP': 'normal, clipped; relievers',
     'umpEdge': 'drawn separately for each of the four edges',
     'umpQuirk': 'one umpire in three: added to (or taken from) one edge picked at random',
@@ -52,9 +59,9 @@ DRAWN = {
 }
 # Units for traits whose comment in the engine does not start with one.
 UNITS = {'pBatSpeed': 'mph', 'pTimingSD': 'ms', 'pBarrelSD': 'in', 'pSpotIn': 'in', 'pEyeSD': 'in', 'pAttack': 'deg',
-         'fbVeloSP': 'mph', 'fbVeloRP': 'mph', 'commandSP': 'in', 'commandRP': 'in', 'staminaSP': 'pitches', 'staminaRP': 'pitches',
-         'relHt': 'ft', 'relSide': 'ft', 'ext': 'ft', 'speed': 'ft/s', 'armMph': 'mph', 'armIdx': 'ratio', 'aggr': 'share', 'commit': 'share',
-         'fbLean': 'factor', 'learn': 'share', 'pAggr': 'share', 'route': 'share', 'glove': 'share', 'block': 'share'}
+         'fbVeloSP': 'mph', 'fbVeloRP': 'mph', 'cmdXSP': 'in', 'cmdZSP': 'in', 'cmdXRP': 'in', 'cmdZRP': 'in', 'staminaSP': 'pitches', 'staminaRP': 'pitches',
+         'pHeightIn': 'in', 'pWeightLb': 'lb', 'armAngle': 'deg', 'spinTalent': 'sd', 'speed': 'ft/s', 'armMph': 'mph', 'armIdx': 'ratio', 'aggr': 'share', 'commit': 'share',
+         'fbLean': 'factor', 'learn': 'share', 'route': 'share', 'glove': 'share', 'block': 'share'}
 GROUPS = [('hitters', 'Hitters'), ('pitchers when they bat', 'Pitchers when they bat (NL rules)'), ('pitchers', 'Pitchers'), ('umpires', 'Umpires'),
           ('catchers', 'Catchers'), ('fielding and running', 'Fielding and running (every player)'), ('the running game', 'The running game')]
 
@@ -112,11 +119,11 @@ def parse_pitch_types(src):
     return out
 
 
-def parse_arch(src):
-    b = block(src, '  var ARCH = [', '\n  ];')
-    out = []
-    for name, w, mix in re.findall(r"name:\s*'([^']*)',\s*w:\s*([0-9.]+),\s*mix:\s*\{([^}]*)\}", b):
-        out.append((name, float(w), re.findall(r'(\w+):\s*([0-9.]+)', mix)))
+def parse_reps(src):
+    b = block(src, '  var REPERTOIRES = [', '\n  ];')
+    out = [[float(x) for x in m.split(',')] for m in re.findall(r'\[([-0-9.,]+)\]', b)]
+    if len(out) < 50:
+        sys.exit('REPERTOIRES did not parse')
     return out
 
 
@@ -135,7 +142,7 @@ def main():
     rows = parse_traits(src)
     fm = parse_field_means(src)
     pt = parse_pitch_types(src)
-    arch = parse_arch(src)
+    reps = parse_reps(src)
     bats = re.search(r"pb \? \(r < ([0-9.]+) \? 'R' : r < ([0-9.]+) \? 'L' : 'S'\) : \(r < ([0-9.]+) \? 'R' : r < ([0-9.]+) \? 'L' : 'S'\)", src)
     throws = re.search(r"rng\.u\(\) < ([0-9.]+) \? 'L' : 'R'", src)
     quirk = re.search(r'if \(rng\.u\(\) < ([0-9.]+)\) \{\s*var names = \[', src)
@@ -169,32 +176,49 @@ def main():
         w('| %s | %s |' % (pos, ' | '.join(('%+g' % d[k]) if k in d else '' for k in keys)))
     w('\n## Pitch types\n')
     w('Each pitcher\'s version of a pitch is drawn from these league figures (`PITCH_TYPES`): speed is his fastball speed plus the offset (and, for every pitch but the fastballs, a further normal(0, 1.0 mph) of his own); spin rate and spin efficiency are normal with the spread shown (spin rate clipped to 3 spreads, efficiency to 0.03-0.99); tilt is normal; his seam break (extra movement the spin does not explain, toward his arm side and up, in inches) is normal around 0 with the spread shown.\n')
-    w('| type | name | kind | speed offset (mph) | spin (rpm) | spin efficiency | tilt (deg) | seam break sd, arm side / up (in) | command factor |')
-    w('|---|---|---|---|---|---|---|---|---|')
+    w('| type | name | kind | speed offset (mph) | spin (rpm) | spin efficiency | tilt (deg) | seam break sd, arm side / up (in) | command factor, across / up (vs four-seam) | plate scatter of its own, across / up (in) |')
+    w('|---|---|---|---|---|---|---|---|---|---|')
     pair = lambda v: ' / '.join(x.strip() for x in v.strip('[]').split(',')) if v else ''
     for code, d in pt:
-        w('| %s | %s | %s | %s | %s ± %s | %s ± %s | %s ± %s | %s | %s |' % (code, d.get('name', ''), d.get('kind', ''), d.get('dv', ''), d.get('rpm', ''), d.get('rpmSD', ''), d.get('eff', ''), d.get('effSD', ''), d.get('tilt', ''), d.get('tiltSD', ''), pair(d.get('seamSD')), d.get('cmd', '')))
-    w('\nA pitch thrown varies again around his version, by these spreads within a game, plus tilt 5 deg and efficiency 0.03 for every type. His command trait is his whole location scatter at the plate: the seams\' pitch-to-pitch scatter is part of it, not added to it.\n')
+        w('| %s | %s | %s | %s | %s ± %s | %s ± %s | %s ± %s | %s | %s | %s |' % (code, d.get('name', ''), d.get('kind', ''), d.get('dv', ''), d.get('rpm', ''), d.get('rpmSD', ''), d.get('eff', ''), d.get('effSD', ''), d.get('tilt', ''), d.get('tiltSD', ''), pair(d.get('seamSD')), pair(d.get('cmd')), pair(d.get('plateW'))))
+    w('\nA pitch thrown varies again around his version, by these spreads within a game, plus tilt 5 deg and efficiency 0.03 for every type. His command (two traits, across and up and down, times the type\'s factor) is his whole scatter at the plate about the target: the scatter these pitch-to-pitch spreads make on their own (the last column, tools/plate_scatter.js) is part of it, not added to it.\n')
     w('| type | speed (mph) | spin (share of his rpm) | seam break, arm side / up (in) |')
     w('|---|---|---|---|')
     for code, d in pt:
         w('| %s | %s | %s | %s |' % (code, d.get('veloW', ''), d.get('rpmW', ''), pair(d.get('seamW'))))
+    m = re.search(r"habit:\s*(\{[^\n]*\})", src)
+    if not m:
+        sys.exit('traits_doc: PLAN_LOC.habit not found in bb_engine.js')
+    hab = re.findall(r"'(\w+)':\[([-0-9.]+),([-0-9.]+)\]", m.group(1))
+    w('Each pitcher also has his own aim for each of his pitches, normal around the league\'s aim point (`PLAN_LOC.habit`, statcast/locations.py): the spread between pitchers, across (in toward his arm side) and in height (share of the batter\'s zone).\n')
+    w('| type | ' + ' | '.join(t for t, _, _ in hab) + ' |')
+    w('|---|' + '---|' * len(hab))
+    w('| across (in) | ' + ' | '.join(a for _, a, _ in hab) + ' |')
+    w('| height (zone share) | ' + ' | '.join(b for _, _, b in hab) + ' |')
     w('\n## Repertoires\n')
-    w('A pitcher is one of these archetypes, picked with the weight shown (`ARCH`); his usage of each pitch is the mix times a lognormal factor (log-sd 0.25), renormalized. Relievers keep their best two pitches (60%) or three.\n')
-    w('| archetype | weight | mix |')
-    w('|---|---|---|')
-    for name, wt, mix in arch:
-        w('| %s | %s | %s |' % (name, num(wt), ', '.join('%s %s' % (k, v) for k, v in mix)))
+    w('A pitcher\'s repertoire is a league pitcher\'s (`REPERTOIRES`, statcast/pitcher_chain.py): drawn from the %d pitchers of 2025 (150+ pitches) in his role, weighted by how near their arm slot is to his (Gaussian, 5 deg wide); his usage of each pitch is that mix times a lognormal factor (log-sd 0.15), renormalized. Summary of the library, by role and slot (share of pitchers carrying each type, and the average number of types):\n' % len(reps))
+    TY = ['FF', 'SI', 'FC', 'SL', 'ST', 'CU', 'CH', 'FS']
+    w('| role | arm slot | pitchers | types | ' + ' | '.join(TY) + ' |')
+    w('|---|---|---|---|' + '---|' * len(TY))
+    for rl, rn in ((0, 'starters'), (1, 'relievers')):
+        for lo, hi, sn in ((-99, 33, 'under 33 deg'), (33, 43, '33-43 deg'), (43, 99, 'over 43 deg')):
+            q = [r for r in reps if r[1] == rl and lo <= r[0] < hi]
+            if not q:
+                continue
+            w('| %s | %s | %d | %.1f | %s |' % (rn, sn, len(q), sum(sum(1 for v in r[2:] if v > 0) for r in q) / len(q), ' | '.join('%.2f' % (sum(1 for r in q if r[2 + i] > 0) / len(q)) for i in range(len(TY)))))
     r1, r2, r3, r4 = (float(bats.group(i)) for i in range(1, 5))
     w('\n## Other draws\n')
     w('- **Batting hand, position players:** right %.0f%%, left %.0f%%, switch %.0f%%. **Pitchers batting:** right %.0f%%, left %.0f%%, switch %.0f%%.' % (100 * r3, 100 * (r4 - r3), 100 * (1 - r4), 100 * r1, 100 * (r2 - r1), 100 * (1 - r2)))
     w('- **Throwing hand, pitchers:** left %.0f%%.' % (100 * float(throws.group(1))))
     w('- **Umpires with one strong habit:** %.0f%% (see `umpQuirk`).' % (100 * float(quirk.group(1))))
     w('- **Strike zone:** not drawn; from height, bottom 0.263 x height, top 0.559 x height.')
+    w('\n## The farm\n')
+    w('The tables above are the POOL: the frequency distribution of the traits among all professional players, majors and minors (the project\'s goal since 2026-10-03 is that distribution and how it meets the physics to give the statistics we measure). Each roster spot goes to the best of `FARM_N` = 6 candidates drawn from it (since engine v2.0; 4 in v1.8-v1.9), as the scouts judge them: `HITTER_VALUE` and `PITCHER_VALUE`, the expected wOBA the engine itself gives each trait (tools/hitter_value.js, tools/pitcher_value.js), plus for a position player the runs his fielding saves at his position (`FIELD_VALUE`, tools/field_value.js; engine v2.1), with `SCOUT_SD` of judgement error. The majors are therefore an extreme-value sample of the pool. Where a trait is measured, its pool was fitted (tools/fit_population.js) so that the majors have the league\'s value; the hand-set skills keep their pool spread, and the farm narrows it.\n')
+    w('**Levels** (engine v2.0): the candidate the scouts rank k-th of six plays at level k - 1 the majors, 2 Triple-A, down to 6 rookie ball (`makeBatter(rng, {level: k})`). The levels below the majors are predictions; Triple-A is measured (statcast/levels.py) and compared in headless/level_check.js.\n')
     w('\n## Open questions\n')
-    w('- **A player below average in every category** (Joe, 2026-10-02, for later): how should the game handle a player on a team who is below average in every trait? With traits drawn independently, such players occur by chance (for k independent traits, about 1 in 2^k players is below the mean in all of them), and real rosters are the selected top of a much larger population, so they would be rare there. Not yet decided.')
+    w('- **A player below average in every category** (Joe, 2026-10-02, for later): how should the game handle a player on a team who is below average in every trait? With traits drawn independently, such players occur by chance (for k independent traits, about 1 in 2^k players is below the mean in all of them), and real rosters are the selected top of a much larger population, so they would be rare there. Not yet decided. Answer from the farm (engine v2.0, best of six): below the pool average in all seven of bat speed, eye, timing, pitch spotting, barrel control, along-barrel control and patience, 0.78% of the pool but 0.01% of the major leaguers (five categories: 3.1% against 0.18%). Such a player can still reach the majors on the scouts\' error, about 1 in 10,000 (1 in 3,000 at best of four, v1.8).')
     open(OUT, 'w').write('\n'.join(L) + '\n')
-    print('wrote %s: %d traits, %d positions, %d pitch types, %d repertoires' % (OUT, len(rows), len(fm), len(pt), len(arch)))
+    print('wrote %s: %d traits, %d positions, %d pitch types, %d repertoires' % (OUT, len(rows), len(fm), len(pt), len(reps)))
 
 
 if __name__ == '__main__':

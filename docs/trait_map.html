@@ -1,0 +1,509 @@
+<!-- trait_map.html · v2.5 · 2026-10-03
+     The trait path map: distal traits -> proximate abilities -> the engine's stages
+     (with every constant and where its value came from) -> statistics against the league.
+     Keep it in step with bb_engine.js; publish to the same artifact URL.
+     CHANGED
+       v2.5  engine v2.4: swing-to-swing effort and checked swings
+       v2.4  engine v2.3: the bat's face and its path; bat direction at contact; open mysteries named
+       v2.3  engine v2.2: the contact rebuild's first stage - reach, the read, looking fastball, miss distance by reach
+       v2.2  engine v2.1: defence in the farm; the hitter's arm length gets its own id (it shared d_arm with arm slot)
+       v2.1  miss distance measured: the league's whiffs against the model's, by pitch kind
+       v2.0  engine v2.0: the pro pool - best of six, the levels, the Triple-A test
+       v1.0  first version (engine v1.0), source kept in the repo from v1.3 on -->
+<meta charset="utf-8">
+<title>Ballgame Trait Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,650&family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a figure page. Short text column on top, then one wide causal diagram
+   (four bands, distal to emergent, scrolls sideways on its own), then the
+   parameter ledger as a table. Colour encodes where a value came from, on a
+   scale from fixed physics to hand-set; outcome fit is encoded by shape. */
+:root {
+  --bg: #f4f5f1; --panel: #ffffff; --ink: #1c2420; --muted: #5a6761; --line: #c7cfca; --edge: #b4bdb8; --dim: 0.16;
+  --p-phys: #3b4c8c; --p-meas: #23748a; --p-fit: #3b8446; --p-out: #b8730c; --p-hand: #b0403a; --p-der: #8b9590;
+  --chip: #f1f3ef; --focus: #1c2420;
+  --f-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-label: "IBM Plex Sans Condensed", "Arial Narrow", Arial, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111513; --panel: #1a201d; --ink: #e2e8e4; --muted: #94a29b; --line: #34403a; --edge: #46534c; --dim: 0.2;
+  --p-phys: #8f9fe2; --p-meas: #5db7cb; --p-fit: #75c27f; --p-out: #e8a744; --p-hand: #e87d72; --p-der: #7c8782;
+  --chip: #222a26; --focus: #e2e8e4; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #111513; --panel: #1a201d; --ink: #e2e8e4; --muted: #94a29b; --line: #34403a; --edge: #46534c; --dim: 0.2;
+  --p-phys: #8f9fe2; --p-meas: #5db7cb; --p-fit: #75c27f; --p-out: #e8a744; --p-hand: #e87d72; --p-der: #7c8782;
+  --chip: #222a26; --focus: #e2e8e4; color-scheme: dark; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-label); font-size: 15px; line-height: 1.5; }
+.wrap { padding-inline: 16px; padding-block: 28px 48px; max-width: 1460px; margin: 0 auto; display: grid; gap: 22px; }
+.text { max-width: 68ch; display: grid; gap: 10px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--f-display); font-weight: 650; font-size: clamp(26px, 3.4vw, 38px); line-height: 1.12; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--f-display); font-weight: 650; font-size: 21px; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; }
+.legend button { font: inherit; font-size: 13.5px; display: flex; align-items: center; gap: 8px; padding: 6px 11px 6px 7px; border-radius: 6px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; text-align: left; }
+.legend button[aria-pressed="true"] { border-color: var(--focus); box-shadow: inset 0 0 0 1px var(--focus); }
+.legend button:focus-visible, .table-wrap a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.legend .n { font-family: var(--f-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.badge { width: 20px; height: 20px; border-radius: 50%; display: inline-grid; place-items: center; font-family: var(--f-mono); font-size: 11px; font-weight: 500; color: #fff; flex: none; }
+.keys { display: grid; gap: 6px; font-size: 13.5px; color: var(--muted); }
+.keys dl { display: grid; grid-template-columns: max-content 1fr; gap: 3px 10px; margin: 0; }
+.keys dt { color: var(--ink); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.keys dd { margin: 0; }
+.fitkey { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; font-size: 13.5px; color: var(--muted); }
+.fitkey span { display: inline-flex; align-items: center; gap: 6px; }
+.fig { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); overflow-x: auto; position: relative; }
+.fig svg { display: block; min-width: 1400px; width: 100%; height: auto; }
+.hint { font-size: 13px; color: var(--muted); }
+#tip { position: absolute; z-index: 5; max-width: 340px; padding: 10px 12px; border-radius: 6px; background: var(--panel); border: 1px solid var(--line);
+  box-shadow: 0 6px 22px rgba(0,0,0,0.16); font-size: 13.5px; line-height: 1.45; pointer-events: none; }
+#tip b { font-weight: 600; } #tip .k { font-family: var(--f-mono); font-size: 12px; color: var(--muted); display: block; margin-block: 2px 4px; }
+svg text { font-family: var(--f-label); fill: var(--ink); }
+svg .t-col { font-family: var(--f-display); font-size: 17px; font-weight: 650; }
+svg .t-colsub, svg .t-sub { fill: var(--muted); }
+svg .t-group { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.08em; fill: var(--muted); }
+svg .box { fill: var(--panel); stroke: var(--line); stroke-width: 1; }
+svg .stage { fill: var(--bg); stroke: var(--line); }
+svg .chip { fill: var(--chip); stroke: none; }
+svg .mono { font-family: var(--f-mono); }
+svg .edge { fill: none; stroke: var(--edge); stroke-width: 1.1; }
+svg .spine { fill: none; stroke: var(--muted); stroke-width: 1.4; }
+svg .arrow { fill: var(--muted); }
+svg .node, svg .chipg { cursor: pointer; }
+svg.focus .node:not(.on), svg.focus .node.on .chipg:not(.on), svg.focus .edge:not(.on), svg.focus .spine, svg.focus .arrow { opacity: var(--dim); }
+svg.focus .edge.on { stroke: var(--ink); stroke-width: 1.8; }
+svg .node.pinned .box, svg .node.pinned .stage { stroke: var(--focus); stroke-width: 2; }
+svg .node:focus-visible .box, svg .node:focus-visible .stage { stroke: var(--focus); stroke-width: 2.5; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 13.5px; }
+th, td { text-align: left; padding: 7px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+thead th { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+tr.cls td { background: var(--bg); font-weight: 600; padding-top: 12px; }
+td.v { font-family: var(--f-mono); font-size: 12.5px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.basis { color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { svg .edge, svg .node, svg .chipg { transition: opacity 120ms ease; } }
+</style>
+
+<div class="wrap">
+  <div class="text">
+    <div class="eyebrow">Ballgame · engine v2.4 · 3 October 2026</div>
+    <h1>How a player's traits become the statistics we measure</h1>
+    <p>Every statistic in Ballgame emerges from traits meeting physics, perception and noise. The map runs left to right: who the players are (distal), what they can do on a pitch (proximate), the engine's stages for every pitch with the constants inside them, and the statistics measured against the 2025 league. Each parameter carries a mark for where its value came from. The distal traits are drawn from the POOL of all professional players, majors and minors: the question is that pool's frequency distribution and how it meets the physics. Each major leaguer is the best of six candidates from it, and the next-best play at the levels below, so Triple-A's measurements test the pool from outside the majors.</p>
+    <p class="hint">Hover or tap any box to trace its paths; tap again to release. Tap a class below to light up every parameter of that kind. The ledger under the map lists them all.</p>
+  </div>
+
+  <div class="text">
+    <h2>Where each value came from</h2>
+    <div class="legend" id="legend"></div>
+    <div class="fitkey"><b style="color:var(--ink)">Statistics, model against the league:</b>
+      <span><svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="var(--ink)"/></svg> close to the league</span>
+      <span><svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="var(--ink)" stroke-width="1.5"/><path d="M7 1.5 A5.5 5.5 0 0 1 7 12.5 Z" fill="var(--ink)"/></svg> right direction, not there yet</span>
+      <span><svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="var(--ink)" stroke-width="1.5"/></svg> clearly off</span>
+    </div>
+  </div>
+
+  <div class="fig" id="fig"><svg id="map" role="img" aria-label="Causal map from player traits through the engine's stages to measured statistics"></svg><div id="tip" hidden></div></div>
+
+  <div class="text">
+    <h2>Reading it for the joint fit</h2>
+    <p>The amber marks are the knobs that were chosen while watching outcomes; they are the first candidates for the sensitivity analysis. The red marks were set by judgement and nothing yet ties them to a measurement; several of them sit in the batter's eye and plan (eye, pitch spotting, how hard he sits on his guess), the collision's friction and the base-running read, which is where the swing curves by pitch kind, the spray and the spin's shape go wrong. Green, blue and indigo values are tied to measurements or physics and should move only if their own measurement changes. A statistic that no amber or red knob upstream can move points at a missing mechanism.</p>
+  </div>
+
+  <div class="table-wrap"><table id="ledger"><thead><tr><th>Parameter</th><th>Where it acts</th><th>Value</th><th>Basis</th></tr></thead><tbody></tbody></table></div>
+  <p class="hint">Sources: bb_engine.js v2.4, bb_field.js v0.8 and bb_game.js v0.8; CALIBRATION.md v2.4 (with its open mysteries); the contact scorecard headless/contact_score.js; Triple-A from statcast/levels.py and headless/level_check.js; miss distance from statcast/misses.py; league figures from statcast/fouls.py, discipline.py, pitch_spread.py, locations.py, bip.py, baserunning.py, pitcher_chain.py, the 2025 leaderboards and run_games over seeds 3, 11 and 29. Fielding and the game layer are shown coarsely.</p>
+</div>
+
+<script>
+(function () {
+  var CLS = {
+    O: { name: 'Fitted to outcomes', color: '--p-out', text: 'chosen while watching emergent statistics; provisional, first in line for the joint fit' },
+    H: { name: 'Hand-set', color: '--p-hand', text: 'set by judgement, origin not recorded; to be measured or fitted' },
+    F: { name: 'Fitted to its own measurement', color: '--p-fit', text: 'chosen so the quantity it governs matches a measurement of that same quantity' },
+    M: { name: 'Measured', color: '--p-meas', text: 'set straight from a measurement: Statcast 2025, Baseball Savant, the hitting literature' },
+    P: { name: 'Physics and rules', color: '--p-phys', text: 'published physical laws and constants, and the rulebook' },
+    D: { name: 'Derived', color: '--p-der', text: 'no value of its own: built from other traits or by the physics' }
+  };
+  var ORDER = ['O', 'H', 'F', 'M', 'P', 'D'];
+  var COLS = [
+    { x: 16, w: 236, title: 'Distal', sub: 'who the players are, drawn once' },
+    { x: 322, w: 236, title: 'Proximate', sub: 'what they can do on a pitch' },
+    { x: 628, w: 430, title: 'Mechanisms', sub: 'the stages of every pitch, in order' },
+    { x: 1124, w: 262, title: 'Emergent', sub: 'measured, model against the league' }
+  ];
+  // [id, col, group, label, sub, class, description]
+  var N = [
+    ['d_farm', 0, 'THE PRO POOL AND THE FARM', 'The farm', 'best of 6, by bat and glove', 'H', 'Every trait in this column is drawn from the POOL, the full range of professional players. Each major-league roster spot goes to the best of FARM_N = 6 candidates by the scouts\' estimate plus judgement error, so the majors are an extreme-value sample (Joe\'s choice, v2.0). A position player is judged by the runs his bat makes and his glove saves (v2.1). Selection alone makes the picks\' bat speed and whiffs go together and makes the player below average in everything rare (0.01% of major leaguers against 0.78% of the pool, seven categories).'],
+    ['d_scout', 0, null, 'Scouts\' estimate', 'expected wOBA from traits', 'D', 'HITTER_VALUE and PITCHER_VALUE: linear estimates of the expected wOBA the engine itself gives a player\'s traits (tools/hitter_value.js, pitcher_value.js). Hitters: bat speed, eye, aggression, barrel control (R2 .70). Pitchers: mostly command; speed barely counts (R2 .12).'],
+    ['d_fieldval', 0, null, 'Fielding value', 'runs saved, by position', 'D', 'FIELD_VALUE: the runs per ball in play a fielder\'s traits save at his position, measured by playing the engine\'s own balls in play through a test fielder among average team-mates (tools/field_value.js, R2 .92-.98). One sd of fielding: 0.09-0.10 runs a game at shortstop and in the outfield, 0.04 at first base, against 0.18 for hitting. Route and reaction count most, then speed in the outfield. v2.1.'],
+    ['d_popfit', 0, null, 'Population fit', 'picks = league', 'F', 'The population is fitted so the picks have the league\'s measured traits: height, weight, swing length, bat speed and weight ~ bat speed; pitchers\' speed, command, slot, height, spin. Hand-set skills keep their calibrated means among the picks (tools/fit_population.js).'],
+    ['d_levels', 0, null, 'Levels', 'k-th of six plays at level k', 'H', 'The candidates are ranked by the scouts and the k-th best plays at level k: 1 the majors, 2 Triple-A, down to 6 rookie ball (v2.0). Only the majors are fitted; Triple-A, measured alike from its Statcast data, tests the pool one level down. Pool bat speed 68.2 mph; levels 1-6: 71.2, 69.6, 68.7, 67.8, 66.8, 65.5.'],
+    ['d_height', 0, "HITTER'S BODY", 'Height', '72.0 ± 2.35 in (pool 70.9)', 'M', '2025 Statcast hitters: the majors. The pool, fitted so the farm\'s picks come out at the league\'s, is 70.9 ± 2.4 in (v2.0).'],
+    ['d_weight', 0, null, 'Weight', '206 lb (pool 193), +5.25 per inch', 'M', 'Scatter about the height line (r = .62), 2025 Statcast; the pool 193 ± 21 lb (v2.0).'],
+    ['d_swinglen', 0, null, 'Swing length', '7.32 ± 0.39 ft (pool 7.17)', 'M', 'The bat head\'s path to contact, about the height line; 2025 Statcast; the pool 7.17 ± 0.40 ft (v2.0).'],
+    ['d_power', 0, null, 'Swing power per kg', '25.3 W/kg (pool), falls as weight^−0.22', 'F', 'Muscle and technique together. Its mean and log-spread were fitted so the major leaguers have the league\'s bat speed (71.2 ± 2.7 mph; pool 68.2 ± 3.1), and the weight exponent so weight ~ bat speed is the league\'s .53 among them (v2.0).'],
+    ['d_style', 0, null, 'Swing style', 'pull-and-lift, one latent', 'F', 'One latent per hitter shared by his attack angle, pull bias and swing length (loadings 0.80, 0.82, 0.41), fitted to the league\'s correlations among them (attack ~ pull% +.66, swing length ~ attack +.33, ~ pull% +.34). v1.9.'],
+    ['d_bat', 0, null, 'Bat weight', '31.8 oz, +0.6 per 50 lb', 'H', 'The bat he chooses. Set by hand.'],
+    ['d_armlen', 0, null, 'Arm length index', '1.00 ± 0.03', 'H', 'Limb proportion: reach and plate coverage. Set by hand.'],
+    ['d_pbody', 0, "PITCHER'S BODY, ARM AND PITCHES", 'Height and weight', '74.7 ± 2.1 in; 214 lb', 'M', '2025 pitchers (MLB Stats API); weight rises 4.2 lb per inch (v1.6).'],
+    ['d_arm', 0, null, 'Arm slot', '37.7 ± 12.8 deg', 'M', 'Statcast arm angle: sets his release point, turns his pitches\' movement, picks his repertoire (v1.6).'],
+    ['d_fbvelo', 0, null, 'Fastball speed', '94.1 ± 2.2 mph (pool 93.5)', 'M', 'Starters; relievers 95.1 ± 2.4 (2025, pitch level). The pool is barely slower (93.5 starters, 94.5 relievers) because the scouts hardly value speed - Triple-A\'s starters average 92.9. Speed does not follow height or weight in the majors (r .09, .05).'],
+    ['d_release', 0, null, 'Release point', 'shoulder + arm lever', 'D', 'Built: shoulder 0.705 of his height up, the arm 0.372 of his height long at his arm angle, plus where he stands on the rubber; extension rises 0.065 ft per inch. Reproduces Statcast\'s arm angle exactly (v1.6).'],
+    ['d_rep', 0, null, 'Repertoire', 'a league pitcher\'s mix', 'M', 'Drawn from the 422 measured 2025 mixes of pitchers in his role with a similar arm slot: low slots carry sinkers and sweepers, high slots curveballs (v1.6; the six hand-set archetypes are gone).'],
+    ['d_spin', 0, null, 'Spin rate', 'follows speed and a talent', 'M', 'Type averages and spreads from Savant; fastball spin rises 18.2 rpm per mph; a pitcher\'s spin talent carries to his sinker (r .81), slider (.36), curveball (.15), changeup (.19) (v1.6).'],
+    ['d_shape', 0, null, 'Spin efficiency and tilt', 'per type, turned by the slot', 'F', 'Each type\'s typical efficiency and tilt fitted so its average movement matches Savant\'s; the slot turns the movement (four-seam -0.79 deg per deg of arm angle, measured) and raises efficiency a little; the spread left at a given slot read from spin axes (v1.6).'],
+    ['d_seam', 0, null, 'Seam break', 'per pitcher, and per pitch', 'F', 'Movement the spin does not explain (seam-shifted wakes), zero on average. Its spreads were fitted so each type\'s movement spread matches the league\'s, between pitchers and pitch to pitch (v1.0).'],
+    ['d_scatter', 0, null, 'Pitch-to-pitch speed, spin', '0.9-1.2 mph; 3-9% of spin', 'M', 'Within-game spreads per type, pitch-level 2025 (v1.0).'],
+    ['d_habit', 0, null, 'Aiming habits', 'per pitch: ~2 in, 0.1-0.17 of the zone', 'M', 'Each pitcher\'s own aim for each of his pitches, around the league\'s aim point: the spread between pitchers of their mean location for a type, sampling removed (statcast/locations.py, v1.4).'],
+    ['d_ump', 0, 'UMPIRE AND CATCHER', 'Umpire\'s zone', 'soft edge 1.4 in, edge habits', 'H', 'Accuracy, a systematic miss per edge, one strong habit for some, and a zone that swells when the pitcher is behind. Set by hand.'],
+    ['d_framing', 0, null, 'Catcher framing', '± 0.35 in at the edges', 'H', 'How much he widens the edges. Set by hand.'],
+    ['d_catcher', 0, null, 'Catcher arm and blocking', 'pop time 1.95 s', 'M', 'Statcast-shaped pop time and blocking.'],
+    ['d_field', 0, 'FIELDERS AND RUNNERS', 'Fielding', 'first step 0.45 s, route, glove, arm', 'M', 'The first step, with the acceleration, reproduces Statcast\'s outfield jump (33.9 ft toward the ball in 3 s from release, v1.5); route, glove and arm are Statcast-shaped, with position means.'],
+    ['d_run', 0, null, 'Running', 'sprint 27.0 ft/s, jump, boldness', 'M', 'Sprint speed and jump are Statcast-shaped; a runner\'s boldness is set by hand.'],
+
+    ['p_batspeed', 1, 'SWING', 'Bat speed', 'built: v³ = 4pWL / m_eff', 'D', 'Not drawn. Built from weight, swing power, swing length and the bat; the bat\'s effective mass also sets the collision efficiency.'],
+    ['p_barrel', 1, null, 'Barrel scatter', '0.87 in × (bat speed / 72)²', 'F', 'Vertical bat-to-ball scatter, growing as bat speed squared. Fitted with the read to the miss table (v2.2; was 0.62, set by hand).'],
+    ['p_timing', 1, null, 'Timing scatter', '13.5 ms', 'F', 'Fitted so contact depth within a batter has the league\'s spread, 9.0 in.'],
+    ['p_long', 1, null, 'Along-barrel scatter', '3.35 in, aimed 1.4 in inside', 'F', 'Along-the-barrel scatter, with the aim toward the hands. First fitted so contact struck square vertically is squared up .695 of the time; v2.2 narrowed it 12% and moved the aim inside so few swings miss past the end, as Statcast\'s miss distance shows.'],
+    ['p_face', 1, null, 'Bat-face scatter', '8 ± 4 deg', 'F', 'Fitted to the league\'s fair-ball spray by contact depth.'],
+    ['p_undercut', 1, null, 'Undercut', '0.55 in below centre', 'F', 'Fitted to the league\'s launch angle minus attack angle, +10 deg on average.'],
+    ['p_attack', 1, null, 'Attack angle', '9 ± 4 deg', 'H', 'The upward tilt of his swing path. Set by hand.'],
+    ['p_tilt', 1, null, 'Swing tilt', '32.3 ± 3.8 deg', 'M', 'The 2025 swing_path_tilt leaderboard.'],
+    ['p_pull', 1, null, 'Pull bias', '1 ± 5 deg round the arc', 'F', 'How far round the arc his usual contact point is, which sets his bat\'s path there. Mean fitted (v2.3) so the path points as Statcast\'s attack direction does - square to centre field (hitters\' means 0.3 ± 4.3 deg); it was 10, fitted to the spray of fair balls. Spread: batters\' usual contact depth.'],
+    ['p_cover', 1, null, 'Plate coverage', '6.3 in off the zone', 'F', 'How far off the zone his swing errors have doubled. Fitted (v2.2) to the league\'s whiffs and misses by how far outside the zone the pitch crossed; it was 3 in, set by hand, and the model\'s chases missed far too often and too badly.'],
+    ['p_eye', 1, 'EYE AND PLAN', 'Eye', '5.0 in at the commit point', 'H', 'His zone-judgement scatter, larger under time pressure. Set by hand.'],
+    ['p_spot', 1, null, 'Pitch spotting', '4.9 in of separation', 'F', 'How far a pitch must have left his expected path by the commit point for him to pick it up. Fitted with the read to the miss table (v2.2; was 4.5, set by hand).'],
+    ['p_learn', 1, null, 'Learning a pitcher', '35% of spotting, within a game', 'H', 'How much of his spotting distance and eye he can learn away as he sees a pitcher. Set by hand.'],
+    ['p_commit', 1, null, 'Sitting on his guess', '0.55 (0 hedges, 1 commits)', 'H', 'How hard he sits on the likeliest pitch. Set by hand.'],
+    ['p_fblean', 1, null, 'Fastball lean', '1.87', 'F', 'How much he leans toward guessing fastball: his mix\'s fastball share times this. Fitted with the read to the miss table (v2.2; was 1.3): he looks fastball and adjusts.'],
+    ['p_aggr', 1, null, 'Aggression', '± 0.07 on the threshold', 'H', 'Lowers his swing threshold. Set by hand.'],
+    ['p_move', 1, 'PITCHER', 'Pitch movement', 'spin and seams through the flight', 'D', 'Emerges from spin, seam break and the flight physics. Checked against Savant\'s averages and the league\'s spreads.'],
+    ['p_command', 1, null, 'Command', '7.2 across, 8.4 up and down (in)', 'M', 'Two traits: his whole scatter at the plate about the target, starters (relievers 8.4 / 8.2). Read from 3-0 four-seamers about each pitcher\'s own 3-0 mean; it agrees with the published miss from the catcher\'s glove (about 10-11 in). Pitchers differ by 7% and 11%. Each type has its measured factor (v1.4).'],
+    ['p_stamina', 1, null, 'Stamina', '95 pitches (starters)', 'H', 'Pitches before fatigue bites. Set by hand.'],
+    ['p_hold', 1, null, 'Time to the plate', '1.35 s with a man on', 'M', 'Statcast-shaped.'],
+
+    ['e_zone', 3, 'ON THE PITCH', 'Zone rate', '.501 vs .509', 'match', 'Share of pitches in the rulebook zone. Where pitches went matched the league\'s band by band, within about .02, in every group of counts and for every pitch kind; pitches in the dirt 3.2% against 3.1%.'],
+    ['e_swing', 3, null, 'Swing and chase', '.465 / .258 vs .479 / .283', 'near', 'Swings per pitch and swings at pitches outside the zone, in games. Batters now check swings at pitches they see late are well off the plate (v2.4); far off the plate they swing less than the league\'s.'],
+    ['e_swingk', 3, null, 'Swings by pitch kind', 'rms .117 against the league', 'off', 'Closer with the league\'s repertoires (was .15); fastballs still chased too often far outside, breaking balls too rarely.'],
+    ['e_whiff', 3, null, 'Whiffs per swing', '.25 in games vs .234', 'near', 'Per swing, 300-400 games. In-zone contact .80 against .85: breaking balls in the zone are missed too often and those diving out of it too rarely.'],
+    ['e_whiffk', 3, null, 'Whiffs by pitch kind', '.21 / .34 / .31 vs .17 / .31 / .30', 'near', 'Fastball, breaking ball, off-speed (game familiarity). In the league\'s order since v2.2; before, fastballs were whiffed as often as breaking balls and more than off-speed.'],
+    ['e_miss', 3, null, 'How far whiffs miss', 'fastballs past 3 in .04 vs .014', 'near', 'Statcast\'s miss distance (ball to the barrel half of the bat), share of swings. v2.1 .07; most of what is left is off the plate. Breaking balls .10 against .155: fooled swings do not yet gather on the pitches that dive out of the zone.'],
+    ['e_velo', 3, null, 'Four-seam whiffs by speed', '.18-.20 to .28 vs .14 to .25', 'near', 'Under 92 mph to 98+ (game familiarity). The slope is the league\'s since v2.2; slow four-seamers are still missed .04-.06 too often - most of velocity\'s missing value.'],
+    ['e_batdev', 3, null, 'Swing speeds about his own', 'p5 -9.1, p95 +8.2 vs -11.1, +7.7', 'match', 'Each swing\'s bat speed against the hitter\'s own mean (mph): median +0.9 against +1.4, 1st percentile -33.8 against -35.3; 4.7% of swings more than 10 below against 5.7%. Effort scatter and checked swings (v2.4).'],
+    ['e_foul', 3, null, 'Fouls per contact', '.46-.47 vs .52', 'near', 'Share of contact that goes foul.'],
+    ['e_depth', 3, null, 'Contact depth by kind', '27.6 / 33.3 in vs 27.5 / 35.5', 'match', 'How far in front of the batter fastballs and breaking balls are met.'],
+    ['e_flat', 3, null, 'Flat-fastball effect', 'whiff +.15 vs +.14', 'near', 'Steepest to flattest fifth of upper-zone four-seamers; squared up falls .09 against .11, but launch angle rises 21 deg against 7.'],
+    ['e_sq', 3, null, 'Squared-up contact', '.48 vs .435 per contact', 'near', 'Statcast\'s rule; per foul .29 against .225. Came nearer the league\'s without being fitted when the face got its own scatter about the path (v2.3; was .51-.53).'],
+    ['e_ev', 3, null, 'Exit velocity', 'EV50 100.4-100.9 vs 100.6 mph', 'match', 'Mean 89.9-90.5 against 89.7 among the major leaguers.'],
+    ['e_la', 3, null, 'Batted-ball mix', '44/20/25/11 vs 43/24/24/9', 'near', 'Ground balls, line drives, fly balls and pop-ups, percent.'],
+    ['e_batdir', 3, null, 'Bat direction at contact', '−1.3° vs −0.5°', 'match', 'The barrel\'s path at contact on balls in play (Statcast\'s attack direction, + pulled); all swings +1.2 ± 17.9 against +0.4 ± 19.0, hitters\' means +1.0 ± 5.1 against +0.3 ± 4.3. Fitted through pullBias (v2.3).'],
+    ['e_spray', 3, null, 'Spray', 'liners +5.4°, flies −1.6° vs +5.7°, −2.8°', 'near', 'Where fair balls go, + pulled, as the league measures it (from where they were fielded). Ground balls +8.5 against +15.4: a mystery (v2.3).'],
+    ['e_move', 3, null, 'Pitch movement spread', 'within 0.4 in, most types', 'match', 'Spread of induced break per type between pitchers, refitted with the engine\'s own pitchers (v1.6).'],
+    ['e_pchain', 3, null, 'Pitcher correlations', 'IVB ~ arm angle .62 vs .72', 'near', 'Release height ~ arm angle .81 (.76-.82), spin ~ speed .30 (.27-.31), four-seam ~ slider spin .39 (.36); release height ~ height .32 against .20.'],
+    ['e_stuff', 3, null, 'Stuff into strikeouts', 'K% ~ speed .36 vs .52', 'near', 'Unfitted: harder throwers strike out more, whiff ~ speed .34-.37 against .56, whiff ~ spin .27-.38 against .36.'],
+    ['e_relk', 3, null, 'K% ~ release height', '+.16 vs -.22', 'off', 'Lower releases strike out more in the league; the model\'s batter pictures every pitch from its true release, so a low release cannot fool him.'],
+    ['e_bsw', 3, 'POWER AGAINST CONTACT', 'Bat speed ~ whiff', '+.26 to +.35 vs +.69', 'near', 'Among the major leaguers the farm picks (was .01 before the farm); bat speed ~ K% +.19 to +.30 against +.58. Within a hitter harder swings whiff less, so the league\'s link is between hitters.'],
+    ['e_style', 3, null, 'Attack angle ~ pull%', '+.57 to +.65 vs +.66', 'match', 'With the swing style (v1.9; was +.18); pull% ~ fly-ball% +.34 to +.39 against +.55; attack angle ~ whiff +.66 to +.71 against +.53, too strong.'],
+    ['e_zbs', 3, null, 'Zone rate ~ bat speed', '-0.0037 vs -0.0038 per mph', 'match', 'Pitchers work around power (v1.7); walks ~ bat speed came to +.05 to +.12 against +.17, unfitted.'],
+    ['e_k', 3, 'IN THE PLATE APPEARANCE', 'Strikeout rate', '20.0-20.9% vs 22.6%', 'near', '200 games at each of three seeds.'],
+    ['e_bb', 3, null, 'Walk rate', '8.2-8.6% vs 8.2%', 'match', 'From measured command and aim, with no tuned constant (v1.4); power hitters walk more as pitchers work around them (v1.7).'],
+    ['e_hbp', 3, null, 'Hit by pitch', '1.01% vs 1.1%', 'match', 'Per plate appearance; 0.40% before command was measured.'],
+    ['e_hr', 3, null, 'Home-run rate', '3.2-3.4% vs 3.0%', 'near', 'Per plate appearance.'],
+    ['e_carry', 3, null, 'Carry by EV and angle', 'within 6 ft at 20-40 deg', 'near', 'Liners at 15-20 deg carry 10-20 ft too far: the spin\'s shape with launch angle.'],
+    ['e_babip', 3, null, 'BABIP', '.258-.260 vs .291', 'off', 'An open mystery (CALIBRATION): ground balls are pulled less than the league\'s, and contact quality and fielding have no believable lever left that has not been measured.'],
+    ['e_avg', 3, null, 'AVG / SLG', '.226-.229 / .367-.378', 'near', 'League .243 / .399.'],
+    ['e_runs', 3, 'IN THE GAME', 'Runs per team-game', '3.80-4.03 vs 4.39', 'near', '200 games at each of three seeds. BABIP .258-.260 against .291 and doubles 1.05-1.10 against 1.6: an open mystery (CALIBRATION).'],
+    ['e_doubles', 3, null, 'Doubles per team-game', '1.05-1.10 vs 1.60', 'off', 'Mostly balls down the lines: the model\'s spray is narrower than the league\'s.'],
+    ['e_triples', 3, null, 'Triples per team-game', '0.05-0.07 vs 0.14', 'off', 'Per team-game.'],
+    ['e_xbt', 3, null, 'Extra bases taken', 'R2 scores .40 / .43 / .71', 'near', 'On a single, by outs; league .36 / .51 / .83. Runners are thrown out 1-3% of chances, as the league\'s.'],
+    ['e_dp', 3, null, 'Double plays', '0.62-0.73 vs 0.72', 'near', 'Per team-game.'],
+    ['e_errors', 3, null, 'Errors', '0.80-0.88 vs 0.55', 'off', 'Per team-game.'],
+    ['e_sb', 3, null, 'Stolen bases', '0.55-0.66 vs 0.47', 'off', 'Per team-game. Up since v2.1 put the major leaguers at the league\'s measured sprint speed (27.3 ft/s, was 27.0); the steal decisions were set before.'],
+    ['e_wp', 3, null, 'Wild pitches', '0.25-0.29 vs 0.36', 'near', 'Per team-game.'],
+    ['e_extra', 3, null, 'Extra-inning games', '8.5-13% vs about 8%', 'near', 'Per game.'],
+    ['e_pitchers', 3, null, 'Pitchers used', '3.9 vs 4.2', 'near', 'Per team-game.'],
+    ['e_aaa_pow', 3, 'ONE LEVEL DOWN: TRIPLE-A, NOT FITTED', 'Power, majors to Triple-A', 'hard-hit .381 vs .375', 'match', 'Level 2 against Triple-A, 42 days of 2025 (level 1 .418, majors .419); home runs 2.76% against 2.85%. Three seeds of 400 games.'],
+    ['e_aaa_k', 3, null, 'Strikeouts in Triple-A', '21.2% vs 22.5%', 'match', 'Level with the majors in both (model level 1 21.0).'],
+    ['e_aaa_velo', 3, null, 'Fastball speed, one level down', '-0.2 / -0.5 vs -1.2 / -0.9 mph', 'off', 'Starters, relievers: level 1 to 2 against the majors to Triple-A. The scouts value speed a little more since v2.2 (about 4 wOBA points per sd) but command most.'],
+    ['e_aaa_bb', 3, null, 'Walks in Triple-A', '10.9% vs 10.8%', 'match', 'With the umpire\'s zone top 2.9 in lower, as Triple-A\'s automated zone. Since v2.2 (the read and reach) the model\'s level 2 walks as Triple-A does.'],
+    ['e_aaa_babip', 3, null, 'BABIP in Triple-A', '.260 vs .315 (level 1 .259)', 'off', 'Triple-A\'s is .026 above the majors\'. Since the farm values defence (v2.1) the model\'s level 2 holds level 1\'s BABIP while its contact softens (hard-hit .361 against .406), and levels 3-6 rise to .27; before, level 2 fell below level 1. Still far short of Triple-A.'],
+    ['e_aaa_chase', 3, null, 'Chase in Triple-A', '.258 vs .264 (level 1 .258)', 'near', 'Triple-A\'s hitters chased less than the majors\' (.283); the model\'s two levels now chase alike (v2.4).']
+  ];
+  // stages: [id, label, gloss, chips: [name, value, class, description]]
+  var S = [
+    ['s_plan', 'Plan', 'the pitcher picks a pitch and a target', [
+      ['Type by side', 'league use', 'M', 'Use of each type against same- and opposite-side batters over its overall share (changeups 0.43 to same-side, 1.46 to opposite). statcast/locations.py, v1.4.'],
+      ['Kind by count', 'league use', 'M', 'Use of fastballs, breaking balls and off-speed in each count over their share against that side (3-0: fastballs 1.7, breaking 0.13).'],
+      ['Aim points', 'type × side', 'M', 'The league\'s mean location for each type against each side, inches toward his arm side and share of the zone height.'],
+      ['Count shift', 'kind × side × count', 'M', 'How the count moves the aim: with two strikes breaking balls go lower and farther away, fastballs higher.'],
+      ['Target spread', 'within a count', 'M', 'What is left of a pitcher\'s scatter within a count once his command is taken out: 1.5-5 in. Targets hardly move within a count.'],
+      ['AROUND 0.021', 'pitching around', 'F', 'Against a hitter with more bat speed he aims farther from the middle: every target\'s distance from the zone\'s centre grows 0.021 per mph above 71.2. Fitted to the league\'s zone rate against bat speed (-0.0038 per mph, r -.34); v1.7.'],
+      ['Repeat lean', '× 1.13, then × 0.98', 'M', 'The same type again after a change is 1.13 times as likely as usage, side and count predict; after two alike, 0.98. (Until v1.4 the engine penalised repeats.)']]],
+    ['s_expect', 'Expect', "the batter's guess from the scouting report", [
+      ['Scouting report', 'his habits', 'D', 'The pitcher\'s own mix in this count to this side, averaged over his intents.'],
+      ['Two-strike hedge', 'commit × 0.6', 'H', 'With two strikes he sits less hard on his guess. Set by hand.']]],
+    ['s_throw', 'Throw', 'aim, scatter and fly the pitch', [
+      ['Drag and lift', 'Nathan', 'P', 'Coefficients from Alan Nathan\'s trajectory calculator; lift saturates with the spin factor.'],
+      ['Spin decay', 'Nathan', 'P', 'Time constant R / (2e-5 × speed).'],
+      ['Seam force', 'grows as speed²', 'P', 'The seam break enters as a force that grows with speed squared, like lift (v1.0).'],
+      ['Fatigue', 'from 70% of stamina', 'F', 'Nothing until 70% of stamina, then rising as a square: −0.4 mph by pitches 76-90 and −1.3 mph at his stamina, as league starters lost 0.4 mph by pitches 76-90. Command barely moves (FATIGUE_CMD 0.1): their scatter did not grow within 4% (v1.4).'],
+      ['plateW', 'per type', 'D', 'The scatter the pitch-to-pitch speed, spin and seam variation make on their own, taken out of command so command stays his whole scatter (tools/plate_scatter.js).']]],
+    ['s_read', 'Read', 'recognise the pitch, then judge where and when', [
+      ['COMMIT_S 0.175 s', 'tunnel point', 'M', 'When he commits: about 24 ft out, where Baseball Prospectus measures pitch tunnels.'],
+      ['STEER_S 0.15 s', 'last look', 'M', 'The visuomotor delay, the hitting literature\'s last 150 ms. 110 and 130 ms were tried and dropped whiffs and K% well below the league.'],
+      ['STEER_IN 3 in', 'late steering', 'M', 'How far the barrel can be redirected after launch: late corrections of 5-10 cm are reported.'],
+      ['ivbSD', 'league spread per type', 'M', 'The league\'s spread of vertical break within each pitch type, pitch-level 2025: the width of his picture of a pitch.'],
+      ['PRIOR_T 5', 'timing pull', 'O', 'How strongly his timing stays pulled toward the pitch he expected. Fitted to breaking balls being met 8 in further out front than fastballs.'],
+      ['PRIOR_S 2.5', 'place pull', 'O', 'How strongly his judgement of where it ends up is pulled toward what that kind of pitch usually does. Fitted to the flat-fastball table and fastball whiffs; 1 (an ideal observer) gave whiffs of .36.'],
+      ['RESID_S 0.07', 'guess kept', 'O', 'Share of the gap to the guessed pitch that stays in his picture. Fitted to breaking-ball whiffs and the launch angles of low pitches.'],
+      ['DIR_READ 0.5', 'half the motion', 'F', 'A batter fooled at the commit point sees where the ball is but reads only half of which way it is moving across and up and down, so more of the curve still fools him. Fitted to the league\'s misses by pitch kind and reach, whiffs by kind and strikeouts in games (v2.2; it read all of it, and fooled breaking balls were missed by a couple of inches where the league\'s are missed by a foot).'],
+      ['Looking fastball', 'eye ready for any fastball', 'H', 'Sitting on a fastball, his eye is ready for any of the pitcher\'s fastballs, but he hunts only the one he guessed: the swing decision treats the others as before (v2.2).']]],
+    ['s_decide', 'Decide', 'swing or take', [
+      ['Swing thresholds', 'count × sat on it or not', 'F', 'He swings when his chance the pitch is a strike passes a threshold for the count: a lower one when it is the pitch he sat on or he has not picked it up, a higher one when he has recognised another. The 24 values were fitted to the league\'s swing rates by count and distance from the zone edge (v1.2): behaviour fitted to its own measurement. A one-pitch bet on run values was tried instead and made batters far too passive in hitters\' counts.'], ['Checked swing', '2-8 in, holds half', 'F', 'At his last look, the farther off the zone his picture puts the pitch, the likelier he tries to check (never inside 2 in, always beyond 8): half the time he holds up, else the bat comes through 5-60% slowed. Fitted to the league\'s tail of slow swings (v2.4).'],
+      ['Commit-time picture', 'flat zone prior', 'D', 'He decides on what he could see by the commit point: the pitch as he reads it if he picked it up, otherwise the pitch he expected corrected for what had shown itself. His chance of a strike assumes nothing about where pitchers usually throw (v1.2).']]],
+    ['s_call', 'Call', 'the umpire calls a take', [
+      ['Rulebook zone', 'plate + ball', 'P', 'Any part of the ball over any part of the plate, between his own zone\'s top and bottom.'],
+      ['Hit by pitch', 'inside 0.58 m, 65%', 'H', 'A pitch this far inside, at body height, hits him 65% of the time. Set by hand.']]],
+    ['s_swing', 'Swing', 'the barrel travels a tilted circle', [
+      ['SWING_R 0.87 m', 'arc radius', 'F', 'Fitted so the bat\'s turn and attack-angle rise per inch of contact depth fall within 11% of the league\'s.'],
+      ['TILT_PER_H 9.4°', 'steeper low', 'M', 'Swing tilt per unit of zone height, pitch-level 2025.'],
+      ['BAT_PEAK, GAIN', 'speed by depth', 'F', 'The barrel\'s speed peaks 9 in out front of his usual point; fitted to the league\'s bat speed by contact depth.'],
+      ['LOC_DEPTH', '1.89 in per ft', 'M', 'Planned contact depth per foot the pitch is inside, pitch-level 2025.'],
+      ['LOC_FACE', 'pull per ft inside', 'F', 'The rest of the league\'s 7.9 deg of spray per foot of location; it turns the face, not the path (v2.3).'], ['FACE_PATH 9°', 'face pulls past the path', 'F', 'The face points 9 deg further to the pull side than the barrel\'s path (the hands are still moving at contact); the face sends the ball, the path is what Statcast measures. Fitted (v2.3) to the league\'s spray of liners and fly balls with the path square to centre.'],
+      ['HAND_MISS 0.3', "hands' reach", 'F', 'The share of a pitch\'s distance in or out that the hands do not cover; measured against squared-up contact by location.'],
+      ['AIM_HANDS 1.4 in', 'aim inside', 'F', 'How far toward the hands of the sweet spot he aims. Fitted with the along-barrel scatter (v2.2) so few swings miss past the end of the bat, as Statcast\'s miss distance shows (was 1 in, set by hand).'],
+      ['SWING_EFFORT', 'ahead 1.017, two 0.982', 'M', 'Swing effort by count: league fastball bat speed at the same contact depth was 71.9 mph ahead in the count, 70.2 even and 68.9 with two strikes (v1.1).'],
+      ['ADJ_PER_MS 0.0014', 'altered swing', 'F', 'Bat speed lost per millisecond of timing he closes by altering his swing after a late read. Fitted so breaking balls and off-speed are swung about 2 mph slower than fastballs at the same depth, as in the league (v1.1).'], ['EFFORT_SD 5%', 'swing to swing', 'F', 'Each swing\'s effort varies: his bat speed times exp(N(0, 0.05)), without changing his precision. Fitted to the league\'s swing speeds about each hitter\'s mean (core about 4.3 mph wide; v2.4).'],
+      ['SWING_NORM 0.978', 'keeps the trait', 'D', 'Divides out the average effort and adjustment, so his bat-speed trait stays the average over his swings (v1.1).']]],
+    ['s_collide', 'Collide', 'the ball meets a wooden bat', [
+      ['Bat as a beam', 'Nathan 2000', 'P', 'The tapered wood beam: its radius at contact, recoil about the balance point, and the bending modes that drain an off-centre strike.'],
+      ['Ball COR', '0.546 to 0.51', 'P', 'The MLB specification at 60 mph and Nathan\'s value at 140 mph, linear between.'],
+      ['Contact time', '1 ms', 'P', 'Bending modes slower than this take energy as if the bat were lighter there.'],
+      ['Friction μ 0.5', 'glancing', 'H', 'Caps the tangential impulse. Set by hand; pop-ups spin about 6,700 rpm against a few thousand.']]],
+    ['s_fly', 'Fly', "the batted ball's flight", [
+      ['Drag, lift, decay', 'Nathan', 'P', 'The same aerodynamics as the pitch.'],
+      ['Batted drag ×', '1.08, carry', 'F', 'Fitted to how far the league\'s balls in the air carried by exit velocity and launch angle, 20-40 deg, within 6 ft rms, with the spin the model\'s collision gives (statcast/bip.py, v1.5). The aerodynamics themselves match Nathan\'s backspin table.'],
+      ['Parks and weather', "MLB's mix", 'M', 'Altitude, temperature and fences drawn from MLB\'s own mix.']]],
+    ['s_field', 'Field and run', 'fielders, throws and runners', [
+      ['Accelerations', 'Statcast jump', 'F', 'Fielders 5.5, runners 4.5 m/s²: with the first step they reproduce Statcast\'s outfield jump (33.7 against 33.9 ft) and the average 4.4 s home to first.'],
+      ['Outfield spots', '300 / 323 / 291 ft', 'M', 'Where the league\'s outfielders stood in 2025 (Statcast positioning, eight teams): pull corner, centre, opposite corner, not turned toward the pull side (v1.5).'],
+      ['Bounce', 'friction grows', 'F', 'A bounce keeps 0.45 (dirt) or 0.35 (grass) of its speed into the ground and 0.76 along it less a friction term: fitted to measured bounces off a skinned infield and grass (Brosnan et al. 2007), v1.5.'],
+      ['CATCH_SET 0.15 s', 'arrive early', 'F', 'An even chance at a catch takes getting there 0.15 s before the ball: fitted to catches by exit velocity and launch angle (v1.5).'],
+      ['Reach 1.2 m', 'glove and dive', 'H', 'Set by hand.'],
+      ['Secondary lead', '15.3 ft', 'M', 'A runner\'s lead when the ball is hit, Statcast 2025.'],
+      ['V_CONTACT 1.5 m/s', 'breaking on contact', 'F', 'A runner who goes on contact is already moving: checked against double plays per game (v1.5).'],
+      ['Send margins', '0.6 / 0.5 / 0.2 s', 'F', 'By outs: fitted to how often the league\'s runners took the extra base on a single or double (statcast/baserunning.py, v1.5).'],
+      ['Read error', '0.25 s', 'H', 'His and the coach\'s error reading the race. Set by hand.'],
+      ['Long-throw doubt', '0.005 s per m', 'H', 'A throw\'s arrival grows less certain beyond 40 m; set by hand so runners are thrown out about as often as the league\'s.'],
+      ['SAFETY 0.30 s', 'taking second', 'H', 'The margin a runner wants before taking second. Set by hand.'],
+      ['Cut-off relay', 'beyond 55 m', 'H', 'Long throws go through a cut-off man. Set by hand.']]],
+    ['s_game', 'Game', 'managers and the bullpen', [
+      ["Starter's hook", 'mean 0.5', 'O', 'Lowered until starters stopped going eight innings.'],
+      ['Relief changes', 'dozen pitches', 'O', 'Relievers swapped between innings after about a dozen pitches; set while fixing starters\' innings.'],
+      ['NL rules', 'pinch-hitting', 'H', 'When the manager pinch-hits for the pitcher, and the NL lineup rules. Set by hand.'],
+      ['Past the catcher', 'by height band', 'O', 'The chance a pitch gets by the catcher, by where it crosses, against his blocking: set by hand in proportion and scaled to the league\'s wild pitches per game, now that the share of pitches in the dirt is the league\'s (bb_game v0.7).']]]
+  ];
+  var E = [
+    ['d_height', 'd_weight'], ['d_height', 'd_swinglen'], ['d_weight', 'd_bat'], ['d_weight', 'd_power'],
+    ['d_weight', 'p_batspeed'], ['d_swinglen', 'p_batspeed'], ['d_power', 'p_batspeed'], ['d_bat', 'p_batspeed'], ['d_style', 'p_attack'], ['d_style', 'p_pull'], ['d_style', 'd_swinglen'], ['d_style', 'e_style'], ['d_armlen', 'p_cover'],
+    ['d_spin', 'p_move'], ['d_shape', 'p_move'], ['d_seam', 'p_move'], ['d_scatter', 'p_move'],
+    ['d_fbvelo', 's_throw'], ['d_farm', 'p_batspeed'], ['d_farm', 'p_eye'], ['d_farm', 'p_command'], ['d_scout', 'd_farm'], ['d_fieldval', 'd_farm'], ['d_field', 'd_fieldval'], ['d_run', 'd_fieldval'], ['s_field', 'd_fieldval'], ['d_farm', 'd_levels'], ['d_levels', 'e_aaa_pow'], ['d_levels', 'e_aaa_k'], ['d_levels', 'e_aaa_velo'], ['d_levels', 'e_aaa_bb'], ['d_levels', 'e_aaa_babip'], ['d_levels', 'e_aaa_chase'], ['d_scout', 'e_aaa_velo'], ['d_scout', 'e_aaa_chase'], ['p_batspeed', 'e_aaa_pow'], ['s_call', 'e_aaa_bb'], ['s_field', 'e_aaa_babip'], ['d_popfit', 'd_farm'], ['d_pbody', 'd_release'], ['d_arm', 'd_release'], ['d_arm', 'd_shape'], ['d_arm', 'd_rep'], ['d_fbvelo', 'd_spin'], ['d_habit', 's_plan'], ['d_release', 's_throw'], ['d_rep', 's_plan'], ['d_rep', 's_expect'], ['d_ump', 's_call'], ['d_framing', 's_call'],
+    ['d_field', 's_field'], ['d_run', 's_field'], ['d_catcher', 's_field'],
+    ['p_batspeed', 'p_barrel'],
+    ['p_batspeed', 's_swing'], ['p_batspeed', 's_collide'], ['p_barrel', 's_swing'], ['p_timing', 's_swing'], ['p_long', 's_swing'], ['p_face', 's_swing'],
+    ['p_undercut', 's_swing'], ['p_attack', 's_swing'], ['p_tilt', 's_swing'], ['p_pull', 's_swing'], ['p_pull', 'e_batdir'], ['s_swing', 'e_batdir'], ['p_cover', 's_swing'],
+    ['p_eye', 's_read'], ['p_eye', 's_decide'], ['p_spot', 's_read'], ['p_learn', 's_read'], ['p_commit', 's_expect'], ['p_fblean', 's_expect'], ['p_aggr', 's_decide'],
+    ['p_move', 's_throw'], ['p_move', 's_read'], ['p_command', 's_throw'], ['p_stamina', 's_throw'], ['p_stamina', 's_game'], ['p_hold', 's_field'],
+    ['s_plan', 'e_zone'], ['s_plan', 'e_zbs'], ['p_batspeed', 'e_bsw'], ['s_read', 'e_bsw'], ['d_farm', 'e_bsw'], ['s_plan', 'e_hbp'], ['s_throw', 'e_hbp'], ['s_throw', 'e_wp'], ['s_game', 'e_wp'], ['s_throw', 'e_bb'], ['s_plan', 'e_swingk'], ['s_read', 'e_swingk'], ['s_decide', 'e_swingk'], ['s_read', 'e_whiffk'], ['s_read', 'e_velo'], ['s_swing', 'e_batdev'], ['s_decide', 'e_batdev'], ['s_swing', 'e_velo'], ['p_cover', 'e_miss'], ['s_swing', 'e_miss'], ['s_read', 'e_miss'], ['s_swing', 'e_whiffk'], ['s_field', 'e_avg'], ['s_collide', 'e_avg'], ['s_plan', 'e_bb'], ['s_throw', 'e_zone'], ['s_throw', 'e_move'], ['p_move', 'e_pchain'], ['s_read', 'e_stuff'], ['p_move', 'e_stuff'], ['s_read', 'e_relk'], ['s_throw', 'e_relk'], ['s_decide', 'e_swing'], ['s_decide', 'e_k'], ['s_decide', 'e_bb'],
+    ['s_read', 'e_whiff'], ['s_read', 'e_flat'], ['s_read', 'e_depth'], ['s_read', 'e_k'], ['s_call', 'e_k'], ['s_call', 'e_bb'],
+    ['s_swing', 'e_whiff'], ['s_swing', 'e_depth'], ['s_swing', 'e_sq'], ['s_swing', 'e_spray'], ['s_swing', 'e_foul'],
+    ['s_collide', 'e_sq'], ['s_collide', 'e_ev'], ['s_collide', 'e_foul'], ['s_collide', 'e_la'], ['s_fly', 'e_hr'],
+    ['s_field', 'e_babip'], ['s_field', 'e_triples'], ['s_field', 'e_doubles'], ['s_collide', 'e_doubles'], ['s_field', 'e_xbt'], ['s_field', 'e_errors'], ['s_fly', 'e_carry'], ['s_collide', 'e_carry'], ['s_fly', 'e_babip'], ['s_field', 'e_dp'], ['s_field', 'e_sb'],
+    ['s_game', 'e_runs'], ['s_game', 'e_extra'], ['s_game', 'e_pitchers']
+  ];
+
+  var NS = 'http://www.w3.org/2000/svg', svg = document.getElementById('map'), tip = document.getElementById('tip'), fig = document.getElementById('fig');
+  function el(tag, attrs, parent) { var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+  function txt(parent, x, y, s, cls, extra) { var t = el('text', Object.assign({ x: x, y: y, class: cls || '' }, extra || {}), parent); t.textContent = s; return t; }
+  function cvar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  // layout
+  var TOP = 74, NODE_H = 42, GAP = 6, GROUP_GAP = 26, pos = {}, info = {}, colY = [TOP, TOP, TOP, TOP];
+  var layer = { edges: el('g', {}, svg), spine: el('g', {}, svg), nodes: el('g', {}, svg) };
+  COLS.forEach(function (c) { txt(svg, c.x, 30, c.title, 't-col'); txt(svg, c.x, 50, c.sub, 't-colsub', { 'font-size': 12.5 }); });
+  N.forEach(function (n) {
+    var c = COLS[n[1]];
+    if (n[2]) { colY[n[1]] += (colY[n[1]] > TOP ? GROUP_GAP - GAP : 4); txt(layer.nodes, c.x, colY[n[1]] - 6, n[2], 't-group'); colY[n[1]] += 6; }
+    pos[n[0]] = { x: c.x, y: colY[n[1]], w: c.w, h: NODE_H, col: n[1] };
+    info[n[0]] = { label: n[3], sub: n[4], cls: n[5], desc: n[6], kind: n[1] === 3 ? 'stat' : 'trait' };
+    colY[n[1]] += NODE_H + GAP;
+  });
+  var CH = 22, SH = 40, sy = TOP + 4, sc = COLS[2], chipW = (sc.w - 24 - 8) / 2;
+  S.forEach(function (s, i) {
+    var rows = Math.ceil(s[3].length / 2), h = SH + rows * CH + 8;
+    pos[s[0]] = { x: sc.x, y: sy, w: sc.w, h: h, col: 2 };
+    info[s[0]] = { label: s[1], sub: s[2], cls: null, desc: null, kind: 'stage', chips: s[3] };
+    sy += h + 18;
+  });
+  var H = Math.max.apply(null, colY.concat([sy])) + 10;
+  svg.setAttribute('viewBox', '0 0 1400 ' + H);
+
+  // edges
+  var adjOut = {}, adjIn = {}, edgeEls = [];
+  function anchorOut(id) { var p = pos[id]; return [p.x + p.w, p.col === 2 ? p.y + 20 : p.y + p.h / 2]; }
+  function anchorIn(id) { var p = pos[id]; return [p.x, p.col === 2 ? p.y + 20 : p.y + p.h / 2]; }
+  E.forEach(function (e) {
+    var a = pos[e[0]], b = pos[e[1]], d;
+    if (a.col === b.col) {   // within a column: an arc on its left
+      var y1 = a.y + a.h / 2, y2 = b.y + b.h / 2, x = a.x, bow = Math.min(14, 6 + Math.abs(y2 - y1) / 18);
+      d = 'M' + x + ' ' + y1 + ' C' + (x - bow) + ' ' + y1 + ' ' + (x - bow) + ' ' + y2 + ' ' + x + ' ' + y2;
+    } else {
+      var s0 = anchorOut(e[0]), t0 = anchorIn(e[1]), mx = (s0[0] + t0[0]) / 2;
+      d = 'M' + s0[0] + ' ' + s0[1] + ' C' + mx + ' ' + s0[1] + ' ' + mx + ' ' + t0[1] + ' ' + t0[0] + ' ' + t0[1];
+    }
+    var p = el('path', { d: d, class: 'edge' }, layer.edges);
+    edgeEls.push({ from: e[0], to: e[1], el: p });
+    (adjOut[e[0]] = adjOut[e[0]] || []).push(e[1]); (adjIn[e[1]] = adjIn[e[1]] || []).push(e[0]);
+  });
+  // the stage spine: the order a pitch runs in
+  var spineEls = [];
+  for (var i = 0; i < S.length - 1; i++) {
+    var a = pos[S[i][0]], b = pos[S[i + 1][0]], xm = a.x + 26;
+    spineEls.push(el('path', { d: 'M' + xm + ' ' + (a.y + a.h) + ' L' + xm + ' ' + (b.y - 4), class: 'spine' }, layer.spine));
+    spineEls.push(el('path', { d: 'M' + (xm - 4) + ' ' + (b.y - 7) + ' L' + xm + ' ' + (b.y - 1) + ' L' + (xm + 4) + ' ' + (b.y - 7) + ' Z', class: 'arrow' }, layer.spine));
+  }
+
+  // nodes
+  var nodeEls = {}, chipEls = [], counts = { O: 0, H: 0, F: 0, M: 0, P: 0, D: 0 }, ledger = [];
+  function badge(g, x, y, cls) {
+    el('circle', { cx: x, cy: y, r: 8, fill: 'var(' + CLS[cls].color + ')' }, g);
+    txt(g, x, y + 3.6, cls, 'mono', { 'font-size': 9.5, 'text-anchor': 'middle', fill: '#fff', style: 'fill:#fff' });
+  }
+  function fitMark(g, x, y, st) {
+    if (st === 'match') el('circle', { cx: x, cy: y, r: 5.5, fill: 'var(--ink)' }, g);
+    else { el('circle', { cx: x, cy: y, r: 5.5, fill: 'none', stroke: 'var(--ink)', 'stroke-width': 1.5 }, g);
+      if (st === 'near') el('path', { d: 'M' + x + ' ' + (y - 5.5) + ' A5.5 5.5 0 0 1 ' + x + ' ' + (y + 5.5) + ' Z', fill: 'var(--ink)' }, g); }
+  }
+  Object.keys(pos).forEach(function (id) {
+    var p = pos[id], f = info[id], g = el('g', { class: 'node', tabindex: 0, 'data-id': id, role: 'button', 'aria-label': f.label }, layer.nodes);
+    nodeEls[id] = g;
+    if (f.kind === 'stage') {
+      el('rect', { x: p.x, y: p.y, width: p.w, height: p.h, rx: 7, class: 'stage' }, g);
+      txt(g, p.x + 12, p.y + 19, f.label, '', { 'font-size': 15, 'font-weight': 600 });
+      txt(g, p.x + 12 + f.label.length * 8.6 + 8, p.y + 19, f.sub, 't-sub', { 'font-size': 12.5 });
+      f.chips.forEach(function (c, k) {
+        var cx = p.x + 12 + (k % 2) * (chipW + 8), cy = p.y + SH + Math.floor(k / 2) * CH;
+        var cg = el('g', { class: 'chipg', 'data-stage': id, 'data-cls': c[2] }, g);
+        el('rect', { x: cx, y: cy - 2, width: chipW, height: CH - 4, rx: 4, class: 'chip' }, cg);
+        badge(cg, cx + 10, cy + 7, c[2]);
+        var mono = /^[A-Z_]+[ ,]|^[A-Z_]+$|^ivbSD/.test(c[0]);
+        var t = txt(cg, cx + 23, cy + 11, '', mono ? 'mono' : '', { 'font-size': mono ? 10.5 : 11.5 });
+        var t1 = el('tspan', { 'font-weight': 500 }, t); t1.textContent = c[0];
+        var t2 = el('tspan', { class: 't-sub', dx: 5, style: 'font-family:var(--f-label);font-size:11px' }, t); t2.textContent = c[1];
+        chipEls.push({ el: cg, cls: c[2], stage: id, data: c });
+        counts[c[2]]++;
+        ledger.push({ cls: c[2], name: c[0], where: f.label + ' stage', value: c[1], basis: c[3] });
+      });
+    } else {
+      el('rect', { x: p.x, y: p.y, width: p.w, height: p.h, rx: 5, class: 'box' }, g);
+      if (f.kind === 'stat') { fitMark(g, p.x + 14, p.y + p.h / 2, f.cls); }
+      else { badge(g, p.x + 14, p.y + p.h / 2, f.cls); counts[f.cls]++;
+        if (f.cls !== 'D') ledger.push({ cls: f.cls, name: f.label, where: (p.col === 0 ? 'distal' : 'proximate') + ' trait', value: f.sub, basis: f.desc }); }
+      txt(g, p.x + 29, p.y + 17, f.label, '', { 'font-size': 13.5, 'font-weight': 600 });
+      txt(g, p.x + 29, p.y + 33, f.sub, 't-sub', { 'font-size': 11.5 });
+    }
+  });
+
+  // legend
+  var legend = document.getElementById('legend'), filter = null;
+  ORDER.forEach(function (k) {
+    var b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-pressed', 'false'); b.id = 'cls-' + k;
+    b.innerHTML = '<span class="badge" style="background:var(' + CLS[k].color + ')">' + k + '</span><span><b>' + CLS[k].name + '</b> <span class="n">' + counts[k] + '</span><br><span class="muted" style="font-size:12.5px">' + CLS[k].text + '</span></span>';
+    b.addEventListener('click', function () { filter = filter === k ? null : k; pinned = null; apply(); });
+    legend.appendChild(b);
+  });
+
+  // ledger table, the tuned and hand-set first
+  var tb = document.querySelector('#ledger tbody');
+  ORDER.filter(function (k) { return k !== 'D'; }).forEach(function (k) {
+    var rows = ledger.filter(function (r) { return r.cls === k; });
+    var tr = document.createElement('tr'); tr.className = 'cls';
+    tr.innerHTML = '<td colspan="4"><span class="badge" style="background:var(' + CLS[k].color + ');margin-right:8px;vertical-align:-5px">' + k + '</span>' + CLS[k].name + ' · ' + rows.length + '</td>';
+    tb.appendChild(tr);
+    rows.forEach(function (r) {
+      var t = document.createElement('tr');
+      [['', r.name], ['', r.where], ['v', r.value], ['basis', r.basis]].forEach(function (c) { var td = document.createElement('td'); if (c[0]) td.className = c[0]; td.textContent = c[1]; t.appendChild(td); });
+      tb.appendChild(t);
+    });
+  });
+
+  // tracing
+  var pinned = null;
+  function reach(id, adj, out) { (adj[id] || []).forEach(function (n) { if (!out[n]) { out[n] = true; reach(n, adj, out); } }); return out; }
+  function clear() {
+    svg.classList.remove('focus');
+    Object.keys(nodeEls).forEach(function (k) { nodeEls[k].classList.remove('on', 'pinned'); });
+    chipEls.forEach(function (c) { c.el.classList.remove('on'); });
+    edgeEls.forEach(function (e) { e.el.classList.remove('on'); });
+    spineEls.forEach(function (e) { e.classList.remove('on'); });
+  }
+  function trace(id) {
+    clear();
+    var set = {}; set[id] = true;
+    var up = reach(id, adjIn, {}), down = reach(id, adjOut, {});
+    Object.keys(up).forEach(function (k) { set[k] = true; }); Object.keys(down).forEach(function (k) { set[k] = true; });
+    svg.classList.add('focus');
+    Object.keys(set).forEach(function (k) { nodeEls[k].classList.add('on'); });
+    chipEls.forEach(function (c) { if (set[c.stage]) c.el.classList.add('on'); });
+    edgeEls.forEach(function (e) {   // edges on a path into this box, or out of it
+      if ((up[e.from] && (e.to === id || up[e.to])) || ((e.from === id || down[e.from]) && down[e.to])) e.el.classList.add('on');
+    });
+  }
+  function apply() {
+    document.querySelectorAll('.legend button').forEach(function (b) { b.setAttribute('aria-pressed', b.id === 'cls-' + filter ? 'true' : 'false'); });
+    if (pinned) { trace(pinned); nodeEls[pinned].classList.add('pinned'); return; }
+    clear();
+    if (!filter) return;
+    svg.classList.add('focus');
+    Object.keys(nodeEls).forEach(function (k) { if (info[k].cls === filter) nodeEls[k].classList.add('on'); });
+    chipEls.forEach(function (c) { if (c.cls === filter) { c.el.classList.add('on'); nodeEls[c.stage].classList.add('on'); } });
+  }
+
+  function showTip(evt, html) {
+    tip.innerHTML = html; tip.hidden = false;
+    var r = fig.getBoundingClientRect(), x = evt.clientX - r.left + fig.scrollLeft + 14, y = evt.clientY - r.top + 14;
+    var maxX = fig.scrollLeft + fig.clientWidth - tip.offsetWidth - 8;
+    tip.style.left = Math.max(fig.scrollLeft + 8, Math.min(x, maxX)) + 'px';
+    tip.style.top = Math.min(y, fig.clientHeight - tip.offsetHeight - 8) + 'px';
+  }
+  function hideTip() { tip.hidden = true; }
+  var FIT = { match: 'close to the league', near: 'right direction, not there yet', off: 'clearly off' };
+  function nodeTip(id) {
+    var f = info[id];
+    if (f.kind === 'stage') return '<b>' + f.label + '</b><span class="k">stage · ' + f.chips.length + ' constants</span>' + f.sub + '. Hover a constant for its basis.';
+    if (f.kind === 'stat') return '<b>' + f.label + '</b><span class="k">' + FIT[f.cls] + '</span>' + f.sub + '. ' + f.desc;
+    return '<b>' + f.label + '</b><span class="k">' + CLS[f.cls].name + ' · ' + f.sub + '</span>' + f.desc;
+  }
+  Object.keys(nodeEls).forEach(function (id) {
+    var g = nodeEls[id];
+    g.addEventListener('pointerenter', function (e) { if (!pinned && !filter) trace(id); showTip(e, nodeTip(id)); });
+    g.addEventListener('pointermove', function (e) { if (!tip.hidden && e.target.closest('.chipg') === null) showTip(e, nodeTip(id)); });
+    g.addEventListener('pointerleave', function () { hideTip(); if (!pinned) { apply(); } });
+    g.addEventListener('click', function (e) { if (e.target.closest('.chipg')) return; filter = null; pinned = pinned === id ? null : id; apply(); showTip(e, nodeTip(id)); });
+    g.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); filter = null; pinned = pinned === id ? null : id; apply(); } });
+  });
+  chipEls.forEach(function (c) {
+    var html = '<b>' + c.data[0] + '</b><span class="k">' + CLS[c.cls].name + ' · ' + info[c.stage].label + ' · ' + c.data[1] + '</span>' + c.data[3];
+    c.el.addEventListener('pointerenter', function (e) { showTip(e, html); });
+    c.el.addEventListener('pointermove', function (e) { showTip(e, html); });
+    c.el.addEventListener('pointerleave', function () { tip.hidden = true; });
+    c.el.addEventListener('click', function (e) { showTip(e, html); });
+  });
+  fig.addEventListener('scroll', hideTip);
+})();
+</script>
