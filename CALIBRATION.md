@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v2.5 · 2026-10-03`
+`CALIBRATION.md · v2.6 · 2026-10-03`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -808,6 +808,15 @@ Joe asked for intentional walks, pickoffs, defensive substitutions and double sw
 - **The league line held** (three seeds × 200 games against the same runs on main): runs 3.73-3.87 against 3.80-4.03, BB% 8.0-8.9 against 8.2-8.6 (it now counts intentional walks), K% and HR% within noise.
 - **Not modelled:** the first baseman holding a runner on at the bag (the fielding layer plays him at his usual depth, so a pickoff shows him hurrying over); pinch-runners; balks (.025-.037 a team-game).
 - The plays now record the outs and bases a batter came up to; a steal or a pickoff during his at-bat had leaked into them, so a caught stealing in an at-bat changed the outs his introduction gave.
+
+## Athleticism (engine v2.6, 2026-10-03)
+
+Joe: "a deeper trait upon which power, strength and speed depend." Each position player now has an athleticism, one standard normal drawn before anything else about him. His swing power per kg, his arm strength and his sprint speed are each drawn as their own normal loaded on it, so each keeps its own spread; sprint speed also falls with body mass. Pitchers' fielding is drawn as before.
+
+- **The league's correlations** (2025, qualified hitters; power/kg is Savant's proxy, bat speed cubed over swing length per kg): power/kg ~ sprint +.462 (n 226), power/kg ~ arm +.292 (199), sprint ~ arm +.366 (395), weight ~ sprint −.373 (579). A single shared trait fits all three pairs at once: the loadings the league's numbers imply are .60, .77 and .48.
+- **Fitting them among the picks** (`tools/fit_population.js` v0.5) needed two things the pure one-factor sum leaves out. First, the league's arm strength comes from infielders' and outfielders' throws, so the pairs with arm are taken over picks who are neither catchers nor DHs. Second, much of sprint ~ arm comes from positions (catchers, first basemen and DHs slow with weak arms; centre fielders and shortstops fast with strong ones), and the power proxy carries the bat's mass and the weight exponent; each round holds what a pair has beyond the shared trait as measured and asks the shared trait for the rest. The first try, which treated the picks' correlations as one factor, drove the power loading to its cap and left the picks at .35 / .20 / .41.
+- **Result:** loadings 0.95 (swing power), 0.50 (sprint), 0.41 (arm), and −0.39 sd of sprint per 20 lb. Among the picks: power/kg ~ sprint .46, power/kg ~ arm .26-.30, sprint ~ arm .36-.39, weight ~ sprint −.36. The test, not fitted: bat speed ~ sprint +.04 (league +.09) and bat speed ~ arm +.18 (+.18). So nearly all of a hitter's power per kg is his athleticism; the proxy's other parts (his bat, his weight) carry the rest of its scatter.
+- **The league line held** (seeds 3, 11, 29 × 200 games against engine v2.5): runs 3.66-3.95 against 3.73-3.87, BABIP .260-.264 against .256-.259, HR% 3.1-3.6 against 3.0-3.3, K% and BB% unchanged.
 
 ## What was learned building the fielding layer
 
