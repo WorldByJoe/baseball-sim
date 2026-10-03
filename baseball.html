@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v2.6 · 2026-10-02
+  baseball.html · v2.6 · 2026-10-03
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
@@ -48,7 +48,8 @@
     v2.6  the broadcast: two announcers, the public-address announcer, the crowd, the
           field and the organ, written ahead for the whole game and played on its
           clock; v and c mute the voices and the park; silent without them. The game
-          and its schedule come from bb_schedule.js; a 30 s seventh-inning stretch
+          and its schedule come from bb_schedule.js; a 30 s seventh-inning stretch;
+          the batter's card shows his uniform number (Joe)
     v2.5  engine v1.1 (the adjusted swing)
     v2.4  engine v1.0 (perception and pitch variety): the drawn pitch and the
           pitcher's card carry his seam break; the drawn ghost is his picture of it
@@ -1337,7 +1338,9 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   function drawBatter(play) {
     if (!play) { setHTML(EL.bcard, ''); return; }
     var b = play.batter, h = [], hIn = Math.round(b.heightIn), s = projBatter(b), order = G.teams[play.half].lineup.indexOf(b);
-    h.push('<div><span class="sw" style="background:' + G.teams[play.half].col + '"></span><span class="name">' + esc(b.name) + '</span>&nbsp;&nbsp;<span class="key">' + b.pos + ' · ' + b.bats + ' · ' + Math.floor(hIn / 12) + "'" + (hIn % 12) + '"' + (b.weightLb ? ' · ' + f0(b.weightLb) + ' lb' : '') + (order >= 0 ? ' · #' + (order + 1) : ' · pinch') + '</span></div>');
+    // his uniform number in his side's colour, like the back of a jersey (0-99, or e, π, i), where the colour dot was; his place in the order as '1st'
+    var num = GAME.NUMBER && GAME.NUMBER[b.id] !== undefined ? '<span class="name" style="font-style:normal;color:' + G.teams[play.half].col + '">' + esc(GAME.NUMBER[b.id]) + '</span>&nbsp;&nbsp;' : '<span class="sw" style="background:' + G.teams[play.half].col + '"></span>';
+    h.push('<div>' + num + '<span class="name">' + esc(b.name) + '</span>&nbsp;&nbsp;<span class="key">' + b.pos + ' · ' + b.bats + ' · ' + Math.floor(hIn / 12) + "'" + (hIn % 12) + '"' + (b.weightLb ? ' · ' + f0(b.weightLb) + ' lb' : '') + (order >= 0 ? ' · ' + ORD[order + 1] : ' · pinch') + '</span></div>');
     h.push('<div style="display:flex;gap:calc(30*var(--wu));margin-top:calc(10*var(--wu))"><table>');
     h.push(traitRow('bat speed', b.batSpeed, 'mph', 'batSpeed'));
     h.push(traitRow('recognition', b.spotIn, 'in', 'spotIn', true));
