@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v1.6 · 2026-10-02
+   bb_engine.js · v1.7 · 2026-10-03
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -60,6 +60,9 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v1.7  pitching around: against a hitter with more bat speed than the league's the
+           pitcher works farther from the middle of the zone (fitted to the league's
+           zone rate against bat speed)
      v1.6  the pitcher's chain: height and arm slot build his release point, his slot turns
            his pitches' movement and spin efficiency, spin follows speed and a spin talent,
            his repertoire is a league pitcher's of similar slot and role (the hand-set
@@ -74,9 +77,6 @@
      v1.3  fooled-swing contact: a batter fooled at the commit point reads the ball's
            direction across and up and down, so only the curve still to come fools
            him there (its speed toward him still does); swing thresholds refitted
-     v1.2  the swing policy: thresholds per count and read (the pitch he sat on, or one
-           he recognised as something else), fitted to the league's swing curves by
-           count; he decides on what he could see at the commit point
 ============================================================================ */
 
 var BB = (function () {
@@ -899,13 +899,23 @@ var BB = (function () {
   // His target [x, z] in metres for pitch `pt`, and the centre and spread it is
   // drawn from. Positions in PLAN_LOC are inches toward his arm side and shares
   // of the batter's zone height.
+  // PITCHING AROUND (v1.7): against a dangerous hitter he aims a little farther
+  // from the middle of the zone, against a weak one a little nearer: every
+  // target's distance from the zone's centre is scaled by 1 + AROUND per mph of
+  // the hitter's bat speed above the league's average (71.2 mph: hitters' mean
+  // over all their tracked swings, those seeing 400+ pitches, pitch-level 2025;
+  // scouting knows it). AROUND was fitted so the zone rate falls with bat speed
+  // as the league's did: 0.0038 per mph, r -.34 (see CALIBRATION v1.7).
+  var AROUND = 0.021, BAT_REF = 71.2;
   function targetFor(P, B, sb, pt, st, rng) {
     var side = sideKey(P, sb), c = st.balls + '-' + st.strikes, k = PITCH_TYPES[pt.type].kind;
     var a = PLAN_LOC.aim[pt.type][side], sh = PLAN_LOC.shift[k][side][c], sp = PLAN_LOC.spread[k][c], h = B.zone.top - B.zone.bot;
     var mx = a[0] + sh[0] + pt.habit[0], mz = a[1] + sh[1] + pt.habit[1];
     var xa = mx + rng.n(0, sp[0]), zf = mz + rng.n(0, sp[1]);
+    var g = B.isPitcher ? 1 : Math.max(0.5, 1 + AROUND * (B.batSpeed - BAT_REF));   // how far out from the middle he works this hitter
+    xa *= g; zf = 0.5 + (zf - 0.5) * g; mx *= g; mz = 0.5 + (mz - 0.5) * g;
     return { target: [P.armSide * xa * IN, B.zone.bot + zf * h],
-             centre: [P.armSide * mx * IN, B.zone.bot + mz * h], spread: [sp[0] * IN, sp[1] * h] };
+             centre: [P.armSide * mx * IN, B.zone.bot + mz * h], spread: [sp[0] * IN * g, sp[1] * h * g] };
   }
 
   // The intent, named from where he aims (for the screen; nothing downstream
@@ -1409,7 +1419,7 @@ var BB = (function () {
   }
 
   return {
-    version: '1.6',
+    version: '1.7',
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
     PITCH_TYPES: PITCH_TYPES, REPERTOIRES: REPERTOIRES, TRAITS: TRAITS, AERO: AERO,

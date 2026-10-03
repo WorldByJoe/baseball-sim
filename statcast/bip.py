@@ -19,7 +19,7 @@ for headless/bip_check.js.
   python3 statcast/bip.py 2025-05-05:2025-09-21
 
 CHANGED
-  v0.1  first build (the fielding layer's targets, and carry by exit velocity and launch angle)
+  v0.1  first build (the fielding layer's targets, carry, and Statcast's expected wOBA by exit velocity and launch angle)
 """
 import json, math, os, sys, collections
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -68,7 +68,7 @@ def main(spec):
             spray = math.degrees(math.atan2(hx - 125.42, 198.27 - hy))     # + toward right field
             if r.get('stand') == 'R':
                 spray = -spray                                             # + toward his pull side
-        B.append({'ev': ev, 'la': la, 'spray': spray, 'dist': d, 'hit': HITS.get(r.get('events'), None)})
+        B.append({'ev': ev, 'la': la, 'spray': spray, 'dist': d, 'hit': HITS.get(r.get('events'), None), 'xw': fl(r.get('estimated_woba_using_speedangle'))})
         days.add(r.get('game_date'))
     J = {'n': len(B), 'ev_edges': EV_E, 'la_edges': LA_E, 'dist_edges': DIST_E, 'spray_edges': SPRAY_E, 'gb_ev_edges': GB_EV_E}
     md = ['balls in play %d (%d days), bunts left out' % (len(B), len(days)), '']
@@ -144,6 +144,17 @@ def main(spec):
     md.append('%10s ' % 'EV \\ LA' + ' '.join('%11s' % l for l in lab(CLA)))
     for i, l in enumerate(lab(CEV)):
         md.append('%10s ' % l + ' '.join('%11s' % ('%.0f (%d)' % (sum(c) / len(c), len(c)) if len(c) >= 10 else '') for c in carry[i]))
+    md.append('')
+    # 6. Statcast's expected wOBA on contact by exit velocity and launch angle (estimated_woba_using_speedangle), for valuing the model's hitters
+    XE, XL = list(range(40, 122, 4)), list(range(-90, 92, 4))
+    xg = [[[0.0, 0] for _ in XL[1:]] for _ in XE[1:]]
+    for b in B:
+        i, j = band(b['ev'], XE), band(b['la'], XL)
+        if i is not None and j is not None and b['xw'] is not None:
+            xg[i][j][0] += b['xw']; xg[i][j][1] += 1
+    J['xwoba'] = {'ev_edges': XE, 'la_edges': XL, 'grid': [[round(c[0] / c[1], 3) if c[1] >= 5 else None for c in row] for row in xg],
+                  'mean': sum(b['xw'] for b in B if b['xw'] is not None) / max(1, sum(1 for b in B if b['xw'] is not None))}
+    md.append('6. Expected wOBA on contact (Statcast) by 4 mph x 4 deg, written to the .js for tools/hitter_value.js; mean on contact %.3f' % J['xwoba']['mean'])
     md.append('')
     tot = collections.Counter(b['hit'] for b in B)
     J['totals'] = {'n': len(B), '1B': tot['1B'], '2B': tot['2B'], '3B': tot['3B'], 'HR': tot['HR']}
