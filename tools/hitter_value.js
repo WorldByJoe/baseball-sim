@@ -1,5 +1,5 @@
 /* ============================================================================
-   hitter_value.js · v0.2 · 2026-10-03
+   hitter_value.js · v0.3 · 2026-10-03
 
    What makes a hitter valuable in the model, and what selecting the best of
    them does. Draws N hitters (makeBatter), lets each face K plate appearances
@@ -16,6 +16,7 @@
    Run:  jsc bb_engine.js statcast/bip_2025.js tools/hitter_value.js -- [N] [K] [Q] [seed]
 
    CHANGED
+     v0.3  familiarity as in games: 40 x u x u pitches of this pitcher seen at the start of each PA (games: median 9 at a swing, mean 12.6; was uniform to 60-80)
      v0.2  draws from the population (BB.drawBatter) when the engine has one; the
            regression uses bat speed rather than its ingredients, and prints the
            HITTER_VALUE literal (the scouts' estimate) for bb_engine.js
@@ -33,7 +34,7 @@
     var B = draw(rng, {}), pa = 0, w = 0, k = 0, bb = 0, sw = 0, wh = 0, con = 0, sq = 0, evs = [];
     for (var j = 0; j < K; j++) {
       var Pi = P[(i * 7 + j) % P.length]; Pi.load = rng.u() * 0.7 * Pi.stamina;
-      var res = BB.simPA(Pi, B, { env: env, ump: ump, framing: 0, seen: rng.u() * 60, rec: false }, rng);
+      var res = BB.simPA(Pi, B, { env: env, ump: ump, framing: 0, seen: 40 * rng.u() * rng.u(), rec: false }, rng);
       if (res.result === 'END') continue;
       pa++;
       if (res.result === 'K') k++; else if (res.result === 'BB') { bb++; w += 0.69; } else if (res.result === 'HBP') w += 0.72;

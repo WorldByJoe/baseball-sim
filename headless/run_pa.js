@@ -1,5 +1,5 @@
 /* ============================================================================
-   run_pa.js · v0.4 · 2026-09-29
+   run_pa.js · v0.5 · 2026-10-03
 
    Headless calibration harness for the plate-appearance layer. Draws a
    league (pitchers, hitters, umpires, catchers) from the TRAITS
@@ -18,6 +18,7 @@
    MLB targets: 2024 league (FanGraphs / Baseball Savant).
 
    CHANGED
+     v0.5  familiarity as in games: 40 x u x u pitches of this pitcher seen at the start of each PA (games: median 9 at a swing, mean 12.6; was uniform to 60-80)
      v0.4  command-line N and SEED actually read (inside the wrapper, `arguments` was its own, empty)
      v0.3  parks and weather drawn from MLB's mix; home-run distance, speed, angle
      v0.2  whiff rate and exit velocity by pitch type
@@ -43,7 +44,7 @@
     var B = bat[Math.floor(rng.u() * bat.length)];
     P.load = rng.u() * P.stamina * 1.05;
     var r = BB.simPA(P, B, { env: BB.mlbEnv(rng), ump: ump[Math.floor(rng.u() * ump.length)],
-                             framing: rng.n(0, 0.35), seen: rng.u() * 80 }, rng);
+                             framing: rng.n(0, 0.35), seen: 40 * rng.u() * rng.u() }, rng);
     npa++; pa[r.result]++;
     r.pitches.forEach(function (p, k) {
       npit++; res[p.result]++;

@@ -1,5 +1,5 @@
 /* ============================================================================
-   pitcher_value.js · v0.1 · 2026-10-03
+   pitcher_value.js · v0.2 · 2026-10-03
 
    What makes a pitcher valuable in the model: draws N pitchers from the
    population (BB.drawPitcher), half starters and half relievers, lets each
@@ -14,6 +14,7 @@
    Run:  jsc bb_engine.js statcast/bip_2025.js tools/pitcher_value.js -- [N] [K] [seed]
 
    CHANGED
+     v0.2  familiarity as in games: 40 x u x u pitches of this pitcher seen at the start of each PA (games: median 9 at a swing, mean 12.6; was uniform to 60-80)
      v0.1  first build (bb_engine v1.8)
 ============================================================================ */
 (function (A) {
@@ -27,7 +28,7 @@
     var P = BB.drawPitcher(rng, { role: i % 2 ? 'RP' : 'SP' }), pa = 0, w = 0, k = 0, bb = 0;
     for (var j = 0; j < K; j++) {
       P.load = rng.u() * 0.7 * P.stamina;
-      var res = BB.simPA(P, B[(i * 13 + j) % B.length], { env: env, ump: ump, framing: 0, seen: rng.u() * 40, rec: false }, rng);
+      var res = BB.simPA(P, B[(i * 13 + j) % B.length], { env: env, ump: ump, framing: 0, seen: 40 * rng.u() * rng.u(), rec: false }, rng);
       if (res.result === 'END') continue;
       pa++;
       if (res.result === 'K') k++; else if (res.result === 'BB') { bb++; w += 0.69; } else if (res.result === 'HBP') w += 0.72; else if (res.bb) w += xw(res.bb);

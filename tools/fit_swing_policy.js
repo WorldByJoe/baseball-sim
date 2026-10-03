@@ -1,5 +1,5 @@
 /* ============================================================================
-   fit_swing_policy.js · v0.1 · 2026-10-02
+   fit_swing_policy.js · v0.2 · 2026-10-03
 
    Fits bb_engine.js's SWING_THR, the batter's swing threshold for each count
    and read ([on, off]: the pitch he sat on or has not told apart from it, and
@@ -22,6 +22,7 @@
    Run:  jsc bb_engine.js bb_names.js bb_field.js bb_game.js statcast/discipline_2025.js tools/fit_swing_policy.js -- [hitters] [PA each] [seed]
 
    CHANGED
+     v0.2  familiarity as in games: 40 x u x u pitches of this pitcher seen at the start of each PA (games: median 9 at a swing, mean 12.6; was uniform to 60-80)
      v0.1  first build (bb_engine v1.2)
 ============================================================================ */
 (function (A) {
@@ -39,7 +40,7 @@
     var B = BB.makeBatter(rng, {});
     for (var k = 0; k < NPA; k++) {
       var Pi = P[(i * NPA + k) % P.length]; Pi.load = rng.u() * Pi.stamina;
-      BB.simPA(Pi, B, { env: env, ump: ump, framing: 0, seen: rng.u() * 80, rec: false }, rng).pitches.forEach(function (q) {
+      BB.simPA(Pi, B, { env: env, ump: ump, framing: 0, seen: 40 * rng.u() * rng.u(), rec: false }, rng).pitches.forEach(function (q) {
         if (!q.decide) return;
         var c = rec[q.count] = rec[q.count] || [[], []], b = binOf(edgeIn(B, q.pitch.plate.x, q.pitch.plate.z));
         c[q.decide.state === 'on' ? 0 : 1].push([b, q.decide.pin + B.aggr, BB.PITCH_TYPES[q.pitch.type].kind]);   // he swings when pin + aggr > threshold
