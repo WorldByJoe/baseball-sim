@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v1.4 · 2026-10-02
+   bb_engine.js · v1.5 · 2026-10-02
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -59,6 +59,9 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v1.5  for the fielding layer (bb_field v0.7): fielders take their first step in 0.45 s
+           (Statcast's outfield jump), and the batted-ball drag is refitted to how far the
+           league's balls carried by exit velocity and launch angle
      v1.4  the pitcher's plan, measured: command is two traits (across, up and down)
            read from 3-0 four-seamers, about twice the old hand-set value; aim points,
            count shifts, habits, kind by count and repeats from the league's locations;
@@ -72,11 +75,6 @@
      v1.1  the adjusted swing: closing the gap between the arrival he planned and the
            real one costs bat speed, so the pitch he sat on gets his full swing; effort
            by count; his bat speed trait stays his average over his swings
-     v1.0  perception: a recognised pitch is judged partly from what that kind of pitch
-           usually does (the prior's pull: timing toward the expected pitch, location
-           toward the type's usual shape); the expected pitch type cannot fool him;
-           pitches vary as the league's do (spin spreads, a seam force, pitch-to-pitch
-           scatter inside the command trait)
 ============================================================================ */
 
 var BB = (function () {
@@ -333,15 +331,20 @@ var BB = (function () {
   // gyro spin along the flight path bends nothing.
   function cdOf(spinRpm) { return 0.3008 + 0.0292 * spinRpm / 1000; }
   function clOf(S) { return 1.12 * S / (0.583 + 2.333 * S); }
-  // Batted-ball drag multiplier, FITTED: with it, a 103.5 mph drive at 28
-  // degrees (with the backspin this model's collision gives it, ~2900 rpm)
-  // carries ~400 ft AVERAGED OVER MLB'S PARKS AND WEATHER (mlbEnv) -
-  // Statcast's average home run, 2023-25. That mix is 2.6% thinner air than
-  // sea level at 70 F, worth +5 ft league-wide and +32 ft at Coors, so a fit
-  // at standard air (1.115) under-corrected. Unscaled, the model carried the
-  // ball 429 ft. Pitches keep the unscaled drag: their speed loss and
-  // movement already matched Savant (physics_check.js).
-  var AERO = { batCd: 1.142 };
+  // Batted-ball drag multiplier, FITTED to how far the league's balls in the
+  // air carried by exit velocity and launch angle (statcast/bip.py table 5,
+  // 42 days of 2025; headless/bip_check.js plays whole games, so MLB's parks
+  // and weather are in it): 1.08 brings the model within 6 ft rms over 20-40
+  // deg, with the spin this model's collision actually gives (about 3,200 rpm
+  // in all at 25-30 deg, a third of it sidespin from the dipped barrel). The
+  // old 1.142 had been fitted to one 400-ft drive at a spin the collision no
+  // longer gives, and fly balls at 25-40 deg carried 7-23 ft short. Liners at
+  // 15-20 deg still carry 10-20 ft too far: the spin's shape with launch angle
+  // is not yet right. Pitches keep the unscaled drag: their speed loss and
+  // movement already matched Savant (physics_check.js); against Nathan's
+  // backspin table for a 103 mph, 27 deg drive the unscaled aerodynamics give
+  // 380-399 ft from 500 to 2,000 rpm (his 368-400).
+  var AERO = { batCd: 1.08 };
 
   function accel(v, w, env, a, cds, sm) {
     var ux = v[0] - env.wind[0], uy = v[1] - env.wind[1], uz = v[2] - env.wind[2];
@@ -589,7 +592,7 @@ var BB = (function () {
     framing:   [0, 0.35, -0.8, 0.8],  // in: how much he widens the edges
     // fielding and running (Statcast-shaped; position means in FIELD_MEANS)
     speed:     [27.0, 1.2, 22, 31],   // ft/s sprint speed
-    react:     [0.70, 0.10, 0.35, 1.10],   // s: his jump - reading the ball and taking the first step
+    react:     [0.45, 0.06, 0.25, 0.70],   // s: reading the ball and taking the first step; with bb_field's acceleration, Statcast's outfield jump (33.9 +- 1.9 ft)
     route:     [0.90, 0.04, 0.75, 1.0],    // straight-line share of the path he actually runs
     glove:     [0.982, 0.008, 0.94, 0.999],// clean-play rate on a routine chance
     armMph:    [85, 3.5, 70, 100],    // throw speed
@@ -603,13 +606,14 @@ var BB = (function () {
     block:     [0.75, 0.10, 0.4, 0.98]     // share of balls in the dirt a catcher keeps in front of him
   };
   // Where a position sits relative to the league on speed, arm and first step.
-  // Infielders read a ball off the bat a quarter-second sooner than an
-  // outfielder judging a fly: it is close, low and on them at once.
+  // Outfielders and infielders take their first step alike (Statcast's
+  // outfield jump says outfielders are quick to read a fly); the catcher
+  // rises from his crouch and the pitcher finishes his delivery first.
   var FIELD_MEANS = {
-    C:  { speed: -1.5, armMph: -5, react: -0.15, transfer: 0.02 }, '1B': { speed: -1.0, armMph: -5, react: -0.25 },
-    '2B': { speed: 0.3, armMph: -3, react: -0.25 }, SS: { speed: 0.8, armMph: 1, react: -0.25 }, '3B': { speed: -0.2, armMph: 1, react: -0.25 },
+    C:  { speed: -1.5, armMph: -5, react: 0.10, transfer: 0.02 }, '1B': { speed: -1.0, armMph: -5 },
+    '2B': { speed: 0.3, armMph: -3 }, SS: { speed: 0.8, armMph: 1 }, '3B': { speed: -0.2, armMph: 1 },
     LF: { speed: 0.2, armMph: 1 }, CF: { speed: 1.3, armMph: 2 }, RF: { speed: 0.2, armMph: 4 },
-    DH: { speed: -0.5, armMph: -3 }, P: { speed: -1.5, armMph: -3, react: -0.1, glove: -0.02 }
+    DH: { speed: -0.5, armMph: -3 }, P: { speed: -1.5, armMph: -3, react: 0.15, glove: -0.02 }
   };
   function drawField(rng, key, pos, T) {
     var t = TRAITS[key], m = FIELD_MEANS[pos] || {}, off = m[key] || 0;
@@ -1303,7 +1307,7 @@ var BB = (function () {
   }
 
   return {
-    version: '1.4',
+    version: '1.5',
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
     PITCH_TYPES: PITCH_TYPES, ARCH: ARCH, TRAITS: TRAITS, AERO: AERO,
