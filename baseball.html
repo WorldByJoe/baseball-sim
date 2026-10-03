@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v3.0 · 2026-10-02
+  baseball.html · v3.1 · 2026-10-03
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
@@ -38,6 +38,7 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v3.1  engine v1.7 (pitching around power hitters)
     v3.0  engine v1.6 (the pitcher's chain): the pitcher's card names his repertoire from
           his league mix
     v2.9  engine v1.5, bb_field v0.7 (the fielding measured): a fielder's first step defaults
@@ -45,7 +46,6 @@
     v2.8  engine v1.4 (the pitcher's plan, measured command): the command circle is an
           ellipse, across and up and down, kept off the key
     v2.7  engine v1.3 (fooled-swing contact)
-    v2.6  engine v1.2 (the swing policy fitted to the league's swing curves)
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -135,7 +135,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   <div id="hud" class="tag"></div>
 </div>
 <!-- version tags so a browser never runs a stale engine against a new page -->
-<script src="bb_engine.js?v=1.6"></script>
+<script src="bb_engine.js?v=1.7"></script>
 <script src="bb_names.js?v=0.1"></script>
 <script src="bb_field.js?v=0.7"></script>
 <script src="bb_game.js?v=0.7"></script>
