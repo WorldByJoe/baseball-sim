@@ -1,5 +1,5 @@
 /* ============================================================================
-   discipline_check.js · v0.1 · 2026-10-02
+   discipline_check.js · v0.2 · 2026-10-03
 
    Measures the model's plate discipline the way statcast/discipline.py
    measures the league's, and prints each table with the league's numbers
@@ -14,6 +14,7 @@
    Run:  jsc bb_engine.js bb_names.js bb_field.js bb_game.js statcast/discipline_2025.js headless/discipline_check.js -- [hitters] [PA each] [seed]
 
    CHANGED
+     v0.2  familiarity as in games: 40 x u x u pitches of this pitcher seen at the start of each PA (games: median 9 at a swing, mean 12.6; was uniform to 60-80)
      v0.1  first build
 ============================================================================ */
 (function (A) {
@@ -30,7 +31,7 @@
     var B = BB.makeBatter(rng, {});
     for (var k = 0; k < NPA; k++) {
       var Pi = P[(i * NPA + k) % P.length]; Pi.load = rng.u() * Pi.stamina;
-      var res = BB.simPA(Pi, B, { env: env, ump: ump, framing: 0, seen: rng.u() * 80, rec: false }, rng);
+      var res = BB.simPA(Pi, B, { env: env, ump: ump, framing: 0, seen: 40 * rng.u() * rng.u(), rec: false }, rng);
       res.pitches.forEach(function (q) {
         if (q.hbp || !q.decide) return;
         var e = edgeIn(B, q.pitch.plate.x, q.pitch.plate.z);

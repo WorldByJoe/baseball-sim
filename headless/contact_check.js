@@ -1,5 +1,5 @@
 /* ============================================================================
-   contact_check.js · v0.2 · 2026-10-02
+   contact_check.js · v0.3 · 2026-10-03
 
    Measures the model's contact the way the league's was measured pitch by
    pitch (STATCAST_TARGETS_2025.md, "What a foul is", and the height tables
@@ -17,6 +17,7 @@
    Run:  jsc ../bb_engine.js ../bb_names.js ../bb_field.js ../bb_game.js contact_check.js -- [hitters] [PA each] [seed]
 
    CHANGED
+     v0.3  familiarity as in games: 40 x u x u pitches of this pitcher seen at the start of each PA (games: median 9 at a swing, mean 12.6; was uniform to 60-80)
      v0.2  the height tables (statcast/fouls.py v0.3, 9-11): height, kind at a height, the
            flat-fastball fifths; whiffs split by read (expected pitch, read, late, fooled); 120 pitchers;
            bat speed by pitch kind at a depth and by count (statcast/swing_geometry.py v0.2 table 7)
@@ -32,7 +33,7 @@
     var B = BB.makeBatter(rng, {});
     for (var k = 0; k < NPA; k++) {
       var Pi = P[(i * NPA + k) % P.length]; Pi.load = rng.u() * Pi.stamina;
-      var res = BB.simPA(Pi, B, { env: env, ump: ump, framing: 0, seen: rng.u() * 80, rec: false }, rng);
+      var res = BB.simPA(Pi, B, { env: env, ump: ump, framing: 0, seen: 40 * rng.u() * rng.u(), rec: false }, rng);
       res.pitches.forEach(function (q) {
         if (!q.swing) return;
         var pz = q.pitch.plate.z, px = q.pitch.plate.x, h = (pz - B.zone.bot) / (B.zone.top - B.zone.bot);

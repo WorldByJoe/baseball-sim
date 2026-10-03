@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-traits_doc.py · v0.7 · 2026-10-03
+traits_doc.py · v0.8 · 2026-10-03
 
 Writes TRAITS.md, the list of every player trait and how the population of
 players is drawn, straight from bb_engine.js: the TRAITS table (mean, spread,
@@ -16,10 +16,10 @@ beyond "normal, clipped to its range" is written in DRAWN below; when the
 engine draws a trait differently, change it here too.
 
 CHANGED
+  v0.8  engine v2.2 (the swing's reach and read refitted)
   v0.7  defence in the farm (engine v2.1)
   v0.6  the pro pool: best of six, the levels, the open question re-answered (engine v2.0)
   v0.5  the farm: the tables are the population; spin talent; a first answer to the open question (engine v1.8)
-  v0.4  the pitcher's body and delivery traits; the repertoire library replaces the archetypes (engine v1.6)
   v0.1  first build
 """
 import os, re, sys

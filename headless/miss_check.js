@@ -1,5 +1,5 @@
 /* ============================================================================
-   miss_check.js · v0.1 · 2026-10-03
+   miss_check.js · v0.2 · 2026-10-03
 
    How far the model's swings miss, measured as Statcast measures miss
    distance: the gap at closest approach between the ball and the barrel half
@@ -12,6 +12,7 @@
    Run:  jsc bb_engine.js statcast/misses_2025.js headless/miss_check.js -- [hitters] [PA each] [seed]
 
    CHANGED
+     v0.2  familiarity as in games: 40 x u x u pitches of this pitcher seen at the start of each PA (games: median 9 at a swing, mean 12.6; was uniform to 60-80)
      v0.1  first build
 ============================================================================ */
 (function (A) {
@@ -29,7 +30,7 @@
     var B = BB.makeBatter(rng, {});
     for (var j = 0; j < NPA; j++) {
       var Pi = P[(i * 7 + j) % P.length]; Pi.load = rng.u() * 0.7 * Pi.stamina;
-      BB.simPA(Pi, B, { env: env, ump: ump, framing: 0, seen: rng.u() * 60, rec: false }, rng).pitches.forEach(function (q) {
+      BB.simPA(Pi, B, { env: env, ump: ump, framing: 0, seen: 40 * rng.u() * rng.u(), rec: false }, rng).pitches.forEach(function (q) {
         if (!q.swing) return;
         var s = q.swing, o;
         if (!s.contact) {
@@ -59,7 +60,7 @@
     print('          league whiff ' + f3(L.whiff) + ' foul ' + f3(L.foul) + ' bip ' + f3(L.bip) + '   miss ' + L.miss_q.map(function (x) { return x.toFixed(1); }).join(' ') + '   shares ' + L.miss_share.map(f3).join(' '));
   }
   print('league squared-up per contact .435 (statcast/fouls.py)');
-  print('miss_check v0.1 · ' + NB + ' hitters x ' + NPA + ' PA · per swing: whiff, foul, in play; whiffs\' miss distance (in) p10 p25 p50 p75 p90; share of swings missing by 0-1, 1-3, 3-6, 6+ in');
+  print('miss_check v0.2 · ' + NB + ' hitters x ' + NPA + ' PA · per swing: whiff, foul, in play; whiffs\' miss distance (in) p10 p25 p50 p75 p90; share of swings missing by 0-1, 1-3, 3-6, 6+ in');
   ['all', 'FB', 'BR', 'OS'].forEach(function (k) { line(k, summ(G[k]), MISSES.by_kind[k]); });
   print('  four-seamers by speed');
   Object.keys(F).forEach(function (k) { line(k, summ(F[k]), MISSES.ff_by_speed[k]); });
