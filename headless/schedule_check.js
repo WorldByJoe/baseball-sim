@@ -1,11 +1,11 @@
 /* ============================================================================
-   schedule_check.js · v0.3 · 2026-10-02
+   schedule_check.js · v0.4 · 2026-10-03
 
    Checks the screen's schedule (bb_schedule.js) headless. For each seed:
    the number of segments and the game's length; that every event id is
    unique; where the seventh-inning stretch falls; and that, the stretch
    taken out, the run of segment kinds and the game's length match what
-   page v2.5 (engine v1.1) laid down before the schedule left it (recorded
+   page v2.6 (engine v1.2) laid down before the schedule left it (recorded
    in headless Chromium for seeds 7, 48 and 59). In Chromium the move was exact to the
    last bit; Node's V8 rounds a few physics results differently in the last
    digits, which once moved a play's length by 0.025 s (seed 59), so the
@@ -22,13 +22,14 @@
      for s in 7 48 59; do jsc bb_engine.js bb_names.js bb_field.js bb_game.js bb_schedule.js headless/schedule_check.js -- $s; done
 
    CHANGED
+     v0.4  the reference is page v2.6 on engine v1.2
      v0.3  the reference is page v2.5 on engine v1.1
      v0.2  the reference is page v2.4 on engine v1.0; only a process's first game is compared
      v0.1  first build
 ============================================================================ */
 (function (argv) {
-  var V21 = {   // page v2.5 (engine v1.1) in Chromium: segments, total seconds, fingerprint of the kinds in order
-    7: [918, 2943.52, 'b5a60009'], 48: [1027, 3202.81, '85e237f5'], 59: [970, 3073.66, 'd5ba0b18'] };
+  var V21 = {   // page v2.6 (engine v1.2) in Chromium: segments, total seconds, fingerprint of the kinds in order
+    7: [974, 3088.00, '0a21b8ca'], 48: [954, 3092.75, 'b62c2a5b'], 59: [939, 3011.71, '4e54cb67'] };
   function fnv(str) { var h = 0x811c9dc5; for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return ('0000000' + h.toString(16)).slice(-8); }
   var seeds = (argv.length ? argv : [7, 48, 59]).map(Number), bad = 0;
   seeds.forEach(function (seed, gi) {
@@ -40,7 +41,7 @@
     var ref = gi === 0 ? V21[seed] : null, tot = S.total - shift;   // only the first game drawn in a process is the page's
     if (ref) {
       var ok = ref[0] === plain.length && Math.abs(ref[1] - tot) < 0.1 && ref[2] === fp;
-      print_ += ' | without it ' + plain.length + ' segments, ' + tot.toFixed(2) + ' s, fingerprint ' + fp + (ok ? ' = v2.5' : ' != v2.5 (' + ref.join(', ') + ')');
+      print_ += ' | without it ' + plain.length + ' segments, ' + tot.toFixed(2) + ' s, fingerprint ' + fp + (ok ? ' = v2.6' : ' != v2.6 (' + ref.join(', ') + ')');
       if (!ok) bad++;
     } else print_ += ' | fingerprint ' + fp + (gi ? ' (drawn after another game: not compared with the page)' : '');
     if (dup) bad++;
