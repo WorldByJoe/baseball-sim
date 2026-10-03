@@ -1,5 +1,5 @@
 /* ============================================================================
-   fit_population.js · v0.2 · 2026-10-03
+   fit_population.js · v0.3 · 2026-10-03
 
    Fits the hitters' POPULATION in bb_engine.js's TRAITS so that the ones the
    farm picks (makeBatter: the best of FARM_N candidates by the scouts'
@@ -33,6 +33,7 @@
    calibrated means among the picks (each net of its position's offset).
 
    CHANGED
+     v0.3  skill targets for engine v2.2 (the swing's reach and read)
      v0.2  picks across positions; the fielding traits (bb_engine v2.1)
      v0.1  first build (bb_engine v1.8)
 ============================================================================ */
@@ -64,9 +65,10 @@
   var SKILLS = ['motorIn', 'timingSD', 'longSD', 'faceSD', 'undercut', 'attack', 'pullBias', 'coverage', 'spotIn', 'eyeSD', 'aggr', 'commit', 'fbLean', 'learn', 'swingTilt'];
   // the means these skills were calibrated to at engine v1.7, when every drawn hitter counted as a major leaguer
   // (fixed here: TRAITS now holds the population, so reading the targets from it would shift them again on every refit)
-  var SK0 = { motorIn: 0.62, timingSD: 13.5, longSD: 3.8, faceSD: 8, undercut: 0.55, attack: 9, pullBias: 10, coverage: 3.0, spotIn: 4.5,
-              eyeSD: 5.0, aggr: 0, commit: 0.55, fbLean: 1.3, learn: 0.35, swingTilt: 32.3 };
-  print('fit_population v0.2 · ' + ROUNDS + ' rounds x ' + NPICK + ' picks (best of ' + BB.FARM_N + ')');
+  // (v0.3: motorIn x1.4, longSD x0.88, coverage x2.1, spotIn x1.09 and the fastball lean's excess x2.9, the engine v2.2 refit to the miss table)
+  var SK0 = { motorIn: 0.87, timingSD: 13.5, longSD: 3.35, faceSD: 8, undercut: 0.55, attack: 9, pullBias: 10, coverage: 6.3, spotIn: 4.9,
+              eyeSD: 5.0, aggr: 0, commit: 0.55, fbLean: 1.87, learn: 0.35, swingTilt: 32.3 };
+  print('fit_population v0.3 · ' + ROUNDS + ' rounds x ' + NPICK + ' picks (best of ' + BB.FARM_N + ')');
   for (var k = 0; k < ROUNDS; k++) {
     var m = moments(sample(SEED + k).S);
     print('round ' + k + ': weight ~ bat speed ' + m.rwv.toFixed(2) + ' (exponent ' + BB.CHAIN.powerExp.toFixed(3) + '); picked height ' + m.h[0].toFixed(2) + ' ± ' + m.h[1].toFixed(2) + '  weight ' + m.w[0].toFixed(1) + ' ± ' + m.w[1].toFixed(1) + '  swing length ' + m.L[0].toFixed(3) + ' ± ' + m.L[1].toFixed(3) + '  bat speed ' + m.v[0].toFixed(2) + ' ± ' + m.v[1].toFixed(2));

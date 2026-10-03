@@ -1,5 +1,5 @@
 /* ============================================================================
-   pitcher_chain_check.js · v0.1 · 2026-10-02
+   pitcher_chain_check.js · v0.2 · 2026-10-03
 
    The pitcher's chain (bb_engine v1.6) against the league: the model's
    pitchers' arm slots, release points, speed and spin, the correlations among
@@ -12,6 +12,7 @@
    Run:  jsc bb_engine.js headless/pitcher_chain_check.js -- [pitchers] [PA each] [seed]
 
    CHANGED
+     v0.2  familiarity as in games: 40 x u x u pitches of this pitcher seen at the start of each PA (games: median 9 at a swing, mean 12.6; was uniform to 60-80)
      v0.1  first build
 ============================================================================ */
 (function (A) {
@@ -66,7 +67,7 @@
     var Pp = P[i], k = 0, bb = 0, pa = 0, sw = 0, wh = 0;
     for (var j = 0; j < NPA; j++) {
       var B = BB.makeBatter(rng, {}); Pp.load = rng.u() * 0.7 * Pp.stamina;
-      var res = BB.simPA(Pp, B, { env: env2, ump: ump, framing: 0, seen: rng.u() * 40, rec: false }, rng);
+      var res = BB.simPA(Pp, B, { env: env2, ump: ump, framing: 0, seen: 40 * rng.u() * rng.u(), rec: false }, rng);
       pa++; if (res.result === 'K') k++; if (res.result === 'BB') bb++;
       res.pitches.forEach(function (q) { if (q.swing) { sw++; if (!q.swing.contact) wh++; } });
     }
