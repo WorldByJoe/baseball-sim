@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v1.2 · 2026-10-02
+   bb_engine.js · v1.3 · 2026-10-02
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -28,7 +28,9 @@
      READ    the batter's picture of the pitch is a GHOST pitch - the same
              release, flown as the pitch type he EXPECTED usually flies.
              Recognition corrects part of the difference before he commits;
-             the rest is his misread. Tunnelling falls out of this: two
+             the rest is his misread. Unrecognised, he still reads where the
+             ball is and its direction across and up and down; the curve still
+             to come and its speed toward him are what fool him. Tunnelling falls out of this: two
              pitches that look alike early and separate late fool him. Even
              a pitch he recognises is judged partly from what its kind
              usually does: a pitch that rides or drops more than most is
@@ -55,6 +57,9 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v1.3  fooled-swing contact: a batter fooled at the commit point reads the ball's
+           direction across and up and down, so only the curve still to come fools
+           him there (its speed toward him still does); swing thresholds refitted
      v1.2  the swing policy: thresholds per count and read (the pitch he sat on, or one
            he recognised as something else), fitted to the league's swing curves by
            count; he decides on what he could see at the commit point
@@ -70,9 +75,6 @@
            where on it the ball is met sets spray, attack angle and bat speed; the
            barrel dips toward its end; hands cover only part of a pitch in or out;
            a bat-face scatter; timing, along-barrel scatter fitted to pitch-level 2025
-     v0.8  the bat is a tapered wood beam: its shape gives the radius the ball meets,
-           the rigid recoil about the balance point and the bending modes that drain
-           a strike off the sweet spot (Nathan 2000); the ball's COR falls with speed
 ============================================================================ */
 
 var BB = (function () {
@@ -951,11 +953,22 @@ var BB = (function () {
     var ps = PRIOR_S * (PITCH_TYPES[pitch.type].ivbSD || 4), pullS = 1 / (1 + (ps / eye) * (ps / eye));
     var real = [pitch.plate.x, pitch.plate.z, pitch.plate.t];
     var judged = [pullS * (ref.x - real[0]) + RESID_S * (gh.x - real[0]), pullS * (ref.z - real[1]) + RESID_S * (gh.z - real[1]), pullT * (gh.t - real[2])];   // how far off his judgement of a recognised pitch is
-    var g3 = [gh.x - real[0], gh.z - real[1], gh.t - real[2]], err = judged, launched = 1 - tc * tc;
-    var base = [launched * g3[0], launched * g3[1], launched * g3[2]];   // the pitch he expected, corrected for the break seen by the commit point
+    // What is left of the gap when he extrapolates from a look at a share f of
+    // the flight. Across and up and down he reads where the ball is AND the
+    // direction it is travelling (the eye reads motion across its view well),
+    // so only the curve still to come fools him: (1 - f)^2 of the gap, with
+    // the expected pitch's curve assumed from there. Its speed toward him he
+    // reads far worse, so his timing keeps the arrival he expected, corrected
+    // only for what had shown itself (1 - f^2). Until v1.3 he read only where
+    // the ball was across and up and down too (1 - f^2), so a fooled swing
+    // was left about 60% of the gap off and nearly always missed.
+    function leftS(f) { return (1 - f) * (1 - f); }
+    var g3 = [gh.x - real[0], gh.z - real[1], gh.t - real[2]], err = judged, launchedS = leftS(tc), launchedT = 1 - tc * tc;
+    var base = [launchedS * g3[0], launchedS * g3[1], launchedT * g3[2]];   // the pitch he expected, corrected for what had shown itself by the commit point
     if (!detected) {   // he launched on the pitch he expected
       // late: he steers toward his judgement; fooled: only by what has shown itself by the last look
-      var target = late ? judged : [(1 - ts * ts) * g3[0], (1 - ts * ts) * g3[1], (1 - ts * ts) * g3[2]];
+      var lastS = leftS(ts), lastT = 1 - ts * ts;
+      var target = late ? judged : [lastS * g3[0], lastS * g3[1], lastT * g3[2]];
       var cx = target[0] - base[0], cz = target[1] - base[1], cm = Math.sqrt(cx * cx + cz * cz), k = cm > STEER_IN * IN ? STEER_IN * IN / cm : 1;
       err = [base[0] + k * cx, base[1] + k * cz, base[2] + k * (target[2] - base[2])];
     }
@@ -997,8 +1010,8 @@ var BB = (function () {
   // policy, not a bet: the league's batters swing more in hitters' counts than
   // the next pitch's run value pays for (discipline.py table 6).
   var SWING_THR = {
-    '0-0': [0.35, 1.20], '0-1': [0.10, 0.76], '0-2': [0.17, 0.17], '1-0': [0.19, 0.99], '1-1': [0.10, 0.66], '1-2': [0.08, 0.23],
-    '2-0': [0.29, 1.06], '2-1': [0.10, 0.65], '2-2': [0.03, 0.35], '3-0': [0.88, 1.14], '3-1': [0.18, 0.72], '3-2': [0.03, 0.34]
+    '0-0': [0.33, 1.18], '0-1': [0.09, 0.75], '0-2': [0.09, 0.30], '1-0': [0.19, 1.01], '1-1': [0.11, 0.64], '1-2': [0.06, 0.28],
+    '2-0': [0.26, 1.03], '2-1': [0.09, 0.70], '2-2': [0.04, 0.35], '3-0': [0.94, 0.95], '3-1': [0.16, 0.72], '3-2': [0.03, 0.34]
   };
   function decide(B, pitch, gh, rf, st, rng) {
     var m = rf.detected ? rf.err : rf.base, mx = m[0], mz = m[1];
@@ -1256,7 +1269,7 @@ var BB = (function () {
   }
 
   return {
-    version: '1.2',
+    version: '1.3',
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
     PITCH_TYPES: PITCH_TYPES, ARCH: ARCH, TRAITS: TRAITS, AERO: AERO,
