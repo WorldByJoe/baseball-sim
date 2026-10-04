@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_game.js · v1.0 · 2026-10-03
+   bb_game.js · v1.1 · 2026-10-04
 
    A whole game: two teams, nine innings or more, lineups that turn over,
    pitchers who tire and get replaced, managers with their own habits.
@@ -45,6 +45,8 @@
    at DH, the rest on the bench, the next man in the five-man rotation.
 
    CHANGED
+     v1.1  a steal's wild throw moves every runner up a base (the stealer from first had
+           landed on a man already on third, who vanished: 16 times in 2,000 games)
      v1.0  standing rosters for a league: makeRoster, teamFromRoster
      v0.9  intentional walks (signalled, 2017-2022 rule), pickoffs, late defensive
            substitutions and NL double switches; a bench of four drawn for their
@@ -242,6 +244,10 @@ var BBGame = (function () {
             var wildThrow = rng.u() < 0.03, safe = wildThrow || tRun < tBall + 0.15;
             rec.steal = { id: g.id, from: g.from, to: g.to, safe: safe, tRun: tRun, tBall: tBall, wild: wildThrow };
             bases[g.from] = null;
+            if (safe && wildThrow) {   // the throw gets away: everyone moves up a base, the stealer one past his target (until v1.1 he landed on a man already on third, who vanished)
+              if (bases[3]) { paRuns++; bases[3] = null; rec.steal.scored = 1; }
+              for (var bb2 = 2; bb2 >= 1; bb2--) if (bases[bb2]) { bases[bb2 + 1] = bases[bb2]; bases[bb2] = null; }
+            }
             if (safe) { var to2 = wildThrow ? Math.min(4, g.to + 1) : g.to; if (to2 >= 4) paRuns++; else bases[to2] = pl; S.sb++; if (wildThrow) { SD.e++; G.errors[1 - half]++; } }
             else { outs++; S.cs++; }
           }
