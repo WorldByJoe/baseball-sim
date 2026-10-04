@@ -14,6 +14,7 @@ The engine is pure JavaScript, seeded and deterministic; a whole game simulates 
 - `bb_field.js` — the ball in play: its track, the fielders' moves, throws, runners.
 - `bb_game.js` — the game: lineups, innings, managers and bullpens, the running game.
 - `bb_names.js` — fictional players, teams and parks.
+- `bb_league.js` — the professional world: thirty organisations, each a major-league club and a club at each of the five levels below (Triple-A to Rookie), with standing rosters; plays their seasons headless, promotes and demotes between levels, measures the promotion drop, and writes the stable the screen loads. `tools/build_stable.sh` runs it (through `headless/league_run.js`) and writes `stable/bb_stable.js` and `stable/league_run.txt`.
 - `bb_schedule.js` — the game for a seed and the screen's schedule (every segment, its time and its event id), shared by the page and the headless tools.
 - `bb_call.js` — the broadcast, written ahead for the whole game: the announcers' lines, the crowd and field sounds, the crowd's mood, the organ cues, each keyed to a segment's event id.
 - `bb_sound.js` — plays the broadcast in the page on the game's clock; `bb_organ.js` — the ballpark organ, synthesised with Web Audio.

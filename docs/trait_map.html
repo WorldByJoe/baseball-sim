@@ -1,14 +1,14 @@
-<!-- trait_map.html · v2.7 · 2026-10-03
+<!-- trait_map.html · v2.8 · 2026-10-03
      The trait path map: distal traits -> proximate abilities -> the engine's stages
      (with every constant and where its value came from) -> statistics against the league.
      Keep it in step with bb_engine.js; publish to the same artifact URL.
      CHANGED
+       v2.8  the league (bb_league v0.1): thirty organisations, six levels, promotion, and its drop
        v2.7  engine v2.6: athleticism, the deep trait beneath swing power, arm strength and sprint speed
        v2.6  engine v2.5, bb_game v0.9: the pitcher's move to first; the manager's moves (intentional walks, pickoffs, defensive changes, double switches)
        v2.5  engine v2.4: swing-to-swing effort and checked swings
        v2.4  engine v2.3: the bat's face and its path; bat direction at contact; open mysteries named
        v2.3  engine v2.2: the contact rebuild's first stage - reach, the read, looking fastball, miss distance by reach
-       v2.2  engine v2.1: defence in the farm; the hitter's arm length gets its own id (it shared d_arm with arm slot)
        v1.0  first version (engine v1.0), source kept in the repo from v1.3 on -->
 <meta charset="utf-8">
 <title>Ballgame Trait Map</title>
@@ -142,7 +142,7 @@ td.basis { color: var(--muted); }
     ['d_scout', 0, null, 'Scouts\' estimate', 'expected wOBA from traits', 'D', 'HITTER_VALUE and PITCHER_VALUE: linear estimates of the expected wOBA the engine itself gives a player\'s traits (tools/hitter_value.js, pitcher_value.js). Hitters: bat speed, eye, aggression, barrel control (R2 .70). Pitchers: mostly command; speed barely counts (R2 .12).'],
     ['d_fieldval', 0, null, 'Fielding value', 'runs saved, by position', 'D', 'FIELD_VALUE: the runs per ball in play a fielder\'s traits save at his position, measured by playing the engine\'s own balls in play through a test fielder among average team-mates (tools/field_value.js, R2 .92-.98). One sd of fielding: 0.09-0.10 runs a game at shortstop and in the outfield, 0.04 at first base, against 0.18 for hitting. Route and reaction count most, then speed in the outfield. v2.1.'],
     ['d_popfit', 0, null, 'Population fit', 'picks = league', 'F', 'The population is fitted so the picks have the league\'s measured traits: height, weight, swing length, bat speed and weight ~ bat speed; pitchers\' speed, command, slot, height, spin. Hand-set skills keep their calibrated means among the picks (tools/fit_population.js).'],
-    ['d_levels', 0, null, 'Levels', 'k-th of six plays at level k', 'H', 'The candidates are ranked by the scouts and the k-th best plays at level k: 1 the majors, 2 Triple-A, down to 6 rookie ball (v2.0). Only the majors are fitted; Triple-A, measured alike from its Statcast data, tests the pool one level down. Pool bat speed 68.2 mph; levels 1-6: 71.2, 69.6, 68.7, 67.8, 66.8, 65.5.'],
+    ['d_levels', 0, null, 'Levels', 'k-th of six plays at level k', 'H', 'The candidates are ranked by the scouts and the k-th best plays at level k: 1 the majors, 2 Triple-A, down to 6 rookie ball (v2.0). Only the majors are fitted; Triple-A, measured alike from its Statcast data, tests the pool one level down. Pool bat speed 68.2 mph; levels 1-6: 71.2, 69.6, 68.7, 67.8, 66.8, 65.5. The league (bb_league v0.1) gives each level thirty clubs with standing rosters, plays their seasons and promotes between them.'],
     ['d_height', 0, "HITTER'S BODY", 'Height', '72.0 ± 2.35 in (pool 70.9)', 'M', '2025 Statcast hitters: the majors. The pool, fitted so the farm\'s picks come out at the league\'s, is 70.9 ± 2.4 in (v2.0).'],
     ['d_weight', 0, null, 'Weight', '206 lb (pool 193), +5.25 per inch', 'M', 'Scatter about the height line (r = .62), 2025 Statcast; the pool 193 ± 21 lb (v2.0).'],
     ['d_swinglen', 0, null, 'Swing length', '7.32 ± 0.39 ft (pool 7.17)', 'M', 'The bat head\'s path to contact, about the height line; 2025 Statcast; the pool 7.17 ± 0.40 ft (v2.0).'],
@@ -234,7 +234,8 @@ td.basis { color: var(--muted); }
     ['e_aaa_velo', 3, null, 'Fastball speed, one level down', '-0.2 / -0.5 vs -1.2 / -0.9 mph', 'off', 'Starters, relievers: level 1 to 2 against the majors to Triple-A. The scouts value speed a little more since v2.2 (about 4 wOBA points per sd) but command most.'],
     ['e_aaa_bb', 3, null, 'Walks in Triple-A', '10.9% vs 10.8%', 'match', 'With the umpire\'s zone top 2.9 in lower, as Triple-A\'s automated zone. Since v2.2 (the read and reach) the model\'s level 2 walks as Triple-A does.'],
     ['e_aaa_babip', 3, null, 'BABIP in Triple-A', '.260 vs .315 (level 1 .259)', 'off', 'Triple-A\'s is .026 above the majors\'. Since the farm values defence (v2.1) the model\'s level 2 holds level 1\'s BABIP while its contact softens (hard-hit .361 against .406), and levels 3-6 rise to .27; before, level 2 fell below level 1. Still far short of Triple-A.'],
-    ['e_aaa_chase', 3, null, 'Chase in Triple-A', '.258 vs .264 (level 1 .258)', 'near', 'Triple-A\'s hitters chased less than the majors\' (.283); the model\'s two levels now chase alike (v2.4).']
+    ['e_aaa_chase', 3, null, 'Chase in Triple-A', '.258 vs .264 (level 1 .258)', 'near', 'Triple-A\'s hitters chased less than the majors\' (.283); the model\'s two levels now chase alike (v2.4).'],
+    ['e_promo', 3, null, 'The promotion drop', 'Triple-A to majors: -.037 wOBA', 'near', 'Hitters promoted after 100+ PA lost .026-.038 of wOBA at the level above; good seasons that stayed lost .020, so the step up itself was .006-.018. But the majors out-hit Triple-A in the league (.305 vs .295) where the real Triple-A out-hits the majors: the minors\' pitchers stay too good (bb_league v0.1).'],
   ];
   // stages: [id, label, gloss, chips: [name, value, class, description]]
   var S = [
@@ -315,7 +316,7 @@ td.basis { color: var(--muted); }
       ['Past the catcher', 'by height band', 'O', 'The chance a pitch gets by the catcher, by where it crosses, against his blocking: set by hand in proportion and scaled to the league\'s wild pitches per game, now that the share of pitches in the dirt is the league\'s (bb_game v0.7).']]]
   ];
   var E = [
-    ['d_height', 'd_weight'], ['d_height', 'd_swinglen'], ['d_weight', 'd_bat'], ['d_weight', 'd_power'], ['d_athletic', 'd_power'], ['d_athletic', 'd_run'], ['d_athletic', 'd_field'], ['d_weight', 'd_run'], ['d_athletic', 'e_athletic'],
+    ['d_height', 'd_weight'], ['d_height', 'd_swinglen'], ['d_weight', 'd_bat'], ['d_weight', 'd_power'], ['d_athletic', 'd_power'], ['d_athletic', 'd_run'], ['d_athletic', 'd_field'], ['d_weight', 'd_run'], ['d_athletic', 'e_athletic'], ['d_levels', 'e_promo'],
     ['d_weight', 'p_batspeed'], ['d_swinglen', 'p_batspeed'], ['d_power', 'p_batspeed'], ['d_bat', 'p_batspeed'], ['d_style', 'p_attack'], ['d_style', 'p_pull'], ['d_style', 'd_swinglen'], ['d_style', 'e_style'], ['d_armlen', 'p_cover'],
     ['d_spin', 'p_move'], ['d_shape', 'p_move'], ['d_seam', 'p_move'], ['d_scatter', 'p_move'],
     ['d_fbvelo', 's_throw'], ['d_farm', 'p_batspeed'], ['d_farm', 'p_eye'], ['d_farm', 'p_command'], ['d_scout', 'd_farm'], ['d_fieldval', 'd_farm'], ['d_field', 'd_fieldval'], ['d_run', 'd_fieldval'], ['s_field', 'd_fieldval'], ['d_farm', 'd_levels'], ['d_levels', 'e_aaa_pow'], ['d_levels', 'e_aaa_k'], ['d_levels', 'e_aaa_velo'], ['d_levels', 'e_aaa_bb'], ['d_levels', 'e_aaa_babip'], ['d_levels', 'e_aaa_chase'], ['d_scout', 'e_aaa_velo'], ['d_scout', 'e_aaa_chase'], ['p_batspeed', 'e_aaa_pow'], ['s_call', 'e_aaa_bb'], ['s_field', 'e_aaa_babip'], ['d_popfit', 'd_farm'], ['d_pbody', 'd_release'], ['d_arm', 'd_release'], ['d_arm', 'd_shape'], ['d_arm', 'd_rep'], ['d_fbvelo', 'd_spin'], ['d_habit', 's_plan'], ['d_release', 's_throw'], ['d_rep', 's_plan'], ['d_rep', 's_expect'], ['d_ump', 's_call'], ['d_framing', 's_call'],

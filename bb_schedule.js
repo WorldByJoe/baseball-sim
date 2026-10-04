@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_schedule.js · v0.4 · 2026-10-03
+   bb_schedule.js · v0.5 · 2026-10-03
 
    The game and its schedule, shared by the screen (baseball.html) and the
    headless tools, so the broadcast script can be written and checked
@@ -25,13 +25,19 @@
    (a second, '...pickoff2'; with no pitch after it, numbered past his last);
    an intentional walk, '7b.3.ibb'.
 
+   With a stable beside the page (stable/bb_stable.js, written by
+   headless/league_run.js from bb_league.js), the game is drawn from it: a level
+   (the majors a little over half the time, the five levels below the rest) and
+   two of that level's clubs with their standing rosters; the minors play with a
+   designated hitter, the majors by the home club's league. Without one, two
+   teams are drawn fresh as before.
+
    CHANGED
+     v0.5  games from the league's stable, when there is one: a level and two clubs
      v0.4  the manager's moves (bb_game v0.9): an 'ibb' segment for an intentional walk,
            a 'pickoff' segment for each throw over, a longer change for a double switch
      v0.3  uniform numbers: 0 to 99, and e, pi and i, from a stream of their own
      v0.2  the seventh-inning stretch: 30 s after the top of the 7th, in games that get there
-     v0.1  moved out of baseball.html v2.1 unchanged (the game, win probability,
-           runners' arrival times, play durations, the schedule); event ids added
 ============================================================================ */
 
 var BBSchedule = (function () {
@@ -58,12 +64,24 @@ var BBSchedule = (function () {
   }
 
   // ============================================================ THE GAME
+  var LEVEL_W = [0.55, 0.15, 0.10, 0.08, 0.07, 0.05];   // how often the screen visits each level: the majors, then Triple-A down to Rookie
+  function stableOf() { return typeof window !== 'undefined' ? window.BB_STABLE || null : typeof BB_STABLE !== 'undefined' ? BB_STABLE : null; }
   function game(seed) {
-    var rng = BB.makeRng(seed), teams = BBNames.teams(rng);
-    var away = BBGame.makeTeam(rng, teams[0]), home = BBGame.makeTeam(rng, teams[1]);
+    var rng = BB.makeRng(seed), ST = stableOf(), away, home, rules, level = 0, levelName = '';
+    if (ST) {   // two clubs of one level from the league, each with its roster as it stands
+      level = rng.pickW(LEVEL_W) + 1; levelName = ST.levels[level - 1].name;
+      var n = ST.orgs.length, ia = Math.floor(rng.u() * n), ih; do { ih = Math.floor(rng.u() * n); } while (ih === ia);
+      away = BBGame.teamFromRoster(ST.orgs[ia].clubs[level - 1], Math.floor(rng.u() * 5));
+      home = BBGame.teamFromRoster(ST.orgs[ih].clubs[level - 1], Math.floor(rng.u() * 5));
+      rules = level === 1 ? ST.orgs[ih].league : 'AL';
+    } else {
+      var teams = BBNames.teams(rng);
+      away = BBGame.makeTeam(rng, teams[0]); home = BBGame.makeTeam(rng, teams[1]);
+    }
     var env = BB.mlbEnv(rng), parkName = BBNames.park(rng);
     var ump = BB.makeUmp(rng); ump.name = BBNames.fullName(BBNames.person(rng));
-    var G = BBGame.simGame(away, home, { rng: rng, env: env, ump: ump });
+    var G = BBGame.simGame(away, home, { rng: rng, env: env, ump: ump, rules: rules });
+    G.level = level; G.levelName = levelName;
     var PLAYER = {};   // every man who can bat, by id (a pitcher bats as his .bat)
     [away, home].forEach(function (Tm) { Tm.lineup.concat(Tm.bench).forEach(function (b) { PLAYER[b.id] = b; });
       [Tm.starter].concat(Tm.bullpen).forEach(function (P) { if (P.bat) PLAYER[P.id] = P.bat; }); });
@@ -188,7 +206,7 @@ var BBSchedule = (function () {
     return { SEG: SEG, total: total, segAt: segAt, playDuration: playDuration, runnerArrive: runnerArrive, ownArrive: ownArrive };
   }
 
-  return { version: '0.3', PACE: PACE, HR_BASE: HR_BASE, CELEB: CELEB, Phi: Phi, winProb: winProb, game: game, build: build };
+  return { version: '0.5', PACE: PACE, HR_BASE: HR_BASE, CELEB: CELEB, Phi: Phi, winProb: winProb, game: game, build: build };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = BBSchedule;

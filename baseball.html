@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v4.2 · 2026-10-03
+  baseball.html · v4.3 · 2026-10-03
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
@@ -45,6 +45,8 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v4.3  games from the league's stable (stable/bb_stable.js) when it is beside the page: the level
+          named in the line-ups and the state panel; without it, two new teams as before
     v4.2  engine v2.6 (athleticism)
     v4.1  the manager's moves (bb_game v0.9): intentional walks, throws over to first (the
           runner diving back, or picked off), late defensive changes and double switches,
@@ -58,8 +60,6 @@
           announcer, the crowd, the field and the organ, written ahead and played on the
           game's clock; v and c mute the voices and the park; silent without them; the
           schedule from bb_schedule.js; a seventh-inning stretch; uniform numbers on the cards
-    v3.8  engine v2.4: a checked swing and a half swing are named on the call and in the batter's line;
-          exit velo to the whole mph (it ran into the card's edge)
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -152,13 +152,15 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
 <script src="bb_engine.js?v=2.6"></script>
 <script src="bb_names.js?v=0.1"></script>
 <script src="bb_field.js?v=0.8"></script>
-<script src="bb_game.js?v=0.9"></script>
-<script src="bb_schedule.js?v=0.4"></script>
-<script src="bb_call.js?v=0.3"></script>
+<script src="bb_game.js?v=1.0"></script>
+<script src="bb_schedule.js?v=0.5"></script>
+<script src="bb_call.js?v=0.5"></script>
 <script src="bb_organ.js?v=0.1"></script>
 <script src="bb_sound.js?v=0.1"></script>
 <!-- the park's sound files, when they are beside the page; without it the game plays silently -->
 <script src="sounds/manifest.js"></script>
+<!-- the league's standing rosters, when they are beside the page (headless/league_run.js writes them); without it every game draws two new teams -->
+<script src="stable/bb_stable.js?v=2"></script>
 <script>
 (function () {
   'use strict';
@@ -1431,7 +1433,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     text(g, fav.nick + ' ' + f0(100 * Math.max(wp, 1 - wp)) + '%', 0, Hh - 2, 30 * W / 640, fav.col, 'left', 'bottom');
     text(g, 'win probability', W, Hh - 2, 30 * W / 640, INK3, 'right', 'bottom');
   }
-  function rulesWords() { return G.rules + ' rules · ' + (G.rules === 'AL' ? 'designated hitter' : 'pitcher bats'); }
+  function rulesWords() { return G.level > 1 ? G.levelName + ' · designated hitter' : (G.level ? G.levelName + ' · ' : '') + G.rules + ' rules · ' + (G.rules === 'AL' ? 'designated hitter' : 'pitcher bats'); }
   function basesSVG(bases) {
     function sq(cx, cy, on) { return '<rect x="' + (cx - 11) + '" y="' + (cy - 11) + '" width="22" height="22" transform="rotate(45 ' + cx + ' ' + cy + ')" fill="' + (on ? '#e8c547' : 'none') + '" stroke="rgba(206,220,240,.7)" stroke-width="3"/>'; }
     return '<svg viewBox="0 0 100 70" style="width:calc(120*var(--wu));height:calc(84*var(--wu));vertical-align:middle">' + sq(50, 14, bases[2]) + sq(80, 40, bases[1]) + sq(20, 40, bases[3]) + '</svg>';
@@ -1618,7 +1620,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     if (seg.kind === 'pregame') {
       var h = ['<h1>' + esc(G.teams[0].name) + ' at ' + esc(G.teams[1].name) + '</h1>'];
       h.push('<div class="row soft">' + esc(parkName) + ' · ' + f0(env.elevFt) + ' ft · ' + f0(env.tempF) + '°F · ' + f0(100 * env.rh) + '% RH · ' + rulesWords() + ' · HP umpire ' + esc(ump.name) + '</div>');
-      h.push('<div class="row faint">traits drawn at random; the numbers on the right are each man\'s odds, projected over 250 plate appearances against a league of the same stuff · first pitch in ' + f0(Math.max(0, seg.dur - tau)) + ' s (p to skip)</div>');
+      h.push('<div class="row faint">' + (G.level ? 'two ' + G.levelName.toLowerCase() + ' clubs with their rosters as they stand in the league' : 'each man the best of six candidates for his place') + '; the numbers on the right are his odds, projected over 250 plate appearances · first pitch in ' + f0(Math.max(0, seg.dur - tau)) + ' s (p to skip)</div>');
       h.push('<div class="row faint">the win probability on the board is an estimate from the run difference, the innings left and the base-out state</div>');
       h.push('<div class="cols">' + teamSheet(G.teams[0], false) + teamSheet(G.teams[1], true) + '</div>');
       setHTML(EL.overlay, h.join('')); EL.overlay.className = 'on';

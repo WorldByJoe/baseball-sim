@@ -1,0 +1,68 @@
+league_run · seed 1 · 30 organisations · 3 seasons of 60 games · world built in 0.1 s
+  season 1 MLB: 900 games (38 s)
+  season 1 AAA: 900 games (76 s)
+  season 1 AA: 900 games (115 s)
+  season 1 A+: 900 games (153 s)
+  season 1 A: 900 games (191 s)
+  season 1 Rk: 900 games (230 s)
+THE LEVELS, season 1 (every club 60 games)
+  level   wOBA   K%    BB%   HR%   runs/g   bat speed  eye   spot   velo SP
+  MLB     0.308  19.2  9.7   3.4   4.16     71.2       5.09  4.86  94.0
+  AAA     0.295  20.4  9.7   2.8   3.81     70.1       5.28  4.92  93.6
+  AA      0.295  21.2  10.1   2.6   3.88     69.2       5.30  5.05  93.7
+  A+      0.284  23.3  10.4   2.3   3.53     68.8       5.44  4.98  93.5
+  A       0.281  23.8  10.5   2.0   3.34     68.1       5.62  5.11  93.1
+  Rk      0.278  25.9  12.0   1.5   3.21     67.3       5.84  5.15  93.1
+
+THE PROMOTION DROP: hitters with 100+ PA before and after (wOBA)
+  move        n    before  after   drop    the levels' gap   good seasons that stayed: before, after
+  promotions after season 1: 814 (145 to the majors)
+
+  season 2 MLB: 900 games (268 s)
+  season 2 AAA: 900 games (305 s)
+  season 2 AA: 900 games (343 s)
+  season 2 A+: 900 games (382 s)
+  season 2 A: 900 games (420 s)
+  season 2 Rk: 900 games (459 s)
+THE LEVELS, season 2 (every club 60 games)
+  level   wOBA   K%    BB%   HR%   runs/g   bat speed  eye   spot   velo SP
+  MLB     0.307  19.2  8.9   3.5   4.13     71.2       5.06  4.86  94.1
+  AAA     0.293  21.4  9.7   2.8   3.78     70.1       5.26  4.99  93.6
+  AA      0.289  21.6  10.1   2.5   3.76     69.1       5.34  5.00  93.9
+  A+      0.289  21.5  11.3   2.2   3.58     68.8       5.45  4.93  93.1
+  A       0.283  23.7  10.6   1.9   3.37     68.0       5.60  5.11  93.2
+  Rk      0.284  25.0  12.5   1.7   3.43     67.4       5.85  5.18  93.2
+
+THE PROMOTION DROP: hitters with 100+ PA before and after (wOBA)
+  move        n    before  after   drop    the levels' gap   good seasons that stayed: before, after
+  AAA to MLB 36   0.344   0.312   0.033   -0.017             0.341, 0.311 (n 33)
+  AA to AAA  35   0.352   0.307   0.045   -0.004             0.338, 0.303 (n 33)
+  A+ to AA   34   0.326   0.306   0.020   -0.008             0.332, 0.305 (n 32)
+  A to A+    34   0.325   0.301   0.025   -0.013             0.321, 0.315 (n 34)
+  Rk to A    35   0.321   0.288   0.033   -0.014             0.321, 0.305 (n 41)
+  promotions after season 2: 732 (128 to the majors)
+
+  season 3 MLB: 900 games (495 s)
+  season 3 AAA: 900 games (532 s)
+  season 3 AA: 900 games (569 s)
+  season 3 A+: 900 games (607 s)
+  season 3 A: 900 games (645 s)
+  season 3 Rk: 900 games (684 s)
+THE LEVELS, season 3 (every club 60 games)
+  level   wOBA   K%    BB%   HR%   runs/g   bat speed  eye   spot   velo SP
+  MLB     0.305  19.9  8.9   3.4   4.06     71.2       5.08  4.88  94.1
+  AAA     0.295  21.7  9.6   2.9   3.78     70.1       5.27  4.96  93.8
+  AA      0.284  22.2  10.2   2.3   3.45     69.1       5.35  4.97  93.7
+  A+      0.289  21.4  10.6   2.3   3.62     68.6       5.45  4.95  93.0
+  A       0.283  23.4  10.7   1.9   3.42     68.1       5.59  5.13  93.5
+  Rk      0.280  24.5  11.6   1.6   3.29     67.4       5.82  5.16  92.9
+
+THE PROMOTION DROP: hitters with 100+ PA before and after (wOBA)
+  move        n    before  after   drop    the levels' gap   good seasons that stayed: before, after
+  AAA to MLB 68   0.341   0.303   0.037   -0.023             0.339, 0.319 (n 62)
+  AA to AAA  74   0.345   0.306   0.038   -0.009             0.335, 0.307 (n 70)
+  A+ to AA   81   0.325   0.300   0.026   0.000             0.333, 0.308 (n 65)
+  A to A+    69   0.323   0.292   0.031   -0.010             0.323, 0.305 (n 75)
+  Rk to A    71   0.322   0.288   0.035   -0.009             0.323, 0.304 (n 78)
+
+STABLE 10146382 bytes

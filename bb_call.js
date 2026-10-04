@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_call.js · v0.4 · 2026-10-03
+   bb_call.js · v0.5 · 2026-10-03
 
    The broadcast, written ahead. Given a game and its schedule (bb_schedule.js)
    it writes everything the park will say and play: every voice line, every
@@ -35,6 +35,7 @@
    start; voice lines also carry maxDur, the air they have.
 
    CHANGED
+     v0.5  a game from the league's minors says its level at the first pitch
      v0.4  the manager's moves (bb_game v0.9): intentional walks, throws over to first,
            defensive changes and double switches are called
      v0.3  the PA gives uniform numbers; colour notes a man who wears e, pi or i
@@ -44,7 +45,7 @@
 
 var BBCall = (function () {
   'use strict';
-  var VERSION = '0.4';
+  var VERSION = '0.5';
   var IN = BB.units.IN, FT = BB.units.FT, GEO = BB.geometry;
 
   // ================================================================ TIMING
@@ -340,7 +341,8 @@ var BBCall = (function () {
         say(seg, 1.2, 'pa', 'excited', ['Ladies and gentlemen, now taking the field, your ' + H.name + '!'], 1, { chime: true });
         cue(seg, 3.2, 'applause_polite', 1.0); cue(seg, 4.2, 'cheer_medium', 0.8);
         play_(seg, 4.4, 'organ_take_field');
-        say(seg, 6.5, 'pbp', 'building', ['And ' + H.starter.name + ', the ' + hand(H.starter) + ', will take the ball for the ' + H.nick + '. ' + first.batter.name + ' leads off for the ' + A.nick + '.',
+        var lvl = G.level > 1 ? G.levelName + ' baseball tonight. ' : '';
+        say(seg, 6.5, 'pbp', 'building', [lvl + 'And ' + H.starter.name + ', the ' + hand(H.starter) + ', will take the ball for the ' + H.nick + '. ' + first.batter.name + ' leads off for the ' + A.nick + '.',
                                          ln(H.starter) + ' on the mound for the ' + H.nick + '.'], 1, { slide: 2 });
         return;
       }
