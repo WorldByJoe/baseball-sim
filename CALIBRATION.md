@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v2.8 · 2026-10-04`
+`CALIBRATION.md · v2.9 · 2026-10-04`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -901,6 +901,38 @@ Joe: for mystery 7, lower the mean of the pitching traits in the minors so good 
 
 **What it means.** Joe's mean-lowering is right for command, and it follows from the pool fit once the farm can tell pitchers apart; trimming the variance goes the other way (selection narrows the spread, so the pool must be wider than the majors). His joint distribution is already in the engine - repertoire, shapes, slot and command together make a pitcher, which is why a trait-by-trait estimate sees so little - so the useful form of the idea is a farm that judges pitchers by what that joint distribution produces, their results, as real organisations do. Two other gaps would leave command short even then: Triple-A's pitchers are 1.8 years younger and still learning command (the model has no development), and a wild pitcher in the model aims where everyone does instead of more over the plate.
 
+## S, J, Y and Z: the outfielder's stop and turn, the runners' sends, aiming to command, and what the scouts see (engine v2.8, bb_field v1.0; 2026-10-04)
+
+Joe asked for hypotheses S, J, Y and Z. Runs: a probe of the batter-runner's race on every outfield single; `headless/xbt_check.js` (new: how far runners go, as `statcast/baserunning.py` measures the league's) at 600-1,500 games; a sweep of the send margins; `statcast` pitch-level aim against scatter for both levels and the same measure on the model (`aim_model`, 300 pitchers x 180 PA, four to six seeds); 4,200 pool pitchers x 400 PA with their results in two halves; the arm-slot spread by level; the refit chain (swing policy, the scouts' values with `pitcher_value.js` v0.3 at 3,000 pitchers, fielding values, the pool) after each engine change; the suite and the level comparison (400 players a level, 50,000 PA a side, three seeds).
+
+**S, the outfielder's stop and turn: confirmed, built (bb_field v1.0).** On the 4.3 singles to the outfield a team-game that stayed singles, the throw beat the batter-runner to second by a median 1.6 s; only 0.16 a game came within the 0.3 s he demands, so caution (J) could add at most a fifth of the missing doubles. The outfielder threw the instant he had the ball, at full speed in whatever direction he was running. Now he first sheds the part of his speed not carrying him toward his throw - all of it running across or away, none charging - braking at his own acceleration (ACC_F, an assumption), less what he could brake in any time he had to spare; on a catch too, before a throw against a tagging runner. Doubles came from 0.58-0.67 a team-game to 1.52-1.57 (league 1.59), triples 0.03-0.05 to 0.10-0.11 (0.13), slugging .351-.369 to .384-.406 (.404), and a runner on first scored on a double .31 of the time (.16-.21; league .39).
+
+**J, base running too cautious: half right, refitted (bb_field v1.0).** After S the runners were too timid going home and too bold going to third, so one margin by outs could not fit both. Third and home now have their own (never make the first or third out at third; risk the plate, most of all with two out), fitted by a sweep to the league's extra bases taken: taking third [0.75, 0.75, 0.35] s, going home [0.7, 0.2, −0.4] s by outs (one margin, [0.6, 0.5, 0.2], before). Runners on second scored on a single .59-.60 of the time (.60), runners on first took third on a single .35 (.33) and scored on a double .41-.45 (.39). They are thrown out about twice as often as the league's (.03-.08 against .01-.03), most of all scoring from first on a double with two out; a sharper read of the race (READ_SD 0.10-0.15, against 0.25 set by hand) did not change that, so it was left.
+
+**Z, aim that follows command: confirmed, built (engine v2.8).** In the league, per pitcher, pitch type and batter side (30+ pitches), the mean location's distance from the zone's centre fell 0.29 in for each inch of scatter about it in the majors (1,919 cells) and 0.31 in Triple-A (1,814); measurement noise in the mean would push it the other way. The model's slope was about 0 (−0.14 and +0.03 at two seeds) with the league's mean scatter and aim distance. Every target's distance from the centre is now scaled by 1 − AIM_CMD per inch his scatter is wider than 8.0 in; AIM_CMD 0.09, between 0.08 (slope −0.25) and 0.10 (−0.34), six seeds each.
+
+**Y, the farm cannot see pitching quality: right as a diagnosis; seeing more did not make the minors wilder (engine v2.8).** 4,200 pool pitchers x 400 PA, their results split in two halves: true spread of expected wOBA allowed .0275, of which the scouts' estimate saw 18% (correlation .42). With what each pitch does against its type - how unusual its spin, efficiency and direction are, its seam break, the speed gap, role and stamina - a fitted estimate saw 39%; squares and products added nothing, and unusual direction counted most (11 points of wOBA per sd). Built into the scouts (`PITCHER_FEATURES`, `pitcher_value.js` v0.3), it exposed two flaws in turn:
+- **The farm picked extreme arm slots** (major leaguers' arm angles 12.5 deg sd, level 2's 10.9; the league's majors 12.9 and Triple-A 12.4): the batter pictured each pitch from the league's average shape whatever the slot, so a slot's ordinary movement fooled him. **He now reads the slot** - his picture starts from the league's shape at that slot - and the levels' slots spread alike (12.7 and 12.7); unusual direction fell to a minor feature, and the major leaguers' strikeout spread came nearer the league's (true sd .050-.053 against .055-.060; league .044).
+- **The farm picked breaking-ball pitchers** (the major leaguers' breaking share .356 against the league's .320) because the model's batters miss breaking balls in the zone too often: a farm that judges by results selects for the engine's flaws. The mix is now left out of the estimate (share .333).
+On the final engine the pool's true spread is .0232 and the estimate sees 35% (the eight features refitted, 27%). But the minors are no wilder: level 1 to 2, starters' command +1.3% across and +2.2% up and down (v2.7 +1.5 / +3.7; league +12.7 / +8.7), fastballs −0.35 mph (−0.50; league −1.2), walks +0.1 to +1.7 points (+3.1). The estimate weighs command most (8 points per sd), but command's spread in the pool is narrow and the judgement error large. The major leaguers' walk rates still spread far wider than the league's (true sd .026-.027 against .015).
+
+**The line, after all four** (seeds 3, 11, 29; against 2025):
+
+| | v2.7 | v2.8 | league |
+|---|---|---|---|
+| runs per team-game | 3.44-3.75 | 3.85-4.07 | 4.45 |
+| doubles / triples | 0.58-0.67 / 0.03-0.05 | 1.54-1.63 / 0.09-0.12 | 1.59 / 0.13 |
+| AVG / OBP / SLG | .223-.234 / .296-.305 / .351-.369 | .224-.230 / .299-.307 / .392-.403 | .245 / .315 / .404 |
+| BABIP | .259-.270 | .257-.263 | .291 |
+| K% / BB% / HR% | 21.7-21.9 / 8.2-8.4 / 3.3-3.4 | 20.4-21.9 / 8.7-9.0 / 3.4-3.6 | 22.2 / 8.4 / 3.1 |
+| chase | .275 | .258 | .283 |
+| double plays | 0.64-0.69 | 0.54-0.59 | 0.75 |
+| runner on first scores on a double | .16-.21 | .38-.42 | .39 |
+| aim against scatter (in per in) | about 0 | −0.31 | −0.30 |
+| arm-slot spread, level 1 / level 2 | - | 12.7 / 12.7 | 12.9 / 12.4 |
+
+The doubles, slugging and extra bases came to the league's. The batter who reads the slot is fooled less, so strikeouts and chase fell a little and walks rose; home runs rose to 14% above the league's (wilder pitchers now miss over the middle), and double plays fell a quarter below it.
+
 ## What was learned building the fielding layer
 
 - **Statcast's outfield JUMP (about 30 ft covered in the first 3 s) is the right anchor for outfielder motion.** The first fielders covered 44 ft in 3 s and caught nearly every fly ball (fly-ball BABIP .03). Slowing everyone to the jump figure fixed the outfield but let 52% of ground balls through, so infielders got their own harder acceleration and a dive reach. That's a real difference: they work from a crouch on a ball that is on them at once.
@@ -918,53 +950,51 @@ Joe: for mystery 7, lower the mean of the pitching traits in the minors so good 
 
 ## Open mysteries (Joe, 2026-10-03: left until the whole model is built)
 
-Where the model and the league disagree and no believable mechanism has been built for it yet. They are recorded, not tuned away; each may close when a missing piece of the model arrives, and the deeper tuning waits until then. Renumbered 2026-10-04 in order of how much each matters to the game; the number before A to E in brackets (the A to E section above uses the old numbers). Engine v2.7 and bb_field v0.9, seeds 3, 11 and 29, against 2025's team totals, unless noted.
+Where the model and the league disagree and no believable mechanism has been built for it yet. They are recorded, not tuned away; each may close when a missing piece of the model arrives, and the deeper tuning waits until then. Remade 2026-10-04 after S, J, Y and Z, in order of how much each matters to the game; the previous number in brackets. Engine v2.8 and bb_field v1.0, seeds 3, 11 and 29, against 2025's team totals, unless noted.
 
-1. **Runs are low** (1): 3.44-3.75 per team-game against 4.45; strikeouts and walks are now the league's, so the gap is what happens on contact - mostly 2 and 3.
-2. **Doubles and triples** (from 1): 0.58-0.67 doubles against 1.59, 0.03-0.05 triples against 0.13. Balls landing 150-300 ft fall in about as often as the league's but become doubles 2-3% of the time against 9-12%.
-3. **The batted-ball mix** (from 1): ground balls 45-46% against 43, liners 19-20% against 24, pop-ups 11% against 9; BABIP .259-.270 against .291. Hits within each band of launch angle are about the league's (10-20 deg .708 against .691), so the mix is nearly the whole BABIP gap. Behind it, the vertical miss leans the wrong way: contact struck 5-40 deg over the middle of the ball .30 of the time against .21, struck 40+ deg under it .13 against .23.
-4. **In-zone contact** (4): breaking balls in the zone are whiffed .27 of swings against .17, and those that dive out of it too rarely (6+ in outside .62 against .84).
-5. **Fastballs are whiffed about .04 too often at every speed** (5): four-seamers under 92 mph .17-.20 against .139, 98+ .26-.35 against .248, the rise with speed about the league's; about the excess of swings missing by 3+ in (.039 against .014).
-6. **Swings by pitch kind** (9): fastballs chased far outside three times as often as the league's (.157 against .056 at 9-12 in), breaking balls too rarely; swings far off the plate at 0-0 still half the league's (.024 against .060 at 9-12 in); chase overall .275 against .283.
-7. **The minors' pitchers are not wild enough** (10, restated after Joe's idea above): on expected outcomes the levels step down as the league's do; what falls short is command - Triple-A's is 9-13% worse than the majors', the model's level 2 2-4% - so its walks rise 0.7-2.2 points against 3.1, and its fastballs slow 0.5 mph against 0.9-1.2. Too many wild pitchers reach the majors: their walk rates spread twice as widely as the league's (true sd .033 against .015). (The majors out-hitting Triple-A was balls in play: mystery 9.)
-8. **Fouls** (3): .32 of contact struck square vertically goes foul against .21 - the model's fouls mostly balls met out front and pulled foul, the league's mostly glancing contact - and fastball swings go foul .35 of the time against .45. So games run 138-140 pitches a team against 146, and 3.8 pitchers against 4.2.
-9. **Triple-A's BABIP and chase** (6; engine v2.4): Triple-A's BABIP is .026 above the majors' where the model's level 2 matches its level 1; Triple-A's hitters chase less than the majors', the model's a little more.
-10. **Throwing errors and caught stealing** (7): errors 0.28-0.32 a team-game against 0.50, all the shortfall in throwing errors (a third of the league's, whose are highest on weak grounders); caught stealing 0.14-0.15 against 0.20 (steals 0.63-0.67 against 0.71).
-11. **The slow-swing tail** (11): .015 of swings more than 10 mph under the hitter's mean, 1st percentile −11 mph, against .057 and −35.
-12. **Ground balls are pulled less** (2): 8.0 deg off the bat (about half a degree more where fielded) against 13.6; what is left matches the bat meeting them deeper (bat direction −6.3 against −3.1).
-13. **From before** (8; engine v2.4): K% ~ release height has the wrong sign (+.16 against −.22), BB% ~ arm angle is flat (+.20 in the league), uphill swings cost too many whiffs (attack ~ whiff +.66 against +.53), bat speed ~ whiff is under half the league's (+.26 to +.35 against +.69), liners at 15-20 deg carry 10-20 ft too far.
+1. **Runs are low** (1): 3.85-4.07 per team-game against 4.45. Doubles, slugging and extra bases are now the league's; what is left is batting average (.224-.230 against .245), mostly 2.
+2. **The batted-ball mix** (3): liners 20% of balls in play against 24, fly balls 26 against 24, pop-ups 11 against 9; BABIP .257-.263 against .291, with hits in each band of launch angle about the league's. Behind it the vertical miss leans the wrong way: contact struck 5-40 deg over the middle of the ball .29 of the time against .21, struck 40+ deg under it .14 against .23.
+3. **The minors' pitchers are not wild enough** (7): command steps down from level 1 to 2 1-2% where Triple-A's is 9-13% worse than the majors'; fastballs 0.35 mph slower against 0.9-1.2; walks 0.1-1.7 points higher against 3.1. And the major leaguers' walk rates spread too widely (true sd .026-.027 against .015).
+4. **In-zone contact** (4): breaking balls in the zone are whiffed .27 of swings against .17, those that dive out of it too rarely (6+ in outside .62 against .84).
+5. **Fastballs are whiffed too often** (5): .21 of swings against .174, about .04 too often at every speed (four-seamers under 92 mph .18 against .139, 98+ .30 against .248); about the excess of swings missing by 3+ in.
+6. **Swings and chase** (6): chase .258 against .283 (it was .275 before the batter read the slot); fastballs chased far outside too often, breaking balls too rarely; swings 9-12 in outside at 0-0 .012 against .060.
+7. **Home runs are high** (new): 3.4-3.6% of plate appearances against 3.1 (1.30-1.35 a team-game against 1.16), up since wilder pitchers aim nearer the middle.
+8. **Double plays are few** (new): 0.54-0.59 a team-game against 0.75, down from 0.64-0.69 this round.
+9. **Fouls** (8): .30 of contact struck square vertically goes foul against .21 (the model's out front and pulled, the league's glancing); fastball swings foul .36 against .45; 140 pitches a team-game against 146, 3.8-3.9 pitchers against 4.2.
+10. **Triple-A's BABIP and chase** (9; engine v2.4): Triple-A's BABIP is .026 above the majors' where the model's level 2 matches its level 1; Triple-A's hitters chase less than the majors'.
+11. **Throwing errors and outs on the bases** (10): errors 0.33-0.34 a team-game against 0.50, the shortfall all throwing errors; runners thrown out taking an extra base about twice as often as the league's; caught stealing 0.14-0.17 against 0.20.
+12. **The slow-swing tail** (11): 1.5% of swings more than 10 mph under the hitter's mean, against 5.7%.
+13. **Ground balls are pulled less** (12): 7.4 deg against 13.6, the bat meeting them deeper (−6.3 against −3.1).
+14. **From before** (13; engine v2.4, not yet re-measured since the batter reads the slot): K% ~ release height has the wrong sign, BB% ~ arm angle is flat, uphill swings cost too many whiffs, bat speed ~ whiff is under half the league's, liners at 15-20 deg carry too far.
 
-## Hypotheses for the open mysteries (2026-10-04, after A to E)
+## Hypotheses for the open mysteries (2026-10-04, after S, J, Y and Z)
 
-Tested on 2026-10-04 (sections above): F, pitchers too alike - not so, the farm cannot see them (Y); A, the check swing - confirmed, built; B, ground balls measured differently - a third of the gap, the rest moved to U and H; C, swing errors that ignore pitch speed - not supported; D, the error rule - confirmed, built, and it uncovered S and T; E, stale steal decisions - the target was stale; K, the slow-fastball mix effect - not supported.
+Tested on 2026-10-04 (sections above): A, B, C, D, E, F, K, and now S - the outfielder's stop and turn, confirmed, built; J - runners too timid going home but too bold going to third, refitted with a margin for each; Y - the farm could see a fifth of what makes a pitcher; it now sees a third, which did not make the minors wilder, and showed that the batter must read the slot and the scouts must not judge the mix; Z - aim that follows command, confirmed, built.
 
 Ranked by how likely each seems (judgement, not measurement); mysteries by the numbers above.
 
 | | Hypothesis | Mysteries | Likelihood |
 |---|---|---|---|
-| S | The outfielder's stop and turn is missing: he throws the moment he picks the ball up, even running toward the wall. With his pickups randomly delayed (the old fumbles) doubles were 1.1 a game; without, 0.6 | 2, 1 | likely |
-| U | The vertical miss leans the wrong way: the league's contact leans under the ball (pop-ups, glancing fouls), the model's over it (grounders). Measured; its cause is open - perhaps batters expect more drop than a riding fastball gives, perhaps the shape of the up-down scatter | 3, 8, 1 | likely |
-| T | Hurried throws are missing: the throw's scatter grows only with its length, never with how rushed he is (league throwing errors 1.9% of 70-80 mph grounders against 0.8% at 100-110) | 10 | likely |
-| J | Base running is too cautious (hand-set margins): the batter-runner settles for a single | 2, 1 | plausible |
-| G | The bat's grip on the ball is wrong (hand-set friction): pop-ups spin far too fast; the same physics sets liners' backspin and how glancing contact deflects | 8, 3, 13 | plausible |
-| Y | The farm cannot see pitching quality: the scouts' estimate sees about a fifth of the engine's differences between pitchers, and their judgement error is as large as its spread. Sharper scouting and a refitted pool (prototype above) closed a third of the command gap; a farm that judges pitchers by their results would see the joint structure | 7, 9 | likely |
-| Z | A wild pitcher aims where everyone does: every pitcher aims at the league's targets whatever his command, where a wild one should aim more over the plate - the majors' walk rates spread twice as widely as the league's | 7, 1 | plausible |
-| V | Mishits along the barrel should mostly connect, weakly (jammed, off the end), not miss: 60% of the model's big fastball misses are along the barrel, and narrowing that scatter made contact far too good | 5, 4 | plausible |
-| H | The ball's direction follows the bat too closely: timing round the arc plus a fixed 9 deg face, where in the league the bat's direction at a given depth barely moves the ball | 8, 2, 12 | plausible |
+| U | The vertical miss leans the wrong way: the league's contact leans under the ball (pop-ups, glancing fouls), the model's over it. Measured; the cause open - perhaps batters expect more drop than a riding fastball gives, perhaps the shape of the up-down scatter | 2, 9, 1 | likely |
+| T | Hurried throws are missing: a throw's scatter grows only with its length (the league's throwing errors are highest on weak grounders) | 11 | likely |
+| AA | No development: Triple-A's pitchers are 1.8 years younger and still learning command; the model's players never change | 3, 10 | plausible |
+| CS | The major leaguers' command spread was measured too wide (3-0 four-seamers, a few per pitcher): their walk rates spread twice the league's. Narrower picks drawn from a pool the farm must filter harder would leave the minors wilder | 3 | plausible |
+| DM | Damage on mistakes: a pitch over the middle is hit too hard, so home runs rose once wild pitchers aimed there; the same test says whether command is worth what it should be | 7, 3, 1 | plausible |
+| DP | Double plays: fewer chances (more runners already on second) or a pivot and relay timed by hand (PIVOT 0.35 s) | 8 | plausible |
+| YS | Pitchers judged more sharply: a season's results seen alongside the estimate (prototype: a third of the command gap) | 3 | plausible |
+| G | The bat's grip on the ball is wrong (hand-set friction): pop-ups spin far too fast; the same physics sets liners' backspin and glancing deflection | 9, 2, 14 | plausible |
+| V | Mishits along the barrel should mostly connect, weakly, not miss: most big fastball misses are along the barrel | 5, 4 | plausible |
+| H | The ball's direction follows the bat too closely | 9, 13 | plausible |
 | I | The batter's picture is pulled toward a pitch's usual break both ways, so a hanger fools him as much as a sharp breaker | 4 | plausible |
-| L | Triple-A's own conditions: Pacific Coast League parks at altitude, the automated zone | 9, 7 | plausible |
-| AA | No development: Triple-A's pitchers are 1.8 years younger and still learning command; the model's players are fixed | 7, 9 | possible |
-| AB | Command built from several distal traits (release consistency, timing, arm path), elite only where all are good - Joe's sparse perimeter; the farm simulation says the shape alone barely moves the levels, so it waits on Y | 7 | possible |
-| W | His eye reads a fastball's destination no sooner than a breaking ball's, where a straight pitch shows its end early | 6 | possible |
-| X | A later checking point than the 0.15 s last look: the league's half swings stop later than the model allows | 11, 6 | possible |
-| Q | Infielders play too shallow: slow rollers too easy (under 70 mph at 0-10 deg, hits .05 against .19), hard grounders too porous (90-105 mph, .61-.71 against .48-.53) | 3 | possible |
-| M | Swing style leaves out bat speed; attack angle's spread is hand-set | 13 | possible |
-| N | Sideways misreads are forgiven by the bat's length, vertical ones miss: sweepers underperform, curveballs overperform | 13, 4 | possible |
-| O | The release point cannot fool him | 13 | possible |
-| P | Command does not depend on arm slot | 13 | possible |
-| R | Long shots: a two-strike spoiling swing; minor-league fielders positioned worse | 8; 9 | long shot |
+| L | Triple-A's own conditions: Pacific Coast League parks, the automated zone | 10, 3 | plausible |
+| W | His eye reads a fastball's destination no sooner than a breaking ball's | 6 | possible |
+| X | A later checking point than the 0.15 s last look | 12, 6 | possible |
+| Q | Infielders play too shallow: slow rollers too easy, hard grounders too porous | 2 | possible |
+| AB | Command built from several distal traits, elite only where all are good (Joe's sparse perimeter); waits on AA and CS | 3 | possible |
+| M, N, O, P | Swing style and bat speed; sideways misreads forgiven; the release point; command by slot - all to re-measure now the batter reads the slot | 14, 4 | possible |
+| R | Long shots: a two-strike spoiling swing; minor-league fielders positioned worse | 9; 10 | long shot |
 
-Order to test (shared mechanisms and the game's biggest gaps moved earlier; cost only breaks ties): (1) S + J, one test: what happens to the same batted ball, model against league, and where the batter-runner stops; (2) Y + Z: a farm that judges pitchers by their results, with the pool refitted, and aim that follows command - the minor-league games and the majors' walk spread; (3) U + G: the vertical miss by pitch kind and contact depth, then the collision's grip against published bat-ball measurements; (4) H; (5) V + I; (6) L + AA; (7) W + X; (8) T (quick, well measured); (9) Q; (10) AB, M, N, O, P; (11) R.
+Order to test (shared mechanisms and the game's biggest gaps moved earlier; cost only breaks ties): (1) U + G: the vertical miss by pitch kind and contact depth, then the collision's grip against published bat-ball measurements - the biggest piece of runs; (2) DM: damage by location, model against league (home runs, command's worth, runs); (3) CS + AA + YS: the minors' command - refit the command spread to the league's walk spread, then aging, then sharper judgement; (4) DP: double plays per chance; (5) V + I; (6) H; (7) W + X; (8) T (quick); (9) L; (10) re-measure 14 (M, N, O, P), then Q, AB, R.
 
 ## Known gaps, to fix with mechanisms rather than knob-turning
 

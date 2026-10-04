@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v0.9 · 2026-10-04
+   bb_field.js · v1.0 · 2026-10-04
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -32,6 +32,8 @@
    doubles are approximate; the cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.0  the outfielder's stop and turn: one who reaches the ball on the run sheds the speed
+           not carrying him toward his throw before he lets it go
      v0.9  the scorer's errors: a fumble is an error only on an ordinary chance; an outfielder
            picking up a ball that got through is not hurried by the ground he ran (half
            of those pickups were fumbled); drops on a catch he is under and fumbles on a grounder from the league's errors
@@ -73,13 +75,19 @@ var BBField = (function () {
   var TAG = 0.25;      // s: catch and apply a tag
   var SAFETY = 0.30;   // s: the margin a runner wants before taking second (plus his own runAggr)
   // Taking third or home: he and the coach read the race with READ_SD s of
-  // error (set by hand) and send him when the read beats SAFETY_FAR for the
-  // outs (plus his own runAggr), so a runner is sometimes thrown out and
-  // sometimes held when he would have made it. SAFETY_FAR was fitted to how
-  // often the league's runners took the extra base on a single or a double
-  // with none, one and two out (statcast/baserunning.py): a runner on second
-  // scored on a single .36 / .51 / .83 of the time, and .02-.03 were thrown out.
-  var SAFETY_FAR = [0.6, 0.5, 0.2], READ_SD = 0.25;   // s, by outs
+  // error (set by hand) and send him when the read beats the margin for that
+  // base and the outs (plus his own runAggr), so a runner is sometimes thrown
+  // out and sometimes held when he would have made it. Third and home have
+  // their own margins (v1.0): never make the first or third out at third
+  // base, but risk the plate when a run is there, most of all with two out.
+  // Both FITTED (a sweep of 1,500 games a setting, seed 7) to how often the
+  // league's runners took the extra base (statcast/baserunning.py,
+  // headless/xbt_check.js): a runner on first held at second on a single
+  // .68 / .67 / .56 of the time with none, one and two out; a runner on second
+  // held at third on a single .60 / .42 / .13, a runner on first on a double
+  // .65 / .64 / .44. (One margin for both, [0.6, 0.5, 0.2], fitted before the
+  // outfielder had to stop and turn, sent too many to third and too few home.)
+  var SAFETY_3 = [0.75, 0.75, 0.35], SAFETY_H = [0.7, 0.2, -0.4], READ_SD = 0.25;   // s, by outs: taking third, going home
   // How sure a throw's arrival is: 0.15 s for an infield throw, and more the
   // longer it is beyond 40 m (footwork, a hop, the catcher moving for it); set
   // by hand, so runners are thrown out at third and home about as often as
@@ -300,6 +308,29 @@ var BBField = (function () {
   function chanceD(F, ic) { return Math.pow(ic.v / 30, 2) + (isOF(F.pos) ? 0 : Math.pow(ic.moved / 10, 2)); }
   function cleanChance(F, ic) { return F.pl.glove * Math.exp(-CLEAN_K * chanceD(F, ic)); }
   var CLEAN_K = 0.015;
+  // THE STOP AND TURN (v1.0). An outfielder who reaches the ball on the run
+  // must shed the part of his speed that is not carrying him toward his
+  // throw before he can make it: v (1 - max(0, cos a)) at ACC_F, where a is
+  // the angle between his run and his throw - nothing if he is charging
+  // toward the target, his whole speed if he is running across or away. His
+  // speed at the ball is what his acceleration gives over the ground he ran,
+  // less what he could brake in any time he had to spare. Braking is taken as
+  // his acceleration (ACC_F, from Statcast's jump): an assumption, not a
+  // measurement. Until v1.0 he threw as soon as he had the ball, and the
+  // fumbles of v0.8 (half of all outfield pickups) had stood in for this: the
+  // throw beat a batter-runner to second by a median 1.6 s on the singles that
+  // stayed singles, and liners landing 150-300 ft were doubles 2-3% of the
+  // time against the league's 9-12%. Infielders are left as they were.
+  function settleTime(F, from, to, moved, spare) {
+    if (!isOF(F.pos) || !(moved > 0)) return 0;
+    var pl = F.pl, d = Math.max(0, moved - REACH * 0.5) / pl.route;
+    var v = Math.max(0, Math.min(pl.speed * FT, Math.sqrt(2 * ACC_F * d)) - ACC_F * Math.max(0, spare));
+    if (!v) return 0;
+    var rx = from[0] - F.at[0], ry = from[1] - F.at[1], rm = Math.hypot(rx, ry) || 1;
+    var tx = BASES[to][0] - from[0], ty = BASES[to][1] - from[1], tm = Math.hypot(tx, ty) || 1;
+    var c = (rx * tx + ry * ty) / (rm * tm);
+    return v * (1 - Math.max(0, c)) / ACC_F;
+  }
   // THE SCORER. A fumble that costs the out is an error only on a chance an ordinary fielder handles
   // (the rulebook's ordinary effort): no harder than D = 1, a ball reaching him at 30 m/s (67 mph) or a
   // 10 m range, where an average glove's clean chance has fallen about a tenth. A harder chance fumbled
@@ -349,11 +380,12 @@ var BBField = (function () {
       R[R.length - 1].out = true; out.outsMade = 1;
       out.hit = 'OUT'; out.desc = (out.type === 'PU' ? 'pop out' : out.type === 'LD' ? 'line out' : 'fly out') + ' to ' + F.pos;
       if (outs + 1 >= 3) { out.desc += ', inning over'; finish(); return out; }
-      // runners held; now they may tag up against this arm
+      // runners held; now they may tag up against this arm, once he has stopped and turned
       var tagging = [];
+      function settleC(to) { return settleTime(F, at, to, dist(F.at, at), best.c.m); }
       R.slice(0, -1).forEach(function (r) {
         var to = r.base + 1, tRun = tc + runTime(r.pl, BASE, true);
-        var tBall = Math.max(tc + F.pl.transfer + throwArrival(F, at, to), rcvArrival(to, F.pos)) + TAG;
+        var tBall = Math.max(tc + settleC(to) + F.pl.transfer + throwArrival(F, at, to), rcvArrival(to, F.pos)) + TAG;
         if (tRun + SAFETY + r.pl.runAggr < tBall && !tagging.some(function (q) { return q.to === to; })) tagging.push({ r: r, to: to, tRun: tRun, tBall: tBall });
       });
       if (tagging.length) {
@@ -361,7 +393,7 @@ var BBField = (function () {
         tagging.forEach(function (q) { q.p = Phi((q.tRun - q.tBall) / 0.15) * (q.to === 4 ? 1.4 : 1); if (!play || q.p > play.p) play = q; });
         tagging.forEach(function (q) { q.r.target = q.to; q.r.start = tc; });
         if (play.p > 0.12) {
-          ev.push({ t: tc + F.pl.transfer, kind: 'throw', who: F.pos, from: at, to: play.to, arrive: play.tBall, rcv: coverOf(play.to, F.pos) });
+          ev.push({ t: tc + settleC(play.to) + F.pl.transfer, kind: 'throw', who: F.pos, from: at, to: play.to, arrive: play.tBall, rcv: coverOf(play.to, F.pos) });
           if (rng.u() < Phi((play.tRun - play.tBall) / 0.15)) {
             play.r.out = true; out.outsMade++; out.desc += ', ' + baseName(play.to) + ' tag: out';
           } else out.desc += ', runner ' + (play.to === 4 ? 'scores' : 'to ' + baseName(play.to)) + ' on the tag';
@@ -386,8 +418,9 @@ var BBField = (function () {
       var d = dist(from, BASES[to]), self = Ff.pos === coverOf(to, Ff.pos) || d < 3;
       if (self && (d < 12 || to !== 1)) return { t: t0 + 0.1 + moveTime(Ff.pl, d) - Ff.pl.react, how: 'run' };   // already moving; a step and a stretch
       if (to === 1 && Ff.pos === '1B' && Pf) return { t: Math.max(t0 + Ff.pl.transfer + throwArrival(Ff, from, to), moveTime(Pf.pl, dist(Pf.at, BASES[1])) + 0.2), how: 'cover' };
-      return { t: Math.max(t0 + Ff.pl.transfer + throwArrival(Ff, from, to), rcvArrival(to, Ff.pos)), how: 'throw' };
+      return { t: Math.max(t0 + settle(to, from) + Ff.pl.transfer + throwArrival(Ff, from, to), rcvArrival(to, Ff.pos)), how: 'throw' };
     }
+    function settle(to, from) { return settleTime(Ff, from, to, ic.moved, ic.t - moveTime(Ff.pl, ic.moved - (isOF(Ff.pos) ? REACH * 0.5 : REACH_GB))); }
     var clean = rng.u() < cleanChance(Ff, ic) && !(onDirt(fieldAt[0], fieldAt[1]) && rng.u() < 0.01);
     ev.push({ t: tField, kind: clean ? 'field' : 'muff', who: Ff.pos, at: fieldAt });
     if (!clean) { tField += 1.2; }
@@ -425,7 +458,7 @@ var BBField = (function () {
       while (to + 1 < ahead && to < 4) {
         var next = to + 1, tRun = arrive(r, next);
         var tBall = ballTo(next, tField, fieldAt).t + TAG;
-        if (next >= 3 ? tBall - tRun + rng.n(0, READ_SD) > SAFETY_FAR[Math.min(outs, 2)] + r.pl.runAggr : tRun + SAFETY + r.pl.runAggr < tBall) to = next; else break;
+        if (next >= 3 ? tBall - tRun + rng.n(0, READ_SD) > (next === 3 ? SAFETY_3 : SAFETY_H)[Math.min(outs, 2)] + r.pl.runAggr : tRun + SAFETY + r.pl.runAggr < tBall) to = next; else break;
       }
       if (T.groundRule) to = Math.min(4, r.base + 2);
       r.target = Math.min(to, ahead - 1); ahead = r.target;
@@ -456,7 +489,7 @@ var BBField = (function () {
       else {
         if (play.how === 'cover') ev.push({ t: 0.3, kind: 'cover', who: 'P', to: 1, arrive: play.tBall });
         err = Math.abs(rng.n(0, Ff.pl.armAcc * d / 40));
-        ev.push({ t: tField + Ff.pl.transfer, kind: 'throw', who: Ff.pos, from: fieldAt, to: to, arrive: play.tBall, wild: err > 1.6, rcv: play.how === 'cover' ? 'P' : coverOf(to, Ff.pos) });
+        ev.push({ t: tField + settle(to, fieldAt) + Ff.pl.transfer, kind: 'throw', who: Ff.pos, from: fieldAt, to: to, arrive: play.tBall, wild: err > 1.6, rcv: play.how === 'cover' ? 'P' : coverOf(to, Ff.pos) });
       }
       var via = play.how === 'run' ? Ff.pos + ' unassisted' : play.how === 'cover' ? Ff.pos + ' to the pitcher covering' : Ff.pos + ' to ' + baseName(to);
       if (err > 1.6) {                                   // thrown away: everyone moves up
