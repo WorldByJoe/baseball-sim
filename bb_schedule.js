@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_schedule.js · v0.5 · 2026-10-03
+   bb_schedule.js · v0.6 · 2026-10-04
 
    The game and its schedule, shared by the screen (baseball.html) and the
    headless tools, so the broadcast script can be written and checked
@@ -33,6 +33,9 @@
    teams are drawn fresh as before.
 
    CHANGED
+     v0.6  more air for the omniscient broadcast: setup 4 s, a take 3.4, a foul 3.0, the batter's
+           introduction 5.5, the end of a half 9 (13 in the middle of an inning), and 6 s after each
+           at-bat for its summary
      v0.5  games from the league's stable, when there is one: a level and two clubs
      v0.4  the manager's moves (bb_game v0.9): an 'ibb' segment for an intentional walk,
            a 'pickoff' segment for each throw over, a longer change for a double switch
@@ -44,7 +47,8 @@ var BBSchedule = (function () {
   'use strict';
   var FT = BB.units.FT;
   // seconds each kind of segment lasts at 1x
-  var PACE = { pregame: 45, halfStart: 8, paStart: 4, setup: 3, flight: 1.8, take: 2.6, foul: 2.4, bipPad: 2.6, change: 3.5, halfEnd: 5.5, stretch: 30, final: 40,
+  // v0.6: more air for the omniscient broadcast (what he meant, what the batter saw, what happened): a pitch about every 9 s
+  var PACE = { pregame: 45, halfStart: 8, paStart: 5.5, setup: 4.0, flight: 1.8, take: 3.4, foul: 3.0, bipPad: 3.0, change: 4.5, halfEnd: 9.0, midInning: 13.0, paEnd: 6.0, stretch: 30, final: 40,
                ibb: 5.0, pickoff: 3.4, dswitch: 2.5 };   // an intentional walk (the sign, the jog to first); a throw over and back; a double switch's extra time
   var HR_BASE = 1.6, CELEB = 3.5;   // a home-run trot per base; how long a grand-slam huddle at the plate holds
 
@@ -183,6 +187,7 @@ var BBSchedule = (function () {
           if (last && play.play) dur = playDuration(play) + PACE.bipPad + (play.play.hit === 'HR' && play.play.runs === 4 ? CELEB + 1.0 : 0);   // a grand slam: the bench comes out
           else if (p.result === 'foul') dur = (p.bb ? Math.min(p.bb.hang, 3) : 0) + PACE.foul;
           else dur = running ? 5.0 : PACE.take;
+          if (last) dur += PACE.paEnd;   // the booth sums up the at-bat before the next man is introduced
           var sg = add('result', dur, { play: play, i: i, last: last, id: qk + '.result' });
           p.tResult = sg.t0;
           if (last && !play.pa.pickoffsEnd) { play.tResult = sg.t0; play.tResolve = sg.t0 + (play.play ? playDuration(play) - 0.6 : running ? 2.6 : 0.4); play.tEnd = sg.t0 + dur; }
@@ -193,7 +198,7 @@ var BBSchedule = (function () {
           play.tResult = lastPk.t0; play.tResolve = lastPk.t0 + 1.4; play.tEnd = lastPk.t0 + lastPk.dur;
         }
       });
-      inn.tEnd = add('halfEnd', PACE.halfEnd, { inn: inn, id: hk + '.end' }).t0;
+      inn.tEnd = add('halfEnd', inn.half === 0 ? PACE.midInning : PACE.halfEnd, { inn: inn, id: hk + '.end' }).t0;   // the middle of an inning is the longer break
       // the middle of the seventh: everyone stands and the organ plays "Take Me Out to the Ball Game"
       if (inn.n === 7 && inn.half === 0) add('stretch', PACE.stretch, { inn: inn, id: '7.stretch' });
     });
@@ -206,7 +211,7 @@ var BBSchedule = (function () {
     return { SEG: SEG, total: total, segAt: segAt, playDuration: playDuration, runnerArrive: runnerArrive, ownArrive: ownArrive };
   }
 
-  return { version: '0.5', PACE: PACE, HR_BASE: HR_BASE, CELEB: CELEB, Phi: Phi, winProb: winProb, game: game, build: build };
+  return { version: '0.6', PACE: PACE, HR_BASE: HR_BASE, CELEB: CELEB, Phi: Phi, winProb: winProb, game: game, build: build };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = BBSchedule;

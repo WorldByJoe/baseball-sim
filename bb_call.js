@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_call.js · v0.5 · 2026-10-03
+   bb_call.js · v0.6 · 2026-10-04
 
    The broadcast, written ahead. Given a game and its schedule (bb_schedule.js)
    it writes everything the park will say and play: every voice line, every
@@ -15,7 +15,9 @@
    home batters, line-ups, pitching changes). The booth is the home team's
    radio crew: it gets louder for the home side's good moments and flatter
    for the visitors', and every word stays true. Lines only use what has
-   happened by their moment (no foreshadowing) and speak of it in the past.
+   happened by their moment, and what the players already know before a
+   pitch: what the pitcher means to throw and what the batter is looking for
+   (v0.6, the omniscient booth).
 
    Every line carries an ENERGY - calm, building, excited, peak, deflated -
    and a pace (Piper's length_scale). Its length is estimated from a table
@@ -35,17 +37,19 @@
    start; voice lines also carry maxDur, the air they have.
 
    CHANGED
+     v0.6  OMNISCIENT (Joe): each pitch's call says what the pitcher meant and the batter was looking
+           for, what he could see in time and how bat met ball; each at-bat ends on the pitch that
+           decided it; the colour sketches players' traits, explains the pitches and the model
      v0.5  a game from the league's minors says its level at the first pitch
      v0.4  the manager's moves (bb_game v0.9): intentional walks, throws over to first,
            defensive changes and double switches are called
      v0.3  the PA gives uniform numbers; colour notes a man who wears e, pi or i
      v0.2  the timing table measured by rendering real lines; the PA paced quicker
-     v0.1  first build
 ============================================================================ */
 
 var BBCall = (function () {
   'use strict';
-  var VERSION = '0.5';
+  var VERSION = '0.6';
   var IN = BB.units.IN, FT = BB.units.FT, GEO = BB.geometry;
 
   // ================================================================ TIMING
@@ -124,6 +128,19 @@ var BBCall = (function () {
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
 
   // ================================================================ WRITE
+  // The farm's major leaguers, for 'better than most hitters': drawn once when this file loads, from a
+  // stream of their own, so they disturb no game (the trait table holds the pool's spreads, not the majors').
+  var REF_CACHE = null;
+  function refPlayers() { return REF_CACHE || (REF_CACHE = (function () {
+    var rng = BB.makeRng(4242), Bs = [], Ps = [], i;
+    for (i = 0; i < 1500; i++) { Bs.push(BB.makeBatter(rng, {})); Ps.push(BB.makePitcher(rng, { role: i % 12 < 7 ? 'SP' : 'RP' })); }
+    function ms(A, f) { var v = A.map(f), m = v.reduce(function (a, b) { return a + b; }, 0) / v.length, s = Math.sqrt(v.reduce(function (a, b) { return a + (b - m) * (b - m); }, 0) / v.length); return [m, s || 1]; }
+    return { batSpeed: ms(Bs, function (b) { return b.batSpeed; }), spotIn: ms(Bs, function (b) { return b.spotIn; }), eyeSD: ms(Bs, function (b) { return b.eyeSD; }),
+             aggr: ms(Bs, function (b) { return b.aggr; }), commit: ms(Bs, function (b) { return b.commit; }), timingSD: ms(Bs, function (b) { return b.timingSD; }),
+             barrelSD: ms(Bs, function (b) { return b.barrelSD; }), pullBias: ms(Bs, function (b) { return b.pullBias; }), attack: ms(Bs, function (b) { return b.attack; }),
+             speed: ms(Bs, function (b) { return b.speed; }), fbVelo: ms(Ps, function (p) { return p.fbVelo; }), command: ms(Ps, function (p) { return p.command; }) };
+  })()); }
+
   function write(GAME, SCHED, opts) {
     opts = opts || {};
     var G = GAME.G, SEG = SCHED.SEG, env = GAME.env, seed = GAME.seed, HOME = 1;
@@ -231,6 +248,160 @@ var BBCall = (function () {
     function sprayDir(sp, type) {   // sp degrees, minus to left field
       if (type === 'GB') return sp < -25 ? 'down the third-base line' : sp < -9 ? 'to the left side' : sp <= 9 ? 'up the middle' : sp <= 25 ? 'to the right side' : 'down the first-base line';
       return sp < -30 ? 'to left' : sp < -12 ? 'to left-center' : sp <= 12 ? 'to center' : sp <= 30 ? 'to right-center' : 'to right';
+    }
+
+
+    // ============================================================ WHAT WE KNOW (v0.6)
+    // This booth is omniscient. Every pitch's record carries what the pitcher meant
+    // (his pitch, his spot and why: attack, paint an edge, or expand), what the batter
+    // was looking for and how hard, whether the pitch left his picture in time for him
+    // to see it, what he judged and decided, and where bat met ball to the millimetre.
+    // The calls say it plainly; the colour explains the players and the model.
+    var PNAME = { FF: 'fastball', SI: 'sinker', FC: 'cutter', SL: 'slider', ST: 'sweeper', CU: 'curveball', CH: 'changeup', FS: 'splitter' };
+    function pn(t) { return PNAME[t] || BB.PITCH_TYPES[t].name; }
+    function pickK(key, arr) { return arr[hash(seed + ':' + key) % arr.length]; }
+    function inW(m) { var n = Math.round(Math.abs(m) / IN); return n <= 1 ? 'an inch' : num(n) + ' inches'; }
+    function msW(s) { var n = Math.round(Math.abs(s) * 1000); return n <= 1 ? 'a millisecond' : num(n) + ' milliseconds'; }
+    function spotWords(B, side, x, z) {   // a point at the plate for this batter: 'low and away', 'up and in', 'down the middle', 'off the plate away'
+      var xin = x * side, zf = (z - B.zone.bot) / (B.zone.top - B.zone.bot), half = GEO.PLATE_HALF + GEO.BALL_R;
+      var h = xin > half ? 'off the plate inside' : xin < -half ? 'off the plate away' : xin > 0.33 * half ? 'in' : xin < -0.33 * half ? 'away' : '';
+      var v = zf < -0.15 ? 'below the knees' : zf < 0.3 ? 'low' : zf > 1.1 ? 'above the zone' : zf > 0.7 ? 'up' : '';
+      if (!h && !v) return 'down the middle';
+      if (h.indexOf('off') === 0 || v.indexOf(' ') > 0) return [v, h].filter(Boolean).join(', ');
+      return v && h ? v + ' and ' + h : v || h;
+    }
+    var INTENT = { attack: ['go right after him', 'attack'], edge: ['paint the edge', 'work the edge'], expand: ['get him to chase', 'expand the zone'] };
+    function sitWords(ex) {
+      var g = pn(ex.guessType);
+      if (ex.approach === 'take') return 'is taking all the way';
+      if (ex.approach === 'protect') return 'is protecting the plate, looking ' + g;
+      if (ex.approach === 'hunt') return 'is hunting a ' + g;
+      return ex.commit >= 0.68 ? 'is sitting dead on the ' + g : ex.commit >= 0.45 ? 'is sitting ' + g : 'is looking ' + g + ', ready to adjust';
+    }
+    function fooledOn(q) { return q.read && !q.read.detected && q.expect && q.expect.guessType !== q.pitch.type; }
+    function missW(sw) { return inW(Math.max(0.5 * IN, Math.abs(sw.D) - 2.7 * IN)) + (sw.D > 0 ? ' under it' : ' over it'); }   // beyond where the barrel would have touched
+    function timeW(e) { return Math.abs(e) < 0.006 ? 'right on time' : (e > 0 ? 'early by ' : 'late by ') + msW(e); }
+    function meetW(sw) {   // where the ball met the bat
+      var v = Math.abs(sw.D) < 0.4 * IN ? 'square' : sw.D > 0 ? inW(sw.D) + ' under the middle of the ball' : inW(sw.D) + ' over the middle of the ball';
+      var a = sw.dLong > 2 * IN ? ', toward the end of the bat' : sw.dLong < -2 * IN ? ', in on the hands' : '';
+      return v + a;
+    }
+    // what happened on one pitch, from his point of view: 'the one-and-two slider: he was sitting fastball, never picked it up, and swung three inches over it'
+    function pitchStory(play, i) {
+      var q = play.pa.pitches[i], t = pn(q.pitch.type), ex = q.expect, rd = q.read, sw = q.swing, sat = ex && ex.guessType === q.pitch.type;
+      var head = 'the ' + countWords(q.count) + ' ' + t + ': ';
+      var saw = sat ? 'he got the pitch he was sitting on' : !rd ? '' : rd.detected ? 'he was sitting ' + pn(ex.guessType) + ' and picked it up' + (rd.late ? ' late' : '') : 'he was sitting ' + pn(ex.guessType) + ' and never picked it up';
+      var did;
+      if (q.decide && q.decide.checked) did = 'checked his swing';
+      else if (!sw) did = q.call ? (q.call.strike ? 'took it for a strike' : 'let it go for a ball') : 'took it';
+      else if (!sw.contact) did = sw.why === 'off the end' ? 'missed it off the end of the bat' : sw.why === 'inside the hands' ? 'missed it in on the hands' : Math.abs(sw.e) > 0.02 ? 'swung ' + timeW(sw.e) : 'swung ' + missW(sw);
+      else if (q.bb && (q.result === 'in_play' || q.result === 'hr')) did = 'met it ' + timeW(sw.e) + ', ' + meetW(sw) + ', and it came off at ' + num(q.bb.ev) + ' miles an hour';
+      else did = 'fouled it off, ' + timeW(sw.e);
+      return head + (saw ? saw + ', and ' : '') + did;
+    }
+    // the at-bat in one pitch: the one that decided it, or what he did again and again
+    function paSummary(play) {
+      var Q = play.pa.pitches || [], r = play.pa.result, n = Q.length;
+      if (!n || r === 'END' || r === 'IBB') return null;
+      var best = n - 1, fooled = Q.filter(function (q) { return q.swing && !q.swing.contact && fooledOn(q); }).length;
+      if (r === 'BB' || r === 'HBP') {   // the take that was closest to a swing
+        var bd = 9; Q.forEach(function (q, j) { if (q.decide && !q.decide.swing && Math.abs(q.decide.pin - q.decide.thr) < bd) { bd = Math.abs(q.decide.pin - q.decide.thr); best = j; } });
+      }
+      if (n === 1) return ['First pitch: ' + pitchStory(play, 0) + '.', null];
+      var lead = r === 'K' && fooled >= 2 ? ln(play.pitcher) + ' fooled him ' + num(fooled) + ' times in that at-bat. ' : '';
+      var st = pitchStory(play, best), q = Q[best], sw = q.swing, ex = q.expect;
+      var sat = ex && ex.guessType === q.pitch.type, key = String(play.batter.id) + best;
+      var who = fooledOn(q) ? 'sitting ' + pn(ex.guessType) + ', he never saw it' : sat ? pickK(key, ['he sat on it', 'he guessed right', 'he was waiting for it']) : pickK(key, ['he read it', 'he picked it up', 'he saw it coming']);
+      var went = '';
+      if (sw && sw.contact && q.bb && q.result !== 'foul') {
+        var pulled = q.bb.spray * (q.side || -1);   // + toward his pull side (bip_check's convention)
+        went = sw.e < -0.006 && pulled < -10 ? ', so it went the other way' : sw.e > 0.006 && pulled > 10 ? ', so he pulled it' : sw.dLong > 2 * IN ? ', off the end of the bat' : sw.dLong < -2 * IN ? ', in on the hands' : '';
+      }
+      var what = !sw ? (q.call && q.call.strike ? ' and took it' : ' and let it go') : !sw.contact ? (Math.abs(sw.e) > 0.02 ? ' but was ' + msW(sw.e) + ' ' + (sw.e > 0 ? 'early' : 'late') : ' but swung ' + missW(sw)) : ' and was ' + timeW(sw.e) + went;
+      var mid = cap(st.split(':')[0]) + ': ' + who + (fooledOn(q) && sw && !sw.contact ? '' : what) + '.';
+      return [lead + 'The pitch that decided it was ' + st + '.', lead + mid, went ? lead + mid.replace(went, '') : null];
+    }
+
+    // a taken pitch, a foul or a swing and miss, from inside both heads: [long, short]
+    function execWords(play, p, res, nB, nS) {
+      var B = play.batter, side = p.side || BB.batterSide(B, play.pitcher), t = cap(pn(p.pitch.type)), mph = num(p.pitch.mph);
+      var pl = p.plan, miss = pl && pl.target ? Math.hypot(p.pitch.plate.x - pl.target[0], p.pitch.plate.z - pl.target[1]) : 0;
+      var where = spotWords(B, side, p.pitch.plate.x, p.pitch.plate.z), ex = p.expect, sw = p.swing, fooled = fooledOn(p), guess = ex ? pn(ex.guessType) : 'something else';
+      var spot = !pl ? '' : miss < 3 * IN ? ', right on his spot' : miss > 9 * IN ? ', ' + inW(miss) + ' off his spot' : '';
+      if (res === 'ball') {
+        if (p.decide && p.decide.checked) return [t + ', ' + where + '. ' + ln(B) + ' started, and held up. Ball ' + num(nB) + '.', 'He held up. Ball ' + num(nB) + '.'];
+        return [t + ', ' + where + spot + '. ' + ln(B) + (fooled ? ' never picked it up, but it was well off' : ' read it and laid off') + '. Ball ' + num(nB) + '.', t + ', ' + where + '. Ball ' + num(nB) + '.'];
+      }
+      if (res === 'called_strike') {
+        if (fooled) return [t + ', ' + where + '. He was sitting ' + guess + ' and froze. Strike ' + num(nS) + '.', 'Froze him. Strike ' + num(nS) + '.'];
+        return [t + ', ' + where + spot + ', and ' + ln(B) + ' took it. Strike ' + num(nS) + '.', t + ', called strike ' + num(nS) + '.'];
+      }
+      if (res === 'swinging_strike' && sw) {
+        var how = fooled ? 'He was sitting ' + guess + ', never picked it up, and swung ' + missW(sw) : sw.why === 'off the end' ? 'He read it, and missed it off the end of the bat' : sw.why === 'inside the hands' ? 'He read it, and missed it in on the hands' : Math.abs(sw.e) > 0.02 ? 'He read it, but he was ' + msW(sw.e) + ' ' + (sw.e > 0 ? 'early' : 'late') : 'He read it and swung ' + missW(sw);
+        if (sw.check) how = 'A half swing, and he missed';
+        return [t + ', ' + mph + '. ' + how + '. Strike ' + num(nS) + '.', how + '. Strike ' + num(nS) + '.'];
+      }
+      if (res === 'foul' && sw && p.bb) {
+        var back = (p.bb.projDist || 0) < 25;
+        return [t + ', ' + mph + '. ' + cap(timeW(sw.e)) + ', ' + meetW(sw) + ', and fouled ' + (back ? 'back' : 'away') + '.', t + ', fouled ' + (back ? 'back' : 'off') + '.'];
+      }
+      return null;
+    }
+
+    // the eight pitches, for a listener who does not know them (the model's own physics)
+    var EXPLAIN = {
+      FF: ['A word on the four-seam fastball: it is the hardest pitch, about ninety-four, thrown with clean backspin. The spin holds it up, so it drops less than a hitter expects, and up in the zone that gets swings underneath.', 'The four-seamer is the hardest pitch, with backspin that holds it up.'],
+      SI: ['The sinker is a fastball a tick slower, with the spin tilted toward his arm side: it runs in on a same-side hitter and drops several inches more than a four-seamer. It is built for ground balls.', 'A sinker runs to his arm side and drops: a ground-ball pitch.'],
+      FC: ['The cutter is a fastball turned a little, about five miles an hour slower, with mostly bullet spin. It breaks a few inches toward the glove side, late, onto the hands of an opposite-side hitter.', 'A cutter: a fastball that breaks a few inches glove-side, late.'],
+      SL: ['A slider comes eight or nine miles an hour off the fastball with tight, bullet-like spin, so it hardly lifts at all. It drops and darts glove-side, late: it looks like a fastball until it is not.', 'A slider looks like a fastball, then drops and darts late.'],
+      ST: ['The sweeper is a slider spun more sideways, about eleven miles an hour off the fastball. It sweeps a foot or more across the plate with little drop, away from a same-side hitter.', 'A sweeper slides a foot or more across the plate.'],
+      CU: ['The curveball is fourteen or fifteen miles an hour slower, thrown with topspin, so it drops a foot or more below where a fastball would go. A hitter has to recognise it early, or he swings over it.', 'The curveball has topspin: it drops a foot or more.'],
+      CH: ['The changeup looks like a fastball out of the hand, but it comes eight or nine miles an hour slower, with less spin. A hitter timed for the fastball is out in front, and it fades and sinks toward the arm side.', 'A changeup looks like a fastball but arrives late, fading and sinking.'],
+      FS: ['The splitter is thrown with the fingers spread, so it barely spins, about thirteen hundred r p m against twenty-three hundred for a fastball, and it tumbles: it falls off the table, late.', 'A splitter barely spins, so it tumbles and falls late.']
+    };
+    // how the model works, one at a time in the breaks (numbers from the engine itself)
+    var MODEL = [
+      ['How our hitters work: he commits to a swing a sixth of a second before the ball arrives, about twenty-four feet out. After that it is a guess, and a few inches of late steering.', 'He commits a sixth of a second early; after that it is a guess.'],
+      ['Every hitter carries a picture of each pitch: the league\'s usual shape for it from that arm slot. A pitch that moves differently from his picture is what fools him.', 'A pitch that moves differently from his picture fools him.'],
+      ['Picking up a pitch is a race: how far it has left the path he expected by the time he must commit, against how sharp his eye for spin is.', 'Picking up a pitch is a race against his eye for spin.'],
+      ['Each swing has three errors: timing, in milliseconds; up and down, where a quarter inch turns a liner into a grounder; and along the barrel, sweet spot or end of the bat.', 'Every swing misses a little in time, height and along the barrel.'],
+      ['Before every pitch the pitcher picks a pitch and a spot the way the league does in that count: attack, paint an edge, or expand. A wilder pitcher aims closer to the middle.', 'A wilder pitcher aims closer to the middle.'],
+      ['A pitcher\'s command is how far his pitches land from where he aimed: about seven inches across for a good starter, more as he tires.', 'Command: about seven inches of scatter for a good starter.'],
+      ['The umpire is in the model too: his zone has a soft edge, about an inch either way, and some umpires keep a habit on one edge all night.', 'The umpire\'s zone has a soft edge, about an inch.'],
+      ['Every big leaguer here is the best of six from a much larger pool of professionals; the next best play at the levels below.', 'Every big leaguer is the best of six from a larger pool.'],
+      ['Once the ball leaves the bat it is pure physics: drag, the lift from backspin, and the air. Thinner air carries the ball farther.', 'After contact it is pure physics: drag, backspin lift and the air.']
+    ];
+    // the farm's major leaguers, for 'better than most': a fixed reference drawn once (the trait table holds the pool's spreads)
+    var REF = refPlayers();
+
+    function zOf(k, v) { return (v - REF[k][0]) / REF[k][1]; }
+    function share(z) { return num(Math.round(10 * BBSchedule.Phi(Math.abs(z)))); }
+    // a batter in a sentence: his two most unusual traits and what they make him do
+    function batterTraits(B) {
+      var T = [
+        ['batSpeed', 1, function (z) { return z > 0 ? 'swings a quick bat, ' + num(B.batSpeed) + ' miles an hour, quicker than ' + share(z) + ' big leaguers in ten: he hits it hard when he finds it, and a fast bat is a harder one to steer' : 'has a slow bat for a big leaguer, ' + num(B.batSpeed) + ' miles an hour, so he lives on contact'; }],
+        ['spotIn', -1, function (z) { return z > 0 ? 'picks up spin early, better than ' + share(z) + ' hitters in ten, so a breaking ball rarely fools him' : 'is slow to pick up spin, so a good slider or curveball gets him'; }],
+        ['eyeSD', -1, function (z) { return z > 0 ? 'has a sharp eye for the zone and rarely chases' : 'judges the zone loosely and will chase off the plate'; }],
+        ['aggr', 1, function (z) { return z > 0 ? 'is aggressive, swinging early in the count' : 'is patient and waits for his pitch'; }],
+        ['commit', 1, function (z) { return z > 0 ? 'sits hard on his guess: right, he punishes it; wrong, he looks lost' : 'hedges his guesses, so he is seldom fooled badly'; }],
+        ['timingSD', -1, function (z) { return z > 0 ? 'has unusually steady timing' : 'has timing that wanders from swing to swing'; }],
+        ['barrelSD', -1, function (z) { return z > 0 ? 'finds the middle of the ball as well as almost anyone' : 'misses the middle of the ball more than most, up and down'; }],
+        ['speed', 1, function (z) { return z > 0 ? 'can really run, ' + num(B.speed) + ' feet a second' : 'is slow down the line'; }]
+      ].map(function (q) { var z = q[1] * zOf(q[0], B[q[0]]); return { z: z, txt: q[2](z) }; }).filter(function (q) { return Math.abs(q.z) >= 1.0; }).sort(function (a, b) { return Math.abs(b.z) - Math.abs(a.z); });
+      if (!T.length) return null;
+      return [ln(B) + ' ' + T[0].txt + (T[1] ? '. He also ' + T[1].txt : '') + '.', ln(B) + ' ' + T[0].txt.split(':')[0].split(',')[0] + '.'];
+    }
+    // a pitcher in a sentence: his mix, his speed, his command, his slot, and the pitch that moves unlike most
+    function pitcherTraits(P) {
+      var zv = zOf('fbVelo', P.fbVelo), zc = zOf('command', P.command);
+      var mix = P.pitches.map(function (q) { return pn(q.type); }), mixW = mix.length > 2 ? mix.slice(0, -1).join(', ') + ' and ' + mix[mix.length - 1] : mix.join(' and ');
+      var cw = zc < -1 ? 'pinpoint command, about ' + inW(P.command * IN) + ' of scatter' : zc > 1 ? 'loose command; he misses his spots by ' + inW(P.command * IN) + ' on average' : 'average command';
+      var slot = P.armAngle < 22 ? ', from a low, almost sidearm slot' : P.armAngle > 52 ? ', from straight over the top' : '';
+      var odd = null;
+      P.pitches.forEach(function (q) { var d = BB.PITCH_TYPES[q.type], dev = Math.abs(q.tilt - d.tilt - d.tiltArm * (P.armAngle - 37.7)) / d.tiltSD + Math.hypot(q.seam[0], q.seam[1]) / 2; if (q.usage > 0.12 && (!odd || dev > odd.dev)) odd = { t: q.type, dev: dev }; });
+      var oddW = odd && odd.dev > 1.6 ? ' His ' + pn(odd.t) + ' moves unlike most, so hitters\' pictures of it are off.' : '';
+      return [ln(P) + ' throws a ' + mixW + '. The fastball sits around ' + num(P.fbVelo) + (zv > 1 ? ', which is hard' : zv < -1 ? ', soft for a big leaguer' : '') + ', with ' + cw + slot + '.' + oddW,
+              ln(P) + ': ' + mixW + ', fastball ' + num(P.fbVelo) + '.'];
     }
 
     // ============================================================ ALLOCATION
@@ -379,6 +550,7 @@ var BBCall = (function () {
       var mood = inn.half === HOME ? (s.runs ? 'excited' : 'calm') : (s.runs ? 'deflated' : 'building');
       say(seg, 0.4, 'pbp', mood, [cap(tally) + ' ' + (inn.half ? 'End of the ' : 'Middle of the ') + ORDW[inn.n] + ', ' + scoreLine(sc) + '.', cap(scoreLine(sc)) + '.'], 1, { slide: 1 });
       if (inn.half === 1 || inn.n !== 7) play_(seg, 2.6, 'organ_filler');
+      if (inn.half === 0 && MODEL[inn.n - 1]) cands.push({ seg: seg, t: seg.t0 + 3.6, role: 'colour', energy: 'calm', alts: MODEL[inn.n - 1], prio: 2, slide: 3, until: seg.t0 + seg.dur + 0.4, n: cands.length });
       lastHalfStats = s;
     }
     function writeStretch(seg) {
@@ -396,8 +568,9 @@ var BBCall = (function () {
         var out = seg.change.out, inP = seg.change.in, k = G.plays.indexOf(play), d = pitcherDay(out, k), defHome = play.half !== HOME;
         var line = !d.pitches ? '' : d.outs ? ln(out) + ' is done: ' + inningsWords(d.outs) + ', ' + num(d.pitches) + ' pitches, ' + (d.runs ? num(d.runs) + ' run' + (d.runs > 1 ? 's' : '') : 'no runs') + ' while he was on the mound.' : ln(out) + ' is done after ' + num(d.pitches) + ' pitches.';
         // the PA announces him as he comes in; the booth sums up the man leaving after it
-        say(seg, 0.2, 'pa', 'calm', ['Now pitching for the ' + T[1 - play.half].nick + ', ' + withNumber(inP.id, inP.name) + '.', 'Now pitching, ' + inP.name + '.'], 1, { slide: 1 });
+        say(seg, 0.2, 'pa', 'calm', ['Now pitching for the ' + T[1 - play.half].nick + ', ' + withNumber(inP.id, inP.name) + '.', 'Now pitching, ' + inP.name + '.'], 1, { slide: 5 });
         say(seg, 0.25, 'pbp', 'calm', [(line ? line + ' ' : '') + inP.last + ' is a ' + hand(inP) + '.', line, d.pitches ? ln(out) + ' threw ' + num(d.pitches) + ' pitches.' : ''], 2, { slide: 22 });
+        if (!used['ptraits' + inP.id]) { used['ptraits' + inP.id] = true; say(seg, 3.0, 'colour', 'calm', pitcherTraits(inP), 3, { slide: 12 }); }
         var dsw = seg.change.doubleSwitch;
         if (dsw) say(seg, 0.3, 'pbp', 'calm', ['And a double switch: ' + dsw.in.name + ' takes over in ' + POSTO[dsw.pos] + ' for ' + ln(dsw.out) + ', and ' + inP.last + ' will bat ' + ORDW[dsw.slotP + 1] + '.', 'A double switch, with ' + dsw.in.name + ' in ' + POSTO[dsw.pos] + '.'], 1, { slide: 24 });
         // the crowd says goodbye: an ovation for a home pitcher who pitched well, thin applause if he was hit hard,
@@ -470,27 +643,14 @@ var BBCall = (function () {
                       'π': ' wears pi: three point one four one six, and it never ends.',
                       i: ' wears i, the square root of minus one. An imaginary number on a very real ballplayer.' };
       if (NUM_FUN[NUMBER[B.id]] && !used['num' + B.id]) L.push({ key: 'num' + B.id, alts: [ln(B) + NUM_FUN[NUMBER[B.id]]] });
-      // his traits against the league: the one that stands out most, once a game
-      if (!used['trait' + B.id] && !used['speed' + B.id] && B.pos !== 'P') {
-        var Tr = BB.TRAITS, best = null;
-        [['batSpeed', 1], ['spotIn', -1], ['eyeSD', -1], ['barrelSD', -1], ['speed', 1]].forEach(function (q) {
-          var t = Tr[q[0]], z = q[1] * (B[q[0]] - t[0]) / t[1]; if (!best || Math.abs(z) > Math.abs(best.z)) best = { key: q[0], z: z, v: B[q[0]], mean: t[0] };
-        });
-        if (best && Math.abs(best.z) >= 1.0) {
-          var share = Math.round(10 * BBSchedule.Phi(Math.abs(best.z))), better = best.z > 0, txt, sh;
-          if (best.key === 'batSpeed') { txt = ln(B) + (better ? ' swings one of the quicker bats around: about ' : ' does not have much bat speed: about ') + num(best.v) + ' miles an hour at the sweet spot, where the league averages ' + num(best.mean) + '.';
-            sh = ln(B) + (better ? ' has a quick bat, ' : ' has a slow bat, ') + num(best.v) + ' miles an hour.'; }
-          else if (best.key === 'spotIn') { txt = better ? ln(B) + ' picks up a pitch early; he reads spin better than ' + num(share) + ' hitters in ten.' : ln(B) + ' is slow to pick up a pitch; most hitters read spin sooner than he does.';
-            sh = ln(B) + (better ? ' reads spin early.' : ' is slow to read spin.'); }
-          else if (best.key === 'eyeSD') { txt = better ? ln(B) + ' has a sharp eye for the zone, better than ' + num(share) + ' hitters in ten.' : ln(B) + ' does not judge the zone well; he will chase.';
-            sh = ln(B) + (better ? ' has a good eye.' : ' will chase.'); }
-          else if (best.key === 'barrelSD') { txt = better ? ln(B) + ' puts the barrel on the ball as well as almost anyone; better than ' + num(share) + ' hitters in ten.' : ln(B) + ' misses the barrel more than most.';
-            sh = ln(B) + (better ? ' finds the barrel.' : ' misses the barrel a lot.'); }
-          else { txt = better ? ln(B) + ' can run: ' + num(best.v) + ' feet a second, faster than ' + num(share) + ' players in ten.' : ln(B) + ' is not quick, ' + num(best.v) + ' feet a second down the line.';
-            sh = ln(B) + (better ? ' can really run.' : ' is not quick.'); }
-          L.push({ key: best.key === 'speed' ? 'speed' + B.id : 'trait' + B.id, alts: [txt, sh] });
-        }
-      }
+      // a pitch he has seen for the first time today, explained once a game (the most recent first)
+      var seenTypes = [];
+      play.pa.pitches.slice(0, upto).forEach(function (q) { if (seenTypes.indexOf(q.pitch.type) < 0) seenTypes.unshift(q.pitch.type); });
+      seenTypes.forEach(function (t) { if (EXPLAIN[t] && !used['explain' + t]) L.push({ key: 'explain' + t, alts: EXPLAIN[t] }); });
+      // the pitcher in a sentence, the first time the booth gets to him
+      if (!used['ptraits' + P.id]) L.push({ key: 'ptraits' + P.id, alts: pitcherTraits(P) });
+      // the batter in a sentence: his two most unusual traits and what they make him do, once a game
+      if (!used['trait' + B.id] && B.pos !== 'P') { var bt = batterTraits(B); if (bt) L.push({ key: 'trait' + B.id, alts: bt }); }
       // how he has done today, for the home batters the PA introduced without it
       if (day.pas.length) L.push({ key: 'day' + k, alts: ['He ' + dayStory(day) + '.'] });
       // the last time he faced this pitcher today, when that is news beyond his day
@@ -524,7 +684,24 @@ var BBCall = (function () {
       // the count, with tension when it matters
       var big = (cw[1] === 2 && (cw[0] === 3 || stk > 0.1)) || (cw[0] === 3 && stk > 0.08);
       var verb = runners ? pick(seg.id, ['He comes set.', 'Set.', 'He checks the runner. Sets.']) : pick(seg.id, ['The wind-up.', 'Here is the pitch.', 'He deals.']);
-      if (seg.i > 0 || cw[0] || cw[1]) say(seg, 0.3, 'pbp', big ? 'building' : 'calm', [cap(countWords(c)) + '. ' + verb, cap(countWords(c)) + '.'], big ? 2 : 4, { slide: 0.3, until: seg.t0 + seg.dur + PACE_FLIGHT() });
+      // what is coming and why, and what the batter is looking for (v0.6: the booth knows both)
+      var B = play.batter, P = play.pitcher, side = p.side || BB.batterSide(B, P), pl = p.plan, ex = p.expect;
+      var cnt = seg.i === 0 && !cw[0] && !cw[1] ? 'First pitch' : cap(countWords(c)), alts = [];
+      if (pl && ex && pl.target) {
+        var t = pn(p.pitch.type), tw = spotWords(B, side, pl.target[0], pl.target[1]), iw = INTENT[pl.intent] || INTENT.attack, sat = ex.guessType === p.pitch.type, sit = sitWords(ex);
+        // the whole picture on the pitches that matter - his first, two strikes, three balls, or when the batter's
+        // guess or approach changes; otherwise just what is coming, which leaves the colour some air
+        var prevQ = seg.i > 0 ? play.pa.pitches[seg.i - 1] : null, changed = !prevQ || !prevQ.expect || prevQ.expect.guessType !== ex.guessType || prevQ.expect.approach !== ex.approach;
+        if (seg.i === 0 || cw[1] === 2 || cw[0] === 3 || changed) {
+          alts.push(cnt + '. ' + ln(P) + ' wants the ' + t + ', ' + tw + ', to ' + iw[0] + '. ' + ln(B) + ' ' + sit + (sat ? ', and that is what is coming.' : '.'));
+          alts.push(cnt + '. ' + cap(t) + ', ' + tw + '. ' + ln(B) + ' ' + sit + (sat ? ', and gets it.' : '.'));
+        }
+        if (pl.intent !== 'attack') alts.push(cnt + '. ' + cap(t) + ', ' + tw + ', to ' + iw[0] + '.');   // why, when it is not just attacking the zone
+        alts.push(cnt + '. ' + cap(t) + ', ' + tw + '.');
+      }
+      alts.push(cnt + '. ' + verb);
+      if (curPA && curPA.brief && curPA.brief[seg.i]) alts = [cnt + '.'];   // the colour has this one
+      say(seg, 0.3, 'pbp', big ? 'building' : 'calm', alts, curPA && curPA.brief && curPA.brief[seg.i] ? 3 : 2, { slide: 0.3, until: seg.t0 + seg.dur + PACE_FLIGHT() });
       // the crowd leans in
       if (homePitch && cw[1] === 2 && stk > 0.04) cue(seg, 0.1, 'clap_two_strike', 0.8, seg.dur + 1.6);
       if (((cw[0] === 3 && cw[1] === 2) || (bases[1] && bases[2] && bases[3])) && play.inning >= 7 && Math.abs(play.scoreBefore[1] - play.scoreBefore[0]) <= 2) cue(seg, 0.2, 'rumble_rising', 0.8, seg.dur + 1.6);
@@ -576,22 +753,25 @@ var BBCall = (function () {
       }
       if (p.wild) {
         var runs = p.wild.runs;
-        say(seg, 1.2, 'pbp', play.half === HOME ? 'excited' : 'building', [(p.wild.kind === 'WP' ? 'In the dirt, and it gets away!' : 'Past the catcher!') + (runs ? ' A run scores!' : ' The runner' + (p.wild.from.length > 1 ? 's move up.' : ' moves up.')), (p.wild.kind === 'WP' ? 'Wild pitch!' : 'Passed ball!')], 1);
+        say(seg, 1.2, 'pbp', play.half === HOME ? 'excited' : 'building', [(p.wild.kind === 'WP' ? 'In the dirt, and it gets away!' : 'Past the catcher!') + (runs ? ' A run scores!' : ' The runner' + (p.wild.from.length > 1 ? 's move up.' : ' moves up.')), (p.wild.kind === 'WP' ? 'Wild pitch!' : 'Passed ball!')], 1, { slide: 2 });
         react(seg, 1.4, play, stealSwing(play, p));
       }
       // ---- the call
       var strikesAfter = cw[1] + (res === 'called_strike' || res === 'swinging_strike' || (res === 'foul' && cw[1] < 2) ? 1 : 0), ballsAfter = cw[0] + (res === 'ball' ? 1 : 0);
+      var xw = (p.steal && !p.steal.back) || p.wild ? null : execWords(play, p, res, ballsAfter, strikesAfter), callUntil = nextSeg ? nextSeg.t0 + 1.6 : Infinity, lastUntil = nextSeg ? nextSeg.t0 + 0.3 : Infinity;   // what both men did; it leaves the next pitch room to be set up
       var callE = (cw[1] === 2 || cw[0] === 3) && curPA && curPA.stakes > 0.08 ? 'building' : 'calm';
       if (isLast && r === 'K') {
         var homeK = !homeBat, looking = res === 'called_strike', dwp = play.wpAfter - play.wpBefore;
         var e = homeK ? (Math.abs(dwp) > 0.06 ? 'peak' : 'excited') : 'deflated';
-        say(seg, 0.15, 'pbp', e, homeK ? [looking ? pitchBit + 'Strike three called! ' + ln(P) + ' froze him!' : 'Swung on and missed! Strike three! ' + ln(P) + ' gets him!', looking ? 'Strike three called!' : 'Strike three!']
-                                        : [looking ? 'Called strike three. ' + ln(B) + ' goes down looking.' : 'Strike three. ' + ln(B) + ' goes down swinging.', 'Strike three.'], 1);
+        var kIn = xw ? (looking ? 'Called strike three! ' : 'Strike three! ') + xw[0].replace(/ Strike three\.$/, '') : null;
+        say(seg, 0.15, 'pbp', e, (kIn ? [kIn + (homeK ? ' ' + ln(P) + ' gets him!' : ''), kIn] : []).concat(homeK ? [looking ? pitchBit + 'Strike three called! ' + ln(P) + ' froze him!' : 'Swung on and missed! Strike three! ' + ln(P) + ' gets him!', looking ? 'Strike three called!' : 'Strike three!']
+                                        : [looking ? 'Called strike three. ' + ln(B) + ' goes down looking.' : 'Strike three. ' + ln(B) + ' goes down swinging.', 'Strike three.']), 1, { until: lastUntil });
         if (play === G.plays[G.plays.length - 1]) say(seg, 3.4, 'pbp', homeK ? 'peak' : 'deflated', [endWords()], 1, { slide: 1 });
         react(seg, 0.4, play, dwp, 'K');
       } else if (isLast && r === 'BB') {
         var forced = play.runs > 0, dwp2 = play.wpAfter - play.wpBefore;
-        say(seg, 0.15, 'pbp', homeBat ? (forced ? 'excited' : 'building') : (forced ? 'deflated' : 'calm'), ['Ball four' + (loc ? ', ' + loc : '') + '. ' + ln(B) + ' walks' + (forced ? ', and that forces in a run! ' + cap(scoreLine(play.score)) + '.' : '.'), 'Ball four.'], 1);
+        var walkW = ln(B) + ' walks' + (forced ? ', and that forces in a run! ' + cap(scoreLine(play.score)) + '.' : '.');
+        say(seg, 0.15, 'pbp', homeBat ? (forced ? 'excited' : 'building') : (forced ? 'deflated' : 'calm'), (xw ? [xw[0] + ' ' + walkW] : []).concat(['Ball four' + (loc ? ', ' + loc : '') + '. ' + walkW, 'Ball four.']), 1, { until: lastUntil });
         cue(seg, 0.8, 'bat_drop', 0.8);
         if (homeBat || forced) react(seg, 0.5, play, dwp2, 'walk');
       } else if (isLast && r === 'HBP') {
@@ -603,12 +783,15 @@ var BBCall = (function () {
       } else if (isLast && play.play) {
         callBallInPlay(seg, play, p);   // a ball in play, or a foul pop caught for the out
       } else if (res === 'ball') {
-        say(seg, 0.15, 'pbp', callE, [pitchBit + 'Ball ' + num(ballsAfter) + (pitchBit || !loc ? '' : ', ' + loc) + '.', 'Ball ' + num(ballsAfter) + '.'], 1);
+        say(seg, 0.15, 'pbp', callE, (xw || []).concat([pitchBit + 'Ball ' + num(ballsAfter) + (pitchBit || !loc ? '' : ', ' + loc) + '.', 'Ball ' + num(ballsAfter) + '.']), 1, { until: callUntil });
       } else if (res === 'called_strike') {
         var corner = plateDepth < 1.5 * IN ? (plateDepth < 0 ? ', and that looked off the plate' : ', on the corner') : '';
-        say(seg, 0.15, 'pbp', callE, [pitchBit + 'Called strike ' + num(strikesAfter) + corner + '.', 'Strike ' + num(strikesAfter) + '.'], 1);
+        say(seg, 0.15, 'pbp', callE, (xw || []).concat([pitchBit + 'Called strike ' + num(strikesAfter) + corner + '.', 'Strike ' + num(strikesAfter) + '.']), 1, { until: callUntil });
       } else if (res === 'swinging_strike') {
-        say(seg, 0.15, 'pbp', callE, [pitchBit + pick(seg.id + 's', ['Swung on and missed', 'Swing and a miss', 'He swung through it']) + ', strike ' + num(strikesAfter) + '.', 'Strike ' + num(strikesAfter) + '.'], 1);
+        say(seg, 0.15, 'pbp', callE, (xw || []).concat([pitchBit + pick(seg.id + 's', ['Swung on and missed', 'Swing and a miss', 'He swung through it']) + ', strike ' + num(strikesAfter) + '.', 'Strike ' + num(strikesAfter) + '.']), 1, { until: callUntil });
+      } else if (res === 'foul' && xw) {
+        say(seg, 0.15, 'pbp', callE, [xw[0] + (cw[1] === 2 ? ' Still ' + countWords(cw[0] + '-2') + '.' : ''), xw[1], 'Foul ball.'], 1, { until: callUntil });
+        if (p.bb && (p.bb.projDist || 0) > 300 && p.bb.la > 15) cue(seg, 0.4, 'ooh_close_foul', 0.8);
       } else if (res === 'foul') {
         var b = p.bb, fd2 = b.projDist || 0, longF = fd2 > 300 && b.la > 15, stands = fd2 > 120 && b.la > 18 && Math.abs(b.spray) > 46;
         var where = b.spray < -45 ? 'the third-base side' : b.spray > 45 ? 'the first-base side' : '';
@@ -617,11 +800,33 @@ var BBCall = (function () {
         if (longF) cue(seg, 0.4, 'ooh_close_foul', 0.8);
         else if (stands) cue(seg, Math.min(b.hang || 2, 3), 'foul_souvenir', 0.6);
       }
+      // ---- the at-bat in one pitch, when it is over: the pitch that decided it, from inside both heads
+      if (isLast) {
+        var sumA = paSummary(play);
+        if (sumA) {
+          var tAfter = play.play ? Math.max(1.3, play.tResolve - seg.t0) + 2.4 : 3.0;
+          cands.push({ seg: seg, t: seg.t0 + tAfter, role: 'colour', energy: 'calm', alts: sumA.filter(Boolean), prio: 1.5, slide: 6, until: nextResultT(seg) - 0.4, n: cands.length });
+        }
+      }
       // ---- colour in the gap after a taken pitch, a foul or a swing and miss, before the next call
       if (!isLast && nextSeg) {
         var nextCall = nextSeg.t0 + BBSchedule.PACE.setup + BBSchedule.PACE.flight;   // the next pitch's result
-        if (nextColour()) cands.push({ seg: seg, t: seg.t0 + 1.4, role: 'colour', energy: 'calm', alts: null, gen: true, prio: 3, slide: 1.2, until: nextCall - 0.3, n: cands.length });
+        // TAKING TURNS (v0.6): when the next pitch is routine, the colour gets its window and the pitch is just the count
+        var nq = play.pa.pitches[i + 1], ncw = nq ? nq.count.split('-').map(Number) : [0, 0];
+        var nChanged = !nq || !nq.expect || !p.expect || nq.expect.guessType !== p.expect.guessType || nq.expect.approach !== p.expect.approach;
+        var turn = nq && !(ncw[1] === 2 || ncw[0] === 3 || nChanged) && hasColour(play, i + 1);
+        if (turn) { curPA.brief = curPA.brief || {}; curPA.brief[i + 1] = true; }
+        if (turn || nextColour()) cands.push({ seg: seg, t: seg.t0 + 1.4, role: 'colour', energy: 'calm', alts: null, gen: true, prio: turn ? 2 : 3, slide: 1.2, until: nextCall - 0.3, n: cands.length });
       }
+    }
+    function hasColour(play, upto) {   // anything left to say about this at-bat, as the allocator will see it
+      var k = G.plays.indexOf(play), save = curPA; curPA = { play: play, colour: [] };
+      planColour(play, dayOf(play), k, upto); var n = curPA.colour.filter(function (q) { return !used[q.key]; }).length; save.brief = save.brief || {}; curPA = save;
+      return n > 0;
+    }
+    function nextResultT(seg) {   // when the next pitch's call comes, after this segment
+      for (var j = SEG.indexOf(seg) + 1; j < SEG.length; j++) if (SEG[j].kind === 'result') return SEG[j].t0;
+      return Infinity;
     }
     function stealSwing(play, p) {   // how far a steal or wild pitch moved the home side's chance
       if (!p.basesAfter) return 0;
@@ -646,7 +851,17 @@ var BBCall = (function () {
       else if (r.type === 'LD') contact = 'Line drive ' + dir + '!';
       else if (r.type === 'PU') contact = 'Popped up' + (bb.projDist < 150 ? ', on the infield.' : ', shallow ' + dir.replace('to ', '') + '.');
       else contact = 'Fly ball ' + dir + '.';
-      say(seg, 0.05, 'pbp', r.hit === 'HR' || deep ? (homeBat ? 'excited' : 'building') : hot, [contact], 1);
+      var sw0 = p.swing, inside = '';
+      if (sw0 && p.expect && !(r.hit === 'HR' || (r.type === 'FB' && deep))) {
+        var sat0 = p.expect.guessType === p.pitch.type;
+        inside = fooledOn(p) ? 'Fooled, but he got the bat on it: ' : sat0 && Math.abs(sw0.e) < 0.008 && Math.abs(sw0.D) < 0.6 * IN ? 'He got his pitch and squared it: ' : sw0.e > 0.015 ? 'Out in front: ' : sw0.e < -0.015 ? 'Late on it: ' : sw0.dLong < -2.5 * IN ? 'Jammed: ' : sw0.dLong > 2.5 * IN ? 'Off the end: ' : '';
+      }
+      var evT = r.events.filter(function (e) { return e.kind === 'catch' || e.kind === 'drop' || e.kind === 'field' || e.kind === 'muff'; }).map(function (e) { return e.t - 0.3; });
+      if ((r.hit === '1B' || r.hit === '2B' || r.hit === '3B') && bb.landT) evT.push(Math.min(bb.landT, 4) - 0.1);
+      var nextLive = evT.length ? Math.max(0.9, Math.min.apply(null, evT)) : Infinity;   // the catch, the stop or the ball dropping in: the contact call ends before it
+      var cE = r.hit === 'HR' || deep ? (homeBat ? 'excited' : 'building') : hot, withIn = inside ? inside + contact.charAt(0).toLowerCase() + contact.slice(1) : null;
+      if (withIn && 0.05 + estDur(withIn, 'pbp', cE) > nextLive) withIn = null;   // the lead-in only when it is over before the catch, the stop or the ball dropping in
+      say(seg, 0.05, 'pbp', cE, (withIn ? [withIn] : []).concat([contact]), 1);
       if (bb.hang > 2.5 && bb.projDist > 250) cue(seg, 0.3, 'swell_fly', clamp((bb.projDist - 200) / 200, 0.4, 1) * (homeBat ? 1 : 0.7), Math.min(6, bb.hang - 0.3));
       // the sounds of the play
       r.events.forEach(function (e) {
@@ -718,7 +933,7 @@ var BBCall = (function () {
         var tag = /tag|runner scores/.test(play.desc) ? cap(play.desc.split(', ').slice(1).join(', ')) + '. ' : '';
         resText = (catchE ? '' : how || outWhere || 'Out at first. ') + tag + outW + (play.runs && !tag ? scoreBit : ''); shortText = outW; eRes = homeBat ? 'calm' : (outsNow >= 3 ? 'building' : 'calm');
       }
-      say(seg, Math.max(1.3, tRes), 'pbp', eRes, [resText.trim(), shortText.trim()], 1, { slide: 1.5 });
+      say(seg, Math.max(1.3, tRes), 'pbp', eRes, [resText.trim(), shortText.trim()], 1, { slide: 3 });
       react(seg, Math.max(0.6, tRes), play, dwp);
       // colour in the walk back after a hard-hit or long ball
       if (!lastPlay && (bb.ev >= 100 || bb.projDist >= 340)) cands.push({ seg: seg, t: seg.t0 + tRes + 1.2, role: 'colour', energy: 'calm', alts: [(r.hit === 'OUT' ? 'He hit that one hard: ' : 'Off the bat at ') + num(bb.ev) + ' miles an hour' + (bb.projDist > 200 ? ', ' + num(bb.projDist) + ' feet.' : '.'), num(bb.ev) + ' off the bat.'], prio: 3, slide: 2.5, until: Infinity, n: cands.length });
@@ -810,6 +1025,7 @@ var BBCall = (function () {
     return { version: VERSION, seed: seed, lines: lines, sfx: sfx, crowd: crowd, organ: organ, dropped: dropped, stats: stats };
   }
 
+  refPlayers();
   return { version: VERSION, write: write, estDur: estDur, PACE: PACE, TIMING: TIMING, GAP: GAP, num: num };
 })();
 
