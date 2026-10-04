@@ -34,11 +34,14 @@
   function pad(s, n) { s = String(s); while (s.length < n) s += ' '; return s; }
   function mmss(t) { var m = Math.floor(t / 60), s = t - 60 * m; return m + ':' + (s < 10 ? '0' : '') + s.toFixed(1); }
   seeds.forEach(function (seed, gi) {
-    var g = BBSchedule.game(seed), S = BBSchedule.build(g.G, g.PLAYER), C = BBCall.write(g, S);
-    var g2 = g, C2 = BBCall.write(g2, BBSchedule.build(g2.G, g2.PLAYER));   // the same game written again: the same broadcast?
+    var g = BBSchedule.game(seed), PC = BBCall.paced(g), S = PC.SCHED, C = PC.CALL;
+    var C2 = BBCall.paced(g).CALL;   // the same game written again: the same broadcast?
     var ids = {}; S.SEG.forEach(function (s) { ids[s.id] = s; });
     var bad = [];
     if (JSON.stringify(C.lines) !== JSON.stringify(C2.lines) || JSON.stringify(C.sfx) !== JSON.stringify(C2.sfx)) bad.push('not deterministic');
+    var heldLeft = Object.keys(C.holds).filter(function (id) { return C.holds[id] > ids[id].dur - ids[id].base + 0.05; });   // the second writing must ask for no more than it was given
+    if (heldLeft.length) bad.push('holds not met at ' + heldLeft.slice(0, 3).join(', '));
+    C.dropped.forEach(function (d) { if (d.hold) bad.push('held line dropped at ' + d.event); });
     C.lines.forEach(function (l, j) {
       var nx = C.lines[j + 1];
       if (!ids[l.event]) bad.push('unknown event ' + l.event);

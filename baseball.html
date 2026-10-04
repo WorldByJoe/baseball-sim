@@ -5,16 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v4.4 · 2026-10-04
+  baseball.html · v4.8 · 2026-10-04
 
   The baseball app's screen: a whole game, played by the engine up front
-  (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
-  (Joe, 2026-09-29): a pitch every ten seconds or so, every number on
-  screen real, nothing hidden. The schedule is deterministic, so ?t=SECONDS
+  (about 50 ms) and then REPLAYED on a schedule - game night mode
+  (Joe, 2026-09-29): every number on screen real, nothing hidden. Since
+  v4.8 the broadcast sets the pace (Joe, 2026-10-04: slower than a pitch
+  every ten seconds is fine if the talk is worth hearing): each pitch waits
+  until what the booth must say about it is said (BBCall.paced), about
+  fifteen seconds a pitch. The schedule is deterministic, so ?t=SECONDS
   seeks to any moment of a game (used to check frames headless), ?seed=N
   draws another game, ?speed=X paces it.
 
-  Each pitch is three beats. SETUP (3 s): the count, the pitcher's intent
+  Each pitch is three beats. SETUP (4 s or more): the count, the pitcher's intent
   and pitch mix, where he is aiming (crosshair, one-sigma command circle),
   and the pitch the batter is sitting on (his dashed picture of it).
   FLIGHT (1.8 s): the real pitch flies in slow motion in the catcher's view
@@ -45,18 +48,15 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v4.8  the talk sets the clock (bb_call v0.7, bb_schedule v0.7): a segment lasts until its lines are said;
+          the pitcher sets and the runners lead off at the end of a long set-up, not its start
+    v4.7  the swing from above (Joe): opposite the flight chart, the bat frozen at contact or where the
+          ball crossed it, beside a ghost of the planned swing, with the timing; the omniscient
+          broadcast (bb_call v0.6) and its longer pauses (bb_schedule v0.6)
+    v4.6  a steal's wild throw drawn: the stealer carries on a base and everyone moves up (bb_game v1.1)
+    v4.5  engine v2.8 (aim follows command, the batter reads the slot, the scouts see each pitch),
+          bb_field v1.0 (the outfielder's stop and turn; separate sends to third and home)
     v4.4  engine v2.7 (a check needs something new at the last look), bb_field v0.9 (the scorer's errors)
-    v4.3  games from the league's stable (stable/bb_stable.js) when it is beside the page: the level
-          named in the line-ups and the state panel; without it, two new teams as before
-    v4.2  engine v2.6 (athleticism)
-    v4.1  the manager's moves (bb_game v0.9): intentional walks, throws over to first (the
-          runner diving back, or picked off), late defensive changes and double switches,
-          with the men walking on and off; at-bats with no pitch are drawn
-    v4.0  the players move as if tracked by GPS (Joe): fielders wander, get set and step in
-          with each pitch; the pitcher strides, the catcher sets up on the target; the batter
-          strides and steps out; runners lead off and get back; outfielders chase home runs
-          and fouls bound for the seats; the catcher's-view bat swings on the engine's circle
-          in his tilted plane, with the sweet spot's path drawn
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -146,18 +146,18 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   <div id="hud" class="tag"></div>
 </div>
 <!-- version tags so a browser never runs a stale engine against a new page -->
-<script src="bb_engine.js?v=2.7"></script>
+<script src="bb_engine.js?v=2.8"></script>
 <script src="bb_names.js?v=0.1"></script>
-<script src="bb_field.js?v=0.9"></script>
-<script src="bb_game.js?v=1.0"></script>
-<script src="bb_schedule.js?v=0.5"></script>
-<script src="bb_call.js?v=0.5"></script>
+<script src="bb_field.js?v=1.0"></script>
+<script src="bb_game.js?v=1.1"></script>
+<script src="bb_schedule.js?v=0.7"></script>
+<script src="bb_call.js?v=0.7"></script>
 <script src="bb_organ.js?v=0.1"></script>
 <script src="bb_sound.js?v=0.1"></script>
 <!-- the park's sound files, when they are beside the page; without it the game plays silently -->
 <script src="sounds/manifest.js"></script>
 <!-- the league's standing rosters, when they are beside the page (headless/league_run.js writes them); without it every game draws two new teams -->
-<script src="stable/bb_stable.js?v=2"></script>
+<script src="stable/bb_stable.js?v=3"></script>
 <script>
 (function () {
   'use strict';
@@ -241,12 +241,15 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   }
 
   // ========================================================= THE SCHEDULE
-  // laid out by bb_schedule.js (the broadcast script is written against the same clock)
-  var SCHED = BBSchedule.build(G, PLAYER), SEG = SCHED.SEG, total = SCHED.total, segAt = SCHED.segAt, playDuration = SCHED.playDuration, runnerArrive = SCHED.runnerArrive;
-  // the broadcast, written ahead for the whole game, and its player; neither may ever stop the picture
-  var CALL = null, SOUND = null;
-  try { CALL = BBCall.write(GAME, SCHED); SOUND = BBSound.create({ call: CALL, SEG: SEG, segAt: segAt, seed: SEED, base: 'sounds/' }); }
-  catch (err) { console.error('broadcast', err); SOUND = null; }
+  // laid out by bb_schedule.js with the holds the broadcast asks for (BBCall.paced: each segment lasts until
+  // what must be said in it is said), and the broadcast written against that clock; if the writer fails, the
+  // fixed pace and no sound - neither may ever stop the picture
+  var SCHED = null, CALL = null, SOUND = null;
+  try { var PACED = BBCall.paced(GAME); SCHED = PACED.SCHED; CALL = PACED.CALL; }
+  catch (err) { console.error('broadcast', err); SCHED = BBSchedule.build(G, PLAYER); CALL = null; }
+  var SEG = SCHED.SEG, total = SCHED.total, segAt = SCHED.segAt, playDuration = SCHED.playDuration, runnerArrive = SCHED.runnerArrive;
+  try { if (CALL) SOUND = BBSound.create({ call: CALL, SEG: SEG, segAt: segAt, seed: SEED, base: 'sounds/' }); }
+  catch (err) { console.error('sound', err); SOUND = null; }
 
   // ============================================================ THE CLOCK
   var T = SEEK, speed = SPEED, paused = false, lastNow = null;
@@ -747,8 +750,17 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     if (st && !st.back) {
       var from = BASES[st.from], to = BASES[st.to], run = lerp(from, to, 9 / (90 * FT)), tArr = Math.max(0.5, st.tRun - 1.35), tBall = Math.max(0.4, st.tBall - 1.35);
       var f = clamp(tau / tArr, 0, 1), pos = lerp(run, to, f), pl = byId[st.id];
+      if (st.safe && st.wild) {                                                       // the throw got away: he keeps going a base, and everyone else moves up (bb_game v1.1)
+        var f2 = clamp((tau - tArr - 0.3) / 1.6, 0, 1);
+        if (st.to + 1 >= 4) { if (f2 >= 1) { shown[st.id] = null; if (tau < tArr + 3.4) text(g, '+1', fx(0) + 40, fy(0) - 30, 44, TC, 'left'); } else pos = lerp(to, BASES[0], f2); }
+        else pos = lerp(to, BASES[st.to + 1], f2);
+        [1, 2, 3].forEach(function (b) { var o = (p.bases || [])[b]; if (!o || o.id === st.id) return;
+          var rq = lerp(BASES[b], BASES[b + 1], clamp((tau - tArr) / 1.8, 0, 1));
+          if (b + 1 >= 4 && tau > tArr + 1.8) { if (tau < tArr + 3.4) text(g, '+1', fx(0) + 40, fy(0) - 70, 44, TC, 'left'); shown[o.id] = null; }
+          else { runnerDot(g, fx(rq[0]), fy(rq[1]), TC, o.pos); shown[o.id] = true; } });
+      }
       if (!st.safe && tau > tArr + 1.4) shown[st.id] = null;                        // walking off (walksOf)
-      else { runnerDot(g, fx(pos[0]), fy(pos[1]), TC, pl && pl.pos); shown[st.id] = true; }
+      else if (shown[st.id] !== null) { runnerDot(g, fx(pos[0]), fy(pos[1]), TC, pl && pl.pos); shown[st.id] = true; }
       if (tau > 0.6 && tau < tBall + 0.5) {                                          // the throw
         var u = clamp((tau - 0.6) / Math.max(0.3, tBall - 0.6), 0, 1), bp = lerp([0, 0], to, u);
         g.strokeStyle = st.wild ? '#e66767' : 'rgba(238,244,252,.6)'; g.lineWidth = 2; g.setLineDash([4, 8]); g.beginPath(); g.moveTo(fx(0), fy(0)); g.lineTo(fx(to[0]), fy(to[1])); g.stroke(); g.setLineDash([]);
@@ -893,14 +905,16 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     var h = hashMix(hashStr(String(key))), a = h % 628 / 100, b = (h >>> 9) % 628 / 100, c = (h >>> 18) % 628 / 100;
     return [amp * (0.6 * Math.sin(t * 0.23 + a) + 0.4 * Math.sin(t * 0.71 + b)), amp * (0.6 * Math.sin(t * 0.19 + c) + 0.4 * Math.sin(t * 0.67 + a + c))];
   }
+  // a set-up lasts as long as the booth needs (v4.8): its beats count back from the pitch, so the man is at ease
+  // while they talk and comes set 3.4 s before the delivery, as he did in the fixed 4-s set-up
   function setPhase(seg, tau) {   // 0 at ease between pitches, 1 set for the pitch
-    if (seg.kind === 'setup') return smooth((tau - 0.6) / 1.2);
+    if (seg.kind === 'setup') return smooth((tau - (seg.dur - 3.4)) / 1.2);
     if (seg.kind === 'flight') return 1;
     if (seg.kind === 'result') return 1 - smooth((tau - 0.8) / 1.4);
     return 0;
   }
   function stepPhase(seg, tau) {   // the step in with the delivery, and back
-    if (seg.kind === 'setup') return smooth((tau - (PACE.setup - 1.0)) / 1.0);
+    if (seg.kind === 'setup') return smooth((tau - (seg.dur - 1.0)) / 1.0);
     if (seg.kind === 'flight') return 1;
     if (seg.kind === 'result') return 1 - smooth((tau - 0.4) / 1.6);
     return 0;
@@ -934,7 +948,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   // lead as the pitcher sets (3.5 m, Statcast's 11.7 ft), shuffles to his secondary
   // as it is delivered (4.66 m, 15.3 ft: the fielding layer's LEAD) and gets back
   function leadNow(seg, tau) {
-    if (seg.kind === 'setup') return 3.5 * smooth((tau - 0.5) / 1.8);
+    if (seg.kind === 'setup') return 3.5 * smooth((tau - (seg.dur - 3.5)) / 1.8);
     if (seg.kind === 'flight') return 3.5 + 1.16 * smooth(tau / 0.9);
     if (seg.kind === 'result') return 4.66 * (1 - smooth((tau - 0.3) / 1.3));
     return 0;
@@ -971,7 +985,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     // the venue, always
     [-1, 1].forEach(function (sd) { var Tm = G.teams[sd < 0 ? 0 : 1]; drawBox(g, dugoutOf(sd), Tm.nick.toUpperCase()); var dk = deckOf(sd);
       g.beginPath(); g.arc(dk[0], dk[1], 30, 0, 7); g.lineWidth = 2; g.strokeStyle = INK3; g.stroke(); });
-    profileFrame(g);
+    profileFrame(g); swingFrame(g);
     if (!play) { [-1, 1].forEach(function (sd) { drawPen(g, sd, null); }); return; }
     var half = play.half, batTeam = G.teams[half], defTeam = G.teams[1 - half], TC = batTeam.col;
     var sdBat = half === 1 ? 1 : -1, sdDef = -sdBat;
@@ -986,6 +1000,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     var byId = {}; byId[play.batter.id] = play.batter; [1, 2, 3].forEach(function (b) { if (play.bases[b]) byId[play.bases[b].id] = play.bases[b]; });
     play.pa.pitches.forEach(function (q) { (q.bases || []).forEach(function (pl) { if (pl) byId[pl.id] = pl; }); });
     var quiet = seg.kind === 'halfStart' || seg.kind === 'halfEnd' || seg.kind === 'change' || seg.kind === 'paStart' || seg.kind === 'final' || seg.kind === 'pregame';
+    drawSwingView(g, seg, play, TC);   // the swing from above, frozen at contact or where the ball crossed it
 
     // bullpens: whoever is warming, on either side
     drawPen(g, sdDef, play.warming, defTeam.col, tAbs, defTeam.nick);
@@ -1013,7 +1028,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
       return t > ch.land + 0.9 ? lerp(cp, F.at, smooth((t - ch.land - 0.9) / 1.6)) : cp;
     }
     var prevCh = null;
-    if (seg.kind === 'setup' && seg.i > 0) { var pp = play.pa.pitches[seg.i - 1]; if (pp && pp.result === 'foul') { var pc = foulChase(play, pp); if (pc) prevCh = { c: pc, tEnd: (pp.bb ? Math.min(pp.bb.hang, 3) : 0) + PACE.foul }; } }
+    if (seg.kind === 'setup' && seg.i > 0) { var pp = play.pa.pitches[seg.i - 1]; if (pp && pp.result === 'foul') { var pc = foulChase(play, pp); if (pc) prevCh = { c: pc, tEnd: seg.t0 - pp.tResult }; } }   // the foul's segment as long as it lasted
     function fielderAt(F, t) {
       if (plan) return plan(F, t);
       if (pko && F.pos === '1B') { var bag1 = pickBag(); return t < 2.4 ? lerp(F.at, bag1, sm(t / 1.0)) : lerp(bag1, F.at, sm((t - 2.4) / 1.0)); }   // to the bag for the throw, then back
@@ -1181,6 +1196,58 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     }
     if (last) { g.beginPath(); g.arc(last[0], last[1], 7, 0, 7); g.fillStyle = INK; g.fill(); }
     g.restore();
+  }
+
+
+  // ===================================================== THE SWING FROM ABOVE
+  // Opposite the flight chart (Joe, 2026-10-04): the batter from overhead, his bat frozen where it was
+  // when it met the ball - or, on a miss, when the ball crossed its path - beside a faint ghost of where
+  // he planned to meet it, so the timing shows. Early, the bat has come round ahead of the ghost and the
+  // ball is met out front (pulled); late, it is behind and the ball is met deep. All from the engine's
+  // own swing record: the timing error (e), where on the arc he met it (depth, sFwd, the path's angle
+  // theta and the swing's tilt), along the barrel (dLong) and up and down (D).
+  var SV = { x0: 1770, y0: 1686, w: 520, h: 220, S: 150, yBot: -0.15, yUsual: BB.geometry.Y_PLATE + 0.45, sweet: 0.71, bat: 0.864 };   // canvas box; 150 px a metre; the bottom edge 0.15 m behind the plate's point; contact 18 in in front of the plate (the engine's)
+  function svX(xm) { return SV.x0 + SV.w / 2 + xm * SV.S; }
+  function svY(ym) { return SV.y0 - (ym - SV.yBot) * SV.S; }
+  function svClip(g) { g.save(); g.beginPath(); g.rect(SV.x0, SV.y0 - SV.h, SV.w, SV.h); g.clip(); }
+  function swingFrame(g) {
+    text(g, 'SWING', SV.x0, SV.y0 - SV.h - 44, 30, INK2);
+    svClip(g);
+    var hp = [[-0.2159, 0.4318], [0.2159, 0.4318], [0.2159, 0.2159], [0, 0], [-0.2159, 0.2159]];   // home plate, its point toward the catcher
+    g.beginPath(); hp.forEach(function (q, i) { if (i) g.lineTo(svX(q[0]), svY(q[1])); else g.moveTo(svX(q[0]), svY(q[1])); }); g.closePath();
+    g.fillStyle = 'rgba(238,244,252,.14)'; g.fill(); g.strokeStyle = INK3; g.lineWidth = 2; g.stroke();
+    g.strokeStyle = 'rgba(206,220,240,.16)';   // the batter's boxes: 4 by 6 ft, 6 in off the plate
+    [-1, 1].forEach(function (sd) { var xi = svX(sd * 0.368), xo = svX(sd * 1.587); g.strokeRect(Math.min(xi, xo), svY(0.216 + 0.914), Math.abs(xo - xi), 1.829 * SV.S); });
+    g.restore();
+  }
+  function batTip(theta, sb) { var u = [Math.sin(theta), Math.cos(theta)]; return sb > 0 ? [-u[1], u[0]] : [u[1], -u[0]]; }   // the barrel points across the path, away from him
+  function drawSwingView(g, seg, play, TC) {
+    if (!play || seg.i === undefined) return;
+    var i = seg.kind === 'result' ? seg.i : seg.i - 1, fade = seg.kind === 'result' ? 1 : 0.45;   // this pitch's swing; while the next is set up, the last one, faded
+    var q = play.pa.pitches[i]; if (!q || !q.swing) { if (seg.kind === 'result' && q) text(g, q.decide && q.decide.checked ? 'checked swing' : 'took it', SV.x0 + SV.w, SV.y0 - SV.h + 28, 28, INK3, 'right'); return; }
+    var sw = q.swing, sb = q.side || -1, cosT = Math.cos((sw.tilt || 30) * Math.PI / 180);
+    var C = [q.pitch.plate.x, SV.yUsual + sw.depth], tip = batTip(sw.theta, sb), r = SV.sweet + sw.dLong, H = [C[0] - tip[0] * r, C[1] - tip[1] * r];
+    var th0 = sw.theta - sb * (sw.sFwd / BB.SWING.R) * cosT, C0 = [C[0], C[1] - sw.sFwd], tip0 = batTip(th0, sb), H0 = [C0[0] - tip0[0] * SV.sweet, C0[1] - tip0[1] * SV.sweet];
+    svClip(g); g.globalAlpha = fade;
+    var body = [sb * 0.86, 0.34];   // his shoulders, beside the plate on his own side
+    g.fillStyle = 'rgba(206,220,240,.22)'; g.beginPath(); g.ellipse(svX(body[0]), svY(body[1]), 0.13 * SV.S, 0.22 * SV.S, 0, 0, 7); g.fill();
+    g.strokeStyle = 'rgba(206,220,240,.35)'; g.lineWidth = 4; g.beginPath(); g.moveTo(svX(body[0]), svY(body[1])); g.lineTo(svX(H[0]), svY(H[1])); g.stroke();   // his arms
+    g.setLineDash([10, 10]); g.strokeStyle = INK3; g.lineWidth = 6; g.beginPath(); g.moveTo(svX(H0[0]), svY(H0[1])); g.lineTo(svX(H0[0] + tip0[0] * SV.bat), svY(H0[1] + tip0[1] * SV.bat)); g.stroke(); g.setLineDash([]);   // the plan: perfectly timed
+    g.strokeStyle = TC; g.lineWidth = 12; g.lineCap = 'round'; g.beginPath(); g.moveTo(svX(H[0]), svY(H[1])); g.lineTo(svX(H[0] + tip[0] * SV.bat), svY(H[1] + tip[1] * SV.bat)); g.stroke(); g.lineCap = 'butt';   // where it was
+    var sx = H[0] + tip[0] * SV.sweet, sy = H[1] + tip[1] * SV.sweet; g.fillStyle = INK; g.beginPath(); g.arc(svX(sx), svY(sy), 4, 0, 7); g.fill();   // the sweet spot
+    g.beginPath(); g.arc(svX(C[0]), svY(C[1]), Math.max(6, GEO.BALL_R * SV.S), 0, 7); g.fillStyle = sw.contact ? INK : 'rgba(0,0,0,0)'; g.fill(); g.strokeStyle = INK; g.lineWidth = 3; g.stroke();   // the ball: solid if he hit it
+    g.globalAlpha = 1; g.restore();
+    // the reading: the timing beside the title, where he met it under it, how in the corner away from him
+    var ms = Math.round(Math.abs(sw.e) * 1000), tW = ms < 6 ? 'ON TIME' : (sw.e > 0 ? 'EARLY ' : 'LATE ') + ms + ' ms', dIn = Math.round(sw.depth / IN);
+    var where = dIn === 0 ? 'at his usual spot' : Math.abs(dIn) + ' in ' + (dIn > 0 ? 'out front' : 'deep');
+    var up = !sw.contact ? (sw.why === 'off the end' ? 'miss off the end' : sw.why === 'inside the hands' ? 'miss in on hands' : sw.why === 'way early' || sw.why === 'way late' ? sw.why : 'miss ' + Math.max(1, Math.round((Math.abs(sw.D) - 2.7 * IN) / IN)) + ' in ' + (sw.D > 0 ? 'under' : 'over'))
+                         : Math.abs(sw.D) < 0.4 * IN ? 'square' : f1(Math.abs(sw.D) / IN) + ' in ' + (sw.D > 0 ? 'under' : 'over');
+    var along = sw.contact && Math.abs(sw.dLong) > 1 * IN ? f1(Math.abs(sw.dLong) / IN) + ' in to ' + (sw.dLong > 0 ? 'tip' : 'hands') : '';
+    g.globalAlpha = fade;
+    text(g, tW, SV.x0 + SV.w, SV.y0 - SV.h - 44, 34, INK, 'right');   // the timing, beside the title
+    var cx = sb < 0 ? SV.x0 + SV.w - 6 : SV.x0 + 6, al = sb < 0 ? 'right' : 'left', yy = SV.y0 - 14;   // the rest in the bottom corner away from him, clear of the plate
+    [along, up, where].filter(Boolean).forEach(function (w) { text(g, w, cx, yy, 22, INK2, al); yy -= 28; });
+    g.globalAlpha = 1;
   }
 
   // ===================================================== CATCHER'S VIEW

@@ -1,14 +1,15 @@
-<!-- trait_map.html · v2.9 · 2026-10-04
+<!-- trait_map.html · v3.0 · 2026-10-04
      The trait path map: distal traits -> proximate abilities -> the engine's stages
      (with every constant and where its value came from) -> statistics against the league.
      Keep it in step with bb_engine.js; publish to the same artifact URL.
      CHANGED
+       v3.0  hypotheses S, J, Y, Z (engine v2.8, bb_field v1.0): the outfielder's stop and turn; sends to third
+             and home; aim that follows command; the batter reads the slot; the scouts see each pitch
        v2.9  hypotheses A-E (engine v2.7, bb_field v0.9): a checked swing needs something new at the last look;
-             the scorer's errors, fumbles and drops; the league's ground-ball spray re-measured; 2025 team totals
+             the scouts' errors, fumbles and drops; the league's ground-ball spray re-measured; 2025 team totals
        v2.8  the league (bb_league v0.1): thirty organisations, six levels, promotion, and its drop
        v2.7  engine v2.6: athleticism, the deep trait beneath swing power, arm strength and sprint speed
        v2.6  engine v2.5, bb_game v0.9: the pitcher's move to first; the manager's moves (intentional walks, pickoffs, defensive changes, double switches)
-       v2.5  engine v2.4: swing-to-swing effort and checked swings
 -->
 <meta charset="utf-8">
 <title>Ballgame Trait Map</title>
@@ -92,7 +93,7 @@ td.basis { color: var(--muted); }
 
 <div class="wrap">
   <div class="text">
-    <div class="eyebrow">Ballgame · engine v2.7 · 4 October 2026</div>
+    <div class="eyebrow">Ballgame · engine v2.8 · 4 October 2026</div>
     <h1>How a player's traits become the statistics we measure</h1>
     <p>Every statistic in Ballgame emerges from traits meeting physics, perception and noise. The map runs left to right: who the players are (distal), what they can do on a pitch (proximate), the engine's stages for every pitch with the constants inside them, and the statistics measured against the 2025 league. Each parameter carries a mark for where its value came from. The distal traits are drawn from the POOL of all professional players, majors and minors: the question is that pool's frequency distribution and how it meets the physics. Each major leaguer is the best of six candidates from it, and the next-best play at the levels below, so Triple-A's measurements test the pool from outside the majors.</p>
     <p class="hint">Hover or tap any box to trace its paths; tap again to release. Tap a class below to light up every parameter of that kind. The ledger under the map lists them all.</p>
@@ -116,7 +117,7 @@ td.basis { color: var(--muted); }
   </div>
 
   <div class="table-wrap"><table id="ledger"><thead><tr><th>Parameter</th><th>Where it acts</th><th>Value</th><th>Basis</th></tr></thead><tbody></tbody></table></div>
-  <p class="hint">Sources: bb_engine.js v2.7, bb_field.js v0.9 and bb_game.js v1.0; CALIBRATION.md v2.8 (with its open mysteries and the hypotheses for them); the contact scorecard headless/contact_score.js; Triple-A from statcast/levels.py and headless/level_check.js (engine v2.4); miss distance from statcast/misses.py; league figures from statcast/fouls.py, discipline.py, pitch_spread.py, locations.py, bip.py, bat_direction.py, baserunning.py, pitcher_chain.py, the 2025 leaderboards and team totals (MLB Stats API) and run_games over seeds 3, 11 and 29. Fielding and the game layer are shown coarsely.</p>
+  <p class="hint">Sources: bb_engine.js v2.8, bb_field.js v1.0 and bb_game.js v1.0; CALIBRATION.md v2.9 (with its open mysteries and the hypotheses for them); the contact scorecard headless/contact_score.js; Triple-A from statcast/levels.py and headless/level_check.js (engine v2.4); miss distance from statcast/misses.py; league figures from statcast/fouls.py, discipline.py, pitch_spread.py, locations.py, bip.py, bat_direction.py, baserunning.py, pitcher_chain.py, the 2025 leaderboards and team totals (MLB Stats API) and run_games over seeds 3, 11 and 29. Fielding and the game layer are shown coarsely.</p>
 </div>
 
 <script>
@@ -139,7 +140,7 @@ td.basis { color: var(--muted); }
   // [id, col, group, label, sub, class, description]
   var N = [
     ['d_farm', 0, 'THE PRO POOL AND THE FARM', 'The farm', 'best of 6, by bat and glove', 'H', 'Every trait in this column is drawn from the POOL, the full range of professional players. Each major-league roster spot goes to the best of FARM_N = 6 candidates by the scouts\' estimate plus judgement error, so the majors are an extreme-value sample (Joe\'s choice, v2.0). A position player is judged by the runs his bat makes and his glove saves (v2.1). Selection alone makes the picks\' bat speed and whiffs go together and makes the player below average in everything rare (0.01% of major leaguers against 0.78% of the pool, seven categories).'],
-    ['d_scout', 0, null, 'Scouts\' estimate', 'expected wOBA from traits', 'D', 'HITTER_VALUE and PITCHER_VALUE: linear estimates of the expected wOBA the engine itself gives a player\'s traits (tools/hitter_value.js, pitcher_value.js). Hitters: bat speed, eye, aggression, barrel control (R2 .70). Pitchers: mostly command, with fastball speed worth 2.9 points of wOBA per mph since v2.7 (1.6 before; R2 .20).'],
+    ['d_scout', 0, null, 'Scouts\' estimate', 'expected wOBA from traits', 'D', 'HITTER_VALUE and PITCHER_VALUE: linear estimates of the expected wOBA the engine itself gives a player\'s traits (tools/hitter_value.js, pitcher_value.js). Hitters: bat speed, eye, aggression, barrel control (R2 .70). Pitchers (engine v2.8): command, seam break, speed and how unusual each pitch\'s spin and direction are against the league\'s shape at his slot - not his mix, which the farm then chose for the engine\'s weakness against breaking balls. Judged with an error of .015 wOBA.'],
     ['d_fieldval', 0, null, 'Fielding value', 'runs saved, by position', 'D', 'FIELD_VALUE: the runs per ball in play a fielder\'s traits save at his position, measured by playing the engine\'s own balls in play through a test fielder among average team-mates (tools/field_value.js, R2 .92-.98). One sd of fielding: 0.09-0.10 runs a game at shortstop and in the outfield, 0.04 at first base, against 0.18 for hitting. Route and reaction count most, then speed in the outfield. v2.1.'],
     ['d_popfit', 0, null, 'Population fit', 'picks = league', 'F', 'The population is fitted so the picks have the league\'s measured traits: height, weight, swing length, bat speed and weight ~ bat speed; pitchers\' speed, command, slot, height, spin. Hand-set skills keep their calibrated means among the picks (tools/fit_population.js).'],
     ['d_levels', 0, null, 'Levels', 'k-th of six plays at level k', 'H', 'The candidates are ranked by the scouts and the k-th best plays at level k: 1 the majors, 2 Triple-A, down to 6 rookie ball (v2.0). Only the majors are fitted; Triple-A, measured alike from its Statcast data, tests the pool one level down. Pool bat speed 68.2 mph; levels 1-6: 71.2, 69.6, 68.7, 67.8, 66.8, 65.5. The league (bb_league v0.1) gives each level thirty clubs with standing rosters, plays their seasons and promotes between them.'],
@@ -189,13 +190,13 @@ td.basis { color: var(--muted); }
     ['p_hold', 1, null, 'Time to the plate', '1.35 s with a man on', 'M', 'Statcast-shaped.'],
 
     ['e_zone', 3, 'ON THE PITCH', 'Zone rate', '.501 vs .509', 'match', 'Share of pitches in the rulebook zone. Where pitches went matched the league\'s band by band, within about .02, in every group of counts and for every pitch kind; pitches in the dirt 3.2% against 3.1%.'],
-    ['e_swing', 3, null, 'Swing and chase', '.466 / .275 vs .479 / .283', 'near', 'Swings per pitch and swings at pitches outside the zone, in games. Since v2.7 a batter can check only a pitch he had not picked up (the check had judged every swing again without his eye\'s error, undoing the swings far off the plate his eye misjudged): chase came to the league\'s; far off the plate he still swings less than the league\'s.'],
+    ['e_swing', 3, null, 'Swing and chase', '.461 / .258 vs .479 / .283', 'near', 'Swings per pitch and swings at pitches outside the zone, in games. Since v2.7 a batter can check only a pitch he had not picked up (the check had judged every swing again without his eye\'s error, undoing the swings far off the plate his eye misjudged): chase came to the league\'s; far off the plate he still swings less than the league\'s.'],
     ['e_swingk', 3, null, 'Swings by pitch kind', 'rms .147 against the league', 'off', 'Fastballs chased far outside three times as often as the league\'s (.157 against .056 at 9-12 in), breaking balls too rarely; v2.7 made the fastballs worse (they had been checked).'],
     ['e_whiff', 3, null, 'Whiffs per swing', '.25 in games vs .234', 'near', 'Per swing, 300-400 games. In-zone contact .80 against .85: breaking balls in the zone are missed too often and those diving out of it too rarely.'],
     ['e_whiffk', 3, null, 'Whiffs by pitch kind', '.21 / .34 / .31 vs .17 / .31 / .30', 'near', 'Fastball, breaking ball, off-speed (game familiarity). In the league\'s order since v2.2; before, fastballs were whiffed as often as breaking balls and more than off-speed.'],
     ['e_miss', 3, null, 'How far whiffs miss', 'fastballs past 3 in .04 vs .014', 'near', 'Statcast\'s miss distance (ball to the barrel half of the bat), share of swings. v2.1 .07; most of what is left is off the plate. Breaking balls .10 against .155: fooled swings do not yet gather on the pitches that dive out of the zone.'],
-    ['e_velo', 3, null, 'Four-seam whiffs by speed', '.17-.20 to .26-.35 vs .14 to .25', 'near', 'Under 92 mph to 98+ (game familiarity), three seeds. The rise with speed is the league\'s (about .11); four-seamers are whiffed about .04 too often at every speed, about the excess of big misses. Swing errors grown with time pressure were tried and steepened the rise (hypothesis C, not built).'],
-    ['e_batdev', 3, null, 'Swing speeds about his own', 'p1 -11.4, p5 -6.9 vs -35.3, -11.1', 'off', 'Each swing\'s bat speed against the hitter\'s own mean (mph): median +0.1 against +1.4, p95 +7.2 against +7.7; 1.4% of swings more than 10 below against 5.7%. The tail came from the check, and since v2.7 a check needs something new at the last look: an open question where the league\'s slow swings come from.'],
+    ['e_velo', 3, null, 'Four-seam whiffs by speed', '.18 to .30 vs .14 to .25', 'near', 'Under 92 mph to 98+ (game familiarity), three seeds. The rise with speed is the league\'s (about .11); four-seamers are whiffed about .04 too often at every speed, about the excess of big misses. Swing errors grown with time pressure were tried and steepened the rise (hypothesis C, not built).'],
+    ['e_batdev', 3, null, 'Swing speeds about his own', 'p1 -11.3, p5 -6.9 vs -35.3, -11.1', 'off', 'Each swing\'s bat speed against the hitter\'s own mean (mph): median +0.1 against +1.4, p95 +7.2 against +7.7; 1.4% of swings more than 10 below against 5.7%. The tail came from the check, and since v2.7 a check needs something new at the last look: an open question where the league\'s slow swings come from.'],
     ['e_foul', 3, null, 'Fouls per contact', '.46-.47 vs .52', 'near', 'Share of contact that goes foul.'],
     ['e_depth', 3, null, 'Contact depth by kind', '27.6 / 33.3 in vs 27.5 / 35.5', 'match', 'How far in front of the batter fastballs and breaking balls are met.'],
     ['e_flat', 3, null, 'Flat-fastball effect', 'whiff +.15 vs +.14', 'near', 'Steepest to flattest fifth of upper-zone four-seamers; squared up falls .09 against .11, but launch angle rises 21 deg against 7.'],
@@ -212,26 +213,29 @@ td.basis { color: var(--muted); }
     ['e_athletic', 3, null, 'Power, arm and speed together', 'unfitted: bat speed ~ sprint +.04 vs +.09', 'match', 'Fitted: power/kg ~ sprint .46 (.46), power/kg ~ arm .26-.30 (.29), sprint ~ arm .36-.39 (.37), weight ~ sprint -.36 (-.37). The test: bat speed ~ sprint +.04 against +.09 and bat speed ~ arm +.18 against +.18, neither fitted (engine v2.6).'],
     ['e_style', 3, null, 'Attack angle ~ pull%', '+.57 to +.65 vs +.66', 'match', 'With the swing style (v1.9; was +.18); pull% ~ fly-ball% +.34 to +.39 against +.55; attack angle ~ whiff +.66 to +.71 against +.53, too strong.'],
     ['e_zbs', 3, null, 'Zone rate ~ bat speed', '-0.0037 vs -0.0038 per mph', 'match', 'Pitchers work around power (v1.7); walks ~ bat speed came to +.05 to +.12 against +.17, unfitted.'],
-    ['e_k', 3, 'IN THE PLATE APPEARANCE', 'Strikeout rate', '21.7-21.9% vs 22.2%', 'match', '200 games at each of three seeds; 2025 team totals.'],
-    ['e_bb', 3, null, 'Walk rate', '8.2-8.4% vs 8.4%', 'match', 'From measured command and aim, with no tuned constant (v1.4); power hitters walk more as pitchers work around them (v1.7).'],
+    ['e_aim', 3, null, 'Aim against command', '-0.31 vs -0.30 in per in', 'match', 'Per pitcher, pitch type and batter side, how far his mean location sits from the zone\'s centre against his scatter about it (league majors -0.29, Triple-A -0.31; model about 0 before engine v2.8, four seeds since).'],
+    ['e_k', 3, 'IN THE PLATE APPEARANCE', 'Strikeout rate', '20.4-21.9% vs 22.2%', 'near', '200 games at each of three seeds; 2025 team totals.'],
+    ['e_bb', 3, null, 'Walk rate', '8.7-9.0% vs 8.4%', 'near', 'Since engine v2.8 the batter reads the slot and is fooled less, so he walks a little more and strikes out a little less; command and aim measured.'],
     ['e_hbp', 3, null, 'Hit by pitch', '1.01% vs 1.1%', 'match', 'Per plate appearance; 0.40% before command was measured.'],
-    ['e_hr', 3, null, 'Home-run rate', '3.3-3.4% vs 3.1%', 'near', 'Per plate appearance.'],
+    ['e_hr', 3, null, 'Home-run rate', '3.4-3.6% vs 3.1%', 'near', 'Per plate appearance.'],
     ['e_carry', 3, null, 'Carry by EV and angle', 'within 6 ft at 20-40 deg', 'near', 'Liners at 15-20 deg carry 10-20 ft too far: the spin\'s shape with launch angle.'],
-    ['e_babip', 3, null, 'BABIP', '.259-.270 vs .291', 'off', 'An open mystery (CALIBRATION): too few line drives (19% against 24%), ground balls pulled less than the league\'s; ground-ball BABIP is the league\'s .24-.25.'],
-    ['e_avg', 3, null, 'AVG / SLG', '.223-.234 / .351-.369', 'near', 'League .245 / .404 (2025).'],
-    ['e_runs', 3, 'IN THE GAME', 'Runs per team-game', '3.44-3.75 vs 4.45', 'off', '200 games at each of three seeds, against 2025\'s team totals. Doubles are the biggest piece since bb_field v0.9 removed the outfield fumbles that had stood in for an outfielder\'s stop and turn.'],
-    ['e_doubles', 3, null, 'Doubles per team-game', '0.58-0.67 vs 1.59', 'off', 'Balls landing 150-300 ft fall in about as often as the league\'s but become doubles 2-3% of the time against 9-12%: the outfielder throws as soon as he picks the ball up, with no stop and turn (until bb_field v0.9 half his pickups were fumbled, which hid it).'],
-    ['e_triples', 3, null, 'Triples per team-game', '0.03-0.05 vs 0.13', 'off', 'Per team-game.'],
-    ['e_xbt', 3, null, 'Extra bases taken', 'R2 scores .40 / .43 / .71', 'near', 'On a single, by outs; league .36 / .51 / .83. Runners are thrown out 1-3% of chances, as the league\'s.'],
-    ['e_dp', 3, null, 'Double plays', '0.64-0.69 vs 0.75', 'near', 'Per team-game.'],
-    ['e_errors', 3, null, 'Errors', '0.28-0.32 vs 0.50', 'off', 'Per team-game. Fumbles and drops are now the league\'s (bb_field v0.9); throwing errors are a third of the league\'s, whose are highest on weak grounders (hurried throws).'],
-    ['e_sb', 3, null, 'Stolen bases', '0.63-0.67 vs 0.71', 'near', 'Per team-game, 79% safe against 78%. The old target, 0.47, was a pre-2023 figure.'],
+    ['e_babip', 3, null, 'BABIP', '.257-.263 vs .291', 'off', 'An open mystery (CALIBRATION): too few line drives (19% against 24%), ground balls pulled less than the league\'s; ground-ball BABIP is the league\'s .24-.25.'],
+    ['e_avg', 3, null, 'AVG / SLG', '.224-.230 / .392-.403', 'near', 'League .245 / .404 (2025).'],
+    ['e_runs', 3, 'IN THE GAME', 'Runs per team-game', '3.85-4.07 vs 4.45', 'near', '200 games at each of three seeds, against 2025\'s team totals. Doubles and slugging are the league\'s since the outfielder stops and turns (bb_field v1.0); BABIP and too few liners are most of what is left.'],
+    ['e_doubles', 3, null, 'Doubles per team-game', '1.54-1.63 vs 1.59', 'match', 'Since bb_field v1.0 an outfielder who reaches the ball on the run sheds his speed before he throws; before, the throw beat the batter-runner to second by a median 1.6 s on the singles that stayed singles.'],
+    ['e_triples', 3, null, 'Triples per team-game', '0.09-0.12 vs 0.13', 'near', 'Per team-game.'],
+    ['e_xbt', 3, null, 'Extra bases taken', 'R2 scores .56-.59 vs .60', 'match', 'Runner on second scoring on a single .56-.59 (.60), runner on first to third on a single .34-.35 (.33), scoring on a double .38-.42 (.39), with sends to third and home of their own (bb_field v1.0). Thrown out .02-.08 of chances against .01-.03.'],
+    ['e_dp', 3, null, 'Double plays', '0.54-0.59 vs 0.75', 'off', 'Per team-game.'],
+    ['e_errors', 3, null, 'Errors', '0.33-0.34 vs 0.50', 'off', 'Per team-game. Fumbles and drops are now the league\'s (bb_field v0.9); throwing errors are a third of the league\'s, whose are highest on weak grounders (hurried throws).'],
+    ['e_sb', 3, null, 'Stolen bases', '0.58-0.68 vs 0.71', 'near', 'Per team-game, 79% safe against 78%. The old target, 0.47, was a pre-2023 figure.'],
     ['e_wp', 3, null, 'Wild pitches', '0.24-0.34 vs 0.29', 'match', 'Per team-game.'],
     ['e_extra', 3, null, 'Extra-inning games', '8-12.5% vs about 8%', 'near', 'Per game.'],
-    ['e_pitchers', 3, null, 'Pitchers used', '3.8 vs 4.2', 'near', 'Per team-game.'],
+    ['e_pitchers', 3, null, 'Pitchers used', '3.8-3.9 vs 4.2', 'near', 'Per team-game.'],
     ['e_aaa_pow', 3, 'ONE LEVEL DOWN: TRIPLE-A, NOT FITTED', 'Power, majors to Triple-A', 'hard-hit .381 vs .375', 'match', 'Level 2 against Triple-A, 42 days of 2025 (level 1 .418, majors .419); home runs 2.76% against 2.85%. Three seeds of 400 games.'],
     ['e_aaa_k', 3, null, 'Strikeouts in Triple-A', '21.2% vs 22.5%', 'match', 'Level with the majors in both (model level 1 21.0).'],
-    ['e_aaa_velo', 3, null, 'Fastball speed, one level down', '-0.2 / -0.5 vs -1.2 / -0.9 mph', 'off', 'Starters, relievers: level 1 to 2 against the majors to Triple-A. The scouts value speed a little more since v2.2 (about 4 wOBA points per sd) but command most.'],
+    ['e_aaa_velo', 3, null, 'Fastball speed, one level down', '-0.35 / -0.38 vs -1.2 / -0.9 mph', 'off', 'Starters, relievers: level 1 to 2 against the majors to Triple-A (engine v2.8). The scouts weigh speed less since they see each pitch\'s shape.'],
+    ['e_aaa_cmd', 3, null, 'Command, one level down', '+1.3 / +2.2% vs +12.7 / +8.7%', 'off', 'Scatter of 3-0 four-seamers about each pitcher\'s own mean, Triple-A against the majors (statcast pitch-level 2025); model level 2 against level 1, starters, across and up and down. The minors\' pitchers are not wild enough: open mystery 4 (CALIBRATION).'],
+    ['e_slots', 3, null, 'Arm slots by level', '12.7 / 12.7 vs 12.9 / 12.4 deg', 'match', 'The spread of arm angle, majors and Triple-A. A farm that saw slot movement as stuff picked extreme slots (12.5 / 10.9) until the batter read the slot (engine v2.8).'],
     ['e_aaa_bb', 3, null, 'Walks in Triple-A', '10.9% vs 10.8%', 'match', 'With the umpire\'s zone top 2.9 in lower, as Triple-A\'s automated zone. Since v2.2 (the read and reach) the model\'s level 2 walks as Triple-A does.'],
     ['e_aaa_babip', 3, null, 'BABIP in Triple-A', '.260 vs .315 (level 1 .259)', 'off', 'Triple-A\'s is .026 above the majors\'. Since the farm values defence (v2.1) the model\'s level 2 holds level 1\'s BABIP while its contact softens (hard-hit .361 against .406), and levels 3-6 rise to .27; before, level 2 fell below level 1. Still far short of Triple-A.'],
     ['e_aaa_chase', 3, null, 'Chase in Triple-A', '.258 vs .264 (level 1 .258)', 'near', 'Triple-A\'s hitters chased less than the majors\' (.283); the model\'s two levels now chase alike (v2.4).'],
@@ -245,6 +249,7 @@ td.basis { color: var(--muted); }
       ['Aim points', 'type × side', 'M', 'The league\'s mean location for each type against each side, inches toward his arm side and share of the zone height.'],
       ['Count shift', 'kind × side × count', 'M', 'How the count moves the aim: with two strikes breaking balls go lower and farther away, fastballs higher.'],
       ['Target spread', 'within a count', 'M', 'What is left of a pitcher\'s scatter within a count once his command is taken out: 1.5-5 in. Targets hardly move within a count.'],
+      ['AIM_CMD 0.09', 'aim to his command', 'F', 'A wilder pitcher aims nearer the middle: every target\'s distance from the centre shrinks 9% per inch his scatter is wider than the major leaguers\' 8.0 in. Fitted so the model\'s aim falls 0.30 in per inch of scatter, as the league\'s does (0.29 majors, 0.31 Triple-A; per pitcher, pitch type and batter side). Engine v2.8.'],
       ['AROUND 0.021', 'pitching around', 'F', 'Against a hitter with more bat speed he aims farther from the middle: every target\'s distance from the zone\'s centre grows 0.021 per mph above 71.2. Fitted to the league\'s zone rate against bat speed (-0.0038 per mph, r -.34); v1.7.'],
       ['Repeat lean', '× 1.13, then × 0.98', 'M', 'The same type again after a change is 1.13 times as likely as usage, side and count predict; after two alike, 0.98. (Until v1.4 the engine penalised repeats.)']]],
     ['s_expect', 'Expect', "the batter's guess from the scouting report", [
@@ -265,6 +270,7 @@ td.basis { color: var(--muted); }
       ['PRIOR_S 2.5', 'place pull', 'O', 'How strongly his judgement of where it ends up is pulled toward what that kind of pitch usually does. Fitted to the flat-fastball table and fastball whiffs; 1 (an ideal observer) gave whiffs of .36.'],
       ['RESID_S 0.07', 'guess kept', 'O', 'Share of the gap to the guessed pitch that stays in his picture. Fitted to breaking-ball whiffs and the launch angles of low pitches.'],
       ['DIR_READ 0.5', 'half the motion', 'F', 'A batter fooled at the commit point sees where the ball is but reads only half of which way it is moving across and up and down, so more of the curve still fools him. Fitted to the league\'s misses by pitch kind and reach, whiffs by kind and strikeouts in games (v2.2; it read all of it, and fooled breaking balls were missed by a couple of inches where the league\'s are missed by a foot).'],
+      ['Reads the slot', 'league shape at his slot', 'D', 'He pictures a pitch from the league\'s shape for that kind FROM THIS ARM SLOT (its tilt and spin efficiency turned by the slot as the league\'s are), since he sees the arm. Before v2.8 he pictured the average shape whatever the slot, a slot\'s ordinary movement fooled him, and a farm that could see it picked extreme slots.'],
       ['Looking fastball', 'eye ready for any fastball', 'H', 'Sitting on a fastball, his eye is ready for any of the pitcher\'s fastballs, but he hunts only the one he guessed: the swing decision treats the others as before (v2.2).']]],
     ['s_decide', 'Decide', 'swing or take', [
       ['Swing thresholds', 'count × sat on it or not', 'F', 'He swings when his chance the pitch is a strike passes a threshold for the count: a lower one when it is the pitch he sat on or he has not picked it up, a higher one when he has recognised another. The 24 values were fitted to the league\'s swing rates by count and distance from the zone edge (v1.2): behaviour fitted to its own measurement. A one-pitch bet on run values was tried instead and made batters far too passive in hitters\' counts.'], ['Checked swing', 'only on something new', 'F', 'Only a pitch he had not picked up at the commit point can be checked: a fooled one by what its curve has shown by his last look, a late pickup by his judgement (v2.7; one he had picked up was already judged when he decided). The farther off the zone that puts it, the likelier he tries (never inside 2 in, always beyond 8): half the time he holds up, else the bat comes through 5-60% slowed. Fitted to the league\'s tail of slow swings in v2.4, when every swing was judged again; with only the new looks the tail is a third of the league\'s.'],
@@ -303,7 +309,8 @@ td.basis { color: var(--muted); }
       ['Drops', '0.15 of his fumble rate', 'F', 'A ball he is under with time to spare is dropped 0.15 of his fumble rate on a grounder: fitted to the league\'s missed-catch errors, about 0.023 a team-game (bb_field v0.9; 0.6, set by hand, dropped 1.1% of routine catches).'],
       ['Secondary lead', '15.3 ft', 'M', 'A runner\'s lead when the ball is hit, Statcast 2025.'],
       ['V_CONTACT 1.5 m/s', 'breaking on contact', 'F', 'A runner who goes on contact is already moving: checked against double plays per game (v1.5).'],
-      ['Send margins', '0.6 / 0.5 / 0.2 s', 'F', 'By outs: fitted to how often the league\'s runners took the extra base on a single or double (statcast/baserunning.py, v1.5).'],
+      ['Send margins', 'third .75/.75/.35, home .7/.2/-.4 s', 'F', 'By outs, with their own margins for third and home (bb_field v1.0): never make the first or third out at third, risk the plate with two out. Fitted to how often the league\'s runners took the extra base: a runner on second scored on a single .60 of the time, a runner on first took third on a single .33 and scored on a double .39.'],
+      ['Stop and turn', 'brake at his acceleration', 'H', 'An outfielder who reaches the ball on the run sheds the speed not carrying him toward his throw before he lets it go, braking at his acceleration (an assumption). Before bb_field v1.0 he threw the instant he had the ball: doubles 0.6 a game against 1.6.'],
       ['Read error', '0.25 s', 'H', 'His and the coach\'s error reading the race. Set by hand.'],
       ['Long-throw doubt', '0.005 s per m', 'H', 'A throw\'s arrival grows less certain beyond 40 m; set by hand so runners are thrown out about as often as the league\'s.'],
       ['SAFETY 0.30 s', 'taking second', 'H', 'The margin a runner wants before taking second. Set by hand.'],
@@ -319,6 +326,7 @@ td.basis { color: var(--muted); }
       ['Past the catcher', 'by height band', 'O', 'The chance a pitch gets by the catcher, by where it crosses, against his blocking: set by hand in proportion and scaled to the league\'s wild pitches per game, now that the share of pitches in the dirt is the league\'s (bb_game v0.7).']]]
   ];
   var E = [
+    ['s_plan', 'e_aim'], ['p_command', 'e_aim'], ['d_levels', 'e_aaa_cmd'], ['p_command', 'e_aaa_cmd'], ['d_scout', 'e_aaa_cmd'], ['d_levels', 'e_slots'], ['s_read', 'e_slots'], ['d_arm', 'e_slots'],
     ['d_height', 'd_weight'], ['d_height', 'd_swinglen'], ['d_weight', 'd_bat'], ['d_weight', 'd_power'], ['d_athletic', 'd_power'], ['d_athletic', 'd_run'], ['d_athletic', 'd_field'], ['d_weight', 'd_run'], ['d_athletic', 'e_athletic'], ['d_levels', 'e_promo'],
     ['d_weight', 'p_batspeed'], ['d_swinglen', 'p_batspeed'], ['d_power', 'p_batspeed'], ['d_bat', 'p_batspeed'], ['d_style', 'p_attack'], ['d_style', 'p_pull'], ['d_style', 'd_swinglen'], ['d_style', 'e_style'], ['d_armlen', 'p_cover'],
     ['d_spin', 'p_move'], ['d_shape', 'p_move'], ['d_seam', 'p_move'], ['d_scatter', 'p_move'],
