@@ -1,5 +1,5 @@
 /* ============================================================================
-   fit_swing_policy.js · v0.3 · 2026-10-03
+   fit_swing_policy.js · v0.4 · 2026-10-04
 
    Fits bb_engine.js's SWING_THR, the batter's swing threshold for each count
    and read ([on, off]: the pitch he sat on or has not told apart from it, and
@@ -22,6 +22,7 @@
    Run:  jsc bb_engine.js bb_names.js bb_field.js bb_game.js statcast/discipline_2025.js tools/fit_swing_policy.js -- [hitters] [PA each] [seed]
 
    CHANGED
+     v0.4  the check is the engine's: only a pitch he had not picked up (engine v2.7)
      v0.3  a swing counts by its chance of surviving his check at the last look (engine v2.4)
      v0.2  familiarity as in games: 40 x u x u pitches of this pitcher seen at the start of each PA (games: median 9 at a swing, mean 12.6; was uniform to 60-80)
      v0.1  first build (bb_engine v1.2)
@@ -44,7 +45,8 @@
       BB.simPA(Pi, B, { env: env, ump: ump, framing: 0, seen: 40 * rng.u() * rng.u(), rec: false }, rng).pitches.forEach(function (q) {
         if (!q.decide) return;
         var c = rec[q.count] = rec[q.count] || [[], []], b = binOf(edgeIn(B, q.pitch.plate.x, q.pitch.plate.z));
-        // he swings when pin + aggr > threshold - unless his last look puts it well off the plate and he holds up (engine v2.4)
+        // he swings when pin + aggr > threshold - unless his last look puts it well off the plate and he holds up (engine v2.4;
+        // from v2.7 only on a pitch he had not picked up, which checkChance knows)
         var w = BB.checkChance ? 1 - BB.CHECK.hold * BB.checkChance(B, q.read, q.pitch) : 1;   // the chance the swing survives his check
         c[q.decide.state === 'on' ? 0 : 1].push([b, q.decide.pin + B.aggr, BB.PITCH_TYPES[q.pitch.type].kind, w]);
       });
