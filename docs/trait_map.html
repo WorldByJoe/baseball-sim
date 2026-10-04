@@ -1,8 +1,9 @@
-<!-- trait_map.html · v3.2 · 2026-10-04
+<!-- trait_map.html · v3.3 · 2026-10-04
      The trait path map: distal traits -> proximate abilities -> the engine's stages
      (with every constant and where its value came from) -> statistics against the league.
      Keep it in step with bb_engine.js; publish to the same artifact URL.
      CHANGED
+       v3.3  engine v3.1: the tunnel (TUNNEL_SEP), the fooled batter's decision (DIR_READ_DEC), the policy by count x kind
        v3.2  engine v3.0: bat speed falls as a pitch pulls the swing up, away or in (BAT_LOC); FG and G findings
        v3.1  engine v2.9: the barrel's height falls short toward the middle of the zone (VERT_MISS); timing
              scatter grows with flight time; RESID_S halved; DM and CS tested
@@ -10,7 +11,6 @@
              and home; aim that follows command; the batter reads the slot; the scouts see each pitch
        v2.9  hypotheses A-E (engine v2.7, bb_field v0.9): a checked swing needs something new at the last look;
              the scouts' errors, fumbles and drops; the league's ground-ball spray re-measured; 2025 team totals
-       v2.8  the league (bb_league v0.1): thirty organisations, six levels, promotion, and its drop
 -->
 <meta charset="utf-8">
 <title>Ballgame Trait Map</title>
@@ -192,7 +192,7 @@ td.basis { color: var(--muted); }
 
     ['e_zone', 3, 'ON THE PITCH', 'Zone rate', '.501 vs .509', 'match', 'Share of pitches in the rulebook zone. Where pitches went matched the league\'s band by band, within about .02, in every group of counts and for every pitch kind; pitches in the dirt 3.2% against 3.1%.'],
     ['e_swing', 3, null, 'Swing and chase', '.461 / .258 vs .479 / .283', 'near', 'Swings per pitch and swings at pitches outside the zone, in games. Since v2.7 a batter can check only a pitch he had not picked up (the check had judged every swing again without his eye\'s error, undoing the swings far off the plate his eye misjudged): chase came to the league\'s; far off the plate he still swings less than the league\'s.'],
-    ['e_swingk', 3, null, 'Swings by pitch kind', 'rms .147 against the league', 'off', 'Fastballs chased far outside three times as often as the league\'s (.157 against .056 at 9-12 in), breaking balls too rarely; v2.7 made the fastballs worse (they had been checked).'],
+    ['e_swingk', 3, null, 'Swings by pitch kind', 'rms .058 against the league', 'near', 'Since engine v3.1 (the tunnel, the fooled batter\'s decision, the policy fitted by count and kind) breaking balls are swung at as the league\'s in and near the zone; far outside they are still chased about half as often (6-9 in .15 against .28).'],
     ['e_whiff', 3, null, 'Whiffs per swing', '.25 in games vs .234', 'near', 'Per swing, 300-400 games. In-zone contact .80 against .85: breaking balls in the zone are missed too often and those diving out of it too rarely.'],
     ['e_whiffk', 3, null, 'Whiffs by pitch kind', '.17 / .28 / .32 vs .17 / .31 / .30', 'near', 'Fastball, breaking ball, off-speed (game familiarity). In the league\'s order since v2.2; before, fastballs were whiffed as often as breaking balls and more than off-speed.'],
     ['e_miss', 3, null, 'How far whiffs miss', 'fastballs past 3 in .04 vs .014', 'near', 'Statcast\'s miss distance (ball to the barrel half of the bat), share of swings. v2.1 .07; most of what is left is off the plate. Breaking balls .10 against .155: fooled swings do not yet gather on the pitches that dive out of the zone.'],
@@ -216,8 +216,8 @@ td.basis { color: var(--muted); }
     ['e_style', 3, null, 'Attack angle ~ pull%', '+.57 to +.65 vs +.66', 'match', 'With the swing style (v1.9; was +.18); pull% ~ fly-ball% +.34 to +.39 against +.55; attack angle ~ whiff +.66 to +.71 against +.53, too strong.'],
     ['e_zbs', 3, null, 'Zone rate ~ bat speed', '-0.0037 vs -0.0038 per mph', 'match', 'Pitchers work around power (v1.7); walks ~ bat speed came to +.05 to +.12 against +.17, unfitted.'],
     ['e_aim', 3, null, 'Aim against command', '-0.31 vs -0.30 in per in', 'match', 'Per pitcher, pitch type and batter side, how far his mean location sits from the zone\'s centre against his scatter about it (league majors -0.29, Triple-A -0.31; model about 0 before engine v2.8, four seeds since).'],
-    ['e_k', 3, 'IN THE PLATE APPEARANCE', 'Strikeout rate', '16.9-17.3% vs 22.2%', 'off', '200 games at each of three seeds; 2025 team totals.'],
-    ['e_bb', 3, null, 'Walk rate', '8.7-9.0% vs 8.4%', 'near', 'Since engine v2.8 the batter reads the slot and is fooled less, so he walks a little more and strikes out a little less; command and aim measured.'],
+    ['e_k', 3, 'IN THE PLATE APPEARANCE', 'Strikeout rate', '19.2-19.6% vs 22.2%', 'near', '200 games at each of three seeds; 2025 team totals.'],
+    ['e_bb', 3, null, 'Walk rate', '8.9-9.5% vs 8.4%', 'near', 'Engine v3.1: fastballs are no longer over-chased, and breaking balls far outside are still chased half as often as the league\'s, so the chase is .229 against .283.'],
     ['e_hbp', 3, null, 'Hit by pitch', '1.01% vs 1.1%', 'match', 'Per plate appearance; 0.40% before command was measured.'],
     ['e_hr', 3, null, 'Home-run rate', '3.4-3.6% vs 3.1%', 'near', 'Per plate appearance.'],
     ['e_carry', 3, null, 'Carry by EV and angle', 'within 6 ft at 20-40 deg', 'near', 'Liners at 15-20 deg carry 10-20 ft too far: the spin\'s shape with launch angle.'],
@@ -270,6 +270,8 @@ td.basis { color: var(--muted); }
       ['ivbSD', 'league spread per type', 'M', 'The league\'s spread of vertical break within each pitch type, pitch-level 2025: the width of his picture of a pitch.'],
       ['PRIOR_T 5', 'timing pull', 'O', 'How strongly his timing stays pulled toward the pitch he expected. Fitted to breaking balls being met 8 in further out front than fastballs.'],
       ['PRIOR_S 2.5', 'place pull', 'O', 'How strongly his judgement of where it ends up is pulled toward what that kind of pitch usually does. Fitted to the flat-fastball table and fastball whiffs; 1 (an ideal observer) gave whiffs of .36.'],
+      ['TUNNEL_SEP 0.5', 'the tunnel', 'O', 'A breaking ball or changeup shows the eye half its separation from the fastball path at the commit point (v3.1): a position there is as easily a lower-aimed fastball. Fitted with the swing policy to the league\'s swings by count and pitch kind, breaking-ball whiffs and strikeouts.'],
+      ['DIR_READ_DEC 0', 'deciding unread', 'O', 'A batter who has not picked a pitch up decides on where the ball is, on the curve he expected, without reading its direction (v3.1); the swing still steers by the last look.'],
       ['RESID_S 0.035', 'guess kept', 'O', 'Share of the gap to the guessed pitch that stays in his picture. Halved in v2.9 when VERT_MISS took over the topping that comes with any low pitch: within each band of height the league\'s breaking balls are met 7-9 deg lower than its fastballs.'],
       ['DIR_READ 0.5', 'half the motion', 'F', 'A batter fooled at the commit point sees where the ball is but reads only half of which way it is moving across and up and down, so more of the curve still fools him. Fitted to the league\'s misses by pitch kind and reach, whiffs by kind and strikeouts in games (v2.2; it read all of it, and fooled breaking balls were missed by a couple of inches where the league\'s are missed by a foot).'],
       ['Reads the slot', 'league shape at his slot', 'D', 'He pictures a pitch from the league\'s shape for that kind FROM THIS ARM SLOT (its tilt and spin efficiency turned by the slot as the league\'s are), since he sees the arm. Before v2.8 he pictured the average shape whatever the slot, a slot\'s ordinary movement fooled him, and a farm that could see it picked extreme slots.'],

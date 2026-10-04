@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v3.2 · 2026-10-04`
+`CALIBRATION.md · v3.3 · 2026-10-04`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -1024,6 +1024,32 @@ DM's test showed the model's contact on pitches off the plate came off far too h
 
 **Results (after the chain; seeds 3, 11, 29).** Fastballs' home runs per ball in play by distance from the zone's edge (heart, edge in, edge out, 4-8 out, 8+ out): .062, .047, .028, .014, 0 against the league's .058, .039, .026, .012, 0 (v2.9: .055, .052, .037, .028, .009); all balls in play .045 against .046 (v2.9 .048); home runs per team-game 1.21-1.36 against 1.16 (v2.9 1.25-1.35); contact score .0673 -> .0653 (squared-up .0531 -> .0466, by reach .0744 -> .0693). Runs 3.92-4.26, AVG .240-.247, walks 3.02-3.23 a team-game (3.16); K% 16.9-17.1, unchanged. Exit speed still falls too slowly past 4 in outside (80.5 and 75.3 mph against 72.6 and 58.4): what is left of mystery 3 is the quality of reaching contact, not its speed.
 
+## #2, the breaking-ball reads (engine v3.1, fit_swing_policy v0.5; 2026-10-04)
+
+Joe asked for the big-picture questions 1-3 (fouls, breaking-ball reads, reaching contact). Runs: the league's swings by count x pitch kind x distance from the zone's edge (new: `statcast/swing_count_kind.py`, 42 days of 2025); the model's breaking balls taken apart by read (sat on it, picked up, late, fooled) and the swing rate of each by band; scratch engines and scratch fitters for each variant; the refit chain and the suite.
+
+**What the league showed.** In the zone, the league took breaking balls more than fastballs only in hitters' counts (0-0: .45 against .57 deep in the zone; 2-0: .48 against .72); at 1-1 and with two strikes it swung at them alike (.87 and .88; .94 and .90). Outside the zone it chased breaking balls MORE than fastballs in every count (two strikes, 6-9 in out: .39 against .20). So the first is the batter's choice when hunting a fastball, the second deception.
+
+**What the model did.** It picked up 80% of breaking balls at the commit point, and a recognised breaking ball put him on the 'off' threshold, which the fitter (matching each count's curve over all kinds) had set so high that a recognised breaking ball in the heart of the zone was swung at .45 of the time, and 1% far outside; the reads stood in for pitch kind, so fastballs were over-swung everywhere (swings by kind missed by .15 rms).
+
+**Built.** (1) The swing policy fitted to the league's curves by count x kind (`fit_swing_policy.js` v0.5): the 'off' read now costs swings only in hitters' counts (0-0, 1-0, 2-0, 3-1), as the league's does. (2) DIR_READ_DEC = 0: a batter who has not picked a pitch up decides on where the ball has got to on the curve he expected, without the half of its direction the swing later steers by (with it, a fooled batter judged a diving breaking ball most of the way to where it went, and seldom chased). (3) TUNNEL_SEP = 0.5: a breaking ball or changeup shows the eye half of its geometric separation from the fastball path at the commit point - a position there is as easily a lower-aimed fastball as a breaking pitch. (3) is fitted to outcomes (class O): 0.35 and 0.25 raised strikeouts to 21.7% and 23.3% but breaking-ball whiffs to .375 and .431 against .310, and doubling every batter's spotIn instead raised walks and changeup whiffs.
+
+**Results (after the chain; seeds 3, 11, 29).**
+
+| | v3.0 | v3.1 | league |
+|---|---|---|---|
+| K% | 16.9-17.1 | 19.2-19.6 | 22.2 |
+| BB% | 8.0-8.4 | 8.9-9.5 | 8.4 |
+| AVG / OBP / SLG | .240-.247 / .307-.317 / .400-.417 | .231-.234 / .309-.311 / .389-.405 | .245 / .315 / .404 |
+| runs / team-game | 3.92-4.26 | 3.97-4.11 | 4.45 |
+| swings: error by kind / by count | .148 / .022 | .058 / .050 | |
+| breaking balls swung at, heart to 8+ in out | .54 .41 .25 .12 .05 | .71 .55 .38 .20 .07 | .69 .60 .46 .33 .15 |
+| whiffs per swing FB / BR / OS | .180 / .285 / .307 | .167 / .323 / .343 | .174 / .310 / .301 |
+| chase | .260 | .229 | .283 |
+| contact score | .0653 | .0645 | |
+
+**The cost.** Walks rose (8.9-9.5% against 8.4) and the chase fell (.229 against .283): the old chase rate was reached by chasing fastballs too often; those chases are now the league's, but breaking balls and changeups far outside are still chased half as often as the league's (6-9 in out .15 against .28, 9-12 in .08 against .21). More deception through TUNNEL_SEP does not close it without too many whiffs; the far chase needs another piece (the decision's eye at the commit point, or how a fooled batter's chase is judged).
+
 ## What was learned building the fielding layer
 
 - **Statcast's outfield JUMP (about 30 ft covered in the first 3 s) is the right anchor for outfielder motion.** The first fielders covered 44 ft in 3 s and caught nearly every fly ball (fly-ball BABIP .03). Slowing everyone to the jump figure fixed the outfield but let 52% of ground balls through, so infielders got their own harder acceleration and a dive reach. That's a real difference: they work from a crouch on a ball that is on them at once.
@@ -1043,10 +1069,10 @@ DM's test showed the model's contact on pitches off the plate came off far too h
 
 Where the model and the league disagree and no believable mechanism has been built for it yet. They are recorded, not tuned away; each may close when a missing piece of the model arrives, and the deeper tuning waits until then. Remade 2026-10-04 after U (engine v2.9), in order of how much each matters to the game; the previous number in brackets. Engine v2.9 and bb_field v1.0, seeds 3, 11 and 29, against 2025's team totals, unless noted.
 
-1. **Fouls and strikeouts** (9; now first): fastball swings fouled .32 against .45, breaking balls .39 against .34; contact struck square vertically goes foul .25 against .21 (the model's out front and pulled, the league's glancing); K% 16.9-17.3 against 22.2, because two-strike at-bats end in play where the league's are fouled off; 135-137 pitches a team-game against 146.
+1. **Fouls and strikeouts** (9; still first): fastball swings fouled .32 against .45; K% 19.2-19.6 against 22.2 after engine v3.1 (16.9-17.3 before); 138 pitches a team-game against 146. The league's typical fastball foul is struck under the ball, 70-85 mph at 30-70 deg (see FG); the model's fastball contact is struck 25+ deg under the ball .31 of the time against .46.
 2. **Runs are a little low** (1): 3.96-4.27 per team-game against 4.45; batting average, on-base and slugging are now the league's (.238-.247 / .307-.317 / .397-.417), so what is left is mostly 1 and the BABIP of 3.
 3. **Reaching contact is hit too hard** (DM restated; partly closed by RE, engine v3.0): home runs per ball in play by distance outside are now the league's, but fastballs 4-8 in outside still come off at 80.5 mph against 72.6, 8+ in out at 75.3 against 58.4 - the contact's quality, not the bat's speed.
-4. **Breaking balls are read too well** (4 and 6): chased far too rarely (8+ in outside .046 against .146), swung at too rarely even in the heart of the zone (.53 against .69), whiffed too rarely once they dive out (6+ in .62 against .84) and below the zone (.43 against .60); fastballs swung at too often at every distance. It also widens the walk-rate spread: breaking-ball pitchers walk too many (true sd .033 against .019).
+4. **Breaking balls chased too rarely far outside** (4 and 6; partly closed by engine v3.1): swings by kind now the league's in and near the zone, and breaking-ball whiffs (.323 against .310), but breaking balls and changeups 6-12 in outside are chased about half as often as the league's, so the overall chase is .229 against .283 and walks 8.9-9.5% against 8.4.
 5. **The batted-ball mix** (2): pop-ups 10% of balls in play against 9, liners 19-20 against 24; BABIP .259-.267 against .291; launch angle above the middle of the zone 6-10 deg short of the league's.
 6. **The minors' pitchers are not wild enough** (3): command steps down from level 1 to 2 about 1-2% where Triple-A's is 9-13% worse; the major leaguers' command spread is the league's (CS refuted), so the step down itself is what is missing.
 7. **Double plays are a little few** (8): 0.59-0.73 a team-game against 0.75 (up from 0.53-0.61 with more ground balls in play).
@@ -1063,7 +1089,7 @@ Tested on 2026-10-04 (sections above): A-F, K, S, J, Y, Z; now U - confirmed, BU
 | | Hypothesis | Mysteries | Likelihood |
 |---|---|---|---|
 | FG | Fouls are glancing contact the model rarely makes: a ball struck near the edge of the barrel's reach should tip back or pop foul, where the model's goes in play or misses; and fair-or-foul by spray follows the bat too closely (H) | 1, 2, 5 | likely |
-| I/W | The batter reads a breaking ball's destination too early and too well: his picture is pulled toward its usual break both ways (I), and he reads its destination as soon as a fastball's (W); the swing policy knows only 'sat on it' or 'something else' | 4, 6, 1 | likely |
+| I/W | The batter reads a breaking ball's destination too early and too well. CONFIRMED and largely BUILT (engine v3.1: TUNNEL_SEP, DIR_READ_DEC, the policy fitted by count x kind); the far chase still half the league's | 4, 6, 1 | half built |
 | RE | Reaching costs a swing its quality: bat speed CONFIRMED and BUILT (BAT_LOC, engine v3.0); the contact's quality when reaching (sweet spot, glancing) still to test | 3, 2 | half built |
 | AA | No development: Triple-A's pitchers are 1.8 years younger and still learning command; the model's players never change | 6, 8 | plausible |
 | YS | Pitchers judged more sharply: a season's results seen alongside the estimate | 6 | plausible |

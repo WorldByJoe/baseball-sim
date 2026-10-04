@@ -1,31 +1,38 @@
 /* ============================================================================
-   fit_swing_policy.js · v0.4 · 2026-10-04
+   fit_swing_policy.js · v0.5 · 2026-10-04
 
    Fits bb_engine.js's SWING_THR, the batter's swing threshold for each count
    and read ([on, off]: the pitch he sat on or has not told apart from it, and
    one he recognised as something else), to the league's swing probability by
-   distance from the zone edge in each count (statcast/discipline.py table 2b,
-   loaded from statcast/discipline_2025.js). It plays plate appearances with
+   distance from the zone edge in each count AND pitch kind (v0.5;
+   statcast/swing_count_kind.py, loaded from statcast/swing_count_kind_2025.js).
+   Until v0.5 it fitted each count's curve over all kinds, and the two reads
+   then stood in for fastball against breaking ball: breaking balls were swung
+   at .15 too rarely and fastballs too often at every distance; the league takes
+   breaking balls in the zone more than fastballs only in hitters' counts. It
+   still reports the error against each count's pooled curve (table 2b,
+   statcast/discipline_2025.js). It plays plate appearances with
    the engine as it stands, records every decision (count, read, his judged
-   chance of a strike, his aggression, and the pitch's true distance from the
-   edge), then for each count searches both thresholds for the least squared
-   error over the ten distance bands, each band weighted by the league's
-   pitches in it. The search keeps off >= on: he is never readier to swing at
+   chance of a strike, his aggression, the pitch's kind and its true distance
+   from the edge), then for each count searches both thresholds for the least
+   squared error over the three kinds' ten distance bands, each band weighted by
+   the league's pitches in it. The search keeps off >= on: he is never readier to swing at
    a pitch he recognised as something else than at the one he sat on (left
    free, the fit turned that round in four counts to bend the curve's tails
    with where breaking balls go). It also prints the error with one threshold
    for both reads, for comparison. The decisions change which counts are reached, so paste the
    printed table into SWING_THR and rerun until it stops moving. It also reads
    the fitted thresholds by pitch kind against the league's swing curves by
-   kind, which the policy cannot shape: they test the perception behind it.
+   kind over all counts, which test the perception behind them: the chases of
+   pitches the batter did not pick up.
 
-   Run:  jsc bb_engine.js bb_names.js bb_field.js bb_game.js statcast/discipline_2025.js tools/fit_swing_policy.js -- [hitters] [PA each] [seed]
+   Run:  jsc bb_engine.js bb_names.js bb_field.js bb_game.js statcast/discipline_2025.js statcast/swing_count_kind_2025.js tools/fit_swing_policy.js -- [hitters] [PA each] [seed]
 
    CHANGED
+     v0.5  fitted to the league's swing curves by count x pitch kind (engine v3.1)
      v0.4  the check is the engine's: only a pitch he had not picked up (engine v2.7)
      v0.3  a swing counts by its chance of surviving his check at the last look (engine v2.4)
      v0.2  familiarity as in games: 40 x u x u pitches of this pitcher seen at the start of each PA (games: median 9 at a swing, mean 12.6; was uniform to 60-80)
-     v0.1  first build (bb_engine v1.2)
 ============================================================================ */
 (function (A) {
   var N = +A[0] || 600, NPA = +A[1] || 40, SEED = +A[2] || 7, IN = BB.units.IN;
@@ -53,15 +60,25 @@
     }
   }
   var COUNTS = ['0-0', '0-1', '0-2', '1-0', '1-1', '1-2', '2-0', '2-1', '2-2', '3-0', '3-1', '3-2'], out = {};
-  print('fit_swing_policy v0.1 · seed ' + SEED + ' · ' + N + ' hitters x ' + NPA + ' PA · 120 pitchers');
+  print('fit_swing_policy v0.5 · seed ' + SEED + ' · ' + N + ' hitters x ' + NPA + ' PA · 120 pitchers');
   COUNTS.forEach(function (cnt) {
     var L = DISCIPLINE.swing_by_edge_count[cnt], c = rec[cnt] || [[], []];
     // per state and band: the sorted values, so the share above a threshold is one binary search
     // per state and band: the values sorted, with the weight (the chance the swing survives his check) summed from the top
-    var sorted = [0, 1].map(function (s) { var by = EDGES.slice(1).map(function () { return []; }); c[s].forEach(function (r) { by[r[0]].push([r[1], r[3]]); });
-      return by.map(function (v) { v.sort(function (a, b) { return a[0] - b[0]; }); var suf = new Array(v.length + 1); suf[v.length] = 0; for (var j = v.length - 1; j >= 0; j--) suf[j] = suf[j + 1] + v[j][1]; v.suf = suf; return v; }); });
+    function bands(rows) { var by = EDGES.slice(1).map(function () { return []; }); rows.forEach(function (r) { by[r[0]].push([r[1], r[3]]); });
+      return by.map(function (v) { v.sort(function (a, b) { return a[0] - b[0]; }); var suf = new Array(v.length + 1); suf[v.length] = 0; for (var j = v.length - 1; j >= 0; j--) suf[j] = suf[j + 1] + v[j][1]; v.suf = suf; return v; }); }
+    var sorted = [0, 1].map(function (s) { return bands(c[s]); });
+    var KS = ['FB', 'BR', 'OS'], sortedK = KS.map(function (kd) { return [0, 1].map(function (s) { return bands(c[s].filter(function (r) { return r[2] === kd; })); }); });
     function above(v, t) { var lo = 0, hi = v.length; while (lo < hi) { var mid = (lo + hi) >> 1; if (v[mid][0] > t) hi = mid; else lo = mid + 1; } return v.suf[lo]; }
-    function err(tOn, tOff) {
+    function err(tOn, tOff) {   // the fit's objective: the three kinds' curves in this count
+      var e = 0;
+      KS.forEach(function (kd, ki) { var LK = SWING_CK[cnt + '|' + kd]; for (var b = 0; b < 10; b++) {
+        var n = sortedK[ki][0][b].length + sortedK[ki][1][b].length; if (n < 20 || LK[b][0] === null || LK[b][1] < 30) continue;
+        var sw = (above(sortedK[ki][0][b], tOn) + above(sortedK[ki][1][b], tOff)) / n;
+        e += LK[b][1] * (sw - LK[b][0]) * (sw - LK[b][0]); } });
+      return e;
+    }
+    function errPooled(tOn, tOff) {   // reported: the count's curve over all kinds (table 2b)
       var e = 0;
       for (var b = 0; b < 10; b++) {
         var n = sorted[0][b].length + sorted[1][b].length; if (n < 20 || L[b][1] < 30) continue;
@@ -72,14 +89,14 @@
     }
     var best = [0, 0, 1e18], one = [0, 1e18];
     for (var a = -0.2; a <= 1.201; a += 0.01) {
-      var e1 = err(a, a); if (e1 < one[1]) one = [a, e1];
+      var e1 = errPooled(a, a); if (e1 < one[1]) one = [a, e1];
       for (var b = a; b <= 1.201; b += 0.01) { var e = err(a, b); if (e < best[2]) best = [a, b, e]; }
     }
-    out[cnt] = [Math.round(best[0] * 100) / 100, Math.round(best[1] * 100) / 100]; out[cnt].err = best[2];
+    out[cnt] = [Math.round(best[0] * 100) / 100, Math.round(best[1] * 100) / 100]; out[cnt].err = errPooled(out[cnt][0], out[cnt][1]);
     var curve = [];
     for (var bb = 0; bb < 10; bb++) { var n = sorted[0][bb].length + sorted[1][bb].length; curve.push(n ? ((above(sorted[0][bb], best[0]) + above(sorted[1][bb], best[1])) / n).toFixed(2) : ' -  '); }
     var tot = L.reduce(function (s0, x) { return s0 + x[1]; }, 0);
-    print('  ' + cnt + '  on ' + out[cnt][0].toFixed(2) + '  off ' + out[cnt][1].toFixed(2) + '  rms ' + Math.sqrt(best[2] / tot).toFixed(3) + '  (one threshold ' + one[0].toFixed(2) + ': rms ' + Math.sqrt(one[1] / tot).toFixed(3) + '; on share ' + (c[0].length / Math.max(1, c[0].length + c[1].length)).toFixed(2) + ')   model ' + curve.join(' ') + '\n' +
+    print('  ' + cnt + '  on ' + out[cnt][0].toFixed(2) + '  off ' + out[cnt][1].toFixed(2) + '  rms ' + Math.sqrt(out[cnt].err / tot).toFixed(3) + '  (one threshold ' + one[0].toFixed(2) + ': rms ' + Math.sqrt(one[1] / tot).toFixed(3) + '; on share ' + (c[0].length / Math.max(1, c[0].length + c[1].length)).toFixed(2) + ')   model ' + curve.join(' ') + '\n' +
           '                                          league ' + L.map(function (x) { return x[0].toFixed(2); }).join(' '));
   });
   // the same thresholds, read by pitch kind (statcast/discipline.py table 2): perception sets these, not the policy
