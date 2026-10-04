@@ -5,16 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v4.7 · 2026-10-04
+  baseball.html · v4.8 · 2026-10-04
 
   The baseball app's screen: a whole game, played by the engine up front
-  (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
-  (Joe, 2026-09-29): a pitch every ten seconds or so, every number on
-  screen real, nothing hidden. The schedule is deterministic, so ?t=SECONDS
+  (about 50 ms) and then REPLAYED on a schedule - game night mode
+  (Joe, 2026-09-29): every number on screen real, nothing hidden. Since
+  v4.8 the broadcast sets the pace (Joe, 2026-10-04: slower than a pitch
+  every ten seconds is fine if the talk is worth hearing): each pitch waits
+  until what the booth must say about it is said (BBCall.paced), about
+  fifteen seconds a pitch. The schedule is deterministic, so ?t=SECONDS
   seeks to any moment of a game (used to check frames headless), ?seed=N
   draws another game, ?speed=X paces it.
 
-  Each pitch is three beats. SETUP (3 s): the count, the pitcher's intent
+  Each pitch is three beats. SETUP (4 s or more): the count, the pitcher's intent
   and pitch mix, where he is aiming (crosshair, one-sigma command circle),
   and the pitch the batter is sitting on (his dashed picture of it).
   FLIGHT (1.8 s): the real pitch flies in slow motion in the catcher's view
@@ -45,6 +48,8 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v4.8  the talk sets the clock (bb_call v0.7, bb_schedule v0.7): a segment lasts until its lines are said;
+          the pitcher sets and the runners lead off at the end of a long set-up, not its start
     v4.7  the swing from above (Joe): opposite the flight chart, the bat frozen at contact or where the
           ball crossed it, beside a ghost of the planned swing, with the timing; the omniscient
           broadcast (bb_call v0.6) and its longer pauses (bb_schedule v0.6)
@@ -52,8 +57,6 @@
     v4.5  engine v2.8 (aim follows command, the batter reads the slot, the scouts see each pitch),
           bb_field v1.0 (the outfielder's stop and turn; separate sends to third and home)
     v4.4  engine v2.7 (a check needs something new at the last look), bb_field v0.9 (the scorer's errors)
-    v4.3  games from the league's stable (stable/bb_stable.js) when it is beside the page: the level
-          named in the line-ups and the state panel; without it, two new teams as before
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -147,8 +150,8 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
 <script src="bb_names.js?v=0.1"></script>
 <script src="bb_field.js?v=1.0"></script>
 <script src="bb_game.js?v=1.1"></script>
-<script src="bb_schedule.js?v=0.6"></script>
-<script src="bb_call.js?v=0.6"></script>
+<script src="bb_schedule.js?v=0.7"></script>
+<script src="bb_call.js?v=0.7"></script>
 <script src="bb_organ.js?v=0.1"></script>
 <script src="bb_sound.js?v=0.1"></script>
 <!-- the park's sound files, when they are beside the page; without it the game plays silently -->
@@ -238,12 +241,15 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   }
 
   // ========================================================= THE SCHEDULE
-  // laid out by bb_schedule.js (the broadcast script is written against the same clock)
-  var SCHED = BBSchedule.build(G, PLAYER), SEG = SCHED.SEG, total = SCHED.total, segAt = SCHED.segAt, playDuration = SCHED.playDuration, runnerArrive = SCHED.runnerArrive;
-  // the broadcast, written ahead for the whole game, and its player; neither may ever stop the picture
-  var CALL = null, SOUND = null;
-  try { CALL = BBCall.write(GAME, SCHED); SOUND = BBSound.create({ call: CALL, SEG: SEG, segAt: segAt, seed: SEED, base: 'sounds/' }); }
-  catch (err) { console.error('broadcast', err); SOUND = null; }
+  // laid out by bb_schedule.js with the holds the broadcast asks for (BBCall.paced: each segment lasts until
+  // what must be said in it is said), and the broadcast written against that clock; if the writer fails, the
+  // fixed pace and no sound - neither may ever stop the picture
+  var SCHED = null, CALL = null, SOUND = null;
+  try { var PACED = BBCall.paced(GAME); SCHED = PACED.SCHED; CALL = PACED.CALL; }
+  catch (err) { console.error('broadcast', err); SCHED = BBSchedule.build(G, PLAYER); CALL = null; }
+  var SEG = SCHED.SEG, total = SCHED.total, segAt = SCHED.segAt, playDuration = SCHED.playDuration, runnerArrive = SCHED.runnerArrive;
+  try { if (CALL) SOUND = BBSound.create({ call: CALL, SEG: SEG, segAt: segAt, seed: SEED, base: 'sounds/' }); }
+  catch (err) { console.error('sound', err); SOUND = null; }
 
   // ============================================================ THE CLOCK
   var T = SEEK, speed = SPEED, paused = false, lastNow = null;
@@ -899,14 +905,16 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     var h = hashMix(hashStr(String(key))), a = h % 628 / 100, b = (h >>> 9) % 628 / 100, c = (h >>> 18) % 628 / 100;
     return [amp * (0.6 * Math.sin(t * 0.23 + a) + 0.4 * Math.sin(t * 0.71 + b)), amp * (0.6 * Math.sin(t * 0.19 + c) + 0.4 * Math.sin(t * 0.67 + a + c))];
   }
+  // a set-up lasts as long as the booth needs (v4.8): its beats count back from the pitch, so the man is at ease
+  // while they talk and comes set 3.4 s before the delivery, as he did in the fixed 4-s set-up
   function setPhase(seg, tau) {   // 0 at ease between pitches, 1 set for the pitch
-    if (seg.kind === 'setup') return smooth((tau - 0.6) / 1.2);
+    if (seg.kind === 'setup') return smooth((tau - (seg.dur - 3.4)) / 1.2);
     if (seg.kind === 'flight') return 1;
     if (seg.kind === 'result') return 1 - smooth((tau - 0.8) / 1.4);
     return 0;
   }
   function stepPhase(seg, tau) {   // the step in with the delivery, and back
-    if (seg.kind === 'setup') return smooth((tau - (PACE.setup - 1.0)) / 1.0);
+    if (seg.kind === 'setup') return smooth((tau - (seg.dur - 1.0)) / 1.0);
     if (seg.kind === 'flight') return 1;
     if (seg.kind === 'result') return 1 - smooth((tau - 0.4) / 1.6);
     return 0;
@@ -940,7 +948,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   // lead as the pitcher sets (3.5 m, Statcast's 11.7 ft), shuffles to his secondary
   // as it is delivered (4.66 m, 15.3 ft: the fielding layer's LEAD) and gets back
   function leadNow(seg, tau) {
-    if (seg.kind === 'setup') return 3.5 * smooth((tau - 0.5) / 1.8);
+    if (seg.kind === 'setup') return 3.5 * smooth((tau - (seg.dur - 3.5)) / 1.8);
     if (seg.kind === 'flight') return 3.5 + 1.16 * smooth(tau / 0.9);
     if (seg.kind === 'result') return 4.66 * (1 - smooth((tau - 0.3) / 1.3));
     return 0;
@@ -1020,7 +1028,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
       return t > ch.land + 0.9 ? lerp(cp, F.at, smooth((t - ch.land - 0.9) / 1.6)) : cp;
     }
     var prevCh = null;
-    if (seg.kind === 'setup' && seg.i > 0) { var pp = play.pa.pitches[seg.i - 1]; if (pp && pp.result === 'foul') { var pc = foulChase(play, pp); if (pc) prevCh = { c: pc, tEnd: (pp.bb ? Math.min(pp.bb.hang, 3) : 0) + PACE.foul }; } }
+    if (seg.kind === 'setup' && seg.i > 0) { var pp = play.pa.pitches[seg.i - 1]; if (pp && pp.result === 'foul') { var pc = foulChase(play, pp); if (pc) prevCh = { c: pc, tEnd: seg.t0 - pp.tResult }; } }   // the foul's segment as long as it lasted
     function fielderAt(F, t) {
       if (plan) return plan(F, t);
       if (pko && F.pos === '1B') { var bag1 = pickBag(); return t < 2.4 ? lerp(F.at, bag1, sm(t / 1.0)) : lerp(bag1, F.at, sm((t - 2.4) / 1.0)); }   // to the bag for the throw, then back

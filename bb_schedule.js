@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_schedule.js · v0.6 · 2026-10-04
+   bb_schedule.js · v0.7 · 2026-10-04
 
    The game and its schedule, shared by the screen (baseball.html) and the
    headless tools, so the broadcast script can be written and checked
@@ -11,7 +11,7 @@
    before and after it (an estimate from the run difference, the innings
    left and the base-out state).
 
-   build(G, PLAYER) lays the game out on the screen's fixed clock: pregame,
+   build(G, PLAYER, holds) lays the game out on the screen's clock: pregame,
    then per half halfStart, per at-bat a change (a pitching change or a
    pinch hitter, when there is one) and paStart, per pitch setup, flight and
    result, then halfEnd; after the top of the 7th the seventh-inning
@@ -25,6 +25,12 @@
    (a second, '...pickoff2'; with no pitch after it, numbered past his last);
    an intentional walk, '7b.3.ibb'.
 
+   THE TALK SETS THE CLOCK (v0.7). `holds`, when given, maps an event id to
+   seconds added to that segment: the time its broadcast lines need beyond the
+   fixed pace (bb_call.js writes the game once on the fixed clock, measures
+   what its lines need, and the schedule is built again with those holds; see
+   BBCall.paced). Each segment keeps `base`, its length before the hold.
+
    With a stable beside the page (stable/bb_stable.js, written by
    headless/league_run.js from bb_league.js), the game is drawn from it: a level
    (the majors a little over half the time, the five levels below the rest) and
@@ -33,6 +39,7 @@
    teams are drawn fresh as before.
 
    CHANGED
+     v0.7  holds: a segment waits for the lines the broadcast must say in it (the talk sets the pace)
      v0.6  more air for the omniscient broadcast: setup 4 s, a take 3.4, a foul 3.0, the batter's
            introduction 5.5, the end of a half 9 (13 in the middle of an inning), and 6 s after each
            at-bat for its summary
@@ -40,15 +47,15 @@
      v0.4  the manager's moves (bb_game v0.9): an 'ibb' segment for an intentional walk,
            a 'pickoff' segment for each throw over, a longer change for a double switch
      v0.3  uniform numbers: 0 to 99, and e, pi and i, from a stream of their own
-     v0.2  the seventh-inning stretch: 30 s after the top of the 7th, in games that get there
 ============================================================================ */
 
 var BBSchedule = (function () {
   'use strict';
   var FT = BB.units.FT;
   // seconds each kind of segment lasts at 1x
-  // v0.6: more air for the omniscient broadcast (what he meant, what the batter saw, what happened): a pitch about every 9 s
-  var PACE = { pregame: 45, halfStart: 8, paStart: 5.5, setup: 4.0, flight: 1.8, take: 3.4, foul: 3.0, bipPad: 3.0, change: 4.5, halfEnd: 9.0, midInning: 13.0, paEnd: 6.0, stretch: 30, final: 40,
+  // the least each lasts; since v0.7 the broadcast's holds stretch a segment until what must be said in it is said,
+  // so the at-bat's summary and the break's note about the model no longer need fixed time of their own
+  var PACE = { pregame: 45, halfStart: 8, paStart: 5.5, setup: 4.0, flight: 1.8, take: 3.4, foul: 3.0, bipPad: 3.0, change: 4.5, halfEnd: 9.0, midInning: 9.0, paEnd: 2.0, stretch: 30, final: 40,
                ibb: 5.0, pickoff: 3.4, dswitch: 2.5 };   // an intentional walk (the sign, the jog to first); a throw over and back; a double switch's extra time
   var HR_BASE = 1.6, CELEB = 3.5;   // a home-run trot per base; how long a grand-slam huddle at the plate holds
 
@@ -120,7 +127,7 @@ var BBSchedule = (function () {
   }
 
   // ======================================================== THE SCHEDULE
-  function build(G, PLAYER) {
+  function build(G, PLAYER, holds) {
     // When each man reaches his bag. Safe: the fielding layer's own time. Scored or
     // put out: at his own pace (his speed, the fielding layer's running model) - and
     // if the ball beat him he still gets there, after it. The batter runs every ball
@@ -159,7 +166,8 @@ var BBSchedule = (function () {
     }
 
     var SEG = [], total = 0;
-    function add(kind, dur, d) { var s = d || {}; s.kind = kind; s.dur = dur; s.t0 = total; SEG.push(s); total += dur; return s; }
+    holds = holds || {};
+    function add(kind, dur, d) { var s = d || {}; s.kind = kind; s.base = dur; s.dur = dur + (holds[s.id] || 0); s.t0 = total; SEG.push(s); total += s.dur; return s; }
     add('pregame', PACE.pregame, { id: 'pre' });
     G.innings.forEach(function (inn, ii) {
       var hk = inn.n + (inn.half ? 'b' : 't');   // '7b': the bottom of the 7th
@@ -176,7 +184,7 @@ var BBSchedule = (function () {
         }
         if (play.ibb) {   // the manager signals; he jogs to first, anyone forced ahead of him
           var ib = add('ibb', PACE.ibb, { play: play, last: true, id: pk + '.ibb' });
-          play.tResult = ib.t0; play.tResolve = ib.t0 + 0.8; play.tEnd = ib.t0 + PACE.ibb;
+          play.tResult = ib.t0; play.tResolve = ib.t0 + 0.8; play.tEnd = ib.t0 + ib.dur;
         }
         play.pa.pitches.forEach(function (p, i) {
           var qk = pk + '.' + (i + 1);
@@ -190,7 +198,7 @@ var BBSchedule = (function () {
           if (last) dur += PACE.paEnd;   // the booth sums up the at-bat before the next man is introduced
           var sg = add('result', dur, { play: play, i: i, last: last, id: qk + '.result' });
           p.tResult = sg.t0;
-          if (last && !play.pa.pickoffsEnd) { play.tResult = sg.t0; play.tResolve = sg.t0 + (play.play ? playDuration(play) - 0.6 : running ? 2.6 : 0.4); play.tEnd = sg.t0 + dur; }
+          if (last && !play.pa.pickoffsEnd) { play.tResult = sg.t0; play.tResolve = sg.t0 + (play.play ? playDuration(play) - 0.6 : running ? 2.6 : 0.4); play.tEnd = sg.t0 + sg.dur; }
         });
         if (play.pa.pickoffsEnd) {   // picked off for the third out, no pitch after: the last throw ends the half
           pickoffs(play.pa.pickoffsEnd, n, pk + '.' + (n + 1));
@@ -211,7 +219,7 @@ var BBSchedule = (function () {
     return { SEG: SEG, total: total, segAt: segAt, playDuration: playDuration, runnerArrive: runnerArrive, ownArrive: ownArrive };
   }
 
-  return { version: '0.6', PACE: PACE, HR_BASE: HR_BASE, CELEB: CELEB, Phi: Phi, winProb: winProb, game: game, build: build };
+  return { version: '0.7', PACE: PACE, HR_BASE: HR_BASE, CELEB: CELEB, Phi: Phi, winProb: winProb, game: game, build: build };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = BBSchedule;
