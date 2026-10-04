@@ -1,8 +1,9 @@
-<!-- trait_map.html · v3.1 · 2026-10-04
+<!-- trait_map.html · v3.2 · 2026-10-04
      The trait path map: distal traits -> proximate abilities -> the engine's stages
      (with every constant and where its value came from) -> statistics against the league.
      Keep it in step with bb_engine.js; publish to the same artifact URL.
      CHANGED
+       v3.2  engine v3.0: bat speed falls as a pitch pulls the swing up, away or in (BAT_LOC); FG and G findings
        v3.1  engine v2.9: the barrel's height falls short toward the middle of the zone (VERT_MISS); timing
              scatter grows with flight time; RESID_S halved; DM and CS tested
        v3.0  hypotheses S, J, Y, Z (engine v2.8, bb_field v1.0): the outfielder's stop and turn; sends to third
@@ -10,7 +11,6 @@
        v2.9  hypotheses A-E (engine v2.7, bb_field v0.9): a checked swing needs something new at the last look;
              the scouts' errors, fumbles and drops; the league's ground-ball spray re-measured; 2025 team totals
        v2.8  the league (bb_league v0.1): thirty organisations, six levels, promotion, and its drop
-       v2.7  engine v2.6: athleticism, the deep trait beneath swing power, arm strength and sprint speed
 -->
 <meta charset="utf-8">
 <title>Ballgame Trait Map</title>
@@ -292,7 +292,8 @@ td.basis { color: var(--muted); }
       ['AIM_HANDS 1.4 in', 'aim inside', 'F', 'How far toward the hands of the sweet spot he aims. Fitted with the along-barrel scatter (v2.2) so few swings miss past the end of the bat, as Statcast\'s miss distance shows (was 1 in, set by hand).'],
       ['SWING_EFFORT', 'ahead 1.017, two 0.982', 'M', 'Swing effort by count: league fastball bat speed at the same contact depth was 71.9 mph ahead in the count, 70.2 even and 68.9 with two strikes (v1.1).'],
       ['ADJ_PER_MS 0.0014', 'altered swing', 'F', 'Bat speed lost per millisecond of timing he closes by altering his swing after a late read. Fitted so breaking balls and off-speed are swung about 2 mph slower than fastballs at the same depth, as in the league (v1.1).'], ['EFFORT_SD 5%', 'swing to swing', 'F', 'Each swing\'s effort varies: his bat speed times exp(N(0, 0.05)), without changing his precision. Fitted to the league\'s swing speeds about each hitter\'s mean (core about 4.3 mph wide; v2.4).'],
-      ['SWING_NORM 0.978', 'keeps the trait', 'D', 'Divides out the average effort and adjustment, so his bat-speed trait stays the average over his swings (v1.1).']]],
+      ['BAT_LOC', 'fastest low over the plate', 'M', 'Bat speed by location (v3.0): a quadratic surface in height and distance away, fitted to the league\'s swings about each hitter\'s mean with the count held fixed; +2 mph low over the plate, -3.5 to -6 above the zone, -4 well away. Reaching contact had kept the model\'s full bat speed.'],
+      ['SWING_NORM 0.961', 'keeps the trait', 'D', 'Divides out the average effort, adjustment and location, so his bat-speed trait stays the average over his swings (v1.1; 0.978 before BAT_LOC).']]],
     ['s_collide', 'Collide', 'the ball meets a wooden bat', [
       ['Bat as a beam', 'Nathan 2000', 'P', 'The tapered wood beam: its radius at contact, recoil about the balance point, and the bending modes that drain an off-centre strike.'],
       ['Ball COR', '0.546 to 0.51', 'P', 'The MLB specification at 60 mph and Nathan\'s value at 140 mph, linear between.'],
