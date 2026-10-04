@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v2.9 · 2026-10-04`
+`CALIBRATION.md · v3.0 · 2026-10-04`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -933,6 +933,39 @@ On the final engine the pool's true spread is .0232 and the estimate sees 35% (t
 
 The doubles, slugging and extra bases came to the league's. The batter who reads the slot is fooled less, so strikeouts and chase fell a little and walks rose; home runs rose to 14% above the league's (wilder pitchers now miss over the middle), and double plays fell a quarter below it.
 
+## U and G, first measurements: the vertical miss by pitch height, and the bat's grip (engine v2.8; 2026-10-04)
+
+Joe asked for the hypotheses in the order ranked, U and G first. Runs: the league's pitch-level contact (42 days of 2025, 52,925 fouls and balls in play with bat tracking) by pitch height as a share of the batter's zone; the model the same way (600 hitters x 40 PA, seed 106; `contact_score.js` 600 x 40 at seed 5); scratch engines only - nothing was built.
+
+**The model's vertical miss hardly depended on pitch height.** Launch angle minus attack angle, by height (0 = the bottom of the zone, 1 = the top):
+
+| height | below | 0-.25 | .25-.5 | .5-.75 | .75-1 | above | mean |
+|---|---|---|---|---|---|---|---|
+| league LA | −2.8 | +6.4 | +15.2 | +25.0 | +31.6 | +35.4 | |
+| league AA | +12.0 | +9.9 | +8.1 | +6.6 | +5.7 | +5.0 | |
+| league LA − AA | −14.8 | −3.5 | +7.0 | +18.4 | +25.9 | +30.4 | +10.3 |
+| model LA − AA | −1.9 | +1.1 | +3.3 | +6.0 | +9.2 | +9.1 | +4.3 |
+
+The league's launch angle climbed 38 deg from low pitches to high, the model's 7; the spread within each band was alike (league 27-34 deg, model 29-32). The model's barrel offset D rose only 0.4 in across the zone, and at about 23 deg of launch per inch of D (the model's own slope, at every friction tried) the league's curve needs about 1.5 in. Real hitters met high pitches under the middle of the ball and low ones over it, as if their aim were pulled toward the middle of the zone. Breaking balls were topped more than the league's in every band (8 to 15 deg below fastballs against the league's 7 to 9): recognised breaking balls kept a misread of −1.45 in (the RESID_S share of the gap to the pitch expected), while those sat on were misread +0.16.
+
+**A pull toward the middle reproduced the curve.** A scratch engine added D += k (pitch height − the zone's middle). With k = 0.11 in per in and the aim under the ball raised 0.4 in, the model's curve was −16.0, −5.8, +5.9, +17.2, +26.6, +30.6 against the league's −14.8, −3.5, +7.0, +18.4, +25.9, +30.4 (mean +8.1 against +10.3). It is the up-down twin of HAND_MISS, by which the hands already cover only 70% of a pitch's distance inside or outside.
+
+**But whiffs by height did not follow.** Whiffs per swing, low to high:
+
+| | below | 0-.25 | .25-.5 | .5-.75 | .75-1 | above |
+|---|---|---|---|---|---|---|
+| league fastballs | .345 | .122 | .102 | .131 | .198 | .366 |
+| model fastballs, as built | .220 | .158 | .179 | .199 | .221 | .327 |
+| model, k .11 + aim .4 in | .190 | .121 | .165 | .248 | .378 | .607 |
+| league breaking balls | .602 | .271 | .147 | .129 | .181 | .317 |
+| model breaking balls, as built | .428 | .298 | .297 | .289 | .256 | .259 |
+
+The league's whiffs sat at the edges of the zone and fell to .10-.15 in the middle; the model's were flat, too many in the middle and too few at the edges. The pull moved whiffs toward the edges, the right shape, but it overshot fastballs up (high fastballs swung under, .38 and .61) and left low fastballs short (.19 against .345), and fastball whiffs overall rose from .210 to .24-.29 (league .174). Shrinking the random up-down scatter (motor x0.65-0.8) barely lowered them: the excess middle-zone misses come from elsewhere, most likely the misses along the barrel (hypothesis V: the excess of fastball swings missing by 3+ in). The best overall contact score of the grid (.0715 against .0775 as built, k .08) came with fastball whiffs of .238.
+
+**G: the grip did not change the launch angles.** The friction cap at 0.5, 0.35 and 0.2 left the launch per inch of D at 22.4-23.0 deg and contact struck 60+ deg under the ball at .010-.017 of contact against the league's .045; it moves spin, which needs published batted-ball spin by launch angle to judge (as v0.9 found). So G is not the other half of U.
+
+**Where this leaves U.** Confirmed as a missing mechanism (the up-down aim does not follow pitch height as the league's does), not built: alone it trades the launch-angle curve for fastball whiffs above the zone. Next: build it with V (misses along the barrel that should connect weakly), which lowers fastball whiffs at every height, and judge the pair on the launch-angle and whiff curves together; G waits for spin measurements.
+
 ## What was learned building the fielding layer
 
 - **Statcast's outfield JUMP (about 30 ft covered in the first 3 s) is the right anchor for outfielder motion.** The first fielders covered 44 ft in 3 s and caught nearly every fly ball (fly-ball BABIP .03). Slowing everyone to the jump figure fixed the outfield but let 52% of ground balls through, so infielders got their own harder acceleration and a dive reach. That's a real difference: they work from a crouch on a ball that is on them at once.
@@ -975,14 +1008,14 @@ Ranked by how likely each seems (judgement, not measurement); mysteries by the n
 
 | | Hypothesis | Mysteries | Likelihood |
 |---|---|---|---|
-| U | The vertical miss leans the wrong way: the league's contact leans under the ball (pop-ups, glancing fouls), the model's over it. Measured; the cause open - perhaps batters expect more drop than a riding fastball gives, perhaps the shape of the up-down scatter | 2, 9, 1 | likely |
+| U | The vertical miss leans the wrong way: the league's contact leans under the ball (pop-ups, glancing fouls), the model's over it. MEASURED (section above): the model's up-down aim barely follows pitch height (launch angle climbs 7 deg across the zone against 38); a pull toward the middle reproduces the curve but overshoots high-fastball whiffs alone - to build with V | 2, 9, 1, 4 | confirmed, not built |
 | T | Hurried throws are missing: a throw's scatter grows only with its length (the league's throwing errors are highest on weak grounders) | 11 | likely |
 | AA | No development: Triple-A's pitchers are 1.8 years younger and still learning command; the model's players never change | 3, 10 | plausible |
 | CS | The major leaguers' command spread was measured too wide (3-0 four-seamers, a few per pitcher): their walk rates spread twice the league's. Narrower picks drawn from a pool the farm must filter harder would leave the minors wilder | 3 | plausible |
 | DM | Damage on mistakes: a pitch over the middle is hit too hard, so home runs rose once wild pitchers aimed there; the same test says whether command is worth what it should be | 7, 3, 1 | plausible |
 | DP | Double plays: fewer chances (more runners already on second) or a pivot and relay timed by hand (PIVOT 0.35 s) | 8 | plausible |
 | YS | Pitchers judged more sharply: a season's results seen alongside the estimate (prototype: a third of the command gap) | 3 | plausible |
-| G | The bat's grip on the ball is wrong (hand-set friction): pop-ups spin far too fast; the same physics sets liners' backspin and glancing deflection | 9, 2, 14 | plausible |
+| G | The bat's grip on the ball is wrong (hand-set friction): pop-ups spin far too fast. Friction does not move the launch angles (tested); spin needs published measurements | 9, 14 | plausible |
 | V | Mishits along the barrel should mostly connect, weakly, not miss: most big fastball misses are along the barrel | 5, 4 | plausible |
 | H | The ball's direction follows the bat too closely | 9, 13 | plausible |
 | I | The batter's picture is pulled toward a pitch's usual break both ways, so a hanger fools him as much as a sharp breaker | 4 | plausible |
