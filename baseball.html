@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v4.3 · 2026-10-03
+  baseball.html · v4.4 · 2026-10-04
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a fixed schedule - game night mode
@@ -45,6 +45,7 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v4.4  engine v2.7 (a check needs something new at the last look), bb_field v0.9 (the scorer's errors)
     v4.3  games from the league's stable (stable/bb_stable.js) when it is beside the page: the level
           named in the line-ups and the state panel; without it, two new teams as before
     v4.2  engine v2.6 (athleticism)
@@ -56,10 +57,6 @@
           strides and steps out; runners lead off and get back; outfielders chase home runs
           and fouls bound for the seats; the catcher's-view bat swings on the engine's circle
           in his tilted plane, with the sweet spot's path drawn
-    v3.9  the broadcast (PR #5, page v2.7) on engine v2.4: two announcers, the public-address
-          announcer, the crowd, the field and the organ, written ahead and played on the
-          game's clock; v and c mute the voices and the park; silent without them; the
-          schedule from bb_schedule.js; a seventh-inning stretch; uniform numbers on the cards
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -149,9 +146,9 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   <div id="hud" class="tag"></div>
 </div>
 <!-- version tags so a browser never runs a stale engine against a new page -->
-<script src="bb_engine.js?v=2.6"></script>
+<script src="bb_engine.js?v=2.7"></script>
 <script src="bb_names.js?v=0.1"></script>
-<script src="bb_field.js?v=0.8"></script>
+<script src="bb_field.js?v=0.9"></script>
 <script src="bb_game.js?v=1.0"></script>
 <script src="bb_schedule.js?v=0.5"></script>
 <script src="bb_call.js?v=0.5"></script>

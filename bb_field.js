@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v0.8 · 2026-10-03
+   bb_field.js · v0.9 · 2026-10-04
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -32,6 +32,9 @@
    doubles are approximate; the cut-off man is a timing rule, not a player.
 
    CHANGED
+     v0.9  the scorer's errors: a fumble is an error only on an ordinary chance; an outfielder
+           picking up a ball that got through is not hurried by the ground he ran (half
+           of those pickups were fumbled); drops on a catch he is under and fumbles on a grounder from the league's errors
      v0.8  infielders shade by how far a batter pulls: his path's pull plus the face's (engine v2.3)
      v0.7  outfielders move as Statcast's jump shows, stand where the league's did, and
            catch as often as the league's by exit velocity and launch angle; bounces lose
@@ -270,8 +273,12 @@ var BBField = (function () {
   function catchChance(F, T) {
     var L = T.land, m = L.t - moveTime(F.pl, dist(F.at, [L.x, L.y]) - REACH);
     if (T.kind === 'wall' && L.z > 2.6) return { m: m, p: 0 };
-    return { m: m, p: Phi((m - CATCH_SET) / 0.2) * (1 - 0.6 * (1 - F.pl.glove)) };
+    return { m: m, p: Phi((m - CATCH_SET) / 0.2) * (1 - DROP_K * (1 - F.pl.glove)) };
   }
+  // A ball he is under is dropped DROP_K of his fumble rate on a grounder (1 - glove), FITTED to the
+  // league's missed-catch errors (2025: about 0.023 a team-game, from the play descriptions' share of
+  // the non-throwing errors: 0.15 gave 0.018-0.022 over 600 games; was 0.6, set by hand, which dropped 1.1% of routine catches).
+  var DROP_K = 0.15;
   // The first point on the ground track he can reach.
   function intercept(F, T) {
     var G = T.ground;
@@ -283,11 +290,22 @@ var BBField = (function () {
     var last = G.length ? G[G.length - 1] : [T.land.t, T.land.x, T.land.y, 0, 0], d2 = dist(F.at, [last[1], last[2]]);
     return { t: Math.max(last[0], moveTime(F.pl, d2)), at: [last[1], last[2]], v: 0, moved: d2 };
   }
-  // A grounder fielded cleanly? Harder when it is hot, when he had to move, on a bad hop.
-  function cleanChance(F, ic) {
-    var D = Math.pow(ic.v / 30, 2) + Math.pow(ic.moved / 10, 2);
-    return F.pl.glove * Math.exp(-0.10 * D);
-  }
+  // A grounder fielded cleanly? Harder when it is hot, on a bad hop, and for an infielder when he had to
+  // range for it (the ground he covered stands for fielding on the run). An outfielder picking up a ball
+  // that got through is not hurried by the ground he ran to reach it (until v0.9 half of those pickups
+  // were fumbled, each costing 1.2 s). D is the chance's difficulty, its scales set by hand; how much it
+  // costs, CLEAN_K, was FITTED to the league's fielding errors per ground ball (2025 play descriptions:
+  // .0145, and flat with exit velocity, 1.3-1.9% from 70 to 130 mph): .015 gave .014-.016 over 600 games.
+  // It was 0.10, set by hand, and 10% of grounders were fumbled.
+  function chanceD(F, ic) { return Math.pow(ic.v / 30, 2) + (isOF(F.pos) ? 0 : Math.pow(ic.moved / 10, 2)); }
+  function cleanChance(F, ic) { return F.pl.glove * Math.exp(-CLEAN_K * chanceD(F, ic)); }
+  var CLEAN_K = 0.015;
+  // THE SCORER. A fumble that costs the out is an error only on a chance an ordinary fielder handles
+  // (the rulebook's ordinary effort): no harder than D = 1, a ball reaching him at 30 m/s (67 mph) or a
+  // 10 m range, where an average glove's clean chance has fallen about a tenth. A harder chance fumbled
+  // is a hit. (Until v0.9 any fumble that cost the out was an error: 0.59 a team-game against the
+  // league's 0.25 non-throwing errors.)
+  var ORDINARY_D = 1;
 
   // ---------------------------------------------------------- the play
   // bases: [null, r1, r2, r3] players; returns what happened and how.
@@ -473,7 +491,7 @@ var BBField = (function () {
         var tB = ballTo(1, ic.t, ic.at).t;
         wouldBeOut = arrive(batR, 1) > tB + 0.1;
       }
-      if (wouldBeOut) { out.hit = 'E'; out.error = true; out.desc = 'reaches on an error by ' + Ff.pos; }
+      if (wouldBeOut && (out.error || chanceD(Ff, ic) <= ORDINARY_D)) { out.hit = 'E'; out.error = true; out.desc = 'reaches on an error by ' + Ff.pos; }
       else if (anyForceOut) out.hit = 'FC';
       else out.hit = ['', '1B', '2B', '3B', 'HR'][batR.target];
       if (T.groundRule) out.desc = 'ground-rule double';
