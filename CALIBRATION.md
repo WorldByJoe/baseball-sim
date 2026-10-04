@@ -874,8 +874,8 @@ Where the model and the league disagree and no believable mechanism has been bui
 6. **Triple-A's BABIP** is .026 above the majors'; the model's level 2 matches its level 1. Triple-A's hitters also chase less than the majors' (the model's chase a little more).
 7. **Errors** 0.8 a game against 0.55; **steals** 0.55-0.66 against 0.47.
 8. From before: K% ~ release height has the wrong sign (+.16 against −.22), BB% ~ arm angle is flat (+.20 in the league), uphill swings cost too many whiffs (attack ~ whiff +.66 against +.53), bat speed ~ whiff is under half the league's (+.26 to +.35 against +.69), liners at 15-20 deg carry 10-20 ft too far.
-10. **Down the levels the pitchers stay too good** (the league, bb_league v0.1): the majors out-hit Triple-A (.305 against .295) where the real Triple-A out-hits the majors and walks 3 points more; promotion from Triple-A costs a hitter about .017 beyond regression to the mean. Same root as 5.
 9. **Swings far off the plate** run below the league's (9+ in outside: .00-.02 of pitches at 0-0 against .04-.06) since batters check their swings; chase .258 against .283.
+10. **Down the levels the pitchers stay too good** (the league, bb_league v0.1): the majors out-hit Triple-A (.305 against .295) where the real Triple-A out-hits the majors and walks 3 points more; promotion from Triple-A costs a hitter about .017 beyond regression to the mean. Same root as 5.
 
 ## Known gaps, to fix with mechanisms rather than knob-turning
 
