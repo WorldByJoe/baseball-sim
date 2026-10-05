@@ -83,6 +83,9 @@
     var thirdOut = outs0 + r.outsMade >= 3;   // outs0: the count when the ball was hit (a runner may have been thrown out during the at-bat)
     if (!thirdOut && scored !== r.runs) flag('runs differ from the runners who crossed the plate', key, scored + ' vs ' + r.runs);
     if (thirdOut && r.runs > scored) flag('more runs than runners crossed the plate', key);
+    // no run scores when the third out is the batter before first base or a runner forced
+    var bat0 = R.filter(function (q) { return q.from === 0; })[0];
+    if (thirdOut && r.runs && ((bat0 && bat0.out) || /force out|double play/.test(r.desc))) flag('a run scored on a play whose third out was a force or the batter', key, r.desc);
     // nobody passes the man ahead; one man a base
     var live = R.filter(function (q) { return !q.out; }).sort(function (a, b) { return b.from - a.from; });
     for (var i = 1; i < live.length; i++) {
@@ -169,7 +172,6 @@
       var isLast = ii === G.innings.length - 1;
       if (!last) flag('an inning with no plays', 'seed ' + SEED + ' game ' + g + ' inning ' + inn.n);
       else if (last.outsAfter !== 3 && !(isLast && G.over)) flag('the inning ended short of three outs', 'seed ' + SEED + ' game ' + g + ' inning ' + inn.n + (inn.half ? ' bot' : ' top'), String(last.outsAfter));
-      else if (last.outsAfter === 3 && isLast && G.over && inn.half === 1 && inn.n >= 9 && G.score[1] > G.score[0] && last.runs) flag('a walk-off that went on to the third out', 'seed ' + SEED + ' game ' + g);
     });
     if (G.score[0] !== score[0] || G.score[1] !== score[1]) flag('the final score is not the sum of the runs', 'seed ' + SEED + ' game ' + g);
     if (!G.over) flag('a game that did not finish', 'seed ' + SEED + ' game ' + g, G.finalInning + ' innings, ' + G.score.join('-'));

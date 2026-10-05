@@ -1,5 +1,5 @@
 /* ============================================================================
-   plays_check.js · v0.2 · 2026-10-05
+   plays_check.js · v0.3 · 2026-10-05
 
    Constructed plays through BBField.resolve, each a regression test for a
    bug the audit found (docs/briefs/2026-10-05_bug_audit.md): a fixed
@@ -10,6 +10,7 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js headless/plays_check.js
 
    CHANGED
+     v0.3  a throw that gets away moves every runner up, the men who held included (bb_field v1.4)
      v0.2  a runner tags up only to a base the man ahead leaves (bb_field v1.3)
      v0.1  the runner behind a man who scores may score too (bb_field v1.2)
 ============================================================================ */
@@ -55,6 +56,18 @@
     if (!distinct(o) || !conserved(o, 3)) { bad++; if (!eg) eg = where(o); }
   }); }); });
   check('second and third, none out, flies to the outfield of every depth: nobody tags up onto the man ahead (' + tried + ' catches, the man on third held on ' + held + ')', tried > 0 && bad === 0, bad ? bad + ' collisions, e.g. ' + eg : 'no collisions');
+
+  // 3. A throw that gets away moves every runner up a base, the men who held included (bb_field v1.4). The dice here
+  //    make the infielder's throw wild (a 5-sigma miss) and nothing else. A man on second alone, none out, a ground
+  //    ball to the second baseman: he held; the throw to first goes wild. Until v1.4 only the men who were moving
+  //    took an extra base, so the batter took second on top of the man who held there, who vanished. The same with
+  //    men on first and third and a grounder to short: the man on third held, the man from first took third on top
+  //    of him.
+  var wildDice = { u: function () { return 0.5; }, n: function (mu, sd) { return sd > 0.26 ? 5 : 0; } };
+  bb = batted(82, -4, 12); out = resolve(bb, [null, null, runner(0.3), null], 0, wildDice);
+  check('man on second, a grounder to the second baseman thrown away: nobody lands on him', out.error && distinct(out) && conserved(out, 2), where(out));
+  bb = batted(84, -3, -14); out = resolve(bb, [null, runner(0), null, runner(0.3)], 0, wildDice);
+  check('first and third, a grounder to short thrown away: nobody lands on the man who held', out.error && distinct(out) && conserved(out, 3), where(out));
 
   print(fails ? 'FAIL: ' + fails + ' of ' + cases + ' cases' : 'PASS: ' + cases + ' cases');
 })();

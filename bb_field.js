@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.3 · 2026-10-05
+   bb_field.js · v1.4 · 2026-10-05
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -32,6 +32,8 @@
    doubles are approximate; the cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.4  a throw that gets away moves every runner up a base, the men who held included (the bug audit): a holder
+           stayed while the runner behind him took the base he was on, and the holder vanished (headless/plays_check.js)
      v1.3  a runner tags up only to a base the man ahead leaves (the bug audit): a man could tag up onto one who
            held, and the man who held vanished from the bases - 21 times in 2,000 games (headless/plays_check.js)
      v1.2  the runner behind a man who scores may score too (the bug audit): a man who had crossed the plate was
@@ -43,10 +45,6 @@
            league's foul pops (v3.2) the first and third basemen ran down twice the league's foul outs
      v1.0  the outfielder's stop and turn: one who reaches the ball on the run sheds the speed
            not carrying him toward his throw before he lets it go
-     v0.9  the scorer's errors: a fumble is an error only on an ordinary chance; an outfielder
-           picking up a ball that got through is not hurried by the ground he ran (half
-           of those pickups were fumbled); drops on a catch he is under and fumbles on a grounder from the league's errors
-     v0.8  infielders shade by how far a batter pulls: his path's pull plus the face's (engine v2.3)
 ============================================================================ */
 
 var BBField = (function () {
@@ -496,9 +494,9 @@ var BBField = (function () {
         ev.push({ t: tField + settle(to, fieldAt) + Ff.pl.transfer, kind: 'throw', who: Ff.pos, from: fieldAt, to: to, arrive: play.tBall, wild: err > 1.6, rcv: play.how === 'cover' ? 'P' : coverOf(to, Ff.pos) });
       }
       var via = play.how === 'run' ? Ff.pos + ' unassisted' : play.how === 'cover' ? Ff.pos + ' to the pitcher covering' : Ff.pos + ' to ' + baseName(to);
-      if (err > 1.6) {                                   // thrown away: everyone moves up
+      if (err > 1.6) {                                   // thrown away: everyone moves up a base, the men who held included (until v1.4 a holder stayed, and a runner behind him landed on top of him)
         out.error = true;
-        R.forEach(function (r) { if (r.target > r.base || r.base === 0) r.target = Math.min(4, r.target + 1); });
+        R.forEach(function (r) { r.target = Math.min(4, r.target + 1); });
         out.desc = 'throwing error by ' + Ff.pos;
       } else if (rng.u() < play.p) {
         play.r.out = true; out.outsMade++;
@@ -567,7 +565,7 @@ var BBField = (function () {
     return best.c.p > 0 && rng.u() < best.c.p ? best : null;
   }
 
-  return { version: '1.3', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
+  return { version: '1.4', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };
