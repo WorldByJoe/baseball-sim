@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.4 · 2026-10-05
+   bb_field.js · v1.5 · 2026-10-05
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -32,6 +32,8 @@
    doubles are approximate; the cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.5  a force play tried and missed is the batter's hit only when he would have beaten a throw to first (the
+           scorer's rule 9.05; the bug audit): the batter had been credited a single whenever the lead runner was safe
      v1.4  a throw that gets away moves every runner up a base, the men who held included (the bug audit): a holder
            stayed while the runner behind him took the base he was on, and the holder vanished (headless/plays_check.js)
      v1.3  a runner tags up only to a base the man ahead leaves (the bug audit): a man could tag up onto one who
@@ -43,8 +45,6 @@
            (accessible): about 42 ft off the lines for the first 150 ft and 21 ft by 250 ft, the backstop 46 ft;
            it had been drawn 59 ft wide to 100 ft and 41-49 ft out to 260 ft, and once the engine made the
            league's foul pops (v3.2) the first and third basemen ran down twice the league's foul outs
-     v1.0  the outfielder's stop and turn: one who reaches the ball on the run sheds the speed
-           not carrying him toward his throw before he lets it go
 ============================================================================ */
 
 var BBField = (function () {
@@ -520,14 +520,15 @@ var BBField = (function () {
     // fielder's choice, and the batter lost the hit).
     var batR = R[R.length - 1], runnerOut = R.some(function (r) { return r.out && r.base > 0; });
     var anyForceOut = runnerOut && (!isOF(Ff.pos) || (play && play.force));
+    var triedRunner = play && play.r.base > 0 && !play.r.out && play.force;   // the fielder tried a force on a runner and failed
     if (!batR.out) {
       var wouldBeOut = false;
-      if (!clean || out.error) {                          // would a clean play have got him?
+      if (!clean || out.error || triedRunner) {           // would a clean play on the batter have got him?
         var tB = ballTo(1, ic.t, ic.at).t;
         wouldBeOut = arrive(batR, 1) > tB + 0.1;
       }
-      if (wouldBeOut && (out.error || chanceD(Ff, ic) <= ORDINARY_D)) { out.hit = 'E'; out.error = true; out.desc = 'reaches on an error by ' + Ff.pos; }
-      else if (anyForceOut) out.hit = 'FC';
+      if (wouldBeOut && (out.error || chanceD(Ff, ic) <= ORDINARY_D) && !(triedRunner && clean)) { out.hit = 'E'; out.error = true; out.desc = 'reaches on an error by ' + Ff.pos; }
+      else if (anyForceOut || (triedRunner && wouldBeOut)) out.hit = 'FC';   // a force tried and missed is the batter's hit only if he would have beaten a throw to first (rule 9.05; until v1.5 it was always a hit)
       else out.hit = ['', '1B', '2B', '3B', 'HR'][batR.target];
       if (T.groundRule) out.desc = 'ground-rule double';
     } else out.hit = 'OUT';
@@ -565,7 +566,7 @@ var BBField = (function () {
     return best.c.p > 0 && rng.u() < best.c.p ? best : null;
   }
 
-  return { version: '1.4', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
+  return { version: '1.5', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };

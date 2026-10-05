@@ -1,5 +1,5 @@
 /* ============================================================================
-   plays_check.js · v0.3 · 2026-10-05
+   plays_check.js · v0.4 · 2026-10-05
 
    Constructed plays through BBField.resolve, each a regression test for a
    bug the audit found (docs/briefs/2026-10-05_bug_audit.md): a fixed
@@ -10,6 +10,7 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js headless/plays_check.js
 
    CHANGED
+     v0.4  a force tried and missed is a fielder's choice when the batter would have been out at first (bb_field v1.5)
      v0.3  a throw that gets away moves every runner up, the men who held included (bb_field v1.4)
      v0.2  a runner tags up only to a base the man ahead leaves (bb_field v1.3)
      v0.1  the runner behind a man who scores may score too (bb_field v1.2)
@@ -27,8 +28,8 @@
   }
   function where(out) { return out.runners.map(function (r) { return r.from + '->' + (r.out ? 'out' : r.to >= 4 ? 'home' : r.to); }).join(' ') + ' | ' + out.hit + ', runs ' + out.runs + ', outs ' + out.outsMade + ': ' + out.desc; }
   function check(name, ok, detail) { cases++; if (!ok) fails++; print((ok ? 'PASS ' : 'FAIL ') + name + '\n       ' + detail); }
-  function resolve(bb, bases, outs, dice, side) {
-    var B = runner(0); BBField.positionDefense(D, B, side || -1);
+  function resolve(bb, bases, outs, dice, side, batter) {
+    var B = batter || runner(0); BBField.positionDefense(D, B, side || -1);
     return BBField.resolve(bb, B, bases, outs, D, env, dice || BB.makeRng(1), { side: side || -1, going: 0 });
   }
   function distinct(out) { var seen = {}; for (var i = 1; i <= 3; i++) if (out.bases[i]) { if (seen[out.bases[i].id]) return false; seen[out.bases[i].id] = 1; } return true; }
@@ -68,6 +69,18 @@
   check('man on second, a grounder to the second baseman thrown away: nobody lands on him', out.error && distinct(out) && conserved(out, 2), where(out));
   bb = batted(84, -3, -14); out = resolve(bb, [null, runner(0), null, runner(0.3)], 0, wildDice);
   check('first and third, a grounder to short thrown away: nobody lands on the man who held', out.error && distinct(out) && conserved(out, 3), where(out));
+
+  // 4. A failed force play is a fielder's choice when the batter would have been out at first (bb_field v1.5; the
+  //    rulebook's 9.05). A slow man on first, none out, a soft grounder to short; the dice make every throw late
+  //    (nobody is put out) and nothing else. The shortstop tries the force at second and the runner beats it; the
+  //    batter, who would have been out at first by two seconds, reaches. Until v1.5 that was scored a single.
+  var lateDice = { u: function () { return 0.9; }, n: function () { return 0; } }, slowB = runner(0, 22), R1m = runner(0, 26.5), tried4 = 0, wrong4 = 0, eg4 = '';
+  [70, 74, 78, 82, 86, 90].forEach(function (ev) { [-14, -10, -6, -2, 2, 6].forEach(function (la) { [-25, -15, -5, 5, 15, 25].forEach(function (sp) {
+    var o = resolve(batted(ev, la, sp), [null, R1m, null, null], 0, lateDice, -1, slowB);
+    if (!/safe at second ahead of the throw/.test(o.desc)) return;
+    tried4++; if (o.hit !== 'FC' || o.error || !conserved(o, 2)) { wrong4++; if (!eg4) eg4 = where(o); }
+  }); }); });
+  check('a slow batter and a man on first, soft grounders to the infield: every force tried and missed at second is a fielder\'s choice (' + tried4 + ' such plays)', tried4 > 0 && wrong4 === 0, wrong4 ? wrong4 + ' scored as hits, e.g. ' + eg4 : 'all fielder\'s choices');
 
   print(fails ? 'FAIL: ' + fails + ' of ' + cases + ' cases' : 'PASS: ' + cases + ' cases');
 })();
