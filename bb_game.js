@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_game.js · v1.2 · 2026-10-05
+   bb_game.js · v1.3 · 2026-10-05
 
    A whole game: two teams, nine innings or more, lineups that turn over,
    pitchers who tire and get replaced, managers with their own habits.
@@ -45,6 +45,8 @@
    at DH, the rest on the bench, the next man in the five-man rotation.
 
    CHANGED
+     v1.3  no pinch-hitter for the pitcher when the pen is empty (the bug audit): with every reliever used, in extra
+           innings, the pitcher who had been hit for came back to pitch - an illegal substitution, one game in 2,000
      v1.2  the pinch-hitter's spot goes back to the pitcher when the next pitcher comes in (the bug audit): the
            pinch-hitter had kept the spot for the rest of the game, so an NL side batted nine hitters and no pitcher
            after its first pinch-hit, in 9% of its plate appearances; the play records the batting order
@@ -369,7 +371,7 @@ var BBGame = (function () {
     var B = st.order[st.idx % 9];
     if (B === null) {                       // the pitcher's spot (NL)
       var P = st.pitcher, f = BB.fatigueOf(P), M = st.team.manager;
-      var ph = inning >= 6 && st.bench.length && (f >= M.hook - 0.15 || diff < 0);
+      var ph = inning >= 6 && st.bench.length && (f >= M.hook - 0.15 || diff < 0) && st.team.bullpen.some(function (p) { return !p.used; });   // only with a fresh arm to follow: a pitcher hit for is out of the game (until v1.3 an empty pen brought him back)
       if (ph) {   // the best bat on the bench; the backup catcher last
         var pick = st.bench.slice().sort(function (a, b) { return (b.benchPos === 'C' ? -1 : 0) - (a.benchPos === 'C' ? -1 : 0) || BB.hitterValue(b) - BB.hitterValue(a); })[0];
         st.bench.splice(st.bench.indexOf(pick), 1); B = pick; st.order[st.idx % 9] = B; st.pinchHitFor = P; st.pinchSlot = st.idx % 9; st.justPinch = { batter: B, forPitcher: P };
@@ -514,7 +516,7 @@ var BBGame = (function () {
     return out.join('\n');
   }
 
-  return { version: '1.2', makeTeam: makeTeam, makeRoster: makeRoster, teamFromRoster: teamFromRoster, canPlay: canPlay, simGame: simGame, line: line, playByPlay: playByPlay, newStats: newStats };
+  return { version: '1.3', makeTeam: makeTeam, makeRoster: makeRoster, teamFromRoster: teamFromRoster, canPlay: canPlay, simGame: simGame, line: line, playByPlay: playByPlay, newStats: newStats };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = BBGame;
