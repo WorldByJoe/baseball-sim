@@ -1,5 +1,5 @@
 /* ============================================================================
-   plays_check.js · v0.1 · 2026-10-05
+   plays_check.js · v0.2 · 2026-10-05
 
    Constructed plays through BBField.resolve, each a regression test for a
    bug the audit found (docs/briefs/2026-10-05_bug_audit.md): a fixed
@@ -10,6 +10,7 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js headless/plays_check.js
 
    CHANGED
+     v0.2  a runner tags up only to a base the man ahead leaves (bb_field v1.3)
      v0.1  the runner behind a man who scores may score too (bb_field v1.2)
 ============================================================================ */
 (function () {
@@ -18,7 +19,7 @@
   var fielders = POS.map(function (pos) { return BB.makeBatter(rng, { pos: pos }); });
   var P = BB.makePitcher(rng, { role: 'SP' }); P.pos = 'P';
   var D = BBField.makeDefense(fielders.concat([P]));
-  function runner(aggr) { var b = BB.makeBatter(rng, { pos: 'LF' }); b.runAggr = aggr || 0; b.speed = 27; b.jump = 0.22; return b; }
+  function runner(aggr, speed) { var b = BB.makeBatter(rng, { pos: 'LF' }); b.runAggr = aggr || 0; b.speed = speed || 27; b.jump = 0.22; return b; }
   function batted(ev, la, spray) {   // a batted ball from the engine's own flight, as simPA builds one
     var v = ev * MPH, col = { v: [v * Math.cos(la * DEG) * Math.sin(spray * DEG), v * Math.cos(la * DEG) * Math.cos(spray * DEG), v * Math.sin(la * DEG)], w: [0, 0, 0], q: 1 };
     return BB.battedBall({ plate: { x: 0, z: 0.8 } }, col, env, true);
@@ -40,6 +41,20 @@
   check('bases loaded, two out, a drive into the right-field corner scores at least two', out.runs >= 2 && !out.error, where(out));
   bb = batted(98, 14, -8); out = resolve(bb, [null, null, runner(-0.2), runner(0)], 2);
   check('second and third, two out, a single up the middle scores both', out.runs === 2 && out.hit === '1B', where(out));
+
+  // 2. A runner may tag up only to a base the man ahead leaves (bb_field v1.3). Second and third, none out, a timid,
+  //    slow man on third (runAggr +0.4, 25.3 ft/s) and a bolder one on second (-0.2, 26.5), a fly to centre caught
+  //    about 330 ft out: the man on third holds, so the man on second must hold too. Until v1.3 he tagged to third
+  //    on top of him, and the man on third vanished from the bases (21 times in 2,000 games).
+  var R3 = runner(0.4, 25.3), R2 = runner(-0.2, 26.5), bad = 0, tried = 0, held = 0, eg = '';
+  [94, 96, 99, 102, 105].forEach(function (ev) { [30, 34, 38, 42].forEach(function (la) { [0, 10, 20, 30].forEach(function (sp) {
+    var fb = batted(ev, la, sp), o = resolve(fb, [null, null, R2, R3], 0);
+    if (!o.events.some(function (e) { return e.kind === 'catch'; })) return;
+    tried++;
+    var r3 = o.runners.filter(function (r) { return r.from === 3; })[0]; if (r3.to === 3) held++;
+    if (!distinct(o) || !conserved(o, 3)) { bad++; if (!eg) eg = where(o); }
+  }); }); });
+  check('second and third, none out, flies to the outfield of every depth: nobody tags up onto the man ahead (' + tried + ' catches, the man on third held on ' + held + ')', tried > 0 && bad === 0, bad ? bad + ' collisions, e.g. ' + eg : 'no collisions');
 
   print(fails ? 'FAIL: ' + fails + ' of ' + cases + ' cases' : 'PASS: ' + cases + ' cases');
 })();

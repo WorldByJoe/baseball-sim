@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.2 · 2026-10-05
+   bb_field.js · v1.3 · 2026-10-05
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -32,6 +32,8 @@
    doubles are approximate; the cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.3  a runner tags up only to a base the man ahead leaves (the bug audit): a man could tag up onto one who
+           held, and the man who held vanished from the bases - 21 times in 2,000 games (headless/plays_check.js)
      v1.2  the runner behind a man who scores may score too (the bug audit): a man who had crossed the plate was
            still the ceiling for the runner behind him, who was held to third - no single, double or triple ever
            scored two runs (headless/plays_check.js)
@@ -376,13 +378,17 @@ var BBField = (function () {
       R[R.length - 1].out = true; out.outsMade = 1;
       out.hit = 'OUT'; out.desc = (out.type === 'PU' ? 'pop out' : out.type === 'LD' ? 'line out' : 'fly out') + ' to ' + F.pos;
       if (outs + 1 >= 3) { out.desc += ', inning over'; finish(); return out; }
-      // runners held; now they may tag up against this arm, once he has stopped and turned
-      var tagging = [];
+      // runners held; now they may tag up against this arm, once he has stopped and turned - the lead runner first,
+      // and each only to a base the man ahead leaves (until v1.3 a man could tag up onto one who held, and the man
+      // who held vanished from the bases)
+      var tagging = [], aheadTag = 5;
       function settleC(to) { return settleTime(F, at, to, dist(F.at, at), best.c.m); }
       R.slice(0, -1).forEach(function (r) {
         var to = r.base + 1, tRun = tc + runTime(r.pl, BASE, true);
         var tBall = Math.max(tc + settleC(to) + F.pl.transfer + throwArrival(F, at, to), rcvArrival(to, F.pos)) + TAG;
-        if (tRun + SAFETY + r.pl.runAggr < tBall && !tagging.some(function (q) { return q.to === to; })) tagging.push({ r: r, to: to, tRun: tRun, tBall: tBall });
+        var goes = to < aheadTag && tRun + SAFETY + r.pl.runAggr < tBall;
+        if (goes) tagging.push({ r: r, to: to, tRun: tRun, tBall: tBall });
+        aheadTag = goes ? to : r.base;
       });
       if (tagging.length) {
         var play = null;
@@ -561,7 +567,7 @@ var BBField = (function () {
     return best.c.p > 0 && rng.u() < best.c.p ? best : null;
   }
 
-  return { version: '1.2', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
+  return { version: '1.3', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };

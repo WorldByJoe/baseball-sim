@@ -130,7 +130,7 @@
         // the pitches
         var st = p.bases.slice(), pitchRuns = 0;
         p.pa.pitches.forEach(function (rec, k) { checkPitch(p, rec, k, key); if (rec._runs) pitchRuns += rec._runs; });
-        if (p.pa.pickoffsEnd) p.pa.pickoffsEnd.forEach(function (ev) { if (!ev.out) flag('the at-bat ended on a pickoff that was not an out', key); });
+        if (p.pa.pickoffsEnd && !p.pa.pickoffsEnd[p.pa.pickoffsEnd.length - 1].out) flag('the at-bat ended on a pickoff that was not an out', key);
         // the plate appearance's own result from the state the last pitch left
         var nP = p.pa.pitches.length, lastRec = nP ? p.pa.pitches[nP - 1] : null, pkEnd = p.pa.pickoffsEnd;
         var s0 = pkEnd ? pkEnd[pkEnd.length - 1].basesAfter : lastRec ? (lastRec.basesAfter || lastRec.bases) : p.bases, res = p.pa.result;
