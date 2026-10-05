@@ -110,7 +110,7 @@
 
   for (var g = 0; g < N; g++) {
     var T = BBNames.teams(rng), away = BBGame.makeTeam(rng, T[0]), home = BBGame.makeTeam(rng, T[1]);
-    var G = BBGame.simGame(away, home, { rng: rng }), score = [0, 0];
+    var G = BBGame.simGame(away, home, { rng: rng }), score = [0, 0], gone = {};
     nGames++;
     G.innings.forEach(function (inn, ii) {
       var outs = 0, runsInn = 0, last = null;
@@ -155,16 +155,20 @@
         (p.defense || []).forEach(function (F) { nF++; if (pos[F.pos]) flag('two men at one position', key, F.pos); pos[F.pos] = 1; if (fid[F.id]) flag('one man at two positions', key); fid[F.id] = 1; });
         if (nF !== 9 || POSITIONS.some(function (q) { return !pos[q]; })) flag('not nine fielders at the nine positions', key, Object.keys(pos).join(' '));
         if (p.pitcher && !fid[p.pitcher.id]) flag('the pitcher is not in the field', key);
-        // the batting order: nine distinct men, the pitcher's spot (NL) or the designated hitter (AL), and the batter among them
+        // the batting order: nine distinct men; in the NL exactly one spot is the pitcher's (null) and the batter is one of
+        // the nine or the pitcher himself, in the AL no spot is empty; every fielder but the pitcher bats for his side
         if (p.order) {
           var seenO = {}, nulls = 0, nO = 0;
           p.order.forEach(function (id) { nO++; if (id === null) nulls++; else { if (seenO[id]) flag('a man twice in the batting order', key); seenO[id] = 1; } });
           if (nO !== 9) flag('the batting order is not nine', key, String(nO));
-          if (G.rules === 'NL') { if (nulls + (seenO[p.pitcher ? 0 : 0] ? 1 : 0) !== 1 && !(nulls === 0 && p.order.indexOf(p.defense.filter(function (F) { return F.pos === 'P'; })[0].id) >= 0)) flag('NL: the pitcher has no spot in the batting order', key, 'nulls ' + nulls); }
-          else if (nulls) flag('AL: an empty spot in the batting order', key);
-          var batId = p.batter.id, pit = p.defense.filter(function (F) { return F.pos === 'P'; })[0];
-          if (!seenO[batId] && !(G.rules === 'NL' && nulls)) flag('the batter is not in the batting order', key);
-          (p.defense || []).forEach(function (F) { if (F.pos !== 'P' && !seenO[F.id]) flag('a fielder who is not in the batting order', key, F.pos); });
+          if (G.rules === 'NL' && nulls !== (p.pinchPending ? 0 : 1)) flag('NL: the pitcher has no spot in the batting order', key, 'empty spots ' + nulls + (p.pinchPending ? ' (a pinch-hitter has it until the next half)' : ''));
+          if (G.rules === 'AL' && nulls) flag('AL: an empty spot in the batting order', key);
+          if (!seenO[p.batter.id] && !(G.rules === 'NL' && p.batter.id === p.batP)) flag('the batter is not in the batting order', key);
+          var seenD = {}; (p.defOrder || []).forEach(function (id) { if (id !== null) seenD[id] = 1; });
+          (p.defense || []).forEach(function (F) { if (F.pos !== 'P' && !seenD[F.id]) flag('a fielder who does not bat for his side', key, F.pos); });
+          // a man who left the game stays out of it: a pitcher who was pinch-hit for never pitches again
+          if (p.pinchHit && p.pinchHit.forPitcher) gone[p.pinchHit.forPitcher.id] = 1;
+          if (p.pitcher && gone[p.pitcher.id]) flag('a pitcher who was pinch-hit for came back to pitch', key);
         }
         outs = p.outsAfter; runsInn += p.runs; last = p;
       });
