@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.0 · 2026-10-04
+   bb_field.js · v1.1 · 2026-10-05
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -32,6 +32,10 @@
    doubles are approximate; the cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.1  the foul ground a fielder can reach, MEASURED from where the league's foul-territory outs were made
+           (accessible): about 42 ft off the lines for the first 150 ft and 21 ft by 250 ft, the backstop 46 ft;
+           it had been drawn 59 ft wide to 100 ft and 41-49 ft out to 260 ft, and once the engine made the
+           league's foul pops (v3.2) the first and third basemen ran down twice the league's foul outs
      v1.0  the outfielder's stop and turn: one who reaches the ball on the run sheds the speed
            not carrying him toward his throw before he lets it go
      v0.9  the scorer's errors: a fumble is an error only on an ordinary chance; an outfielder
@@ -165,17 +169,21 @@ var BBField = (function () {
     return d < dAcc ? (Math.sqrt(v0 * v0 + 2 * ACC_R * d) - v0) / ACC_R : (v - v0) / ACC_R + (d - dAcc) / v;
   }
   // The part of foul ground a fielder can reach: in front of the backstop and
-  // within a strip along each line that narrows from the plate to the poles,
-  // with the dugouts cut out of it (16 to 24 m off the lines, 50 to 80 m out).
-  // Anything else is in the seats.
+  // within a strip along each line that narrows from the plate to the poles.
+  // Anything else is in the seats. MEASURED (v1.1) from where the league's
+  // foul-territory outs were made (785 field outs with foul landing spots, 42
+  // days of 2025, the hit coordinates at 2.38 ft a unit): off the nearer line
+  // the 95th percentile ran 12.6-12.9 m for the first 46 m along it, 10.3 m
+  // at 46-61 m, 6.4 m at 61-91 m and 2 m beyond; behind the plate the outs
+  // reached 14 m (46 ft) at the 95th percentile. The league makes such outs
+  // on .027 of balls in play, 0.68 a team-game.
   function accessible(x, y) {
-    if (y < -18) return false;
+    if (y < -14) return false;
     var ax = Math.abs(x);
     if (ax <= y) return true;                                     // fair
     var s = (ax + y) / Math.SQRT2, perp = (ax - y) / Math.SQRT2;  // along the line, and off it
-    if (s > 105) return false;
-    var w = s < 30 ? 18 : 18 - 14 * (s - 30) / 75;
-    if (s > 50 && s < 80) w = Math.min(w, 15);
+    if (s > 100) return false;
+    var w = s <= 46 ? 12.8 : s <= 64 ? 12.8 - 6.4 * (s - 46) / 18 : s <= 91 ? 6.4 : 6.4 - 4.4 * (s - 91) / 9;
     return perp <= w;
   }
 
