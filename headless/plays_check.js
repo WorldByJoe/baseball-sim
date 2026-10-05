@@ -1,0 +1,45 @@
+/* ============================================================================
+   plays_check.js · v0.1 · 2026-10-05
+
+   Constructed plays through BBField.resolve, each a regression test for a
+   bug the audit found (docs/briefs/2026-10-05_bug_audit.md): a fixed
+   defence, a batted ball built from exit speed, launch angle and spray, the
+   runners placed by hand, and a stand-in for the dice where a case needs
+   one (a throw that must go wild). Prints each case and PASS or FAIL.
+
+   Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js headless/plays_check.js
+
+   CHANGED
+     v0.1  the runner behind a man who scores may score too (bb_field v1.2)
+============================================================================ */
+(function () {
+  var U = BB.units, MPH = U.MPH, DEG = U.DEG, env = BB.makeEnv({}), fails = 0, cases = 0;
+  var rng = BB.makeRng(7), POS = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF'];
+  var fielders = POS.map(function (pos) { return BB.makeBatter(rng, { pos: pos }); });
+  var P = BB.makePitcher(rng, { role: 'SP' }); P.pos = 'P';
+  var D = BBField.makeDefense(fielders.concat([P]));
+  function runner(aggr) { var b = BB.makeBatter(rng, { pos: 'LF' }); b.runAggr = aggr || 0; b.speed = 27; b.jump = 0.22; return b; }
+  function batted(ev, la, spray) {   // a batted ball from the engine's own flight, as simPA builds one
+    var v = ev * MPH, col = { v: [v * Math.cos(la * DEG) * Math.sin(spray * DEG), v * Math.cos(la * DEG) * Math.cos(spray * DEG), v * Math.sin(la * DEG)], w: [0, 0, 0], q: 1 };
+    return BB.battedBall({ plate: { x: 0, z: 0.8 } }, col, env, true);
+  }
+  function where(out) { return out.runners.map(function (r) { return r.from + '->' + (r.out ? 'out' : r.to >= 4 ? 'home' : r.to); }).join(' ') + ' | ' + out.hit + ', runs ' + out.runs + ', outs ' + out.outsMade + ': ' + out.desc; }
+  function check(name, ok, detail) { cases++; if (!ok) fails++; print((ok ? 'PASS ' : 'FAIL ') + name + '\n       ' + detail); }
+  function resolve(bb, bases, outs, dice, side) {
+    var B = runner(0); BBField.positionDefense(D, B, side || -1);
+    return BBField.resolve(bb, B, bases, outs, D, env, dice || BB.makeRng(1), { side: side || -1, going: 0 });
+  }
+  function distinct(out) { var seen = {}; for (var i = 1; i <= 3; i++) if (out.bases[i]) { if (seen[out.bases[i].id]) return false; seen[out.bases[i].id] = 1; } return true; }
+  function conserved(out, n) { var on = 0; for (var i = 1; i <= 3; i++) if (out.bases[i]) on++; return on + out.outsMade + out.runs === n; }
+
+  // 1. The runner behind a man who scores may score too (bb_field v1.2). Bases loaded, two out, a ball driven into the
+  //    right-field corner: the men from third and second both score ahead of the throw. Until v1.2 the second man was
+  //    held to the base below the man ahead even when the man ahead had crossed the plate: no single, double or triple
+  //    ever scored two runs.
+  var bb = batted(103, 12, 40), out = resolve(bb, [null, runner(0), runner(0), runner(0)], 2);
+  check('bases loaded, two out, a drive into the right-field corner scores at least two', out.runs >= 2 && !out.error, where(out));
+  bb = batted(98, 14, -8); out = resolve(bb, [null, null, runner(-0.2), runner(0)], 2);
+  check('second and third, two out, a single up the middle scores both', out.runs === 2 && out.hit === '1B', where(out));
+
+  print(fails ? 'FAIL: ' + fails + ' of ' + cases + ' cases' : 'PASS: ' + cases + ' cases');
+})();

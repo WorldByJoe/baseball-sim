@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.1 · 2026-10-05
+   bb_field.js · v1.2 · 2026-10-05
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -32,6 +32,9 @@
    doubles are approximate; the cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.2  the runner behind a man who scores may score too (the bug audit): a man who had crossed the plate was
+           still the ceiling for the runner behind him, who was held to third - no single, double or triple ever
+           scored two runs (headless/plays_check.js)
      v1.1  the foul ground a fielder can reach, MEASURED from where the league's foul-territory outs were made
            (accessible): about 42 ft off the lines for the first 150 ft and 21 ft by 250 ft, the backstop 46 ft;
            it had been drawn 59 ft wide to 100 ft and 41-49 ft out to 260 ft, and once the engine made the
@@ -42,21 +45,6 @@
            picking up a ball that got through is not hurried by the ground he ran (half
            of those pickups were fumbled); drops on a catch he is under and fumbles on a grounder from the league's errors
      v0.8  infielders shade by how far a batter pulls: his path's pull plus the face's (engine v2.3)
-     v0.7  outfielders move as Statcast's jump shows, stand where the league's did, and
-           catch as often as the league's by exit velocity and launch angle; bounces lose
-           more the steeper they land (measured); runners read the race with error and are
-           sent by the outs (fitted to extra bases taken); a runner thrown out on a clean
-           hit to the outfield no longer costs the batter his hit
-     v0.6  the running game: stealTime from a moving lead, a runner going with the
-           pitch is 9 m down the line at contact (o.going); accessible() marks the
-           foul ground a man can reach - foul pops in the seats are nobody's
-     v0.5  a throw cannot arrive before the man covering that base does; on a
-           fly ball a runner reads the catch chance - goes on contact when nobody
-           will reach it, halfway when it might drop, holds on a routine fly (he
-           used to wait at the bag on every fly and the batter caught him up)
-     v0.4  unassisted putouts: the man who covers a base runs the ball there
-           himself; a first baseman far off the bag throws to the pitcher covering
-           and waits for him (Joe saw a throw to an empty bag). Events 'carry', 'cover'
 ============================================================================ */
 
 var BBField = (function () {
@@ -457,7 +445,9 @@ var BBField = (function () {
       if (r.base > 0 && r.start !== null && r.start < 0.5 && !r.midway && r.onContact) return r.start + stealTime(r.pl, d, V_CONTACT);
       return r.start + runTime(r.pl, d, (r.start >= 0.5 && !r.midway) || r.base === 0);
     }
-    // how far each goes: lead runner first, nobody passes the man ahead
+    // how far each goes: lead runner first, nobody passes the man ahead - and a man who has crossed the plate is
+    // nobody's ceiling (until v1.2 he was: the runner behind him was held to third, so no single, double or triple
+    // ever scored two runs)
     var ahead = 5;
     R.forEach(function (r, i) {
       if (r.start === null) { r.target = r.base; ahead = r.base; return; }
@@ -469,7 +459,7 @@ var BBField = (function () {
         if (next >= 3 ? tBall - tRun + rng.n(0, READ_SD) > (next === 3 ? SAFETY_3 : SAFETY_H)[Math.min(outs, 2)] + r.pl.runAggr : tRun + SAFETY + r.pl.runAggr < tBall) to = next; else break;
       }
       if (T.groundRule) to = Math.min(4, r.base + 2);
-      r.target = Math.min(to, ahead - 1); ahead = r.target;
+      r.target = Math.min(to, ahead - 1); ahead = r.target >= 4 ? 5 : r.target;
     });
 
     // the fielder's throw: the most likely, most valuable out
@@ -571,7 +561,7 @@ var BBField = (function () {
     return best.c.p > 0 && rng.u() < best.c.p ? best : null;
   }
 
-  return { version: '0.8', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
+  return { version: '1.2', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };
