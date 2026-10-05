@@ -1,0 +1,1611 @@
+{
+ "pulled": "2026-10-05",
+ "units": "tempF in F, rh as a share, wind in mph, windFromDeg compass (0 = from the north)",
+ "note": "Closed or fixed roofs: the engine holds 72 F indoors. A reported value is the Stats API game-day report. A forecast is the National Weather Service hourly forecast for the first-pitch hour (about 7 days out); later games have only the climate.",
+ "games": [
+  {
+   "gamePk": 849845,
+   "date": "2026-09-29",
+   "series": "NL Wild Card Series",
+   "seriesGame": 1,
+   "venueId": 4705,
+   "venue": "Truist Park",
+   "firstPitchUTC": "2026-09-29T18:00:00Z",
+   "roof": "Open",
+   "reported": {
+    "condition": "Sunny",
+    "temp": "80",
+    "wind": "3 mph, Calm"
+   },
+   "localFirstPitch": "14:00",
+   "climate": {
+    "n_hours": 60,
+    "tempF": {
+     "mean": 78.2,
+     "sd": 5.5
+    },
+    "rh": {
+     "mean": 0.52,
+     "sd": 0.15
+    },
+    "windMph": {
+     "mean": 6.7,
+     "sd": 3.3
+    },
+    "windFromDeg_vectorMean": 85.0,
+    "windVectorMeanMph": 3.0,
+    "rainyHourShare": 0.083
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849849,
+   "date": "2026-09-29",
+   "series": "AL Wild Card Series",
+   "seriesGame": 1,
+   "venueId": 2392,
+   "venue": "Daikin Park",
+   "firstPitchUTC": "2026-09-29T21:00:00Z",
+   "roof": "Retractable",
+   "reported": {
+    "condition": "Roof Closed",
+    "temp": "73",
+    "wind": "0 mph, None"
+   },
+   "localFirstPitch": "16:00",
+   "climate": {
+    "n_hours": 60,
+    "tempF": {
+     "mean": 84.3,
+     "sd": 3.8
+    },
+    "rh": {
+     "mean": 0.55,
+     "sd": 0.18
+    },
+    "windMph": {
+     "mean": 7.4,
+     "sd": 3.4
+    },
+    "windFromDeg_vectorMean": 104.0,
+    "windVectorMeanMph": 5.7,
+    "rainyHourShare": 0.1
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849851,
+   "date": "2026-09-29",
+   "series": "AL Wild Card Series",
+   "seriesGame": 1,
+   "venueId": 3313,
+   "venue": "Yankee Stadium",
+   "firstPitchUTC": "2026-09-30T00:00:00Z",
+   "roof": "Open",
+   "reported": {
+    "condition": "Cloudy",
+    "temp": "67",
+    "wind": "8 mph, L To R"
+   },
+   "localFirstPitch": "20:00",
+   "climate": {
+    "n_hours": 70,
+    "tempF": {
+     "mean": 62.5,
+     "sd": 5.6
+    },
+    "rh": {
+     "mean": 0.81,
+     "sd": 0.13
+    },
+    "windMph": {
+     "mean": 6.8,
+     "sd": 3.5
+    },
+    "windFromDeg_vectorMean": 204.0,
+    "windVectorMeanMph": 0.5,
+    "rainyHourShare": 0.114
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849843,
+   "date": "2026-09-29",
+   "series": "NL Wild Card Series",
+   "seriesGame": 1,
+   "venueId": 2680,
+   "venue": "Petco Park",
+   "firstPitchUTC": "2026-09-30T02:00:00Z",
+   "roof": "Open",
+   "reported": {
+    "condition": "Clear",
+    "temp": "74",
+    "wind": "4 mph, L To R"
+   },
+   "localFirstPitch": "19:00",
+   "climate": {
+    "n_hours": 70,
+    "tempF": {
+     "mean": 67.9,
+     "sd": 2.4
+    },
+    "rh": {
+     "mean": 0.8,
+     "sd": 0.09
+    },
+    "windMph": {
+     "mean": 3.8,
+     "sd": 2.2
+    },
+    "windFromDeg_vectorMean": 280.0,
+    "windVectorMeanMph": 2.5,
+    "rainyHourShare": 0.0
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849841,
+   "date": "2026-09-30",
+   "series": "NL Wild Card Series",
+   "seriesGame": 2,
+   "venueId": 4705,
+   "venue": "Truist Park",
+   "firstPitchUTC": "2026-09-30T18:00:00Z",
+   "roof": "Open",
+   "reported": {
+    "condition": "Partly Cloudy",
+    "temp": "83",
+    "wind": "4 mph, L To R"
+   },
+   "localFirstPitch": "14:00",
+   "climate": {
+    "n_hours": 70,
+    "tempF": {
+     "mean": 78.2,
+     "sd": 5.3
+    },
+    "rh": {
+     "mean": 0.53,
+     "sd": 0.15
+    },
+    "windMph": {
+     "mean": 6.9,
+     "sd": 3.4
+    },
+    "windFromDeg_vectorMean": 81.0,
+    "windVectorMeanMph": 2.5,
+    "rainyHourShare": 0.086
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849846,
+   "date": "2026-09-30",
+   "series": "AL Wild Card Series",
+   "seriesGame": 2,
+   "venueId": 2392,
+   "venue": "Daikin Park",
+   "firstPitchUTC": "2026-09-30T21:00:00Z",
+   "roof": "Retractable",
+   "reported": {
+    "condition": "Roof Closed",
+    "temp": "73",
+    "wind": "0 mph, None"
+   },
+   "localFirstPitch": "16:00",
+   "climate": {
+    "n_hours": 70,
+    "tempF": {
+     "mean": 84.3,
+     "sd": 3.8
+    },
+    "rh": {
+     "mean": 0.54,
+     "sd": 0.18
+    },
+    "windMph": {
+     "mean": 7.5,
+     "sd": 3.4
+    },
+    "windFromDeg_vectorMean": 97.0,
+    "windVectorMeanMph": 5.2,
+    "rainyHourShare": 0.1
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849848,
+   "date": "2026-09-30",
+   "series": "AL Wild Card Series",
+   "seriesGame": 2,
+   "venueId": 3313,
+   "venue": "Yankee Stadium",
+   "firstPitchUTC": "2026-10-01T00:00:00Z",
+   "roof": "Open",
+   "reported": {
+    "condition": "Cloudy",
+    "temp": "68",
+    "wind": "5 mph, Varies"
+   },
+   "localFirstPitch": "20:00",
+   "climate": {
+    "n_hours": 80,
+    "tempF": {
+     "mean": 62.2,
+     "sd": 5.8
+    },
+    "rh": {
+     "mean": 0.8,
+     "sd": 0.14
+    },
+    "windMph": {
+     "mean": 6.7,
+     "sd": 3.4
+    },
+    "windFromDeg_vectorMean": 245.0,
+    "windVectorMeanMph": 0.3,
+    "rainyHourShare": 0.113
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849842,
+   "date": "2026-09-30",
+   "series": "NL Wild Card Series",
+   "seriesGame": 2,
+   "venueId": 2680,
+   "venue": "Petco Park",
+   "firstPitchUTC": "2026-10-01T02:00:00Z",
+   "roof": "Open",
+   "reported": {
+    "condition": "Partly Cloudy",
+    "temp": "71",
+    "wind": "6 mph, L To R"
+   },
+   "localFirstPitch": "19:00",
+   "climate": {
+    "n_hours": 80,
+    "tempF": {
+     "mean": 67.8,
+     "sd": 2.4
+    },
+    "rh": {
+     "mean": 0.79,
+     "sd": 0.09
+    },
+    "windMph": {
+     "mean": 3.8,
+     "sd": 2.2
+    },
+    "windFromDeg_vectorMean": 279.0,
+    "windVectorMeanMph": 2.5,
+    "rainyHourShare": 0.0
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849844,
+   "date": "2026-10-01",
+   "series": "NL Wild Card Series",
+   "seriesGame": 3,
+   "venueId": 4705,
+   "venue": "Truist Park",
+   "firstPitchUTC": "2026-10-02T00:00:00Z",
+   "roof": "Open",
+   "reported": {
+    "condition": "Partly Cloudy",
+    "temp": "84",
+    "wind": "5 mph, L To R"
+   },
+   "localFirstPitch": "20:00",
+   "climate": {
+    "n_hours": 90,
+    "tempF": {
+     "mean": 68.8,
+     "sd": 5.6
+    },
+    "rh": {
+     "mean": 0.71,
+     "sd": 0.16
+    },
+    "windMph": {
+     "mean": 6.5,
+     "sd": 2.7
+    },
+    "windFromDeg_vectorMean": 54.0,
+    "windVectorMeanMph": 3.2,
+    "rainyHourShare": 0.056
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849829,
+   "date": "2026-10-03",
+   "series": "AL Division Series",
+   "seriesGame": 1,
+   "venueId": 5,
+   "venue": "Progressive Field",
+   "firstPitchUTC": "2026-10-03T17:00:00Z",
+   "roof": "Open",
+   "reported": {
+    "condition": "Partly Cloudy",
+    "temp": "63",
+    "wind": "9 mph, R To L"
+   },
+   "localFirstPitch": "13:00",
+   "climate": {
+    "n_hours": 100,
+    "tempF": {
+     "mean": 67.3,
+     "sd": 8.3
+    },
+    "rh": {
+     "mean": 0.65,
+     "sd": 0.13
+    },
+    "windMph": {
+     "mean": 9.7,
+     "sd": 4.8
+    },
+    "windFromDeg_vectorMean": 284.0,
+    "windVectorMeanMph": 3.8,
+    "rainyHourShare": 0.02
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849828,
+   "date": "2026-10-03",
+   "series": "NL Division Series",
+   "seriesGame": 1,
+   "venueId": 22,
+   "venue": "UNIQLO Field at Dodger Stadium",
+   "firstPitchUTC": "2026-10-03T20:00:00Z",
+   "roof": "Open",
+   "reported": {
+    "condition": "Sunny",
+    "temp": "100",
+    "wind": "2 mph, Varies"
+   },
+   "localFirstPitch": "13:00",
+   "climate": {
+    "n_hours": 100,
+    "tempF": {
+     "mean": 82.9,
+     "sd": 7.4
+    },
+    "rh": {
+     "mean": 0.35,
+     "sd": 0.15
+    },
+    "windMph": {
+     "mean": 7.3,
+     "sd": 2.1
+    },
+    "windFromDeg_vectorMean": 217.0,
+    "windVectorMeanMph": 6.9,
+    "rainyHourShare": 0.01
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849835,
+   "date": "2026-10-03",
+   "series": "AL Division Series",
+   "seriesGame": 1,
+   "venueId": 12,
+   "venue": "Tropicana Field",
+   "firstPitchUTC": "2026-10-03T22:30:00Z",
+   "roof": "Dome",
+   "reported": {
+    "condition": "Dome",
+    "temp": "72",
+    "wind": "0 mph, None"
+   },
+   "localFirstPitch": "18:30",
+   "climate": {
+    "n_hours": 100,
+    "tempF": {
+     "mean": 79.2,
+     "sd": 3.3
+    },
+    "rh": {
+     "mean": 0.75,
+     "sd": 0.11
+    },
+    "windMph": {
+     "mean": 10.4,
+     "sd": 5.1
+    },
+    "windFromDeg_vectorMean": 51.0,
+    "windVectorMeanMph": 7.8,
+    "rainyHourShare": 0.09
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849830,
+   "date": "2026-10-03",
+   "series": "NL Division Series",
+   "seriesGame": 1,
+   "venueId": 32,
+   "venue": "American Family Field",
+   "firstPitchUTC": "2026-10-04T00:30:00Z",
+   "roof": "Retractable",
+   "reported": {
+    "condition": "Roof Closed",
+    "temp": "69",
+    "wind": "0 mph, None"
+   },
+   "localFirstPitch": "19:30",
+   "climate": {
+    "n_hours": 110,
+    "tempF": {
+     "mean": 58.8,
+     "sd": 8.4
+    },
+    "rh": {
+     "mean": 0.73,
+     "sd": 0.16
+    },
+    "windMph": {
+     "mean": 8.7,
+     "sd": 4.2
+    },
+    "windFromDeg_vectorMean": 197.0,
+    "windVectorMeanMph": 1.6,
+    "rainyHourShare": 0.1
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849825,
+   "date": "2026-10-04",
+   "series": "NL Division Series",
+   "seriesGame": 2,
+   "venueId": 32,
+   "venue": "American Family Field",
+   "firstPitchUTC": "2026-10-04T20:00:00Z",
+   "roof": "Retractable",
+   "reported": {
+    "condition": "Sunny",
+    "temp": "68",
+    "wind": "11 mph, Out To CF"
+   },
+   "localFirstPitch": "15:00",
+   "climate": {
+    "n_hours": 110,
+    "tempF": {
+     "mean": 64.9,
+     "sd": 8.7
+    },
+    "rh": {
+     "mean": 0.6,
+     "sd": 0.19
+    },
+    "windMph": {
+     "mean": 10.4,
+     "sd": 3.8
+    },
+    "windFromDeg_vectorMean": 176.0,
+    "windVectorMeanMph": 1.5,
+    "rainyHourShare": 0.127
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849823,
+   "date": "2026-10-04",
+   "series": "NL Division Series",
+   "seriesGame": 2,
+   "venueId": 22,
+   "venue": "UNIQLO Field at Dodger Stadium",
+   "firstPitchUTC": "2026-10-05T00:00:00Z",
+   "roof": "Open",
+   "reported": {
+    "condition": "Partly Cloudy",
+    "temp": "95",
+    "wind": "4 mph, Varies"
+   },
+   "localFirstPitch": "17:00",
+   "climate": {
+    "n_hours": 120,
+    "tempF": {
+     "mean": 73.0,
+     "sd": 5.9
+    },
+    "rh": {
+     "mean": 0.51,
+     "sd": 0.18
+    },
+    "windMph": {
+     "mean": 7.1,
+     "sd": 1.9
+    },
+    "windFromDeg_vectorMean": 238.0,
+    "windVectorMeanMph": 6.3,
+    "rainyHourShare": 0.008
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849834,
+   "date": "2026-10-05",
+   "series": "AL Division Series",
+   "seriesGame": 2,
+   "venueId": 5,
+   "venue": "Progressive Field",
+   "firstPitchUTC": "2026-10-05T21:00:00Z",
+   "roof": "Open",
+   "forecast": {
+    "issued": "2026-10-05T00:06:19+00:00",
+    "source": "api.weather.gov hourly",
+    "tempF": 61,
+    "rh": 0.52,
+    "windMph": 10.0,
+    "windFrom": "NW",
+    "precipChance": 0,
+    "sky": "Sunny"
+   },
+   "localFirstPitch": "17:00",
+   "climate": {
+    "n_hours": 120,
+    "tempF": {
+     "mean": 65.7,
+     "sd": 7.6
+    },
+    "rh": {
+     "mean": 0.67,
+     "sd": 0.13
+    },
+    "windMph": {
+     "mean": 8.9,
+     "sd": 4.2
+    },
+    "windFromDeg_vectorMean": 329.0,
+    "windVectorMeanMph": 1.6,
+    "rainyHourShare": 0.075
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849839,
+   "date": "2026-10-05",
+   "series": "AL Division Series",
+   "seriesGame": 2,
+   "venueId": 12,
+   "venue": "Tropicana Field",
+   "firstPitchUTC": "2026-10-06T00:00:00Z",
+   "roof": "Dome",
+   "forecast": {
+    "issued": "2026-10-05T00:49:53+00:00",
+    "source": "api.weather.gov hourly",
+    "tempF": 80,
+    "rh": 0.86,
+    "windMph": 3.0,
+    "windFrom": "WNW",
+    "precipChance": 20,
+    "sky": "Isolated Showers And Thunderstorms"
+   },
+   "localFirstPitch": "20:00",
+   "climate": {
+    "n_hours": 130,
+    "tempF": {
+     "mean": 78.3,
+     "sd": 3.0
+    },
+    "rh": {
+     "mean": 0.76,
+     "sd": 0.1
+    },
+    "windMph": {
+     "mean": 10.5,
+     "sd": 6.1
+    },
+    "windFromDeg_vectorMean": 49.0,
+    "windVectorMeanMph": 7.6,
+    "rainyHourShare": 0.123
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849819,
+   "date": "2026-10-06",
+   "series": "NL Division Series",
+   "seriesGame": 3,
+   "venueId": 4705,
+   "venue": "Truist Park",
+   "firstPitchUTC": "2026-10-06T22:00:00Z",
+   "roof": "Open",
+   "forecast": {
+    "issued": "2026-10-05T00:49:56+00:00",
+    "source": "api.weather.gov hourly",
+    "tempF": 74,
+    "rh": 0.58,
+    "windMph": 10.0,
+    "windFrom": "E",
+    "precipChance": 0,
+    "sky": "Mostly Clear"
+   },
+   "localFirstPitch": "18:00",
+   "climate": {
+    "n_hours": 130,
+    "tempF": {
+     "mean": 72.0,
+     "sd": 5.2
+    },
+    "rh": {
+     "mean": 0.64,
+     "sd": 0.18
+    },
+    "windMph": {
+     "mean": 5.7,
+     "sd": 2.8
+    },
+    "windFromDeg_vectorMean": 67.0,
+    "windVectorMeanMph": 1.7,
+    "rainyHourShare": 0.085
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849826,
+   "date": "2026-10-06",
+   "series": "NL Division Series",
+   "seriesGame": 3,
+   "venueId": 2680,
+   "venue": "Petco Park",
+   "firstPitchUTC": "2026-10-07T01:30:00Z",
+   "roof": "Open",
+   "forecast": {
+    "issued": "2026-10-05T00:50:26+00:00",
+    "source": "api.weather.gov hourly",
+    "tempF": 84,
+    "rh": 0.5,
+    "windMph": 5.0,
+    "windFrom": "NW",
+    "precipChance": 0,
+    "sky": "Mostly Clear"
+   },
+   "localFirstPitch": "18:30",
+   "climate": {
+    "n_hours": 140,
+    "tempF": {
+     "mean": 66.9,
+     "sd": 2.8
+    },
+    "rh": {
+     "mean": 0.81,
+     "sd": 0.08
+    },
+    "windMph": {
+     "mean": 4.0,
+     "sd": 2.1
+    },
+    "windFromDeg_vectorMean": 288.0,
+    "windVectorMeanMph": 2.5,
+    "rainyHourShare": 0.021
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849833,
+   "date": "2026-10-07",
+   "series": "AL Division Series",
+   "seriesGame": 3,
+   "venueId": 4,
+   "venue": "Rate Field",
+   "firstPitchUTC": "2026-10-07T20:00:00Z",
+   "roof": "Open",
+   "forecast": {
+    "issued": "2026-10-05T00:50:00+00:00",
+    "source": "api.weather.gov hourly",
+    "tempF": 71,
+    "rh": 0.58,
+    "windMph": 10.0,
+    "windFrom": "WNW",
+    "precipChance": 0,
+    "sky": "Sunny"
+   },
+   "localFirstPitch": "15:00",
+   "climate": {
+    "n_hours": 140,
+    "tempF": {
+     "mean": 65.9,
+     "sd": 9.0
+    },
+    "rh": {
+     "mean": 0.61,
+     "sd": 0.18
+    },
+    "windMph": {
+     "mean": 11.7,
+     "sd": 5.0
+    },
+    "windFromDeg_vectorMean": 243.0,
+    "windVectorMeanMph": 1.8,
+    "rainyHourShare": 0.093
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849822,
+   "date": "2026-10-07",
+   "series": "NL Division Series",
+   "seriesGame": 4,
+   "venueId": 4705,
+   "venue": "Truist Park",
+   "firstPitchUTC": "2026-10-07T22:00:00Z",
+   "roof": "Open",
+   "forecast": {
+    "issued": "2026-10-05T00:49:56+00:00",
+    "source": "api.weather.gov hourly",
+    "tempF": 78,
+    "rh": 0.5,
+    "windMph": 0.0,
+    "windFrom": "",
+    "precipChance": 1,
+    "sky": "Mostly Clear"
+   },
+   "localFirstPitch": "18:00",
+   "climate": {
+    "n_hours": 140,
+    "tempF": {
+     "mean": 71.8,
+     "sd": 5.2
+    },
+    "rh": {
+     "mean": 0.64,
+     "sd": 0.18
+    },
+    "windMph": {
+     "mean": 5.7,
+     "sd": 2.8
+    },
+    "windFromDeg_vectorMean": 64.0,
+    "windVectorMeanMph": 1.6,
+    "rainyHourShare": 0.079
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849838,
+   "date": "2026-10-07",
+   "series": "AL Division Series",
+   "seriesGame": 3,
+   "venueId": 3313,
+   "venue": "Yankee Stadium",
+   "firstPitchUTC": "2026-10-08T00:00:00Z",
+   "roof": "Open",
+   "forecast": {
+    "issued": "2026-10-05T01:01:33+00:00",
+    "source": "api.weather.gov hourly",
+    "tempF": 64,
+    "rh": 0.58,
+    "windMph": 9.0,
+    "windFrom": "SW",
+    "precipChance": 0,
+    "sky": "Mostly Clear"
+   },
+   "localFirstPitch": "20:00",
+   "climate": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 60.6,
+     "sd": 6.2
+    },
+    "rh": {
+     "mean": 0.79,
+     "sd": 0.14
+    },
+    "windMph": {
+     "mean": 7.2,
+     "sd": 3.6
+    },
+    "windFromDeg_vectorMean": 263.0,
+    "windVectorMeanMph": 0.5,
+    "rainyHourShare": 0.093
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849827,
+   "date": "2026-10-07",
+   "series": "NL Division Series",
+   "seriesGame": 4,
+   "venueId": 2680,
+   "venue": "Petco Park",
+   "firstPitchUTC": "2026-10-08T02:00:00Z",
+   "roof": "Open",
+   "forecast": {
+    "issued": "2026-10-05T00:50:26+00:00",
+    "source": "api.weather.gov hourly",
+    "tempF": 79,
+    "rh": 0.63,
+    "windMph": 5.0,
+    "windFrom": "W",
+    "precipChance": 0,
+    "sky": "Mostly Clear"
+   },
+   "localFirstPitch": "19:00",
+   "climate": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 66.8,
+     "sd": 2.9
+    },
+    "rh": {
+     "mean": 0.8,
+     "sd": 0.09
+    },
+    "windMph": {
+     "mean": 4.0,
+     "sd": 2.1
+    },
+    "windFromDeg_vectorMean": 288.0,
+    "windVectorMeanMph": 2.4,
+    "rainyHourShare": 0.027
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849832,
+   "date": "2026-10-08",
+   "series": "AL Division Series",
+   "seriesGame": 4,
+   "venueId": 4,
+   "venue": "Rate Field",
+   "firstPitchUTC": "2026-10-08T21:00:00Z",
+   "roof": "Open",
+   "forecast": {
+    "issued": "2026-10-05T00:50:00+00:00",
+    "source": "api.weather.gov hourly",
+    "tempF": 67,
+    "rh": 0.54,
+    "windMph": 5.0,
+    "windFrom": "NNW",
+    "precipChance": 3,
+    "sky": "Sunny"
+   },
+   "localFirstPitch": "16:00",
+   "climate": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 64.3,
+     "sd": 9.0
+    },
+    "rh": {
+     "mean": 0.63,
+     "sd": 0.17
+    },
+    "windMph": {
+     "mean": 11.2,
+     "sd": 4.6
+    },
+    "windFromDeg_vectorMean": 263.0,
+    "windVectorMeanMph": 1.5,
+    "rainyHourShare": 0.113
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849837,
+   "date": "2026-10-08",
+   "series": "AL Division Series",
+   "seriesGame": 4,
+   "venueId": 3313,
+   "venue": "Yankee Stadium",
+   "firstPitchUTC": "2026-10-09T00:00:00Z",
+   "roof": "Open",
+   "forecast": {
+    "issued": "2026-10-05T01:01:33+00:00",
+    "source": "api.weather.gov hourly",
+    "tempF": 68,
+    "rh": 0.53,
+    "windMph": 6.0,
+    "windFrom": "W",
+    "precipChance": 0,
+    "sky": "Mostly Clear"
+   },
+   "localFirstPitch": "20:00",
+   "climate": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 60.1,
+     "sd": 6.3
+    },
+    "rh": {
+     "mean": 0.78,
+     "sd": 0.14
+    },
+    "windMph": {
+     "mean": 7.4,
+     "sd": 3.8
+    },
+    "windFromDeg_vectorMean": 274.0,
+    "windVectorMeanMph": 0.6,
+    "rainyHourShare": 0.1
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849824,
+   "date": "2026-10-09",
+   "series": "NL Division Series",
+   "seriesGame": 5,
+   "venueId": 32,
+   "venue": "American Family Field",
+   "firstPitchUTC": "2026-10-09T20:30:00Z",
+   "roof": "Retractable",
+   "forecast": {
+    "issued": "2026-10-05T00:35:05+00:00",
+    "source": "api.weather.gov hourly",
+    "tempF": 65,
+    "rh": 0.56,
+    "windMph": 5.0,
+    "windFrom": "SW",
+    "precipChance": 1,
+    "sky": "Mostly Sunny"
+   },
+   "localFirstPitch": "15:30",
+   "climate": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 60.9,
+     "sd": 8.8
+    },
+    "rh": {
+     "mean": 0.61,
+     "sd": 0.18
+    },
+    "windMph": {
+     "mean": 10.5,
+     "sd": 4.1
+    },
+    "windFromDeg_vectorMean": 241.0,
+    "windVectorMeanMph": 1.7,
+    "rainyHourShare": 0.093
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849821,
+   "date": "2026-10-09",
+   "series": "NL Division Series",
+   "seriesGame": 5,
+   "venueId": 22,
+   "venue": "UNIQLO Field at Dodger Stadium",
+   "firstPitchUTC": "2026-10-10T00:00:00Z",
+   "roof": "Open",
+   "forecast": {
+    "issued": "2026-10-05T00:19:06+00:00",
+    "source": "api.weather.gov hourly",
+    "tempF": 83,
+    "rh": 0.49,
+    "windMph": 10.0,
+    "windFrom": "SW",
+    "precipChance": 1,
+    "sky": "Sunny"
+   },
+   "localFirstPitch": "17:00",
+   "climate": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 72.1,
+     "sd": 5.8
+    },
+    "rh": {
+     "mean": 0.52,
+     "sd": 0.19
+    },
+    "windMph": {
+     "mean": 6.7,
+     "sd": 2.1
+    },
+    "windFromDeg_vectorMean": 238.0,
+    "windVectorMeanMph": 5.9,
+    "rainyHourShare": 0.007
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849831,
+   "date": "2026-10-10",
+   "series": "AL Division Series",
+   "seriesGame": 5,
+   "venueId": 5,
+   "venue": "Progressive Field",
+   "firstPitchUTC": "2026-10-10T21:00:00Z",
+   "roof": "Open",
+   "forecast": {
+    "issued": "2026-10-05T00:06:19+00:00",
+    "source": "api.weather.gov hourly",
+    "tempF": 68,
+    "rh": 0.48,
+    "windMph": 9.0,
+    "windFrom": "E",
+    "precipChance": 0,
+    "sky": "Sunny"
+   },
+   "localFirstPitch": "17:00",
+   "climate": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 63.1,
+     "sd": 8.4
+    },
+    "rh": {
+     "mean": 0.65,
+     "sd": 0.13
+    },
+    "windMph": {
+     "mean": 9.6,
+     "sd": 5.0
+    },
+    "windFromDeg_vectorMean": 295.0,
+    "windVectorMeanMph": 2.4,
+    "rainyHourShare": 0.073
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849836,
+   "date": "2026-10-10",
+   "series": "AL Division Series",
+   "seriesGame": 5,
+   "venueId": 12,
+   "venue": "Tropicana Field",
+   "firstPitchUTC": "2026-10-11T00:00:00Z",
+   "roof": "Dome",
+   "forecast": {
+    "issued": "2026-10-05T00:49:53+00:00",
+    "source": "api.weather.gov hourly",
+    "tempF": 81,
+    "rh": 0.85,
+    "windMph": 5.0,
+    "windFrom": "SSE",
+    "precipChance": 24,
+    "sky": "Isolated Showers And Thunderstorms"
+   },
+   "localFirstPitch": "20:00",
+   "climate": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 77.8,
+     "sd": 3.8
+    },
+    "rh": {
+     "mean": 0.75,
+     "sd": 0.11
+    },
+    "windMph": {
+     "mean": 10.2,
+     "sd": 5.8
+    },
+    "windFromDeg_vectorMean": 42.0,
+    "windVectorMeanMph": 6.9,
+    "rainyHourShare": 0.087
+   },
+   "climate_note": "Open-Meteo archive (ERA5), 2016-2025, +-7 days of the date, the hour after first pitch"
+  },
+  {
+   "gamePk": 849809,
+   "date": "2026-10-11",
+   "series": "NL Championship Series",
+   "seriesGame": 1,
+   "venueId": 3833,
+   "venue": "NL Stadium",
+   "firstPitchUTC": "2026-10-11T07:33:00Z"
+  },
+  {
+   "gamePk": 849820,
+   "date": "2026-10-12",
+   "series": "AL Championship Series",
+   "seriesGame": 1,
+   "venueId": 3832,
+   "venue": "AL Stadium",
+   "firstPitchUTC": "2026-10-12T07:33:00Z"
+  },
+  {
+   "gamePk": 849812,
+   "date": "2026-10-12",
+   "series": "NL Championship Series",
+   "seriesGame": 2,
+   "venueId": 3833,
+   "venue": "NL Stadium",
+   "firstPitchUTC": "2026-10-12T07:33:00Z"
+  },
+  {
+   "gamePk": 849813,
+   "date": "2026-10-13",
+   "series": "AL Championship Series",
+   "seriesGame": 2,
+   "venueId": 3832,
+   "venue": "AL Stadium",
+   "firstPitchUTC": "2026-10-13T07:33:00Z"
+  },
+  {
+   "gamePk": 849811,
+   "date": "2026-10-14",
+   "series": "NL Championship Series",
+   "seriesGame": 3,
+   "venueId": 3833,
+   "venue": "NL Stadium",
+   "firstPitchUTC": "2026-10-14T07:33:00Z"
+  },
+  {
+   "gamePk": 849818,
+   "date": "2026-10-15",
+   "series": "AL Championship Series",
+   "seriesGame": 3,
+   "venueId": 3832,
+   "venue": "AL Stadium",
+   "firstPitchUTC": "2026-10-15T07:33:00Z"
+  },
+  {
+   "gamePk": 849810,
+   "date": "2026-10-15",
+   "series": "NL Championship Series",
+   "seriesGame": 4,
+   "venueId": 3833,
+   "venue": "NL Stadium",
+   "firstPitchUTC": "2026-10-15T07:33:00Z"
+  },
+  {
+   "gamePk": 849817,
+   "date": "2026-10-16",
+   "series": "AL Championship Series",
+   "seriesGame": 4,
+   "venueId": 3832,
+   "venue": "AL Stadium",
+   "firstPitchUTC": "2026-10-16T07:33:00Z"
+  },
+  {
+   "gamePk": 849808,
+   "date": "2026-10-16",
+   "series": "NL Championship Series",
+   "seriesGame": 5,
+   "venueId": 3833,
+   "venue": "NL Stadium",
+   "firstPitchUTC": "2026-10-16T07:33:00Z"
+  },
+  {
+   "gamePk": 849816,
+   "date": "2026-10-17",
+   "series": "AL Championship Series",
+   "seriesGame": 5,
+   "venueId": 3832,
+   "venue": "AL Stadium",
+   "firstPitchUTC": "2026-10-17T07:33:00Z"
+  },
+  {
+   "gamePk": 849806,
+   "date": "2026-10-18",
+   "series": "NL Championship Series",
+   "seriesGame": 6,
+   "venueId": 3833,
+   "venue": "NL Stadium",
+   "firstPitchUTC": "2026-10-18T07:33:00Z"
+  },
+  {
+   "gamePk": 849815,
+   "date": "2026-10-19",
+   "series": "AL Championship Series",
+   "seriesGame": 6,
+   "venueId": 3832,
+   "venue": "AL Stadium",
+   "firstPitchUTC": "2026-10-19T07:33:00Z"
+  },
+  {
+   "gamePk": 849807,
+   "date": "2026-10-19",
+   "series": "NL Championship Series",
+   "seriesGame": 7,
+   "venueId": 3833,
+   "venue": "NL Stadium",
+   "firstPitchUTC": "2026-10-19T07:33:00Z"
+  },
+  {
+   "gamePk": 849814,
+   "date": "2026-10-20",
+   "series": "AL Championship Series",
+   "seriesGame": 7,
+   "venueId": 3832,
+   "venue": "AL Stadium",
+   "firstPitchUTC": "2026-10-20T07:33:00Z"
+  },
+  {
+   "gamePk": 849805,
+   "date": "2026-10-23",
+   "series": "World Series",
+   "seriesGame": 1,
+   "venueId": 401,
+   "venue": "TBD",
+   "firstPitchUTC": "2026-10-23T07:33:00Z"
+  },
+  {
+   "gamePk": 849802,
+   "date": "2026-10-24",
+   "series": "World Series",
+   "seriesGame": 2,
+   "venueId": 401,
+   "venue": "TBD",
+   "firstPitchUTC": "2026-10-24T07:33:00Z"
+  },
+  {
+   "gamePk": 849804,
+   "date": "2026-10-26",
+   "series": "World Series",
+   "seriesGame": 3,
+   "venueId": 401,
+   "venue": "TBD",
+   "firstPitchUTC": "2026-10-26T07:33:00Z"
+  },
+  {
+   "gamePk": 849803,
+   "date": "2026-10-27",
+   "series": "World Series",
+   "seriesGame": 4,
+   "venueId": 401,
+   "venue": "TBD",
+   "firstPitchUTC": "2026-10-27T07:33:00Z"
+  },
+  {
+   "gamePk": 849799,
+   "date": "2026-10-28",
+   "series": "World Series",
+   "seriesGame": 5,
+   "venueId": 401,
+   "venue": "TBD",
+   "firstPitchUTC": "2026-10-28T07:33:00Z"
+  },
+  {
+   "gamePk": 849801,
+   "date": "2026-10-30",
+   "series": "World Series",
+   "seriesGame": 6,
+   "venueId": 401,
+   "venue": "TBD",
+   "firstPitchUTC": "2026-10-30T07:33:00Z"
+  },
+  {
+   "gamePk": 849800,
+   "date": "2026-10-31",
+   "series": "World Series",
+   "seriesGame": 7,
+   "venueId": 401,
+   "venue": "TBD",
+   "firstPitchUTC": "2026-10-31T07:33:00Z"
+  }
+ ],
+ "homeParkClimate": {
+  "CWS": {
+   "venueId": 4,
+   "venue": "Rate Field",
+   "roof": "Open",
+   "mid_october_20h": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 56.1,
+     "sd": 8.4
+    },
+    "rh": {
+     "mean": 0.71,
+     "sd": 0.13
+    },
+    "windMph": {
+     "mean": 11.1,
+     "sd": 4.6
+    },
+    "windFromDeg_vectorMean": 214.0,
+    "windVectorMeanMph": 3.4,
+    "rainyHourShare": 0.1
+   },
+   "late_october_20h": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 50.4,
+     "sd": 8.6
+    },
+    "rh": {
+     "mean": 0.73,
+     "sd": 0.13
+    },
+    "windMph": {
+     "mean": 11.0,
+     "sd": 5.1
+    },
+    "windFromDeg_vectorMean": 204.0,
+    "windVectorMeanMph": 1.7,
+    "rainyHourShare": 0.14
+   }
+  },
+  "CLE": {
+   "venueId": 5,
+   "venue": "Progressive Field",
+   "roof": "Open",
+   "mid_october_20h": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 58.0,
+     "sd": 7.2
+    },
+    "rh": {
+     "mean": 0.68,
+     "sd": 0.13
+    },
+    "windMph": {
+     "mean": 10.5,
+     "sd": 5.3
+    },
+    "windFromDeg_vectorMean": 218.0,
+    "windVectorMeanMph": 3.1,
+    "rainyHourShare": 0.12
+   },
+   "late_october_20h": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 52.6,
+     "sd": 6.6
+    },
+    "rh": {
+     "mean": 0.71,
+     "sd": 0.13
+    },
+    "windMph": {
+     "mean": 10.7,
+     "sd": 5.1
+    },
+    "windFromDeg_vectorMean": 229.0,
+    "windVectorMeanMph": 2.7,
+    "rainyHourShare": 0.127
+   }
+  },
+  "NYY": {
+   "venueId": 3313,
+   "venue": "Yankee Stadium",
+   "roof": "Open",
+   "mid_october_20h": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 58.5,
+     "sd": 6.2
+    },
+    "rh": {
+     "mean": 0.73,
+     "sd": 0.16
+    },
+    "windMph": {
+     "mean": 7.6,
+     "sd": 3.3
+    },
+    "windFromDeg_vectorMean": 252.0,
+    "windVectorMeanMph": 1.6,
+    "rainyHourShare": 0.073
+   },
+   "late_october_20h": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 55.1,
+     "sd": 6.8
+    },
+    "rh": {
+     "mean": 0.74,
+     "sd": 0.16
+    },
+    "windMph": {
+     "mean": 7.6,
+     "sd": 3.6
+    },
+    "windFromDeg_vectorMean": 251.0,
+    "windVectorMeanMph": 1.4,
+    "rainyHourShare": 0.087
+   }
+  },
+  "TB": {
+   "venueId": 12,
+   "venue": "Tropicana Field",
+   "roof": "Dome",
+   "mid_october_20h": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 77.8,
+     "sd": 4.3
+    },
+    "rh": {
+     "mean": 0.7,
+     "sd": 0.13
+    },
+    "windMph": {
+     "mean": 9.4,
+     "sd": 4.4
+    },
+    "windFromDeg_vectorMean": 32.0,
+    "windVectorMeanMph": 5.6,
+    "rainyHourShare": 0.04
+   },
+   "late_october_20h": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 75.5,
+     "sd": 4.6
+    },
+    "rh": {
+     "mean": 0.69,
+     "sd": 0.13
+    },
+    "windMph": {
+     "mean": 9.6,
+     "sd": 3.8
+    },
+    "windFromDeg_vectorMean": 36.0,
+    "windVectorMeanMph": 5.4,
+    "rainyHourShare": 0.04
+   }
+  },
+  "ATL": {
+   "venueId": 4705,
+   "venue": "Truist Park",
+   "roof": "Open",
+   "mid_october_20h": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 64.3,
+     "sd": 7.0
+    },
+    "rh": {
+     "mean": 0.68,
+     "sd": 0.18
+    },
+    "windMph": {
+     "mean": 6.2,
+     "sd": 2.5
+    },
+    "windFromDeg_vectorMean": 3.0,
+    "windVectorMeanMph": 1.4,
+    "rainyHourShare": 0.06
+   },
+   "late_october_20h": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 60.0,
+     "sd": 8.0
+    },
+    "rh": {
+     "mean": 0.69,
+     "sd": 0.17
+    },
+    "windMph": {
+     "mean": 6.7,
+     "sd": 3.0
+    },
+    "windFromDeg_vectorMean": 15.0,
+    "windVectorMeanMph": 0.9,
+    "rainyHourShare": 0.053
+   }
+  },
+  "LAD": {
+   "venueId": 22,
+   "venue": "UNIQLO Field at Dodger Stadium",
+   "roof": "Open",
+   "mid_october_20h": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 66.8,
+     "sd": 4.9
+    },
+    "rh": {
+     "mean": 0.63,
+     "sd": 0.2
+    },
+    "windMph": {
+     "mean": 3.5,
+     "sd": 2.0
+    },
+    "windFromDeg_vectorMean": 223.0,
+    "windVectorMeanMph": 1.7,
+    "rainyHourShare": 0.0
+   },
+   "late_october_20h": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 65.2,
+     "sd": 5.5
+    },
+    "rh": {
+     "mean": 0.6,
+     "sd": 0.24
+    },
+    "windMph": {
+     "mean": 3.2,
+     "sd": 1.8
+    },
+    "windFromDeg_vectorMean": 247.0,
+    "windVectorMeanMph": 0.9,
+    "rainyHourShare": 0.0
+   }
+  },
+  "SD": {
+   "venueId": 2680,
+   "venue": "Petco Park",
+   "roof": "Open",
+   "mid_october_20h": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 66.5,
+     "sd": 3.4
+    },
+    "rh": {
+     "mean": 0.78,
+     "sd": 0.13
+    },
+    "windMph": {
+     "mean": 4.1,
+     "sd": 2.1
+    },
+    "windFromDeg_vectorMean": 298.0,
+    "windVectorMeanMph": 2.1,
+    "rainyHourShare": 0.027
+   },
+   "late_october_20h": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 64.9,
+     "sd": 3.5
+    },
+    "rh": {
+     "mean": 0.77,
+     "sd": 0.18
+    },
+    "windMph": {
+     "mean": 3.7,
+     "sd": 2.3
+    },
+    "windFromDeg_vectorMean": 297.0,
+    "windVectorMeanMph": 1.3,
+    "rainyHourShare": 0.007
+   }
+  },
+  "MIL": {
+   "venueId": 32,
+   "venue": "American Family Field",
+   "roof": "Retractable",
+   "mid_october_20h": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 53.4,
+     "sd": 8.7
+    },
+    "rh": {
+     "mean": 0.7,
+     "sd": 0.15
+    },
+    "windMph": {
+     "mean": 9.1,
+     "sd": 4.1
+    },
+    "windFromDeg_vectorMean": 232.0,
+    "windVectorMeanMph": 3.1,
+    "rainyHourShare": 0.12
+   },
+   "late_october_20h": {
+    "n_hours": 150,
+    "tempF": {
+     "mean": 47.6,
+     "sd": 9.2
+    },
+    "rh": {
+     "mean": 0.71,
+     "sd": 0.14
+    },
+    "windMph": {
+     "mean": 8.9,
+     "sd": 4.6
+    },
+    "windFromDeg_vectorMean": 239.0,
+    "windVectorMeanMph": 2.0,
+    "rainyHourShare": 0.107
+   }
+  }
+ }
+}

@@ -1,0 +1,4565 @@
+{
+ "columns": [
+  "game_date",
+  "game_pk",
+  "game_type",
+  "at_bat_number",
+  "pitch_number",
+  "batter",
+  "pitcher",
+  "stand",
+  "p_throws",
+  "balls",
+  "strikes",
+  "outs_when_up",
+  "on_1b",
+  "on_2b",
+  "on_3b",
+  "pitch_type",
+  "release_speed",
+  "release_spin_rate",
+  "spin_axis",
+  "release_pos_x",
+  "release_pos_z",
+  "release_extension",
+  "arm_angle",
+  "pfx_x",
+  "pfx_z",
+  "plate_x",
+  "plate_z",
+  "sz_top",
+  "sz_bot",
+  "vx0",
+  "vy0",
+  "vz0",
+  "ax",
+  "ay",
+  "az",
+  "description",
+  "events",
+  "type",
+  "bb_type",
+  "launch_speed",
+  "launch_angle",
+  "hc_x",
+  "hc_y",
+  "hit_distance_sc",
+  "estimated_woba_using_speedangle",
+  "woba_value",
+  "bat_speed",
+  "swing_length",
+  "attack_angle",
+  "attack_direction",
+  "swing_path_tilt",
+  "intercept_ball_minus_batter_pos_x_inches",
+  "intercept_ball_minus_batter_pos_y_inches",
+  "inning",
+  "inning_topbot",
+  "home_team",
+  "away_team",
+  "fielder_2",
+  "effective_speed",
+  "release_pos_y",
+  "zone",
+  "n_thruorder_pitcher",
+  "pitcher_days_since_prev_game",
+  "batter_days_since_prev_game",
+  "delta_run_exp",
+  "api_break_x_arm",
+  "api_break_z_with_gravity",
+  "woba_denom",
+  "launch_speed_angle",
+  "bunt"
+ ],
+ "missingColumns": [],
+ "files": {
+  "2026_batter_643217": {
+   "id": 643217,
+   "name": "Andrew Benintendi",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1793,
+   "byGameType": {
+    "F": 21,
+    "R": 1772
+   }
+  },
+  "2025_batter_643217": {
+   "id": 643217,
+   "name": "Andrew Benintendi",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1729,
+   "byGameType": {
+    "R": 1729
+   }
+  },
+  "2026_pitcher_641743": {
+   "id": 641743,
+   "name": "Anthony Kay",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2825,
+   "byGameType": {
+    "D": 22,
+    "F": 11,
+    "R": 2792
+   }
+  },
+  "2025_pitcher_641743": {
+   "id": 641743,
+   "name": "Anthony Kay",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_batter_695731": {
+   "id": 695731,
+   "name": "Braden Montgomery",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1444,
+   "byGameType": {
+    "D": 11,
+    "F": 22,
+    "R": 1411
+   }
+  },
+  "2025_batter_695731": {
+   "id": 695731,
+   "name": "Braden Montgomery",
+   "role": "batter",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_batter_686668": {
+   "id": 686668,
+   "name": "Brenton Doyle",
+   "role": "batter",
+   "year": 2026,
+   "rows": 796,
+   "byGameType": {
+    "D": 18,
+    "F": 3,
+    "R": 775
+   }
+  },
+  "2025_batter_686668": {
+   "id": 686668,
+   "name": "Brenton Doyle",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1959,
+   "byGameType": {
+    "R": 1959
+   }
+  },
+  "2026_pitcher_663542": {
+   "id": 663542,
+   "name": "Bryan Hudson",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1069,
+   "byGameType": {
+    "D": 6,
+    "R": 1063
+   }
+  },
+  "2025_pitcher_663542": {
+   "id": 663542,
+   "name": "Bryan Hudson",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 326,
+   "byGameType": {
+    "R": 326
+   }
+  },
+  "2026_batter_805367": {
+   "id": 805367,
+   "name": "Chase Meidroth",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2706,
+   "byGameType": {
+    "D": 18,
+    "F": 39,
+    "R": 2649
+   }
+  },
+  "2025_batter_805367": {
+   "id": 805367,
+   "name": "Chase Meidroth",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2057,
+   "byGameType": {
+    "R": 2057
+   }
+  },
+  "2026_batter_695657": {
+   "id": 695657,
+   "name": "Colson Montgomery",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2507,
+   "byGameType": {
+    "D": 12,
+    "F": 37,
+    "R": 2458
+   }
+  },
+  "2025_batter_695657": {
+   "id": 695657,
+   "name": "Colson Montgomery",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1088,
+   "byGameType": {
+    "R": 1088
+   }
+  },
+  "2026_pitcher_689818": {
+   "id": 689818,
+   "name": "David Sandlin",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 660,
+   "byGameType": {
+    "F": 22,
+    "R": 638
+   }
+  },
+  "2025_pitcher_689818": {
+   "id": 689818,
+   "name": "David Sandlin",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_pitcher_663436": {
+   "id": 663436,
+   "name": "Davis Martin",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2349,
+   "byGameType": {
+    "R": 2349
+   }
+  },
+  "2025_pitcher_663436": {
+   "id": 663436,
+   "name": "Davis Martin",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 2315,
+   "byGameType": {
+    "R": 2315
+   }
+  },
+  "2026_pitcher_607200": {
+   "id": 607200,
+   "name": "Erick Fedde",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2456,
+   "byGameType": {
+    "F": 34,
+    "R": 2422
+   }
+  },
+  "2025_pitcher_607200": {
+   "id": 607200,
+   "name": "Erick Fedde",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 2374,
+   "byGameType": {
+    "R": 2374
+   }
+  },
+  "2026_pitcher_691799": {
+   "id": 691799,
+   "name": "Grant Taylor",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1429,
+   "byGameType": {
+    "D": 42,
+    "F": 54,
+    "R": 1333
+   }
+  },
+  "2025_pitcher_691799": {
+   "id": 691799,
+   "name": "Grant Taylor",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 614,
+   "byGameType": {
+    "R": 614
+   }
+  },
+  "2026_pitcher_696146": {
+   "id": 696146,
+   "name": "Hagen Smith",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 558,
+   "byGameType": {
+    "D": 51,
+    "F": 38,
+    "R": 469
+   }
+  },
+  "2025_pitcher_696146": {
+   "id": 696146,
+   "name": "Hagen Smith",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_batter_668670": {
+   "id": 668670,
+   "name": "Jake Rogers",
+   "role": "batter",
+   "year": 2026,
+   "rows": 688,
+   "byGameType": {
+    "R": 688
+   }
+  },
+  "2025_batter_668670": {
+   "id": 668670,
+   "name": "Jake Rogers",
+   "role": "batter",
+   "year": 2025,
+   "rows": 574,
+   "byGameType": {
+    "D": 4,
+    "R": 570
+   }
+  },
+  "2026_pitcher_663855": {
+   "id": 663855,
+   "name": "Jordan Hicks",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 955,
+   "byGameType": {
+    "D": 17,
+    "F": 38,
+    "R": 900
+   }
+  },
+  "2025_pitcher_663855": {
+   "id": 663855,
+   "name": "Jordan Hicks",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1203,
+   "byGameType": {
+    "R": 1203
+   }
+  },
+  "2026_batter_691019": {
+   "id": 691019,
+   "name": "Kyle Teel",
+   "role": "batter",
+   "year": 2026,
+   "rows": 668,
+   "byGameType": {
+    "D": 17,
+    "F": 39,
+    "R": 612
+   }
+  },
+  "2025_batter_691019": {
+   "id": 691019,
+   "name": "Kyle Teel",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1225,
+   "byGameType": {
+    "R": 1225
+   }
+  },
+  "2026_batter_682668": {
+   "id": 682668,
+   "name": "Luisangel Acu\u00f1a",
+   "role": "batter",
+   "year": 2026,
+   "rows": 781,
+   "byGameType": {
+    "F": 2,
+    "R": 779
+   }
+  },
+  "2025_batter_682668": {
+   "id": 682668,
+   "name": "Luisangel Acu\u00f1a",
+   "role": "batter",
+   "year": 2025,
+   "rows": 688,
+   "byGameType": {
+    "R": 688
+   }
+  },
+  "2026_batter_678246": {
+   "id": 678246,
+   "name": "Miguel Vargas",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2864,
+   "byGameType": {
+    "D": 18,
+    "F": 43,
+    "R": 2803
+   }
+  },
+  "2025_batter_678246": {
+   "id": 678246,
+   "name": "Miguel Vargas",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2326,
+   "byGameType": {
+    "R": 2326
+   }
+  },
+  "2026_batter_808959": {
+   "id": 808959,
+   "name": "Munetaka Murakami",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2511,
+   "byGameType": {
+    "D": 16,
+    "F": 41,
+    "R": 2454
+   }
+  },
+  "2025_batter_808959": {
+   "id": 808959,
+   "name": "Munetaka Murakami",
+   "role": "batter",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_pitcher_702273": {
+   "id": 702273,
+   "name": "Noah Schultz",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1262,
+   "byGameType": {
+    "R": 1262
+   }
+  },
+  "2025_pitcher_702273": {
+   "id": 702273,
+   "name": "Noah Schultz",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_batter_545341": {
+   "id": 545341,
+   "name": "Randal Grichuk",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1030,
+   "byGameType": {
+    "D": 11,
+    "F": 6,
+    "R": 1013
+   }
+  },
+  "2025_batter_545341": {
+   "id": 545341,
+   "name": "Randal Grichuk",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1081,
+   "byGameType": {
+    "R": 1081
+   }
+  },
+  "2026_batter_803011": {
+   "id": 803011,
+   "name": "Sam Antonacci",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2219,
+   "byGameType": {
+    "D": 6,
+    "F": 36,
+    "R": 2177
+   }
+  },
+  "2025_batter_803011": {
+   "id": 803011,
+   "name": "Sam Antonacci",
+   "role": "batter",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_pitcher_680732": {
+   "id": 680732,
+   "name": "Sean Burke",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2952,
+   "byGameType": {
+    "F": 72,
+    "R": 2880
+   }
+  },
+  "2025_pitcher_680732": {
+   "id": 680732,
+   "name": "Sean Burke",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 2380,
+   "byGameType": {
+    "R": 2380
+   }
+  },
+  "2026_pitcher_656794": {
+   "id": 656794,
+   "name": "Sean Newcomb",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1501,
+   "byGameType": {
+    "F": 19,
+    "R": 1482
+   }
+  },
+  "2025_pitcher_656794": {
+   "id": 656794,
+   "name": "Sean Newcomb",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1554,
+   "byGameType": {
+    "R": 1554
+   }
+  },
+  "2026_batter_502054": {
+   "id": 502054,
+   "name": "Tommy Pham",
+   "role": "batter",
+   "year": 2026,
+   "rows": 151,
+   "byGameType": {
+    "D": 12,
+    "R": 139
+   }
+  },
+  "2025_batter_502054": {
+   "id": 502054,
+   "name": "Tommy Pham",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1715,
+   "byGameType": {
+    "R": 1715
+   }
+  },
+  "2026_batter_671976": {
+   "id": 671976,
+   "name": "Tristan Peters",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1812,
+   "byGameType": {
+    "D": 10,
+    "F": 31,
+    "R": 1771
+   }
+  },
+  "2025_batter_671976": {
+   "id": 671976,
+   "name": "Tristan Peters",
+   "role": "batter",
+   "year": 2025,
+   "rows": 46,
+   "byGameType": {
+    "R": 46
+   }
+  },
+  "2026_pitcher_699823": {
+   "id": 699823,
+   "name": "Tyler Davis",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 497,
+   "byGameType": {
+    "R": 497
+   }
+  },
+  "2025_pitcher_699823": {
+   "id": 699823,
+   "name": "Tyler Davis",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_batter_694197": {
+   "id": 694197,
+   "name": "Angel Genao",
+   "role": "batter",
+   "year": 2026,
+   "rows": 519,
+   "byGameType": {
+    "R": 519
+   }
+  },
+  "2025_batter_694197": {
+   "id": 694197,
+   "name": "Angel Genao",
+   "role": "batter",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_batter_682657": {
+   "id": 682657,
+   "name": "Angel Mart\u00ednez",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1513,
+   "byGameType": {
+    "D": 16,
+    "R": 1497
+   }
+  },
+  "2025_batter_682657": {
+   "id": 682657,
+   "name": "Angel Mart\u00ednez",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1818,
+   "byGameType": {
+    "F": 18,
+    "R": 1800
+   }
+  },
+  "2026_batter_595978": {
+   "id": 595978,
+   "name": "Austin Hedges",
+   "role": "batter",
+   "year": 2026,
+   "rows": 946,
+   "byGameType": {
+    "D": 12,
+    "R": 934
+   }
+  },
+  "2025_batter_595978": {
+   "id": 595978,
+   "name": "Austin Hedges",
+   "role": "batter",
+   "year": 2025,
+   "rows": 709,
+   "byGameType": {
+    "F": 13,
+    "R": 696
+   }
+  },
+  "2026_batter_677587": {
+   "id": 677587,
+   "name": "Brayan Rocchio",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2270,
+   "byGameType": {
+    "D": 15,
+    "R": 2255
+   }
+  },
+  "2025_batter_677587": {
+   "id": 677587,
+   "name": "Brayan Rocchio",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1445,
+   "byGameType": {
+    "F": 34,
+    "R": 1411
+   }
+  },
+  "2026_pitcher_671922": {
+   "id": 671922,
+   "name": "Cade Smith",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1253,
+   "byGameType": {
+    "D": 12,
+    "R": 1241
+   }
+  },
+  "2025_pitcher_671922": {
+   "id": 671922,
+   "name": "Cade Smith",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1252,
+   "byGameType": {
+    "F": 58,
+    "R": 1194
+   }
+  },
+  "2026_batter_800050": {
+   "id": 800050,
+   "name": "Chase DeLauter",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2172,
+   "byGameType": {
+    "D": 19,
+    "R": 2153
+   }
+  },
+  "2025_batter_800050": {
+   "id": 800050,
+   "name": "Chase DeLauter",
+   "role": "batter",
+   "year": 2025,
+   "rows": 27,
+   "byGameType": {
+    "F": 27
+   }
+  },
+  "2026_pitcher_682982": {
+   "id": 682982,
+   "name": "Daniel Espino",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 285,
+   "byGameType": {
+    "D": 12,
+    "R": 273
+   }
+  },
+  "2025_pitcher_682982": {
+   "id": 682982,
+   "name": "Daniel Espino",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_batter_682177": {
+   "id": 682177,
+   "name": "Daniel Schneemann",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1137,
+   "byGameType": {
+    "R": 1137
+   }
+  },
+  "2025_batter_682177": {
+   "id": 682177,
+   "name": "Daniel Schneemann",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1678,
+   "byGameType": {
+    "F": 8,
+    "R": 1670
+   }
+  },
+  "2026_batter_681807": {
+   "id": 681807,
+   "name": "David Fry",
+   "role": "batter",
+   "year": 2026,
+   "rows": 916,
+   "byGameType": {
+    "D": 4,
+    "R": 912
+   }
+  },
+  "2025_batter_681807": {
+   "id": 681807,
+   "name": "David Fry",
+   "role": "batter",
+   "year": 2025,
+   "rows": 626,
+   "byGameType": {
+    "R": 626
+   }
+  },
+  "2026_pitcher_681870": {
+   "id": 681870,
+   "name": "Erik Sabrowski",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 853,
+   "byGameType": {
+    "D": 20,
+    "R": 833
+   }
+  },
+  "2025_pitcher_681870": {
+   "id": 681870,
+   "name": "Erik Sabrowski",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 534,
+   "byGameType": {
+    "F": 31,
+    "R": 503
+   }
+  },
+  "2026_pitcher_656492": {
+   "id": 656492,
+   "name": "Foster Griffin",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2835,
+   "byGameType": {
+    "R": 2835
+   }
+  },
+  "2025_pitcher_656492": {
+   "id": 656492,
+   "name": "Foster Griffin",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_pitcher_668909": {
+   "id": 668909,
+   "name": "Gavin Williams",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2991,
+   "byGameType": {
+    "R": 2991
+   }
+  },
+  "2025_pitcher_668909": {
+   "id": 668909,
+   "name": "Gavin Williams",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 3013,
+   "byGameType": {
+    "F": 88,
+    "R": 2925
+   }
+  },
+  "2026_pitcher_683769": {
+   "id": 683769,
+   "name": "Hunter Gaddis",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 988,
+   "byGameType": {
+    "D": 4,
+    "R": 984
+   }
+  },
+  "2025_pitcher_683769": {
+   "id": 683769,
+   "name": "Hunter Gaddis",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1113,
+   "byGameType": {
+    "F": 53,
+    "R": 1060
+   }
+  },
+  "2026_batter_666176": {
+   "id": 666176,
+   "name": "Jo Adell",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2597,
+   "byGameType": {
+    "D": 18,
+    "R": 2579
+   }
+  },
+  "2025_batter_666176": {
+   "id": 666176,
+   "name": "Jo Adell",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2221,
+   "byGameType": {
+    "R": 2221
+   }
+  },
+  "2026_pitcher_676282": {
+   "id": 676282,
+   "name": "Joey Cantillo",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2752,
+   "byGameType": {
+    "R": 2752
+   }
+  },
+  "2025_pitcher_676282": {
+   "id": 676282,
+   "name": "Joey Cantillo",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1681,
+   "byGameType": {
+    "F": 44,
+    "R": 1637
+   }
+  },
+  "2026_batter_608070": {
+   "id": 608070,
+   "name": "Jos\u00e9 Ram\u00edrez",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2247,
+   "byGameType": {
+    "D": 13,
+    "R": 2234
+   }
+  },
+  "2025_batter_608070": {
+   "id": 608070,
+   "name": "Jos\u00e9 Ram\u00edrez",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2816,
+   "byGameType": {
+    "F": 64,
+    "R": 2752
+   }
+  },
+  "2026_pitcher_670036": {
+   "id": 670036,
+   "name": "Matt Festa",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1102,
+   "byGameType": {
+    "R": 1102
+   }
+  },
+  "2025_pitcher_670036": {
+   "id": 670036,
+   "name": "Matt Festa",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 838,
+   "byGameType": {
+    "F": 15,
+    "R": 823
+   }
+  },
+  "2026_batter_663993": {
+   "id": 663993,
+   "name": "Nathaniel Lowe",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1785,
+   "byGameType": {
+    "D": 12,
+    "R": 1773
+   }
+  },
+  "2025_batter_663993": {
+   "id": 663993,
+   "name": "Nathaniel Lowe",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2640,
+   "byGameType": {
+    "F": 23,
+    "R": 2617
+   }
+  },
+  "2026_pitcher_800048": {
+   "id": 800048,
+   "name": "Parker Messick",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 3041,
+   "byGameType": {
+    "D": 87,
+    "R": 2954
+   }
+  },
+  "2025_pitcher_800048": {
+   "id": 800048,
+   "name": "Parker Messick",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 625,
+   "byGameType": {
+    "R": 625
+   }
+  },
+  "2026_batter_672275": {
+   "id": 672275,
+   "name": "Patrick Bailey",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1364,
+   "byGameType": {
+    "D": 1,
+    "R": 1363
+   }
+  },
+  "2025_batter_672275": {
+   "id": 672275,
+   "name": "Patrick Bailey",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1726,
+   "byGameType": {
+    "R": 1726
+   }
+  },
+  "2026_batter_690984": {
+   "id": 690984,
+   "name": "Petey Halpin",
+   "role": "batter",
+   "year": 2026,
+   "rows": 663,
+   "byGameType": {
+    "R": 663
+   }
+  },
+  "2025_batter_690984": {
+   "id": 690984,
+   "name": "Petey Halpin",
+   "role": "batter",
+   "year": 2025,
+   "rows": 33,
+   "byGameType": {
+    "R": 33
+   }
+  },
+  "2026_pitcher_542888": {
+   "id": 542888,
+   "name": "Shawn Armstrong",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 632,
+   "byGameType": {
+    "R": 632
+   }
+  },
+  "2025_pitcher_542888": {
+   "id": 542888,
+   "name": "Shawn Armstrong",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1118,
+   "byGameType": {
+    "R": 1118
+   }
+  },
+  "2026_batter_680757": {
+   "id": 680757,
+   "name": "Steven Kwan",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2644,
+   "byGameType": {
+    "D": 19,
+    "R": 2625
+   }
+  },
+  "2025_batter_680757": {
+   "id": 680757,
+   "name": "Steven Kwan",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2837,
+   "byGameType": {
+    "F": 43,
+    "R": 2794
+   }
+  },
+  "2026_pitcher_676440": {
+   "id": 676440,
+   "name": "Tanner Bibee",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2968,
+   "byGameType": {
+    "R": 2968
+   }
+  },
+  "2025_pitcher_676440": {
+   "id": 676440,
+   "name": "Tanner Bibee",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 3062,
+   "byGameType": {
+    "F": 87,
+    "R": 2975
+   }
+  },
+  "2026_pitcher_682120": {
+   "id": 682120,
+   "name": "Tim Herrin",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1008,
+   "byGameType": {
+    "D": 14,
+    "R": 994
+   }
+  },
+  "2025_pitcher_682120": {
+   "id": 682120,
+   "name": "Tim Herrin",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 781,
+   "byGameType": {
+    "F": 25,
+    "R": 756
+   }
+  },
+  "2026_batter_683953": {
+   "id": 683953,
+   "name": "Travis Bazzana",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2100,
+   "byGameType": {
+    "D": 9,
+    "R": 2091
+   }
+  },
+  "2025_batter_683953": {
+   "id": 683953,
+   "name": "Travis Bazzana",
+   "role": "batter",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_batter_645305": {
+   "id": 645305,
+   "name": "Ali S\u00e1nchez",
+   "role": "batter",
+   "year": 2026,
+   "rows": 310,
+   "byGameType": {
+    "R": 310
+   }
+  },
+  "2025_batter_645305": {
+   "id": 645305,
+   "name": "Ali S\u00e1nchez",
+   "role": "batter",
+   "year": 2025,
+   "rows": 80,
+   "byGameType": {
+    "R": 80
+   }
+  },
+  "2026_batter_683011": {
+   "id": 683011,
+   "name": "Anthony Volpe",
+   "role": "batter",
+   "year": 2026,
+   "rows": 990,
+   "byGameType": {
+    "F": 11,
+    "R": 979
+   }
+  },
+  "2025_batter_683011": {
+   "id": 683011,
+   "name": "Anthony Volpe",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2511,
+   "byGameType": {
+    "D": 68,
+    "F": 45,
+    "R": 2398
+   }
+  },
+  "2026_batter_669224": {
+   "id": 669224,
+   "name": "Austin Wells",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1626,
+   "byGameType": {
+    "D": 8,
+    "F": 27,
+    "R": 1591
+   }
+  },
+  "2025_batter_669224": {
+   "id": 669224,
+   "name": "Austin Wells",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1887,
+   "byGameType": {
+    "D": 42,
+    "F": 48,
+    "R": 1797
+   }
+  },
+  "2026_batter_700250": {
+   "id": 700250,
+   "name": "Ben Rice",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2756,
+   "byGameType": {
+    "D": 17,
+    "F": 44,
+    "R": 2695
+   }
+  },
+  "2025_batter_700250": {
+   "id": 700250,
+   "name": "Ben Rice",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2129,
+   "byGameType": {
+    "D": 56,
+    "F": 25,
+    "R": 2048
+   }
+  },
+  "2026_pitcher_687396": {
+   "id": 687396,
+   "name": "Brent Headrick",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1300,
+   "byGameType": {
+    "D": 12,
+    "F": 3,
+    "R": 1285
+   }
+  },
+  "2025_pitcher_687396": {
+   "id": 687396,
+   "name": "Brent Headrick",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 370,
+   "byGameType": {
+    "R": 370
+   }
+  },
+  "2026_pitcher_693645": {
+   "id": 693645,
+   "name": "Cam Schlittler",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 3161,
+   "byGameType": {
+    "F": 117,
+    "R": 3044
+   }
+  },
+  "2025_pitcher_693645": {
+   "id": 693645,
+   "name": "Cam Schlittler",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1448,
+   "byGameType": {
+    "D": 88,
+    "F": 107,
+    "R": 1253
+   }
+  },
+  "2026_pitcher_607074": {
+   "id": 607074,
+   "name": "Carlos Rod\u00f3n",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1438,
+   "byGameType": {
+    "R": 1438
+   }
+  },
+  "2025_pitcher_607074": {
+   "id": 607074,
+   "name": "Carlos Rod\u00f3n",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 3375,
+   "byGameType": {
+    "D": 71,
+    "F": 91,
+    "R": 3213
+   }
+  },
+  "2026_batter_641355": {
+   "id": 641355,
+   "name": "Cody Bellinger",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2157,
+   "byGameType": {
+    "D": 21,
+    "F": 34,
+    "R": 2102
+   }
+  },
+  "2025_batter_641355": {
+   "id": 641355,
+   "name": "Cody Bellinger",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2697,
+   "byGameType": {
+    "D": 65,
+    "F": 34,
+    "R": 2598
+   }
+  },
+  "2026_pitcher_670280": {
+   "id": 670280,
+   "name": "David Bednar",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1182,
+   "byGameType": {
+    "F": 22,
+    "R": 1160
+   }
+  },
+  "2025_pitcher_670280": {
+   "id": 670280,
+   "name": "David Bednar",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1120,
+   "byGameType": {
+    "D": 43,
+    "F": 45,
+    "R": 1032
+   }
+  },
+  "2026_batter_806146": {
+   "id": 806146,
+   "name": "George Lombard Jr.",
+   "role": "batter",
+   "year": 2026,
+   "rows": 698,
+   "byGameType": {
+    "D": 10,
+    "F": 35,
+    "R": 653
+   }
+  },
+  "2025_batter_806146": {
+   "id": 806146,
+   "name": "George Lombard Jr.",
+   "role": "batter",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_pitcher_543037": {
+   "id": 543037,
+   "name": "Gerrit Cole",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2035,
+   "byGameType": {
+    "D": 82,
+    "R": 1953
+   }
+  },
+  "2025_pitcher_543037": {
+   "id": 543037,
+   "name": "Gerrit Cole",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_batter_519317": {
+   "id": 519317,
+   "name": "Giancarlo Stanton",
+   "role": "batter",
+   "year": 2026,
+   "rows": 389,
+   "byGameType": {
+    "D": 5,
+    "R": 384
+   }
+  },
+  "2025_batter_519317": {
+   "id": 519317,
+   "name": "Giancarlo Stanton",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1338,
+   "byGameType": {
+    "D": 63,
+    "F": 53,
+    "R": 1222
+   }
+  },
+  "2026_batter_671218": {
+   "id": 671218,
+   "name": "Heliot Ramos",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1756,
+   "byGameType": {
+    "F": 10,
+    "R": 1746
+   }
+  },
+  "2025_batter_671218": {
+   "id": 671218,
+   "name": "Heliot Ramos",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2665,
+   "byGameType": {
+    "R": 2665
+   }
+  },
+  "2026_batter_665862": {
+   "id": 665862,
+   "name": "Jazz Chisholm Jr.",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2212,
+   "byGameType": {
+    "D": 15,
+    "F": 17,
+    "R": 2180
+   }
+  },
+  "2025_batter_665862": {
+   "id": 665862,
+   "name": "Jazz Chisholm Jr.",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2253,
+   "byGameType": {
+    "D": 68,
+    "F": 42,
+    "R": 2143
+   }
+  },
+  "2026_pitcher_670167": {
+   "id": 670167,
+   "name": "John Schreiber",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1022,
+   "byGameType": {
+    "F": 11,
+    "R": 1011
+   }
+  },
+  "2025_pitcher_670167": {
+   "id": 670167,
+   "name": "John Schreiber",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1051,
+   "byGameType": {
+    "R": 1051
+   }
+  },
+  "2026_batter_676609": {
+   "id": 676609,
+   "name": "Jos\u00e9 Caballero",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1856,
+   "byGameType": {
+    "R": 1856
+   }
+  },
+  "2025_batter_676609": {
+   "id": 676609,
+   "name": "Jos\u00e9 Caballero",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1532,
+   "byGameType": {
+    "D": 8,
+    "F": 17,
+    "R": 1507
+   }
+  },
+  "2026_batter_671277": {
+   "id": 671277,
+   "name": "Luis Garc\u00eda Jr.",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2013,
+   "byGameType": {
+    "D": 7,
+    "F": 21,
+    "R": 1985
+   }
+  },
+  "2025_batter_671277": {
+   "id": 671277,
+   "name": "Luis Garc\u00eda Jr.",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1842,
+   "byGameType": {
+    "R": 1842
+   }
+  },
+  "2026_pitcher_608331": {
+   "id": 608331,
+   "name": "Max Fried",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1794,
+   "byGameType": {
+    "F": 98,
+    "R": 1696
+   }
+  },
+  "2025_pitcher_608331": {
+   "id": 608331,
+   "name": "Max Fried",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 3263,
+   "byGameType": {
+    "D": 51,
+    "F": 102,
+    "R": 3110
+   }
+  },
+  "2026_pitcher_621112": {
+   "id": 621112,
+   "name": "Paul Blackburn",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1285,
+   "byGameType": {
+    "D": 25,
+    "F": 18,
+    "R": 1242
+   }
+  },
+  "2025_pitcher_621112": {
+   "id": 621112,
+   "name": "Paul Blackburn",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 702,
+   "byGameType": {
+    "D": 36,
+    "R": 666
+   }
+  },
+  "2026_batter_502671": {
+   "id": 502671,
+   "name": "Paul Goldschmidt",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1531,
+   "byGameType": {
+    "F": 27,
+    "R": 1504
+   }
+  },
+  "2025_batter_502671": {
+   "id": 502671,
+   "name": "Paul Goldschmidt",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2149,
+   "byGameType": {
+    "D": 22,
+    "F": 18,
+    "R": 2109
+   }
+  },
+  "2026_batter_641857": {
+   "id": 641857,
+   "name": "Ryan McMahon",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1515,
+   "byGameType": {
+    "D": 8,
+    "F": 20,
+    "R": 1487
+   }
+  },
+  "2025_batter_641857": {
+   "id": 641857,
+   "name": "Ryan McMahon",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2572,
+   "byGameType": {
+    "D": 45,
+    "F": 23,
+    "R": 2504
+   }
+  },
+  "2026_pitcher_677960": {
+   "id": 677960,
+   "name": "Ryan Weathers",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2290,
+   "byGameType": {
+    "D": 9,
+    "R": 2281
+   }
+  },
+  "2025_pitcher_677960": {
+   "id": 677960,
+   "name": "Ryan Weathers",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 642,
+   "byGameType": {
+    "R": 642
+   }
+  },
+  "2026_pitcher_642232": {
+   "id": 642232,
+   "name": "Ryan Yarbrough",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1064,
+   "byGameType": {
+    "R": 1064
+   }
+  },
+  "2025_pitcher_642232": {
+   "id": 642232,
+   "name": "Ryan Yarbrough",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1018,
+   "byGameType": {
+    "R": 1018
+   }
+  },
+  "2026_batter_682987": {
+   "id": 682987,
+   "name": "Spencer Jones",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1289,
+   "byGameType": {
+    "D": 12,
+    "F": 40,
+    "R": 1237
+   }
+  },
+  "2025_batter_682987": {
+   "id": 682987,
+   "name": "Spencer Jones",
+   "role": "batter",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_batter_663757": {
+   "id": 663757,
+   "name": "Trent Grisham",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1994,
+   "byGameType": {
+    "D": 12,
+    "F": 16,
+    "R": 1966
+   }
+  },
+  "2025_batter_663757": {
+   "id": 663757,
+   "name": "Trent Grisham",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2529,
+   "byGameType": {
+    "D": 84,
+    "F": 51,
+    "R": 2394
+   }
+  },
+  "2026_pitcher_701542": {
+   "id": 701542,
+   "name": "Will Warren",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2665,
+   "byGameType": {
+    "F": 19,
+    "R": 2646
+   }
+  },
+  "2025_pitcher_701542": {
+   "id": 701542,
+   "name": "Will Warren",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 2892,
+   "byGameType": {
+    "D": 84,
+    "R": 2808
+   }
+  },
+  "2026_batter_810938": {
+   "id": 810938,
+   "name": "Ben Williamson",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1109,
+   "byGameType": {
+    "R": 1109
+   }
+  },
+  "2025_batter_810938": {
+   "id": 810938,
+   "name": "Ben Williamson",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1216,
+   "byGameType": {
+    "R": 1216
+   }
+  },
+  "2026_pitcher_641329": {
+   "id": 641329,
+   "name": "Bryan Baker",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 995,
+   "byGameType": {
+    "D": 14,
+    "R": 981
+   }
+  },
+  "2025_pitcher_641329": {
+   "id": 641329,
+   "name": "Bryan Baker",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1102,
+   "byGameType": {
+    "R": 1102
+   }
+  },
+  "2026_pitcher_592155": {
+   "id": 592155,
+   "name": "Cam Booser",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 574,
+   "byGameType": {
+    "R": 574
+   }
+  },
+  "2025_pitcher_592155": {
+   "id": 592155,
+   "name": "Cam Booser",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 572,
+   "byGameType": {
+    "R": 572
+   }
+  },
+  "2026_batter_656775": {
+   "id": 656775,
+   "name": "Cedric Mullins",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1968,
+   "byGameType": {
+    "R": 1968
+   }
+  },
+  "2025_batter_656775": {
+   "id": 656775,
+   "name": "Cedric Mullins",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2113,
+   "byGameType": {
+    "R": 2113
+   }
+  },
+  "2026_batter_802415": {
+   "id": 802415,
+   "name": "Chandler Simpson",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1962,
+   "byGameType": {
+    "D": 11,
+    "R": 1951
+   }
+  },
+  "2025_batter_802415": {
+   "id": 802415,
+   "name": "Chandler Simpson",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1518,
+   "byGameType": {
+    "R": 1518
+   }
+  },
+  "2026_pitcher_642121": {
+   "id": 642121,
+   "name": "Cole Sulser",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 950,
+   "byGameType": {
+    "R": 950
+   }
+  },
+  "2025_pitcher_642121": {
+   "id": 642121,
+   "name": "Cole Sulser",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 391,
+   "byGameType": {
+    "R": 391
+   }
+  },
+  "2026_pitcher_656876": {
+   "id": 656876,
+   "name": "Drew Rasmussen",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2761,
+   "byGameType": {
+    "D": 101,
+    "R": 2660
+   }
+  },
+  "2025_pitcher_656876": {
+   "id": 656876,
+   "name": "Drew Rasmussen",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 2317,
+   "byGameType": {
+    "R": 2317
+   }
+  },
+  "2026_pitcher_642547": {
+   "id": 642547,
+   "name": "Freddy Peralta",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2960,
+   "byGameType": {
+    "R": 2960
+   }
+  },
+  "2025_pitcher_642547": {
+   "id": 642547,
+   "name": "Freddy Peralta",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 3365,
+   "byGameType": {
+    "L": 97,
+    "D": 179,
+    "R": 3089
+   }
+  },
+  "2026_pitcher_664076": {
+   "id": 664076,
+   "name": "Garrett Cleavinger",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 738,
+   "byGameType": {
+    "R": 738
+   }
+  },
+  "2025_pitcher_664076": {
+   "id": 664076,
+   "name": "Garrett Cleavinger",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 874,
+   "byGameType": {
+    "R": 874
+   }
+  },
+  "2026_pitcher_643377": {
+   "id": 643377,
+   "name": "Griffin Jax",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1732,
+   "byGameType": {
+    "R": 1732
+   }
+  },
+  "2025_pitcher_643377": {
+   "id": 643377,
+   "name": "Griffin Jax",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1105,
+   "byGameType": {
+    "R": 1105
+   }
+  },
+  "2026_pitcher_693855": {
+   "id": 693855,
+   "name": "Ian Seymour",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2138,
+   "byGameType": {
+    "R": 2138
+   }
+  },
+  "2025_pitcher_693855": {
+   "id": 693855,
+   "name": "Ian Seymour",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 999,
+   "byGameType": {
+    "R": 999
+   }
+  },
+  "2026_batter_666018": {
+   "id": 666018,
+   "name": "Jonathan Aranda",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2697,
+   "byGameType": {
+    "D": 14,
+    "R": 2683
+   }
+  },
+  "2025_batter_666018": {
+   "id": 666018,
+   "name": "Jonathan Aranda",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1732,
+   "byGameType": {
+    "R": 1732
+   }
+  },
+  "2026_batter_676356": {
+   "id": 676356,
+   "name": "Jonny DeLuca",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1360,
+   "byGameType": {
+    "D": 14,
+    "R": 1346
+   }
+  },
+  "2025_batter_676356": {
+   "id": 676356,
+   "name": "Jonny DeLuca",
+   "role": "batter",
+   "year": 2025,
+   "rows": 225,
+   "byGameType": {
+    "R": 225
+   }
+  },
+  "2026_batter_622761": {
+   "id": 622761,
+   "name": "Jorge Mateo",
+   "role": "batter",
+   "year": 2026,
+   "rows": 842,
+   "byGameType": {
+    "R": 842
+   }
+  },
+  "2025_batter_622761": {
+   "id": 622761,
+   "name": "Jorge Mateo",
+   "role": "batter",
+   "year": 2025,
+   "rows": 336,
+   "byGameType": {
+    "R": 336
+   }
+  },
+  "2026_batter_691406": {
+   "id": 691406,
+   "name": "Junior Caminero",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2788,
+   "byGameType": {
+    "D": 27,
+    "R": 2761
+   }
+  },
+  "2025_batter_691406": {
+   "id": 691406,
+   "name": "Junior Caminero",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2498,
+   "byGameType": {
+    "R": 2498
+   }
+  },
+  "2026_pitcher_687330": {
+   "id": 687330,
+   "name": "Kevin Kelly",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 999,
+   "byGameType": {
+    "R": 999
+   }
+  },
+  "2025_pitcher_687330": {
+   "id": 687330,
+   "name": "Kevin Kelly",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 592,
+   "byGameType": {
+    "R": 592
+   }
+  },
+  "2026_batter_689414": {
+   "id": 689414,
+   "name": "Liam Hicks",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2065,
+   "byGameType": {
+    "D": 17,
+    "R": 2048
+   }
+  },
+  "2025_batter_689414": {
+   "id": 689414,
+   "name": "Liam Hicks",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1537,
+   "byGameType": {
+    "R": 1537
+   }
+  },
+  "2026_batter_663743": {
+   "id": 663743,
+   "name": "Nick Fortes",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1120,
+   "byGameType": {
+    "R": 1120
+   }
+  },
+  "2025_batter_663743": {
+   "id": 663743,
+   "name": "Nick Fortes",
+   "role": "batter",
+   "year": 2025,
+   "rows": 915,
+   "byGameType": {
+    "R": 915
+   }
+  },
+  "2026_pitcher_607259": {
+   "id": 607259,
+   "name": "Nick Martinez",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2525,
+   "byGameType": {
+    "R": 2525
+   }
+  },
+  "2025_pitcher_607259": {
+   "id": 607259,
+   "name": "Nick Martinez",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 2603,
+   "byGameType": {
+    "F": 21,
+    "R": 2582
+   }
+  },
+  "2026_batter_680700": {
+   "id": 680700,
+   "name": "Richie Palacios",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1540,
+   "byGameType": {
+    "D": 4,
+    "R": 1536
+   }
+  },
+  "2025_batter_680700": {
+   "id": 680700,
+   "name": "Richie Palacios",
+   "role": "batter",
+   "year": 2025,
+   "rows": 190,
+   "byGameType": {
+    "R": 190
+   }
+  },
+  "2026_batter_668723": {
+   "id": 668723,
+   "name": "Ryan Vilade",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1102,
+   "byGameType": {
+    "R": 1102
+   }
+  },
+  "2025_batter_668723": {
+   "id": 668723,
+   "name": "Ryan Vilade",
+   "role": "batter",
+   "year": 2025,
+   "rows": 60,
+   "byGameType": {
+    "R": 60
+   }
+  },
+  "2026_pitcher_571927": {
+   "id": 571927,
+   "name": "Steven Matz",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1345,
+   "byGameType": {
+    "R": 1345
+   }
+  },
+  "2025_pitcher_571927": {
+   "id": 571927,
+   "name": "Steven Matz",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1197,
+   "byGameType": {
+    "F": 37,
+    "R": 1160
+   }
+  },
+  "2026_batter_670764": {
+   "id": 670764,
+   "name": "Taylor Walls",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1714,
+   "byGameType": {
+    "D": 15,
+    "R": 1699
+   }
+  },
+  "2025_batter_670764": {
+   "id": 670764,
+   "name": "Taylor Walls",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1278,
+   "byGameType": {
+    "R": 1278
+   }
+  },
+  "2026_pitcher_669330": {
+   "id": 669330,
+   "name": "Tyler Wells",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1072,
+   "byGameType": {
+    "R": 1072
+   }
+  },
+  "2025_pitcher_669330": {
+   "id": 669330,
+   "name": "Tyler Wells",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 342,
+   "byGameType": {
+    "R": 342
+   }
+  },
+  "2026_batter_683748": {
+   "id": 683748,
+   "name": "Victor Mesa Jr.",
+   "role": "batter",
+   "year": 2026,
+   "rows": 955,
+   "byGameType": {
+    "D": 12,
+    "R": 943
+   }
+  },
+  "2025_batter_683748": {
+   "id": 683748,
+   "name": "Victor Mesa Jr.",
+   "role": "batter",
+   "year": 2025,
+   "rows": 141,
+   "byGameType": {
+    "R": 141
+   }
+  },
+  "2026_batter_650490": {
+   "id": 650490,
+   "name": "Yandy D\u00edaz",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2590,
+   "byGameType": {
+    "D": 14,
+    "R": 2576
+   }
+  },
+  "2025_batter_650490": {
+   "id": 650490,
+   "name": "Yandy D\u00edaz",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2543,
+   "byGameType": {
+    "R": 2543
+   }
+  },
+  "2026_pitcher_700363": {
+   "id": 700363,
+   "name": "AJ Smith-Shawver",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 626,
+   "byGameType": {
+    "D": 53,
+    "R": 573
+   }
+  },
+  "2025_pitcher_700363": {
+   "id": 700363,
+   "name": "AJ Smith-Shawver",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 711,
+   "byGameType": {
+    "R": 711
+   }
+  },
+  "2026_batter_663586": {
+   "id": 663586,
+   "name": "Austin Riley",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2610,
+   "byGameType": {
+    "D": 20,
+    "F": 46,
+    "R": 2544
+   }
+  },
+  "2025_batter_663586": {
+   "id": 663586,
+   "name": "Austin Riley",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1797,
+   "byGameType": {
+    "R": 1797
+   }
+  },
+  "2026_pitcher_608718": {
+   "id": 608718,
+   "name": "Brent Suter",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1567,
+   "byGameType": {
+    "D": 33,
+    "R": 1534
+   }
+  },
+  "2025_pitcher_608718": {
+   "id": 608718,
+   "name": "Brent Suter",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1175,
+   "byGameType": {
+    "F": 34,
+    "R": 1141
+   }
+  },
+  "2026_batter_676551": {
+   "id": 676551,
+   "name": "Brewer Hicklen",
+   "role": "batter",
+   "year": 2026,
+   "rows": 174,
+   "byGameType": {
+    "R": 174
+   }
+  },
+  "2025_batter_676551": {
+   "id": 676551,
+   "name": "Brewer Hicklen",
+   "role": "batter",
+   "year": 2025,
+   "rows": 18,
+   "byGameType": {
+    "R": 18
+   }
+  },
+  "2026_pitcher_519242": {
+   "id": 519242,
+   "name": "Chris Sale",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2691,
+   "byGameType": {
+    "F": 116,
+    "R": 2575
+   }
+  },
+  "2025_pitcher_519242": {
+   "id": 519242,
+   "name": "Chris Sale",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 2031,
+   "byGameType": {
+    "R": 2031
+   }
+  },
+  "2026_pitcher_800311": {
+   "id": 800311,
+   "name": "Didier Fuentes",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1285,
+   "byGameType": {
+    "F": 46,
+    "R": 1239
+   }
+  },
+  "2025_pitcher_800311": {
+   "id": 800311,
+   "name": "Didier Fuentes",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 293,
+   "byGameType": {
+    "R": 293
+   }
+  },
+  "2026_batter_686948": {
+   "id": 686948,
+   "name": "Drake Baldwin",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2458,
+   "byGameType": {
+    "D": 17,
+    "F": 53,
+    "R": 2388
+   }
+  },
+  "2025_batter_686948": {
+   "id": 686948,
+   "name": "Drake Baldwin",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1750,
+   "byGameType": {
+    "R": 1750
+   }
+  },
+  "2026_pitcher_689266": {
+   "id": 689266,
+   "name": "Dylan Dodd",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 844,
+   "byGameType": {
+    "D": 47,
+    "F": 14,
+    "R": 783
+   }
+  },
+  "2025_pitcher_689266": {
+   "id": 689266,
+   "name": "Dylan Dodd",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 536,
+   "byGameType": {
+    "R": 536
+   }
+  },
+  "2026_pitcher_669276": {
+   "id": 669276,
+   "name": "Dylan Lee",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1090,
+   "byGameType": {
+    "F": 31,
+    "R": 1059
+   }
+  },
+  "2025_pitcher_669276": {
+   "id": 669276,
+   "name": "Dylan Lee",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1104,
+   "byGameType": {
+    "R": 1104
+   }
+  },
+  "2026_pitcher_656550": {
+   "id": 656550,
+   "name": "Grant Holmes",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2413,
+   "byGameType": {
+    "F": 28,
+    "R": 2385
+   }
+  },
+  "2025_pitcher_656550": {
+   "id": 656550,
+   "name": "Grant Holmes",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1970,
+   "byGameType": {
+    "R": 1970
+   }
+  },
+  "2026_batter_673490": {
+   "id": 673490,
+   "name": "Ha-Seong Kim",
+   "role": "batter",
+   "year": 2026,
+   "rows": 670,
+   "byGameType": {
+    "D": 11,
+    "F": 22,
+    "R": 637
+   }
+  },
+  "2025_batter_673490": {
+   "id": 673490,
+   "name": "Ha-Seong Kim",
+   "role": "batter",
+   "year": 2025,
+   "rows": 790,
+   "byGameType": {
+    "R": 790
+   }
+  },
+  "2026_pitcher_702275": {
+   "id": 702275,
+   "name": "JR Ritchie",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1282,
+   "byGameType": {
+    "R": 1282
+   }
+  },
+  "2025_pitcher_702275": {
+   "id": 702275,
+   "name": "JR Ritchie",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_batter_657041": {
+   "id": 657041,
+   "name": "Lane Thomas",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1537,
+   "byGameType": {
+    "D": 6,
+    "R": 1531
+   }
+  },
+  "2025_batter_657041": {
+   "id": 657041,
+   "name": "Lane Thomas",
+   "role": "batter",
+   "year": 2025,
+   "rows": 556,
+   "byGameType": {
+    "R": 556
+   }
+  },
+  "2026_batter_621566": {
+   "id": 621566,
+   "name": "Matt Olson",
+   "role": "batter",
+   "year": 2026,
+   "rows": 3000,
+   "byGameType": {
+    "D": 16,
+    "F": 56,
+    "R": 2928
+   }
+  },
+  "2025_batter_621566": {
+   "id": 621566,
+   "name": "Matt Olson",
+   "role": "batter",
+   "year": 2025,
+   "rows": 3172,
+   "byGameType": {
+    "R": 3172
+   }
+  },
+  "2026_batter_643289": {
+   "id": 643289,
+   "name": "Mauricio Dub\u00f3n",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2322,
+   "byGameType": {
+    "D": 16,
+    "F": 40,
+    "R": 2266
+   }
+  },
+  "2025_batter_643289": {
+   "id": 643289,
+   "name": "Mauricio Dub\u00f3n",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1346,
+   "byGameType": {
+    "R": 1346
+   }
+  },
+  "2026_batter_671739": {
+   "id": 671739,
+   "name": "Michael Harris II",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2261,
+   "byGameType": {
+    "D": 12,
+    "F": 47,
+    "R": 2202
+   }
+  },
+  "2025_batter_671739": {
+   "id": 671739,
+   "name": "Michael Harris II",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2181,
+   "byGameType": {
+    "R": 2181
+   }
+  },
+  "2026_batter_573262": {
+   "id": 573262,
+   "name": "Mike Yastrzemski",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1766,
+   "byGameType": {
+    "F": 28,
+    "R": 1738
+   }
+  },
+  "2025_batter_573262": {
+   "id": 573262,
+   "name": "Mike Yastrzemski",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2321,
+   "byGameType": {
+    "R": 2321
+   }
+  },
+  "2026_batter_645277": {
+   "id": 645277,
+   "name": "Ozzie Albies",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2613,
+   "byGameType": {
+    "D": 15,
+    "F": 49,
+    "R": 2549
+   }
+  },
+  "2025_batter_645277": {
+   "id": 645277,
+   "name": "Ozzie Albies",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2411,
+   "byGameType": {
+    "R": 2411
+   }
+  },
+  "2026_pitcher_628452": {
+   "id": 628452,
+   "name": "Raisel Iglesias",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 932,
+   "byGameType": {
+    "F": 16,
+    "R": 916
+   }
+  },
+  "2025_pitcher_628452": {
+   "id": 628452,
+   "name": "Raisel Iglesias",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 974,
+   "byGameType": {
+    "R": 974
+   }
+  },
+  "2026_pitcher_678061": {
+   "id": 678061,
+   "name": "Ray Kerr",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 259,
+   "byGameType": {
+    "F": 47,
+    "R": 212
+   }
+  },
+  "2025_pitcher_678061": {
+   "id": 678061,
+   "name": "Ray Kerr",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_pitcher_663158": {
+   "id": 663158,
+   "name": "Robert Suarez",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 499,
+   "byGameType": {
+    "F": 11,
+    "R": 488
+   }
+  },
+  "2025_pitcher_663158": {
+   "id": 663158,
+   "name": "Robert Suarez",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1135,
+   "byGameType": {
+    "F": 49,
+    "R": 1086
+   }
+  },
+  "2026_batter_660670": {
+   "id": 660670,
+   "name": "Ronald Acu\u00f1a Jr.",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1942,
+   "byGameType": {
+    "D": 18,
+    "F": 49,
+    "R": 1875
+   }
+  },
+  "2025_batter_660670": {
+   "id": 660670,
+   "name": "Ronald Acu\u00f1a Jr.",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1758,
+   "byGameType": {
+    "R": 1758
+   }
+  },
+  "2026_batter_642133": {
+   "id": 642133,
+   "name": "Rowdy Tellez",
+   "role": "batter",
+   "year": 2026,
+   "rows": 52,
+   "byGameType": {
+    "R": 52
+   }
+  },
+  "2025_batter_642133": {
+   "id": 642133,
+   "name": "Rowdy Tellez",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1288,
+   "byGameType": {
+    "R": 1288
+   }
+  },
+  "2026_batter_669221": {
+   "id": 669221,
+   "name": "Sean Murphy",
+   "role": "batter",
+   "year": 2026,
+   "rows": 485,
+   "byGameType": {
+    "D": 15,
+    "F": 19,
+    "R": 451
+   }
+  },
+  "2025_batter_669221": {
+   "id": 669221,
+   "name": "Sean Murphy",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1362,
+   "byGameType": {
+    "R": 1362
+   }
+  },
+  "2026_pitcher_641816": {
+   "id": 641816,
+   "name": "Tyler Mahle",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2499,
+   "byGameType": {
+    "F": 95,
+    "R": 2404
+   }
+  },
+  "2025_pitcher_641816": {
+   "id": 641816,
+   "name": "Tyler Mahle",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1381,
+   "byGameType": {
+    "R": 1381
+   }
+  },
+  "2026_pitcher_682989": {
+   "id": 682989,
+   "name": "Victor Mederos",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 599,
+   "byGameType": {
+    "D": 11,
+    "R": 588
+   }
+  },
+  "2025_pitcher_682989": {
+   "id": 682989,
+   "name": "Victor Mederos",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 314,
+   "byGameType": {
+    "R": 314
+   }
+  },
+  "2026_pitcher_681911": {
+   "id": 681911,
+   "name": "Alex Vesia",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1039,
+   "byGameType": {
+    "D": 15,
+    "R": 1024
+   }
+  },
+  "2025_pitcher_681911": {
+   "id": 681911,
+   "name": "Alex Vesia",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1122,
+   "byGameType": {
+    "L": 17,
+    "D": 33,
+    "F": 36,
+    "R": 1036
+   }
+  },
+  "2026_batter_681624": {
+   "id": 681624,
+   "name": "Andy Pages",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2355,
+   "byGameType": {
+    "D": 21,
+    "R": 2334
+   }
+  },
+  "2025_batter_681624": {
+   "id": 681624,
+   "name": "Andy Pages",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2586,
+   "byGameType": {
+    "W": 67,
+    "L": 57,
+    "D": 58,
+    "F": 38,
+    "R": 2366
+   }
+  },
+  "2026_pitcher_605483": {
+   "id": 605483,
+   "name": "Blake Snell",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 742,
+   "byGameType": {
+    "R": 742
+   }
+  },
+  "2025_pitcher_605483": {
+   "id": 605483,
+   "name": "Blake Snell",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1570,
+   "byGameType": {
+    "W": 244,
+    "L": 103,
+    "D": 99,
+    "F": 91,
+    "R": 1033
+   }
+  },
+  "2026_pitcher_592779": {
+   "id": 592779,
+   "name": "Brock Stewart",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 400,
+   "byGameType": {
+    "D": 13,
+    "R": 387
+   }
+  },
+  "2025_pitcher_592779": {
+   "id": 592779,
+   "name": "Brock Stewart",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 614,
+   "byGameType": {
+    "R": 614
+   }
+  },
+  "2026_pitcher_683618": {
+   "id": 683618,
+   "name": "Edgardo Henriquez",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 972,
+   "byGameType": {
+    "R": 972
+   }
+  },
+  "2025_pitcher_683618": {
+   "id": 683618,
+   "name": "Edgardo Henriquez",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 343,
+   "byGameType": {
+    "W": 45,
+    "F": 18,
+    "R": 280
+   }
+  },
+  "2026_pitcher_621242": {
+   "id": 621242,
+   "name": "Edwin D\u00edaz",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 402,
+   "byGameType": {
+    "R": 402
+   }
+  },
+  "2025_pitcher_621242": {
+   "id": 621242,
+   "name": "Edwin D\u00edaz",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1067,
+   "byGameType": {
+    "R": 1067
+   }
+  },
+  "2026_batter_571771": {
+   "id": 571771,
+   "name": "Enrique Hern\u00e1ndez",
+   "role": "batter",
+   "year": 2026,
+   "rows": 342,
+   "byGameType": {
+    "R": 342
+   }
+  },
+  "2025_batter_571771": {
+   "id": 571771,
+   "name": "Enrique Hern\u00e1ndez",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1302,
+   "byGameType": {
+    "W": 116,
+    "L": 60,
+    "D": 64,
+    "F": 29,
+    "R": 1033
+   }
+  },
+  "2026_pitcher_623465": {
+   "id": 623465,
+   "name": "Evan Phillips",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 447,
+   "byGameType": {
+    "D": 12,
+    "R": 435
+   }
+  },
+  "2025_pitcher_623465": {
+   "id": 623465,
+   "name": "Evan Phillips",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 92,
+   "byGameType": {
+    "R": 92
+   }
+  },
+  "2026_batter_518692": {
+   "id": 518692,
+   "name": "Freddie Freeman",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2747,
+   "byGameType": {
+    "D": 15,
+    "R": 2732
+   }
+  },
+  "2025_batter_518692": {
+   "id": 518692,
+   "name": "Freddie Freeman",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2734,
+   "byGameType": {
+    "W": 139,
+    "L": 80,
+    "D": 62,
+    "F": 46,
+    "R": 2407
+   }
+  },
+  "2026_batter_676439": {
+   "id": 676439,
+   "name": "Hunter Feduccia",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1018,
+   "byGameType": {
+    "R": 1018
+   }
+  },
+  "2025_batter_676439": {
+   "id": 676439,
+   "name": "Hunter Feduccia",
+   "role": "batter",
+   "year": 2025,
+   "rows": 477,
+   "byGameType": {
+    "R": 477
+   }
+  },
+  "2026_batter_808975": {
+   "id": 808975,
+   "name": "Hyeseong Kim",
+   "role": "batter",
+   "year": 2026,
+   "rows": 515,
+   "byGameType": {
+    "R": 515
+   }
+  },
+  "2025_batter_808975": {
+   "id": 808975,
+   "name": "Hyeseong Kim",
+   "role": "batter",
+   "year": 2025,
+   "rows": 660,
+   "byGameType": {
+    "R": 660
+   }
+  },
+  "2026_batter_800543": {
+   "id": 800543,
+   "name": "Josue De Paula",
+   "role": "batter",
+   "year": 2026,
+   "rows": 170,
+   "byGameType": {
+    "R": 170
+   }
+  },
+  "2025_batter_800543": {
+   "id": 800543,
+   "name": "Josue De Paula",
+   "role": "batter",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_pitcher_663460": {
+   "id": 663460,
+   "name": "Kris Bubic",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 883,
+   "byGameType": {
+    "R": 883
+   }
+  },
+  "2025_pitcher_663460": {
+   "id": 663460,
+   "name": "Kris Bubic",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1799,
+   "byGameType": {
+    "R": 1799
+   }
+  },
+  "2026_batter_663656": {
+   "id": 663656,
+   "name": "Kyle Tucker",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2479,
+   "byGameType": {
+    "D": 14,
+    "R": 2465
+   }
+  },
+  "2025_batter_663656": {
+   "id": 663656,
+   "name": "Kyle Tucker",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2468,
+   "byGameType": {
+    "D": 87,
+    "F": 46,
+    "R": 2335
+   }
+  },
+  "2026_batter_571970": {
+   "id": 571970,
+   "name": "Max Muncy",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2311,
+   "byGameType": {
+    "D": 16,
+    "R": 2295
+   }
+  },
+  "2025_batter_571970": {
+   "id": 571970,
+   "name": "Max Muncy",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1926,
+   "byGameType": {
+    "W": 128,
+    "L": 67,
+    "D": 37,
+    "F": 34,
+    "R": 1660
+   }
+  },
+  "2026_batter_500743": {
+   "id": 500743,
+   "name": "Miguel Rojas",
+   "role": "batter",
+   "year": 2026,
+   "rows": 881,
+   "byGameType": {
+    "R": 881
+   }
+  },
+  "2025_batter_500743": {
+   "id": 500743,
+   "name": "Miguel Rojas",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1244,
+   "byGameType": {
+    "W": 39,
+    "D": 11,
+    "F": 23,
+    "R": 1171
+   }
+  },
+  "2026_batter_605141": {
+   "id": 605141,
+   "name": "Mookie Betts",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1980,
+   "byGameType": {
+    "D": 19,
+    "R": 1961
+   }
+  },
+  "2025_batter_605141": {
+   "id": 605141,
+   "name": "Mookie Betts",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2796,
+   "byGameType": {
+    "W": 149,
+    "L": 63,
+    "D": 70,
+    "F": 42,
+    "R": 2472
+   }
+  },
+  "2026_pitcher_808963": {
+   "id": 808963,
+   "name": "Roki Sasaki",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2100,
+   "byGameType": {
+    "R": 2100
+   }
+  },
+  "2025_pitcher_808963": {
+   "id": 808963,
+   "name": "Roki Sasaki",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 790,
+   "byGameType": {
+    "W": 62,
+    "L": 44,
+    "D": 49,
+    "F": 11,
+    "R": 624
+   }
+  },
+  "2026_batter_660271": {
+   "id": 660271,
+   "name": "Shohei Ohtani",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2433,
+   "byGameType": {
+    "D": 15,
+    "R": 2418
+   }
+  },
+  "2026_pitcher_660271": {
+   "id": 660271,
+   "name": "Shohei Ohtani",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1335,
+   "byGameType": {
+    "R": 1335
+   }
+  },
+  "2025_batter_660271": {
+   "id": 660271,
+   "name": "Shohei Ohtani",
+   "role": "batter",
+   "year": 2025,
+   "rows": 3279,
+   "byGameType": {
+    "W": 143,
+    "L": 82,
+    "D": 71,
+    "F": 43,
+    "R": 2940
+   }
+  },
+  "2025_pitcher_660271": {
+   "id": 660271,
+   "name": "Shohei Ohtani",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1089,
+   "byGameType": {
+    "W": 147,
+    "L": 100,
+    "D": 89,
+    "R": 753
+   }
+  },
+  "2026_pitcher_656945": {
+   "id": 656945,
+   "name": "Tanner Scott",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 991,
+   "byGameType": {
+    "D": 12,
+    "R": 979
+   }
+  },
+  "2025_pitcher_656945": {
+   "id": 656945,
+   "name": "Tanner Scott",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 919,
+   "byGameType": {
+    "R": 919
+   }
+  },
+  "2026_pitcher_669373": {
+   "id": 669373,
+   "name": "Tarik Skubal",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2451,
+   "byGameType": {
+    "D": 94,
+    "R": 2357
+   }
+  },
+  "2025_pitcher_669373": {
+   "id": 669373,
+   "name": "Tarik Skubal",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 3152,
+   "byGameType": {
+    "D": 196,
+    "F": 107,
+    "R": 2849
+   }
+  },
+  "2026_batter_606192": {
+   "id": 606192,
+   "name": "Teoscar Hern\u00e1ndez",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1968,
+   "byGameType": {
+    "D": 17,
+    "R": 1951
+   }
+  },
+  "2025_batter_606192": {
+   "id": 606192,
+   "name": "Teoscar Hern\u00e1ndez",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2431,
+   "byGameType": {
+    "W": 130,
+    "L": 66,
+    "D": 69,
+    "F": 24,
+    "R": 2142
+   }
+  },
+  "2026_batter_669242": {
+   "id": 669242,
+   "name": "Tommy Edman",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1222,
+   "byGameType": {
+    "D": 12,
+    "R": 1210
+   }
+  },
+  "2025_batter_669242": {
+   "id": 669242,
+   "name": "Tommy Edman",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1571,
+   "byGameType": {
+    "W": 107,
+    "L": 57,
+    "D": 58,
+    "F": 11,
+    "R": 1338
+   }
+  },
+  "2026_pitcher_607192": {
+   "id": 607192,
+   "name": "Tyler Glasnow",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1156,
+   "byGameType": {
+    "R": 1156
+   }
+  },
+  "2025_pitcher_607192": {
+   "id": 607192,
+   "name": "Tyler Glasnow",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1826,
+   "byGameType": {
+    "W": 126,
+    "L": 99,
+    "D": 117,
+    "R": 1484
+   }
+  },
+  "2026_batter_669257": {
+   "id": 669257,
+   "name": "Will Smith",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1194,
+   "byGameType": {
+    "D": 15,
+    "R": 1179
+   }
+  },
+  "2025_batter_669257": {
+   "id": 669257,
+   "name": "Will Smith",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2190,
+   "byGameType": {
+    "W": 137,
+    "L": 62,
+    "D": 60,
+    "R": 1931
+   }
+  },
+  "2026_pitcher_808967": {
+   "id": 808967,
+   "name": "Yoshinobu Yamamoto",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2740,
+   "byGameType": {
+    "R": 2740
+   }
+  },
+  "2025_pitcher_808967": {
+   "id": 808967,
+   "name": "Yoshinobu Yamamoto",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 3318,
+   "byGameType": {
+    "W": 235,
+    "L": 111,
+    "D": 67,
+    "F": 113,
+    "R": 2792
+   }
+  },
+  "2026_pitcher_670970": {
+   "id": 670970,
+   "name": "Adrian Morejon",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1404,
+   "byGameType": {
+    "D": 31,
+    "F": 29,
+    "R": 1344
+   }
+  },
+  "2025_pitcher_670970": {
+   "id": 670970,
+   "name": "Adrian Morejon",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1057,
+   "byGameType": {
+    "F": 50,
+    "R": 1007
+   }
+  },
+  "2026_batter_669720": {
+   "id": 669720,
+   "name": "Austin Hays",
+   "role": "batter",
+   "year": 2026,
+   "rows": 423,
+   "byGameType": {
+    "D": 5,
+    "F": 18,
+    "R": 400
+   }
+  },
+  "2025_batter_669720": {
+   "id": 669720,
+   "name": "Austin Hays",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1592,
+   "byGameType": {
+    "F": 28,
+    "R": 1564
+   }
+  },
+  "2026_pitcher_699134": {
+   "id": 699134,
+   "name": "Bradgley Rodriguez",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1224,
+   "byGameType": {
+    "D": 19,
+    "F": 21,
+    "R": 1184
+   }
+  },
+  "2025_pitcher_699134": {
+   "id": 699134,
+   "name": "Bradgley Rodriguez",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 129,
+   "byGameType": {
+    "R": 129
+   }
+  },
+  "2026_pitcher_688158": {
+   "id": 688158,
+   "name": "David Morgan",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 607,
+   "byGameType": {
+    "R": 607
+   }
+  },
+  "2025_pitcher_688158": {
+   "id": 688158,
+   "name": "David Morgan",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 781,
+   "byGameType": {
+    "F": 11,
+    "R": 770
+   }
+  },
+  "2026_batter_687957": {
+   "id": 687957,
+   "name": "Dustin Harris",
+   "role": "batter",
+   "year": 2026,
+   "rows": 584,
+   "byGameType": {
+    "D": 32,
+    "F": 20,
+    "R": 532
+   }
+  },
+  "2025_batter_687957": {
+   "id": 687957,
+   "name": "Dustin Harris",
+   "role": "batter",
+   "year": 2025,
+   "rows": 181,
+   "byGameType": {
+    "R": 181
+   }
+  },
+  "2026_batter_806956": {
+   "id": 806956,
+   "name": "Ethan Salas",
+   "role": "batter",
+   "year": 2026,
+   "rows": 168,
+   "byGameType": {
+    "D": 13,
+    "F": 6,
+    "R": 149
+   }
+  },
+  "2025_batter_806956": {
+   "id": 806956,
+   "name": "Ethan Salas",
+   "role": "batter",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_batter_665487": {
+   "id": 665487,
+   "name": "Fernando Tatis Jr.",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2616,
+   "byGameType": {
+    "D": 16,
+    "F": 41,
+    "R": 2559
+   }
+  },
+  "2025_batter_665487": {
+   "id": 665487,
+   "name": "Fernando Tatis Jr.",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2699,
+   "byGameType": {
+    "F": 41,
+    "R": 2658
+   }
+  },
+  "2026_batter_666023": {
+   "id": 666023,
+   "name": "Freddy Fermin",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1018,
+   "byGameType": {
+    "R": 1018
+   }
+  },
+  "2025_batter_666023": {
+   "id": 666023,
+   "name": "Freddy Fermin",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1421,
+   "byGameType": {
+    "F": 43,
+    "R": 1378
+   }
+  },
+  "2026_batter_657757": {
+   "id": 657757,
+   "name": "Gavin Sheets",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1813,
+   "byGameType": {
+    "F": 2,
+    "R": 1811
+   }
+  },
+  "2025_batter_657757": {
+   "id": 657757,
+   "name": "Gavin Sheets",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2301,
+   "byGameType": {
+    "F": 18,
+    "R": 2283
+   }
+  },
+  "2026_batter_701538": {
+   "id": 701538,
+   "name": "Jackson Merrill",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2607,
+   "byGameType": {
+    "D": 19,
+    "F": 32,
+    "R": 2556
+   }
+  },
+  "2025_batter_701538": {
+   "id": 701538,
+   "name": "Jackson Merrill",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1748,
+   "byGameType": {
+    "F": 40,
+    "R": 1708
+   }
+  },
+  "2026_batter_630105": {
+   "id": 630105,
+   "name": "Jake Cronenworth",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1789,
+   "byGameType": {
+    "D": 21,
+    "F": 24,
+    "R": 1744
+   }
+  },
+  "2025_batter_630105": {
+   "id": 630105,
+   "name": "Jake Cronenworth",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2224,
+   "byGameType": {
+    "F": 36,
+    "R": 2188
+   }
+  },
+  "2026_batter_687749": {
+   "id": 687749,
+   "name": "Jase Bowen",
+   "role": "batter",
+   "year": 2026,
+   "rows": 366,
+   "byGameType": {
+    "R": 366
+   }
+  },
+  "2025_batter_687749": {
+   "id": 687749,
+   "name": "Jase Bowen",
+   "role": "batter",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_pitcher_592094": {
+   "id": 592094,
+   "name": "Jason Adam",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 610,
+   "byGameType": {
+    "D": 16,
+    "F": 11,
+    "R": 583
+   }
+  },
+  "2025_pitcher_592094": {
+   "id": 592094,
+   "name": "Jason Adam",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1097,
+   "byGameType": {
+    "R": 1097
+   }
+  },
+  "2026_pitcher_605397": {
+   "id": 605397,
+   "name": "Joe Musgrove",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 22,
+   "byGameType": {
+    "F": 22
+   }
+  },
+  "2025_pitcher_605397": {
+   "id": 605397,
+   "name": "Joe Musgrove",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_batter_669134": {
+   "id": 669134,
+   "name": "Luis Campusano",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1032,
+   "byGameType": {
+    "D": 16,
+    "F": 14,
+    "R": 1002
+   }
+  },
+  "2025_batter_669134": {
+   "id": 669134,
+   "name": "Luis Campusano",
+   "role": "batter",
+   "year": 2025,
+   "rows": 127,
+   "byGameType": {
+    "R": 127
+   }
+  },
+  "2026_batter_592518": {
+   "id": 592518,
+   "name": "Manny Machado",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2738,
+   "byGameType": {
+    "D": 21,
+    "F": 31,
+    "R": 2686
+   }
+  },
+  "2025_batter_592518": {
+   "id": 592518,
+   "name": "Manny Machado",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2714,
+   "byGameType": {
+    "F": 48,
+    "R": 2666
+   }
+  },
+  "2026_pitcher_695243": {
+   "id": 695243,
+   "name": "Mason Miller",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1173,
+   "byGameType": {
+    "F": 19,
+    "R": 1154
+   }
+  },
+  "2025_pitcher_695243": {
+   "id": 695243,
+   "name": "Mason Miller",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1021,
+   "byGameType": {
+    "F": 40,
+    "R": 981
+   }
+  },
+  "2026_pitcher_650633": {
+   "id": 650633,
+   "name": "Michael King",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 3078,
+   "byGameType": {
+    "F": 97,
+    "R": 2981
+   }
+  },
+  "2025_pitcher_650633": {
+   "id": 650633,
+   "name": "Michael King",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1238,
+   "byGameType": {
+    "F": 19,
+    "R": 1219
+   }
+  },
+  "2026_batter_609280": {
+   "id": 609280,
+   "name": "Miguel Andujar",
+   "role": "batter",
+   "year": 2026,
+   "rows": 944,
+   "byGameType": {
+    "D": 2,
+    "F": 7,
+    "R": 935
+   }
+  },
+  "2025_batter_609280": {
+   "id": 609280,
+   "name": "Miguel Andujar",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1238,
+   "byGameType": {
+    "F": 18,
+    "R": 1220
+   }
+  },
+  "2026_pitcher_601713": {
+   "id": 601713,
+   "name": "Nick Pivetta",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 644,
+   "byGameType": {
+    "F": 66,
+    "R": 578
+   }
+  },
+  "2025_pitcher_601713": {
+   "id": 601713,
+   "name": "Nick Pivetta",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 2941,
+   "byGameType": {
+    "F": 85,
+    "R": 2856
+   }
+  },
+  "2026_pitcher_681190": {
+   "id": 681190,
+   "name": "Randy V\u00e1squez",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2230,
+   "byGameType": {
+    "R": 2230
+   }
+  },
+  "2025_pitcher_681190": {
+   "id": 681190,
+   "name": "Randy V\u00e1squez",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 2153,
+   "byGameType": {
+    "R": 2153
+   }
+  },
+  "2026_pitcher_592662": {
+   "id": 592662,
+   "name": "Robbie Ray",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2900,
+   "byGameType": {
+    "D": 45,
+    "R": 2855
+   }
+  },
+  "2025_pitcher_592662": {
+   "id": 592662,
+   "name": "Robbie Ray",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 3072,
+   "byGameType": {
+    "R": 3072
+   }
+  },
+  "2026_batter_669392": {
+   "id": 669392,
+   "name": "Samad Taylor",
+   "role": "batter",
+   "year": 2026,
+   "rows": 691,
+   "byGameType": {
+    "F": 8,
+    "R": 683
+   }
+  },
+  "2025_batter_669392": {
+   "id": 669392,
+   "name": "Samad Taylor",
+   "role": "batter",
+   "year": 2025,
+   "rows": 23,
+   "byGameType": {
+    "R": 23
+   }
+  },
+  "2026_batter_664034": {
+   "id": 664034,
+   "name": "Ty France",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2025,
+   "byGameType": {
+    "D": 12,
+    "F": 26,
+    "R": 1987
+   }
+  },
+  "2025_batter_664034": {
+   "id": 664034,
+   "name": "Ty France",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1890,
+   "byGameType": {
+    "W": 13,
+    "R": 1877
+   }
+  },
+  "2026_batter_593428": {
+   "id": 593428,
+   "name": "Xander Bogaerts",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2437,
+   "byGameType": {
+    "D": 18,
+    "F": 43,
+    "R": 2376
+   }
+  },
+  "2025_batter_593428": {
+   "id": 593428,
+   "name": "Xander Bogaerts",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2165,
+   "byGameType": {
+    "F": 55,
+    "R": 2110
+   }
+  },
+  "2026_pitcher_673513": {
+   "id": 673513,
+   "name": "Yuki Matsui",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1125,
+   "byGameType": {
+    "D": 15,
+    "F": 11,
+    "R": 1099
+   }
+  },
+  "2025_pitcher_673513": {
+   "id": 673513,
+   "name": "Yuki Matsui",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1073,
+   "byGameType": {
+    "R": 1073
+   }
+  },
+  "2026_pitcher_676879": {
+   "id": 676879,
+   "name": "Aaron Ashby",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1609,
+   "byGameType": {
+    "D": 23,
+    "R": 1586
+   }
+  },
+  "2025_pitcher_676879": {
+   "id": 676879,
+   "name": "Aaron Ashby",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1188,
+   "byGameType": {
+    "L": 53,
+    "D": 102,
+    "R": 1033
+   }
+  },
+  "2026_pitcher_682842": {
+   "id": 682842,
+   "name": "Abner Uribe",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 943,
+   "byGameType": {
+    "D": 16,
+    "R": 927
+   }
+  },
+  "2025_pitcher_682842": {
+   "id": 682842,
+   "name": "Abner Uribe",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1265,
+   "byGameType": {
+    "L": 56,
+    "D": 35,
+    "R": 1174
+   }
+  },
+  "2026_batter_683734": {
+   "id": 683734,
+   "name": "Andrew Vaughn",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1363,
+   "byGameType": {
+    "D": 6,
+    "R": 1357
+   }
+  },
+  "2025_batter_683734": {
+   "id": 683734,
+   "name": "Andrew Vaughn",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1834,
+   "byGameType": {
+    "L": 48,
+    "D": 64,
+    "R": 1722
+   }
+  },
+  "2026_pitcher_622608": {
+   "id": 622608,
+   "name": "Antonio Senzatela",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1184,
+   "byGameType": {
+    "D": 11,
+    "R": 1173
+   }
+  },
+  "2025_pitcher_622608": {
+   "id": 622608,
+   "name": "Antonio Senzatela",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 2289,
+   "byGameType": {
+    "R": 2289
+   }
+  },
+  "2026_batter_668930": {
+   "id": 668930,
+   "name": "Brice Turang",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2920,
+   "byGameType": {
+    "D": 14,
+    "R": 2906
+   }
+  },
+  "2025_batter_668930": {
+   "id": 668930,
+   "name": "Brice Turang",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2922,
+   "byGameType": {
+    "L": 63,
+    "D": 82,
+    "R": 2777
+   }
+  },
+  "2026_pitcher_694477": {
+   "id": 694477,
+   "name": "Chad Patrick",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1739,
+   "byGameType": {
+    "R": 1739
+   }
+  },
+  "2025_pitcher_694477": {
+   "id": 694477,
+   "name": "Chad Patrick",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 2143,
+   "byGameType": {
+    "L": 66,
+    "D": 62,
+    "R": 2015
+   }
+  },
+  "2026_batter_592885": {
+   "id": 592885,
+   "name": "Christian Yelich",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2115,
+   "byGameType": {
+    "D": 12,
+    "R": 2103
+   }
+  },
+  "2025_batter_592885": {
+   "id": 592885,
+   "name": "Christian Yelich",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2775,
+   "byGameType": {
+    "L": 76,
+    "D": 79,
+    "R": 2620
+   }
+  },
+  "2026_batter_806198": {
+   "id": 806198,
+   "name": "Cooper Pratt",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1059,
+   "byGameType": {
+    "D": 18,
+    "R": 1041
+   }
+  },
+  "2025_batter_806198": {
+   "id": 806198,
+   "name": "Cooper Pratt",
+   "role": "batter",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_pitcher_669084": {
+   "id": 669084,
+   "name": "DL Hall",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1018,
+   "byGameType": {
+    "D": 20,
+    "R": 998
+   }
+  },
+  "2025_pitcher_669084": {
+   "id": 669084,
+   "name": "DL Hall",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 589,
+   "byGameType": {
+    "R": 589
+   }
+  },
+  "2026_batter_666152": {
+   "id": 666152,
+   "name": "David Hamilton",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1542,
+   "byGameType": {
+    "R": 1542
+   }
+  },
+  "2025_batter_666152": {
+   "id": 666152,
+   "name": "David Hamilton",
+   "role": "batter",
+   "year": 2025,
+   "rows": 744,
+   "byGameType": {
+    "R": 744
+   }
+  },
+  "2026_pitcher_669160": {
+   "id": 669160,
+   "name": "Dustin May",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2400,
+   "byGameType": {
+    "R": 2400
+   }
+  },
+  "2025_pitcher_669160": {
+   "id": 669160,
+   "name": "Dustin May",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 2182,
+   "byGameType": {
+    "R": 2182
+   }
+  },
+  "2026_batter_669003": {
+   "id": 669003,
+   "name": "Garrett Mitchell",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2162,
+   "byGameType": {
+    "D": 17,
+    "R": 2145
+   }
+  },
+  "2025_batter_669003": {
+   "id": 669003,
+   "name": "Garrett Mitchell",
+   "role": "batter",
+   "year": 2025,
+   "rows": 303,
+   "byGameType": {
+    "R": 303
+   }
+  },
+  "2026_batter_596142": {
+   "id": 596142,
+   "name": "Gary S\u00e1nchez",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1151,
+   "byGameType": {
+    "R": 1151
+   }
+  },
+  "2025_batter_596142": {
+   "id": 596142,
+   "name": "Gary S\u00e1nchez",
+   "role": "batter",
+   "year": 2025,
+   "rows": 415,
+   "byGameType": {
+    "R": 415
+   }
+  },
+  "2026_batter_694192": {
+   "id": 694192,
+   "name": "Jackson Chourio",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2214,
+   "byGameType": {
+    "D": 7,
+    "R": 2207
+   }
+  },
+  "2025_batter_694192": {
+   "id": 694192,
+   "name": "Jackson Chourio",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2228,
+   "byGameType": {
+    "L": 50,
+    "D": 64,
+    "R": 2114
+   }
+  },
+  "2026_pitcher_694819": {
+   "id": 694819,
+   "name": "Jacob Misiorowski",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2737,
+   "byGameType": {
+    "D": 88,
+    "R": 2649
+   }
+  },
+  "2025_pitcher_694819": {
+   "id": 694819,
+   "name": "Jacob Misiorowski",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1349,
+   "byGameType": {
+    "L": 73,
+    "D": 111,
+    "R": 1165
+   }
+  },
+  "2026_batter_641343": {
+   "id": 641343,
+   "name": "Jake Bauers",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2431,
+   "byGameType": {
+    "D": 10,
+    "R": 2421
+   }
+  },
+  "2025_batter_641343": {
+   "id": 641343,
+   "name": "Jake Bauers",
+   "role": "batter",
+   "year": 2025,
+   "rows": 968,
+   "byGameType": {
+    "L": 42,
+    "D": 25,
+    "R": 901
+   }
+  },
+  "2026_pitcher_668941": {
+   "id": 668941,
+   "name": "JoJo Romero",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 930,
+   "byGameType": {
+    "R": 930
+   }
+  },
+  "2025_pitcher_668941": {
+   "id": 668941,
+   "name": "JoJo Romero",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 1008,
+   "byGameType": {
+    "R": 1008
+   }
+  },
+  "2026_batter_687401": {
+   "id": 687401,
+   "name": "Joey Ortiz",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1622,
+   "byGameType": {
+    "D": 15,
+    "R": 1607
+   }
+  },
+  "2025_batter_687401": {
+   "id": 687401,
+   "name": "Joey Ortiz",
+   "role": "batter",
+   "year": 2025,
+   "rows": 1969,
+   "byGameType": {
+    "L": 32,
+    "D": 61,
+    "R": 1876
+   }
+  },
+  "2026_pitcher_690986": {
+   "id": 690986,
+   "name": "Kyle Harrison",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2107,
+   "byGameType": {
+    "R": 2107
+   }
+  },
+  "2025_pitcher_690986": {
+   "id": 690986,
+   "name": "Kyle Harrison",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 592,
+   "byGameType": {
+    "R": 592
+   }
+  },
+  "2026_pitcher_701656": {
+   "id": 701656,
+   "name": "Logan Henderson",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1505,
+   "byGameType": {
+    "R": 1505
+   }
+  },
+  "2025_pitcher_701656": {
+   "id": 701656,
+   "name": "Logan Henderson",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 410,
+   "byGameType": {
+    "R": 410
+   }
+  },
+  "2026_batter_800325": {
+   "id": 800325,
+   "name": "Luis Lara",
+   "role": "batter",
+   "year": 2026,
+   "rows": 898,
+   "byGameType": {
+    "D": 12,
+    "R": 886
+   }
+  },
+  "2025_batter_800325": {
+   "id": 800325,
+   "name": "Luis Lara",
+   "role": "batter",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_pitcher_688107": {
+   "id": 688107,
+   "name": "Robert Gasser",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 1817,
+   "byGameType": {
+    "R": 1817
+   }
+  },
+  "2025_pitcher_688107": {
+   "id": 688107,
+   "name": "Robert Gasser",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 166,
+   "byGameType": {
+    "L": 18,
+    "D": 46,
+    "R": 102
+   }
+  },
+  "2026_batter_686217": {
+   "id": 686217,
+   "name": "Sal Frelick",
+   "role": "batter",
+   "year": 2026,
+   "rows": 1458,
+   "byGameType": {
+    "R": 1458
+   }
+  },
+  "2025_batter_686217": {
+   "id": 686217,
+   "name": "Sal Frelick",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2436,
+   "byGameType": {
+    "L": 51,
+    "D": 74,
+    "R": 2311
+   }
+  },
+  "2026_pitcher_675660": {
+   "id": 675660,
+   "name": "Shane Drohan",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 2001,
+   "byGameType": {
+    "R": 2001
+   }
+  },
+  "2025_pitcher_675660": {
+   "id": 675660,
+   "name": "Shane Drohan",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 0,
+   "byGameType": {}
+  },
+  "2026_pitcher_656730": {
+   "id": 656730,
+   "name": "Trevor Megill",
+   "role": "pitcher",
+   "year": 2026,
+   "rows": 903,
+   "byGameType": {
+    "D": 17,
+    "R": 886
+   }
+  },
+  "2025_pitcher_656730": {
+   "id": 656730,
+   "name": "Trevor Megill",
+   "role": "pitcher",
+   "year": 2025,
+   "rows": 832,
+   "byGameType": {
+    "L": 35,
+    "D": 32,
+    "R": 765
+   }
+  },
+  "2026_batter_661388": {
+   "id": 661388,
+   "name": "William Contreras",
+   "role": "batter",
+   "year": 2026,
+   "rows": 2311,
+   "byGameType": {
+    "D": 15,
+    "R": 2296
+   }
+  },
+  "2025_batter_661388": {
+   "id": 661388,
+   "name": "William Contreras",
+   "role": "batter",
+   "year": 2025,
+   "rows": 2710,
+   "byGameType": {
+    "L": 66,
+    "D": 72,
+    "R": 2572
+   }
+  }
+ }
+}

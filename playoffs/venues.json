@@ -1,0 +1,292 @@
+{
+ "pulled": "2026-10-05",
+ "note": "fence = [left line, left-centre, centre, right-centre, right line] ft, the engine makeEnv order; azimuthDeg as the API gives it (0 where it is not filled in)",
+ "venues": {
+  "4": {
+   "id": 4,
+   "name": "Rate Field",
+   "city": "Chicago",
+   "state": "IL",
+   "lat": 41.83,
+   "lon": -87.634167,
+   "elevFt": 595,
+   "azimuthDeg": 127.0,
+   "roof": "Open",
+   "turf": "Grass",
+   "capacity": 40126,
+   "dims": {
+    "leftLine": 330,
+    "left": null,
+    "leftCenter": 377,
+    "center": 400,
+    "rightCenter": 372,
+    "right": null,
+    "rightLine": 335
+   },
+   "fence": [
+    330,
+    377,
+    400,
+    372,
+    335
+   ],
+   "homeOf": [
+    "CWS"
+   ]
+  },
+  "5": {
+   "id": 5,
+   "name": "Progressive Field",
+   "city": "Cleveland",
+   "state": "OH",
+   "lat": 41.495861,
+   "lon": -81.685255,
+   "elevFt": 653,
+   "azimuthDeg": 0.0,
+   "roof": "Open",
+   "turf": "Grass",
+   "capacity": 34830,
+   "dims": {
+    "leftLine": 325,
+    "left": 370,
+    "leftCenter": 410,
+    "center": 405,
+    "rightCenter": 375,
+    "right": null,
+    "rightLine": 325
+   },
+   "fence": [
+    325,
+    410,
+    405,
+    375,
+    325
+   ],
+   "homeOf": [
+    "CLE"
+   ]
+  },
+  "12": {
+   "id": 12,
+   "name": "Tropicana Field",
+   "city": "St. Petersburg",
+   "state": "FL",
+   "lat": 27.767778,
+   "lon": -82.6525,
+   "elevFt": 15,
+   "azimuthDeg": 359.0,
+   "roof": "Dome",
+   "turf": "Artificial Turf",
+   "capacity": 25025,
+   "dims": {
+    "leftLine": 315,
+    "left": 370,
+    "leftCenter": 410,
+    "center": 404,
+    "rightCenter": 404,
+    "right": 370,
+    "rightLine": 322
+   },
+   "fence": [
+    315,
+    410,
+    404,
+    404,
+    322
+   ],
+   "homeOf": [
+    "TB"
+   ]
+  },
+  "22": {
+   "id": 22,
+   "name": "UNIQLO Field at Dodger Stadium",
+   "city": "Los Angeles",
+   "state": "CA",
+   "lat": 34.07368,
+   "lon": -118.24053,
+   "elevFt": 515,
+   "azimuthDeg": 26.0,
+   "roof": "Open",
+   "turf": "Grass",
+   "capacity": 56000,
+   "dims": {
+    "leftLine": 330,
+    "left": null,
+    "leftCenter": 385,
+    "center": 395,
+    "rightCenter": 385,
+    "right": null,
+    "rightLine": 330
+   },
+   "fence": [
+    330,
+    385,
+    395,
+    385,
+    330
+   ],
+   "homeOf": [
+    "LAD"
+   ]
+  },
+  "32": {
+   "id": 32,
+   "name": "American Family Field",
+   "city": "Milwaukee",
+   "state": "WI",
+   "lat": 43.02838,
+   "lon": -87.97099,
+   "elevFt": 597,
+   "azimuthDeg": 129.0,
+   "roof": "Retractable",
+   "turf": "Grass",
+   "capacity": 40100,
+   "dims": {
+    "leftLine": 344,
+    "left": null,
+    "leftCenter": 371,
+    "center": 400,
+    "rightCenter": 374,
+    "right": null,
+    "rightLine": 345
+   },
+   "fence": [
+    344,
+    371,
+    400,
+    374,
+    345
+   ],
+   "homeOf": [
+    "MIL"
+   ]
+  },
+  "2392": {
+   "id": 2392,
+   "name": "Daikin Park",
+   "city": "Houston",
+   "state": "TX",
+   "lat": 29.756967,
+   "lon": -95.355509,
+   "elevFt": 45,
+   "azimuthDeg": 343.0,
+   "roof": "Retractable",
+   "turf": "Grass",
+   "capacity": 41168,
+   "dims": {
+    "leftLine": 315,
+    "left": null,
+    "leftCenter": 362,
+    "center": 409,
+    "rightCenter": 373,
+    "right": null,
+    "rightLine": 326
+   },
+   "fence": [
+    315,
+    362,
+    409,
+    373,
+    326
+   ],
+   "homeOf": []
+  },
+  "2680": {
+   "id": 2680,
+   "name": "Petco Park",
+   "city": "San Diego",
+   "state": "CA",
+   "lat": 32.707861,
+   "lon": -117.157278,
+   "elevFt": 23,
+   "azimuthDeg": 0.0,
+   "roof": "Open",
+   "turf": "Grass",
+   "capacity": 40000,
+   "dims": {
+    "leftLine": 336,
+    "left": null,
+    "leftCenter": 386,
+    "center": 396,
+    "rightCenter": 391,
+    "right": null,
+    "rightLine": 322
+   },
+   "fence": [
+    336,
+    386,
+    396,
+    391,
+    322
+   ],
+   "homeOf": [
+    "SD"
+   ]
+  },
+  "3313": {
+   "id": 3313,
+   "name": "Yankee Stadium",
+   "city": "Bronx",
+   "state": "NY",
+   "lat": 40.82919482,
+   "lon": -73.9264977,
+   "elevFt": 55,
+   "azimuthDeg": 75.0,
+   "roof": "Open",
+   "turf": "Grass",
+   "capacity": 46537,
+   "dims": {
+    "leftLine": 318,
+    "left": null,
+    "leftCenter": 399,
+    "center": 408,
+    "rightCenter": 385,
+    "right": null,
+    "rightLine": 314
+   },
+   "fence": [
+    318,
+    399,
+    408,
+    385,
+    314
+   ],
+   "homeOf": [
+    "NYY"
+   ]
+  },
+  "4705": {
+   "id": 4705,
+   "name": "Truist Park",
+   "city": "Atlanta",
+   "state": "GA",
+   "lat": 33.890672,
+   "lon": -84.467641,
+   "elevFt": 1001,
+   "azimuthDeg": 145.0,
+   "roof": "Open",
+   "turf": "Grass",
+   "capacity": 40819,
+   "dims": {
+    "leftLine": 335,
+    "left": 375,
+    "leftCenter": 385,
+    "center": 400,
+    "rightCenter": 375,
+    "right": null,
+    "rightLine": 325
+   },
+   "fence": [
+    335,
+    385,
+    400,
+    375,
+    325
+   ],
+   "homeOf": [
+    "ATL"
+   ]
+  }
+ }
+}
