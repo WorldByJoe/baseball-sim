@@ -66,7 +66,7 @@
   //    took an extra base, so the batter took second on top of the man who held there, who vanished. The same with
   //    men on first and third and a grounder to short: the man on third held, the man from first took third on top
   //    of him.
-  var wildDice = { u: function () { return 0.5; }, n: function (mu, sd) { return sd > 0.26 ? 5 : 0; } };
+  var wildDice = { u: function () { return 0.5; }, n: function (mu, sd) { return sd > 0.1 && sd !== 0.25 && sd !== 0.15 ? 5 : 0; } };   // the throw's scatter (armAcc x distance / 40) and nothing else: the reads (READ_SD 0.25) and the race (0.15) stay true
   bb = batted(82, -4, 12); out = resolve(bb, [null, null, runner(0.3), null], 0, wildDice);
   check('man on second, a grounder to the second baseman thrown away: nobody lands on him', out.error && distinct(out) && conserved(out, 2), where(out));
   bb = batted(84, -3, -14); out = resolve(bb, [null, runner(0), null, runner(0.3)], 0, wildDice);
