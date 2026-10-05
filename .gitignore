@@ -2,6 +2,7 @@ Zipped/
 .DS_Store
 *.png
 .claude/
+statcast/raw/pitches
 statcast/raw/pitches/
 statcast/raw/pitches_aaa/
 tts/voices/
