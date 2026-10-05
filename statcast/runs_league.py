@@ -84,6 +84,7 @@ def main(spec):
     RE = collections.defaultdict(lambda: [0.0, 0])
     TR = collections.defaultdict(collections.Counter)
     S = collections.Counter()
+    HS = {c: collections.Counter() for c in ('empty', 'on', 'RISP')}
     lob = lisp = 0
 
     def state(r):
@@ -107,6 +108,25 @@ def main(spec):
                 nb, nouts = state(nxt); made = nouts - outs
             else:
                 nb, nouts = [None, '', '', ''], 3; made = 3 - outs
+            # hitting by base state (the batter's own line)
+            cls = 'RISP' if (b[2] or b[3]) else 'on' if b[1] else 'empty'; hs = HS[cls]
+            if ev:
+                hs['pa'] += 1
+                if ev.startswith('strikeout'): hs['k'] += 1
+                elif ev in ('walk', 'intent_walk', 'hit_by_pitch'): hs['bb'] += 1
+                elif ev not in ('sac_fly', 'sac_fly_double_play', 'sac_bunt', 'sac_bunt_double_play', 'catcher_interf', 'caught_stealing_2b', 'caught_stealing_3b', 'caught_stealing_home', 'pickoff_1b', 'pickoff_2b', 'pickoff_3b', 'pickoff_caught_stealing_2b', 'pickoff_caught_stealing_3b', 'pickoff_caught_stealing_home'):
+                    hs['ab'] += 1
+                    if ev in HIT: hs['h'] += 1
+                    if ev == 'home_run': hs['hr'] += 1
+                    else: hs['bip'] += 1
+                elif ev in ('sac_fly', 'sac_fly_double_play'): hs['bip'] += 1
+                if ev != 'home_run' and (ev in HIT or ev in ('field_error', 'fielders_choice', 'fielders_choice_out', 'field_out', 'force_out', 'grounded_into_double_play', 'double_play', 'triple_play', 'sac_fly', 'sac_fly_double_play', 'other_out')):
+                    gbk = 'gb' if bb == 'ground_ball' else 'air'; hs[gbk] += 1
+                    if ev in HIT: hs[gbk + 'h'] += 1
+                    if ev in ('fielders_choice', 'fielders_choice_out'): hs['fc'] += 1; hs[gbk + 'fc'] += 1
+                    if ev == 'field_error': hs['roe'] += 1
+                    ls, la = fl(l.get('launch_speed')), fl(l.get('launch_angle'))
+                    if ls is not None and la is not None: hs['ev'] += ls; hs['la'] += la; hs['nq'] += 1
             # events per team-game
             if ev in HIT: S[HIT[ev]] += 1
             elif ev == 'walk': S['BB'] += 1
@@ -184,7 +204,7 @@ def main(spec):
     bsr = A * B / (B + C) + S['HR']
     S['LOB'] = lob; S['LISP'] = lisp
     J = {'games': games, 'runs': runs / tg, 'baseruns': bsr / tg, 'events': {k: v / tg for k, v in S.items()},
-         're': {k: [v[0] / v[1], v[1]] for k, v in RE.items()}, 'tr': {}}
+         're': {k: [v[0] / v[1], v[1]] for k, v in RE.items()}, 'tr': {}, 'hit': {c: dict(HS[c]) for c in HS}}
     for k in E:
         J['events'][k] = E[k] / tg
     for k in ('SB', 'CS', 'WP', 'PB', 'picked off'):   # the pitch rows do not describe these; the season's team totals (MLB Stats API, 2025) stand in

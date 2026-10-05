@@ -21,6 +21,7 @@
 (function (A) {
   var N = +A[0] || 300, SEED = +A[1] || 3, rng = BB.makeRng(SEED), L = typeof RUNSL !== 'undefined' ? RUNSL : null;
   var E = {}, RE = {}, TR = {}, VAL = {}, games = 0, S = BBGame.newStats(), lob = 0, lisp = 0;
+  var HS = {}; ['empty', 'on', 'RISP'].forEach(function (c) { HS[c] = { pa: 0, k: 0, bb: 0, ab: 0, h: 0, hr: 0, bip: 0, gb: 0, gbh: 0, gbfc: 0, air: 0, airh: 0, airfc: 0, fc: 0, roe: 0, ev: 0, la: 0, aheadOfThrow: 0, stretchOut: 0, aircaught: 0 }; });
   function inc(k, n) { E[k] = (E[k] || 0) + (n === undefined ? 1 : n); }
   function stKey(outs, b) { return outs + ':' + [1, 2, 3].map(function (i) { return b[i] ? i : '-'; }).join(''); }
   function tr(cat, outcome, value) {
@@ -52,6 +53,11 @@
           (rec.pickoffs || []).forEach(function (ev) { if (ev.out) inc('runners gone between pitches'); });
         });
         (p.pa.pickoffsEnd || []).forEach(function (ev) { inc('pickoff throws'); if (ev.out) { inc('picked off'); inc('runners gone between pitches'); } });
+        // hitting by base state: the batter's own line with the bases empty, men on, a man in scoring position
+        var cls = s0[2] || s0[3] ? 'RISP' : s0[1] ? 'on' : 'empty', hs = HS[cls];
+        if (res !== 'END') { hs.pa++; if (res === 'K') hs.k++; else if (res === 'BB' || res === 'IBB' || res === 'HBP') hs.bb++; else if (r) { hs.ab++; if (r.hit === 'SF') hs.ab--; if (r.hit === '1B' || r.hit === '2B' || r.hit === '3B') { hs.h++; hs.bip++; } else if (r.hit === 'HR') { hs.h++; hs.hr++; } else hs.bip++;
+          if (r.hit !== 'HR') { var gbk = r.type === 'GB' ? 'gb' : 'air', isH = r.hit === '1B' || r.hit === '2B' || r.hit === '3B'; hs[gbk]++; if (isH) hs[gbk + 'h']++; if (r.hit === 'FC') { hs.fc++; hs[gbk + 'fc']++; } if (r.hit === 'E') hs.roe++; hs.ev += p.pa.bb.ev; hs.la += p.pa.bb.la; if (isH && /ahead of the throw/.test(r.desc)) hs.aheadOfThrow++;
+            var bq = r.runners.filter(function (x) { return x.from === 0; })[0]; if (bq && bq.out && bq.to >= 2) hs.stretchOut++; if (gbk === 'air' && (r.events || []).some(function (e) { return e.kind === 'catch'; })) hs.aircaught++; } } }
         if (res === 'K') inc('K'); else if (res === 'BB') inc('BB'); else if (res === 'IBB') { inc('BB'); inc('IBB'); } else if (res === 'HBP') inc('HBP');
         else if (r) {
           var bat = r.runners.filter(function (q) { return q.from === 0; })[0], batterOut = bat && bat.out;
@@ -161,9 +167,19 @@
         ';  gone ' + f(1000 * (E['runners gone between pitches'] || 0) / pr, 1) + (L ? ' | ' + f(1000 * L.events['runners gone between pitches'] / L.events['pitches with runners on'], 1) : '') +
         ';  the model\'s parts: SB ' + f(1000 * (E.SB || 0) / pr, 1) + ' CS ' + f(1000 * (E.CS || 0) / pr, 1) + ' WP ' + f(1000 * (E.WP || 0) / pr, 1) + ' PB ' + f(1000 * (E.PB || 0) / pr, 1) + ' picked off ' + f(1000 * (E['picked off'] || 0) / pr, 1) +
         ';  runner out on a hit ' + f(100 * (E['runner out on a hit'] || 0) / (E['hits with runners on'] || 1), 1) + '% of hits with runners on' + (L ? ' | ' + f(100 * L.events['runner out on a hit'] / L.events['hits with runners on'], 1) + '%' : ''));
-  // 5. events per team-game
+  // 5. hitting by base state
   print('');
-  print('5. EVENTS per team-game (model | league)');
+  print('5. HITTING BY BASE STATE (model | league): K%, BB+HBP%, AVG, BABIP, HR% - the batter\'s own line, so a gap here is the hitting, not the running');
+  ['empty', 'on', 'RISP'].forEach(function (c) {
+    var h = HS[c], l = L && L.hit && L.hit[c];
+    function line(q) { return pad(q.pa, 7) + '  K ' + f(100 * q.k / q.pa, 1) + '  BB ' + f(100 * q.bb / q.pa, 1) + '  AVG ' + f(q.h / q.ab, 3).replace(/^0/, '') + '  BABIP ' + f((q.h - q.hr) / q.bip, 3).replace(/^0/, '') + '  HR ' + f(100 * q.hr / q.pa, 1); }
+    function line2(q) { return 'BABIP on the ground ' + f(q.gbh / (q.gb || 1), 3).replace(/^0/, '') + ' in the air ' + f(q.airh / (q.air || 1), 3).replace(/^0/, '') + '  FC per ground ball ' + f(q.gbfc / (q.gb || 1), 3).replace(/^0/, '') + ' per air ball ' + f(q.airfc / (q.air || 1), 3).replace(/^0/, '') + '  ROE/BIP ' + f(q.roe / (q.bip || 1), 3).replace(/^0/, '') + '  EV ' + f(q.ev / (q.nq || q.bip || 1), 1) + '  LA ' + f(q.la / (q.nq || q.bip || 1), 1) + (q.aheadOfThrow !== undefined ? '  hits with the lead runner played on and safe ' + f(q.aheadOfThrow / (q.bip || 1), 3).replace(/^0/, '') + '  batter out past first ' + f(q.stretchOut / (q.bip || 1), 3).replace(/^0/, '') + '  air balls caught ' + f(q.aircaught / (q.air || 1), 3).replace(/^0/, '') : ''); }
+    print('   ' + rpad(c === 'on' ? 'man on first only' : c === 'RISP' ? 'scoring position' : 'bases empty', 20) + line(h) + (l ? '   | ' + line(l) : ''));
+    print('   ' + rpad('', 20) + line2(h) + (l ? '   | ' + line2(l) : ''));
+  });
+  // 6. events per team-game
+  print('');
+  print('6. EVENTS per team-game (model | league)');
   E.LOB = lob; E.LISP = lisp;
   var KEYS = ['1B', '2B', '3B', 'HR', 'BB', 'IBB', 'HBP', 'K', 'SF', 'outs in play', 'DP', 'FC', 'ROE', 'E throwing', 'E fumbled grounder', 'E dropped fly', 'E on a steal throw', 'E on a pickoff', 'SB', 'CS', 'picked off', 'pickoff throws', 'WP', 'PB', 'runners forced out', 'runners out on the bases (tag)', 'runner out on a hit', 'hits with runners on', 'balls in play', 'LOB', 'LISP'];
   KEYS.forEach(function (k) { var m = (E[k] || 0) / tg, l = L && L.events[k] !== undefined ? L.events[k] : null; print('  ' + rpad(k, 32) + pad(f(m), 7) + (l !== null ? pad('| ' + f(l), 9) : '') ); });
