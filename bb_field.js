@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.5 · 2026-10-05
+   bb_field.js · v1.6 · 2026-10-05
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -32,6 +32,8 @@
    doubles are approximate; the cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.6  a batter thrown out past first base keeps the hit that got him there (rule 9.05; the bug audit): the play
+           had been scored a plain out and the single lost - 0.2-0.3% of balls in play, three times the league's
      v1.5  a force play tried and missed is the batter's hit only when he would have beaten a throw to first (the
            scorer's rule 9.05; the bug audit): the batter had been credited a single whenever the lead runner was safe
      v1.4  a throw that gets away moves every runner up a base, the men who held included (the bug audit): a holder
@@ -41,10 +43,6 @@
      v1.2  the runner behind a man who scores may score too (the bug audit): a man who had crossed the plate was
            still the ceiling for the runner behind him, who was held to third - no single, double or triple ever
            scored two runs (headless/plays_check.js)
-     v1.1  the foul ground a fielder can reach, MEASURED from where the league's foul-territory outs were made
-           (accessible): about 42 ft off the lines for the first 150 ft and 21 ft by 250 ft, the backstop 46 ft;
-           it had been drawn 59 ft wide to 100 ft and 41-49 ft out to 260 ft, and once the engine made the
-           league's foul pops (v3.2) the first and third basemen ran down twice the league's foul outs
 ============================================================================ */
 
 var BBField = (function () {
@@ -531,10 +529,11 @@ var BBField = (function () {
       else if (anyForceOut || (triedRunner && wouldBeOut)) out.hit = 'FC';   // a force tried and missed is the batter's hit only if he would have beaten a throw to first (rule 9.05; until v1.5 it was always a hit)
       else out.hit = ['', '1B', '2B', '3B', 'HR'][batR.target];
       if (T.groundRule) out.desc = 'ground-rule double';
-    } else out.hit = 'OUT';
+    } else out.hit = batR.target >= 2 ? ['', '', '1B', '2B', '3B'][batR.target] : 'OUT';   // thrown out past first, he keeps the hit that got him there (rule 9.05; until v1.6 a plain out)
     if (!out.desc || out.hit === '1B' || out.hit === '2B' || out.hit === '3B') {
       var where = Ff.pos, kind = out.type === 'GB' ? 'ground ball' : out.type === 'LD' ? 'line drive' : 'fly ball';
-      out.desc = (out.hit === 'OUT' ? out.desc : (out.hit === '1B' ? 'single' : out.hit === '2B' ? 'double' : out.hit === '3B' ? 'triple' : out.hit === 'HR' ? 'inside-the-park home run' : out.desc) + ', ' + kind + ' to ' + where + (play && !play.r.out && play.r.base !== 0 ? ', ' + out.desc : ''));
+      out.desc = (out.hit === 'OUT' ? out.desc : (out.hit === '1B' ? 'single' : out.hit === '2B' ? 'double' : out.hit === '3B' ? 'triple' : out.hit === 'HR' ? 'inside-the-park home run' : out.desc) + ', ' + kind + ' to ' + where +
+                 (batR.out ? ', out at ' + baseName(batR.target) + ' trying for more' : play && !play.r.out && play.r.base !== 0 ? ', ' + out.desc : ''));
     }
     // runs: none score if the third out is the batter or a force; on a tag play a run counts if it crossed first
     var third = outs + out.outsMade >= 3, thirdOutForce = third && (batR.out || (play && play.r.out && play.force));
@@ -566,7 +565,7 @@ var BBField = (function () {
     return best.c.p > 0 && rng.u() < best.c.p ? best : null;
   }
 
-  return { version: '1.5', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
+  return { version: '1.6', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };

@@ -1,5 +1,5 @@
 /* ============================================================================
-   plays_check.js · v0.4 · 2026-10-05
+   plays_check.js · v0.5 · 2026-10-05
 
    Constructed plays through BBField.resolve, each a regression test for a
    bug the audit found (docs/briefs/2026-10-05_bug_audit.md): a fixed
@@ -10,6 +10,7 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js headless/plays_check.js
 
    CHANGED
+     v0.5  a batter thrown out past first keeps the hit that got him there (bb_field v1.6)
      v0.4  a force tried and missed is a fielder's choice when the batter would have been out at first (bb_field v1.5)
      v0.3  a throw that gets away moves every runner up, the men who held included (bb_field v1.4)
      v0.2  a runner tags up only to a base the man ahead leaves (bb_field v1.3)
@@ -81,6 +82,14 @@
     tried4++; if (o.hit !== 'FC' || o.error || !conserved(o, 2)) { wrong4++; if (!eg4) eg4 = where(o); }
   }); }); });
   check('a slow batter and a man on first, soft grounders to the infield: every force tried and missed at second is a fielder\'s choice (' + tried4 + ' such plays)', tried4 > 0 && wrong4 === 0, wrong4 ? wrong4 + ' scored as hits, e.g. ' + eg4 : 'all fielder\'s choices');
+
+  // 5. A batter thrown out past first base keeps the hit that got him there (bb_field v1.6; the scorer's rule 9.05):
+  //    a bold batter (runAggr -0.4), a ground ball down the right-field line, the dice make the throw beat him at
+  //    second. Until v1.6 the play was scored a plain out, and the single was lost.
+  var beatDice = { u: function () { return 0.03; }, n: function () { return 0; } };
+  bb = batted(92, 5, 42); out = resolve(bb, [null, null, null, null], 0, beatDice, -1, runner(-0.4, 26.5));
+  var bq = out.runners[out.runners.length - 1];
+  check('a bold batter thrown out at second on a ball down the line: a single and an out on the bases', bq.out && bq.to === 2 && out.hit === '1B' && out.outsMade === 1, where(out));
 
   print(fails ? 'FAIL: ' + fails + ' of ' + cases + ' cases' : 'PASS: ' + cases + ' cases');
 })();

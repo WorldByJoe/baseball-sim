@@ -97,7 +97,7 @@
     var bat = R.filter(function (q) { return q.from === 0; })[0];
     if (!bat) { flag('a ball in play without the batter among its runners', key); return; }
     var want = { '1B': 1, '2B': 2, '3B': 3, 'HR': 4 }[r.hit];
-    if (want !== undefined) { if (bat.out) flag('a hit with the batter out', key, r.hit); else if (bat.to < want) flag('a hit with the batter short of its base', key, r.hit + ' to ' + bat.to); else if (bat.to > want && !r.error) flag('a hit with the batter past its base and no error', key, r.hit + ' to ' + bat.to); }
+    if (want !== undefined) { if (bat.out) { if (bat.to !== want + 1) flag('a hit with the batter out, not at the next base', key, r.hit + ' out at ' + bat.to); } else if (bat.to < want) flag('a hit with the batter short of its base', key, r.hit + ' to ' + bat.to); else if (bat.to > want && !r.error) flag('a hit with the batter past its base and no error', key, r.hit + ' to ' + bat.to); }
     else if (r.hit === 'OUT' || r.hit === 'SF') { if (!bat.out) flag('an out with the batter safe', key, r.hit); if (r.hit === 'SF' && (r.runs === 0 || thirdOut)) flag('a sacrifice fly with no run, or as the third out', key); }
     else if (r.hit === 'FC') { if (bat.out) flag("a fielder's choice with the batter out", key); if (!R.some(function (q) { return q.out && q.from > 0; }) && !/ahead of the throw/.test(r.desc)) flag("a fielder's choice with no runner out and no force tried", key); }
     else if (r.hit === 'E') { if (bat.out || !r.error) flag('reached on an error without an error, or out', key); }
