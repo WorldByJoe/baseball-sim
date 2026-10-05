@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.0 · 2026-10-04
+   bb_field.js · v1.7 · 2026-10-05
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -32,27 +32,16 @@
    doubles are approximate; the cut-off man is a timing rule, not a player.
 
    CHANGED
-     v1.0  the outfielder's stop and turn: one who reaches the ball on the run sheds the speed
-           not carrying him toward his throw before he lets it go
-     v0.9  the scorer's errors: a fumble is an error only on an ordinary chance; an outfielder
-           picking up a ball that got through is not hurried by the ground he ran (half
-           of those pickups were fumbled); drops on a catch he is under and fumbles on a grounder from the league's errors
-     v0.8  infielders shade by how far a batter pulls: his path's pull plus the face's (engine v2.3)
-     v0.7  outfielders move as Statcast's jump shows, stand where the league's did, and
-           catch as often as the league's by exit velocity and launch angle; bounces lose
-           more the steeper they land (measured); runners read the race with error and are
-           sent by the outs (fitted to extra bases taken); a runner thrown out on a clean
-           hit to the outfield no longer costs the batter his hit
-     v0.6  the running game: stealTime from a moving lead, a runner going with the
-           pitch is 9 m down the line at contact (o.going); accessible() marks the
-           foul ground a man can reach - foul pops in the seats are nobody's
-     v0.5  a throw cannot arrive before the man covering that base does; on a
-           fly ball a runner reads the catch chance - goes on contact when nobody
-           will reach it, halfway when it might drop, holds on a routine fly (he
-           used to wait at the bag on every fly and the batter caught him up)
-     v0.4  unassisted putouts: the man who covers a base runs the ball there
-           himself; a first baseman far off the bag throws to the pitcher covering
-           and waits for him (Joe saw a throw to an empty bag). Events 'carry', 'cover'
+     v1.7  a force tried and thrown away is an error, not a fielder's choice (the bug audit): v1.5 had scored the
+           batter a fielder's choice with nobody out when the throw to second got away
+     v1.6  a batter thrown out past first base keeps the hit that got him there (rule 9.05; the bug audit): the play
+           had been scored a plain out and the single lost - 0.2-0.3% of balls in play, three times the league's
+     v1.5  a force play tried and missed is the batter's hit only when he would have beaten a throw to first (the
+           scorer's rule 9.05; the bug audit): the batter had been credited a single whenever the lead runner was safe
+     v1.4  a throw that gets away moves every runner up a base, the men who held included (the bug audit): a holder
+           stayed while the runner behind him took the base he was on, and the holder vanished (headless/plays_check.js)
+     v1.3  a runner tags up only to a base the man ahead leaves (the bug audit): a man could tag up onto one who
+           held, and the man who held vanished from the bases - 21 times in 2,000 games (headless/plays_check.js)
 ============================================================================ */
 
 var BBField = (function () {
@@ -165,17 +154,21 @@ var BBField = (function () {
     return d < dAcc ? (Math.sqrt(v0 * v0 + 2 * ACC_R * d) - v0) / ACC_R : (v - v0) / ACC_R + (d - dAcc) / v;
   }
   // The part of foul ground a fielder can reach: in front of the backstop and
-  // within a strip along each line that narrows from the plate to the poles,
-  // with the dugouts cut out of it (16 to 24 m off the lines, 50 to 80 m out).
-  // Anything else is in the seats.
+  // within a strip along each line that narrows from the plate to the poles.
+  // Anything else is in the seats. MEASURED (v1.1) from where the league's
+  // foul-territory outs were made (785 field outs with foul landing spots, 42
+  // days of 2025, the hit coordinates at 2.38 ft a unit): off the nearer line
+  // the 95th percentile ran 12.6-12.9 m for the first 46 m along it, 10.3 m
+  // at 46-61 m, 6.4 m at 61-91 m and 2 m beyond; behind the plate the outs
+  // reached 14 m (46 ft) at the 95th percentile. The league makes such outs
+  // on .027 of balls in play, 0.68 a team-game.
   function accessible(x, y) {
-    if (y < -18) return false;
+    if (y < -14) return false;
     var ax = Math.abs(x);
     if (ax <= y) return true;                                     // fair
     var s = (ax + y) / Math.SQRT2, perp = (ax - y) / Math.SQRT2;  // along the line, and off it
-    if (s > 105) return false;
-    var w = s < 30 ? 18 : 18 - 14 * (s - 30) / 75;
-    if (s > 50 && s < 80) w = Math.min(w, 15);
+    if (s > 100) return false;
+    var w = s <= 46 ? 12.8 : s <= 64 ? 12.8 - 6.4 * (s - 46) / 18 : s <= 91 ? 6.4 : 6.4 - 4.4 * (s - 91) / 9;
     return perp <= w;
   }
 
@@ -380,13 +373,17 @@ var BBField = (function () {
       R[R.length - 1].out = true; out.outsMade = 1;
       out.hit = 'OUT'; out.desc = (out.type === 'PU' ? 'pop out' : out.type === 'LD' ? 'line out' : 'fly out') + ' to ' + F.pos;
       if (outs + 1 >= 3) { out.desc += ', inning over'; finish(); return out; }
-      // runners held; now they may tag up against this arm, once he has stopped and turned
-      var tagging = [];
+      // runners held; now they may tag up against this arm, once he has stopped and turned - the lead runner first,
+      // and each only to a base the man ahead leaves (until v1.3 a man could tag up onto one who held, and the man
+      // who held vanished from the bases)
+      var tagging = [], aheadTag = 5;
       function settleC(to) { return settleTime(F, at, to, dist(F.at, at), best.c.m); }
       R.slice(0, -1).forEach(function (r) {
         var to = r.base + 1, tRun = tc + runTime(r.pl, BASE, true);
         var tBall = Math.max(tc + settleC(to) + F.pl.transfer + throwArrival(F, at, to), rcvArrival(to, F.pos)) + TAG;
-        if (tRun + SAFETY + r.pl.runAggr < tBall && !tagging.some(function (q) { return q.to === to; })) tagging.push({ r: r, to: to, tRun: tRun, tBall: tBall });
+        var goes = to < aheadTag && tRun + SAFETY + r.pl.runAggr < tBall;
+        if (goes) tagging.push({ r: r, to: to, tRun: tRun, tBall: tBall });
+        aheadTag = goes ? to : r.base;
       });
       if (tagging.length) {
         var play = null;
@@ -449,7 +446,9 @@ var BBField = (function () {
       if (r.base > 0 && r.start !== null && r.start < 0.5 && !r.midway && r.onContact) return r.start + stealTime(r.pl, d, V_CONTACT);
       return r.start + runTime(r.pl, d, (r.start >= 0.5 && !r.midway) || r.base === 0);
     }
-    // how far each goes: lead runner first, nobody passes the man ahead
+    // how far each goes: lead runner first, nobody passes the man ahead - and a man who has crossed the plate is
+    // nobody's ceiling (until v1.2 he was: the runner behind him was held to third, so no single, double or triple
+    // ever scored two runs)
     var ahead = 5;
     R.forEach(function (r, i) {
       if (r.start === null) { r.target = r.base; ahead = r.base; return; }
@@ -461,7 +460,7 @@ var BBField = (function () {
         if (next >= 3 ? tBall - tRun + rng.n(0, READ_SD) > (next === 3 ? SAFETY_3 : SAFETY_H)[Math.min(outs, 2)] + r.pl.runAggr : tRun + SAFETY + r.pl.runAggr < tBall) to = next; else break;
       }
       if (T.groundRule) to = Math.min(4, r.base + 2);
-      r.target = Math.min(to, ahead - 1); ahead = r.target;
+      r.target = Math.min(to, ahead - 1); ahead = r.target >= 4 ? 5 : r.target;
     });
 
     // the fielder's throw: the most likely, most valuable out
@@ -492,9 +491,9 @@ var BBField = (function () {
         ev.push({ t: tField + settle(to, fieldAt) + Ff.pl.transfer, kind: 'throw', who: Ff.pos, from: fieldAt, to: to, arrive: play.tBall, wild: err > 1.6, rcv: play.how === 'cover' ? 'P' : coverOf(to, Ff.pos) });
       }
       var via = play.how === 'run' ? Ff.pos + ' unassisted' : play.how === 'cover' ? Ff.pos + ' to the pitcher covering' : Ff.pos + ' to ' + baseName(to);
-      if (err > 1.6) {                                   // thrown away: everyone moves up
+      if (err > 1.6) {                                   // thrown away: everyone moves up a base, the men who held included (until v1.4 a holder stayed, and a runner behind him landed on top of him)
         out.error = true;
-        R.forEach(function (r) { if (r.target > r.base || r.base === 0) r.target = Math.min(4, r.target + 1); });
+        R.forEach(function (r) { r.target = Math.min(4, r.target + 1); });
         out.desc = 'throwing error by ' + Ff.pos;
       } else if (rng.u() < play.p) {
         play.r.out = true; out.outsMade++;
@@ -518,20 +517,22 @@ var BBField = (function () {
     // fielder's choice, and the batter lost the hit).
     var batR = R[R.length - 1], runnerOut = R.some(function (r) { return r.out && r.base > 0; });
     var anyForceOut = runnerOut && (!isOF(Ff.pos) || (play && play.force));
+    var triedRunner = play && play.r.base > 0 && !play.r.out && play.force && !out.error;   // the fielder tried a force on a runner and failed (a throw that got away is an error, scored below; v1.7)
     if (!batR.out) {
       var wouldBeOut = false;
-      if (!clean || out.error) {                          // would a clean play have got him?
+      if (!clean || out.error || triedRunner) {           // would a clean play on the batter have got him?
         var tB = ballTo(1, ic.t, ic.at).t;
         wouldBeOut = arrive(batR, 1) > tB + 0.1;
       }
-      if (wouldBeOut && (out.error || chanceD(Ff, ic) <= ORDINARY_D)) { out.hit = 'E'; out.error = true; out.desc = 'reaches on an error by ' + Ff.pos; }
-      else if (anyForceOut) out.hit = 'FC';
+      if (wouldBeOut && (out.error || chanceD(Ff, ic) <= ORDINARY_D) && !(triedRunner && clean)) { out.hit = 'E'; out.error = true; out.desc = 'reaches on an error by ' + Ff.pos; }
+      else if (anyForceOut || (triedRunner && wouldBeOut)) out.hit = 'FC';   // a force tried and missed is the batter's hit only if he would have beaten a throw to first (rule 9.05; until v1.5 it was always a hit)
       else out.hit = ['', '1B', '2B', '3B', 'HR'][batR.target];
       if (T.groundRule) out.desc = 'ground-rule double';
-    } else out.hit = 'OUT';
+    } else out.hit = batR.target >= 2 ? ['', '', '1B', '2B', '3B'][batR.target] : 'OUT';   // thrown out past first, he keeps the hit that got him there (rule 9.05; until v1.6 a plain out)
     if (!out.desc || out.hit === '1B' || out.hit === '2B' || out.hit === '3B') {
       var where = Ff.pos, kind = out.type === 'GB' ? 'ground ball' : out.type === 'LD' ? 'line drive' : 'fly ball';
-      out.desc = (out.hit === 'OUT' ? out.desc : (out.hit === '1B' ? 'single' : out.hit === '2B' ? 'double' : out.hit === '3B' ? 'triple' : out.hit === 'HR' ? 'inside-the-park home run' : out.desc) + ', ' + kind + ' to ' + where + (play && !play.r.out && play.r.base !== 0 ? ', ' + out.desc : ''));
+      out.desc = (out.hit === 'OUT' ? out.desc : (out.hit === '1B' ? 'single' : out.hit === '2B' ? 'double' : out.hit === '3B' ? 'triple' : out.hit === 'HR' ? 'inside-the-park home run' : out.desc) + ', ' + kind + ' to ' + where +
+                 (batR.out ? ', out at ' + baseName(batR.target) + ' trying for more' : play && !play.r.out && play.r.base !== 0 ? ', ' + out.desc : ''));
     }
     // runs: none score if the third out is the batter or a force; on a tag play a run counts if it crossed first
     var third = outs + out.outsMade >= 3, thirdOutForce = third && (batR.out || (play && play.r.out && play.force));
@@ -563,7 +564,7 @@ var BBField = (function () {
     return best.c.p > 0 && rng.u() < best.c.p ? best : null;
   }
 
-  return { version: '0.8', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
+  return { version: '1.7', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };

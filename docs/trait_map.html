@@ -1,8 +1,11 @@
-<!-- trait_map.html · v3.3 · 2026-10-04
+<!-- trait_map.html · v3.4 · 2026-10-05
      The trait path map: distal traits -> proximate abilities -> the engine's stages
      (with every constant and where its value came from) -> statistics against the league.
      Keep it in step with bb_engine.js; publish to the same artifact URL.
      CHANGED
+       v3.4  the bug audit (bb_field v1.2-1.6, bb_game v1.2): the runner behind a man who scores may score too, a runner tags
+             up only to a base the man ahead leaves, a throw that gets away moves every runner up, the pinch-hitter's spot
+             goes back to the pitcher, two scorer's rules; the result rows re-measured
        v3.3  engine v3.1: the tunnel (TUNNEL_SEP), the fooled batter's decision (DIR_READ_DEC), the policy by count x kind
        v3.2  engine v3.0: bat speed falls as a pitch pulls the swing up, away or in (BAT_LOC); FG and G findings
        v3.1  engine v2.9: the barrel's height falls short toward the middle of the zone (VERT_MISS); timing
@@ -216,20 +219,20 @@ td.basis { color: var(--muted); }
     ['e_style', 3, null, 'Attack angle ~ pull%', '+.57 to +.65 vs +.66', 'match', 'With the swing style (v1.9; was +.18); pull% ~ fly-ball% +.34 to +.39 against +.55; attack angle ~ whiff +.66 to +.71 against +.53, too strong.'],
     ['e_zbs', 3, null, 'Zone rate ~ bat speed', '-0.0037 vs -0.0038 per mph', 'match', 'Pitchers work around power (v1.7); walks ~ bat speed came to +.05 to +.12 against +.17, unfitted.'],
     ['e_aim', 3, null, 'Aim against command', '-0.31 vs -0.30 in per in', 'match', 'Per pitcher, pitch type and batter side, how far his mean location sits from the zone\'s centre against his scatter about it (league majors -0.29, Triple-A -0.31; model about 0 before engine v2.8, four seeds since).'],
-    ['e_k', 3, 'IN THE PLATE APPEARANCE', 'Strikeout rate', '19.2-19.6% vs 22.2%', 'near', '200 games at each of three seeds; 2025 team totals.'],
-    ['e_bb', 3, null, 'Walk rate', '8.9-9.5% vs 8.4%', 'near', 'Engine v3.1: fastballs are no longer over-chased, and breaking balls far outside are still chased half as often as the league\'s, so the chase is .229 against .283.'],
+    ['e_k', 3, 'IN THE PLATE APPEARANCE', 'Strikeout rate', '19.0-19.8% vs 22.2%', 'near', '200 games at each of three seeds; 2025 team totals. The fouls (CALIBRATION, #31) are what is missing.'],
+    ['e_bb', 3, null, 'Walk rate', '8.9-9.4% vs 8.4%', 'near', 'Engine v3.1: fastballs are no longer over-chased, and breaking balls far outside are still chased half as often as the league\'s, so the chase is .229 against .283.'],
     ['e_hbp', 3, null, 'Hit by pitch', '1.01% vs 1.1%', 'match', 'Per plate appearance; 0.40% before command was measured.'],
     ['e_hr', 3, null, 'Home-run rate', '3.4-3.6% vs 3.1%', 'near', 'Per plate appearance.'],
     ['e_carry', 3, null, 'Carry by EV and angle', 'within 6 ft at 20-40 deg', 'near', 'Liners at 15-20 deg carry 10-20 ft too far: the spin\'s shape with launch angle.'],
-    ['e_babip', 3, null, 'BABIP', '.257-.263 vs .291', 'off', 'An open mystery (CALIBRATION): too few line drives (19% against 24%), ground balls pulled less than the league\'s; ground-ball BABIP is the league\'s .24-.25.'],
-    ['e_avg', 3, null, 'AVG / SLG', '.238-.247 / .397-.417', 'match', 'League .245 / .404 (2025).'],
-    ['e_runs', 3, 'IN THE GAME', 'Runs per team-game', '3.96-4.27 vs 4.45', 'near', '200 games at each of three seeds, against 2025\'s team totals. Doubles and slugging are the league\'s since the outfielder stops and turns (bb_field v1.0); BABIP and too few liners are most of what is left.'],
+    ['e_babip', 3, null, 'BABIP', '.262-.272 vs .291', 'off', 'An open mystery (CALIBRATION): too few line drives (20-21% against 24%); on the ground, choppers at -10 to 0 deg are hits .135 against .249 and low liners at 0-10 deg .538 against .482; and the league hits better with men on (BABIP .280 empty, .301 with a man on first) where the model is flat (.261-.269, .262-.269) - the infield never holds a runner or plays in (the bug audit).'],
+    ['e_avg', 3, null, 'AVG / SLG', '.232-.239 / .397-.408', 'near', 'League .245 / .404 (2025).'],
+    ['e_runs', 3, 'IN THE GAME', 'Runs per team-game', '4.06-4.54 vs 4.45', 'near', '200 games at each of three seeds, against 2025\'s team totals. Runs against BaseRuns from the model\'s own events .926-.988 (the league 1.01; .905-.909 before the bug audit, when no single, double or triple ever scored two runs). What is left is hitting with men on base and the sacrifice flies (CALIBRATION, the bug audit).'],
     ['e_doubles', 3, null, 'Doubles per team-game', '1.54-1.63 vs 1.59', 'match', 'Since bb_field v1.0 an outfielder who reaches the ball on the run sheds his speed before he throws; before, the throw beat the batter-runner to second by a median 1.6 s on the singles that stayed singles.'],
     ['e_triples', 3, null, 'Triples per team-game', '0.09-0.12 vs 0.13', 'near', 'Per team-game.'],
-    ['e_xbt', 3, null, 'Extra bases taken', 'R2 scores .56-.59 vs .60', 'match', 'Runner on second scoring on a single .56-.59 (.60), runner on first to third on a single .34-.35 (.33), scoring on a double .38-.42 (.39), with sends to third and home of their own (bb_field v1.0). Thrown out .02-.08 of chances against .01-.03.'],
-    ['e_dp', 3, null, 'Double plays', '0.59-0.73 vs 0.75', 'near', 'Per team-game.'],
-    ['e_errors', 3, null, 'Errors', '0.33-0.34 vs 0.50', 'off', 'Per team-game. Fumbles and drops are now the league\'s (bb_field v0.9); throwing errors are a third of the league\'s, whose are highest on weak grounders (hurried throws).'],
-    ['e_sb', 3, null, 'Stolen bases', '0.58-0.68 vs 0.71', 'near', 'Per team-game, 79% safe against 78%. The old target, 0.47, was a pre-2023 figure.'],
+    ['e_xbt', 3, null, 'Extra bases taken', 'R2 scores .58 vs .60', 'match', 'Runner on second scoring on a single .58 (.60), runner on first to third on a single .36 (.33), scoring on a double .44 (.39); thrown out trying .04-.07 (.01-.03), most on a double with two out (xbt_check, 400 games, after the bug audit).'],
+    ['e_dp', 3, null, 'Double plays', '0.64-0.71 vs 0.75', 'near', 'Per team-game.'],
+    ['e_errors', 3, null, 'Errors', '0.34-0.37 vs 0.50', 'off', 'Per team-game. Fumbles and drops are the league\'s (bb_field v0.9); throwing errors .10 against .13 (hurried throws are missing), and the bug audit\'s fixes took a holder\'s vanishing on a wild throw out of the count.'],
+    ['e_sb', 3, null, 'Stolen bases', '0.57-0.67 vs 0.71', 'near', 'Per team-game, 77% safe against 78%. The old target, 0.47, was a pre-2023 figure.'],
     ['e_wp', 3, null, 'Wild pitches', '0.24-0.34 vs 0.29', 'match', 'Per team-game.'],
     ['e_extra', 3, null, 'Extra-inning games', '8-12.5% vs about 8%', 'near', 'Per game.'],
     ['e_pitchers', 3, null, 'Pitchers used', '3.8-3.9 vs 4.2', 'near', 'Per team-game.'],

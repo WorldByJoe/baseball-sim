@@ -1,5 +1,5 @@
 /* ============================================================================
-   field_value.js · v0.1 · 2026-10-03
+   field_value.js · v0.2 · 2026-10-05
 
    What a fielder's traits are worth, measured by the engine itself, so the
    farm's scouts can judge a position player by his glove as well as his bat.
@@ -17,6 +17,7 @@
    Run:  jsc bb_engine.js bb_field.js tools/field_value.js -- [balls] [trials] [seed] [positions, comma]
 
    CHANGED
+     v0.2  a ball on which the fielder put the batter out past first is worth an out, not the hit the scorer now credits (bb_field v1.6)
      v0.1  first build (bb_engine v2.1)
 ============================================================================ */
 (function (A) {
@@ -41,7 +42,7 @@
     for (var j = 0; j < L.length; j++) {
       BBField.positionDefense(D, L[j].B, L[j].side);
       var r = BBField.resolve(L[j].bb, L[j].B, [null, null, null, null], 0, D, env, BB.makeRng(1e6 + j), { side: L[j].side });
-      s += RV[r.hit] || 0;
+      s += r.outsMade ? 0 : (RV[r.hit] || 0);   // a batter thrown out past first keeps his hit (bb_field v1.6) but the fielder made the out: worth an out here
     }
     return s / L.length;
   }

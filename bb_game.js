@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_game.js · v1.1 · 2026-10-04
+   bb_game.js · v1.3 · 2026-10-05
 
    A whole game: two teams, nine innings or more, lineups that turn over,
    pitchers who tire and get replaced, managers with their own habits.
@@ -45,14 +45,17 @@
    at DH, the rest on the bench, the next man in the five-man rotation.
 
    CHANGED
+     v1.3  no pinch-hitter for the pitcher when the pen is empty (the bug audit): with every reliever used, in extra
+           innings, the pitcher who had been hit for came back to pitch - an illegal substitution, one game in 2,000
+     v1.2  the pinch-hitter's spot goes back to the pitcher when the next pitcher comes in (the bug audit): the
+           pinch-hitter had kept the spot for the rest of the game, so an NL side batted nine hitters and no pitcher
+           after its first pinch-hit, in 9% of its plate appearances; the play records the batting order
      v1.1  a steal's wild throw moves every runner up a base (the stealer from first had
            landed on a man already on third, who vanished: 16 times in 2,000 games)
      v1.0  standing rosters for a league: makeRoster, teamFromRoster
      v0.9  intentional walks (signalled, 2017-2022 rule), pickoffs, late defensive
            substitutions and NL double switches; a bench of four drawn for their
            positions; the pinch-hitter is the best bat on the bench
-     v0.8  a team can be drawn from a level of the pro pool (o.level: 1 the majors,
-           2 Triple-A ... 6 rookie ball; bb_engine v2.0)
 ============================================================================ */
 
 var BBGame = (function () {
@@ -291,7 +294,9 @@ var BBGame = (function () {
                      pitchCount: P.pitchesToday - n, load: P.load - n, seen: seenOwn + 0.25 * (seenTeam - seenOwn),
                      newPitcher: def.justChanged || null, pinchHit: bat.justPinch || null, defSubs: def.justSubs || null, ibb: pa.result === 'IBB' || null,
                      warming: def.warming ? { id: def.warming.id, name: def.warming.name } : null,
-                     warmingBat: bat.warming ? { id: bat.warming.id, name: bat.warming.name } : null };
+                     warmingBat: bat.warming ? { id: bat.warming.id, name: bat.warming.name } : null,
+                     order: bat.order.map(function (b) { return b ? b.id : null; }), batP: bat.pitcher.id,   // the batting order (null: the pitcher's spot, NL) and whose pitcher
+                     pinchPending: !!bat.pinchHitFor, defOrder: def.order.map(function (b) { return b ? b.id : null; }) };   // pinchPending: a pinch-hitter has the pitcher's spot until the next half
         def.justChanged = null; bat.justPinch = null; def.justSubs = null;
         var r = pa.result, runs = paRuns;
         if (r !== 'END') S.pa++;
@@ -364,10 +369,10 @@ var BBGame = (function () {
     var B = st.order[st.idx % 9];
     if (B === null) {                       // the pitcher's spot (NL)
       var P = st.pitcher, f = BB.fatigueOf(P), M = st.team.manager;
-      var ph = inning >= 6 && st.bench.length && (f >= M.hook - 0.15 || diff < 0);
+      var ph = inning >= 6 && st.bench.length && (f >= M.hook - 0.15 || diff < 0) && st.team.bullpen.some(function (p) { return !p.used; });   // only with a fresh arm to follow: a pitcher hit for is out of the game (until v1.3 an empty pen brought him back)
       if (ph) {   // the best bat on the bench; the backup catcher last
         var pick = st.bench.slice().sort(function (a, b) { return (b.benchPos === 'C' ? -1 : 0) - (a.benchPos === 'C' ? -1 : 0) || BB.hitterValue(b) - BB.hitterValue(a); })[0];
-        st.bench.splice(st.bench.indexOf(pick), 1); B = pick; st.order[st.idx % 9] = B; st.pinchHitFor = P; st.justPinch = { batter: B, forPitcher: P };
+        st.bench.splice(st.bench.indexOf(pick), 1); B = pick; st.order[st.idx % 9] = B; st.pinchHitFor = P; st.pinchSlot = st.idx % 9; st.justPinch = { batter: B, forPitcher: P };
       }
       else B = P.bat;
     }
@@ -383,8 +388,10 @@ var BBGame = (function () {
 
   // ------------------------------------------------------- the manager
   function startHalf(def, T, inning, lead, rng) {
-    // pitcher who was pinch-hit for is done; the pen takes over
-    if (def.pinchHitFor === def.pitcher) { bringIn(def, T, inning, lead, rng); def.pinchHitFor = null; }
+    // the pitcher who was pinch-hit for is done, and so is the man who hit for him: the spot is the pitcher's again
+    // (until v1.2 the pinch-hitter kept it for the rest of the game, batting in place of every pitcher after him,
+    // and no double switch could find the pitcher's spot), then the pen takes over
+    if (def.pinchHitFor === def.pitcher) { def.order[def.pinchSlot] = null; bringIn(def, T, inning, lead, rng); def.pinchHitFor = null; }
     // a reliever who has had his inning gives way to a fresh arm (the closer keeps his save)
     var Pn = def.pitcher;
     if (Pn.role === 'RP' && Pn.pitchesToday >= 12 && !(Pn === T.closer && inning >= 9 && lead > 0 && lead <= 3) &&
@@ -507,7 +514,7 @@ var BBGame = (function () {
     return out.join('\n');
   }
 
-  return { version: '1.0', makeTeam: makeTeam, makeRoster: makeRoster, teamFromRoster: teamFromRoster, canPlay: canPlay, simGame: simGame, line: line, playByPlay: playByPlay, newStats: newStats };
+  return { version: '1.3', makeTeam: makeTeam, makeRoster: makeRoster, teamFromRoster: teamFromRoster, canPlay: canPlay, simGame: simGame, line: line, playByPlay: playByPlay, newStats: newStats };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = BBGame;

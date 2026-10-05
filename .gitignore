@@ -2,6 +2,7 @@ Zipped/
 .DS_Store
 *.png
 .claude/
+statcast/raw/pitches
 statcast/raw/pitches/
 statcast/raw/pitches_aaa/
 tts/voices/
@@ -11,3 +12,6 @@ __pycache__/
 # the league stable is generated (tools/build_stable.sh) and large; the report beside it is kept
 stable/bb_stable.js
 stable/league_run.raw
+
+# the diagnostic suites (tools/diag/suite.sh) and the audit runs
+diag_out/
