@@ -56,8 +56,6 @@
      v0.9  intentional walks (signalled, 2017-2022 rule), pickoffs, late defensive
            substitutions and NL double switches; a bench of four drawn for their
            positions; the pinch-hitter is the best bat on the bench
-     v0.8  a team can be drawn from a level of the pro pool (o.level: 1 the majors,
-           2 Triple-A ... 6 rookie ball; bb_engine v2.0)
 ============================================================================ */
 
 var BBGame = (function () {

@@ -1,5 +1,5 @@
 /* ============================================================================
-   plays_check.js · v0.5 · 2026-10-05
+   plays_check.js · v0.6 · 2026-10-05
 
    Constructed plays through BBField.resolve, each a regression test for a
    bug the audit found (docs/briefs/2026-10-05_bug_audit.md): a fixed
@@ -10,6 +10,7 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js headless/plays_check.js
 
    CHANGED
+     v0.6  a force tried and thrown away is an error, not a fielder's choice (bb_field v1.7)
      v0.5  a batter thrown out past first keeps the hit that got him there (bb_field v1.6)
      v0.4  a force tried and missed is a fielder's choice when the batter would have been out at first (bb_field v1.5)
      v0.3  a throw that gets away moves every runner up, the men who held included (bb_field v1.4)
@@ -90,6 +91,18 @@
   bb = batted(92, 5, 42); out = resolve(bb, [null, null, null, null], 0, beatDice, -1, runner(-0.4, 26.5));
   var bq = out.runners[out.runners.length - 1];
   check('a bold batter thrown out at second on a ball down the line: a single and an out on the bases', bq.out && bq.to === 2 && out.hit === '1B' && out.outsMade === 1, where(out));
+
+  // 6. A force tried and thrown away is an error, not a fielder's choice (bb_field v1.7): the grid of case 4 again,
+  //    with dice that make the infielder's throw wild. The batter reaches on the error (or keeps a hit he had
+  //    earned); v1.5 had scored the play a fielder's choice with nobody out.
+  var tried6 = 0, wrong6 = 0, eg6 = '';
+  [70, 74, 78, 82, 86, 90].forEach(function (ev) { [-14, -10, -6, -2, 2, 6].forEach(function (la) { [-25, -15, -5, 5, 15, 25].forEach(function (sp) {
+    var o = resolve(batted(ev, la, sp), [null, R1m, null, null], 0, wildDice, -1, slowB);
+    if (!/throwing error/.test(o.desc) && !/error/.test(o.desc)) return;
+    if (!(o.runners.some(function (r) { return r.from === 1 && r.to >= 3; }))) return;   // the throw went to second: the man from first took third on it
+    tried6++; if (o.hit === 'FC' || !o.error || !conserved(o, 2)) { wrong6++; if (!eg6) eg6 = where(o); }
+  }); }); });
+  check('a slow batter and a man on first, soft grounders, the force at second thrown away: an error, never a fielder\'s choice (' + tried6 + ' such plays)', tried6 > 0 && wrong6 === 0, wrong6 ? wrong6 + ' wrong, e.g. ' + eg6 : 'all errors');
 
   print(fails ? 'FAIL: ' + fails + ' of ' + cases + ' cases' : 'PASS: ' + cases + ' cases');
 })();
