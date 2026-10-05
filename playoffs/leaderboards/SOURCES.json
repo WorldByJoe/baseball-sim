@@ -1,0 +1,202 @@
+{
+ "active_spin_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/active-spin?year=2025_spin-based&min=1&hand=&csv=true",
+  "rows": 717
+ },
+ "active_spin_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/active-spin?year=2026_spin-based&min=1&hand=&csv=true",
+  "rows": 712
+ },
+ "arm_angle_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/pitcher-arm-angles?batSide=&dateStart=2025-03-01&dateEnd=2025-11-30&gameType=R&groupBy=&min=1&minGroupPitches=1&perspective=back&pitchHand=&pitchType=&season=2025&size=small&sort=ascending&team=&csv=true",
+  "rows": 835
+ },
+ "arm_angle_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/pitcher-arm-angles?batSide=&dateStart=2026-03-01&dateEnd=2026-11-30&gameType=R&groupBy=&min=1&minGroupPitches=1&perspective=back&pitchHand=&pitchType=&season=2026&size=small&sort=ascending&team=&csv=true",
+  "rows": 834
+ },
+ "arm_strength_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/arm-strength?type=player&year=2025&minThrows=1&pos=&team=&csv=true",
+  "rows": 395
+ },
+ "arm_strength_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/arm-strength?type=player&year=2026&minThrows=1&pos=&team=&csv=true",
+  "rows": 388
+ },
+ "bat_tracking_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/bat-tracking?attackZone=&batSide=&contactType=&count=&dateStart=&dateEnd=&gameType=Regular&isHardHit=&minSwings=1&minGroupSwings=1&pitchHand=&pitchType=&seasonStart=2025&seasonEnd=2025&team=&type=batter&csv=true",
+  "rows": 671
+ },
+ "bat_tracking_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/bat-tracking?attackZone=&batSide=&contactType=&count=&dateStart=&dateEnd=&gameType=Regular&isHardHit=&minSwings=1&minGroupSwings=1&pitchHand=&pitchType=&seasonStart=2026&seasonEnd=2026&team=&type=batter&csv=true",
+  "rows": 660
+ },
+ "catcher_framing_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/catcher-framing?type=catcher&seasonStart=2025&seasonEnd=2025&team=&min=0&sortColumn=rv_tot&sortDirection=desc&csv=true",
+  "rows": 57
+ },
+ "catcher_framing_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/catcher-framing?type=catcher&seasonStart=2026&seasonEnd=2026&team=&min=0&sortColumn=rv_tot&sortDirection=desc&csv=true",
+  "rows": 56
+ },
+ "fielding_run_value_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2025&seasonEnd=2025&type=fielder&position=&minInnings=0&minResults=1&csv=true",
+  "rows": 661
+ },
+ "fielding_run_value_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2026&seasonEnd=2026&type=fielder&position=&minInnings=0&minResults=1&csv=true",
+  "rows": 651
+ },
+ "fielding_run_value_pos2_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2025&seasonEnd=2025&type=fielder&position=2&minInnings=0&minResults=1&csv=true",
+  "rows": 111
+ },
+ "fielding_run_value_pos2_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2026&seasonEnd=2026&type=fielder&position=2&minInnings=0&minResults=1&csv=true",
+  "rows": 111
+ },
+ "fielding_run_value_pos3_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2025&seasonEnd=2025&type=fielder&position=3&minInnings=0&minResults=1&csv=true",
+  "rows": 175
+ },
+ "fielding_run_value_pos3_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2026&seasonEnd=2026&type=fielder&position=3&minInnings=0&minResults=1&csv=true",
+  "rows": 166
+ },
+ "fielding_run_value_pos4_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2025&seasonEnd=2025&type=fielder&position=4&minInnings=0&minResults=1&csv=true",
+  "rows": 174
+ },
+ "fielding_run_value_pos4_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2026&seasonEnd=2026&type=fielder&position=4&minInnings=0&minResults=1&csv=true",
+  "rows": 165
+ },
+ "fielding_run_value_pos5_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2025&seasonEnd=2025&type=fielder&position=5&minInnings=0&minResults=1&csv=true",
+  "rows": 168
+ },
+ "fielding_run_value_pos5_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2026&seasonEnd=2026&type=fielder&position=5&minInnings=0&minResults=1&csv=true",
+  "rows": 164
+ },
+ "fielding_run_value_pos6_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2025&seasonEnd=2025&type=fielder&position=6&minInnings=0&minResults=1&csv=true",
+  "rows": 124
+ },
+ "fielding_run_value_pos6_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2026&seasonEnd=2026&type=fielder&position=6&minInnings=0&minResults=1&csv=true",
+  "rows": 130
+ },
+ "fielding_run_value_pos7_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2025&seasonEnd=2025&type=fielder&position=7&minInnings=0&minResults=1&csv=true",
+  "rows": 217
+ },
+ "fielding_run_value_pos7_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2026&seasonEnd=2026&type=fielder&position=7&minInnings=0&minResults=1&csv=true",
+  "rows": 257
+ },
+ "fielding_run_value_pos8_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2025&seasonEnd=2025&type=fielder&position=8&minInnings=0&minResults=1&csv=true",
+  "rows": 174
+ },
+ "fielding_run_value_pos8_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2026&seasonEnd=2026&type=fielder&position=8&minInnings=0&minResults=1&csv=true",
+  "rows": 167
+ },
+ "fielding_run_value_pos9_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2025&seasonEnd=2025&type=fielder&position=9&minInnings=0&minResults=1&csv=true",
+  "rows": 223
+ },
+ "fielding_run_value_pos9_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart=2026&seasonEnd=2026&type=fielder&position=9&minInnings=0&minResults=1&csv=true",
+  "rows": 215
+ },
+ "oaa_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/outs_above_average?type=Fielder&startYear=2025&endYear=2025&split=no&team=&range=year&min=0&pos=&roles=&viz=hide&csv=true",
+  "rows": 568
+ },
+ "oaa_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/outs_above_average?type=Fielder&startYear=2026&endYear=2026&split=no&team=&range=year&min=0&pos=&roles=&viz=hide&csv=true",
+  "rows": 563
+ },
+ "oaa_pos3_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/outs_above_average?type=Fielder&startYear=2025&endYear=2025&split=no&team=&range=year&min=0&pos=3&roles=&viz=hide&csv=true",
+  "rows": 159
+ },
+ "oaa_pos3_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/outs_above_average?type=Fielder&startYear=2026&endYear=2026&split=no&team=&range=year&min=0&pos=3&roles=&viz=hide&csv=true",
+  "rows": 156
+ },
+ "oaa_pos4_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/outs_above_average?type=Fielder&startYear=2025&endYear=2025&split=no&team=&range=year&min=0&pos=4&roles=&viz=hide&csv=true",
+  "rows": 175
+ },
+ "oaa_pos4_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/outs_above_average?type=Fielder&startYear=2026&endYear=2026&split=no&team=&range=year&min=0&pos=4&roles=&viz=hide&csv=true",
+  "rows": 165
+ },
+ "oaa_pos5_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/outs_above_average?type=Fielder&startYear=2025&endYear=2025&split=no&team=&range=year&min=0&pos=5&roles=&viz=hide&csv=true",
+  "rows": 168
+ },
+ "oaa_pos5_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/outs_above_average?type=Fielder&startYear=2026&endYear=2026&split=no&team=&range=year&min=0&pos=5&roles=&viz=hide&csv=true",
+  "rows": 164
+ },
+ "oaa_pos6_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/outs_above_average?type=Fielder&startYear=2025&endYear=2025&split=no&team=&range=year&min=0&pos=6&roles=&viz=hide&csv=true",
+  "rows": 123
+ },
+ "oaa_pos6_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/outs_above_average?type=Fielder&startYear=2026&endYear=2026&split=no&team=&range=year&min=0&pos=6&roles=&viz=hide&csv=true",
+  "rows": 131
+ },
+ "oaa_pos7_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/outs_above_average?type=Fielder&startYear=2025&endYear=2025&split=no&team=&range=year&min=0&pos=7&roles=&viz=hide&csv=true",
+  "rows": 215
+ },
+ "oaa_pos7_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/outs_above_average?type=Fielder&startYear=2026&endYear=2026&split=no&team=&range=year&min=0&pos=7&roles=&viz=hide&csv=true",
+  "rows": 252
+ },
+ "oaa_pos8_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/outs_above_average?type=Fielder&startYear=2025&endYear=2025&split=no&team=&range=year&min=0&pos=8&roles=&viz=hide&csv=true",
+  "rows": 174
+ },
+ "oaa_pos8_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/outs_above_average?type=Fielder&startYear=2026&endYear=2026&split=no&team=&range=year&min=0&pos=8&roles=&viz=hide&csv=true",
+  "rows": 163
+ },
+ "oaa_pos9_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/outs_above_average?type=Fielder&startYear=2025&endYear=2025&split=no&team=&range=year&min=0&pos=9&roles=&viz=hide&csv=true",
+  "rows": 217
+ },
+ "oaa_pos9_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/outs_above_average?type=Fielder&startYear=2026&endYear=2026&split=no&team=&range=year&min=0&pos=9&roles=&viz=hide&csv=true",
+  "rows": 207
+ },
+ "pop_time_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/poptime?year=2025&team=&min2b=1&min3b=0&csv=true",
+  "rows": 99
+ },
+ "pop_time_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/poptime?year=2026&team=&min2b=1&min3b=0&csv=true",
+  "rows": 106
+ },
+ "sprint_speed_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/sprint_speed?year=2025&position=&team=&min=0&csv=true",
+  "rows": 617
+ },
+ "sprint_speed_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/sprint_speed?year=2026&position=&team=&min=0&csv=true",
+  "rows": 612
+ },
+ "swing_path_2025": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/bat-tracking/swing-path-attack-angle?dateStart=&dateEnd=&gameType=Regular&minSwings=1&minGroupSwings=1&seasonStart=2025&seasonEnd=2025&type=batter&csv=true",
+  "rows": 671
+ },
+ "swing_path_2026": {
+  "url": "https://baseballsavant.mlb.com/leaderboard/bat-tracking/swing-path-attack-angle?dateStart=&dateEnd=&gameType=Regular&minSwings=1&minGroupSwings=1&seasonStart=2026&seasonEnd=2026&type=batter&csv=true",
+  "rows": 660
+ }
+}

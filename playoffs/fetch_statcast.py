@@ -53,8 +53,8 @@ LB = {
     'fielding_run_value': ('https://baseballsavant.mlb.com/leaderboard/fielding-run-value?gameType=Regular&seasonStart={y}&seasonEnd={y}&type=fielder&position=&minInnings=0&minResults=1&csv=true', 'total_runs'),
     'pop_time': ('https://baseballsavant.mlb.com/leaderboard/poptime?year={y}&team=&min2b=1&min3b=0&csv=true', 'pop_2b_sba'),
     'catcher_framing': ('https://baseballsavant.mlb.com/leaderboard/catcher-framing?type=catcher&seasonStart={y}&seasonEnd={y}&team=&min=0&sortColumn=rv_tot&sortDirection=desc&csv=true', 'rv_tot'),
-    'bat_tracking': ('https://baseballsavant.mlb.com/leaderboard/bat-tracking?attackZone=&batSide=&contactType=&count=&dateStart={y}-03-01&dateEnd={y}-11-30&gameType=Regular&isHardHit=&minSwings=1&minGroupSwings=1&pitchHand=&pitchType=&seasonStart=&seasonEnd=&team=&type=batter&csv=true', 'avg_bat_speed'),
-    'swing_path': ('https://baseballsavant.mlb.com/leaderboard/bat-tracking/swing-path-attack-angle?dateStart={y}-03-01&dateEnd={y}-11-30&gameType=Regular&minSwings=1&minGroupSwings=1&seasonStart=&seasonEnd=&type=batter&csv=true', 'swing_tilt'),
+    'bat_tracking': ('https://baseballsavant.mlb.com/leaderboard/bat-tracking?attackZone=&batSide=&contactType=&count=&dateStart=&dateEnd=&gameType=Regular&isHardHit=&minSwings=1&minGroupSwings=1&pitchHand=&pitchType=&seasonStart={y}&seasonEnd={y}&team=&type=batter&csv=true', 'avg_bat_speed'),
+    'swing_path': ('https://baseballsavant.mlb.com/leaderboard/bat-tracking/swing-path-attack-angle?dateStart=&dateEnd=&gameType=Regular&minSwings=1&minGroupSwings=1&seasonStart={y}&seasonEnd={y}&type=batter&csv=true', 'swing_tilt'),
     'arm_angle': ('https://baseballsavant.mlb.com/leaderboard/pitcher-arm-angles?batSide=&dateStart={y}-03-01&dateEnd={y}-11-30&gameType=R&groupBy=&min=1&minGroupPitches=1&perspective=back&pitchHand=&pitchType=&season={y}&size=small&sort=ascending&team=&csv=true', 'ball_angle'),
     'active_spin': ('https://baseballsavant.mlb.com/leaderboard/active-spin?year={y}_spin-based&min=1&hand=&csv=true', 'active_spin_fourseam'),
 }
@@ -66,14 +66,16 @@ for _pos in range(2, 10):
 
 
 def leaderboards():
+    """the season form of the bat-tracking URLs (seasonStart/seasonEnd) is used: the date-range form returned a
+    header and no rows for 2025 (2026-10-04)"""
     os.makedirs(os.path.join(HERE, 'leaderboards'), exist_ok=True)
     src = {}
     for name, (url, key) in sorted(LB.items()):
         for y in (2025, 2026):
             u = url.format(y=y)
             data = fetch(u, 'leaderboards/%s_%d.csv' % (name, y), check=csv_check(key))
-            if data is None:
-                src['%s_%d' % (name, y)] = {'url': u, 'rows': None, 'error': 'failed'}
+            if data is None or not data.strip().count(b'\n'):
+                src['%s_%d' % (name, y)] = {'url': u, 'rows': 0 if data is not None else None, 'error': 'failed' if data is None else 'header only'}
                 continue
             text = data.decode('utf-8-sig', 'replace').replace('\r\n', '\n')
             fn = os.path.join(HERE, 'leaderboards', '%s_%d.csv' % (name, y))

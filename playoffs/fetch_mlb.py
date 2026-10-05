@@ -123,10 +123,10 @@ def venues(games, teams):
             continue
         v = d['venues'][0]
         loc, fi = v.get('location', {}), v.get('fieldInfo', {})
-        if not fi and not loc.get('elevation'):
+        co = loc.get('defaultCoordinates', {})
+        if (not fi and not loc.get('elevation')) or co.get('latitude') is None:
             continue          # placeholder venues (TBD, "AL Stadium") for games not yet set
         fence = [fi.get(k) for k in ('leftLine', 'leftCenter', 'center', 'rightCenter', 'rightLine')]
-        co = loc.get('defaultCoordinates', {})
         out[vid] = {'id': vid, 'name': v['name'], 'city': loc.get('city'), 'state': loc.get('stateAbbrev'),
                     'lat': co.get('latitude'), 'lon': co.get('longitude'), 'elevFt': loc.get('elevation'),
                     'azimuthDeg': loc.get('azimuthAngle'), 'roof': fi.get('roofType'), 'turf': fi.get('turfType'),
