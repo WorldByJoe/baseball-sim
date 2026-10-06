@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v3.3 · 2026-10-06
+   bb_engine.js · v3.4 · 2026-10-06
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -66,6 +66,8 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v3.4  a pitcher's own DECEPTION scales the batter's read of his pitches (P.deception, carried on the pitch; unset it is 1
+           and the engine is unchanged); typicalPitch exported. Both for the playoff review (review/fit_pitchers.js)
      v3.3  the batted ball carries its spin to the ground (landW, for bb_field's bounce); a fielder's first step fitted to both
            windows of Statcast's outfield jump (react 0.20 s for position players, was 0.47; the catcher's and pitcher's kept)
      v3.2  THE RELEASE BEHIND HIS SHOULDER (PL): a batter reads a pitch worse, swings slower and meets it higher the
@@ -79,11 +81,6 @@
      v3.0  THE BAT IS FASTEST WHERE THE SWING IS BUILT TO GO (BAT_LOC): bat speed rises low over the plate
            and falls as a pitch pulls the swing up, away or in, measured from the league's swings about
            each hitter's mean (reaching contact had kept the model's full bat speed); SWING_NORM 0.961
-     v2.9  THE BARREL'S HEIGHT FOLLOWS THE PITCH LESS THAN FULLY: the up-down aim is pulled toward
-           the middle of his zone (VERT_MISS), as the league's launch angles climb with pitch
-           height; timing scatter grows with the time he is judging (flight time, a Weber
-           fraction), not with pitch speed, refitted to the league's contact depth by pitch kind;
-           a recognised breaking ball keeps half the misread it did (RESID_S); aim under the ball -0.15 in
 ============================================================================ */
 
 var BB = (function () {
@@ -1215,7 +1212,7 @@ var BB = (function () {
     var w0 = spinVector(d, rpmA, tiltA, effA, P.armSide);
     var fl = flyPitch(relA, v0, w0, env, false, seamA, P.armSide);
     return { type: pt.type, rel: relA, v0: v0, w0: w0, seam: seamA, armSide: P.armSide, mph: vA / MPH, rpm: rpmA, tilt: tiltA, eff: effA,
-             fatigue: f, cmdIn: cmdIn, plate: { x: fl.x, z: fl.z, t: fl.t, v: fl.v, w: fl.w } };
+             fatigue: f, cmdIn: cmdIn, deception: P.deception, plate: { x: fl.x, z: fl.z, t: fl.t, v: fl.v, w: fl.w } };
   }
 
   // ---------------------------------------------------------------- READ
@@ -1342,7 +1339,7 @@ var BB = (function () {
     return Math.atan2((pitch.rel[0] - sbR * PL.eye[0]) * sbR, pitch.rel[1] - PL.eye[1]) / DEG;
   }
   function readFactors(B, pitch, gh, ref, seen, same, rng, sameKind) {
-    var T = pitch.plate.t, psi = releaseAngle(B, pitch), tp = 0.26 / Math.max(0.12, T - 0.15) * (1 + PL.read * ramp(psi));
+    var T = pitch.plate.t, psi = releaseAngle(B, pitch), tp = 0.26 / Math.max(0.12, T - 0.15) * (1 + PL.read * ramp(psi)) * (pitch.deception || 1);   // deception: a pitcher's own (the playoff review fits it; 1 when unset)
     var tc = Math.max(0, T - COMMIT_S) / T, ts = Math.max(0, T - STEER_S) / T;
     var dx = gh.x - pitch.plate.x, dz = gh.z - pitch.plate.z, gap = Math.sqrt(dx * dx + dz * dz);
     var sep = gap * tc * tc * (PITCH_TYPES[pitch.type].kind === 'FB' ? 1 : TUNNEL_SEP);
@@ -1744,7 +1741,7 @@ var BB = (function () {
   }
 
   return {
-    version: '3.3',
+    version: '3.4',
     SWING: { R: SWING_R, tiltPerH: TILT_PER_H },
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
@@ -1756,7 +1753,7 @@ var BB = (function () {
     flyPitch: flyPitch, flyBatted: flyBatted, spinVector: spinVector, dirOf: dirOf, aim: aim, SWING_THR: SWING_THR, ZONE_HALF: ZONE_HALF, PLAN_LOC: PLAN_LOC,
     fatigueOf: fatigueOf, releasePoint: releasePoint, releaseAngle: releaseAngle, PL: PL, batterSide: batterSide, inZone: inZone,
     planPitch: planPitch, expectPitch: expectPitch, throwPitch: throwPitch, ghostPitch: ghostPitch,
-    readFactors: readFactors, decide: decide, callPitch: callPitch, swing: swing, collide: collide,
+    readFactors: readFactors, typicalPitch: typicalPitch, decide: decide, callPitch: callPitch, swing: swing, collide: collide,
     battedBall: battedBall, simPA: simPA
   };
 })();

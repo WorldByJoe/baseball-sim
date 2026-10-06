@@ -19,6 +19,8 @@
    engine's types were fitted to Savant's IVB and HB). Command is his measured
    scatter per type over the type's own multiplier, usage-weighted. Usage is
    his overall mix; the league's count and side multipliers do the rest.
+   When review/pitchers_fit.json exists, his two fitted hidden traits are
+   applied: deception, and the scale on his command (review/fit_pitchers.js).
 
    CHANGED
      v0.1  first build (the Yankees-Rays review, 2026-10-06)
@@ -108,14 +110,18 @@ var REVIEW = (function () {
     var use26 = S.use && (S.use['2026'] || S.use['2025']);
     if (use26 && use26.pitchesPerApp) P.stamina = role === 'SP' ? Math.max(75, use26.pitchesPerApp.mean) : Math.max(15, 1.2 * use26.pitchesPerApp.mean);
     P.role = role;
+    var pf = PFIT && PFIT.pitchers[rec.id];   // the fitted hidden traits, when review/fit_pitchers.js has run
+    if (pf) { P.deception = pf.deception; P.cmd = [P.cmd[0] * pf.cmdScale, P.cmd[1] * pf.cmdScale]; P.command = Math.sqrt((P.cmd[0] * P.cmd[0] + P.cmd[1] * P.cmd[1]) / 2); }
     return P;
   }
+  var PFIT = null;
 
   function load() {
     var recs = JSON.parse(read('playoffs/players_measured.json')); recs = recs.players || recs;
     var fits = JSON.parse(read('review/hitters_fit.json')), byId = {};
     recs.forEach(function (r) { byId[r.id] = r; });
-    return { recs: byId, fits: fits };
+    try { PFIT = JSON.parse(read('review/pitchers_fit.json')); } catch (e) { PFIT = null; }
+    return { recs: byId, fits: fits, pfit: PFIT };
   }
   return { hitter: hitter, pitcher: pitcher, move: move, load: load };
 })();
