@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.8 · 2026-10-05
+   bb_field.js · v1.9 · 2026-10-05
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -33,6 +33,8 @@
    cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.9  a runner on base starting from a standstill runs the league's measured curve (Statcast's running splits:
+           his speed rises as 1 - exp(-t / 0.78 s)): 90 ft in 4.11 s where he ran the batter's 4.40 s from the box
      v1.8  the infield stands where the league's did in 2025 (Savant's fielder positioning): by the batter's side,
            the first baseman holding a runner, double-play depth, the infield in with a man on third as the manager's
            call, and the 2023 rule (two infielders each side of second, all on the dirt);
@@ -46,8 +48,6 @@
            had been scored a plain out and the single lost - 0.2-0.3% of balls in play, three times the league's
      v1.5  a force play tried and missed is the batter's hit only when he would have beaten a throw to first (the
            scorer's rule 9.05; the bug audit): the batter had been credited a single whenever the lead runner was safe
-     v1.4  a throw that gets away moves every runner up a base, the men who held included (the bug audit): a holder
-           stayed while the runner behind him took the base he was on, and the holder vanished (headless/plays_check.js)
 ============================================================================ */
 
 var BBField = (function () {
@@ -215,6 +215,22 @@ var BBField = (function () {
   // than a man walking off on a steal: V_CONTACT, fitted to the league's double
   // plays per game (the forced runner's race to second).
   var V_CONTACT = 1.5;   // m/s
+  // RUNNING FROM REST (v1.9). A runner on base who starts from a standstill - tagging up, held at the bag till a fly
+  // drops, frozen at his lead till a grounder is through - runs the league's measured curve: his speed rises toward
+  // his sprint speed as 1 - exp(-t / TAU_RUN), TAU_RUN 0.78 s, fitted to Statcast's running splits (549 hitters,
+  // 2025, every 5 ft from 5 to 90: rmse .054 s, where a constant acceleration fits at .082). The average runner (27.0
+  // ft/s) covers 90 ft in 4.11 s from a standstill. Until v1.9 he ran the batter's run from the box (4.5 m/s^2 with
+  // 0.15 s to get going, fitted to Statcast's 4.4 s home to first, the swing's finish included): 4.40 s. The batter
+  // keeps that run (he finishes his swing first: Statcast's home to first runs .44 s longer than his running split
+  // to 90 ft), and a man moving off his lead keeps ACC_R (the curve from 1.5 m/s is worth 4.35 m/s^2 over 90 ft).
+  var TAU_RUN = 0.78;   // s
+  function restTime(pl, d) {   // s to cover d m from a standstill, on the curve
+    var v = pl.speed * FT; d = Math.max(0, d);
+    if (!d) return 0;
+    var t = d / v + TAU_RUN;   // the asymptote; Newton from there
+    for (var i = 0; i < 8; i++) { var e = Math.exp(-t / TAU_RUN); t -= (v * (t - TAU_RUN * (1 - e)) - d) / Math.max(v * (1 - e), 0.5); if (t < 1e-3) t = 1e-3; }
+    return t;
+  }
   function stealTime(pl, d, v0) {
     var v = pl.speed * FT; v0 = v0 === undefined ? V_SECONDARY : v0;
     var dAcc = (v * v - v0 * v0) / (2 * ACC_R);
@@ -451,7 +467,7 @@ var BBField = (function () {
       var tagging = [], aheadTag = 5;
       function settleC(to) { return settleTime(F, at, to, dist(F.at, at), best.c.m); }
       R.slice(0, -1).forEach(function (r) {
-        var to = r.base + 1, tRun = tc + runTime(r.pl, BASE, true);
+        var to = r.base + 1, tRun = tc + 0.05 + restTime(r.pl, BASE);   // leaves the bag as the ball is caught, from a standstill (v1.9)
         var tBall = Math.max(tc + settleC(to) + F.pl.transfer + throwArrival(F, at, to), rcvArrival(to, F.pos)) + TAG;
         var goes = to < aheadTag && tRun + SAFETY + r.pl.runAggr < tBall;
         if (goes) tagging.push({ r: r, to: to, tRun: tRun, tBall: tBall });
@@ -515,7 +531,7 @@ var BBField = (function () {
       if (r.going) r.start = 0.05;                                       // already running with the pitch
       else if (twoOut || (!flyBall && isForced)) { r.start = 0.05; r.onContact = true; }   // goes on contact
       else if (!flyBall) {                                                // unforced on a grounder: read the ball
-        var to = r.base + 1, tRun = 0.05 + runTime(r.pl, BASE - LEAD, false);
+        var to = r.base + 1, tRun = 0.1 + restTime(r.pl, BASE - LEAD);
         var tBall = ballTo(to, ic.t, ic.at).t + TAG;
         r.start = tRun + SAFETY + r.pl.runAggr < tBall ? 0.05 : null;
       } else if (best.c.p < 0.3) r.start = 0.05;                          // a fly nobody will reach: goes on contact
@@ -530,7 +546,8 @@ var BBField = (function () {
     function arrive(r, to) {
       var d = (to - r.base) * BASE - leadOf(r);
       if (r.base > 0 && r.start !== null && r.start < 0.5 && !r.midway && r.onContact) return r.start + stealTime(r.pl, d, V_CONTACT);
-      return r.start + runTime(r.pl, d, (r.start >= 0.5 && !r.midway) || r.base === 0);
+      if (r.base > 0) return r.start + (r.start >= 0.5 && !r.midway ? 0.15 : 0.05) + restTime(r.pl, d);   // from a standstill (v1.9)
+      return r.start + runTime(r.pl, d, true);   // the batter, out of the box
     }
     // how far each goes: lead runner first, nobody passes the man ahead - and a man who has crossed the plate is
     // nobody's ceiling (until v1.2 he was: the runner behind him was held to third, so no single, double or triple
@@ -663,7 +680,7 @@ var BBField = (function () {
     return best.c.p > 0 && rng.u() < best.c.p ? best : null;
   }
 
-  return { version: '1.8', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
+  return { version: '1.9', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };
