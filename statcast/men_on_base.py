@@ -1,5 +1,5 @@
 """
-men_on_base.py · v0.1 · 2026-10-05
+men_on_base.py · v0.2 · 2026-10-05
 
 Play with men on base in the league, from pitch-level Statcast (the men-on-base brief,
 docs/briefs/2026-10-05_men_on_base.md), measured the way headless/mob_check.js measures the model:
@@ -27,12 +27,16 @@ docs/briefs/2026-10-05_men_on_base.md), measured the way headless/mob_check.js m
      by distance (hit_distance_sc), launch angle, fielder, outs, the runner's sprint speed and the
      fielder's arm (statcast/raw/2025/arm_strength.csv).
 
+  E. Throwing errors on ground balls an infielder fielded (the play description's 'throwing error'), by the
+     batter's sprint speed, the fielder, the exit speed, and whether men were on: how the hurry shows.
+
 Writes statcast/men_on_base_2025.json and statcast/men_on_base_2025.js (`var MOB = ...`) for
 headless/mob_check.js. Needs pandas and numpy.
 
   python3 statcast/men_on_base.py 2025-05-05:2025-09-21
 
 CHANGED
+  v0.2  E: throwing errors on infield ground balls
   v0.1  first build
 """
 import json, os, sys, glob, datetime
@@ -234,11 +238,26 @@ def part_d(P, SP):
     return out
 
 
+def part_e(P, SP):
+    g = P[(P.bb_type == 'ground_ball') & P.hit_location.isin([1, 3, 4, 5, 6]) & P.events.isin(HITS | BIP_OUTS)].copy()
+    g['te'] = g.des.fillna('').str.contains('throwing error').astype(float)
+    g['bs'] = g.batter.map(lambda x: SP.get(int(x)))
+    q = np.nanpercentile(list(SP.values()), [33.3, 66.7])
+    g['batter speed'] = pd.cut(g.bs, [0, q[0], q[1], 40], labels=['slow', 'mid', 'fast'])
+    g['fielder'] = g.hit_location.map({1: 'P', 3: '1B', 4: '2B', 5: '3B', 6: 'SS'})
+    g['ev'] = pd.cut(g.launch_speed, [0, 80, 90, 100, 200], labels=['<80', '80-90', '90-100', '100+'])
+    g['men'] = np.where(g.on_1b.notna() | g.on_2b.notna() | g.on_3b.notna(), 'on', 'empty')
+    out = {'all': {'all': [float(g.te.mean()), int(len(g))]}}
+    for by in ('batter speed', 'fielder', 'ev', 'men'):
+        out[by] = {str(k): [float(h.te.mean()), int(len(h))] for k, h in g.groupby(by, observed=True)}
+    return out
+
+
 def main(spec):
     P = load(spec)
     rng = np.random.default_rng(5)
     SP = speeds()
-    J = {'spec': spec, 'games': int(P.game_pk.nunique()), 'A': part_a(P, rng), 'B': part_b(P), 'C': part_c(P, SP), 'D': part_d(P, SP)}
+    J = {'spec': spec, 'games': int(P.game_pk.nunique()), 'A': part_a(P, rng), 'B': part_b(P), 'C': part_c(P, SP), 'D': part_d(P, SP), 'E': part_e(P, SP)}
     with open(os.path.join(HERE, 'men_on_base_2025.json'), 'w') as f:
         json.dump(J, f, indent=1)
     with open(os.path.join(HERE, 'men_on_base_2025.js'), 'w') as f:
@@ -247,7 +266,7 @@ def main(spec):
 
 
 def report(J):
-    print('men_on_base v0.1 · %d games (%s)' % (J['games'], J['spec']))
+    print('men_on_base v0.2 · %d games (%s)' % (J['games'], J['spec']))
     print('\nA. HITTING BY BASE STATE: level (empty / on1 / RISP), then the gain over the bases empty: raw, batter+pitcher fixed, and with the contact\'s xBA too [90%]')
     for k, v in J['A'].items():
         if 'BABIP' in k:
@@ -278,6 +297,9 @@ def report(J):
         for by, t in tabs.items():
             for k, x in t.items():
                 print('  %-12s %-24s %-9s n %4d  ' % (grp, by, k, x['n']) + '  '.join('%s %.3f' % (o, x.get(o, 0)) for o in ('scored', 'held', 'out')))
+    print('\nE. THROWING ERRORS per ground ball an infielder fielded')
+    for by, t in J['E'].items():
+        print('  %-14s ' % by + '   '.join('%s %.4f (%d)' % (k, v[0], v[1]) for k, v in t.items()))
 
 
 if __name__ == '__main__':

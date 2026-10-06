@@ -1,5 +1,5 @@
 /* ============================================================================
-   mob_check.js · v0.1 · 2026-10-05
+   mob_check.js · v0.2 · 2026-10-05
 
    Play with men on base in the model, measured the way statcast/men_on_base.py
    measures the league's (loaded first as MOB, statcast/men_on_base_2025.js), on
@@ -17,11 +17,14 @@
         the runner's and the batter's speed (the league's tertile cuts);
      D. the tag-up: a man on third (and a man on second with third open) on a ball
         caught with fewer than two out - scored, held, out - by the fielder, outs,
-        the catch's distance from the plate, the runner's speed and the arm.
+        the catch's distance from the plate, the runner's speed and the arm;
+     E. throwing errors on ground balls an infielder fielded, by the batter's
+        speed, the fielder, the exit speed and whether men were on.
 
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js bb_game.js statcast/men_on_base_2025.js headless/mob_check.js -- [games] [seed] [csv]
 
    CHANGED
+     v0.2  E: throwing errors on infield ground balls
      v0.1  first build (the men-on-base brief, docs/briefs/2026-10-05_men_on_base.md)
 ============================================================================ */
 (function (A) {
@@ -29,7 +32,7 @@
   var SECT = [-90, -30, -15, 0, 15, 30, 90], SECT_N = ['<-30', '-30..-15', '-15..0', '0..15', '15..30', '>30'];
   var CLS_B = ['empty', 'hold 2 out', 'hold+DP', 'DP', 'R3 <2 out', 'R2', 'other'];
   var SPD = L ? L.C['speed tertiles (ft/s)'] : [26.6, 27.8];
-  var HA = {}, HB = { field: {}, pull: {} }, HC = {}, HD = {};
+  var HA = {}, HB = { field: {}, pull: {} }, HC = {}, HD = {}, HE = {};
   function inc(o, k, f) { var c = o[k] = o[k] || { n: 0 }; c.n++; Object.keys(f).forEach(function (q) { c[q] = (c[q] || 0) + f[q]; }); }
   function sect(a) { for (var i = 0; i < SECT_N.length; i++) if (a < SECT[i + 1]) return SECT_N[i]; return SECT_N[SECT_N.length - 1]; }
   function posClass(b, o) {
@@ -77,6 +80,12 @@
         inc(HC, 'runner speed|' + tert(b[1].speed), f); inc(HC, 'batter speed|' + tert(p.batter.speed), f);
         if (!b[2] && !b[3]) inc(HC, 'R1 only|all', f);
       }
+      // E. throwing errors on infield ground balls
+      if (gb && fd && /^(P|1B|2B|3B|SS)$/.test(fd.who)) {
+        var te = (r.events || []).some(function (e) { return e.kind === 'throw' && e.wild; }) ? 1 : 0, evE = p.pa.bb.ev, fe = { te: te };
+        inc(HE, 'all|all', fe); inc(HE, 'batter speed|' + tert(p.batter.speed), fe); inc(HE, 'fielder|' + fd.who, fe);
+        inc(HE, 'ev|' + (evE < 80 ? '<80' : evE < 90 ? '80-90' : evE < 100 ? '90-100' : '100+'), fe); inc(HE, 'men|' + (b[1] || b[2] || b[3] ? 'on' : 'empty'), fe);
+      }
       // D. the tag-up
       var caught = (r.events || []).some(function (e) { return e.kind === 'catch'; });
       if (caught && outs < 2 && (b[3] || b[2])) {
@@ -96,7 +105,7 @@
   function f3(v) { return (v === undefined || v === null || isNaN(v)) ? '  -  ' : v.toFixed(3); }
   function pad(s, w) { s = String(s); while (s.length < w) s = ' ' + s; return s; }
   function rpad(s, w) { s = String(s); while (s.length < w) s = s + ' '; return s; }
-  print('mob_check v0.1 · ' + N + ' games · seed ' + SEED + (L ? '   (league: ' + L.games + ' games of 2025, statcast/men_on_base.py)' : ''));
+  print('mob_check v0.2 · ' + N + ' games · seed ' + SEED + (L ? '   (league: ' + L.games + ' games of 2025, statcast/men_on_base.py)' : ''));
   print('');
   print('A. HITTING BY BASE STATE (model | league raw level): empty / on1 / RISP');
   [['BABIP', ' all', 'BABIP'], ['BABIP on the ground', ' gb', 'BABIP on the ground'], ['BABIP in the air', ' air', 'BABIP in the air']].forEach(function (q) {
@@ -133,5 +142,13 @@
   Object.keys(HD).sort().forEach(function (k) {
     var m = HD[k], parts = k.split('|'), l = L && L.D[parts[0]] && L.D[parts[0]][parts[1]] ? L.D[parts[0]][parts[1]][parts[2]] : null;
     print('  ' + rpad(parts[0], 12) + rpad(parts[1], 18) + rpad(parts[2], 9) + ' n ' + pad(m.n, 5) + '  ' + ['scored', 'held', 'out'].map(function (o) { return o + ' ' + f3((m[o] || 0) / m.n) + '|' + (l ? f3(l[o]) : '  -  '); }).join('  ') + (l ? '   (league n ' + l.n + ')' : ''));
+  });
+  print('');
+  print('E. THROWING ERRORS per ground ball an infielder fielded (model | league)');
+  ['all', 'batter speed', 'fielder', 'ev', 'men'].forEach(function (by) {
+    print('  ' + rpad(by, 13) + Object.keys(HE).filter(function (k) { return k.split('|')[0] === by; }).sort().map(function (k) {
+      var x = HE[k], key = k.split('|')[1], l = L && L.E && L.E[by] ? L.E[by][key] : null;
+      return key + ' ' + (x.te / x.n).toFixed(4) + '|' + (l ? l[0].toFixed(4) : '  -   ') + ' (' + x.n + ')';
+    }).join('   '));
   });
 })(typeof arguments !== 'undefined' ? arguments : []);
