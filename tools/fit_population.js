@@ -1,5 +1,5 @@
 /* ============================================================================
-   fit_population.js · v0.6 · 2026-10-04
+   fit_population.js · v0.7 · 2026-10-05
 
    Fits the hitters' POPULATION in bb_engine.js's TRAITS so that the ones the
    farm picks (makeBatter: the best of FARM_N candidates by the scouts'
@@ -43,17 +43,17 @@
    to the picks'.
 
    CHANGED
+     v0.7  the picked fielders' first step 0.20 s (bb_engine v3.2: both windows of Statcast's jump; was 0.45)
      v0.6  timing and aim-under targets for engine v2.9 (timing scatter by flight time, VERT_MISS)
      v0.5  athleticism's loadings (engine v2.6)
      v0.4  pullBias's target 1 deg (engine v2.3: the bat's path square to centre, the face pulls)
      v0.3  skill targets for engine v2.2 (the swing's reach and read)
-     v0.2  picks across positions; the fielding traits (bb_engine v2.1)
 ============================================================================ */
 (function (A) {
   var ROUNDS = +A[0] || 8, NPICK = +A[1] || 6000, SEED = +A[2] || 5, T = BB.TRAITS;
   var POS9 = ['C', '1B', '2B', 'SS', '3B', 'LF', 'CF', 'RF', 'DH'];
   // the fielding traits' calibrated means (net of position) and the league's sprint speed among hitters (2025)
-  var FSK = { react: 0.45, route: 0.90, glove: 0.982, armMph: 85, armAcc: 0.6, transfer: 0.68 }, SPEED = [27.34, 1.35];
+  var FSK = { react: 0.20, route: 0.90, glove: 0.982, armMph: 85, armAcc: 0.6, transfer: 0.68 }, SPEED = [27.34, 1.35];   // react 0.20 since bb_engine v3.2 (both windows of the jump; was 0.45)
   function net(b, t) { return b[t] - ((BB.FIELD_MEANS[b.pos] || {})[t] || 0); }
   var TG = { h: [72.0, 2.35], w: [206.3, 19.9], L: [7.32, 0.39], v: [71.2, 2.70] };
   // athleticism: the league's correlations (2025 qualified hitters) and the loadings one shared trait implies from them

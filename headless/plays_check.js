@@ -1,5 +1,5 @@
 /* ============================================================================
-   plays_check.js · v0.10 · 2026-10-05
+   plays_check.js · v0.11 · 2026-10-06
 
    Constructed plays through BBField.resolve, each a regression test for a
    bug the audit found (docs/briefs/2026-10-05_bug_audit.md): a fixed
@@ -10,6 +10,8 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js headless/plays_check.js
 
    CHANGED
+     v0.11 cases 1 and 5 re-aimed for bb_field v1.11's ball track (sure dice on the corner drive; a liner to right for the
+           batter thrown out at second); the rules they test are unchanged
      v0.10 a tag play that makes the third out is a time play (bb_field v1.10)
      v0.9  a fly the fielder was under and dropped is an error, not a hit; the tag-up is a read, as a send home on a
            hit is (bb_field v1.9)
@@ -45,7 +47,8 @@
   //    right-field corner: the men from third and second both score ahead of the throw. Until v1.2 the second man was
   //    held to the base below the man ahead even when the man ahead had crossed the plate: no single, double or triple
   //    ever scored two runs.
-  var bb = batted(103, 12, 40), out = resolve(bb, [null, runner(0), runner(0), runner(0)], 2, { u: function () { return 0.5; }, n: function () { return 0; } });   // true throws: the case is the runners' bookkeeping
+  var sureDice = { u: function () { return 0.5; }, n: function () { return 0; } };   // median races, no scatter on the throw (v0.11: with the ball's track of bb_field v1.8 the stock dice threw this one away)
+  var bb = batted(103, 12, 40), out = resolve(bb, [null, runner(0), runner(0), runner(0)], 2, sureDice);
   check('bases loaded, two out, a drive into the right-field corner scores at least two', out.runs >= 2 && !out.error, where(out));
   bb = batted(98, 14, -8); out = resolve(bb, [null, null, runner(-0.2), runner(0)], 2);
   check('second and third, two out, a single up the middle scores both', out.runs === 2 && out.hit === '1B', where(out));
@@ -89,10 +92,11 @@
   check('a slow batter and a man on first, soft grounders to the infield: every force tried and missed at second is a fielder\'s choice (' + tried4 + ' such plays)', tried4 > 0 && wrong4 === 0, wrong4 ? wrong4 + ' scored as hits, e.g. ' + eg4 : 'all fielder\'s choices');
 
   // 5. A batter thrown out past first base keeps the hit that got him there (bb_field v1.6; the scorer's rule 9.05):
-  //    a bold batter (runAggr -0.4), a ground ball down the right-field line, the dice make the throw beat him at
-  //    second. Until v1.6 the play was scored a plain out, and the single was lost.
+  //    a bold batter (runAggr -0.6), a liner to right that the right fielder reaches on the run, the dice make the throw
+  //    beat him at second (v0.11: a ground ball down the line was used until bb_field v1.11, whose faster track made it a
+  //    plain double). Until v1.6 the play was scored a plain out, and the single was lost.
   var beatDice = { u: function () { return 0.03; }, n: function () { return 0; } };
-  bb = batted(92, 5, 42); out = resolve(bb, [null, null, null, null], 0, beatDice, -1, runner(-0.4, 26.5));
+  bb = batted(90, 12, 40); out = resolve(bb, [null, null, null, null], 0, beatDice, -1, runner(-0.6, 26.5));
   var bq = out.runners[out.runners.length - 1];
   check('a bold batter thrown out at second on a ball down the line: a single and an out on the bases', bq.out && bq.to === 2 && out.hit === '1B' && out.outsMade === 1, where(out));
 

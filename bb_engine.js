@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v3.2 · 2026-10-05
+   bb_engine.js · v3.3 · 2026-10-06
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -66,6 +66,8 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v3.3  the batted ball carries its spin to the ground (landW, for bb_field's bounce); a fielder's first step fitted to both
+           windows of Statcast's outfield jump (react 0.20 s for position players, was 0.47; the catcher's and pitcher's kept)
      v3.2  THE RELEASE BEHIND HIS SHOULDER (PL): a batter reads a pitch worse, swings slower and meets it higher the
            further the release sits toward his own side of his line of sight (a same-side pitcher, a sidearmer most),
            measured from the league by release angle with batter, pitcher and pitch type held fixed; the model's
@@ -82,11 +84,6 @@
            height; timing scatter grows with the time he is judging (flight time, a Weber
            fraction), not with pitch speed, refitted to the league's contact depth by pitch kind;
            a recognised breaking ball keeps half the misread it did (RESID_S); aim under the ball -0.15 in
-     v2.8  a wilder pitcher aims nearer the middle (AIM_CMD, fitted to the league's aim against
-           scatter); the batter pictures a pitch from the league's shape at the pitcher's slot;
-           the scouts judge a pitcher by what each of his pitches does against its type
-           as well as speed and command (PITCHER_FEATURES): they saw 18% of the pool's differences,
-           now 39%
 ============================================================================ */
 
 var BB = (function () {
@@ -668,14 +665,15 @@ var BB = (function () {
     block:     [0.75, 0.10, 0.4, 0.98]     // share of balls in the dirt a catcher keeps in front of him
   };
   // Where a position sits relative to the league on speed, arm and first step.
-  // Outfielders and infielders take their first step alike (Statcast's
-  // outfield jump says outfielders are quick to read a fly); the catcher
-  // rises from his crouch and the pitcher finishes his delivery first.
+  // Outfielders and infielders take their first step alike (the jump is measured
+  // on outfielders); the catcher rises from his crouch and the pitcher finishes
+  // his delivery first: their offsets keep the reaction they had before v3.2
+  // (0.57 and 0.62 s), since the jump says nothing about them.
   var FIELD_MEANS = {
-    C:  { speed: -1.5, armMph: -5, react: 0.10, transfer: 0.02 }, '1B': { speed: -1.0, armMph: -5 },
+    C:  { speed: -1.5, armMph: -5, react: 0.37, transfer: 0.02 }, '1B': { speed: -1.0, armMph: -5 },
     '2B': { speed: 0.3, armMph: -3 }, SS: { speed: 0.8, armMph: 1 }, '3B': { speed: -0.2, armMph: 1 },
     LF: { speed: 0.2, armMph: 1 }, CF: { speed: 1.3, armMph: 2 }, RF: { speed: 0.2, armMph: 4 },
-    DH: { speed: -0.5, armMph: -3 }, P: { speed: -1.5, armMph: -3, react: 0.15, glove: -0.02 }
+    DH: { speed: -0.5, armMph: -3 }, P: { speed: -1.5, armMph: -3, react: 0.42, glove: -0.02 }
   };
   // ATHLETICISM (v2.6, Joe: "a deeper trait upon which power, strength and speed
   // depend"). A position player's athleticism `athletic` is one standard normal,
@@ -1668,7 +1666,7 @@ var BB = (function () {
     return { ev: sp / MPH, la: Math.asin(v[2] / sp) / DEG, spray: Math.atan2(v[0], v[1]) / DEG,
              spin: norm(col.w) / RPM, backspin: back, q: col.q,
              kind: fl.kind, fair: fair, hr: fl.kind === 'over',
-             landing: [fl.x, fl.y], landZ: fl.z, landV: fl.v, landT: fl.t,
+             landing: [fl.x, fl.y], landZ: fl.z, landV: fl.v, landW: fl.w, landT: fl.t,
              dist: r / FT, projDist: proj / FT, hang: fl.t, apex: fl.apex / FT, path: fl.path };
   }
 
@@ -1746,7 +1744,7 @@ var BB = (function () {
   }
 
   return {
-    version: '2.6',
+    version: '3.3',
     SWING: { R: SWING_R, tiltPerH: TILT_PER_H },
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
