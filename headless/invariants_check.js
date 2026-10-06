@@ -1,5 +1,5 @@
 /* ============================================================================
-   invariants_check.js · v0.4 · 2026-10-06
+   invariants_check.js · v0.5 · 2026-10-06
 
    Every simulated play checked for the impossible, over whole games: base
    states that are legal (one man a base, nobody on 'base 0', nobody passing
@@ -16,6 +16,8 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js bb_game.js headless/invariants_check.js -- [games] [seed]
 
    CHANGED
+     v0.5  every trait's mean, at every position, lies inside the range its draws are clipped to (react's had fallen
+           below its floor in the integration: every position player then reacted in exactly 0.25 s)
      v0.4  the current rules (bb_game v1.6): no pitcher leaves before he has faced three or finished a half-inning;
            from the tenth inning each half starts with the man who batted before its leadoff hitter on second; no
            more than two throws over a plate appearance
@@ -23,7 +25,6 @@
            made by the batter (bb_field v1.10 judges the time; the rule had never fired while no tag-up was thrown out)
      v0.2  half the games play NL rules by name (a game given no rules now plays a designated hitter for both
            sides, bb_game v1.4), so the pitcher's spot and the pinch-hitter are still checked
-     v0.1  first build (the bug audit, docs/briefs/2026-10-05_bug_audit.md)
 ============================================================================ */
 (function (A) {
   var N = +A[0] || 500, SEED = +A[1] || 3, MAXEX = +A[2] || 3, rng = BB.makeRng(SEED);
@@ -34,6 +35,12 @@
     if (!EX[kind]) EX[kind] = [];
     if (EX[kind].length < MAXEX) EX[kind].push(key + (detail ? '  | ' + detail : ''));
   }
+  // the traits first: a mean outside its clip (at any position's offset) pins every draw at the edge
+  Object.keys(BB.TRAITS).forEach(function (k) {
+    var t = BB.TRAITS[k]; if (!Array.isArray(t) || t.length !== 4) return;
+    var offs = { all: 0 }; Object.keys(BB.FIELD_MEANS).forEach(function (pos) { if (BB.FIELD_MEANS[pos][k] !== undefined) offs[pos] = BB.FIELD_MEANS[pos][k]; });
+    Object.keys(offs).forEach(function (pos) { var m = t[0] + offs[pos]; if (!(m > t[2] && m < t[3])) flag('a trait whose mean lies outside the range its draws are clipped to', k + ' at ' + pos, 'mean ' + m.toFixed(3) + ', clipped to ' + t[2] + '..' + t[3]); });
+  });
   function ids(b) { var o = []; for (var i = 1; i <= 3; i++) if (b && b[i]) o.push(b[i].id); return o; }
   function show(b) { return [1, 2, 3].map(function (i) { return b && b[i] ? i : '-'; }).join(''); }
   function legal(b, what, key) {
@@ -203,7 +210,7 @@
     if (G.score[0] !== score[0] || G.score[1] !== score[1]) flag('the final score is not the sum of the runs', 'seed ' + SEED + ' game ' + g);
     if (!G.over) flag('a game that did not finish', 'seed ' + SEED + ' game ' + g, G.finalInning + ' innings, ' + G.score.join('-'));
   }
-  print('invariants_check v0.4 · ' + nGames + ' games · seed ' + SEED + ' · ' + nPlays + ' plate appearances · ' + nPitches + ' pitches');
+  print('invariants_check v0.5 · ' + nGames + ' games · seed ' + SEED + ' · ' + nPlays + ' plate appearances · ' + nPitches + ' pitches');
   var kinds = Object.keys(V).sort(function (a, b) { return V[b] - V[a]; });
   if (!kinds.length) print('  no violations');
   kinds.forEach(function (k) { print('  ' + V[k] + '  ' + k); EX[k].forEach(function (e) { print('       e.g. ' + e); }); });
