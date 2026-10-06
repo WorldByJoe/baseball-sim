@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.14 · 2026-10-06
+   bb_field.js · v1.15 · 2026-10-06
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -38,6 +38,7 @@
    cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.15 SAFETY_3 refitted on the new ball, the fielder's run and the runner's arc: [1.15, 0.95, 0.55]; SAFETY_H kept
      v1.14 a runner who goes on past a base turns on an arc: 2.4 m of extra ground for each base he runs through (Statcast's
            fastest home-to-third times); he had run straight through every base
      v1.13 the forced runner's break (V_CONTACT 2.75 m/s) and the double play's pivot (0.87 s) refitted on the new ball to
@@ -48,8 +49,6 @@
      v1.11 ground balls by launch angle: a bounce from measured physics (Coulomb friction on the slip, the spin carried, the
            soil's crater fitted to Pennbounce), a grass infield inside the dirt skin, air drag on the roll, a catch anywhere
            along the flight, and the fielder's first step fitted to both windows of Statcast's jump (docs/sections)
-     v1.10 a tag play that makes the third out counts a run only if it crossed the plate before the tag (a time
-           play); the hurried throw of the last commit taken out again (recorded, not kept: the write-up)
 ============================================================================ */
 
 var BBField = (function () {
@@ -101,7 +100,14 @@ var BBField = (function () {
   // on second took third .21). Until v1.9 [0.75, 0.75, 0.35] and [0.7, 0.2, -0.4], fitted with bug A present
   // (the second runner never sent) and the tag-up on its own rule: the two-out double sent a man on first home
   // and lost him .12 of the time, the league .03.
-  var SAFETY_3 = [0.95, 0.95, 0.35], SAFETY_H = [0.8, 0.2, 0.0], READ_SD = 0.25;   // s, by outs: taking third, going home
+  // SAFETY_3 REFITTED (v1.15) on the ball of v1.11, the fielder's run of v1.12 and the runner's arc of v1.14, the same
+  // way (xbt_check 1,000 games at seeds 3 and 11, mob_check 600 at seed 3): [1.15, 0.95, 0.55] puts a man on first on
+  // third after a single .27 / .29 / .42 of the time with none, one and two out (league .28 / .30 / .42; it was .32 /
+  // .30 / .50). SAFETY_H could not be refitted: at every margin swept (0.6-1.0, 0.2-0.6, -0.2-0.2 by outs) a man on
+  // second scored on a single too seldom while a man on first scored on a double too often (at the kept values .29 /
+  // .49 / .69 against .36 / .51 / .83, and .42 / .56 / .61 against .34 / .31 / .52): the throw home beats him too
+  // easily on a single and too slowly on a double, so one margin cannot fit both. Kept as fitted in v1.9.
+  var SAFETY_3 = [1.15, 0.95, 0.55], SAFETY_H = [0.8, 0.2, 0.0], READ_SD = 0.25;   // s, by outs: taking third, going home
   // How sure a throw's arrival is: 0.15 s for an infield throw, and more the
   // longer it is beyond 40 m (footwork, a hop, the catcher moving for it); set
   // by hand, so runners are thrown out at third and home about as often as
@@ -781,7 +787,7 @@ var BBField = (function () {
     return best.c.p > 0 && rng.u() < best.c.p ? best : null;
   }
 
-  return { version: '1.14', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
+  return { version: '1.15', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack, restTime: restTime,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };
