@@ -76,9 +76,11 @@ var BBField = (function () {
   // 1.5 s after the pitch is released (about 1.07 s after contact; the league 6.91) and 29.6 ft in the next 1.5 s
   // (30.0), and is running 23.6 ft/s at the end of the window (the leaderboard's sprint speed on those plays, 24.0).
   // ROUTE_D is the window's ground toward the ball, 34.0 ft, and the route trait's mean among major leaguers is the
-  // window's 34.0 ft toward the ball over 36.9 covered, 0.921 (tools/fit_population.js). Together they put half the
-  // catches at 25 ft from the nearest fielder's spot with 2.25 s of hang, 51 ft at 3.25 s and 106 ft at 5.25 s,
-  // as the league's are (statcast/air_balls.py): full sprint speed, 27-29 ft/s, after a lag of about 1.4 s.
+  // window's 34.0 ft toward the ball over 36.9 covered, 0.921 (tools/fit_population.js). The test is the league's
+  // catches on liners and flies (statcast/air_balls.py): half the balls nearest an outfielder are caught 37, 51, 65,
+  // 78, 92 and 106 ft from his spot at 2.75 to 5.25 s of hang (full sprint speed, 27-29 ft/s, after a lag of about
+  // 1.4 s); with this run the model's are 42, 54, 65, 77, 90 and 109 (headless/air_check.js, seed 3). Still off: 35
+  // ft against 25 at 2.25 s (low liners an outfielder charges), and deep flies of 5.5 s and more caught too often.
   // Until v1.12 he accelerated at a constant 5.0 m/s^2 to his sprint speed with the route a share of the whole
   // path (0.885): that pair fitted the jump's first window but reached about 10 ft too far at 2-3 s of hang, so
   // liners were caught too often, and a constant acceleration that fits all three windows tops out at an in-play
