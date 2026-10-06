@@ -1,5 +1,5 @@
 /* ============================================================================
-   game_review.js · v0.1 · 2026-10-06
+   game_review.js · v0.2 · 2026-10-06
 
    One postseason game, plate appearance by plate appearance, through the
    model with each player's own traits (review/players.js). For each plate
@@ -25,13 +25,15 @@
 
    One JSON line a plate appearance.
 
-   Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js bb_game.js review/players.js review/game_review.js -- PK [replays] [seed] [part] [parts]
+   Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js bb_game.js review/players.js review/game_review.js -- PK [replays] [seed] [part] [parts] [only] [epb]
 
    CHANGED
+     v0.2  ONLY and PARTS-of-the-work arguments, for the live watcher: one plate appearance, and 'e' (the
+           expectation), 'p' (the pitches), 'b' (the batted ball through the model's field)
      v0.1  first build (the Yankees-Rays review, 2026-10-06)
 ============================================================================ */
 (function (A) {
-  var PK = A[0], M = +A[1] || 800, SEED = +A[2] || 1, PART = +A[3] || 0, PARTS = +A[4] || 1;
+  var PK = A[0], M = +A[1] || 800, SEED = +A[2] || 1, PART = +A[3] || 0, PARTS = +A[4] || 1, ONLY = A[5] !== undefined && A[5] !== '' ? +A[5] : -1, DO = A[6] || 'epb';
   var U = BB.units, MPH = U.MPH, FT = U.FT, IN = U.IN, RPM = U.RPM, DEG = U.DEG;
   var G = JSON.parse(read('review/games/' + PK + '.json')), D = REVIEW.load(), rng = BB.makeRng(SEED * 101 + PART);
   var venues = JSON.parse(read('playoffs/venues.json')); venues = venues.venues || venues;
@@ -61,8 +63,9 @@
   }
 
   // ---- the engine's typical backspin by launch angle (for a ground ball, whose distance says nothing of its spin)
-  var SPIN = {};
-  (function () {
+  var SPIN = null;
+  function spinTable() {   // built on first use: only the batted-ball part needs it
+    SPIN = {};
     var r2 = BB.makeRng(4242), e2 = BB.mlbEnv(r2), ps = [], bs = [], u2 = BB.makeUmp(r2), acc = {};
     for (var i = 0; i < 40; i++) { ps.push(BB.makePitcher(r2, { role: 'SP' })); bs.push(BB.makeBatter(r2, {})); }
     for (var k = 0; k < 5000; k++) {
@@ -70,8 +73,8 @@
       res.pitches.forEach(function (q) { if (q.bb) { var b = Math.round(q.bb.la / 5) * 5; (acc[b] = acc[b] || []).push(q.bb.backspin); } });
     }
     Object.keys(acc).forEach(function (b) { var a = acc[b].sort(function (x, y) { return x - y; }); SPIN[b] = a[Math.floor(a.length / 2)]; });
-  })();
-  function typicalSpin(la) { var b = Math.max(-60, Math.min(80, Math.round(la / 5) * 5)); while (SPIN[b] === undefined && b > -60) b -= 5; return SPIN[b] || 1500; }
+  }
+  function typicalSpin(la) { if (!SPIN) spinTable(); var b = Math.max(-60, Math.min(80, Math.round(la / 5) * 5)); while (SPIN[b] === undefined && b > -60) b -= 5; return SPIN[b] || 1500; }
 
   // ---- a pitch as it was really thrown
   function pitchFor(P, code) {
@@ -130,7 +133,7 @@
     var P0 = pitcher(pa.pitcher), key = pa.batter + ':' + pa.pitcher, tkey = pa.bat + ':' + pa.pitcher;
     var ld0 = load[pa.pitcher] || 0, so = seenOwn[key] || 0, st0 = seenTeam[tkey] || 0;
     load[pa.pitcher] = ld0 + pa.pitches.length; seenOwn[key] = so + pa.pitches.length; seenTeam[tkey] = st0 + pa.pitches.length;
-    if (n % PARTS !== PART) return;
+    if (n % PARTS !== PART || (ONLY >= 0 && n !== ONLY)) return;
     var Bm = hitter(pa.batter), fs = pa.bat === 'away' ? 'home' : 'away';
     if (!Bm) { print(JSON.stringify({ i: pa.i, skip: 'no fit for ' + pa.batterName })); return; }
     var sb = BB.batterSide(Bm, P0), seen = so + 0.25 * (st0 - so), lead = pa.bat === 'away' ? pa.score[1] - pa.score[0] : pa.score[0] - pa.score[1];
@@ -138,7 +141,7 @@
     var sit = { bases: basesObj, outs: pa.outs, inning: pa.inning, lead: lead };
     // 1. the expectation
     var cats = { K: 0, BB: 0, HBP: 0, '1B': 0, '2B': 0, '3B': 0, HR: 0, OUT: 0, E: 0 }, wsum = 0, wvals = [], runs = 0;
-    for (var k = 0; k < M; k++) {
+    for (var k = 0; k < (DO.indexOf('e') >= 0 ? M : 0); k++) {
       var Bk = hitter(pa.batter, k);
       P0.load = ld0;
       var res = BB.simPA(P0, Bk, { env: env, ump: ump, framing: 0, seen: seen, rec: false, runnersOn: !!(basesIds[0] || basesIds[1] || basesIds[2]) }, rng), c;
@@ -150,17 +153,18 @@
       }
       cats[c]++; wsum += WOBA[c]; wvals.push(WOBA[c]);
     }
-    for (var c2 in cats) cats[c2] = +(cats[c2] / M).toFixed(4);
+    var Mr = DO.indexOf('e') >= 0 ? M : 1;
+    for (var c2 in cats) cats[c2] = +(cats[c2] / Mr).toFixed(4);
     var actual = categoryOf(pa.eventType), wa = WOBA[actual] === undefined ? null : WOBA[actual];
-    var below = wvals.filter(function (w) { return w < wa; }).length / M, same = wvals.filter(function (w) { return w === wa; }).length / M;
+    var below = wvals.filter(function (w) { return w < wa; }).length / Mr, same = wvals.filter(function (w) { return w === wa; }).length / Mr;
     var out = { i: pa.i, inning: pa.inning, half: pa.half, outs: pa.outs, bases: basesIds.map(function (b) { return b ? 1 : 0; }), score: pa.score,
                 batter: pa.batterName, batterId: pa.batter, pitcher: pa.pitcherName, pitcherId: pa.pitcher, bat: pa.bat, event: pa.event, desc: pa.desc,
-                actual: actual, probs: cats, pActual: cats[actual] !== undefined ? cats[actual] : null, xwoba: +(wsum / M).toFixed(3), woba: wa,
+                actual: actual, probs: cats, pActual: cats[actual] !== undefined ? cats[actual] : null, xwoba: +(wsum / Mr).toFixed(3), woba: wa,
                 pctile: wa === null ? null : +(below + same / 2).toFixed(3), pitchCount: ld0, seen: +seen.toFixed(1) };
     // 2. each pitch as thrown
     P0.load = ld0;
     var last = [], pv = [], soPitch = so, stPitch = st0;
-    pa.pitches.forEach(function (f, j) {
+    (DO.indexOf('p') >= 0 ? pa.pitches : []).forEach(function (f, j) {
       var rcode = resultOf(f.code), q = f.px === null || f.px === undefined ? null : pitchFor(P0, f.type);
       var rec = { n: j + 1, type: f.type, mph: f.mph, count: f.balls + '-' + f.strikes, result: rcode, px: f.px, pz: f.pz };
       if (q && rcode && rcode !== 'hbp') {
@@ -192,7 +196,7 @@
     });
     out.pitches = pv;
     // 3. the batted ball as it left the bat
-    if (pa.hit && pa.hit.ev !== null && pa.hit.la !== null && pa.hit.hcx !== null) {
+    if (DO.indexOf('b') >= 0 && pa.hit && pa.hit.ev !== null && pa.hit.la !== null && pa.hit.hcx !== null) {
       var lastP = pa.pitches[pa.pitches.length - 1], qq = lastP && lastP.px !== null ? pitchFor(P0, lastP.type) : null;
       if (qq) {
         var pitchL = realPitch(P0, qq, lastP), bb = realBatted(pitchL, pa.hit), bc = { '1B': 0, '2B': 0, '3B': 0, HR: 0, OUT: 0, E: 0 }, xw = 0, RB = 400;

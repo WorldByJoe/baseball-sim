@@ -1,5 +1,5 @@
 """
-game_feed.py · v0.1 · 2026-10-06
+game_feed.py · v0.2 · 2026-10-06
 
 One postseason game from MLB's live feed (playoffs/games/<gamePk>_feed.json,
 statsapi.mlb.com/api/v1.1/game/<pk>/feed/live) as the review reads it:
@@ -12,13 +12,22 @@ with their positions; who pitched for each side and in what order.
   python3 review/game_feed.py 849839   ->  review/games/849839.json
 
 CHANGED
+  v0.2  parse(feed) returns the game, for the live watcher (review/live/poll.py); a play still in progress keeps
+        its pitches so far and no outcome
   v0.1  first build (the Yankees-Rays review)
 """
 import json, sys, os
 
 
 def main(pk):
-    d = json.load(open('playoffs/games/%s_feed.json' % pk))
+    out = parse(json.load(open('playoffs/games/%s_feed.json' % pk)), pk)
+    os.makedirs('review/games', exist_ok=True)
+    json.dump(out, open('review/games/%s.json' % pk, 'w'), indent=0)
+    teams = out['teams']
+    print('%s: %s at %s, %d-%d, %d plate appearances' % (pk, teams['away']['name'], teams['home']['name'], out['final']['away'], out['final']['home'], len(out['pas'])))
+
+
+def parse(d, pk):
     gd, ld = d['gameData'], d['liveData']
     teams = {s: {'id': gd['teams'][s]['id'], 'name': gd['teams'][s]['name'], 'abbrev': gd['teams'][s].get('abbreviation')} for s in ('away', 'home')}
     box = ld['boxscore']['teams']
@@ -77,14 +86,17 @@ def main(pk):
         score = [r.get('awayScore', score[0]), r.get('homeScore', score[1])]
         prev = {'key': key, 'bases': post, 'outs': outsAfter}
     ls = ld['linescore']
+    lt = ls.get('teams', {})
     out = {'pk': int(pk), 'date': gd['datetime'].get('officialDate'), 'venue': gd['venue']['name'], 'weather': gd.get('weather'), 'teams': teams,
            'lineups': lineups, 'pitchers': pitchers, 'pas': pas,
-           'final': {'away': ls['teams']['away']['runs'], 'home': ls['teams']['home']['runs'],
-                     'hits': [ls['teams']['away']['hits'], ls['teams']['home']['hits']]},
-           'innings': [[i.get('away', {}).get('runs'), i.get('home', {}).get('runs')] for i in ls['innings']]}
-    os.makedirs('review/games', exist_ok=True)
-    json.dump(out, open('review/games/%s.json' % pk, 'w'), indent=0)
-    print('%s: %s at %s, %d-%d, %d plate appearances' % (pk, teams['away']['name'], teams['home']['name'], out['final']['away'], out['final']['home'], len(pas)))
+           'final': {'away': lt.get('away', {}).get('runs', 0), 'home': lt.get('home', {}).get('runs', 0),
+                     'hits': [lt.get('away', {}).get('hits', 0), lt.get('home', {}).get('hits', 0)]},
+           'status': gd['status'].get('abstractGameState'), 'detailed': gd['status'].get('detailedState'),
+           'now': {'inning': ls.get('currentInning'), 'half': ls.get('inningHalf'), 'outs': ls.get('outs'),
+                   'balls': ls.get('balls'), 'strikes': ls.get('strikes'),
+                   'bases': [bool((ls.get('offense') or {}).get(k)) for k in ('first', 'second', 'third')]},
+           'innings': [[i.get('away', {}).get('runs'), i.get('home', {}).get('runs')] for i in ls.get('innings', [])]}
+    return out
 
 
 if __name__ == '__main__':
