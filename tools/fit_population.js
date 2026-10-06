@@ -1,5 +1,5 @@
 /* ============================================================================
-   fit_population.js · v0.7 · 2026-10-05
+   fit_population.js · v0.8 · 2026-10-05
 
    Fits the hitters' POPULATION in bb_engine.js's TRAITS so that the ones the
    farm picks (makeBatter: the best of FARM_N candidates by the scouts'
@@ -43,11 +43,11 @@
    to the picks'.
 
    CHANGED
+     v0.8  raw barrel scatter target x1.15 for engine v3.3 (the last look judges the gap with 0.5 in of error)
      v0.7  raw barrel scatter, aim-under and pull-bias targets for engine v3.2 (the last look corrects a miss; from #31)
      v0.6  timing and aim-under targets for engine v2.9 (timing scatter by flight time, VERT_MISS)
      v0.5  athleticism's loadings (engine v2.6)
      v0.4  pullBias's target 1 deg (engine v2.3: the bat's path square to centre, the face pulls)
-     v0.3  skill targets for engine v2.2 (the swing's reach and read)
 ============================================================================ */
 (function (A) {
   var ROUNDS = +A[0] || 8, NPICK = +A[1] || 6000, SEED = +A[2] || 5, T = BB.TRAITS;
@@ -92,9 +92,10 @@
   // (v0.3: motorIn x1.4, longSD x0.88, coverage x2.1, spotIn x1.09 and the fastball lean's excess x2.9, the engine v2.2 refit to the miss table)
   // (v0.6: timingSD x0.72 and undercut -0.15 in, engine v2.9's joint fit with the timing scatter following flight time and VERT_MISS)
   // (v0.7: motorIn x1.7, undercut 1.0 in and pullBias -1.5 deg, engine v3.2: the last look corrects a miss, the aim and the usual contact point refitted)
-  var SK0 = { motorIn: 1.48, timingSD: 9.72, longSD: 3.35, faceSD: 8, undercut: 1.0, attack: 9, pullBias: -1.5, coverage: 6.3, spotIn: 4.9,
+  // (v0.8: motorIn x1.15 more, engine v3.3: the last look judges the gap to the ball with 0.5 in of error)
+  var SK0 = { motorIn: 1.70, timingSD: 9.72, longSD: 3.35, faceSD: 8, undercut: 1.0, attack: 9, pullBias: -1.5, coverage: 6.3, spotIn: 4.9,
               eyeSD: 5.0, aggr: 0, commit: 0.55, fbLean: 1.87, learn: 0.35, swingTilt: 32.3 };
-  print('fit_population v0.7 · ' + ROUNDS + ' rounds x ' + NPICK + ' picks (best of ' + BB.FARM_N + ')');
+  print('fit_population v0.8 · ' + ROUNDS + ' rounds x ' + NPICK + ' picks (best of ' + BB.FARM_N + ')');
   for (var k = 0; k < ROUNDS; k++) {
     var m = moments(sample(SEED + k).S);
     print('round ' + k + ': weight ~ bat speed ' + m.rwv.toFixed(2) + ' (exponent ' + BB.CHAIN.powerExp.toFixed(3) + '); picked height ' + m.h[0].toFixed(2) + ' ± ' + m.h[1].toFixed(2) + '  weight ' + m.w[0].toFixed(1) + ' ± ' + m.w[1].toFixed(1) + '  swing length ' + m.L[0].toFixed(3) + ' ± ' + m.L[1].toFixed(3) + '  bat speed ' + m.v[0].toFixed(2) + ' ± ' + m.v[1].toFixed(2));
