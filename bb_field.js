@@ -37,7 +37,8 @@
            his speed rises as 1 - exp(-t / 0.78 s)): 90 ft in 4.11 s where he ran the batter's 4.40 s from the box;
            a fly the fielder was under and dropped puts the batter on by the error (rule 9.12), no longer a hit as well;
            the tag-up for third or home is a read, as a send on a hit is (READ_SD, SAFETY_3 and SAFETY_H by the outs
-           after the catch, the throw's arrival as sure as raceSD): he went only when no throw could get him
+           after the catch, the throw's arrival as sure as raceSD): he went only when no throw could get him;
+           the cut-off man's catch, turn and throw takes the double play's pivot (0.65 s, measured), not 0.45 s by hand
      v1.8  the infield stands where the league's did in 2025 (Savant's fielder positioning): by the batter's side,
            the first baseman holding a runner, double-play depth, the infield in with a man on third as the manager's
            call, and the 2023 rule (two infielders each side of second, all on the dirt);
@@ -286,11 +287,14 @@ var BBField = (function () {
 
   // A long outfield throw goes through a cut-off man: two shorter throws
   // beat one lofted one. The estimate every fielder and runner works from.
-  var RELAY_FROM = 55, CUT = 35, RELAY_XFER = 0.45;   // m, m, s
+  // The cut-off man's catch, turn and release is the double play's pivot
+  // (v1.9): the same body's motion, measured there (0.65 s, PIVOT below);
+  // it was 0.45 s, set by hand when the cut-off man came in to curb triples.
+  var RELAY_FROM = 55, CUT = 35;   // m, m
   function throwArrival(F, from, to) {
     var d = dist(from, BASES[to]), direct = throwTime(F.pl.armMph, d);
     if (d <= RELAY_FROM) return direct;
-    return Math.min(direct, throwTime(F.pl.armMph, d - CUT) + RELAY_XFER + throwTime(86, CUT));
+    return Math.min(direct, throwTime(F.pl.armMph, d - CUT) + PIVOT + throwTime(86, CUT));
   }
 
   // ---------------------------------------------------------- the track
