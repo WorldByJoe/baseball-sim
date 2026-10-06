@@ -1,8 +1,11 @@
-<!-- trait_map.html · v3.4 · 2026-10-05
+<!-- trait_map.html · v3.5 · 2026-10-06
      The trait path map: distal traits -> proximate abilities -> the engine's stages
      (with every constant and where its value came from) -> statistics against the league.
      Keep it in step with bb_engine.js; publish to the same artifact URL.
      CHANGED
+       v3.5  the five jobs of 2026-10-05/06 and the current rules: PL (the release behind his shoulder), the field ledger
+             rewritten (the run, the route, the runner's arc, the infield's spots, the bounce, the catch in the air, the throw by
+             run value, the double play, the sends, the tag-up), the rules and the reliever, every result row re-measured
        v3.4  the bug audit (bb_field v1.2-1.6, bb_game v1.2): the runner behind a man who scores may score too, a runner tags
              up only to a base the man ahead leaves, a throw that gets away moves every runner up, the pinch-hitter's spot
              goes back to the pitcher, two scorer's rules; the result rows re-measured
@@ -10,10 +13,6 @@
        v3.2  engine v3.0: bat speed falls as a pitch pulls the swing up, away or in (BAT_LOC); FG and G findings
        v3.1  engine v2.9: the barrel's height falls short toward the middle of the zone (VERT_MISS); timing
              scatter grows with flight time; RESID_S halved; DM and CS tested
-       v3.0  hypotheses S, J, Y, Z (engine v2.8, bb_field v1.0): the outfielder's stop and turn; sends to third
-             and home; aim that follows command; the batter reads the slot; the scouts see each pitch
-       v2.9  hypotheses A-E (engine v2.7, bb_field v0.9): a checked swing needs something new at the last look;
-             the scouts' errors, fumbles and drops; the league's ground-ball spray re-measured; 2025 team totals
 -->
 <meta charset="utf-8">
 <title>Ballgame Trait Map</title>
@@ -169,7 +168,7 @@ td.basis { color: var(--muted); }
     ['d_ump', 0, 'UMPIRE AND CATCHER', 'Umpire\'s zone', 'soft edge 1.4 in, edge habits', 'H', 'Accuracy, a systematic miss per edge, one strong habit for some, and a zone that swells when the pitcher is behind. Set by hand.'],
     ['d_framing', 0, null, 'Catcher framing', '± 0.35 in at the edges', 'H', 'How much he widens the edges. Set by hand.'],
     ['d_catcher', 0, null, 'Catcher arm and blocking', 'pop time 1.95 s', 'M', 'Statcast-shaped pop time and blocking.'],
-    ['d_field', 0, 'FIELDERS AND RUNNERS', 'Fielding', 'first step 0.45 s, route, glove, arm', 'M', 'The first step, with the acceleration, reproduces Statcast\'s outfield jump (33.9 ft toward the ball in 3 s from release, v1.5); route, glove and arm are Statcast-shaped, with position means.'],
+    ['d_field', 0, 'FIELDERS AND RUNNERS', 'Fielding', 'first step 0.20 s, route, glove, arm', 'M', 'The first step, with the acceleration, reproduces Statcast\'s outfield jump (33.9 ft toward the ball in 3 s from release, v1.5); route, glove and arm are Statcast-shaped, with position means.'],
     ['d_run', 0, null, 'Running', 'sprint 27.0 ft/s, jump, boldness', 'M', 'Sprint speed and jump are Statcast-shaped; a runner\'s boldness is set by hand.'],
 
     ['p_batspeed', 1, 'SWING', 'Bat speed', 'built: v³ = 4pWL / m_eff', 'D', 'Not drawn. Built from weight, swing power, swing length and the bat; the bat\'s effective mass also sets the collision efficiency.'],
@@ -213,26 +212,27 @@ td.basis { color: var(--muted); }
     ['e_move', 3, null, 'Pitch movement spread', 'within 0.4 in, most types', 'match', 'Spread of induced break per type between pitchers, refitted with the engine\'s own pitchers (v1.6).'],
     ['e_pchain', 3, null, 'Pitcher correlations', 'IVB ~ arm angle .62 vs .72', 'near', 'Release height ~ arm angle .81 (.76-.82), spin ~ speed .30 (.27-.31), four-seam ~ slider spin .39 (.36); release height ~ height .32 against .20.'],
     ['e_stuff', 3, null, 'Stuff into strikeouts', 'K% ~ speed .36 vs .52', 'near', 'Unfitted: harder throwers strike out more, whiff ~ speed .34-.37 against .56, whiff ~ spin .27-.38 against .36.'],
-    ['e_relk', 3, null, 'K% ~ release height', '+.16 vs -.22', 'off', 'Lower releases strike out more in the league; the model\'s batter pictures every pitch from its true release, so a low release cannot fool him.'],
+    ['e_relk', 3, null, 'K% ~ release height', '-.03 to -.11 vs -.22', 'near', 'Since engine v3.2 (PL) lower releases strike out more in the model too, though less than in the league; BB% ~ arm angle +.06 to +.08 against +.20.'],
+    ['e_platoon', 3, null, 'Platoon split', '-.026 / -.012 vs -.028 wOBA', 'near', 'Same-side minus opposite-side wOBA with batter and pitcher held fixed (two seeds; the league\'s from statcast/platoon.py). The sign has been right since engine v3.2; the contact half is not: same-side contact comes off 1.0 mph slower against 2.5.'],
     ['e_bsw', 3, 'POWER AGAINST CONTACT', 'Bat speed ~ whiff', '+.26 to +.35 vs +.69', 'near', 'Among the major leaguers the farm picks (was .01 before the farm); bat speed ~ K% +.19 to +.30 against +.58. Within a hitter harder swings whiff less, so the league\'s link is between hitters.'],
     ['e_athletic', 3, null, 'Power, arm and speed together', 'unfitted: bat speed ~ sprint +.04 vs +.09', 'match', 'Fitted: power/kg ~ sprint .46 (.46), power/kg ~ arm .26-.30 (.29), sprint ~ arm .36-.39 (.37), weight ~ sprint -.36 (-.37). The test: bat speed ~ sprint +.04 against +.09 and bat speed ~ arm +.18 against +.18, neither fitted (engine v2.6).'],
     ['e_style', 3, null, 'Attack angle ~ pull%', '+.57 to +.65 vs +.66', 'match', 'With the swing style (v1.9; was +.18); pull% ~ fly-ball% +.34 to +.39 against +.55; attack angle ~ whiff +.66 to +.71 against +.53, too strong.'],
     ['e_zbs', 3, null, 'Zone rate ~ bat speed', '-0.0037 vs -0.0038 per mph', 'match', 'Pitchers work around power (v1.7); walks ~ bat speed came to +.05 to +.12 against +.17, unfitted.'],
     ['e_aim', 3, null, 'Aim against command', '-0.31 vs -0.30 in per in', 'match', 'Per pitcher, pitch type and batter side, how far his mean location sits from the zone\'s centre against his scatter about it (league majors -0.29, Triple-A -0.31; model about 0 before engine v2.8, four seeds since).'],
-    ['e_k', 3, 'IN THE PLATE APPEARANCE', 'Strikeout rate', '19.0-19.8% vs 22.2%', 'near', '200 games at each of three seeds; 2025 team totals. The fouls (CALIBRATION, #31) are what is missing.'],
-    ['e_bb', 3, null, 'Walk rate', '8.9-9.4% vs 8.4%', 'near', 'Engine v3.1: fastballs are no longer over-chased, and breaking balls far outside are still chased half as often as the league\'s, so the chase is .229 against .283.'],
+    ['e_k', 3, 'IN THE PLATE APPEARANCE', 'Strikeout rate', '18.1-19.5% vs 22.2%', 'near', '200 games at each of three seeds; 2025 team totals. The fouls (CALIBRATION, #31) are what is missing.'],
+    ['e_bb', 3, null, 'Walk rate', '8.5-9.2% vs 8.4%', 'near', 'Engine v3.1: fastballs are no longer over-chased, and breaking balls far outside are still chased half as often as the league\'s, so the chase is .229 against .283.'],
     ['e_hbp', 3, null, 'Hit by pitch', '1.01% vs 1.1%', 'match', 'Per plate appearance; 0.40% before command was measured.'],
-    ['e_hr', 3, null, 'Home-run rate', '3.4-3.6% vs 3.1%', 'near', 'Per plate appearance.'],
+    ['e_hr', 3, null, 'Home-run rate', '3.3-3.5% vs 3.1%', 'near', 'Per plate appearance.'],
     ['e_carry', 3, null, 'Carry by EV and angle', 'within 6 ft at 20-40 deg', 'near', 'Liners at 15-20 deg carry 10-20 ft too far: the spin\'s shape with launch angle.'],
-    ['e_babip', 3, null, 'BABIP', '.262-.272 vs .291', 'off', 'An open mystery (CALIBRATION): too few line drives (20-21% against 24%); on the ground, choppers at -10 to 0 deg are hits .135 against .249 and low liners at 0-10 deg .538 against .482; and the league hits better with men on (BABIP .280 empty, .301 with a man on first) where the model is flat (.261-.269, .262-.269) - the infield never holds a runner or plays in (the bug audit).'],
-    ['e_avg', 3, null, 'AVG / SLG', '.232-.239 / .397-.408', 'near', 'League .245 / .404 (2025).'],
-    ['e_runs', 3, 'IN THE GAME', 'Runs per team-game', '4.06-4.54 vs 4.45', 'near', '200 games at each of three seeds, against 2025\'s team totals. Runs against BaseRuns from the model\'s own events .926-.988 (the league 1.01; .905-.909 before the bug audit, when no single, double or triple ever scored two runs). What is left is hitting with men on base and the sacrifice flies (CALIBRATION, the bug audit).'],
-    ['e_doubles', 3, null, 'Doubles per team-game', '1.54-1.63 vs 1.59', 'match', 'Since bb_field v1.0 an outfielder who reaches the ball on the run sheds his speed before he throws; before, the throw beat the batter-runner to second by a median 1.6 s on the singles that stayed singles.'],
-    ['e_triples', 3, null, 'Triples per team-game', '0.09-0.12 vs 0.13', 'near', 'Per team-game.'],
+    ['e_babip', 3, null, 'BABIP', '.277-.282 vs .291', 'near', 'The ground balls closed (bb_field v1.11: choppers at -10 to 0 deg .30 against .249, low liners .50 against .482) and liners and flies are caught at the league\'s range from 3 to 5.5 s of hang (v1.12). Left: line drives 20-21% of balls in play against 24, infield hits .012-.015 of ground balls against .061, deep flies caught too often.'],
+    ['e_avg', 3, null, 'AVG / SLG', '.246-.251 / .422-.433', 'near', 'League .245 / .404 (2025).'],
+    ['e_runs', 3, 'IN THE GAME', 'Runs per team-game', '4.58-4.75 vs 4.45', 'near', '200 games at each of three seeds, against 2025\'s team totals. Runs over BaseRuns from the model\'s own events .958-.971 against the league\'s 1.011 (.905-.909 before the bug audit). A little high now that BABIP has risen while strikeouts stay low.'],
+    ['e_doubles', 3, null, 'Doubles per team-game', '1.94-1.95 vs 1.59', 'off', 'Up since the men-on-base job\'s measured infield spots and the ground-ball physics: the extra doubles are on the lines, and outfielders pick up balls that get through deeper than the league\'s (hypothesis CO).'],
+    ['e_triples', 3, null, 'Triples per team-game', '0.14-0.15 vs 0.13', 'match', 'Per team-game.'],
     ['e_xbt', 3, null, 'Extra bases taken', 'R2 scores .58 vs .60', 'match', 'Runner on second scoring on a single .58 (.60), runner on first to third on a single .36 (.33), scoring on a double .44 (.39); thrown out trying .04-.07 (.01-.03), most on a double with two out (xbt_check, 400 games, after the bug audit).'],
-    ['e_dp', 3, null, 'Double plays', '0.64-0.71 vs 0.75', 'near', 'Per team-game.'],
-    ['e_errors', 3, null, 'Errors', '0.34-0.37 vs 0.50', 'off', 'Per team-game. Fumbles and drops are the league\'s (bb_field v0.9); throwing errors .10 against .13 (hurried throws are missing), and the bug audit\'s fixes took a holder\'s vanishing on a wild throw out of the count.'],
-    ['e_sb', 3, null, 'Stolen bases', '0.57-0.67 vs 0.71', 'near', 'Per team-game, 77% safe against 78%. The old target, 0.47, was a pre-2023 figure.'],
+    ['e_dp', 3, null, 'Double plays', '0.61-0.66 vs 0.64', 'match', 'Ground-ball double plays against the league\'s grounded-into figure (0.64), the like-for-like measure since run_games v0.3; every double play turned is 0.75.'],
+    ['e_errors', 3, null, 'Errors', '0.24-0.31 vs 0.50', 'off', 'Per team-game. Fumbles and drops are the league\'s (bb_field v0.9); throwing errors .10 against .13 (hurried throws are missing), and the bug audit\'s fixes took a holder\'s vanishing on a wild throw out of the count.'],
+    ['e_sb', 3, null, 'Stolen bases', '0.64-0.65 vs 0.71', 'near', 'Per team-game, 77% safe against 78%. The old target, 0.47, was a pre-2023 figure.'],
     ['e_wp', 3, null, 'Wild pitches', '0.24-0.34 vs 0.29', 'match', 'Per team-game.'],
     ['e_extra', 3, null, 'Extra-inning games', '8-12.5% vs about 8%', 'near', 'Per game.'],
     ['e_pitchers', 3, null, 'Pitchers used', '3.8-3.9 vs 4.2', 'near', 'Per team-game.'],
@@ -267,6 +267,7 @@ td.basis { color: var(--muted); }
       ['Fatigue', 'from 70% of stamina', 'F', 'Nothing until 70% of stamina, then rising as a square: −0.4 mph by pitches 76-90 and −1.3 mph at his stamina, as league starters lost 0.4 mph by pitches 76-90. Command barely moves (FATIGUE_CMD 0.1): their scatter did not grow within 4% (v1.4).'],
       ['plateW', 'per type', 'D', 'The scatter the pitch-to-pitch speed, spin and seam variation make on their own, taken out of command so command stays his whole scatter (tools/plate_scatter.js).']]],
     ['s_read', 'Read', 'recognise the pitch, then judge where and when', [
+      ['PL, the release behind his shoulder', 'read +0.03 per deg', 'F', 'The further the release sits toward the batter\'s own side of his line of sight (past -3 deg, centred on the league\'s matchups), the worse he reads it (noise +0.03 per deg, fitted to the league\'s bands with batter, pitcher and type held fixed), the slower he swings (-0.0045 of bat speed per deg, measured) and the higher he meets it (0.039 in per deg, measured); his eye at (1.8, 0.7) ft, assumed (engine v3.2). The platoon split had the wrong sign until then.'],
       ['COMMIT_S 0.175 s', 'tunnel point', 'M', 'When he commits: about 24 ft out, where Baseball Prospectus measures pitch tunnels.'],
       ['STEER_S 0.15 s', 'last look', 'M', 'The visuomotor delay, the hitting literature\'s last 150 ms. 110 and 130 ms were tried and dropped whiffs and K% well below the league.'],
       ['STEER_IN 3 in', 'late steering', 'M', 'How far the barrel can be redirected after launch: late corrections of 5-10 cm are reported.'],
@@ -309,26 +310,34 @@ td.basis { color: var(--muted); }
       ['Batted drag ×', '1.08, carry', 'F', 'Fitted to how far the league\'s balls in the air carried by exit velocity and launch angle, 20-40 deg, within 6 ft rms, with the spin the model\'s collision gives (statcast/bip.py, v1.5). The aerodynamics themselves match Nathan\'s backspin table.'],
       ['Parks and weather', "MLB's mix", 'M', 'Altitude, temperature and fences drawn from MLB\'s own mix.']]],
     ['s_field', 'Field and run', 'fielders, throws and runners', [
-      ['Accelerations', 'Statcast jump', 'F', 'Fielders 5.5, runners 4.5 m/s²: with the first step they reproduce Statcast\'s outfield jump (33.7 against 33.9 ft) and the average 4.4 s home to first.'],
-      ['Outfield spots', '300 / 323 / 291 ft', 'M', 'Where the league\'s outfielders stood in 2025 (Statcast positioning, eight teams): pull corner, centre, opposite corner, not turned toward the pull side (v1.5).'],
-      ['Bounce', 'friction grows', 'F', 'A bounce keeps 0.45 (dirt) or 0.35 (grass) of its speed into the ground and 0.76 along it less a friction term: fitted to measured bounces off a skinned infield and grass (Brosnan et al. 2007), v1.5.'],
-      ['CATCH_SET 0.15 s', 'arrive early', 'F', 'An even chance at a catch takes getting there 0.15 s before the ball: fitted to catches by exit velocity and launch angle (v1.5).'],
-      ['Reach 1.2 m', 'glove and dive', 'H', 'Set by hand.'],
-      ['Fumbles', 'glove, then difficulty', 'F', 'A grounder is fielded cleanly at his glove rate, less a little for a hot ball and, for an infielder, the ground he ranged (v0.9: an outfielder picking up a ball that got through is not hurried by his run). How much difficulty costs is fitted to the league\'s fielding errors per grounder, 1.45% and flat with exit velocity (2025 play descriptions).'],
-      ['The scorer', 'ordinary effort', 'P', 'A fumble that costs the out is an error only on a chance an ordinary fielder handles (the rulebook\'s ordinary effort): no harder than a ball reaching him at 67 mph or a 10 m range; a harder chance fumbled is a hit (bb_field v0.9).'],
-      ['Drops', '0.15 of his fumble rate', 'F', 'A ball he is under with time to spare is dropped 0.15 of his fumble rate on a grounder: fitted to the league\'s missed-catch errors, about 0.023 a team-game (bb_field v0.9; 0.6, set by hand, dropped 1.1% of routine catches).'],
-      ['Secondary lead', '15.3 ft', 'M', 'A runner\'s lead when the ball is hit, Statcast 2025.'],
-      ['V_CONTACT 1.5 m/s', 'breaking on contact', 'F', 'A runner who goes on contact is already moving: checked against double plays per game (v1.5).'],
-      ['Send margins', 'third .75/.75/.35, home .7/.2/-.4 s', 'F', 'By outs, with their own margins for third and home (bb_field v1.0): never make the first or third out at third, risk the plate with two out. Fitted to how often the league\'s runners took the extra base: a runner on second scored on a single .60 of the time, a runner on first took third on a single .33 and scored on a double .39.'],
-      ['Stop and turn', 'brake at his acceleration', 'H', 'An outfielder who reaches the ball on the run sheds the speed not carrying him toward his throw before he lets it go, braking at his acceleration (an assumption). Before bb_field v1.0 he threw the instant he had the ball: doubles 0.6 a game against 1.6.'],
+      ['First step', 'react 0.20 s (the picks)', 'F', 'Fitted with the run to both windows of Statcast\'s outfield jump (the pool\'s mean 0.219 s, drawn within 0.05-0.8; the catcher +0.37 s, the pitcher +0.42 s). Combining the jobs of 2026-10-05 brought back the old clip, which pinned every position player at 0.25 s until bb_engine v3.4.'],
+      ['The run', 'TAU_F 1.2 s', 'F', 'After his first step a fielder\'s speed rises as 1 - exp(-t / 1.2 s) to his sprint speed: fitted to the jump\'s two windows (6.9 and 29.6 ft). His range by hang time came within a foot of the league\'s from 3.5 to 5.5 s (bb_field v1.12).'],
+      ['The route', 'over the first 34 ft', 'M', 'His route costs him only while he reads the ball, over the jump\'s window toward the ball (ROUTE_D); the route trait\'s target 0.921, the window\'s share toward the ball (v1.12, fit_population v0.8).'],
+      ['Braking', '5.0 m/s²', 'H', 'An outfielder who reaches the ball on the run sheds the speed not carrying him toward his throw (BRAKE_F, an assumption within the measured 4.2-5.0 m/s², Harper et al. 2020).'],
+      ['Runners', 'from a standstill', 'M', 'A runner on base starts from rest and his speed rises as 1 - exp(-t / 0.78 s) (TAU_RUN): Statcast\'s running splits, 90 ft in 4.11 s (v1.9).'],
+      ['The runner\'s arc', '2.4 m a base', 'M', 'Each base a runner goes past costs 2.4 m of extra ground (ROUND_PATH): measured roughly, from Statcast\'s record home-to-third times against the straight-line model (v1.14).'],
+      ['Infield spots', 'Savant 2025, by side', 'M', 'Where the league\'s infielders stood in 2025 by the batter\'s side, under the 2023 rule (two on each side of second, all on the dirt); the first baseman holds a runner (88 ft out); double-play depth with a man on first and fewer than two out; the infield in as the manager\'s call, by first base, inning and lead (IN_P, from Statcast\'s alignment) (v1.8).'],
+      ['Outfield spots', '300 / 323 / 291 ft', 'M', 'Where the league\'s outfielders stood in 2025: pull corner, centre, opposite corner (v1.5).'],
+      ['Bounce', 'Coulomb slip, the crater', 'P', 'Coulomb friction on the slip with the spin carried (Cross, Am. J. Phys. 70, 1093, 2002), the soil\'s crater fitted to Pennbounce (Brosnan, McNitt and Schlossberg 2007) at the league\'s parks (BOUNCE_MU 0.41 dirt / 0.45 grass, BOUNCE_KC); a grass infield inside the dirt skin; air drag on the roll; the roll\'s resistance set by hand (v1.11).'],
+      ['A catch in the air', 'anywhere along the flight', 'D', 'A ball can be caught at any point of its flight a man can reach, up to Z_CATCH 2.6 m standing and Z_LUNGE 1.3 m at full stretch (v1.11; until then only where it landed).'],
+      ['CATCH_SET 0.15 s', 'arrive early', 'F', 'An even chance at a catch takes getting there 0.15 s before the ball (v1.5).'],
+      ['Fumbles and drops', 'glove, then difficulty', 'F', 'A grounder is fielded cleanly at his glove rate, less a little for a hot ball and the ground he ranged; a ball he is under is dropped at 0.15 of that rate. Fitted to the league\'s errors by kind (v0.9).'],
+      ['The scorer', 'the rulebook', 'P', 'Ordinary effort decides an error (v0.9); a force tried and missed is the batter\'s hit only if he would have beaten a throw to first (9.05, v1.5); a batter thrown out past first keeps his hit (v1.6); a dropped fly he was under is an error, not a hit (9.12, v1.9); a tag for the third out counts only the runs that crossed first (a time play, v1.10).'],
+      ['The throw', 'the out worth the most runs', 'M', 'For each runner he could play: the runs that would score plus the league\'s RE24 of the bases and outs left (runs_league 2025), if the throw gets him and if not; he throws for the lowest (v1.8). The second baseman covers second on a ball to third; the relay waits for the man covering first.'],
+      ['The double play', 'PIVOT 0.87 s, V_CONTACT 2.75 m/s', 'F', 'The pivot and the forced runner\'s break, refitted on the new ball to how often the force at second came off (.757) and the relay then beat the batter (.595) (v1.13). The cut-off man keeps RELAY_XFER 0.65 s.'],
+      ['Send margins', 'third 1.15/.95/.55, home .8/.2/0 s', 'F', 'By outs. SAFETY_3 refitted on the new ball to the league\'s first-to-third on singles (v1.15). SAFETY_H was fitted with the tag-ups (v1.9) and could not be refitted on the new ball: no one margin fits both the single and the double (hypothesis TB).'],
+      ['The tag-up', 'a read, as a send', 'D', 'A runner tags for third or home on the same read of the catch and the throw as a send on a hit (READ_SD, the margins by the outs after the catch) (v1.9).'],
       ['Read error', '0.25 s', 'H', 'His and the coach\'s error reading the race. Set by hand.'],
-      ['Long-throw doubt', '0.005 s per m', 'H', 'A throw\'s arrival grows less certain beyond 40 m; set by hand so runners are thrown out about as often as the league\'s.'],
+      ['Long-throw doubt', '0.005 s per m', 'H', 'A throw\'s arrival grows less certain beyond 40 m; set by hand.'],
       ['SAFETY 0.30 s', 'taking second', 'H', 'The margin a runner wants before taking second. Set by hand.'],
+      ['Secondary lead', '15.3 ft', 'M', 'A runner\'s lead when the ball is hit, Statcast 2025.'],
       ['Cut-off relay', 'beyond 55 m', 'H', 'Long throws go through a cut-off man. Set by hand.']]],
     ['s_game', 'Game', 'managers and the bullpen', [
       ["Starter's hook", 'mean 0.5', 'O', 'Lowered until starters stopped going eight innings.'],
       ['Relief changes', 'dozen pitches', 'O', 'Relievers swapped between innings after about a dozen pitches; set while fixing starters\' innings.'],
-      ['NL rules', 'pinch-hitting', 'H', 'When the manager pinch-hits for the pitcher (the best bat on the bench), and the NL lineup rules. Set by hand.'],
+      ['Rules', 'current, 2023 on', 'P', 'Joe, 2026-10-06. The designated hitter for both sides; the shift ban (see Infield spots); every pitcher faces three batters or finishes the half-inning; two throws over a plate appearance (a third that missed would be a balk); the 18-in bases take 4.5 in off the steal of second and third; from the tenth inning of a regular-season game a runner starts on second. The pitch clock is not modelled (bb_game v1.6).'],
+      ['Reliever choice', 'for the three due up', 'H', 'Among the freshest arms (within ten pitches of load), the one with the most of the three hitters due up on his own side (bb_game v1.6; described since v0.4, but the hitters due up had never been looked at). Set by hand.'],
+      ['NL rules', 'when asked for', 'H', 'The pitcher bats and the manager pinch-hits for him (the best bat on the bench), for a caller who asks; no game plays them by default since bb_game v1.4. Set by hand.'],
       ['Intentional walk', 'gap .075 wOBA', 'O', 'The manager\'s bar: the expected-wOBA gap to the next hitter he needs, with first base open and a man in scoring position, late and close. Its mean sized to the league\'s .10-.16 a team-game (bb_game v0.9).'],
       ['Throw over', 'PK_T 0.915 s + move', 'O', 'A throw over beats a runner back when it is quicker than half his jump plus a 3.5 m lead at 6 m/s; the pitcher\'s pickMove (sd 0.06 s) moves it. Sized to the league\'s .05 pickoffs a team-game; the throws (about one a game) are assumed.'],
       ['Late defence', 'glove bar .012 runs', 'O', 'From the 8th with a one- to three-run lead: a bench glove in when the runs it saves over the innings left beat the bat it costs, by the manager\'s bar. Not measured: .26-.29 a team-game.'],
@@ -336,6 +345,7 @@ td.basis { color: var(--muted); }
       ['Past the catcher', 'by height band', 'O', 'The chance a pitch gets by the catcher, by where it crosses, against his blocking: set by hand in proportion and scaled to the league\'s wild pitches per game, now that the share of pitches in the dirt is the league\'s (bb_game v0.7).']]]
   ];
   var E = [
+    ['s_read', 'e_platoon'], ['d_arm', 'e_platoon'], ['d_release', 'e_platoon'],
     ['s_plan', 'e_aim'], ['p_command', 'e_aim'], ['d_levels', 'e_aaa_cmd'], ['p_command', 'e_aaa_cmd'], ['d_scout', 'e_aaa_cmd'], ['d_levels', 'e_slots'], ['s_read', 'e_slots'], ['d_arm', 'e_slots'],
     ['d_height', 'd_weight'], ['d_height', 'd_swinglen'], ['d_weight', 'd_bat'], ['d_weight', 'd_power'], ['d_athletic', 'd_power'], ['d_athletic', 'd_run'], ['d_athletic', 'd_field'], ['d_weight', 'd_run'], ['d_athletic', 'e_athletic'], ['d_levels', 'e_promo'],
     ['d_weight', 'p_batspeed'], ['d_swinglen', 'p_batspeed'], ['d_power', 'p_batspeed'], ['d_bat', 'p_batspeed'], ['d_style', 'p_attack'], ['d_style', 'p_pull'], ['d_style', 'd_swinglen'], ['d_style', 'e_style'], ['d_armlen', 'p_cover'],

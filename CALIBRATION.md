@@ -1,6 +1,6 @@
 # Calibration log
 
-`CALIBRATION.md · v3.3 · 2026-10-04`
+`CALIBRATION.md · v3.4 · 2026-10-06`
 
 This file records where the engine stands against MLB and what is known to be off. Per Joe (2026-09-29), calibration is deliberately loose at this stage. Tuning hard now could hide real mechanisms we haven't built yet, such as fielding, base running, managers, weather and parks. Each gap below is either a missing mechanism or a trait mean that was left alone on purpose.
 
@@ -1143,6 +1143,620 @@ Seed 3: before 300 games, after 600; at seed 11 (300 and 600 games) the ratio we
 
 **What is left.** The run-conversion ratio came from .905-.909 to .926-.988 (three seeds of 200 games; .956 and .940 over 600 games at seeds 3 and 11; the league 1.01), most of it the first bug: a second runner scoring. Runs are 4.06-4.54 a team-game against 4.45, now within the seeds' spread of the league on two seeds of three, with strikeouts 2.5 points low and walks a point high (the engine, #31). What is left of the conversion is not in the bases' bookkeeping, which the invariants check now holds clean over 6,000 games at three seeds (apart from one 18-inning tie a run): it is hitting with men on base, where the league gains 20-45 points of BABIP from the hole a held runner opens and the infield's depth, and the model gains nothing; and the sacrifice fly, where a man on third scores on an air out half as often as the league's. The next suspect is MO - the infield with men on base: measure the league's infield positions and the ground-ball hit rate by base state and by where the ball went (the hit coordinates), and which out its infielders take by the runners' and the batter's speed; then TU and FO together, one refit of the runners' margins.
 
+## The designated hitter for both sides, the league's run table, and five jobs at once (bb_game v1.4; 2026-10-05)
+
+**The designated hitter.** `simGame` drew AL or NL rules at random when a caller gave none, so the pitcher batted in half the games of every headless check (run_games, runs_check, bip_check, xbt_check, shape_check, level_check), measured against 2025's league, where no pitcher batted. bb_game v1.4: a game given no rules plays the designated hitter for both sides; invariants_check v0.2 names NL rules for half its games so the pitcher's spot is still checked. The new baseline on the Mac (`diag_out/base_dh`, seeds 3 / 11 / 29): runs 4.37 / 4.50 / 4.39 (league 4.45), K% 19.5 / 19.1 / 18.7 (22.2), BB% 8.6 / 9.5 / 9.4 (8.4), BABIP .268 / .263 / .267 (.291). Without the pitchers at the plate the strikeout rate fell, as expected: the strikeout gap was a little larger than it had looked.
+
+**The league's run table.** The bug audit's RE24 from 42 days of 2025 (`statcast/runs_league.py`) ran high with men on and none out. Recomputed for innings 1-9 with game-bootstrap 90% intervals beside FanGraphs' 2010-15 table, 21 of 24 states agreed within their intervals. Three none-out states with a man on second ran high: second only 1.29 (1.19-1.40) against 1.10, first and second 1.67 (1.53-1.79) against 1.44, bases loaded 2.92 (2.48-3.35) against 2.28. The data had no gaps (at-bat numbers contiguous within every half-inning; only extra innings started with a runner on). It may be a real 2025 effect (pickoff limits and bigger bases since 2023); the men-on-base job weighted those three states lightly. That job later fixed a different fault in the same script's transitions (runs_league v0.2: a force out had been counted as the batter's out); RE24 and BaseRuns were unchanged by it.
+
+**Five jobs at once.** From `dh-everywhere`, four jobs ran in parallel on Joe's Mac, each in its own git worktree, under shared rules (`docs/briefs/2026-10-05_parallel_rules.md`): write-ups in `docs/sections/` rather than this file, one suite or chain at a time, one pull request each. The platoon and ground-ball jobs ran in Joe's Fable sessions, the men-on-base and fouls-and-chases jobs as Opus agents. A fifth job, the field follow-up (2026-10-06), took on the ground-ball job's costs. Their write-ups follow as written, in the order they were combined, with the integration's own notes between them.
+
+## Men on base: the infield's positions and throws, the tag-up and the margins (bb_field v1.8-v1.10, bb_game v1.5; 2026-10-05)
+
+The brief (`docs/briefs/2026-10-05_men_on_base.md`), on branch `men-on-base` from `dh-everywhere` (engine v3.1, bb_game v1.4), on the Mac under jsc. Runs: the league's play with men on base (new: `statcast/men_on_base.py`, 42 days of 2025, 564 games): hitting by base state with a fixed effect for each batter and pitcher, ground-ball hit rate by base-out state and direction, which out the infielders take, the tag-up by depth, throwing errors on infield grounders; where the league's fielders stood (new: `statcast/infield_positioning.py`, Baseball Savant's fielder positioning, 2025, by batter side and runners on); the model measured the same way (new: `headless/mob_check.js`); `headless/runs_check.js` (600 games, seeds 3, 11, 29) and `headless/xbt_check.js` before and after each step; sweeps of the margins and the pivot (600-1,000 games a setting); the refit chain and the suite after each step against the shared baseline (`dh/diag_out/base_dh`).
+
+**A measurement bug first** (`statcast/runs_league.py` v0.2). The league's measure counted a force out and a fielder's choice out as the batter's out, but 98% of batters who grounded into a force out were on base at the next plate appearance. So the forced runner was scored 'left', not out: runners forced out ran .69 a team-game where they were 1.45, and the force at second on a ground ball with a man on first counted as 'batter out' where `runs_check` counts the model's as a fielder's choice. Measured alike, the league made .84 fielder's choices a team-game to the model's .28, and its infielders took the lead runner far more often than the model's. The bug audit had read it the other way (.13 against .32). A play's outs had also gone to the lead runner first, so an inning-ending double play with men on first and third put the man on third out; they now go to the trailing runners. The RE24 table and BaseRuns are unchanged.
+
+### What the league showed
+
+**Hitting with men on base is mostly who is hitting** (`men_on_base.py` A; a linear probability model with a fixed effect for each batter and pitcher, then with the contact's own expected hit rate (Statcast's xBA from exit speed and launch angle) as well; 90% intervals from 40 bootstrap draws of whole games):
+
+| BABIP gain over the bases empty | raw | batter and pitcher fixed | and the contact's xBA |
+|---|---|---|---|
+| all balls in play, a man on first only | +.024 [+.013, +.032] | +.010 [-.003, +.017] | +.013 [-.002, +.016] |
+| all balls in play, a man in scoring position | +.033 [+.022, +.041] | +.010 [-.014, +.012] | +.013 [-.001, +.016] |
+| on the ground, a man on first only | +.045 [+.029, +.065] | **+.036 [+.007, +.049]** | +.034 [+.009, +.047] |
+| on the ground, scoring position | +.032 [+.018, +.045] | +.011 [-.016, +.020] | +.016 [-.011, +.020] |
+| in the air, a man on first only | +.008 | -.007 | -.003 |
+| in the air, scoring position | +.038 | +.015 | +.009 |
+
+Levels: BABIP .281 / .305 / .314 (empty / on first / scoring position), on the ground .238 / .283 / .270, in the air .314 / .322 / .352. Two thirds of the raw gain was the batters and pitchers who come up with men on. What survived the control was a ground ball with a man on first (+.036), the fielding, not the contact (xBA flat at .250-.254). K% fell with men on (-.016 with a man on first, batter and pitcher fixed).
+
+**Where the infield stood** (Savant, 2025, every fielder with 10+ PA, weighted; depth ft from home, angle deg, + toward first):
+
+| | vs RHB, empty | vs LHB, empty | vs RHB, man on first only | vs LHB, man on first only |
+|---|---|---|---|---|
+| 1B | 113.7, +29.8 | 123.6, +37.8 | 87.9, +40.5 (holding) | 88.8, +41.1 |
+| 2B | 153.0, +6.8 | 148.3, +19.0 | 148.9, +6.7 | 143.8, +18.8 |
+| SS | 148.3, -18.1 | 152.3, -6.0 | 145.0, -17.2 | 149.1, -5.5 |
+| 3B | 122.3, -36.5 | 116.0, -27.1 | 119.1, -36.6 | 114.6, -27.3 |
+
+The model's infielders turned toward the pull side from a central spot by 1.0 deg per deg of pull (2B, SS), 0.8 (3B), 0.2 (1B): against a right-handed hitter the SS stood at -24 deg, the 3B at -40, the 2B at +4, 5-7 deg further round than the league's, and the opposite-field hole let through .46 of ground balls against .31. .63 of the league's pitches with a man on first only came with fewer than two out. With a man on third and fewer than two out, Statcast's 'Strategic' infield alignment (the infield in) ran .37 of pitches against .079 with third empty: .75 with first open, .18-.22 with first occupied; by the fielding side's lead, never when it led by two or more, .4-.85 otherwise, more late.
+
+**Ground-ball hit rate by the positioning the state implies** (field frame, direction in deg, + toward right field):
+
+| | <-30 | -30..-15 | -15..0 | 0..15 | 15..30 | >30 | all |
+|---|---|---|---|---|---|---|---|
+| bases empty | .321 | .223 | .271 | .287 | .174 | .193 | .237 |
+| man on first, 2 out (holding) | .254 | .189 | .217 | .320 | .214 | .301 | .240 |
+| man on first, <2 out (holding, DP depth) | .417 | .264 | .287 | .267 | .276 | .344 | .302 |
+| first and second, <2 out | .420 | .388 | .200 | .327 | .226 | .254 | .303 |
+| man on third, <2 out | .351 | .364 | .222 | .338 | .231 | .417 | .319 |
+| man on second only | .284 | .261 | .176 | .331 | .162 | .244 | .241 |
+
+Holding the runner opens the right side (>30 deg .301 against .193) but closes the left; the gain comes with fewer than two out.
+
+**Which out the infielders took** (ground balls an infielder fielded, a man on first, fewer than two out, 1,699): a double play .403, the lead runner out and the batter safe .274, the batter out .180, a fielder's choice with no out .036, a hit .101. Among single outs the lead runner .60: more with a fast batter (.71 against .47 slow), less with a fast runner (.49 against .70 slow), more on hard balls (.72-.73 at 90+ mph against .52 under 80), by fielder SS .69, 2B .67, 3B .64, 1B .54, P .28. Once the force at second was made the relay beat the batter .60 of the time (.73 / .59 / .47 for slow, middling and fast batters). Covers (play descriptions): on a ball to third the throw to second went to the second baseman 239 times in 267; on a 3-6 double play the relay went to the pitcher covering 19 times, the first baseman back at the bag 11.
+
+**The tag-up** (caught balls, fewer than two out; outcome from the play's description): a man on third scored .626 of the time (infield catches held always; LF .80, CF .90, RF .87), out .020; by depth 200-250 ft .35 scored (.05 out), 250-280 .67 (.15 out), 280-300 .93 (0), 300+ .98-1.00. A man on second took third .21 (.07 to LF, .36 to CF, .45 to RF; .41 at 320-340 ft, .71 at 340-360).
+
+**Throwing errors on infield ground balls** (play descriptions): .0123 a ground ball, rising with the batter's speed (.0054 / .0146 / .0167, slow to fast) and falling with the exit speed (.0149 under 80 mph, .0089 over 100); the pitcher's the most (.0219) on the shortest throws. 56% put the batter on base by the error, 28% came on a single.
+
+**The runner from a standstill**: Statcast's running splits (549 hitters, 2025, every 5 ft) fit an exponential rise to sprint speed, 1 - exp(-t / 0.78 s), at rmse .054 s (a constant acceleration .082): the average runner covers 90 ft in 4.11 s. Statcast's home to first runs .44 s (sd .08) longer than the split to 90 ft: the swing's finish.
+
+### What was built
+
+**1. MO: the infield with men on base** (bb_field v1.8, bb_game v1.5; four commits).
+- *Positions* (measured): the league's spots by batter side, shading toward a hitter's pull beyond the average at the rate that turns one hand's spots into the other's (2B, SS 0.54 deg per deg, 3B 0.42, 1B 0.36); the first baseman holds a runner whenever second is open; with a force at second and fewer than two out the middle infielders and the third baseman play at double-play depth (the 'first only' shift over .63); with a man on third and fewer than two out the manager brings the infield in as often as the league's did by first base, inning and lead (one draw a plate appearance). The 2023 rule holds them: two infielders each side of second, all four on the dirt. Infield in stands on the line through the bases (2B and SS about 102 ft out, the corners about 92): a definition, as Statcast publishes no depth for it. bb_game places the infield at each plate appearance and again as the ball is hit. *This plays the 2023 shift rule against Joe's pre-2023 'shifts allowed' (bb_game's RULES): for Joe to decide.*
+- *Covers* (measured): the second baseman covers second on a ball to third; a double play's relay goes to the man covering first (the pitcher, or the first baseman back), thrown with the pivot man's arm (plays_check 7, 8).
+- *The throw* (a decision from measured values): for each runner he could play, the fielder weighs the runs that would score plus the league's RE24 of the bases and outs left, if the throw gets him and if not (and for a force at second the relay's chance at the batter), and throws for the lowest. It had counted expected outs and tried a force at second only when it was .6 likely (plays_check 9).
+- *The pivot* (fitted, class O): at double-play depth the relay beat the batter .87-.91 of the time once the force was made; PIVOT 0.35 s (by hand) -> 0.65 s, swept 0.55-0.85 at seeds 3 and 11, fitted to the .60 overall; the slope by the batter's speed is the check.
+
+Result (mob_check, seed 3, 600 games, after the chain; model | league): lead runner on .51 of single outs | .60 (.13 before); by the batter's speed .61 / .50 / .38 | .71 / .59 / .47; by the runner's .36 / .54 / .59 | .49 / .59 / .70; by the exit speed .36 / .53 / .63 / .65 | .52 / .62 / .73 / .72; SS .76 | .69, 3B .52 | .64, 2B .45 | .67, 1B .40 | .54, P .26 | .28 - not fitted. Double plays .409 of chances | .403, the relay's success .62 | .60 (.75 / .63 / .45 by the batter's speed | .73 / .59 / .47). Fielder's choices .55 a team-game (.28 before | .84), runners forced out 1.24 (.87 | 1.45). Ground-ball BABIP with a man on first .259 (.240 before | .283), hits with men on 3.57 a team-game (3.46 | 3.61).
+
+**2. TU and FO: the tag-up and the sends home** (bb_field v1.9; five commits). First, as the brief asked, the tag-up loop read for a logic error: no bookkeeping slip after the audit's fix, but its decision was not the send's. A runner weighed the race with no error against SAFETY (0.30 s, the margin for taking second) and took the throw as sure to 0.15 s, so he went only when the throw had at most a 2% chance: no runner was ever thrown out tagging up (the league's .02 of chances), and the runner left from the batter's start out of the box.
+- *The runner from a standstill* (measured): a runner on base starting from rest runs the running splits' curve (90 ft in 4.11 s where he took 4.40); the batter keeps his run from the box, a man moving off his lead keeps ACC_R.
+- *The tag-up's read* (the send's): for third or home READ_SD (0.25 s), the margins SAFETY_3 and SAFETY_H by the outs he plays with once the catch is made, and the throw as sure as raceSD (plays_check 11).
+- *The cut-off man* (measured elsewhere): his catch, turn and throw takes the pivot's 0.65 s (was 0.45 s by hand).
+- *FO, the margins refitted* (class O, as before): one margin per base and outs for hits and tag-ups (a tag-up indexed by the outs after the catch); swept SAFETY_H -0.4 to 0.8 at three values of RACE_SD_M (the throw's spread: nothing decisive, left at 0.005), then SAFETY_3 0.55-0.95, 1,000 games a setting: SAFETY_3 [0.75, 0.75, 0.35] -> [0.95, 0.95, 0.35], SAFETY_H [0.7, 0.2, -0.4] -> [0.8, 0.2, 0].
+
+Result (1,000 games, seeds 3 / 11; model | league): a man on third scored on a caught ball .48 / .50 | .63 (.27-.36 before), out .05 / .04 | .02; a man on second took third on a catch .19 | .21; sacrifice flies .17 a team-game (.10-.13 before | .27). A man on second scored on a single .43/.40, .61/.56, .71/.70 with none, one, two out | .36, .51, .83; a man on first took third on a single .32/.28, .30/.31, .48/.46 | .28, .30, .42; a man on first scored on a double .33/.23, .41/.44, .44/.53 | .34, .31, .52, thrown out at home with two out .10 / .09 | .03 (.12 in #32). One margin cannot fit both: at the same margin hits are sent too readily and tag-ups too seldom (below).
+
+**3. T and DP.** DP is above (the pivot measured once double-play depth exposed it). T was built (bb_field v1.10, commit 3fa15f8): an infielder with less than 0.5 s to spare on his play rushes it and his throw scatters by up to 1.1 x armAcc more (fitted to the overall rate; additive and multiplicative forms swept). It brought throwing errors on infield ground balls from .0039 to .0098-.0123 (league .0123) with the league's slopes by the exit speed and men on, and all errors to .43 / .41 / .40 a team-game (.32 / .36 / .37 | .50); but throwing errors a team-game rose from .09 to .17 (league .13) and batters reaching on an error from .23 to .30 (.19), so it was **taken out again** (760c148): see what failed.
+
+### Bugs fixed (each its own commit with a test)
+
+1. **`runs_league.py`: a force out was the batter's out** (above). Check: the script now counts force outs whose batter was on base next (0.41 of 0.42 a team-game).
+2. **A fly the fielder was under and dropped was the batter's hit as well as the fielder's error** (bb_field v1.9): the scorer judged the batter's race to first as if no catch had been possible. Rule 9.12: he reaches on the error. plays_check 10 (three drops: hits before, errors after). About 0.02 hits a team-game.
+3. **A tag play that made the third out counted every run of a runner who tagged and reached home** (bb_field v1.10): rule 5.08(a) makes it a time play. Found by `invariants_check` once tag-ups could be thrown out (3 plays in 500 games); its rule now leaves a caught fly to bb_field (v0.3). plays_check 12 (19 plays, the run counted in all before, none after). `invariants_check`, 500 games at seed 11: clean but for the 18-inning limit; on the final code, 500 games at seed 29: no violations.
+4. **A double play's relay went to the first baseman who had just thrown to second** (with the covers above): outcome-neutral, as the pitcher covering is there long before a relay can be.
+5. `plays_check` v0.8: its constructed batters set the defence by their own drawn bat speed and pull, so the chain's pool refit moved the fielders and cases 1 and 5 failed on unchanged code; they now carry the pool's average, and case 1 throws true.
+
+### The line against the baseline
+
+Suite (200 games a seed) and runs_check (600 games a seed), seeds 3 / 11 / 29, each step after its chain:
+
+| | baseline (base_dh) | after MO | after TU and FO | final (TU, the time play; T out) | league |
+|---|---|---|---|---|---|
+| runs | 4.37 / 4.50 / 4.39 | 4.23 / 4.45 / 4.07 | 4.45 / 4.48 / 4.29 | 4.37 / 4.36 / 4.59 | 4.45 |
+| runs / BaseRuns (runs_check) | .962 / .962 / .947 | .943 / .957 / .952 | .960 / .974 / .962 | .950 / .954 / .955 | 1.011 |
+| hits | 8.27 / 8.13 / 8.27 | 8.07 / 8.02 / 7.94 | 8.27 / 8.01 / 8.04 | 8.29 / 8.34 / 8.45 | 8.26 |
+| doubles | 1.65 / 1.56 / 1.62 | 1.66 / 1.68 / 1.74 | 1.62 / 1.76 / 1.72 | 1.79 / 1.69 / 1.76 | 1.59 |
+| home runs | 1.36 / 1.42 / 1.33 | 1.27 / 1.36 / 1.25 | 1.25 / 1.33 / 1.32 | 1.31 / 1.34 / 1.36 | 1.16 |
+| walks | 3.31 / 3.65 / 3.63 | 3.48 / 3.53 / 3.33 | 3.42 / 3.48 / 3.46 | 3.25 / 3.46 / 3.52 | 3.16 |
+| strikeouts | 7.45 / 7.28 / 7.22 | 7.58 / 7.51 / 7.22 | 7.10 / 7.42 / 7.30 | 7.03 / 7.04 / 7.36 | 8.36 |
+| double plays | 0.70 / 0.75 / 0.68 | 0.73 / 0.77 / 0.78 | 0.73 / 0.65 / 0.72 | 0.70 / 0.76 / 0.62 | 0.75 |
+| errors | 0.37 / 0.30 / 0.33 | 0.38 / 0.40 / 0.35 | 0.32 / 0.36 / 0.37 | 0.38 / 0.37 / 0.41 | 0.50 |
+| triples | 0.15 / 0.11 / 0.11 | 0.14 / 0.11 / 0.14 | 0.14 / 0.14 / 0.13 | 0.12 / 0.13 / 0.14 | 0.13 |
+| AVG | .240 / .238 / .240 | .235 / .235 / .234 | .244 / .234 / .238 | .242 / .243 / .245 | .245 |
+| BABIP | .268 / .263 / .267 | .265 / .262 / .263 | .273 / .260 / .264 | .267 / .268 / .273 | .291 |
+| SLG | .415 / .415 / .410 | .402 / .410 / .404 | .410 / .409 / .414 | .416 / .417 / .422 | .404 |
+
+runs_check, final code (600 games; seeds 3 / 11 / 29 where given; model | league): BABIP with the bases empty, a man on first only, a man in scoring position .265 / .271 / .264 at seed 3 (.280 / .301 / .298), on the ground .237 / .253 / .233 (.237 / .282 / .269; with a man on first .253 / .261 / .272 at the three seeds, .240 at the baseline); a man on third scored on an air out .50 / .49 with none and one out (.65 / .62; .35 / .37 at the baseline), out .04 / .05 (.00 / .04); sacrifice flies .17 / .17 / .18 a team-game (.27; .13 at the baseline); fielder's choices .57 / .55 / .54 (.84; .28); runners forced out 1.26 (1.45; .87); double plays .72 (.71); a man on first thrown out at home on a two-out double .04 at seed 3 (runs_check), .08 / .06 (xbt_check, seeds 3 / 11) (.03; .08 at the baseline, .12 in #32); hits with runners on 3.51 (3.61; 3.46); reached on error .26 / .27 / .26 (.19; .23); throwing errors .09 / .09 / .07 (.13; .12); runners left in scoring position 4.24 (3.55; 4.37).
+
+The run-conversion ratio: **.962 / .962 / .947 before, .950 / .954 / .955 after** (league 1.011): unchanged within the spread the refit chain itself puts between runs of the same code (after MO .943 / .957 / .952, after TU and FO .960 / .974 / .962, with T .958 / .977 / .970 - each after its own chain, whose pool refit moves who plays). The lead-runner choice (MO) pulls it down, as it should: a lead runner put out costs about 0.15 runs that BaseRuns, counting no fielder's choice as a hit, does not see, so matching the league's choices widens the gap; the tag-up and the margins push it back up. Runs a team-game 4.37 / 4.36 / 4.59 against 4.45 (4.37 / 4.50 / 4.39 before); the worst seed beside the baseline: seed 11, runs 4.50 -> 4.36, ratio .962 -> .954. What is left of the gap is not the fielders' choices or the tag-up's rule: it is hitting in scoring position (AVG .307 against .344, BABIP .264 against .298) and the outfield throw's race (TB below).
+
+### Tried and not kept
+
+- **T, the hurried throw** (above): it matched the infield's throwing errors and their slopes, but the totals overshot because the model's outfield throws go wild about 3.5 times as often as the league's (throwing errors other than on infield grounders .07 a team-game against .02; a long throw's scatter grows with its length and nobody at the other end moves for it) and its fumbles already put the batter on too often (reached on error .23 against .19 before T). Keep it for when the long throw's receiver is built (hypothesis RX below).
+- **The pivot at 0.70 s** matched the lead-runner share better (.55-.58 against .60) but the relay's success worse (.55-.56 against .60); 0.65 s was kept for the relay, which the pivot alone governs.
+- **One margin for hits and tag-ups**: no value fits both (the sweep above); the residual is recorded as TB.
+- **The throw's spread (RACE_SD_M 0.005 -> 0.002 or 0)**: no decisive change in the joint fit; not changed.
+- **The hurry as a multiple of the length's scatter** (1.5-8): the third baseman's long throws went wild 1.5 times the league's rate; the additive form fitted the fielders better.
+
+### What is left, and the next suspects
+
+- **TB, the race on the throw home from the outfield.** At the same margins the model's hit-sends go too readily and its tag-ups too seldom; by depth a man on third tagging was still thrown out .15-.30 of the time at 250-320 ft where the league's were 0-.15, and scored .46-.75 where the league's scored .67-.98. The model's race margin for a man on third (the throw's arrival less his) ran -0.12, +0.25, +0.62, +0.96 s at 250-280, 280-300, 300-320, 320-340 ft; the league's outcomes (93% safe at 280-300 ft, no out in 53 sends) need about +0.5 s more at those depths and a smaller spread (raceSD grows 0.005 s a metre past 40 m: 0.39 s at 88 m, which turns a 0.25 s lead into a 26% out). Suspects: an outfielder's catch-to-release on a throw home (one transfer, 0.69 s, for every fielder), the throw's spread past 40 m (set by hand), the direct throw against the relay estimate. Test: Statcast's outfield throw times if they can be had, or the league's out rate by depth with the spread fitted jointly.
+- **Doubles rose** from 1.65 / 1.56 / 1.62 to 1.79 / 1.69 / 1.76 a team-game (league 1.59; .067 of balls in play against .063), from the first step on (after MO 1.66 / 1.68 / 1.74): the cost of this work on the suite. Suspects: the measured spots put the corners further off the lines than the hand-set ones did (the third baseman at -36.5 deg against a right-handed hitter, -40 before), so the model's grounders and liners down the lines (its bounce and the batter's stretch at SAFETY 0.30 s, set by hand) now show; and the slower cut-off man.
+- **RX, a receiver's reach on a long throw**: outfield throwing errors 3.5 times the league's; it blocks T.
+- **Who takes the ball between first and second** (bases empty; for the ground-balls job and the integration): with the league's spots the model's first baseman fielded .26 of grounders at 15-30 deg and turned .33 of them into infield hits (throwing to the pitcher covering), where the league's second baseman took .70 of them and the first baseman's went for hits .07: the fielder who can reach the ball first takes it, where the league's first baseman yields to the second baseman who has the play.
+- **Ground-ball BABIP with men on**: .253-.272 with a man on first after the build at the three seeds (.240 before; league .283, its controlled gain +.036, the model's now +.016-.035); in scoring position flat (.233-.244 against .270; the league's controlled gain +.011, not significant).
+- **Who comes up with men on.** Two thirds of the league's raw BABIP gain with men on (+.014 of +.024 with a man on first, +.023 of +.033 in scoring position) is the batters and pitchers who meet in those states; the model's raw gain was nil before this work (-.008 / -.006), so it has no such mix effect: its BABIP talent may vary too little between hitters and pitchers. The model's checks draw fresh teams every game, so the fixed-effects fit cannot be run on it as on the league (mob_check's csv rows give a meaningless fit: every player has four or five plate appearances); a season in bb_league would allow it.
+- **The infield in's depth** is a definition; **the shift rule** plays 2023's against Joe's pre-2023 choice.
+
+### Proposed changes for CALIBRATION.md
+
+**Mysteries.** 2 (hitting with men on): two thirds of the league's raw gain is who comes up with men on (batter and pitcher fixed: +.010 overall, +.036 on the ground with a man on first); the fielders' choices are now the league's, and the ground-ball gain with a man on first half there; the audit's 'fielder's choices .32 against .13' was the league's measure counting force outs as the batter's. 6 (sacrifice flies): .10-.13 -> .17 a team-game against .27; a man on third scores on a catch .48-.50 against .63; the rest is TB. 10 (double plays, errors, outs on the bases): double plays matched (pivot measured), the two-out double's out at home .12 -> .09-.10 against .03; throwing errors on infield grounders .0039 against .0123 (T built, not kept, until RX).
+
+**Hypotheses.** MO: built (positions, covers, the throw by run value). TU: built (the read, the runner from a standstill). FO: refitted. DP: PIVOT fitted 0.65 s. T: built with a cost, recorded (3fa15f8). New: TB (the outfield throw's race home), RX (a receiver's reach on a long throw), WB (who takes the ball between first and second).
+
+**Trait map constants** (bb_field): INF and INF_FIRST spots (measured, Savant 2025); FIRST_LT2 .63 (measured); IN_P, the infield in by first base, inning and lead (measured from Statcast's alignment); lineDepth for the infield in (definition); RE24 (measured, runs_league 2025); PIVOT 0.35 -> 0.65 s (class O); RELAY_XFER 0.45 s removed, the cut-off man takes PIVOT; TAU_RUN 0.78 s (measured, running splits); SAFETY_3 [0.95, 0.95, 0.35] and SAFETY_H [0.8, 0.2, 0] (class O, refitted); the shade 0.54 / 0.54 / 0.42 / 0.36 deg per deg of pull (measured from the L/R spots, proportional pull assumed).
+
+## Fouls and far chases without their costs; reaching contact (engines v3.2-v3.4 built and taken back out; 2026-10-05)
+
+The brief (`docs/briefs/2026-10-05_fouls_chases_costs.md`) asked for three things in order: FL, #31's v3.2 fouls without its BABIP cost; KB, #31's v3.3 far chases without its strikeout overshoot; RE's second half, whether reaching costs the contact's quality. Worked on the Mac on branch `fouls-chases-costs` from `dh-everywhere` (engine v3.1). Runs: the league's pitch-level data (42 days of 2025, tracked contact with bat 50+ mph unless noted), measured with new scripts that have model twins (`tools/diag/fl_*`, `aa_*`, `re_*`, `vmh_*`, `kbcurve.js`, `foldscore.js`); scratch engines with each candidate as a knob (`diag_out/scratch/`); for each engine built, the refit chain (`tools/diag/chain.sh`) and the suite (three seeds of 200 games, `compare.py` against the shared baseline `base_dh`). Three engine versions were built and suited: v3.2 (#31's last look, carried by hand), v3.3 (FL on top of it) and v3.4 (#31's DEC_UNSEEN on v3.1). Each moved its target and broke two or more other lines, so each is committed with its chain values for the record and then taken back out: **the engine at the end of the branch is v3.1, unchanged.** Results below are scoped to these runs.
+
+### 1. FL: where the folded contact lands
+
+**What #31 suspected, tested first: refuted for fastballs.** #31 thought v3.2's under-the-ball contact came down fair as pop-ups where the league's goes back foul. Fastball pop-ups in play (50+ deg) per tracked contact were .054 in the league, .043 in v3.1 and .051 in v3.2: v3.2's fastballs popped up no more than the league's. The extra pop-ups were breaking balls (below).
+
+**The league's fouls are grazes.** A third of the league's tracked fastball contact (.327; .245 over all kinds) was a foul at 10-70 deg whose exit speed followed the pitch's speed and not the bat's: fitted on both, exit speed = 14.9 + 0.655 x pitch speed + 0.006 x bat speed (balls in play: 19.0 + 0.049 x pitch + 0.943 x bat). They left at .817 of the release speed (sd .054); fouls at 10-70 deg piled up at .75-.85 of it (.212 of all fastball contact in those two bins). By launch angle and exit speed, the league's contact at 70-80 mph and 10-70 deg was 7,255 balls (24% of fastball contact), 84-91% of them foul: a ball that barely touched the bat and went on back. v3.2's grazes were .181 of fastball contact (.146 over all kinds), spread from .60 to .95 of the release speed with the most at .60-.70: on the collision's own curve (a 95-mph fastball, a 70-mph square swing, the offset stepped 0.05 in), with the low-speed friction of 0.5 a near-miss 2.2-2.6 in under the ball's centre came off at 62-73 mph, the friction dragging it forward with the bat; with 0.15 at 83-90 mph.
+
+| exit speed / release speed, fouls at 10-70 deg, share of fastball contact | .60-.70 | .70-.75 | .75-.80 | .80-.85 | .85-.90 | .90-.95 | grazes |
+|---|---|---|---|---|---|---|---|
+| league | .018 | .035 | .091 | .121 | .052 | .029 | .327 at .817 |
+| v3.2 (friction 0.5, last look 1 in) | .069 | .042 | .036 | .037 | .035 | .031 | .181 |
+| friction 0.25 (scratch on v3.2) | .021 | .029 | .051 | .077 | .050 | .033 | .241 |
+| friction 0.15 (scratch on v3.2) | .012 | .012 | .025 | .049 | .088 | .064 | .237 |
+
+**Where v3.2's BABIP cost came from: the breaking balls.** By pitch kind (all tracked contact, bat 50+ mph):
+
+| | attack | launch minus attack | launch | launch in play | foul share of contact | pop-ups in play per contact | in play GB / LD / FB / PU % |
+|---|---|---|---|---|---|---|---|
+| league fastballs | 5.5 | 18.1 | 23.6 | 14.8 | .506 | .054 | 42 / 22 / 25 / 11 |
+| v3.2 fastballs | 6.7 | 12.7 | 19.4 | 12.8 | .474 | .051 | 44 / 20 / 27 / 10 |
+| league breaking | 11.6 | 1.1 | 12.7 | 14.0 | .442 | .058 | 42 / 22 / 25 / 10 |
+| v3.1 breaking | 15.9 | -6.2 | 9.7 | 16.0 | .565 | .052 | 41 / 20 / 27 / 12 |
+| v3.2 breaking | 17.1 | 0.9 | 18.0 | 21.1 | .560 | .076 | 34 / 19 / 30 / 17 |
+| league off-speed | 12.5 | -4.8 | 7.7 | 9.1 | .416 | .049 | 50 / 22 / 19 / 8 |
+| v3.2 off-speed | 14.2 | 1.3 | 15.6 | 18.8 | .513 | .069 | 37 / 19 / 29 / 14 |
+
+v3.2's aim under the ball (1.0 in for every kind) brought the breaking balls' launch minus attack to the league's (0.9 against 1.1); in v3.1 the breaking balls had been topped (-6.2), which hid a bat path 4-5 deg too steep. Unmasked, it launched them 5 deg too high (in play 21 against 14), and they were fouled too often by spray, so what stayed fair was the under-struck part. Both come from where breaking balls are met:
+
+| about each hitter's mean depth (in) | FF | SI | FC | SL | ST | CU | CH | FS |
+|---|---|---|---|---|---|---|---|---|
+| league | -4.2 | -4.0 | +0.4 | +4.0 | +5.6 | +6.6 | +4.8 | +5.1 |
+| model (v3.2) | -4.2 | -3.5 | 0.0 | +5.2 | +6.8 | +9.4 | +4.0 | +5.1 |
+| league attack (deg) | 5.2 | 4.5 | 9.0 | 11.2 | 12.3 | 13.1 | 12.8 | 13.1 |
+| model attack | 6.0 | 6.6 | 10.2 | 15.2 | 17.0 | 19.6 | 14.1 | 15.1 |
+
+The league's contact depth rose about 1 in per mph of speed below the fastball up to about 9 mph and then flattened (curveballs, 15 mph slower, met 10.8 in further out front than four-seamers); the model's kept rising at 1 in per mph (13.6 in). And across pitch types the league's attack rose only 0.73-0.84 deg per inch of depth (within fastballs 0.97), the model's 1.0 everywhere. The bat's direction on breaking-ball contact pointed +10.2 deg to the pull side against the league's +5.7 (fastballs -5.5 against -5.6). So contact struck square vertically (launch minus attack -15 to +15) went foul .464 of the time on breaking balls against the league's .234, and .362 on off-speed against .206, nearly all pulled foul; on fastballs .231 against .226. The brief's "square contact fouled by spray .31 against .21" is the breaking and off-speed pitches. With the fouls at the bottom of the vertical spread removed, the breaking balls left in play were the high ones.
+
+**Built: v3.2 carried over, then v3.3 (FL).** v3.2 as #31 built it (LOOK_GAIN 1.3, LOOK_SD 1 in, raw barrel scatter x1.7, aim under the ball 1.0 in, VERT_MISS 0.09, SWING_R 0.82 m, pullBias -0.4; fit_population v0.7). v3.3 added the two things the grazes measure: the ball-bat friction 0.27 (was 0.5), fitted to the grazes' speed (0.2 gave .84 of the release speed, 0.25 .82, 0.3 .81; league .817; Cross & Nathan 2006 measured at least 0.50 at 4 m/s, Nathan et al. 2012 about 0.15 at game speed beyond 40 deg of incidence; square contact rolls on the bat under either cap); and the last look's error 0.5 in (was 1 in), fitted to the grazes' share of contact, with the raw barrel scatter x1.15 to keep the fastball whiffs (in a scratch engine on chained v3.2: 1 in gave grazes .233 of fastball contact and whiffs .173; 0.5 in x1.15 .303 and .170; 0.3 in .318 and .152). At 1 in, the correction had scattered the folded swings back across the barrel, many of them square; at 0.5 they stop at the edge of the ball.
+
+| (seeds 3 / 11 / 29) | base_dh (v3.1) | v3.2 | v3.3 | league |
+|---|---|---|---|---|
+| fastball fouls per swing | .327 | .389 | .446 | .451 |
+| fastball whiffs per swing | .162 | .169 | .168 | .174 |
+| K% | 19.5 / 19.1 / 18.7 | 19.9 / 19.8 / 20.2 | 22.3 / 22.3 / 23.0 | 22.2 |
+| BB% | 8.6 / 9.5 / 9.4 | 9.7 / 10.3 / 10.0 | 10.2 / 10.2 / 10.4 | 8.4 |
+| BABIP | .268 / .263 / .267 | .242 / .242 / .234 | .227 / .224 / .232 | .291 |
+| runs / team-game | 4.37 / 4.50 / 4.39 | 4.00 / 4.07 / 3.99 | 3.45 / 3.38 / 3.42 | 4.45 |
+| AVG | .240 / .238 / .240 | .219 / .217 / .213 | .199 / .195 / .198 | .245 |
+| pitches / team-game | 139 / 139 / 141 | 141 / 143 / 144 | 147 / 147 / 147 | 146 |
+| in play GB / LD / FB / PU % | 45 / 20-21 / 25 / 9-10 | 39-41 / 18 / 27-28 / 14-15 | 40-41 / 17 / 26-27 / 16 | 43 / 24 / 24 / 9 |
+| chase | .225 | .234 | .244 | .283 |
+| breaking balls chased 6-9 / 9-12 in below the zone | .16 / .09 | .17 / .11 | .19 / .10 | .36 / .28 |
+| contact score (90 targets) | .0630 | .0576 | .0601 | |
+
+v3.3 brought the fastball fouls, strikeouts and pitches to the league's, and the squared-up panel of the contact score from .060 to .021; on the worst seed (29) runs fell from 4.39 to 3.42 and BABIP from .267 to .232. With the breaking-ball contact as it is, every extra foul is a breaking ball pulled foul or a fastball graze, and what reaches the field is lofted: by kind in chained v3.3, breaking balls were fouled .620 of contact (league .442) and 20% of those in play were pop-ups (league 10%); fastball liners were 16% of fastballs in play (22). Recorded, not kept.
+
+**Tried and not built (scratch engines).**
+- The breaking balls' attack lowered by hand (5 deg): their launch did not fall (18.0 to 19.8): the vertical offset's timing term uses the planned path, so a flatter path put the barrel further under an out-front ball. Not a mechanism; it located the problem in the bat's path at the contact point, not in the aim.
+- RESID_S 0.07-0.10 with the aim re-raised: the breaking balls' launch came to the league's only with their launch minus attack 7-10 deg below it (the fastball-to-breaking gap by height 11-20 deg against 7-9). One aim cannot fit both kinds while the breaking balls' path is 5 deg too steep.
+- A lower aim with the sharper last look (0.7 in, 0.4 in): pop-ups per contact .051 and .044, but fastball launch in play 8.5 and 7.7 deg against the league's 14.8: the aim was measured from the fastballs.
+- The timing of slow pitches flattening (a soft cap on the prior's pull on timing, tanh with 18 ms): measured from the depth by pitch type above, and it reproduced it (curveballs +8.9 to +6.3 in, sweepers +6.7 to +5.3; league +6.6, +5.6); on v3.1 breaking balls were fouled .565 to .521 and popped up .052 to .042 per contact (in play 45 / 21 / 24 / 9 against the league's 42 / 22 / 25 / 10), but strikeouts per plate appearance fell .195 to .179 (fewer fouls and whiffs). On v3.3 it took the breaking balls' fouls from .620 to .571 and left the pop-ups. Not built alone (it would take two points of K from a model already short); it is half of the breaking-ball fix.
+
+**What is left.** The fold and the graze physics are measured and ready (friction 0.27, last look 0.5 in); what stops them is the breaking-ball contact: met too far out front on the slowest pitches (timing linear in the speed gap where the league's flattens), and with a path that rises too fast across pitch types. That is a new suspect (BC below), to fix before the fold is adopted again.
+
+### 2. KB: the two-strike picture
+
+**DEC_UNSEEN, carried over and fitted by direction.** On v3.1 with the policy refitted twice (scratch, 500 hitters; plate-appearance level strikeouts and walks, the far chases of breaking balls by direction, two-strike swings at breaking balls 6+ in inside the zone, the policy's rms):
+
+| | K / BB per PA | below 6-9 / 9-12 | away 6-9 / 9-12 | in 6-9 / 9-12 | two strikes, deep in the zone | rms by count / kind |
+|---|---|---|---|---|---|---|
+| v3.1 | .206 / .093 | .17 / .10 | .13 / .08 | .13 / .09 | .90 | .048 / .053 |
+| 0.5 both axes (#31) | .248 / .079 | .38 / .24 | .27 / .14 | .25 / .19 | .81 | .035 / .041 |
+| 0.5 up-down only | .219 / .084 | .35 / .26 | .12 / .06 | .13 / .06 | .88 | .033 / .036 |
+| 0.5 up-down, 0.25 across (built, v3.4) | .231 / .080 | .36 / .25 | .17 / .10 | .18 / .10 | .83 | .030 / .036 |
+| the same, two-strike commit 0.12 s (KB) | .211 / .081 | .34 / .23 | .18 / .08 | .15 / .11 | .88 | .028 / .036 |
+| league (game K% / BB%) | 22.2 / 8.4 | .36 / .28 | .21 / .15 | .25 / .14 | .96 | |
+
+**KB refuted on its premise.** A later two-strike commit point needs a quicker two-strike swing. The league's two-strike swing was shorter but slower, so it took as long: swing length over bat speed 69.4 ms with no strikes, 69.7 with one, 70.5 with two (7.35 / 7.29 / 7.19 ft at 72.4 / 71.5 / 69.8 mph, 74,000 swings). As a knob, a commit 55 ms later with two strikes did cut the strikeouts (.231 to .211 per plate appearance) and kept the far chases, but nothing measured says it is later, so it was not built. The two-strike curve is sharper than the no-strike one in the league, but on the model's policy that follows from the single two-strike threshold (with no strikes the 'on' and 'off' thresholds mix two curves), not from a sharper eye.
+
+**Built: v3.4 (DEC_UNSEEN 0.5 up-down, 0.25 across; class O, fitted to the league's chases by direction).** The chain and the suite:
+
+| (seeds 3 / 11 / 29) | base_dh | v3.4 | league |
+|---|---|---|---|
+| K% | 19.5 / 19.1 / 18.7 | 22.8 / 22.7 / 22.0 | 22.2 |
+| BB% | 8.6 / 9.5 / 9.4 | 7.6 / 6.9 / 7.5 | 8.4 |
+| BABIP | .268 / .263 / .267 | .267 / .271 / .255 | .291 |
+| runs / team-game | 4.37 / 4.50 / 4.39 | 3.91 / 3.99 / 3.63 | 4.45 |
+| OBP | .312 / .317 / .320 | .292 / .291 / .287 | .315 |
+| pitches / team-game | 139 / 139 / 141 | 135 / 136 / 135 | 146 |
+| chase | .225 | .274 | .283 |
+| breaking balls swung at, heart to 8+ in out | .70 .55 .37 .20 .06 | .61 .57 .47 .34 .14 | .69 .60 .46 .33 .15 |
+| breaking balls chased below, 6-9 / 9-12 / 12+ in (whiff per swing) | .16 / .09 / .03 (.74 / .75 / .92) | .41 / .28 / .12 (.59 / .67 / .71) | .36 / .28 / .11 (.78 / .91 / .97) |
+| two-strike swings at breaking balls, deep in the zone to the edge | .89 .91 .87 .79 | .82 .81 .79 .76 | .96 .92 .88 .82 |
+| fastball fouls per swing | .327 | .317 | .451 |
+| contact score (90 targets; by reach) | .0630 (.051) | .0708 (.073) | |
+
+It met the step's stated aim: the league's far chases with strikeouts at 22.0-22.8%, no overshoot (#31's v3.3 on v3.2 had 23.8-24.6). But walks fell past the league's (6.9-7.6), runs to 3.63-3.99 (worst seed 3.63 against 4.39), pitches to 135 and the contact score by reach worsened. The cause is in the curve: the picture's shift is proportional to each pitch's break still to come (measured in v3.4: curveballs pictured 9.6 in higher than their true place on average, sliders 5.7, sweepers 5.5, splitters 4.9, changeups 3.5), so it spreads the pictures and flattens the swing curve; the policy's one two-strike threshold then trades swings deep in the zone for chases, and breaking balls in the zone are taken for strikes (.82 against .96). The far chases are also missed too rarely (.59 / .67 / .71 against .78 / .91 / .97): reaching contact is too good. Recorded, not kept.
+
+**What is left.** The far chases come with DEC_UNSEEN, but its shift makes strikes look like balls. A form that shifts the picture only for pitches whose break carries them out of the zone has no measured basis yet; the next measurement is the league's swing rate at breaking balls by where they ended against where a pitch of that shape was headed at the commit point (the in-zone takes are the test). With the strikeouts the league's, the run gap would be BABIP's.
+
+### 3. RE: the quality of reaching contact (measured; nothing built)
+
+Fastball contact by distance from the zone's edge and by direction out of it (league from 42 days; model v3.1, 600 hitters x 40 PA). "Efficiency" is exit speed over Statcast's squared-up ceiling (1.23 x bat + 0.23 x pitch), so the bat speed lost to reaching (BAT_LOC, v3.0) is taken out; balls in play only:
+
+| | league n | league EV in play | league efficiency | model EV in play | model efficiency |
+|---|---|---|---|---|---|
+| heart (4+ in inside) | 15,186 | 94.3 | .851 | 91.9 | .838 |
+| edge, 0-4 in inside | 10,447 | 89.3 | .817 | 89.6 | .826 |
+| edge, 0-4 in outside | 4,220 | 82.9 | .772 | 85.4 | .801 |
+| 4-8 in outside | 839 | 74.5 | .709 | 79.7 | .767 |
+| 8+ in outside | 109 | 62.5 | .634 | 72.1 | .716 |
+| in toward the batter 0-4 / 4+ | 1,600 / 392 | 75.5 / 62.2 | .702 / .586 | 79.0 / 74.7 | .731 / .709 |
+| away 0-4 / 4+ | 1,099 / 193 | 86.6 / 77.7 | .802 / .752 | 87.5 / 79.7 | .823 / .768 |
+| below 0-4 / 4+ | 344 / 47 | 90.8 / 74.3 | .821 / .682 | 90.1 / 84.9 | .827 / .792 |
+| above 0-4 / 4+ | 1,177 / 316 | 88.7 / 87.7 | .848 / .853 | 84.3 / 78.5 | .811 / .779 |
+
+**Confirmed, and it depends on the direction.** Reaching cost the league's contact its quality beyond the bat speed: efficiency in play fell .14 from the heart to 4-8 in outside (the model's .07) and .22 to 8+ in (the model's .12). Most of it was inside (jammed: .586 at 4+ in against the model's .709) and below (.682 against .792, a thin sample); away the model was close (.768 against .752); above, the league's contact lost nothing (.85, as in the heart) while the model's lost .03-.06. The launch spread grew with reach alike in both (launch sd from the heart to 8+ in outside: 29 to 35 deg in the league, 29 to 37 in the model). So the model's reach cost (every execution error x (1 + reach / coverage), the same in every direction) is too small inside and below and too large above.
+
+**Tried: the hands cover less of a reach (HAND_MISS split in and out; scratch on v3.1 with DEC_UNSEEN).** HAND_MISS (0.3, the share of a pitch's distance in or out that the hands do not cover) has no stated measurement. Out 0.45 brought the away efficiency to the league's (0-4 in .793, 4+ in .753 against .802 and .752); in 0.5 took the inside 0-4 in to .630 (league .702, too far) while 4+ in stayed .685 (league .586), because the deepest jams became misses inside the hands rather than weak contact. Both raised the fastball whiffs (.174 to .183-.195, misses past the end and inside the hands; the league's swings missing by 3+ in are already .014 against the model's .023). Not built: the league's reaching contact gets weak without missing more.
+
+**What is left.** The cost of a reach should depend on its direction: inside jams the ball on the handle as contact, not as a miss (the model counts contact to 14 in from the sweet spot, where its collision efficiency is about -0.11; the league's jammed balls in play imply about -0.05); a low reach tops the ball; a high reach costs bat speed (BAT_LOC has it) but not the strike. Proposed as hypothesis RD.
+
+### Proposed changes to the mysteries and hypotheses tables
+
+- **Mystery 1 (fouls and strikeouts):** the fouls are grazes (a third of the league's tracked fastball contact; exit speed follows the pitch's speed, at .817 of it). v3.2 + v3.3 brought fastball fouls to .446 and K% to 22.3-23.0 but BABIP to .224-.232 and runs to 3.4: blocked by BC.
+- **Mystery 4 (far chases):** v3.4 brought them (chase .274; 6-9 / 9-12 in below .41 / .28) with K% 22.0-22.8, but walks to 6.9-7.6 and runs to 3.6-4.0: the in-zone takes (DF).
+- **Mystery 5 (batted-ball mix and BABIP):** add that breaking balls are fouled .565 of contact against .442 (pulled foul) and that their path is 4-5 deg too steep, hidden in v3.1 by topping; any change that raises the aim exposes it.
+- **Mystery 7 (reaching contact):** restate with the efficiency in play by direction (table above): inside .709 against .586, below .792 against .682, above .779 against .853.
+- **New hypotheses:**
+  - **BC, breaking-ball contact** (mysteries 1, 5): slow pitches are met too far out front because the timing's pull toward the expected pitch grows linearly with the speed gap where the league's flattens past about 9 mph (curveballs +9.4 in against +6.6), and the bat's path rises 1.0 deg per inch across pitch types where the league's rises 0.73-0.84. Test: the timing cap (measured from depth by pitch type) with the attack across types; judge by the breaking balls' foul share (.442), pop-ups (.058 per contact) and attack (11.6). First in line: it blocks FL.
+  - **DF, the decision's picture flattens** (mysteries 4, 1): DEC_UNSEEN's shift spreads with each pitch's break and takes breaking balls in the zone. Test: the league's swings at breaking balls by where they ended against where their shape was headed at the commit point.
+  - **RD, the reach's cost by direction** (mystery 7): see section 3.
+  - **KB:** refuted (two-strike swings take as long: 70.5 ms of swing length over bat speed against 69.4).
+  - **FG and FL:** FG confirmed with its physics measured (the grazes); FL's suspect (fastball under-contact landing fair) refuted, replaced by BC.
+- **Order:** BC first (it unblocks the fold, which is ready), then DF (it unblocks DEC_UNSEEN), then RD.
+
+### Proposed trait map constants (none adopted on this branch)
+
+- `MU_BAT` 0.27: ball-bat friction on a glancing strike, fitted to its own measurement (the grazes' speed, .817 of release); ready when the fold returns.
+- `LOOK_SD` 0.5 in with `motorIn` x1.15 (x1.96 over v3.1 in all): the last look's error, fitted to the grazes' share of contact (.33 of fastball contact); with v3.2's `LOOK_GAIN` 1.3 (class O).
+- `DEC_UNSEEN` 0.5 up-down, 0.25 across: class O, fitted to the league's chases by direction.
+- A timing cap of about 18 ms on the prior's pull (candidate for BC), fitted to the league's contact depth by pitch type.
+- `HAND_MISS`: no measurement found; a split (out 0.45) fits the away efficiency but costs whiffs.
+
+### Commits on the branch
+
+`14c4454` FL diag scripts; `3d467d9` v3.2 carried over and chained (recorded); `d1e273e` v3.3 FL and chained (recorded); `bd6e19d` v3.2 and v3.3 taken back out; `c7075d2` v3.4 DEC_UNSEEN and chained (recorded); `a8e3b8a` v3.4 taken back out; `b3b296b` KB and RE diag scripts. The chained engines can be restored from their commits (`git show d1e273e:bb_engine.js`, `git show c7075d2:bb_engine.js`).
+
+## The current rules (bb_game v1.6, bb_schedule v0.8, bb_league v0.2; 2026-10-06)
+
+Joe (2026-10-06): the model plays the current rules, 2023 on (until then pre-2023 with shifts allowed). Every number the model is measured against is 2025's, and the playoff forecasts are for 2026.
+
+- The designated hitter for both sides in every game, the TV's schedule and the league season included (bb_schedule v0.8, bb_league v0.2). NL rules remain for a caller who asks.
+- The shift ban: two infielders on each side of second, all four on the dirt (the men-on-base job's measured 2025 positions, bb_field v1.8).
+- Every pitcher faces three batters or finishes the half-inning.
+- At most two throws over a plate appearance (a third that missed would be a balk, so he does not make one).
+- The 18-in bases take 4.5 in off the steal of second and third.
+- From the tenth inning of a regular-season game each half starts with the man who batted before its leadoff hitter on second (`o.ghost`; the postseason passes `ghost: false`).
+- The pitch clock is not modelled: it sets the pace, and nothing in the model depends on the time between pitches.
+
+The reliever is now picked for the three hitters due up: among the freshest arms (within ten pitches of load), the one with the most of them on his own side. bb_game's header had described a matchup choice since v0.4, but the hitters due up were never looked at (`def.oppOrder` was never set).
+
+invariants_check v0.4 checks the three new rules. Against the old game file (400 games at seed 11) it found three pitchers who left before facing three batters or finishing a half, and one plate appearance with three throws over; with v1.6 it found none (400 games at seed 11, 300 at seed 29). On the suite (seeds 3 / 11 / 29, before and after): runs 4.37 / 4.36 / 4.59 to 4.57 / 4.64 / 4.60 (the extra-innings runner, and the seeds' spread), K% 18.4 / 18.4 / 19.1 to 17.8 / 18.4 / 19.1, BB% 8.5 / 9.0 / 9.1 to 9.0 / 9.2 / 9.0. The three-batter minimum barely bound: the old managers had broken it three times in 400 games.
+
+## The platoon split: the release behind his shoulder (engine v3.2; 2026-10-05)
+
+Joe's brief (`docs/briefs/2026-10-05_platoon.md`): the model's same-side batters did better, the league's do worse; measure the league's split by component and pitch type with the batter and the pitcher held fixed, measure the model the same way, find what gives the model's same-side batter his edge, and build the mechanism the measurements support. Runs: the league's split from pitch-level Statcast (42 days of 2025, 145,252 pitches, 37,238 plate appearances; new: `statcast/platoon.py`, which writes `statcast/platoon_2025.json` and `.js`); the model's split from the same men drawn with both hands on the same dice (new: `headless/platoon_check.js`, 300 batters x 40 PA x 4 hand combinations x 60 pitchers, seeds 3 and 11, every pitch valued in runs with the league's run values by count and ball-in-play value by launch angle and exit speed); scratch runs with the pitcher's plan made blind to the batter's side (`tools/diag/platoon_sym.js`); the fit of one constant over seeds 3 and 11 (`tools/diag/platoon_k.js`, `tools/diag/platoon_score.py`); the refit chain and the suite.
+
+**Who is batting and who is pitching hide most of the split.** Raw, right-handed batters showed no platoon split at all (wOBA .318 against .319, same side minus opposite) and left-handed batters a large one (-.032): left-handers are kept away from left-handed pitchers, and the left-handers who face them are the ones who can. Within batter the splits were -.009 (right) and -.042 (left); within pitcher -.013 and -.024. Both at once can be held fixed, but then only the two hands' average is identified: with a batter effect and a pitcher effect in the regression, the right-handed split's dummy and the left-handed split's dummy differ by terms the effects absorb (the batter's hand, the pitcher's hand), so a two-way regression gives one number, their sum. The two-way average was **-.028 of wOBA (se .007)**, and every component below is that two-way average unless it says otherwise. (The one-way splits are per hand but each carries the other pool's quality with opposite signs on the two hands, which is why they straddle the two-way number.)
+
+**The league's split by component** (same side minus opposite, two-way):
+
+| | split | se |
+|---|---|---|
+| wOBA | -.028 | .007 |
+| K per PA | +.008 | .005 |
+| BB per PA | -.015 | .003 |
+| HR per PA | -.007 | .002 |
+| xwOBA on contact | -.041 | .006 |
+| exit speed | -2.5 mph | 0.2 |
+| launch angle | -3.1 deg | 0.4 |
+| in zone (the pitcher's choice) | +.018 | .003 |
+| swing | -.001 | .003 |
+| zone swing | -.026 | .004 |
+| chase | +.013 | .004 |
+| zone contact | -.009 | .004 |
+| whiff per swing | +.013 | .004 |
+| called strike per take | +.032 | .004 |
+| run value, per 100 pitches | -0.61 | 0.15 |
+
+The largest piece was the contact: same-side contact came off 2.5 mph slower and 3 deg lower, worth .041 of xwOBA, where the discipline moved by a point or two (fewer swings at strikes, a few more chases and whiffs, more called strikes). Taking the eight pitch types apart (run value per pitch, the types' shares against their values), the split was almost all within type: for left-handed batters, where the raw split is not confounded away, the mix (which types he sees) was worth -0.07 runs per 100 pitches and how each type played against him -0.62. The pitch mix by platoon is large (same-side batters see sinkers x1.7, sliders x1.5, sweepers x2, and changeups x0.3, splitters x0.4) but nearly value-neutral in the league.
+
+**By pitch type**, the same-side penalty (two-way) sat on the pitches that move sideways and on contact: whiffs per swing sliders +.047, sweepers +.092, cutters +.046, four-seamers +.020; sinkers -.015 but chased +.097 (the one running in at him is swung at and jammed: exit speed -5.1 mph); xwOBA on contact -.064 to -.071 on sinkers, sliders, sweepers and curveballs, -.048 cutters, -.015 four-seamers, and +.013 on changeups, the one type that did not play worse from the same side. By location in the batter's frame, same-side pitches off the plate away were whiffed .60 against .37 (sliders and sweepers breaking away against changeups and sinkers running away), and off the plate inside .19 against .46 with twice the swings (.31 against .21: the sinker that looks like a strike and runs in).
+
+**The read worsens with the release's angle behind his line of sight, not with the pitcher's hand as such.** Each release was placed against the batter's eye (1.8 ft from the plate's centre line toward him, 0.7 ft in front of the plate's point): psi, the angle toward his own side, + when the release sits behind his line of sight. Same-side releases sat at +0.12 deg (sd 0.79), opposite-side at -4.02 (sd 0.80). With batter, pitcher and pitch type held fixed, against the usual opposite-side release (-4.5..-3.5 deg):
+
+| psi band (deg) | -9..-4.5 | -3.5..-2.5 | -1.5..-0.5 | -0.5..0.5 | 0.5..1.5 | 1.5..9 |
+|---|---|---|---|---|---|---|
+| share of pitches | .135 | .110 | .095 | .241 | .139 | .019 |
+| whiff per swing | -.007 | +.005 | +.019 | +.027 | +.026 | +.003 |
+| chase | -.000 | +.014 | +.016 | +.024 | +.028 | +.058 |
+| zone swing | -.024 | +.024 | +.032 | -.010 | -.034 | -.057 |
+| zone contact | +.003 | +.005 | -.007 | -.017 | -.025 | +.012 |
+| xwOBA on contact | +.001 | -.000 | -.034 | -.043 | -.036 | -.041 |
+| exit speed (mph) | +0.2 | -0.3 | -2.8 | -2.7 | -2.6 | -2.3 |
+| bat speed (mph) | +0.05 | -0.36 | -1.23 | -1.08 | -0.95 | -0.73 |
+| launch minus attack (deg) | -0.9 | -0.1 | -2.0 | -3.3 | -3.5 | -5.6 |
+| topped (miss under -5 deg) | +.018 | +.008 | +.023 | +.047 | +.045 | +.087 |
+| run value per 100 | +0.04 | -0.14 | +0.03 | -0.62 | -0.74 | -1.43 |
+
+The opposite-side bands are flat; the penalty is there in full by the first same-side band and the zone judgement keeps worsening as the release goes behind him (zone swing +.032 to -.057, chase +.016 to +.058, launch minus attack -2.0 to -5.6). The sidearmer's platoon split is this ramp. Without the type dummies the whiff and exit-speed rows ramped too (+.011, +.026, +.027; -2.3, -3.0, -3.1), which was the low slots' repertoires (sinkers and sweepers), not the read.
+
+**What the swing itself does against a release behind him** (bat tracking, full swings of 50+ mph; two-way with pitch type held fixed): bat speed -0.99 mph (se .05), swing path tilt -1.1 deg, swing length -0.02 ft, contact depth +0.3 in, and the barrel higher on the ball: launch minus attack -2.8 deg (se .4), topped balls +.036, under -.015, squared-up contact -.025, exit speed over its maximum -.007. So the league's contact penalty is a slower bat and a barrel over the ball, both systematic, not a scattered barrel.
+
+**What the model did** (as built, engine v3.1; the two hands' average over seeds 3 and 11, every split within batter and within pitcher by construction): wOBA +.021 (right-handed +.026 / +.017, left-handed +.024 / +.021), K -.028, BB +.002, xwOBA on contact +.018, exit speed +0.5 mph, launch angle -0.6 deg, zone swing -.004, chase -.005, zone contact +.021, whiff -.018, called strike per take -.005, run value +0.52 per 100 pitches. The pitch mix by platoon was the league's (same-side sinkers +.085 of pitches against +.085, changeups -.101 against -.132) and the aim was the league's; the values were not: same-side fastballs, sinkers, cutters, sliders and sweepers all played BETTER for the model's batter (+0.6 to +1.3 runs per 100 pitches, whiffs on sliders -.027, xwOBA on sweepers +.081), changeups and splitters worse (-0.6, -0.4), where the league has the first group worse (-0.2 to -0.9) and the changeup better (+0.3). Taken apart, the model's split was +0.16 the mix and +0.59 within type (seed 3, right-handed).
+
+**The cause: the model had no platoon mechanism at all.** With the pitcher's plan made blind to the batter's side (the same-side and opposite-side aim averaged; the mix averaged; both), on the same dice: aim blind, wOBA +.015 / +.014; mix blind, +.013 / +.016; both blind, **+.005 / +.007** (se .007), with whiffs -.005 / +.005 and strikeouts -.003 / +.004. Everything hand-dependent in the engine was the league's own pitch mix and aim by platoon; the batter read every release alike, and to him the league's same-side package (sinkers and sweepers in, changeups out) was the easier one, because the model's breaking balls play too well and its changeups too poorly against the league's (mystery 4, the far chase, and the whiffs by kind: changeups .34-.41 against .30-.33). That wrong-signed +.02 is what the mix and the aim are worth to the model's batter; the league's same-side batter loses .028 on top of a near-neutral mix because he reads the release worse.
+
+**Built: THE RELEASE BEHIND HIS SHOULDER (PL, engine v3.2).** The release's angle psi toward the batter's own side is computed from the release point and his eye (`releaseAngle`); a ramp max(0, psi + 3 deg), centred on the league's mean of it over its matchups (1.593 deg; same-side pitches average 3.12, opposite-side 0.04), drives three things:
+
+1. **the read's noise** - his pickup (spotIn), his judgement of a pitch he has picked up (the prior's pull) and his eye at the decision (eyeSD), all through the time-pressure term they already share - grows by PL.read = 0.03 per degree (so +9% behind a same-side release, -5% against an opposite-side one). FITTED (class O): the band score (the three main same-side bands, seven stats, against the league's type-controlled estimates) had its minimum at 0.03 on both seeds (125 and 163 against 136 and 169 at 0.04, 189 at 0.02); whiffs per swing came to +.023 / +.028 at the centre band against the league's +.027, chases to +.005 / +.011 against +.024, zone swings to -.031 / -.019 against -.010;
+2. **a slower bat**, PL.speed = 0.0045 of his speed per degree: the league's -0.99 mph over the 3.08 deg between the sides, MEASURED;
+3. **the barrel higher on the ball**, PL.over = 0.039 in per degree: the league's launch minus attack of -2.8 deg at this engine's 23 deg of launch per inch of barrel height, over the same 3.08 deg, MEASURED.
+
+The centring keeps the average batter's noise, bat speed and barrel height at what the traits were fitted to. The last-look steer, the swing policy and the collision are untouched.
+
+**Tried and not kept.** The read's noise alone (no swing channels): at 0.05 per degree the whiffs and zone swings were the league's but contact did not weaken at all (xwOBA -.003, exit speed -0.1 mph): in this engine perception noise reaches the decision and the misses, never the quality of a hit. A scattered barrel (the execution scatter scaled by the same ramp) bought the exit speed only with twice the league's whiffs (-2.8 mph with whiffs +.069 against +.027), which is what sent me to the bat tracking. A ramp starting at -1 deg rather than -3: the type-controlled bands showed the penalty in full by -1.
+
+**Results (after the chain; seeds 3, 11, 29; `tools/diag/compare.py` against the integration's baseline `diag_out/base_dh`).**
+
+| | before (3, 11, 29) | after | league |
+|---|---|---|---|
+| runs per team-game | 4.37 / 4.50 / 4.39 | 4.34 / 4.39 / 4.55 | 4.45 |
+| hits | 8.27 / 8.13 / 8.27 | 8.02 / 8.24 / 8.41 | 8.26 |
+| walks | 3.31 / 3.65 / 3.63 | 3.51 / 3.54 / 3.58 | 3.16 |
+| strikeouts | 7.45 / 7.28 / 7.22 | 7.12 / 7.35 / 7.29 | 8.36 |
+| home runs | 1.36 / 1.42 / 1.33 | 1.45 / 1.24 / 1.35 | 1.16 |
+| AVG | .240 / .238 / .240 | .235 / .241 / .243 | .245 |
+| OBP | .312 / .317 / .320 | .312 / .317 / .321 | .315 |
+| SLG | .415 / .415 / .410 | .415 / .405 / .415 | .404 |
+| BABIP | .268 / .263 / .267 | .256 / .272 / .271 | .291 |
+| K% | 19.5 / 19.1 / 18.7 | 18.7 / 19.2 / 18.8 | 22.2 |
+| BB% | 8.6 / 9.5 / 9.4 | 9.2 / 9.2 / 9.3 | 8.4 |
+| HR% | 3.6 / 3.7 / 3.4 | 3.8 / 3.2 / 3.5 | 3.1 |
+| double plays | 0.70 / 0.75 / 0.68 | 0.77 / 0.63 / 0.69 | 0.75 |
+| pitches per team-game | 139 / 139 / 141 | 139 / 140 / 141 | 146 |
+| whiffs per swing FB / BR / OS (probe) | .162 / .328 / .362 | .172 / .308 / .326 | .174 / .310 / .301 |
+| chase / zone swing (discipline_check) | .225 / .658 | .232 / .668 | .283 / .667 |
+| breaking balls swung at, heart to 8+ in out | .70 .55 .37 .20 .06 | .72 .58 .40 .21 .07 | .69 .60 .46 .33 .15 |
+| contact score (90 targets) | .0630 | .0655 | |
+| foul share of contact struck square | .275 | .291 | .211 |
+
+The game line moved within the seeds' spread on every row (the worst seed on runs, 4.34, sits beside the baseline's 4.37; BABIP's worst seed .256 against .263). Whiffs by kind came nearer the league's on all three kinds after the refit, and breaking balls are swung at a little more in every band. **The cost:** the contact score rose .0630 to .0655, all of it in the part scored by reach (.051 to .060; the misses, the squared-up contact and the vertical miss each improved a little), and the foul share of contact struck square rose .275 to .291, away from the league's .211. Strikeouts and walks did not move (the fouls, mystery 1).
+
+**The platoon split after the build** (the probe on the chained engine; the two hands' average; seeds 3 / 11; before = engine v3.1 on the same seeds):
+
+| | before | after | league, two-way |
+|---|---|---|---|
+| wOBA | +.025 / +.019 | **-.026 / -.012** | -.028 (within batter -.009 to -.042) |
+| K per PA | -.028 / -.028 | +.013 / +.010 | +.008 |
+| BB per PA | +.002 / +.002 | -.004 / +.001 | -.015 |
+| xwOBA on contact | +.025 / +.012 | -.017 / -.011 | -.041 |
+| exit speed (mph) | +0.7 / +0.3 | -0.9 / -1.1 | -2.5 |
+| launch angle (deg) | -0.7 / -0.4 | -2.8 / -3.2 | -3.1 |
+| zone swing | -.005 / -.003 | -.037 / -.032 | -.026 |
+| chase | -.005 / -.005 | +.006 / +.006 | +.013 |
+| zone contact | +.021 / +.021 | -.006 / -.009 | -.009 |
+| whiff per swing | -.018 / -.018 | +.013 / +.014 | +.013 |
+| called strike per take | -.004 / -.006 | +.019 / +.013 | +.032 |
+| run value per 100 pitches | +0.62 / +0.43 | -0.43 / -0.29 | -0.61 |
+
+By release-angle band (type-standardised, against the usual opposite-side release; seeds 3 / 11, the league's type-controlled estimate in brackets): whiffs +.040 / +.030, +.027 / +.023, +.037 / +.039 (+.019, +.027, +.026); chases +.021 / -.005, +.016 / +.012, -.002 / +.001 (+.016, +.024, +.028); zone swings -.006 / -.024, -.022 / -.020, -.042 / -.032 (+.032, -.010, -.034); zone contact -.032 / -.027, -.016 / -.018, -.026 / -.027 (-.007, -.017, -.025); xwOBA on contact -.017 / -.015, -.021 / -.019, -.020 / -.026 (-.034, -.043, -.036); exit speed -1.2 / -1.2, -1.0 / -1.2, -0.9 / -1.0 (-2.8, -2.7, -2.6); run value -0.67 / -0.32, -0.53 / -0.49, -0.49 / -0.40 (+0.03, -0.62, -0.74). The sign is the league's on every line of both seeds; the size is the league's on the discipline and the strikeouts, and about half of it on the contact.
+
+**K% against release height and BB% against arm angle** (`headless/pitcher_chain_check.js`, 240 pitchers x 250 PA, seeds 3 / 11): K% ~ release height -.11 / -.03 (the audit's +.16; league -.22), BB% ~ arm angle +.08 / +.06 (the audit's about 0; league +.20); K% ~ fastball speed +.36 / +.37 (.52), as before. Both turned to the league's sign through the ramp: a low slot releases further behind the same-side batter. The rest of the league's correlation is the managers' doing, who send a sidearmer out against his own side; the model's managers do not platoon yet.
+
+**Left open.**
+
+- **The contact half of the split is under half the league's** (exit speed -1.0 mph against -2.5, xwOBA on contact -.014 against -.041). The measured bat speed (-1.0 mph) and barrel height (2.8 deg over the ball) reproduce themselves in the model and give it one mph of exit speed; the league loses 2.7, because its same-side contact is also less square (squared-up -.025, exit speed over its maximum -.007). In this engine a less precise barrel means a miss, not a weak hit: perception noise reaches the decision and the whiffs and never the quality of a hit that is made. That is mystery 7's question too (reaching contact comes off too hard): how off-centre contact leaves the bat.
+- **The decision's balance.** The eye's noise took swings at strikes (-.035 against the league's -.026) more than it added chases (+.006 against +.013). With pitch type held fixed the league's same-side batter swings MORE at balls and barely less at strikes (+.024, -.010): a bias toward swinging, not noise alone; he judges a same-side pitch nearer the zone than it is (the sinker running in at him is chased +.097). The candidate is the pitch's late lateral movement, which he under-reads from behind his shoulder; not built.
+- **Walks.** The model's same-side batter walks the same (-.004 / +.001 against -.015). The league's same-side pitcher throws more strikes (+.018 in zone, two-way), the model's a few fewer (-.006): PLAN carries the league's mean location by side, and the zone rate that falls out of it with his command is not quite the league's. To measure: the league's zone rate by type and side against the model's.
+- **The model's own pitch-type values** are the other half of the sign. With the plan blind to the batter's side the split was +.005; the league's same-side mix and aim, near value-neutral in the league, are worth +.02 to the model's batter because breaking balls play too well and changeups too poorly against it (mystery 4). PL carries the split to the league's size on one seed and half on the other; closing mystery 4 would carry it the rest of the way without touching PL.
+- **Switch hitters** always bat opposite in both and are untouched. The reference eye position (1.8 ft from the centre line, 0.7 ft in front of the plate's point) is assumed, not measured; it sets where psi = 0 falls and nothing else, since the ramp is centred on the league's matchups.
+
+**Proposed changes to the tables.**
+
+- Mystery 8 (the platoon split has the wrong sign): closed in sign on every component and in size on the discipline and the strikeouts; restate as *the platoon split's contact half*: same-side contact comes off 1.0 mph slower in the model against 2.5 in the league, xwOBA on contact -.014 against -.041, and the same-side batter does not walk less (-.004 / +.001 against -.015).
+- Hypothesis PL: CONFIRMED and BUILT (engine v3.2). The release's angle behind the batter's line of sight is the variable, not the pitcher's hand: the penalty is flat across the opposite-side releases and ramps through the same-side ones, a sidearmer's worst. Three channels: the read's noise (fitted, class O), the bat's speed and the barrel's height (measured).
+- New hypothesis **PB**, the swing bias behind the shoulder: a same-side pitch's late lateral movement is under-read, so he judges it nearer the zone than it is (the sinker running in is chased +.097, the league's zone swing falls only -.010 with type held fixed) and meets it off the sweet spot (squared-up -.025): would close the contact half and the decision's balance. Mysteries 8, 7. Likelihood: likely.
+- Trait map: add PL (`releaseAngle`, `ramp`): PL.read 0.03 per deg (fitted, class O), PL.speed 0.0045 of bat speed per deg (measured), PL.over 0.039 in per deg (measured), psi0 -3 deg and the centring 1.593 deg (measured from the league's releases), the eye at (1.8 ft, 0.7 ft) (assumed). The chain's refit: SWING_THR, HITTER_VALUE, PITCHER_VALUE, FIELD_VALUE and the pool, as pasted.
+- The audit's two correlations: K% ~ release height -.03 to -.11 (was +.16; league -.22), BB% ~ arm angle +.06 to +.08 (was 0; league +.20).
+
+## Ground balls by launch angle: the bounce, the grass infield, the catch in the air and the fielder's first step (bb_field v1.11, bb_engine v3.3 after the integration renumbered them; 2026-10-05)
+
+The brief (`docs/briefs/2026-10-05_ground_balls.md`): choppers at -10 to 0 deg were hits .135 of the time against the league's .249, low liners at 0 to 10 deg .538 against .482, and BABIP .263-.268 against .291. Runs: the league's ground balls and low liners (launch angle -30 to 15 deg) from the 42 days of 2025 by launch angle, exit speed, direction and the fielder who handled them (new: `statcast/ground_balls.py`, 12,801 balls); the model the same way on whole games (new: `headless/ground_check.js`, 300 games at seed 3); the ball's track through `bb_field.js` on representative balls; the published physics of a ball bouncing on dirt and turf, read in full; Statcast's outfield jump in all its windows; the refit chain and the suite (seeds 3, 11, 29) against `base_dh`; six variants of the fielder's motion on the suite to attribute the costs.
+
+**What the league showed.** Hits per ball rose smoothly with launch angle, .05 at -30 to -20 deg, .09-.18 at -20 to -10, .18-.33 at -10 to 0, .38-.58 at 0 to 10 and .71-.80 at 10 to 16, and with exit speed on the ground (.087 under 70 mph, .229 at 85-90, .340 at 95-100, .471 at 105-110). Infield hits (a hit handled by an infielder) were .061 of ground balls, flat with exit speed (.05-.07 from 70 to 110 mph) and with launch angle (.04-.06 on choppers steeper than -14 deg, .06-.08 from -6 to +10), and rose with the batter's sprint speed (.045 for 25.5-27 ft/s, .065 for 27-28.5, .075 above 28.5; .055 for the slowest, n 766). Errors were .014 per ground ball. At 5-10 deg the league caught .138 of balls in the air (line-outs; .168 at 10-15 deg, .009 at 0-5), and its infielders handled .52 of the 5-10 deg balls; when an infielder handled a ball at -5 to +5 deg it was still a hit .06-.09 of the time. By direction (the hit coordinates, home plate at 126.0, 205.0, + pulled) the opposite field was always the softest: at -5 to 0 deg .385 opposite, .330 middle, .251 pulled; at 0-5, .535 / .455 / .351. Under the shift ban the infield was Standard on .655 of ground balls (hits .294), shaded on .245 (.283) and Strategic on .100 (.286). Statcast's hit distance on a ground-ball out marks its first bounce: a median 22-33 ft for -5 to 0 deg, 39-71 for 0-5 and 68-122 for 5-10, rising with exit speed. Relative to the league's average starting spots with the bases empty (Baseball Savant positioning, branch men-on-base), infielders made ground outs a median 20-21 ft from their spot at 90-110 mph (p90 38-42 ft; first basemen 11-13, the others 19-25), with no fall as exit speed rose, so that table measures the pitch-to-pitch scatter of positioning as much as the fielder's range.
+
+**What the model did (the baseline, `base_dh`'s code).** Hits per ball were .250 on ground balls (.291) and .337 over -30 to 15 deg (.369): .055-.091 at -12 to -6 deg against .18-.21, .19-.25 at -4 to 0 against .28-.33, then .56-.79 at 4-10 deg against .49-.58. By direction the pulled side died (.027-.076 at -20 to 0 deg against .095-.251) while the opposite field got through more than the league's (.231-.475 against .367-.385); with the infield's pull turn switched off in a scratch copy the ground-ball hit rate went .250 to .261 and the deficit became even across directions, so positioning explained about a quarter of the gap and belongs to the men-on-base job. In the air the model caught .043 of 5-10 deg balls (.138). Infield hits were .051 of ground balls, but .104 under 70 mph (.068) and .027-.045 from 85 to 105 (.061-.069), most of them muffs.
+
+**Where the difference arose: the bounce.** A 95-mph ball at -5 deg landed 26 ft out at 0.17 s doing 91 mph, hopped 0.31 m, and reached 35 m (the corner infielders) at 1.60 s doing 28 mph and 45 m (shortstop depth) at 2.46 s doing 23 mph: three bounces had taken 70% of its speed. The bounce kept `BOUNCE_KF - C vn/vh` of the horizontal speed (0.76 - 0.35 vn/vh on dirt), a line fitted through the Pennbounce measurements at 25 and 35 deg that extrapolated to a 24% loss at grazing incidence. That is unphysical: during a bounce the friction impulse cannot exceed the friction coefficient times the normal impulse (Cross 2002, below), and at a 5-deg bounce the normal impulse is a twelfth of the horizontal momentum. With a slow ball every infielder had time to range: they fielded choppers a median 6-7 m from their spot, 1.7-2.0 s after contact. The infield was also entirely dirt, a circle 93 ft round the mound, so the first bounce (20-70 ft out) was on the faster surface where the league's is on grass. Last, a liner could be caught only at its landing point (`catchChance` looked nowhere else; gap 6 of CALIBRATION), so a ball passing an infielder at chest height went through.
+
+**The physics brought in** (each paper read in full).
+
+- Cross, R., "Grip-slip behavior of a bouncing ball", Am. J. Phys. 70, 1093 (2002). Measurements of the normal and friction forces on bouncing balls, a baseball among them. At low angles of incidence a ball slides throughout the bounce and its horizontal speed falls by mu (1 + e_y) v_y (his eq. 4), the spin rising by the matching impulse (eq. 5); at steeper angles the bottom grips and the ball comes off spinning a little faster than rolling (a baseball at 41 deg on a smooth surface: e_y 0.39, horizontal speed kept 0.76, R w2 = 1.13 v_x2). The sliding regime ends when the friction impulse reaches 2/7 of the slip (a solid sphere, I = 0.4 m R^2). Cross's 1999 paper (Am. J. Phys. 67, 222) gave a baseball's own restitution on a rigid surface, 0.49 at 1.25 m/s.
+- Brosnan, McNitt and Schlossberg, "An apparatus to evaluate the pace of baseball field playing surfaces", J. Testing and Evaluation 35, 676 (2007). Pennbounce: a ball fired at 31 and 40 m/s onto a skinned infield and natural turf at 25 and 35 deg, the speed kept measured by light screens (their table 5): skinned .549 and .610 at 25 deg, .471 and .518 at 35; turf .448 and .428, .358 and .281. These were the two points the old line went through. There are no measurements below 25 deg.
+- Brosnan and McNitt, Penn State turfgrass annual report 2005 (the survey of 4 major-league, 4 minor-league and 6 college fields, Pennbounce at 25 deg and 40 m/s): skinned infields .562 (range .514-.584), natural turf .479 (.429-.533), the infield grass .484. The league's parks are faster than the test plot on turf (.479 against .44) and slower on dirt (.562 against .58). Brosnan, McNitt and Serensits (J. Testing and Evaluation 39, 2011) showed the dirt's pace follows its compaction (.44-.59), not its conditioner.
+- Statcast's outfield jump, the 2025 leaderboard's raw feet (the CSV in `statcast/raw/2025` carries only the differences from average; the page's data carry the feet): 6.91 ft covered in any direction in the first 1.5 s after the pitch is released (about 1.07 s after contact), 30.0 ft in the next 1.5 s, 34.0 ft toward the ball in 3 s, and 24.0 ft/s as the fielders' average sprint speed on those plays.
+
+**Built: the bounce (`bounce()` in bb_field).** The ball keeps BOUNCE_E of its speed into the ground (dirt .45, grass .35, unchanged; the Pennbounce totals cannot separate the vertical part from the crater). Along the ground it loses (1) Coulomb friction on the slip of its bottom point, the centre's horizontal velocity plus the spin's share there, an impulse of at most BOUNCE_MU (1 + e) vn and never more than 2/7 of the slip, with the spin changed by the same impulse; and (2) the soil's crater, a share BOUNCE_KC of the normal speed taken from the centre on top of friction, which is how dirt and turf take more horizontal momentum than a rigid surface can. mu was set so that the ball reaches rolling at the measured 25 deg (dirt 0.41, turf 0.45), and BOUNCE_KC fitted to the league parks' totals at 25 deg (dirt 0.28, turf 0.46); the 35-deg points then came out at .50 on dirt (measured .49) and .38 on turf (measured .32 on the test plot, which was slower than the parks at 25 deg too). At a 5-deg bounce the horizontal loss is now 7.5% on dirt and 10% on grass. The spin is carried from the flight (`landW`, bb_engine v3.2) and through each bounce, so a topped ball's topspin (the model's median 1,300 rpm at -5 to 0 deg, 2,800 at -20 to -10) grows at each bounce and the hop's Magnus force holds it down. The same 95-mph ball at -5 deg now hops 0.15 m and reaches 35 m at 1.06 s doing 59 mph and 45 m at 1.46 s doing 54 mph; the -25 deg chopper hops 2.4 m at 49 ft and reaches 45 m at 2.5 s doing 29 mph (was 16).
+
+**Built: the surfaces (`onDirt`).** A grass infield, as every 2025 park has: dirt within the plate's circle (rule 2.01, 26 ft across) and the mound's (18 ft), and on the skin between the base paths and the outfield, the arc 95 ft from the rubber less the grass diamond inside the base paths (3 ft inside each base line); the paths home to first and third to home are dirt. The roll, once a hop is under 1 m/s, now feels the air (the engine's own batted-ball drag, 4.8 m/s^2 at 25 m/s, which the hops already felt) on top of the surface's hand-set resistance.
+
+**Built: the catch anywhere along the flight (`catchChance`).** A fielder can catch a ball at any point of its path no higher than 2.6 m (a standing man's glove overhead with a small jump), with his reach to the side the full 1.2 m up to chest height (1.3 m, where a lunge or dive works) and tapering to nothing straight overhead, or at the landing point; the point taken is the one with the most time to spare, judged by the same margin rule as before (no new fitted constant). Line-outs at 5-10 deg went from .043 of balls to .17 (league .138) and at 10-15 deg from .130 to .18 (.168).
+
+**Built: the fielder's first step.** With the ball at the right speed the infielders' reach was too small: the ground-ball hit rate went to .384 on the physics alone, with the react trait (0.47 s) and acceleration (5.5 m/s^2) that had been fitted to the jump's 3-second total only. Fitted to the jump's first window as well, with the model's own kinematics (first step, acceleration to top speed, route 0.90), the built pair covered 3.3 ft in the first window against the measured 6.9 and 31 ft in 3 s against 34; react 0.20 s and 5.0 m/s^2 cover 6.2 and 37.8 ft (the 3-s figure runs over because the model runs fielders at their top sprint speed, 27.3 ft/s, where the league averages 24.0 on these plays). The population's react mean is 0.234 so that the farm's picks average 0.20 (`fit_population` v0.7); the catcher's and pitcher's offsets were raised (0.37, 0.42) so their absolute reaction stayed where it was (0.57 and 0.62 s), since the jump says nothing about them. With react 0.20 the pitcher had been snaring comebackers at 0.45 s and the infielders catching liners at full lateral reach two and a half metres up, which is why the reach tapers with height.
+
+**Results, the ground balls** (`ground_check`, 300 games at seed 3, after the chain; the league beside):
+
+| | baseline | built | league |
+|---|---|---|---|
+| hits per ball, -30 to 15 deg | .337 | .368 | .369 |
+| hits per ground ball (under 10 deg) | .250 | .304 | .291 |
+| -10 to -6 deg / -6 to -2 / -2 to 2 | .074-.091 / .070-.193 / .254-.324 | .171-.251 / .320-.351 / .367-.389 | .18-.21 / .23-.28 / .33-.38 |
+| 2 to 6 deg / 6 to 10 | .410-.558 / .626-.785 | .428-.455 / .559-.664 | .42-.49 / .53-.58 |
+| by exit speed, ground balls, 85-90 / 90-95 / 95-100 / 100-105 | .153 / .199 / .283 / .352 | .202 / .297 / .347 / .462 | .229 / .270 / .340 / .431 |
+| caught in the air, 0-5 / 5-10 / 10-15 deg | .001 / .043 / .130 | .033 / .173 / .184 | .009 / .138 / .168 |
+| through to the outfield, -5 to 0 / 5 to 10 deg | .175 / .594 | .350 / .584 | .23 / .48 |
+| infield hits per ground ball | .051 | .005 | .061 |
+| errors per ground ball | .017 | .010 | .014 |
+| time the infielder had the ball, -10 to 0 deg (median) | 1.7-1.9 s | 1.2-1.4 s | |
+| ball's speed when fielded, -10 to 0 deg | 25-34 mph | 47-57 mph | |
+| distance the infielder moved, -10 to 0 deg | 5.3-6.4 m | 3.4-4.2 m | |
+
+**Results, the suite** (after the chain; seeds 3, 11, 29; `tools/diag/compare.py` against `base_dh`):
+
+| | before (3, 11, 29) | after (3, 11, 29) | league |
+|---|---|---|---|
+| runs per team-game | 4.37 / 4.50 / 4.39 | 4.57 / 4.24 / 4.39 | 4.45 |
+| hits | 8.27 / 8.13 / 8.27 | 8.32 / 8.01 / 7.91 | 8.26 |
+| doubles | 1.65 / 1.56 / 1.62 | 1.74 / 1.67 / 1.62 | 1.59 |
+| triples | 0.15 / 0.11 / 0.11 | 0.30 / 0.27 / 0.28 | 0.13 |
+| home runs | 1.36 / 1.42 / 1.33 | 1.42 / 1.37 / 1.39 | 1.16 |
+| walks | 3.31 / 3.65 / 3.63 | 3.41 / 3.41 / 3.48 | 3.16 |
+| strikeouts | 7.45 / 7.28 / 7.22 | 7.07 / 7.26 / 7.16 | 8.36 |
+| double plays | 0.70 / 0.75 / 0.68 | 0.86 / 0.94 / 0.88 | 0.75 |
+| errors | 0.37 / 0.30 / 0.33 | 0.28 / 0.37 / 0.32 | 0.50 |
+| AVG / OBP / SLG | .240 / .312 / .415 (seed 3) | .241 / .315 / .433 | .245 / .315 / .404 |
+| BABIP | .268 / .263 / .267 | .264 / .261 / .256 | .291 |
+| BABIP on the ground (under 10 deg) | .237 / .237 / .246 | .270 / .269 / .267 | .291 (same definition) |
+| BABIP on liners (10-25 deg) | .640 / .637 / .625 | .574 / .562 / .565 | .68 |
+| BABIP on flies (25-50 deg) | .112 / .104 / .107 | .086 / .081 / .085 | .12 |
+| hits per ball by launch angle, -10 to 0 / 0-10 / 10-20 / 20-30 / 30-40 (bip_check, seed 3) | .139 / .544 / .717 / .356 / .102 | .297 / .501 / .647 / .312 / .084 | .249 / .482 / .691 / .350 / .109 |
+| K% / BB% / HR% | 19.5 / 8.6 / 3.6 (seed 3) | 18.4 / 8.9 / 3.7 | 22.2 / 8.4 / 3.1 |
+| contact score (90 targets) | .0428 .0596 .0816 .0510 | .0421 .0530 .0848 .0591 | |
+
+**The costs, and where each comes from.** The ground balls are fixed and the batted-ball mix, strikeouts and walks untouched, but BABIP did not rise: three costs appeared, attributed by running the suite on variants of the fielder's motion.
+
+1. *Liners and flies caught more often* (10-20 deg .717 to .647 against .691; liners .63 to .57, flies .11 to .085). Not the catch anywhere along the flight: without it (variant E) liners stayed .57-.59 and flies .087-.089. It is the quicker first step: with the old pair restored (variant G: 0.47 s, 5.5 m/s^2) liners came back to .61-.63 and flies to .10-.11 and the 10-20 deg band to .691 exactly, while ground balls went to .34-.36. The pair that fits the first window over-reaches at 2-3 s (the 3-s jump +11%), and the lever is sharp: 4.3 m/s^2 (variant D) sent ground balls to .31 and triples to 0.5. A profile that fits all three windows and the in-play speed (variant H: already moving at 1 m/s when the ball is hit, 0.20 s, 3.25 m/s^2 to 24 ft/s) kept ground balls at .28-.29 and liners at .63-.64 but let deep flies fall (.14-.15) and rolling balls run to the wall (triples 1.0-1.1): the constant-acceleration model of a fielder cannot serve a 1.3-s ground ball and a 4-s fly with one pair, and the outfielder's cut-off of a rolling ball is more sensitive to his top speed than anything else in the suite.
+2. *Triples doubled* (0.11-0.15 to 0.27-0.30 against 0.13), doubles up a little. In 300 games the 175 triples were balls at 99-105 mph into the gaps and down the lines (80 at 10-20 deg, 50 at 0-10, 36 at 20-35), fielded at 350-375 ft 5.4-6.0 s after contact once the outfielder had run 32-37 m; the track would have stopped at 356-381 ft. The ball now reaches the wall where it used to die at 200-300 ft, the outfielder's intercept rule (the first point of the track he can reach) takes him to the wall rather than across it, and the runners' margins for third (SAFETY_3, fitted to the league's extra bases with the old ball) send the batter on. The sends belong to the men-on-base job; the outfielder's route to a rolling ball is a mechanism to measure (a wider reach for a rolling ball, variant C, did not help at 4.3 m/s^2).
+3. *Double plays* 0.68-0.75 to 0.86-0.94 against 0.75: the ball reaches the infielder 0.5 s sooner, and the forced runner's break (V_CONTACT, "fitted to the league's double plays per game") and the pivot (PIVOT 0.35 s) were fitted around the old ball; both sit in the men-on-base job's force plays.
+
+By the parallel rules a mechanism that moves its target and breaks other things is recorded, not kept; here the mechanism is the ball's physics, which is not in doubt, and what broke are constants fitted around the unphysical ball. The branch keeps the physics, the surfaces, the catch anywhere along the flight and the first step as fitted, and hands the three costs to the integration with their attribution; the alternative, the old first step on the physical ball (variant G), is worse on every line.
+
+**Left open: the infield hits.** The model now makes .005 infield hits per ground ball against the league's .061, a fifth of the league's ground-ball hits; they fell from .051 because the old ones were muffs on slow balls, and the physical ball reaches the fielder so early that the throw beats the batter by a median 1.2-1.4 s on plays to first (the league's batters beat out .055 of ground balls even when their sprint speed is under 25.5 ft/s). The deficit sits on the softer balls (70-90 mph: hits .07-.20 against .12-.23, infield hits .000-.004 against .05-.06) while the hardest get through a little too often (100-110 mph .46-.52 against .43-.47). The candidates are on the throw's side, not the ball's: an infielder's exchange on a routine play (the `transfer` trait, 0.68 s, is the catcher's exchange), throws made at the arm's top speed on every play where the league's routine throws are not, and a ball reached at full stretch that is knocked down rather than fielded (the league's infielders turned .06-.09 of the balls they handled at -5 to +5 deg into hits). Each is a measurement to make before a mechanism is built: recorded as hypothesis IH below. Also left: the roll's surface resistance is still set by hand (2.4 and 3.2 m/s^2; a ball-roll measurement on baseball turf was not found); the vertical restitution on dirt and grass is not separated from the crater by any published test (a drop test on the skin would do it); the turf's 35-deg point is reproduced at .38 against the plot's .32; fielders run at their maximum sprint speed where the league's average 24 ft/s on plays; line-outs at 5-15 deg run .02-.04 over the league's.
+
+**Tried and not kept.** The physics with the old first step (react 0.47, 5.5 m/s^2): ground-ball hit rate .384-.427 (the skinned infield made it .427), infield hits .005, the infielders covering half the distances the league's did on ground outs. React 0.20 applied to the pitcher and catcher too: the pitcher caught .06 of 0-5 deg balls in the air (league .009). Full lateral reach at any height up to 2.6 m: line-outs .19 at 5-10 deg and .25 at 10-15. The fielders' top speed set to the in-play 24 ft/s with 5.0 m/s^2 (variant B): BABIP .28-.29 but triples 0.43-0.49 and doubles 2.0-2.1. Variants D, C and H as above.
+
+**Proposed changes to CALIBRATION's tables.** Mystery 5 (the batted-ball mix and BABIP): the ground-ball part is closed, choppers at -10 to 0 deg .30 against .249 and low liners at 0 to 10 deg .50 against .482 (seed 3, bip_check); what remains of it is the liner share of balls in play (the contact model), the infield hits, and now liners and flies caught too often by the quicker first step. Hypothesis GB: built. New hypothesis IH, likely: infield hits are a fifth of the league's ground-ball hits and the model makes none, because the throw beats the batter by over a second on every routine play; measure the infielder's exchange, the throw speed used on routine plays, and the share of reached balls knocked down, before building. New hypothesis FM, likely: the fielder's motion needs a profile with more than a first step and one acceleration (Statcast's three windows and the in-play speed fit a fielder already moving at 1 m/s, 0.20 s, 3.25 m/s^2 to 24 ft/s, which is right at 1-3 s but lets deep flies fall and rolling balls run to the wall); and the outfielder's route to a rolling ball (the cut-off) is to be measured against where the league's outfielders field balls that get through, by exit speed. For the men-on-base job: SAFETY_3, V_CONTACT and PIVOT were fitted around the old ball and now overshoot (triples 0.28, double plays 0.88). Hypothesis G (the bat's grip sets batted-ball spin): the bounce now uses the spin, so measured batted-ball spin by launch angle would also be tested on the ground. Gap 6 (a low liner can only be fielded once it lands): closed. The trait map's constants: react 0.466 to 0.234 (population; picks 0.20), ACC_F 5.5 to 5.0, the bounce's BOUNCE_KF/BOUNCE_C replaced by BOUNCE_MU (0.41, 0.45) and BOUNCE_KC (0.28, 0.46), new Z_CATCH 2.6 and Z_LUNGE 1.3, ROLL_DRAG from the engine's drag, the grass diamond.
+
+**Measurement notes.** The league's direction is the angle of the hit coordinates (where the fielder touched the ball), the model's the angle of the spot where the ball was fielded, so both are fielding spots. Statcast's `hit_distance_sc` on a ground ball is its first bounce, which checks the model's flight: the model's ground outs first landed 7, 11, 17, 31 and 70 ft out (medians by band from -30 to +5 deg) against the league's 5, 8, 14, 27 and 60, about 15-25% further at every band, a small open question about the contact height or the league's measure. The ranging table (section 8 of both scripts) is dominated by positioning scatter and should not be read as range. The suite's "GB .24" league column in `run_games` is by Statcast's batted-ball type; the model's ground balls are launch angle under 10 deg, for which the league is .291.
+
+## The integration (branch `integrate`; 2026-10-06)
+
+`integrate` holds `dh-everywhere`; the men-on-base job (#36); the fouls-and-chases record (#35, the engine unchanged); the current rules; the platoon job (#33); the ground-ball job (#34); one refit of the chain; and the field follow-up (#37).
+
+**The conflicts** were the values the chain pastes (each job had refitted them; one refit of the combined code replaced them) and clashing version numbers, renumbered in the order combined. The platoon's engine is v3.2. The ground balls' engine is v3.3 (its write-up says v3.2) and its bb_field v1.11 (its write-up says v1.8; the men-on-base job's v1.8-v1.10 came first); plays_check v0.11 (written as v0.7). The field follow-up's engine is v3.4, its bb_field v1.12-v1.15.
+
+**A mistake in combining.** Resolving the ground-ball merge, the pasted-value blocks were taken from the platoon side, and with them the old clip on `react` (0.25-0.7 s). The refit then pulled react's mean to 0.035, below the clip, so every position player reacted in exactly 0.25 s and the pitcher fielded .11-.13 of choppers against the league's .05-.06 (the line `int2` below). The field follow-up found and fixed it (react drawn within 0.05-0.8; invariants_check v0.5). A block of pasted values can carry a hand-set limit beside the fitted ones: such blocks are to be diffed line by line, not taken whole from one side.
+
+**The line after combining and one refit** (`int2`, seeds 3 / 11 / 29, league in brackets): runs 4.50 / 4.71 / 4.45 (4.45), BABIP .270 / .273 / .269 (.291), K% 18.3 / 18.3 / 19.2 (22.2), BB% 9.7 / 9.3 / 8.6 (8.4), doubles 1.92 on all three (1.59), triples 0.28 / 0.36 / 0.27 (0.13), ground-ball double plays 0.94 / 0.98 / 0.90 (0.64, the grounded-into figure; see the field follow-up), singles .172 of balls in play (.208). The ground-ball job's costs (triples, double plays, liners and flies caught) survived the refit: they sat in constants fitted to the old ball, which the refit does not touch.
+
+**The line after the field follow-up** (`int3`): runs 4.58 / 4.75 / 4.65; hits 8.40 / 8.61 / 8.65 (8.26); AVG / OBP / SLG .246-.251 / .321-.326 / .422-.433 (.245 / .315 / .404); BABIP .277 / .278 / .282; K% 18.9 / 18.1 / 19.5; BB% 9.0 / 9.2 / 8.5; HR% 3.3 / 3.4 / 3.5 (3.1); doubles 1.94 / 1.94 / 1.95; triples 0.14 / 0.15 / 0.14; ground-ball double plays 0.66 / 0.65 / 0.61; errors 0.29 / 0.31 / 0.24 (0.50); stolen bases 0.64-0.65 (0.71); singles .188 of balls in play (.208); the contact score better on all four parts (misses by kind .0396, squared up .0522, vertical miss .0816, by reach .0521, from .0416 / .0562 / .0839 / .0609). Runs over BaseRuns .958-.971 (league 1.011).
+
+**Open:** plays_check case 4 (a slow batter and a man on first, soft grounders: every force tried and missed at second should be a fielder's choice) has failed since #37's final refit, and still failed with the test's fielders held at the pool's averages; no change to the scoring rule caused it. On some soft grounders to the first baseman the clean play to first is no longer decisive. The suspect is his carry to the bag under the new run (TAU_F) against the pitcher covering (the 12-m rule). Recorded as hypothesis 1C.
+
+## The field layer on the new ball: the fielder's run, the runner's arc, the double play and the sends to third (bb_field v1.12-v1.15, bb_engine v3.4; 2026-10-06)
+
+The brief (`docs/briefs/2026-10-06_field_followup.md`), on branch `field-followup` from `integrate` (the four jobs of 2026-10-05, bb_game v1.6, one refit of the chain), on the Mac under jsc, against the baseline `integrate/diag_out/int2`. Runs: the league's liners and flies by hang time and distance, and where its outfield picked up the hits (new: `statcast/air_balls.py`, 42 days of 2025, 11,919 liners and flies, 6,752 outfield-fielded hits; hang time from the engine's own flight, `statcast/hang_time.js`); the model measured the same way (new: `headless/air_check.js`); Statcast's outfield jump leaderboard (2025, the page's raw feet, 7,417 plays); `mob_check`, `xbt_check`, `runs_check` and `ground_check` before and after; sweeps of the double-play pivot and the forced runner's break (600 games a setting) and of the margins for third and home (1,000 games a setting, seeds 3 and 11); the refit chain after each change and the suite (seeds 3, 11, 29).
+
+### A bug in the baseline first
+
+**Every position player reacted in exactly 0.25 s** (bb_engine v3.4; regression test in `invariants_check` v0.5). Combining #34 into `integrate` brought back the old line for the react trait, clipped to 0.25-0.7 s. #34 had moved its mean to 0.234 so that the farm's picks average the 0.20 s that fits the jump; under the old clip the chain's pool refit kept lowering the mean toward that target and left it at 0.035, below the floor, so every draw was pinned at 0.25 s. The catcher's and pitcher's offsets (0.37, 0.42) put them at 0.405 and 0.455 s where #34 meant 0.57 and 0.62. In `int2` the pitcher handled .11-.13 of the choppers at -30 to -5 deg (league .05-.06). The next chain's `field_value` could not fit react at all (a constant column; FIELD_VALUE came out NaN), which is how it showed. #34's own clip (0.05-0.45) would have pinned the catcher and pitcher at 0.45. Now 0.05-0.8 with the mean refitted by the chain (0.219); the pitcher handles .07 / .06 / .02 / .02 of the balls from -30 to 0 deg (league .06 / .06 / .05 / .02). Every line below against `int2` carries this fix.
+
+**And a measurement slip in the suite** (`run_games` v0.3): the model counts a double play only on the ground ball's force and relay, but the league column was every double play turned (0.75 a team-game), which also counts line drives doubled off and strike-'em-out, throw-'em-out. Grounded into double plays, 2025 team totals: 3,122 in 4,860 team-games, **0.64**. The brief's 0.94 / 0.98 / 0.90 were half again the league's, not a quarter.
+
+### 1. The fielder's run (FM)
+
+**What the league showed** (`air_balls.py`). Hang time is not in the pitch data, so it was solved: the engine's flight in the parks' average air, with the model's median backspin for the launch angle, its exit speed set so the ball comes down at Statcast's projected distance (on the model's own balls the solve ran +0.06 s median, p10 -0.15, p90 +0.32 against the true hang; the model's tables use the same solve). The landing spot is that distance along the direction of the hit coordinates, and the distance is to the nearest of the seven fielders' average starting spots (Savant's positioning by batter side and runners), so it includes the pitch-to-pitch scatter of positioning; the model is measured from the same spots. Caught in the air by hang time: .167 at 1-1.5 s, .249 at 1.5-2 (infielders), .081 at 2-2.5, .193 at 2.5-3, .485, .632, .728, .848 at 3-5 s, .927, .970, .980 at 5-6.5 s. The distance at which half the balls nearest an outfielder were caught (a logistic in distance within each half-second): **25, 37, 51, 65, 78, 92, 106, 120 ft at 2.25 to 5.75 s**, a straight line of 27-29 ft/s (full sprint speed) after a lag of about 1.4 s. Running back cost 3-8 ft against running to the side from 3.5 to 5 s, and running in about 6 ft at 3-3.5 s. Liners (10-25 deg) were caught .355 of the time and fell for hits .614; flies (25-50 deg) .870 and .125. The jump leaderboard's raw feet on its 2-star-and-harder plays (average hang 4.19 s, caught .48): 6.91 ft covered in the first 1.5 s after the release, 30.0 ft in the next 1.5 s, 2.90 ft lost to the route, 34.0 ft toward the ball in 3 s, and a sprint speed on those plays of 24.0 ft/s against the same men's 27.4 fielding and 28.1 running.
+
+**What the model did (int2).** Half caught at 36, 46, 56, 69, 80, 92, 113 ft at 2.25 to 5.25 s: 10 ft too far on liners, right at 4-5 s. Its outfielders made 40% of the catches at 2-2.5 s (league 17%). A constant 5.0 m/s^2 to top speed fits the jump's first window but reaches too far at 2-3 s, and the route as a share of the whole path (0.885) made the late slope route times speed, about 24.5 ft/s, where the league's is the full sprint speed.
+
+**Built (bb_field v1.12).** After his first step a fielder's speed rises toward his sprint speed as 1 - exp(-t / TAU_F), the form the league's runners follow from a standstill (Statcast's running splits, TAU_RUN 0.78 s), with **TAU_F 1.2 s fitted to the jump's two windows**: 6.9 ft in the first window (6.91) and 29.6 ft in the second (30.0), running 23.6 ft/s at the window's end (the leaderboard's 24.0). His route now costs him only over the window's 34 ft toward the ball (the read), and the route trait's mean among major leaguers is the window's 34.0 / 36.9 = 0.921 (fit_population v0.8; was 0.90). An outfielder braking to throw keeps 5.0 m/s^2 (BRAKE_F): an assumption, but the measured average maximal horizontal deceleration of team-sport athletes from 7.4-7.8 m/s is 4.2-5.0 m/s^2 (Harper, Cohen, Carling and Kiely, Sports 8, 76, 2020).
+
+**Result** (`air_check`, 400 games, seed 3, after the chain): half caught at **36, 42, 54, 66, 78, 92, 106 ft** at 2.25 to 5.25 s (league 25, 37, 51, 65, 78, 92, 106): from 3.5 to 5.5 s within a foot. Liners caught .378 / .365 / .363 at seeds 3 / 11 / 29 (int2 .387 / .380 / .386, league .355), hits .591 / .605 / .602 (.576 / .587 / .575, league .614); flies caught .896 / .897 / .891 (.908 / .908 / .903, league .870), hits .098 / .098 / .103 (.086 / .083 / .091, league .125). Two residuals: at 2.25 s the outfielder still reaches 11 ft too far (the low liner he charges, which the catch anywhere along the flight lets him take at chest height 5-10 ft in front of its landing), and flies of 5 s and more are caught .960-1.000 against .927-.980, including at 30-75 ft where the league still misses 1-3%: probably the wall (the model plays one park shape with an 8-ft wall) and the league's measure (a hit's direction comes from where it was picked up, which off a carom is not where it landed).
+
+### 2. The outfielder's cut-off of a rolling ball
+
+**Measured** (`air_balls.py` 5-8, `air_check` 5-8). The league's outfielders picked up ground balls that got through a median 216-272 ft from the plate, rising from 245 to 267 ft up the middle between 80-90 and 105+ mph. **The model's picked them up deeper**: by 11-23 ft up the middle (261-290 ft), 7-24 in the left gap, 17-36 on the left-field line, 6-37 on the right-field line and 0-9 in the right gap (final code; int2 the same within a few feet), and hard grounders up the middle and in the gaps went for doubles .05-.25 of the time (league .00-.09). Liners and flies that fell for hits rolled about as far past their landing in both (10-20 deg: model 39-56 ft, league 46-62). The excess doubles were on the lines: of the hits the outfield picked up, doubles were .568 on the left-field line and .445 on the right (league .493, .331) against .177 / .091 / .204 in the left gap, centre and right gap (.204 / .124 / .167); and the model sent more balls toward the left-field line (.170 of balls in play fielded or caught at -50 to -30 deg, the league .132). Triples had been three times the league's on the right side (.113 of right-line hits on int2, league .033; .058 on the final code).
+
+**The route is not wrong in kind**: the fielder takes the first point of the ball's track he can reach, which is the cut-off. What the measurements point to instead: the ball through the outfield (the roll's resistance is still set by hand, and the model's ground balls get through the infield more often than the league's), the share of balls toward the left-field line (the spray, or the corners' positions), and the time from the pickup to the throw. Switching the stop-and-turn off entirely (a bracket, not a mechanism) took doubles from 2.0-2.3 to 1.21-1.24 a team-game, so it carries about one double a game; the deceleration it uses is the measured one. Nothing was built for the route.
+
+### 3. The decisions fitted on the old ball
+
+**The double play (bb_field v1.13).** On the new ball, with a man on first and fewer than two out, the infield forced him at second on .89 of its clean plays (league .757, from `men_on_base.py`: double plays .403, lead runner out .274 of the infield's chances, less the hits and errors) and the relay then beat the batter .73 of the time (.595); double plays were .63 of those chances (.40). Swept with `mob_check` (V_CONTACT 1.5-3.0 m/s by PIVOT 0.65-0.95 s): **V_CONTACT 2.75 m/s and PIVOT 0.87 s** gave forced on .770 / .745 of clean plays at seeds 3 / 11 and the relay .603 / .598, by the batter's speed .79-.76 / .56-.61 / .46-.42 against the league's .73 / .59 / .47 (not fitted). 2.75 m/s is a little under the 3 m/s of a man walking off on a steal. The cut-off man had taken the pivot's time; he keeps 0.65 s (RELAY_XFER), since the refitted pivot also carries the man crossing second ahead of the slide. Final code: double plays .416 of the chances (.403), relay .575; ground-ball double plays 0.66 / 0.65 / 0.61 a team-game against the league's 0.64.
+
+**The runner's arc (bb_field v1.14).** Built before refitting the sends, because the sends were absorbing it: a runner went straight through every base, so a 30-ft/s batter reached third in 10.2 s, faster than Statcast has ever timed a triple (Buxton 10.57 s in 2017, De La Cruz 10.84 s in 2023, both near 30 ft/s, each man's best run). **ROUND_PATH 2.4 m of extra ground for each base a runner goes on past**, measured roughly from those times against the model's straight-line run (0.2-0.3 s, 6-9 ft a base) and the optimal arc at a sprinter's lean (about 10 ft; Carozza, Johnson and Morgan, Williams College 2010). A 30-ft/s batter now takes 10.74 s to third. On its own (200 games, before the chain): triples 0.31 / 0.31 / 0.31 to 0.17 / 0.17 / 0.15, doubles 2.05 / 1.94 / 1.88 to 1.86 / 1.92 / 1.90.
+
+**The sends to third (bb_field v1.15).** With the arc, a man on first took third on a single .32 / .30 / .50 of the time with none, one and two out (league .28 / .30 / .42). Refitted with `xbt_check` and `mob_check` as in v1.9: **SAFETY_3 [0.95, 0.95, 0.35] to [1.15, 0.95, 0.55]**, giving .31-.28 / .30 / .41-.42 at seeds 3 and 11. **SAFETY_H could not be refitted**: at every margin swept (0.6-1.0, 0.2-0.6 and -0.2 to 0.2 by outs) a man on second scored on a single too seldom while a man on first scored on a double too often (final code: .32-.30 / .48-.54 / .64-.73 against .36 / .51 / .83, and .35-.36 / .45-.53 / .63-.65 against .34 / .31 / .52). The outfield's throw home beats him too easily on a single and too slowly on a double, which is the cut-off of section 2 again; kept as fitted in v1.9.
+
+### 4. Infield hits (IH)
+
+Not built. The model now makes .012-.015 infield hits per ground ball (int2 .006, league .061); with a man on first .020 of the infield's chances were hits against the league's .101, by fielder the league's 3B .144, SS .085, 1B .085, 2B .049, P .208. The three measurements the ground-ball section asks for are not in the public data: Statcast times no infielder's exchange (pop time is the catcher's), its arm strength is the average of a fielder's hardest throws, not his routine ones, and the play descriptions do not say when a ball was knocked down.
+
+### The line against the baseline
+
+Suite (200 games a seed), seeds 3 / 11 / 29, `int2` against the final code (after its chain); the steps after their own chains:
+
+| | int2 | FM and the react fix | and the double play | final (and the arc, SAFETY_3) | league |
+|---|---|---|---|---|---|
+| runs | 4.50 / 4.71 / 4.45 | 4.76 / 4.43 / 4.82 | 5.08 / 4.78 / 4.64 | 4.58 / 4.75 / 4.65 | 4.45 |
+| hits | 8.19 / 8.43 / 8.16 | 8.70 / 8.29 / 8.70 | 8.73 / 8.27 / 8.03 | 8.40 / 8.61 / 8.65 | 8.26 |
+| BABIP | .270 / .273 / .269 | .286 / .272 / .286 | .283 / .271 / .269 | .277 / .278 / .282 | .291 |
+| singles, share of balls in play | .175 / .175 / .175 | .185 / .175 / .187 | .182 / .175 / .175 | .187 / .189 / .191 | .208 |
+| doubles | 1.92 / 1.92 / 1.92 | 2.10 / 1.98 / 2.04 | 2.05 / 1.94 / 1.88 | 1.94 / 1.94 / 1.95 | 1.59 |
+| triples | 0.28 / 0.36 / 0.27 | 0.28 / 0.31 / 0.24 | 0.31 / 0.31 / 0.31 | 0.14 / 0.15 / 0.14 | 0.13 |
+| home runs | 1.30 / 1.37 / 1.26 | 1.29 / 1.24 / 1.34 | 1.38 / 1.32 / 1.19 | 1.26 / 1.29 / 1.36 | 1.16 |
+| double plays (ground ball) | 0.94 / 0.98 / 0.90 | 0.93 / 1.00 / 1.08 | 0.62 / 0.69 / 0.63 | 0.66 / 0.65 / 0.61 | 0.64 (GIDP) |
+| errors | 0.31 / 0.30 / 0.29 | 0.33 / 0.31 / 0.28 | 0.34 / 0.38 / 0.33 | 0.29 / 0.31 / 0.24 | 0.50 |
+| K% | 18.3 / 18.3 / 19.2 | 18.6 / 18.2 / 19.0 | 19.1 / 18.6 / 19.1 | 18.9 / 18.1 / 19.5 | 22.2 |
+| BB% | 9.7 / 9.3 / 8.6 | 9.3 / 9.0 / 9.7 | 9.3 / 9.4 / 9.7 | 9.0 / 9.2 / 8.5 | 8.4 |
+| ground balls (under 10 deg) | .270 / .280 / .277 | .295 / .283 / .294 | .284 / .270 / .264 | .283 / .283 / .283 | .291 |
+| liners / flies, hits per ball (run_games) | .58 / .58 / .57, .09 / .09 / .10 | .61 / .59 / .60, .09 / .09 / .11 | .61 / .60 / .60, .12 / .10 / .10 | .58 / .60 / .61, .10 / .10 / .10 | .614 / .125 (10-25, 25-50 deg) |
+| contact score (A-D) | .0416 .0562 .0839 .0609 | .0413 .0578 .0853 .0613 | .0416 .0571 .0777 .0573 | .0396 .0522 .0816 .0521 | |
+
+From the checks (int2 | final): liners caught .387 / .380 / .386 | .378 / .365 / .363 (league .355), flies caught .908 / .908 / .903 | .896 / .897 / .891 (.870) (`air_check`, 400 games a seed); ground-ball hit rate .312 / .317 / .317 | .311 / .322 / .309 (.291) and infield hits .006 | .012-.015 (.061) (`ground_check`, 300 games a seed); runs over BaseRuns .952 / .938 / .952 | .971 / .958 / .964 (1.011) (`runs_check`, 600 games); a man on first scored on a double .56 / .59 | .52 / .49 (.39) and took third on a single .37 / .36 | .34 / .34 (.33) (`xbt_check`, 1,000 games, seeds 3 / 11); a man on third scored on a caught ball .459 (.626), out .059 (.020) (`mob_check`, seed 3). The worst seed beside the baseline: runs at seed 29 went 4.45 to 4.65 and hits 8.16 to 8.65, from BABIP .269 to .282 with K% unchanged: the hits per game run over the league's because the model's batters strike out 18-19% of the time against 22%, so more balls are put in play.
+
+### What failed, and what is left
+
+- **The stop-and-turn switched off** (bracket): doubles 1.21-1.24, triples 0.09-0.11, double plays 0.99-1.02 on the old pivot; not physical, not kept.
+- **SAFETY_H**: no margin fits both the single and the double (above).
+- **A quicker run for an outfielder going after a ball on the ground** (the runners' 0.78 s instead of 1.2, on the argument that a grounder needs no read of depth) was considered for the deep pickups and not built: the same argument holds for the infielders, whose reach on a 1.3-s ground ball fits the league's ground-ball hit rate with 1.2 s and would grow by 1.2 m.
+- **Left**: doubles 1.94 against 1.59, concentrated on the lines (above); the outfield's pickups 7-36 ft deep (the roll's resistance by hand, the ball through the infield, the corners); the outfielder's catch on a low liner he charges (2.25 s, 11 ft too far) and deep flies near the wall; infield hits (IH); the tag-up home (TB, unchanged: scored .46 against .63).
+
+### Proposed changes for CALIBRATION.md
+
+**Mysteries.** 5 (the batted-ball mix and BABIP): liners and flies are now caught at the league's range from 3 to 5.5 s of hang; BABIP .277-.282 against .291, the rest in the deep flies, the low liners an outfielder charges and the infield hits. 10 (double plays, outs on the bases): the double play is the league's once measured alike (ground-ball double plays against GIDP 0.64) and its forces and relays are fitted on the new ball; triples are the league's with the runner's arc. New: doubles on the lines (above).
+
+**Hypotheses.** FM: built (TAU_F, the route over the read); residuals at 2.25 s and 5 s and more. DP: PIVOT and V_CONTACT refitted. FO: SAFETY_3 refitted, SAFETY_H not refittable (the single against the double). New, RA (the runner's arc): built, ROUND_PATH measured roughly from record times; a measurement of ordinary home-to-second and home-to-third times would pin it. New, CO (the cut-off): the model's outfield picks up ground balls 7-36 ft deeper than the league's (0-9 in the right gap), and doubles on the lines run .57 / .45 of the hits there against .49 / .33; suspects the roll's resistance (by hand), the ball through the infield, the share of balls to the left-field line; test with a ball-roll measurement on outfield grass, or Statcast's time from contact to the outfielder's pickup if it can be had. IH: unchanged, its three measurements are not public. TB: unchanged.
+
+**The trait map's constants** (bb_field, bb_engine, fit_population): ACC_F 5.0 no longer moves the fielder; TAU_F 1.2 s (fitted, the jump's two windows); ROUTE_D 34 ft (measured, the jump's window toward the ball); the route trait's target 0.90 to 0.921 (measured, the window's share toward the ball); BRAKE_F 5.0 m/s^2 (assumption, within the measured 4.2-5.0); react [0.234, 0.06, 0.05, 0.8] (the clip restored and widened; the chain's mean 0.219); PIVOT 0.65 to 0.87 s and V_CONTACT 1.5 to 2.75 m/s (class O, refitted); RELAY_XFER 0.65 s (the cut-off man, kept); ROUND_PATH 2.4 m (measured, roughly); SAFETY_3 [1.15, 0.95, 0.55] (class O, refitted); SAFETY_H [0.8, 0.2, 0] (kept). The suite's league column for double plays: 0.64 (GIDP).
+
+**Measurement notes.** Hang time for the league is a solve through the engine's flight with the model's backspin by launch angle, which is higher than published batted-ball spin at high launch angles (about 4,500 rpm at 40 deg); the league's slope of range against hang (27-29 ft/s, the fielders' sprint speed) suggests the solve does not stretch time. Distances are from the average spots, so the league's logistic scales (10-13 ft) are wider than the model's (5-8 ft), whose fielders scatter less around their spots.
+
+## The playoff review: each player's hidden traits, and a pitcher's own deception (branch `yankees-review`; 2026-10-06)
+
+For a review of the Yankees' ALDS losses and the live couch analyst (Joe, 2026-10-06; `review/`, the page at worldbyjoe.github.io/baseball-sim/live/), every playoff player was made into the engine's player from his 2025-26 measurements (PR #30's data).
+
+- **Hitters.** His measured body and swing (height, weight, swing length, attack angle, swing tilt, and bat speed by solving the power chain for his swing power), and 13 hidden traits (eye, spotting, aggression, timing, barrel scatter, along-barrel scatter, face, undercut, commitment, fastball lean, pull bias, learning, coverage) from a linear-Gaussian posterior (`review/fit_hitters.py`). The emulator was a linear map from the traits to 16 measures over 3,600 emulated major leaguers (`review/emulate_hitters.js`, the measures as `playoffs/measure_traits.py` took them); the prior was the emulated major leaguers' traits conditional on the measured ones; the noise was the player's own sampling error plus the emulator's structural error. Then four Gauss-Newton steps on the simulator itself (`review/check_hitters.js`). On a fresh seed over 112 hitters the model reproduced each one's strikeouts at r .86, walks .66-.75, home runs .70-.76, chase .93, zone swing .94 and exit speed .92-.93; the median miss was about one measured standard error. Home runs ran about a fifth low on average.
+- **Pitchers.** Slot, release, command, and every pitch's speed, spin, active spin and movement (the tilt solved for the Magnus break's direction, the seam break for the rest: the movement matched exactly). **Built from measurables alone, the pitchers did not pitch like themselves:** against the league's hitters their strikeout rates tracked their own at r .29 (Cam Schlittler 15% against 31%), and they walked too many (the measured location scatter holds the deliberate spread of targets as well as the misses). Two hidden traits were fitted by bisection (`review/fit_pitchers.js`): DECEPTION, a multiplier on the batter's read noise for that pitcher (engine v3.5 on that branch, `pitch.deception`, unchanged when unset), and a scale on command. The targets were relative to the league (his rates stand to the model's league as his measured ones stand to the real league): the hitters' fit already carries the model's league-wide shortfall of strikeouts, and absolute targets would count it twice in every matchup. Deception came to 0.79-1.35 among the Yankees' and Rays' pitchers.
+- **What it says about the model.** The engine's map from a pitcher's measured stuff to his strikeouts carries little of the real spread between pitchers (the trait map's Stuff into strikeouts: K% ~ fastball speed .36 against .52). Something the measurables miss, the hiding of the ball, the sequencing, is a real trait. Recorded as mystery 11 and hypothesis DC.
+- **The review itself** (Games 1 and 2 at Tampa Bay): pregame the model made the Yankees 52% and 60%; they lost 1-0 and 5-2. In Game 1 they made one hit from 15 balls in play against 4.1 expected from the league's 40 most similar balls (a 1-in-45 outcome); in Game 2 four defensive miscues led to three of the Rays' five runs, and Freddy Peralta threw his four-seamer 2.4 mph above his season (replayed with his speeds that day, the Yankees' chance fell from 60% to 56%).
+
 ## What was learned building the fielding layer
 
 - **Statcast's outfield JUMP (about 30 ft covered in the first 3 s) is the right anchor for outfielder motion.** The first fielders covered 44 ft in 3 s and caught nearly every fly ball (fly-ball BABIP .03). Slowing everyone to the jump figure fixed the outfield but let 52% of ground balls through, so infielders got their own harder acceleration and a dive reach. That's a real difference: they work from a crouch on a ball that is on them at once.
@@ -1160,49 +1774,53 @@ Seed 3: before 300 games, after 600; at seed 11 (300 and 600 games) the ratio we
 
 ## Open mysteries (Joe, 2026-10-03: left until the whole model is built)
 
-Where the model and the league disagree and no believable mechanism has been built for it yet. They are recorded, not tuned away; each may close when a missing piece of the model arrives, and the deeper tuning waits until then. Remade 2026-10-05 after the bug audit (bb_field v1.6, bb_game v1.2; engine v3.1), in order of how much each matters to the game; the previous number in brackets. Seeds 3, 11 and 29, against 2025's team totals, unless noted.
+Where the model and the league disagree and no believable mechanism has been built for it yet. They are recorded, not tuned away; each may close when a missing piece of the model arrives, and the deeper tuning waits until then. Remade 2026-10-06 after the five jobs and the current rules (engine v3.4, bb_field v1.15, bb_game v1.6; the line `int3`), in order of how much each matters to the game; the previous number in brackets. Seeds 3, 11 and 29, against 2025's team totals, unless noted.
 
-1. **Fouls and strikeouts** (1): fastball swings fouled .32 against .45; K% 19.1-19.6 against 22.2; 138-141 pitches a team-game against 146 (#31's v3.2 built the fouls and was recorded, not adopted).
-2. **Hitting with men on base** (new; was hidden under 2): the league's batters hit better with runners on (AVG .314 empty, .332 a man on first, .344 in scoring position; BABIP on the ground .237 / .282 / .269), the model's flat (.297-.302 / .297-.305 / .302; .233-.239 / .228-.250 / .229-.230) with the same contact. The infield never holds a runner or plays in, and the fielders take the force at second too often (fielder's choices .32 a team-game against .13). This is most of what is left of the run-conversion gap: runs against BaseRuns .926-.988 (three seeds of 200 games; .956 and .940 over 600 games at seeds 3 and 11) against the league's 1.01 (.905-.909 before the audit).
-3. **Runs** (2): 4.06-4.54 per team-game against 4.45 (3.87-4.11 before the audit), from 1, 2 and 5.
-4. **Breaking balls chased too rarely far outside** (4): chase .229 against .283, walks 8.9-9.5% against 8.4 (#31's v3.3 built the far chases and was recorded, not adopted).
-5. **The batted-ball mix and BABIP** (5): liners 20-21% of balls in play against 24, BABIP .262-.272 against .291; on the ground, choppers at -10 to 0 deg are hits .135 of the time against .249 and low liners at 0-10 deg .538 against .482.
-6. **Sacrifice flies** (new): a man on third scores on an air out with fewer than two out .27-.35 of the time against .62-.65 (SF .08-.13 a team-game against .27): the tag-up margin.
-7. **Reaching contact is hit too hard** (3): fastballs 4-8 in outside come off at 80.5 mph against 72.6, 8+ in out at 75.3 against 58.4.
-8. **The platoon split has the wrong sign** (new): same-side batters 13-16 points of wOBA better in the model, 20-30 worse in the league (mirror_check); K% ~ release height +.16 against -.22 and the flat walk rate ~ arm angle share the root: the model's batter sees every pitch from its true release.
-9. **The minors' pitchers are not wild enough** (6).
-10. **Double plays, errors and outs on the bases** (7, 9): double plays 0.64-0.71 against 0.75; errors about 0.36 a team-game against 0.50 (throwing errors .10 against .13: hurried throws are missing); runners taking the extra base are now the league's (xbt_check: a man on second scores on a single .59 against .60, a man on first reaches third .38 against .33, scores on a double .38 against .39) and are thrown out a little more (.03-.06 against .01-.03, most on a double with two out).
-11. **Triple-A's BABIP and chase** (8).
-12. **The slow-swing tail** (10): 1.5% of swings more than 10 mph under the hitter's mean, against 5.7%.
-13. **Ground balls are pulled less** (11): 10.4 deg against 13.6 (spray_check, bb_field v1.1); the sign conventions were checked in this audit and are right.
-14. **From before** (12; engine v2.4, to re-measure): uphill swings cost too many whiffs, bat speed ~ whiff under half the league's, liners at 15-20 deg carry too far.
+1. **Fouls and strikeouts** (1): K% 18.1-19.5 against 22.2; fastball swings fouled about .32 against .45; 138-139 pitches a team-game against 146. The fouls are grazes: a third of the league's fastball contact, coming off at .817 of the pitch's speed. Building them (#35's v3.2 and v3.3) fixed the fouls and the strikeouts but cost BABIP .04 and nearly a run, through breaking balls met too far out front (BC).
+2. **Far chases and walks** (4): chase about .23 against .283; BB% 8.5-9.2 against 8.4. #35's v3.4 (DEC_UNSEEN) got the league's far chases but took breaking balls in the zone, and walks and runs fell (DF).
+3. **The batted-ball mix and BABIP** (5): BABIP .277-.282 against .291 (.262-.272 before the jobs). The ground balls closed (choppers at -10 to 0 deg .30 against .249, low liners at 0-10 deg .50 against .482) and liners and flies are caught at the league's range from 3 to 5.5 s of hang. Left: line drives 20-21% of balls in play against 24; infield hits .012-.015 of ground balls against .061; flies of 5 s and more caught .96-1.00 against .93-.98; low liners charged at 2.25 s reached 11 ft too far.
+4. **Doubles** (new): 1.94-1.95 a team-game against 1.59 (1.56-1.65 before the jobs), on the lines: outfielders pick up balls that get through deeper than the league's (11-36 ft), and the model sends .170 of balls toward the left-field line against .132 (CO).
+5. **Runs** (3): 4.58-4.75 against 4.45, a little high now that BABIP has risen while strikeouts stay low; runs over BaseRuns .958-.971 against 1.011.
+6. **Tag-ups and sends home** (6, and part of 10): a man on third scores on a catch .46-.50 of the time against .63 (sacrifice flies .17-.18 a team-game against .27); a man on second scores on a single .30-.32 / .48-.54 / .64-.73 by outs against .36 / .51 / .83, while a man on first scores on a double too often. One margin cannot fit both (TB).
+7. **Hitting with men on base** (2): two thirds of the league's raw gain is who comes up with men on; with batter and pitcher held fixed it is +.010 of BABIP, +.036 on the ground with a man on first. The model's ground-ball gain with a man on first is now +.016-.035; its raw gain has no who-comes-up part, so its BABIP talent may vary too little between players (WC).
+8. **The platoon split's contact half** (8; the sign closed by PL): same-side contact comes off 1.0 mph slower in the model against 2.5 in the league, xwOBA on contact -.014 against -.041, and the same-side batter does not walk less. K% ~ release height -.03 to -.11 against -.22; BB% ~ arm angle +.06 to +.08 against +.20.
+9. **Reaching contact by direction** (7): the efficiency of balls in play over Statcast's squared-up ceiling, inside .709 against .586, below .792 against .682, above .779 against .853; away it is close (RD).
+10. **Errors** (10): 0.24-0.31 a team-game against 0.50. Outfield throws go wild about 3.5 times as often as the league's because nobody at the other end moves for a long throw (RX); the hurried throw is built and recorded, blocked by that (T).
+11. **A pitcher's stuff into his strikeouts** (new, from the playoff review): pitchers built from their measurements struck out the league's hitters at rates that tracked their own at r .29. A fitted deception (the read's noise) carries the rest (DC).
+12. **The minors' pitchers are not wild enough** (9).
+13. **Triple-A's BABIP and chase** (11).
+14. **The slow-swing tail** (12): 1.5% of swings more than 10 mph under the hitter's mean, against 5.7%.
+15. **Ground balls are pulled less** (13): 10.4 deg against 13.6.
+16. **From before** (14; engine v2.4, to re-measure): uphill swings cost too many whiffs, bat speed ~ whiff under half the league's, liners at 15-20 deg carry too far.
 
-## Hypotheses for the open mysteries (2026-10-05, after the bug audit)
+## Hypotheses for the open mysteries (2026-10-06, after the five jobs)
 
-Tested on 2026-10-04 (sections above): A-F, K, S, J, Y, Z; U - confirmed, BUILT with timing scatter that follows flight time (engine v2.9); V - the big fastball misses were mostly swings under the ball from late timing, not along the barrel; G - friction does not move launch angles (spin still unjudged); DM - refuted as stated, restated as RE; CS - refuted, the walk-rate spread traced to the breaking-ball reads. On #31 (cloud, 2026-10-05): FG and I/W built with a cost and recorded. In the bug audit (2026-10-05): six bugs fixed in the bases and the scoring (the section above); the mirrors, the signs and the conventions checked and found right; new suspects MO, TU, FO, PL, GB.
+Tested by the five jobs of 2026-10-05/06 (sections above): PL confirmed and built (engine v3.2); GB built (bb_field v1.11, engine v3.3); MO built (bb_field v1.8, bb_game v1.5); TU built (the tag-up as a read, the runner from a standstill, v1.9); DP built (PIVOT and V_CONTACT refitted, v1.13); FM built (the fielder's run, v1.12); RA built roughly (the runner's arc, v1.14); FO half built (SAFETY_3 refitted, v1.15; SAFETY_H not refittable); T built with a cost and recorded (blocked by RX); FG confirmed with its physics measured (the grazes), FL refuted and replaced by BC; I/W built and recorded (blocked by DF); KB refuted (two-strike swings take as long: 70.5 ms of swing length over bat speed against 69.4). From the playoff review: DC.
 
 | | Hypothesis | Mysteries | Likelihood |
 |---|---|---|---|
-| MO | Men on base: the infield holds the runner at first and plays in or back by the situation, as the league's does, and the fielder's choice of base is measured (which out the league's infielders take, by the runners' and the batter's speed) - the league gains .02-.045 of BABIP with men on, the model loses .01 | 2, 3, 5 | likely |
-| TU | The tag-up: a runner on third reads the catch and the throw with error and goes by the margins fitted for going home (SAFETY_H), measured from the league's sacrifice flies by fly distance and outs | 6, 3 | likely |
-| FG | Fouls are glancing contact the model rarely makes: CONFIRMED and BUILT on #31 (the last look corrects a miss), recorded not adopted - the folded contact lands wrong (FL there) | 1 | built, with a cost |
-| I/W | The batter reads a breaking ball's destination too early and too well: BUILT on #31 (DEC_UNSEEN), recorded not adopted - the strikeouts overshoot (KB there) | 4 | built, with a cost |
-| PL | The same-side release is harder to pick up: a later or noisier commit point by platoon, measured from the league's whiffs and chases by platoon; would also turn K% ~ release height and walks ~ arm angle toward the league's signs | 8 | likely |
-| GB | Ground balls by launch angle: the choppers' bounces and the low liners' intercept against the league's hit rate by launch angle and exit speed on the ground | 5, 3 | likely |
-| FO | The send home on a double with two out: SAFETY_H[2] refitted now that the second runner is sent (bug A) | 10 | sure, small |
-| RE | Reaching costs a swing its quality: bat speed CONFIRMED and BUILT (BAT_LOC, engine v3.0); the contact's quality when reaching (sweet spot, glancing) still to test | 7 | half built |
-| AA | No development: Triple-A's pitchers are 1.8 years younger and still learning command; the model's players never change | 9, 11 | plausible |
-| YS | Pitchers judged more sharply: a season's results seen alongside the estimate | 9 | plausible |
-| DP | Double plays: a pivot and relay timed by hand (PIVOT 0.35 s) | 10 | possible |
-| T | Hurried throws are missing: a throw's scatter grows only with its length | 10 | likely |
-| G | The bat's grip sets batted-ball spin: needs published spin by launch angle | 5, 14 | plausible |
-| L | Triple-A's own conditions: Pacific Coast League parks, the automated zone | 11, 9 | plausible |
-| X | A later checking point than the 0.15 s last look | 12, 4 | possible |
-| AB | Command built from several distal traits, elite only where all are good (Joe's sparse perimeter) | 9 | possible |
-| M, N, O, P | Swing style and bat speed; sideways misreads forgiven; the release point; command by slot - to re-measure | 14, 4 | possible |
-| R | Long shots: a two-strike spoiling swing; minor-league fielders positioned worse | 1; 11 | long shot |
+| BC | Breaking-ball contact: slow pitches are met too far out front because the timing's pull toward the expected pitch grows linearly with the speed gap where the league's flattens past about 9 mph (curveballs +9.4 in from each hitter's mean contact point against +6.6), and the bat's path rises 1.0 deg per inch across pitch types against the league's 0.73-0.84. Test: the timing cap (about 18 ms, measured from contact depth by type) and the path; then the fold's measured constants (ball-bat friction 0.27, last-look error 0.5 in) return | 1, 3 | likely |
+| DF | The decision's picture flattens: DEC_UNSEEN shifts each pitch's picture by its remaining break, so breaking balls in the zone are taken. Test: the league's swings at breaking balls by where they ended against where their shape was headed at the commit point | 2, 1 | likely |
+| DC | A pitcher's deception is a hidden trait: a multiplier on the batter's read noise, fitted per playoff pitcher to his strikeouts (0.79-1.68). For the main model: its spread in the pool and what it correlates with (release, extension, arm angle) | 11, 1 | likely |
+| CO | The cut-off's depth: outfielders pick up balls that get through 11-36 ft deeper than the league's; with the left-line share of balls (.170 against .132) and the roll's hand-set resistance | 4, 5 | likely |
+| TB | The outfield throw's race home: the runner's margin at 250-320 ft needs about 0.5 s more and a tighter spread; suspects one 0.69 s transfer for all fielders, raceSD's growth (set by hand), the relay estimate | 6 | likely |
+| RX | A long throw's receiver does not move: outfield throwing errors 3.5 times the league's; unblocks T | 10 | likely |
+| IH | Infield hits: the infielder's exchange, the routine throw's speed, balls knocked down at full stretch; none of the three is in the public data | 3 | likely, needs data |
+| WB | Who takes the ball between first and second (bases empty): the model's first baseman fields .26 of grounders at 15-30 deg, the league's second baseman .70 | 3 | likely |
+| RD | The cost of a reach by direction: jammed inside, topped below, nothing lost above | 9 | likely |
+| PB | The swing bias behind the shoulder: a same-side pitch's late lateral movement under-read, so he judges it nearer the zone (a sinker running in chased +.097) and meets it off the sweet spot | 8, 9 | possible |
+| WC | Who comes up with men on: the model's BABIP talent varies too little between hitters and pitchers | 7 | possible |
+| 1C | plays_check case 4 after #37's refit: the first baseman's carry to the bag under the new run against the pitcher covering | (a test) | to check |
+| AA | No development: Triple-A's pitchers are 1.8 years younger and still learning command | 12, 13 | plausible |
+| YS | Pitchers judged more sharply: a season's results seen alongside the estimate | 12 | plausible |
+| G | The bat's grip sets batted-ball spin: needs published spin by launch angle (the bounce now uses the spin too) | 3, 16 | plausible |
+| L | Triple-A's own conditions: Pacific Coast League parks, the automated zone | 13, 12 | plausible |
+| X | A later checking point than the 0.15 s last look | 14, 2 | possible |
+| AB | Command built from several distal traits, elite only where all are good (Joe's sparse perimeter) | 12 | possible |
+| M, N, O, P | Swing style and bat speed; sideways misreads forgiven; the release point; command by slot: to re-measure | 16, 2 | possible |
+| R | Long shots: a two-strike spoiling swing; minor-league fielders positioned worse | 1; 13 | long shot |
 
-Order to test (shared mechanisms and the game's biggest gaps first): (1) MO: men on base - measure the league's infield depth and the hole with a man on, and which out its infielders take; (2) TU and FO together (the runners' reads, one refit of the margins); (3) GB: the ground balls by launch angle; (4) PL: the same-side release; (5) FG and I/W on their own costs (#31's FL and KB); (6) RE's second half; (7) AA + YS; (8) T, DP; (9) G, L, X; (10) re-measure 14, then AB, R.
+Order to test (shared mechanisms and the game's biggest gaps first): (1) BC, which unblocks the fouls and the strikeouts; (2) DF, which unblocks the far chases; (3) DC into the main model; (4) CO and TB together (the doubles and the sends); (5) RX, then T; (6) RD and PB; (7) WB, and IH when data allow; (8) 1C; (9) the minors (AA, YS, L, AB); (10) re-measure 16, then G, X, R.
 
 ## Known gaps, to fix with mechanisms rather than knob-turning
 
