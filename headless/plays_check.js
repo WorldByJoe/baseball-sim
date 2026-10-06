@@ -1,5 +1,5 @@
 /* ============================================================================
-   plays_check.js · v0.7 · 2026-10-05
+   plays_check.js · v0.8 · 2026-10-05
 
    Constructed plays through BBField.resolve, each a regression test for a
    bug the audit found (docs/briefs/2026-10-05_bug_audit.md): a fixed
@@ -10,14 +10,13 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js headless/plays_check.js
 
    CHANGED
+     v0.8  the defence sets up on the pool's average bat speed and pull, and case 1 throws true, so a case does not
+           move when the chain refits the pool (cases 1 and 5 had stopped testing what they were written for)
      v0.7  the second baseman covers second on a ball to third; a double play's relay waits for the man covering first;
            the throw goes for the out worth the most runs (bb_field v1.8)
      v0.6  a force tried and thrown away is an error, not a fielder's choice (bb_field v1.7)
      v0.5  a batter thrown out past first keeps the hit that got him there (bb_field v1.6)
      v0.4  a force tried and missed is a fielder's choice when the batter would have been out at first (bb_field v1.5)
-     v0.3  a throw that gets away moves every runner up, the men who held included (bb_field v1.4)
-     v0.2  a runner tags up only to a base the man ahead leaves (bb_field v1.3)
-     v0.1  the runner behind a man who scores may score too (bb_field v1.2)
 ============================================================================ */
 (function () {
   var U = BB.units, MPH = U.MPH, DEG = U.DEG, env = BB.makeEnv({}), fails = 0, cases = 0;
@@ -25,7 +24,10 @@
   var fielders = POS.map(function (pos) { return BB.makeBatter(rng, { pos: pos }); });
   var P = BB.makePitcher(rng, { role: 'SP' }); P.pos = 'P';
   var D = BBField.makeDefense(fielders.concat([P]));
-  function runner(aggr, speed) { var b = BB.makeBatter(rng, { pos: 'LF' }); b.runAggr = aggr || 0; b.speed = speed || 27; b.jump = 0.22; return b; }
+  function runner(aggr, speed) {   // the defence sets up on his bat speed and pull: the pool's average, so a case does not move with the pool's refits
+    var b = BB.makeBatter(rng, { pos: 'LF' }); b.runAggr = aggr || 0; b.speed = speed || 27; b.jump = 0.22;
+    b.batSpeed = BB.TRAITS.batSpeed[0]; b.pullBias = BB.TRAITS.pullBias[0]; return b;
+  }
   function batted(ev, la, spray) {   // a batted ball from the engine's own flight, as simPA builds one
     var v = ev * MPH, col = { v: [v * Math.cos(la * DEG) * Math.sin(spray * DEG), v * Math.cos(la * DEG) * Math.cos(spray * DEG), v * Math.sin(la * DEG)], w: [0, 0, 0], q: 1 };
     return BB.battedBall({ plate: { x: 0, z: 0.8 } }, col, env, true);
@@ -43,7 +45,7 @@
   //    right-field corner: the men from third and second both score ahead of the throw. Until v1.2 the second man was
   //    held to the base below the man ahead even when the man ahead had crossed the plate: no single, double or triple
   //    ever scored two runs.
-  var bb = batted(103, 12, 40), out = resolve(bb, [null, runner(0), runner(0), runner(0)], 2);
+  var bb = batted(103, 12, 40), out = resolve(bb, [null, runner(0), runner(0), runner(0)], 2, { u: function () { return 0.5; }, n: function () { return 0; } });   // true throws: the case is the runners' bookkeeping
   check('bases loaded, two out, a drive into the right-field corner scores at least two', out.runs >= 2 && !out.error, where(out));
   bb = batted(98, 14, -8); out = resolve(bb, [null, null, runner(-0.2), runner(0)], 2);
   check('second and third, two out, a single up the middle scores both', out.runs === 2 && out.hit === '1B', where(out));
