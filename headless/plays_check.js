@@ -1,5 +1,5 @@
 /* ============================================================================
-   plays_check.js · v0.9 · 2026-10-05
+   plays_check.js · v0.10 · 2026-10-05
 
    Constructed plays through BBField.resolve, each a regression test for a
    bug the audit found (docs/briefs/2026-10-05_bug_audit.md): a fixed
@@ -10,14 +10,13 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js headless/plays_check.js
 
    CHANGED
+     v0.10 a tag play that makes the third out is a time play (bb_field v1.10)
      v0.9  a fly the fielder was under and dropped is an error, not a hit; the tag-up is a read, as a send home on a
            hit is (bb_field v1.9)
      v0.8  the defence sets up on the pool's average bat speed and pull, and case 1 throws true, so a case does not
            move when the chain refits the pool (cases 1 and 5 had stopped testing what they were written for)
      v0.7  the second baseman covers second on a ball to third; a double play's relay waits for the man covering first;
            the throw goes for the out worth the most runs (bb_field v1.8)
-     v0.6  a force tried and thrown away is an error, not a fielder's choice (bb_field v1.7)
-     v0.5  a batter thrown out past first keeps the hit that got him there (bb_field v1.6)
 ============================================================================ */
 (function () {
   var U = BB.units, MPH = U.MPH, DEG = U.DEG, env = BB.makeEnv({}), fails = 0, cases = 0;
@@ -183,6 +182,23 @@
   }); }); });
   check('a man on third, one out, flies caught 220-380 ft out: some sent and thrown out, every deep one scores (' + caught11 + ' catches)', thrown11 > 0 && deep11 > 0 && deepScored11 === deep11,
         thrown11 + ' thrown out at the plate; ' + deepScored11 + ' of ' + deep11 + ' caught 340+ ft out scored');
+
+  // 12. A tag play that makes the third out is a time play (bb_field v1.10; rule 5.08(a)). One out, a slow man on
+  //     second and a fast one on third, both sent (the dice make every read say go) on flies to left: when the throw
+  //     to third gets the man from second before the man from third crosses the plate, his run does not count.
+  //     Until v1.10 every runner who tagged and reached home counted.
+  var goDice = { u: function () { return 0.01; }, n: function (mu, sd) { return sd === 0.25 ? 3 : 0; } }, t12 = 0, w12 = 0, eg12 = '';
+  var R2s = runner(-0.4, 24), R3f = runner(-0.4, 30);
+  [86, 89, 92, 95, 98].forEach(function (ev) { [28, 32, 36].forEach(function (la) { [-35, -28, -20].forEach(function (sp) {
+    var o = resolveAt(batted(ev, la, sp), [null, null, R2s, R3f], 1, goDice);
+    var c = o.events.filter(function (e) { return e.kind === 'catch'; })[0], th = o.events.filter(function (e) { return e.kind === 'throw' && e.to === 3; })[0];
+    var q2 = o.runners.filter(function (r) { return r.from === 2; })[0];
+    if (!c || !th || !q2.out) return;
+    var r3Home = c.t + 0.05 + (BBField.restTime ? BBField.restTime(R3f, 90 * BB.units.FT) : 90 * BB.units.FT / (R3f.speed * BB.units.FT) + 0.78);
+    if (r3Home <= th.arrive) return;   // he crossed first: his run counts
+    t12++; if (o.runs !== 0) { w12++; if (!eg12) eg12 = where(o); }
+  }); }); });
+  check('one out, both runners tag, the man from second out at third before the man from third crosses: no run (' + t12 + ' plays)', t12 > 0 && w12 === 0, w12 ? w12 + ' counted the run, e.g. ' + eg12 : 'no run counted');
 
   print(fails ? 'FAIL: ' + fails + ' of ' + cases + ' cases' : 'PASS: ' + cases + ' cases');
 })();

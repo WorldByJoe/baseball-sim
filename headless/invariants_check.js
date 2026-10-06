@@ -1,5 +1,5 @@
 /* ============================================================================
-   invariants_check.js · v0.2 · 2026-10-05
+   invariants_check.js · v0.3 · 2026-10-05
 
    Every simulated play checked for the impossible, over whole games: base
    states that are legal (one man a base, nobody on 'base 0', nobody passing
@@ -16,6 +16,8 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js bb_game.js headless/invariants_check.js -- [games] [seed]
 
    CHANGED
+     v0.3  a run on a caught fly whose third out is a runner tagged out is a time play, not a run after a third out
+           made by the batter (bb_field v1.10 judges the time; the rule had never fired while no tag-up was thrown out)
      v0.2  half the games play NL rules by name (a game given no rules now plays a designated hitter for both
            sides, bb_game v1.4), so the pitcher's spot and the pinch-hitter are still checked
      v0.1  first build (the bug audit, docs/briefs/2026-10-05_bug_audit.md)
@@ -87,7 +89,10 @@
     if (thirdOut && r.runs > scored) flag('more runs than runners crossed the plate', key);
     // no run scores when the third out is the batter before first base or a runner forced
     var bat0 = R.filter(function (q) { return q.from === 0; })[0];
-    if (thirdOut && r.runs && ((bat0 && bat0.out) || /force out|double play/.test(r.desc))) flag('a run scored on a play whose third out was a force or the batter', key, r.desc);
+    // (a caught fly puts the batter out first: a runner tagged out after it for the third out is a time play, and a run
+    // that crossed before the tag counts - bb_field v1.10 judges it)
+    var caught = (r.events || []).some(function (e) { return e.kind === 'catch'; });
+    if (thirdOut && r.runs && ((bat0 && bat0.out && !caught) || /force out|double play/.test(r.desc))) flag('a run scored on a play whose third out was a force or the batter', key, r.desc);
     // nobody passes the man ahead; one man a base
     var live = R.filter(function (q) { return !q.out; }).sort(function (a, b) { return b.from - a.from; });
     for (var i = 1; i < live.length; i++) {

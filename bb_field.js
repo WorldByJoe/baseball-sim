@@ -34,7 +34,8 @@
 
    CHANGED
      v1.10 an infielder's throw scatters more when he is hurried (less than 0.5 s to spare), whatever its length:
-           throwing errors on infield ground balls .0030 -> .0123 (the league's), falling with the exit speed as theirs
+           throwing errors on infield ground balls .0030 -> .0123 (the league's), falling with the exit speed as theirs;
+           a tag play that makes the third out counts a run only if it crossed the plate before the tag (a time play)
      v1.9  a runner on base starting from a standstill runs the league's measured curve (Statcast's running splits:
            his speed rises as 1 - exp(-t / 0.78 s)): 90 ft in 4.11 s where he ran the batter's 4.40 s from the box;
            a fly the fielder was under and dropped puts the batter on by the error (rule 9.12), no longer a hit as well;
@@ -504,7 +505,7 @@ var BBField = (function () {
       if (tagging.length) {
         var play = null;
         tagging.forEach(function (q) { q.sd = raceSD(at, q.to); q.p = Phi((q.tRun - q.tBall) / q.sd) * (q.to === 4 ? 1.4 : 1); if (!play || q.p > play.p) play = q; });
-        tagging.forEach(function (q) { q.r.target = q.to; q.r.start = tc; });
+        tagging.forEach(function (q) { q.r.target = q.to; q.r.start = tc; q.r.tagRun = q.tRun; });
         if (play.p > 0.12) {
           ev.push({ t: tc + settleC(play.to) + F.pl.transfer, kind: 'throw', who: F.pos, from: at, to: play.to, arrive: play.tBall, rcv: coverOf(play.to, F.pos) });
           if (rng.u() < Phi((play.tRun - play.tBall) / play.sd)) {
@@ -512,7 +513,11 @@ var BBField = (function () {
           } else out.desc += ', runner ' + (play.to === 4 ? 'scores' : 'to ' + baseName(play.to)) + ' on the tag';
         } else out.desc += ', runner ' + (play.r === tagging[0].r && play.to === 4 ? 'scores' : 'tags to ' + baseName(play.to));
       }
-      R.forEach(function (r) { if (!r.out && r.target >= 4) { out.runs++; out.rbi++; } });
+      // a tag play that makes the third out is a time play: a run counts only if it crossed the plate before the tag
+      // (rule 5.08(a); until v1.10 every runner who tagged and reached home counted - seldom wrong while no runner
+      // was ever thrown out tagging up)
+      var thirdTagAt = play && play.r.out && outs + out.outsMade >= 3 ? play.tBall : Infinity;
+      R.forEach(function (r) { if (!r.out && r.target >= 4 && !(r.tagRun >= thirdTagAt)) { out.runs++; out.rbi++; } });
       if (out.runs && outs + out.outsMade < 3) out.hit = 'SF';
       finish(); return out;
     }
@@ -715,7 +720,7 @@ var BBField = (function () {
 
   return { version: '1.10', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
-           throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack,
+           throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack, restTime: restTime,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };
 })();
 
