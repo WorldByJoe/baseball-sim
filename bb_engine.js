@@ -68,7 +68,7 @@
    CHANGED
      v3.7  HE WATCHES THE BALL, NOT HIS BARREL (VD): met out front or deep, he steers to most of where the ball is and
            keeps DESCENT_KEPT 0.3 of its descent, while his barrel's rise along its path is committed; launch minus
-           attack now falls with depth for every pitch kind as the league's; the aim under the ball 1.4 in with it
+           attack now falls with depth for every pitch kind as the league's
      v3.6  THE FOLD RETURNS on BC (fouls-chases-costs v3.2-v3.3, built and taken out there for its BABIP cost): the
            last look corrects a miss it can see (LOOK_GAIN 1.3, LOOK_SD 0.5 in), the raw barrel scatter x1.96 with it,
            the aim under the ball 1.0 in, VERT_MISS 0.09, and a graze goes back at the pitch's speed (MU_BAT 0.27);
@@ -651,7 +651,7 @@ var BB = (function () {
     athletic:  [0, 1, -4, 4],                // standard normal: the deep trait beneath swing power, arm strength and sprint speed (ATHLETIC, v2.6)
     swingTilt: [31.543, 3.826, 22, 44],     // deg: the tilt of his swing plane for a mid-zone pitch (2025 leaderboard swing_path_tilt: 32.3 +- 3.8)
     faceSD:    [8.362, 4, 4, 20],           // deg: swing-to-swing scatter of the bat face's horizontal angle about its path at contact; fitted to fair-ball spray by contact depth (pitch-level 2025)
-    undercut:  [1.431, 0.25, 0.65, 2.15],    // in: how far below the ball's centre he aims the barrel; REFITTED v3.2 (0.40 -> 1.0) to the league's barrel offset on fastball contact read through the engine's own collision, and v3.7 (1.0 -> 1.4) with VD, so fastball contact's launch minus attack is the league's (18.1 deg; launch 23.6, in play 14.8; the model 18.4, 24.1, 14.8)
+    undercut:  [1.031, 0.25, 0.25, 1.75],    // in: how far below the ball's centre he aims the barrel; REFITTED v3.2 (0.40 -> 1.0) to the league's barrel offset on fastball contact (0.85 in, read through the engine's own collision from launch minus attack: fastballs are met 25+ deg under the ball's middle .46 of the time, pitch-level 2025, 42 days), which the last look's correction allows without more whiffs; 1.4 tried with VD (v3.7): fastball launch minus attack the league's, but the batted-ball mix 38/17/28/16 and K% 25-26
     timingSD:  [10, 1.66, 6.26, 15.26],  // ms at a 94-mph fastball's flight, growing with flight time (v2.9); x0.72 in v2.9 so contact depth about each batter's mean has the league's sd by kind: 7.4 in fastballs, 8.3 breaking, 8.2 off-speed (pitch-level 2025)
     longSD:    [3.423, 0.51, 1.9, 5.1],   // in: along-the-barrel scatter; fitted so contact struck square vertically is squared up .695 of the time (pitch-level 2025), then x0.88 with the aim toward the hands (v2.2: the miss table's tail past the end)
     spotIn:    [5.073, 0.87, 2.7, 8.1],     // in: how far a pitch must have left his expected path by the commit point for him to pick it up; x1.09 in v2.2 (the miss table)
