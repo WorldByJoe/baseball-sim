@@ -68,7 +68,8 @@
    CHANGED
      v3.7  HE WATCHES THE BALL, NOT HIS BARREL (VD): met out front or deep, he steers to most of where the ball is and
            keeps DESCENT_KEPT 0.3 of its descent, while his barrel's rise along its path is committed; launch minus
-           attack now falls with depth for every pitch kind as the league's
+           attack now falls with depth for every pitch kind as the league's; the raw barrel scatter x0.9 so the
+           fastball whiffs stay the league's
      v3.6  THE FOLD RETURNS on BC (fouls-chases-costs v3.2-v3.3, built and taken out there for its BABIP cost): the
            last look corrects a miss it can see (LOOK_GAIN 1.3, LOOK_SD 0.5 in), the raw barrel scatter x1.96 with it,
            the aim under the ball 1.0 in, VERT_MISS 0.09, and a graze goes back at the pitch's speed (MU_BAT 0.27);
@@ -644,7 +645,7 @@ var BB = (function () {
     swingLenFt: [7.25, 0.379, 6.2, 8.6], // ft: the bat head's path to contact, about the height line (0.047 per inch; r = .27)
     batOz:      [31.8, 0.6, 29, 35],     // oz: the bat he swings (plus 0.6 oz per 50 lb of hitter)
     swingPower: [25.397, 0.088, 10, 60],  // W/kg at 206 lb, lognormal with this log-sd; falls as weight^CHAIN.powerExp
-    motorIn:    [1.769, 0.274, 1.09, 2.74], // in: vertical bat-to-ball scatter AT 72 MPH before his last look corrects it; grows as bat speed squared (impulse variability); x1.4 in v2.2 (the miss table); x1.7 in v3.2, REFITTED with LOOK_GAIN so the fastball whiffs stay the league's (.174) once the last look folds the near misses back; x1.15 in v3.3 with LOOK_SD 0.5 (the whiffs again)
+    motorIn:    [1.592, 0.247, 0.98, 2.47], // in: vertical bat-to-ball scatter AT 72 MPH before his last look corrects it; grows as bat speed squared (impulse variability); x1.4 in v2.2 (the miss table); x1.7 in v3.2, REFITTED with LOOK_GAIN so the fastball whiffs stay the league's (.174) once the last look folds the near misses back; x1.15 in v3.3 with LOOK_SD 0.5 (the whiffs again); x0.9 in v3.7 with VD (the fastball whiffs .183 -> .175, the league's .174)
     batSpeed:   [72.0, 2.65, 62, 82],    // mph - DERIVED from the chain; this entry only scales the display bars
     barrelSD:   [0.62, 0.11, 0.40, 1.1], // in - DERIVED (motorIn x (bat speed/72)^2); display scale only
     attack:    [8.494, 3.562, -3, 19],          // deg: upward tilt of the swing path at contact, at his usual contact point; the picks' mean REFITTED v3.6 (target 9 -> 7.8) so the attack his swings make (with the arc and PLAN_H) averages the league's over swings of 50+ mph, 9.6 (42 days of 2025; whiffs 14.2, contact 8.3); v3.6 before it 10.8
