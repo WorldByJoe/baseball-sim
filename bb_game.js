@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_game.js · v1.3 · 2026-10-05
+   bb_game.js · v1.4 · 2026-10-05
 
    A whole game: two teams, nine innings or more, lineups that turn over,
    pitchers who tire and get replaced, managers with their own habits.
@@ -9,7 +9,10 @@
    RULES (Joe, 2026-09-29: pre-2023) - no pitch clock, no ghost runner in
    extra innings, shifts allowed, no three-batter minimum. 'AL' plays a
    designated hitter; 'NL' has the pitcher bat and the manager pinch-hit
-   for him.
+   for him. A game given no rules plays 'AL', the designated hitter for
+   both sides, as the majors and the minors have since 2022: the headless
+   checks measure against 2025, when no pitcher batted. The schedule and
+   the league season pass 'NL' in an NL club's park.
 
    THE MANAGER is two traits. `hook` is the fatigue at which he pulls a
    starter (0.3 quick, 0.85 patient; 0.5 is about 95 pitches); `warmAt` is
@@ -45,6 +48,8 @@
    at DH, the rest on the bench, the next man in the five-man rotation.
 
    CHANGED
+     v1.4  a game given no rules plays a designated hitter for both sides (it had drawn AL or NL rules at
+           random, so pitchers batted in half the headless checks' games, against 2025's league, where none did)
      v1.3  no pinch-hitter for the pitcher when the pen is empty (the bug audit): with every reliever used, in extra
            innings, the pitcher who had been hit for came back to pitch - an illegal substitution, one game in 2,000
      v1.2  the pinch-hitter's spot goes back to the pitcher when the next pitcher comes in (the bug audit): the
@@ -53,9 +58,6 @@
      v1.1  a steal's wild throw moves every runner up a base (the stealer from first had
            landed on a man already on third, who vanished: 16 times in 2,000 games)
      v1.0  standing rosters for a league: makeRoster, teamFromRoster
-     v0.9  intentional walks (signalled, 2017-2022 rule), pickoffs, late defensive
-           substitutions and NL double switches; a bench of four drawn for their
-           positions; the pinch-hitter is the best bat on the bench
 ============================================================================ */
 
 var BBGame = (function () {
@@ -161,7 +163,7 @@ var BBGame = (function () {
   function simGame(A, H, o) {
     o = o || {};
     var rng = o.rng || BB.makeRng(o.seed || 1);
-    var rules = o.rules || (rng.u() < 0.5 ? 'AL' : 'NL');
+    var rules = o.rules || 'AL';
     var env = o.env || BB.mlbEnv(rng), ump = o.ump || named(rng, BB.makeUmp(rng));
     var G = { rules: rules, env: env, ump: ump, teams: [A, H], score: [0, 0], innings: [], plays: [], pitches: 0, over: false,
               hits: [0, 0], errors: [0, 0], lob: [0, 0], stats: [newStats(), newStats()], changes: [0, 0] };

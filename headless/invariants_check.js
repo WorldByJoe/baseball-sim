@@ -1,5 +1,5 @@
 /* ============================================================================
-   invariants_check.js · v0.1 · 2026-10-05
+   invariants_check.js · v0.2 · 2026-10-05
 
    Every simulated play checked for the impossible, over whole games: base
    states that are legal (one man a base, nobody on 'base 0', nobody passing
@@ -16,6 +16,8 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js bb_game.js headless/invariants_check.js -- [games] [seed]
 
    CHANGED
+     v0.2  half the games play NL rules by name (a game given no rules now plays a designated hitter for both
+           sides, bb_game v1.4), so the pitcher's spot and the pinch-hitter are still checked
      v0.1  first build (the bug audit, docs/briefs/2026-10-05_bug_audit.md)
 ============================================================================ */
 (function (A) {
@@ -110,7 +112,7 @@
 
   for (var g = 0; g < N; g++) {
     var T = BBNames.teams(rng), away = BBGame.makeTeam(rng, T[0]), home = BBGame.makeTeam(rng, T[1]);
-    var G = BBGame.simGame(away, home, { rng: rng }), score = [0, 0], gone = {};
+    var G = BBGame.simGame(away, home, { rng: rng, rules: g % 2 ? 'NL' : 'AL' }), score = [0, 0], gone = {};
     nGames++;
     G.innings.forEach(function (inn, ii) {
       var outs = 0, runsInn = 0, last = null;
@@ -180,7 +182,7 @@
     if (G.score[0] !== score[0] || G.score[1] !== score[1]) flag('the final score is not the sum of the runs', 'seed ' + SEED + ' game ' + g);
     if (!G.over) flag('a game that did not finish', 'seed ' + SEED + ' game ' + g, G.finalInning + ' innings, ' + G.score.join('-'));
   }
-  print('invariants_check v0.1 · ' + nGames + ' games · seed ' + SEED + ' · ' + nPlays + ' plate appearances · ' + nPitches + ' pitches');
+  print('invariants_check v0.2 · ' + nGames + ' games · seed ' + SEED + ' · ' + nPlays + ' plate appearances · ' + nPitches + ' pitches');
   var kinds = Object.keys(V).sort(function (a, b) { return V[b] - V[a]; });
   if (!kinds.length) print('  no violations');
   kinds.forEach(function (k) { print('  ' + V[k] + '  ' + k); EX[k].forEach(function (e) { print('       e.g. ' + e); }); });
