@@ -1431,8 +1431,8 @@ var BB = (function () {
   // policy, not a bet: the league's batters swing more in hitters' counts than
   // the next pitch's run value pays for (discipline.py table 6).
   var SWING_THR = {
-    '0-0': [0.62, 0.73], '0-1': [0.30, 0.30], '0-2': [0.15, 0.15], '1-0': [0.49, 0.50], '1-1': [0.29, 0.29], '1-2': [0.13, 0.13],
-    '2-0': [0.42, 0.81], '2-1': [0.28, 0.28], '2-2': [0.15, 0.15], '3-0': [0.89, 0.92], '3-1': [0.35, 0.51], '3-2': [0.14, 0.14]
+    '0-0': [0.62, 0.71], '0-1': [0.30, 0.30], '0-2': [0.16, 0.16], '1-0': [0.47, 0.57], '1-1': [0.29, 0.29], '1-2': [0.15, 0.15],
+    '2-0': [0.51, 0.67], '2-1': [0.27, 0.27], '2-2': [0.15, 0.15], '3-0': [0.91, 1.00], '3-1': [0.35, 0.52], '3-2': [0.14, 0.14]
   };
   function decide(B, pitch, gh, rf, st, rng) {
     var m = rf.detected ? rf.err : rf.baseDec, mx = m[0], mz = m[1];   // a pitch not yet picked up: where it is, on the curve he expected (v3.1)

@@ -1,5 +1,5 @@
 /* ============================================================================
-   run_games.js · v0.2 · 2026-10-04
+   run_games.js · v0.3 · 2026-10-06
 
    Headless games. Draws fresh teams for each game, plays N of them, and
    prints the league line beside MLB (2025 team totals from the MLB Stats API,
@@ -11,6 +11,9 @@
    Run:  jsc ../bb_engine.js ../bb_names.js ../bb_field.js ../bb_game.js run_games.js -- N SEED [innings-of-pbp]
 
    CHANGED
+     v0.3  double plays against the league's grounded into double plays, 0.64 a team-game: the model counts only the
+           ground ball's force and relay, where the 0.75 of every double play turned also counts line drives doubled
+           off and strike-'em-out, throw-'em-out (2025 team totals: 3,122 GIDP and 3,630 double plays in 4,860)
      v0.2  MLB column from 2025 team totals (MLB Stats API); stolen bases were 0.47, a pre-2023 figure (2025: 0.71)
      v0.1  first build
 ============================================================================ */
@@ -53,7 +56,7 @@
   row('walks', (S.bb / tg).toFixed(2), '3.16');
   row('strikeouts', (S.k / tg).toFixed(2), '8.36');
   row('errors', (S.e / tg).toFixed(2), '0.50');
-  row('double plays', (S.dp / tg).toFixed(2), '0.75');
+  row('double plays', (S.dp / tg).toFixed(2), '0.64');   // the ground ball's force and relay: the league's GIDP (all double plays turned 0.75)
   row('stolen bases', (S.sb / tg).toFixed(2), '0.71');
   row('caught stealing', (S.cs / tg).toFixed(2), '0.20');
   row('wild pitches', (S.wp / tg).toFixed(2), '0.29');
