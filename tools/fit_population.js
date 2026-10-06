@@ -1,5 +1,5 @@
 /* ============================================================================
-   fit_population.js · v0.8 · 2026-10-06
+   fit_population.js · v0.9 · 2026-10-06
 
    Fits the hitters' POPULATION in bb_engine.js's TRAITS so that the ones the
    farm picks (makeBatter: the best of FARM_N candidates by the scouts'
@@ -43,11 +43,11 @@
    to the picks'.
 
    CHANGED
+     v0.9  raw barrel scatter, aim-under, pull-bias and attack targets for engine v3.6 (the fold returns on BC)
      v0.8  the picked fielders' route 0.921, Statcast's jump window (34.0 ft toward the ball of 36.9 covered; bb_field v1.12)
      v0.7  the picked fielders' first step 0.20 s (bb_engine v3.2: both windows of Statcast's jump; was 0.45)
      v0.6  timing and aim-under targets for engine v2.9 (timing scatter by flight time, VERT_MISS)
      v0.5  athleticism's loadings (engine v2.6)
-     v0.4  pullBias's target 1 deg (engine v2.3: the bat's path square to centre, the face pulls)
 ============================================================================ */
 (function (A) {
   var ROUNDS = +A[0] || 8, NPICK = +A[1] || 6000, SEED = +A[2] || 5, T = BB.TRAITS;
@@ -91,7 +91,8 @@
   // (fixed here: TRAITS now holds the population, so reading the targets from it would shift them again on every refit)
   // (v0.3: motorIn x1.4, longSD x0.88, coverage x2.1, spotIn x1.09 and the fastball lean's excess x2.9, the engine v2.2 refit to the miss table)
   // (v0.6: timingSD x0.72 and undercut -0.15 in, engine v2.9's joint fit with the timing scatter following flight time and VERT_MISS)
-  var SK0 = { motorIn: 0.87, timingSD: 9.72, longSD: 3.35, faceSD: 8, undercut: 0.40, attack: 9, pullBias: 1, coverage: 6.3, spotIn: 4.9,
+  // (v0.9: motorIn x1.96, undercut 1.0 in, pullBias -1.5 deg and attack 7.8 deg, engine v3.6: the fold returns on BC - the last look corrects a miss, 0.5 in of error)
+  var SK0 = { motorIn: 1.70, timingSD: 9.72, longSD: 3.35, faceSD: 8, undercut: 1.0, attack: 7.8, pullBias: -1.5, coverage: 6.3, spotIn: 4.9,
               eyeSD: 5.0, aggr: 0, commit: 0.55, fbLean: 1.87, learn: 0.35, swingTilt: 32.3 };
   print('fit_population v0.6 · ' + ROUNDS + ' rounds x ' + NPICK + ' picks (best of ' + BB.FARM_N + ')');
   for (var k = 0; k < ROUNDS; k++) {
