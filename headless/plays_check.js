@@ -1,5 +1,5 @@
 /* ============================================================================
-   plays_check.js · v0.6 · 2026-10-05
+   plays_check.js · v0.7 · 2026-10-05
 
    Constructed plays through BBField.resolve, each a regression test for a
    bug the audit found (docs/briefs/2026-10-05_bug_audit.md): a fixed
@@ -10,6 +10,8 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js headless/plays_check.js
 
    CHANGED
+     v0.7  the second baseman covers second on a ball to third; a double play's relay waits for the man covering first
+           (bb_field v1.8)
      v0.6  a force tried and thrown away is an error, not a fielder's choice (bb_field v1.7)
      v0.5  a batter thrown out past first keeps the hit that got him there (bb_field v1.6)
      v0.4  a force tried and missed is a fielder's choice when the batter would have been out at first (bb_field v1.5)
@@ -103,6 +105,40 @@
     tried6++; if (o.hit === 'FC' || !o.error || !conserved(o, 2)) { wrong6++; if (!eg6) eg6 = where(o); }
   }); }); });
   check('a slow batter and a man on first, soft grounders, the force at second thrown away: an error, never a fielder\'s choice (' + tried6 + ' such plays)', tried6 > 0 && wrong6 === 0, wrong6 ? wrong6 + ' wrong, e.g. ' + eg6 : 'all errors');
+
+  // The cases below stand the infield where the base-out state puts it (bb_field v1.8).
+  function resolveAt(bb, bases, outs, dice, side, batter) {
+    var B = batter || runner(0); BBField.positionDefense(D, B, side || -1, { bases: bases, outs: outs });
+    return BBField.resolve(bb, B, bases, outs, D, env, dice || BB.makeRng(1), { side: side || -1, going: 0 });
+  }
+  var trueDice = { u: function () { return 0.5; }, n: function () { return 0; } };
+
+  // 7. The second baseman covers second on a ball to the third baseman (bb_field v1.8; the league's forces at second
+  //    from third went to the second baseman 239 times in 267). A slow batter and a man on first, none out,
+  //    grounders to third: every throw to second goes to the second baseman. Until v1.8 the shortstop covered.
+  var t7 = 0, w7 = 0, eg7 = '', slow7 = runner(0, 22.5);
+  [72, 80, 88, 96].forEach(function (ev) { [-10, -5, -1].forEach(function (la) { [-38, -34, -30, -26].forEach(function (sp) {
+    var o = resolveAt(batted(ev, la, sp), [null, R1m, null, null], 0, trueDice, -1, slow7);
+    if (!o.fielded || o.fielded.who !== '3B') return;
+    o.events.forEach(function (e) { if (e.kind === 'throw' && e.who === '3B' && e.to === 2) { t7++; if (e.rcv !== '2B') { w7++; if (!eg7) eg7 = where(o) + ' (received by ' + e.rcv + ')'; } } });
+  }); }); });
+  check('a man on first, grounders to third: the second baseman takes the throw at second (' + t7 + ' throws)', t7 > 0 && w7 === 0, w7 ? w7 + ' taken by someone else, e.g. ' + eg7 : 'all to the second baseman');
+
+  // 8. A double play's relay needs a man at first (bb_field v1.8). A slow left-handed batter and a man on first,
+  //    none out, grounders to the first baseman, who throws to second: the relay goes to the pitcher covering first
+  //    and arrives no sooner than he (or the first baseman back at the bag) is there. Until v1.8 the relay went to
+  //    the first baseman - the man who had just thrown to second (in time, as it happened: the pitcher covering is
+  //    there long before a relay can be).
+  var t8 = 0, w8 = 0, eg8 = '', Pf8 = D.filter(function (F) { return F.pos === 'P'; })[0], F1 = D.filter(function (F) { return F.pos === '1B'; })[0];
+  [72, 80, 88, 96].forEach(function (ev) { [-10, -5, -1].forEach(function (la) { [22, 26, 30, 34, 38].forEach(function (sp) {
+    var o = resolveAt(batted(ev, la, sp), [null, R1m, null, null], 0, trueDice, 1, slow7);   // a left-handed batter
+    if (!o.fielded || o.fielded.who !== '1B') return;
+    var rel = o.events.filter(function (e) { return e.who === 'relay'; })[0]; if (!rel) return;
+    var tP = BBField.moveTime(Pf8.pl, Math.hypot(Pf8.at[0] - BBField.BASES[1][0], Pf8.at[1] - BBField.BASES[1][1])) + 0.2;
+    var tBack = o.fielded.t + F1.pl.transfer + BBField.moveTime(F1.pl, Math.hypot(o.fielded.at[0] - BBField.BASES[1][0], o.fielded.at[1] - BBField.BASES[1][1])) - F1.pl.react + 0.1;
+    t8++; if (rel.arrive < Math.min(tP, tBack) - 1e-9 || rel.rcv === '1B') { w8++; if (!eg8) eg8 = where(o) + ' (relay at ' + rel.arrive.toFixed(2) + ' s, first covered at ' + Math.min(tP, tBack).toFixed(2) + ' s)'; }
+  }); }); });
+  check('a man on first, grounders to the first baseman turned two: the relay waits for the man covering first (' + t8 + ' relays)', t8 > 0 && w8 === 0, w8 ? w8 + ' to an empty bag, e.g. ' + eg8 : 'every relay to a covered bag');
 
   print(fails ? 'FAIL: ' + fails + ' of ' + cases + ' cases' : 'PASS: ' + cases + ' cases');
 })();

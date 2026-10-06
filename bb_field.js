@@ -34,7 +34,8 @@
    CHANGED
      v1.8  the infield stands where the league's did in 2025 (Savant's fielder positioning): by the batter's side,
            the first baseman holding a runner, double-play depth, the infield in with a man on third as the manager's
-           call, and the 2023 rule (two infielders each side of second, all on the dirt)
+           call, and the 2023 rule (two infielders each side of second, all on the dirt);
+           the second baseman covers second on a ball to third; a double play's relay goes to the man covering first
      v1.7  a force tried and thrown away is an error, not a fielder's choice (the bug audit): v1.5 had scored the
            batter a fielder's choice with nobody out when the throw to second got away
      v1.6  a batter thrown out past first base keeps the hit that got him there (rule 9.05; the bug audit): the play
@@ -394,7 +395,12 @@ var BBField = (function () {
     // Who covers each base when `who` has the ball, and when that man can be
     // there: a throw cannot arrive before its receiver does (a first baseman
     // playing deep is late to the bag on a hot shot - Joe saw throws to an empty bag).
-    function coverOf(to, who) { return { 1: '1B', 2: who === 'SS' ? '2B' : 'SS', 3: '3B', 4: 'C' }[to]; }
+    // Second base: the second baseman covers when the shortstop or the third baseman has the ball, the shortstop
+    // otherwise - the league's forces at second (2025 play descriptions): a ball to third went to the second
+    // baseman 239 times in 267, to first to the shortstop 104 in 106, to the pitcher 26 to the shortstop and 21 to
+    // the second baseman (until v1.8 the shortstop covered on a ball to third).
+    function coverOf(to, who) { return { 1: '1B', 2: who === 'SS' || who === '3B' ? '2B' : 'SS', 3: '3B', 4: 'C' }[to]; }
+    function fielderAt(pos) { return D.filter(function (F) { return F.pos === pos; })[0]; }
     function rcvArrival(to, who) { var Fr = D.filter(function (F) { return F.pos === coverOf(to, who); })[0]; return Fr ? moveTime(Fr.pl, dist(Fr.at, BASES[to])) + 0.1 : 0; }
     function forced(i) { for (var j = i; j < R.length; j++) if (R[j].base !== R[i].base - (j - i)) return false; return true; }
     function scoreRuns(thirdOutForce) {
@@ -469,6 +475,20 @@ var BBField = (function () {
       return { t: Math.max(t0 + settle(to, from) + Ff.pl.transfer + throwArrival(Ff, from, to), rcvArrival(to, Ff.pos)), how: 'throw' };
     }
     function settle(to, from) { return settleTime(Ff, from, to, ic.moved, ic.t - moveTime(Ff.pl, ic.moved - (isOF(Ff.pos) ? REACH * 0.5 : REACH_GB))); }
+    // The double play's relay: the man covering second catches the force, pivots and throws to first with his own
+    // arm - and someone must be at first to take it. When the first baseman fielded the ball, the pitcher covers or
+    // the first baseman gets back himself, whichever is there first (the league's 3-6 double plays: the pitcher took
+    // the relay 19 times, the first baseman 11). Until v1.8 the relay always arrived at 85 mph to a first baseman
+    // standing on the bag, even when he was the man who had thrown to second.
+    function relayAt1(tAt2) {
+      var Pv = fielderAt(coverOf(2, Ff.pos)), t = tAt2 + PIVOT + throwTime(Pv ? Pv.pl.armMph : 85, BASE);
+      if (Ff.pos === '1B') {
+        var tP = Pf ? moveTime(Pf.pl, dist(Pf.at, BASES[1])) + 0.2 : Infinity;
+        var tBack = tField + Ff.pl.transfer + moveTime(Ff.pl, dist(fieldAt, BASES[1])) - Ff.pl.react + 0.1;
+        t = Math.max(t, Math.min(tP, tBack));
+      }
+      return t;
+    }
     var clean = rng.u() < cleanChance(Ff, ic) && !(onDirt(fieldAt[0], fieldAt[1]) && rng.u() < 0.01);
     ev.push({ t: tField, kind: clean ? 'field' : 'muff', who: Ff.pos, at: fieldAt });
     if (!clean) { tField += 1.2; }
@@ -525,7 +545,7 @@ var BBField = (function () {
       // the lead runner at second is worth going for only when it is a likely
       // out; then the relay's chance at the batter counts too (expected outs)
       if (isForce && r.target === 2 && r.base === 1 && outs < 2) {
-        var bat = R[R.length - 1], t2 = tBall + PIVOT + throwTime(85, BASE);
+        var bat = R[R.length - 1], t2 = relayAt1(tBall);
         pRelay = Phi((arrive(bat, 1) - t2) / 0.15); w = p < 0.6 ? 0 : p * (1 + pRelay);
       }
       cands.push({ r: r, i: i, p: p, w: w, tRun: tRun, tBall: tBall, force: isForce, pRelay: pRelay, how: way.how });
@@ -553,8 +573,8 @@ var BBField = (function () {
         // double play: force at second, relay to first
         var bat = R[R.length - 1];
         if (play.force && to === 2 && play.r.base === 1 && !bat.out && bat.target === 1 && outs + out.outsMade < 3) {
-          var t2 = play.tBall + PIVOT + throwTime(85, BASE), p2 = Phi((arrive(bat, 1) - t2) / 0.15);
-          ev.push({ t: play.tBall + PIVOT, kind: 'throw', who: 'relay', from: BASES[2], to: 1, arrive: t2, rcv: '1B' });
+          var t2 = relayAt1(play.tBall), p2 = Phi((arrive(bat, 1) - t2) / 0.15);
+          ev.push({ t: play.tBall + PIVOT, kind: 'throw', who: 'relay', from: BASES[2], to: 1, arrive: t2, rcv: Ff.pos === '1B' ? 'P' : '1B' });
           if (rng.u() < p2) { bat.out = true; out.outsMade++; out.desc = 'double play, ' + Ff.pos + ' to second to first'; out.dp = true; }
           else out.desc += ', batter beats the relay';
         }
