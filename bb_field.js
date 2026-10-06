@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.13 · 2026-10-06
+   bb_field.js · v1.14 · 2026-10-06
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -15,7 +15,8 @@
      his sprint speed as the league's runners' does (Statcast's jump), a
      route longer than the straight line by his route trait while he reads
      the ball
-   - a runner's motion: the same, from a standing start or a lead
+   - a runner's motion: the same, from a standing start or a lead, and an
+     arc around each base he runs through
    - a throw: a real ball flight at his arm speed, launched at the angle
      that reaches the receiver soonest (solved and cached); a long one
      goes through a cut-off man when that is quicker
@@ -37,6 +38,8 @@
    cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.14 a runner who goes on past a base turns on an arc: 2.4 m of extra ground for each base he runs through (Statcast's
+           fastest home-to-third times); he had run straight through every base
      v1.13 the forced runner's break (V_CONTACT 2.75 m/s) and the double play's pivot (0.87 s) refitted on the new ball to
            the league's forces at second and relays (mob_check); the cut-off man keeps 0.65 s (RELAY_XFER)
      v1.12 the fielder's run (FM): his speed rises as 1 - exp(-t / 1.2 s) after his first step, fitted to Statcast's jump
@@ -47,13 +50,6 @@
            along the flight, and the fielder's first step fitted to both windows of Statcast's jump (docs/sections)
      v1.10 a tag play that makes the third out counts a run only if it crossed the plate before the tag (a time
            play); the hurried throw of the last commit taken out again (recorded, not kept: the write-up)
-     v1.9  a runner on base starting from a standstill runs the league's measured curve (Statcast's running splits:
-           his speed rises as 1 - exp(-t / 0.78 s)): 90 ft in 4.11 s where he ran the batter's 4.40 s from the box;
-           a fly the fielder was under and dropped puts the batter on by the error (rule 9.12), no longer a hit as well;
-           the tag-up for third or home is a read, as a send on a hit is (READ_SD, SAFETY_3 and SAFETY_H by the outs
-           after the catch, the throw's arrival as sure as raceSD): he went only when no throw could get him;
-           the cut-off man's catch, turn and throw takes the double play's pivot (0.65 s, measured), not 0.45 s by hand;
-           SAFETY_3 and SAFETY_H refitted to the league's sends and tag-ups together: [0.95, 0.95, 0.35], [0.8, 0.2, 0]
 ============================================================================ */
 
 var BBField = (function () {
@@ -266,6 +262,14 @@ var BBField = (function () {
   // keeps that run (he finishes his swing first: Statcast's home to first runs .44 s longer than his running split
   // to 90 ft), and a man moving off his lead keeps ACC_R (the curve from 1.5 m/s is worth 4.35 m/s^2 over 90 ft).
   var TAU_RUN = 0.78;   // s
+  // ROUNDING A BASE (v1.14). A runner who goes on past a base turns on an arc outside the base line, which is longer
+  // than the two straight legs: ROUND_PATH m of extra ground for each base he runs through. MEASURED, roughly, from
+  // Statcast's fastest home-to-third times (Buxton 10.57 s, 2017; De La Cruz 10.84 s, 2023, both near 30 ft/s), which
+  // ran 0.4-0.6 s longer than this model's straight-line run for a 30-ft/s batter (10.2 s): 0.2-0.3 s, 6-9 ft, for each
+  // of the two bases turned on each man's best run; the optimal arc at a sprinter's lean is about 10 ft longer per
+  // base (Carozza, Johnson and Morgan, Williams College 2010). Until v1.14 the runner went straight through every
+  // base: a 30-ft/s batter reached third in 10.2 s, faster than Statcast has ever timed a triple.
+  var ROUND_PATH = 2.4;   // m
   function restTime(pl, d) { return sprintTime(pl.speed * FT, TAU_RUN, d); }   // s to cover d m from a standstill, on the curve
   function stealTime(pl, d, v0) {
     var v = pl.speed * FT; v0 = v0 === undefined ? V_SECONDARY : v0;
@@ -639,7 +643,7 @@ var BBField = (function () {
     // two outs an unforced runner freezes at his lead to see the ball caught
     // or through, and starts from there at rest.
     function arrive(r, to) {
-      var d = (to - r.base) * BASE - leadOf(r);
+      var d = (to - r.base) * BASE - leadOf(r) + ROUND_PATH * Math.max(0, to - r.base - 1);   // each base he runs through is turned on an arc (v1.14)
       if (r.base > 0 && r.start !== null && r.start < 0.5 && !r.midway && r.onContact) return r.start + stealTime(r.pl, d, V_CONTACT);
       if (r.base > 0) return r.start + (r.start >= 0.5 && !r.midway ? 0.15 : 0.05) + restTime(r.pl, d);   // from a standstill (v1.9)
       return r.start + runTime(r.pl, d, true);   // the batter, out of the box
@@ -777,7 +781,7 @@ var BBField = (function () {
     return best.c.p > 0 && rng.u() < best.c.p ? best : null;
   }
 
-  return { version: '1.13', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
+  return { version: '1.14', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack, restTime: restTime,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };
