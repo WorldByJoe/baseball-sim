@@ -1,5 +1,5 @@
 /* ============================================================================
-   plays_check.js · v0.8 · 2026-10-05
+   plays_check.js · v0.9 · 2026-10-05
 
    Constructed plays through BBField.resolve, each a regression test for a
    bug the audit found (docs/briefs/2026-10-05_bug_audit.md): a fixed
@@ -10,13 +10,13 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js headless/plays_check.js
 
    CHANGED
+     v0.9  a fly the fielder was under and dropped is an error, not a hit (bb_field v1.9)
      v0.8  the defence sets up on the pool's average bat speed and pull, and case 1 throws true, so a case does not
            move when the chain refits the pool (cases 1 and 5 had stopped testing what they were written for)
      v0.7  the second baseman covers second on a ball to third; a double play's relay waits for the man covering first;
            the throw goes for the out worth the most runs (bb_field v1.8)
      v0.6  a force tried and thrown away is an error, not a fielder's choice (bb_field v1.7)
      v0.5  a batter thrown out past first keeps the hit that got him there (bb_field v1.6)
-     v0.4  a force tried and missed is a fielder's choice when the batter would have been out at first (bb_field v1.5)
 ============================================================================ */
 (function () {
   var U = BB.units, MPH = U.MPH, DEG = U.DEG, env = BB.makeEnv({}), fails = 0, cases = 0;
@@ -155,6 +155,17 @@
     t9++; if (th.to !== 2) { w9++; if (!eg9) eg9 = q.join(' ') + ': ' + where(o); }
   });
   check('a slow man on first and a fast batter, routine grounders to short and third: the throw goes to second (' + t9 + ' plays)', t9 > 0 && w9 === 0, w9 ? w9 + ' to first, e.g. ' + eg9 : 'all to second');
+
+  // 10. A fly the fielder was under and dropped is an error, not a hit (bb_field v1.9; rule 9.12): routine flies to
+  //     the outfield, the dice make every catch fail (and every pick-up after it). Until v1.9 the batter was scored
+  //     a hit while the fielder was charged an error on the same play.
+  var dropDice = { u: function () { return 0.999; }, n: function () { return 0; } }, t10 = 0, w10 = 0, eg10 = '';
+  [[88, 28, -20], [90, 30, 0], [92, 32, 18], [86, 26, 25], [94, 34, -10]].forEach(function (q) {
+    var o = resolve(batted(q[0], q[1], q[2]), [null, null, null, null], 0, dropDice);
+    if (!o.events.some(function (e) { return e.kind === 'drop'; })) return;
+    t10++; if (o.hit !== 'E' || !o.error) { w10++; if (!eg10) eg10 = q.join(' ') + ': ' + where(o); }
+  });
+  check('routine flies dropped: the batter reaches on the error (' + t10 + ' drops)', t10 > 0 && w10 === 0, w10 ? w10 + ' scored as hits, e.g. ' + eg10 : 'all errors');
 
   print(fails ? 'FAIL: ' + fails + ' of ' + cases + ' cases' : 'PASS: ' + cases + ' cases');
 })();

@@ -34,7 +34,8 @@
 
    CHANGED
      v1.9  a runner on base starting from a standstill runs the league's measured curve (Statcast's running splits:
-           his speed rises as 1 - exp(-t / 0.78 s)): 90 ft in 4.11 s where he ran the batter's 4.40 s from the box
+           his speed rises as 1 - exp(-t / 0.78 s)): 90 ft in 4.11 s where he ran the batter's 4.40 s from the box;
+           a fly the fielder was under and dropped puts the batter on by the error (rule 9.12), no longer a hit as well
      v1.8  the infield stands where the league's did in 2025 (Savant's fielder positioning): by the batter's side,
            the first baseman holding a runner, double-play depth, the infield in with a man on third as the manager's
            call, and the 2023 rule (two infielders each side of second, all on the dirt);
@@ -635,8 +636,10 @@ var BBField = (function () {
     var anyForceOut = runnerOut && (!isOF(Ff.pos) || (play && play.force));
     var triedRunner = play && play.r.base > 0 && !play.r.out && play.force && !out.error;   // the fielder tried a force on a runner and failed (a throw that got away is an error, scored below; v1.7)
     if (!batR.out) {
-      var wouldBeOut = false;
-      if (!clean || out.error || triedRunner) {           // would a clean play on the batter have got him?
+      // a fly he was under and dropped would have been the batter's out: he reaches on the error (rule 9.12; until v1.9
+      // he was scored a hit and the fielder an error on the same play)
+      var wouldBeOut = ev.some(function (e) { return e.kind === 'drop'; });
+      if (!wouldBeOut && (!clean || out.error || triedRunner)) {           // would a clean play on the batter have got him?
         var tB = ballTo(1, ic.t, ic.at).t;
         wouldBeOut = arrive(batR, 1) > tB + 0.1;
       }
