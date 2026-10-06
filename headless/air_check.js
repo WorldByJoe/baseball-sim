@@ -55,7 +55,7 @@
   var NOWALL = BB.makeEnv({ fence: [9999, 9999, 9999, 9999, 9999] });
   var SP = {};   // the league's average spots, field frame (x, y) ft
   if (L) Object.keys(L.spots).forEach(function (k) { var s = L.spots[k]; SP[k] = [s[0] * Math.sin(s[1] * DEG), s[0] * Math.cos(s[1] * DEG)]; });
-  var rng = BB.makeRng(SEED), Aa = [], C = [], spinBy = {};
+  var rng = BB.makeRng(SEED), Aa = [], C = [], spinBy = {}, ALL = DIR_E.slice(1).map(function () { return [0, 0, 0]; });
   for (var g = 0; g < N; g++) {
     var T = BBNames.teams(rng), G = BBGame.simGame(BBGame.makeTeam(rng, T[0]), BBGame.makeTeam(rng, T[1]), { rng: rng });
     G.plays.forEach(function (p) {
@@ -81,6 +81,8 @@
         Aa.push({ ev: bb.ev, la: bb.la, hang: hs ? hs[0] : hangT, hangT: hangT, near: near, nd: nd, way: way, ndAct: ndAct, caught: !!cEv, catcher: cEv ? cEv.who : null,
                   hit: h, err: r.hit === 'E', wall: bb.kind === 'wall' });
       }
+      var cAt = (r.events.filter(function (e) { return e.kind === 'catch'; })[0] || {}).at || (fld ? fld.at : null);   // where it was caught or fielded
+      if (cAt) { var kd = band(Math.atan2(cAt[0], cAt[1]) / DEG, DIR_E); if (kd >= 0) { ALL[kd][0]++; if (h) ALL[kd][1]++; if (bb.la < 10) ALL[kd][2]++; } }
       if (h && fld && OF[fld.who]) {
         var ang = Math.atan2(fld.at[0], fld.at[1]) / DEG;
         C.push({ ev: bb.ev, la: bb.la, ang: ang, fdist: Math.hypot(fld.at[0], fld.at[1]) / FT, land: bb.dist, hit: h, tF: fld.t });
@@ -165,4 +167,10 @@
     print(pad(h, 10) + ' ' + DIR_E.slice(1).map(function (_, k) { var s = C.filter(function (b) { return band(b.ang, DIR_E) === k; }), t = s.filter(function (b) { return b.hit === h; }); return s.length ? pad(f3(t.length / s.length) + ' of ' + pad(s.length, 5) + ', ' + pad((q(t.map(function (b) { return b.fdist; }), .5) || 0).toFixed(0), 4) + ' ft', 22) : pad('', 22); }).join(' '));
     if (L) print(pad('league', 10) + ' ' + L.xb_dir[hi].map(function (c) { return c[1] ? pad(f3(c[0] / c[1]) + ' of ' + pad(c[1], 5) + ', ' + pad((c[2] || 0).toFixed(0), 4) + ' ft', 22) : pad('', 22); }).join(' '));
   });
+  print('');
+  print('8. EVERY BALL IN PLAY (home runs out) BY DIRECTION (where it was fielded or caught, field frame): share of balls, hits per ball, ground-ball share; league below');
+  var nAll = ALL.reduce(function (a, c) { return a + c[0]; }, 0);
+  print(pad('', 10) + ' ' + lab(DIR_E).map(function (l) { return pad(l, 22); }).join(' '));
+  print(pad('model', 10) + ' ' + ALL.map(function (c) { return pad(f3(c[0] / nAll) + ' ' + f3(c[1] / c[0]) + ' ' + f3(c[2] / c[0]), 22); }).join(' '));
+  if (L && L.dir_all) { var nL = L.dir_all.reduce(function (a, c) { return a + c[0]; }, 0); print(pad('league', 10) + ' ' + L.dir_all.map(function (c) { return pad(f3(c[0] / nL) + ' ' + f3(c[1] / c[0]) + ' ' + f3(c[2] / c[0]), 22); }).join(' ')); }
 })(typeof arguments !== 'undefined' ? arguments : []);

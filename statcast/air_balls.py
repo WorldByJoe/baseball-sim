@@ -136,6 +136,7 @@ def main(spec):
     xy = {k: (v[0] * math.sin(math.radians(v[1])), v[0] * math.cos(math.radians(v[1]))) for k, v in spots.items()}
     rows = load(spec)
     A, C, days = [], [], set()
+    ALL = [[0, 0, 0] for _ in DIR_E[1:]]   # every ball in play but home runs, by direction: n, hits, ground balls
     for r in rows:
         if (r.get('game_type') or 'R') != 'R' or r.get('description') != 'hit_into_play':
             continue
@@ -152,6 +153,10 @@ def main(spec):
         pos = POS[int(loc) - 1] if loc.isdigit() and 1 <= int(loc) <= 9 else None
         side = r.get('stand') or 'R'
         days.add(r.get('game_date'))
+        if hit != 'HR':
+            k = band(ang, DIR_E)
+            if k is not None:
+                ALL[k][0] += 1; ALL[k][1] += hit is not None; ALL[k][2] += la < 10
         if 10 <= la < 50 and hit != 'HR' and d is not None and d > 0:
             lx, ly = d * math.sin(math.radians(ang)), d * math.cos(math.radians(ang))
             run = runners(r)
@@ -281,6 +286,12 @@ def main(spec):
             cells.append([len(t), len(s), q([b['fdist'] for b in t], .5)])
         J['xb_dir'].append(cells)
         md.append('%10s ' % h + ' '.join('%5.3f of %5d, %4.0f ft' % (c[0] / c[1], c[1], c[2] or 0) if c[1] else '%22s' % '' for c in cells))
+    md.append('')
+    J['dir_all'] = ALL
+    n_all = sum(c[0] for c in ALL)
+    md.append('8. EVERY BALL IN PLAY (home runs out) BY DIRECTION (where it was fielded or caught, field frame): share of balls, hits per ball, ground-ball share')
+    md.append('%10s ' % '' + ' '.join('%22s' % l for l in lab(DIR_E)))
+    md.append('%10s ' % '' + ' '.join('%6.3f %6.3f %6.3f   ' % (c[0] / n_all, c[1] / c[0], c[2] / c[0]) for c in ALL))
     md.append('')
     yr = spec[:4]
     with open(os.path.join(HERE, 'air_balls_%s.json' % yr), 'w') as f:
