@@ -68,7 +68,8 @@
    CHANGED
      v3.5  BREAKING-BALL CONTACT (BC): the gap from the pitch he expected to the kind he picks up is the committed swing,
            re-timed by how early he picked it up (RETIME_S; a curveball shows itself early, a changeup late); and his
-           planned depth and attack follow the pitch's height (PLAN_H: a low pitch met further out front, measured)
+           planned depth and attack follow the pitch's height (PLAN_H: a low pitch met further out front, measured);
+           the arc's radius 0.81 m (was 0.87), re-measured with the pitch's height held
      v3.4  the route trait is the straight-line share of the ground a fielder covers while he reads the ball (bb_field v1.12);
            react's draw restored: the integration had brought back the old clip (0.25-0.7), which pinned every position
            player at 0.25 s once the pool refit moved the mean to 0.035; now 0.05-0.8, mean 0.234 as fitted in v3.3
@@ -190,11 +191,16 @@ var BB = (function () {
   // tilt (Statcast's swing_path_tilt), with the barrel below the hands. Meeting
   // the ball further round the arc (out front) or short of it (deep) turns the
   // bat toward the pull side by cos(tilt) of that angle and raises its path by
-  // sin(tilt) of it. Pitch-level 2025 (one week of July, 9,972 contacts): balls
-  // met out front were pulled 1.59 deg per inch and the attack angle rose 0.80
-  // deg per inch; SWING_R is the one radius that gives both within 11% at the
-  // league's tilt. The plane is steeper for low pitches: 9.4 deg per zone height.
-  var SWING_R = 0.87;     // m
+  // sin(tilt) of it. Pitch-level 2025 (42 days, 52,029 tracked contacts, about
+  // each hitter's own mean depth, with the pitch's height and inside distance
+  // held): the bat's direction turned 1.53 deg per inch of depth and the attack
+  // angle rose 0.95 deg per inch, and at the league's tilt (32 deg) both give
+  // the same radius, 0.81 m (v3.5, BC; 0.87 m was from one week of July with
+  // height not held, and gave the model 0.89-0.92 deg per inch of attack: the
+  // league's breaking balls, thrown low, had seemed to rise only 0.78 per inch
+  // across pitch types because a low pitch is met out front at a lower attack,
+  // PLAN_H below). The plane is steeper for low pitches: 9.4 deg per zone height.
+  var SWING_R = 0.81;     // m
   var TILT_PER_H = 9.4;   // deg of swing tilt per zone height (0 = bottom of his zone, 1 = top); 38 deg below the zone, 21 above
   var BAT_PEAK_M = 0.229, BAT_GAIN_EXP = 0.2;   // the barrel's speed peaks 9 in out front of his usual contact point; fitted to bat speed by contact depth (pitch-level 2025)
   // Pitch location (pitch-level 2025, one week of July): an inside pitch was met
