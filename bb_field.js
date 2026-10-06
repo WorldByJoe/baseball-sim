@@ -38,7 +38,8 @@
            call, and the 2023 rule (two infielders each side of second, all on the dirt);
            the second baseman covers second on a ball to third; a double play's relay goes to the man covering first;
            the throw goes for the out worth the most runs by the league's RE24 (it had counted outs, and took the lead
-           runner on .13 of single outs with a man on first, the league .60)
+           runner on .13 of single outs with a man on first, the league .60);
+           the pivot 0.65 s, fitted to the league's relay success once the force is made (was 0.35 s, by hand)
      v1.7  a force tried and thrown away is an error, not a fielder's choice (the bug audit): v1.5 had scored the
            batter a fielder's choice with nobody out when the throw to second got away
      v1.6  a batter thrown out past first base keeps the hit that got him there (rule 9.05; the bug audit): the play
@@ -88,7 +89,13 @@ var BBField = (function () {
   // the league's (1-5% of chances).
   var RACE_SD = 0.15, RACE_SD_M = 0.005;   // s, s per m beyond 40 m
   function raceSD(from, to) { return RACE_SD + RACE_SD_M * Math.max(0, dist(from, BASES[to]) - 40); }
-  var PIVOT = 0.35;    // s: catch, pivot and release on a double-play relay
+  // The double-play pivot: the man covering second catches the force, crosses the bag and releases the relay. 0.65 s,
+  // FITTED (v1.8) to how often the league's relay beat the batter once the force at second was made (statcast/
+  // men_on_base.py, 42 days of 2025: .60 of the time, and .73 / .59 / .47 for slow, middling and fast batters; the
+  // model .61 / .62 at seeds 3 / 11, and .76 / .58 / .49 by the batter's speed - the slope is the check, not fitted).
+  // It was 0.35 s, set by hand while the infield played at its usual depth with a man on: at double-play depth that
+  // relay beat the batter .90 of the time and double plays ran .61 of the chances against .40.
+  var PIVOT = 0.65;    // s
   var STD_AIR = BB.makeEnv({ fence: [9999, 9999, 9999, 9999, 9999] });
   // The league's run expectancy to the end of the inning from each base-out state (statcast/runs_league.py, 42 days of
   // 2025), by outs and the bases as bits (first 1, second 2, third 4): what a fielder's throw is worth (v1.8).
