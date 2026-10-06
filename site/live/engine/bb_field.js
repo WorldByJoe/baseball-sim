@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.11 · 2026-10-06
+   bb_field.js · v1.15 · 2026-10-06
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -11,9 +11,12 @@
      friction on the slip with the spin carried, and the soil's crater, on
      a grass infield with a dirt skin), then a roll slowed by the air and
      the ground until it stops or reaches the fence
-   - a fielder's motion: first-step delay, acceleration to his sprint
-     speed, a route longer than the straight line by his route trait
-   - a runner's motion: the same, from a standing start or a lead
+   - a fielder's motion: first-step delay, then his speed rising toward
+     his sprint speed as the league's runners' does (Statcast's jump), a
+     route longer than the straight line by his route trait while he reads
+     the ball
+   - a runner's motion: the same, from a standing start or a lead, and an
+     arc around each base he runs through
    - a throw: a real ball flight at his arm speed, launched at the angle
      that reaches the receiver soonest (solved and cached); a long one
      goes through a cut-off man when that is quicker
@@ -35,27 +38,17 @@
    cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.15 SAFETY_3 refitted on the new ball, the fielder's run and the runner's arc: [1.15, 0.95, 0.55]; SAFETY_H kept
+     v1.14 a runner who goes on past a base turns on an arc: 2.4 m of extra ground for each base he runs through (Statcast's
+           fastest home-to-third times); he had run straight through every base
+     v1.13 the forced runner's break (V_CONTACT 2.75 m/s) and the double play's pivot (0.87 s) refitted on the new ball to
+           the league's forces at second and relays (mob_check); the cut-off man keeps 0.65 s (RELAY_XFER)
+     v1.12 the fielder's run (FM): his speed rises as 1 - exp(-t / 1.2 s) after his first step, fitted to Statcast's jump
+           windows, and his route costs him only over the read (34 ft); was a constant 5.0 m/s^2, the route a share of the
+           whole path. The league's catch rate on liners and flies by hang time and distance is the test (docs/sections)
      v1.11 ground balls by launch angle: a bounce from measured physics (Coulomb friction on the slip, the spin carried, the
            soil's crater fitted to Pennbounce), a grass infield inside the dirt skin, air drag on the roll, a catch anywhere
            along the flight, and the fielder's first step fitted to both windows of Statcast's jump (docs/sections)
-     v1.10 a tag play that makes the third out counts a run only if it crossed the plate before the tag (a time
-           play); the hurried throw of the last commit taken out again (recorded, not kept: the write-up)
-     v1.9  a runner on base starting from a standstill runs the league's measured curve (Statcast's running splits:
-           his speed rises as 1 - exp(-t / 0.78 s)): 90 ft in 4.11 s where he ran the batter's 4.40 s from the box;
-           a fly the fielder was under and dropped puts the batter on by the error (rule 9.12), no longer a hit as well;
-           the tag-up for third or home is a read, as a send on a hit is (READ_SD, SAFETY_3 and SAFETY_H by the outs
-           after the catch, the throw's arrival as sure as raceSD): he went only when no throw could get him;
-           the cut-off man's catch, turn and throw takes the double play's pivot (0.65 s, measured), not 0.45 s by hand;
-           SAFETY_3 and SAFETY_H refitted to the league's sends and tag-ups together: [0.95, 0.95, 0.35], [0.8, 0.2, 0]
-     v1.8  the infield stands where the league's did in 2025 (Savant's fielder positioning): by the batter's side,
-           the first baseman holding a runner, double-play depth, the infield in with a man on third as the manager's
-           call, and the 2023 rule (two infielders each side of second, all on the dirt);
-           the second baseman covers second on a ball to third; a double play's relay goes to the man covering first;
-           the throw goes for the out worth the most runs by the league's RE24 (it had counted outs, and took the lead
-           runner on .13 of single outs with a man on first, the league .60);
-           the pivot 0.65 s, fitted to the league's relay success once the force is made (was 0.35 s, by hand)
-     v1.7  a force tried and thrown away is an error, not a fielder's choice (the bug audit): v1.5 had scored the
-           batter a fielder's choice with nobody out when the throw to second got away
 ============================================================================ */
 
 var BBField = (function () {
@@ -65,18 +58,29 @@ var BBField = (function () {
   var BASE = 90 * FT, H2 = BASE / Math.SQRT2;
   var BASES = [[0, 0], [H2, H2], [0, 2 * H2], [-H2, H2], [0, 0]];   // home, 1st, 2nd, 3rd, home again
   var REACH = 1.2;     // m: glove plus a dive
-  // A fielder's acceleration and the react trait together reproduce Statcast's
-  // outfield JUMP in both its windows (2025 leaderboard, the raw feet): 6.9 ft
-  // covered in the first 1.5 s after the pitch is RELEASED (about 1.07 s after
-  // contact) and 34.0 ft toward the ball in 3 s. With a 0.20 s first step, 5.0
-  // m/s^2 and a route 0.90 of straight the model covers 6.2 and 37.8 ft; the
-  // 3-s figure runs over because fielders are run here at their top sprint
-  // speed where the league's average 24 ft/s on these plays. (From v0.7 to
-  // v1.7 the pair was 0.45 s and 5.5 m/s^2, fitted to the 3 s alone: it covered
-  // half the first window, and at the 1.3 s a hard ground ball allows an
-  // infielder it reached 1.9 m where this reaches 3.0. Until v0.7 outfielders
-  // reacted in 0.70 s and accelerated at 3.5 m/s^2.)
-  var ACC_F = 5.0, ACC_R = 4.5;   // m/s^2 (a runner's 4.5 puts the average home-to-first at 4.4 s, Statcast's average; 5.5 was tried and inflated BABIP to .315)
+  // A FIELDER'S RUN (v1.12, hypothesis FM). After his first step (the react trait) his speed rises toward his sprint
+  // speed as 1 - exp(-t / TAU_F), the form the league's runners follow from a standstill (Statcast's running splits,
+  // TAU_RUN below), and his path is longer than the straight line by his route trait only over the first ROUTE_D of
+  // ground, while he reads the ball; after that he runs straight at the spot. TAU_F is FITTED to Statcast's outfield
+  // jump (2025 leaderboard, the raw feet, 7,417 plays): with the 0.20 s first step he covers 6.9 ft in the first
+  // 1.5 s after the pitch is released (about 1.07 s after contact; the league 6.91) and 29.6 ft in the next 1.5 s
+  // (30.0), and is running 23.6 ft/s at the end of the window (the leaderboard's sprint speed on those plays, 24.0).
+  // ROUTE_D is the window's ground toward the ball, 34.0 ft, and the route trait's mean among major leaguers is the
+  // window's 34.0 ft toward the ball over 36.9 covered, 0.921 (tools/fit_population.js). The test is the league's
+  // catches on liners and flies (statcast/air_balls.py): half the balls nearest an outfielder are caught 37, 51, 65,
+  // 78, 92 and 106 ft from his spot at 2.75 to 5.25 s of hang (full sprint speed, 27-29 ft/s, after a lag of about
+  // 1.4 s); with this run the model's are 42, 54, 66, 78, 92 and 106 (headless/air_check.js, seed 3, bb_field v1.15).
+  // Still off: 36 ft against 25 at 2.25 s (low liners an outfielder charges), and deep flies of 5 s and more caught
+  // too often.
+  // Until v1.12 he accelerated at a constant 5.0 m/s^2 to his sprint speed with the route a share of the whole
+  // path (0.885): that pair fitted the jump's first window but reached about 10 ft too far at 2-3 s of hang, so
+  // liners were caught too often, and a constant acceleration that fits all three windows tops out at an in-play
+  // speed (24 ft/s) that lets deep flies fall (the ground-balls section's variant H). (From v0.7 to v1.10 the pair
+  // was 0.45 s and 5.5 m/s^2, fitted to the jump's 3-s total alone; until v0.7 0.70 s and 3.5 m/s^2.)
+  var TAU_F = 1.2, ROUTE_D = 34.0 * FT;   // s, m
+  // An outfielder braking to make his throw (settleTime) sheds speed at BRAKE_F, the constant acceleration the model
+  // used until v1.12: an assumption, not a measurement.
+  var BRAKE_F = 5.0, ACC_R = 4.5;   // m/s^2 (a runner's 4.5 puts the average home-to-first at 4.4 s, Statcast's average; 5.5 was tried and inflated BABIP to .315)
   var REACH_GB = 1.5;  // m: a dive or full extension for a grounder
   var LEAD = 4.66;     // m: a runner's lead when the ball is hit: Statcast's average secondary lead, 15.3 ft (2025, runners on first)
   var TAG = 0.25;      // s: catch and apply a tag
@@ -97,20 +101,30 @@ var BBField = (function () {
   // on second took third .21). Until v1.9 [0.75, 0.75, 0.35] and [0.7, 0.2, -0.4], fitted with bug A present
   // (the second runner never sent) and the tag-up on its own rule: the two-out double sent a man on first home
   // and lost him .12 of the time, the league .03.
-  var SAFETY_3 = [0.95, 0.95, 0.35], SAFETY_H = [0.8, 0.2, 0.0], READ_SD = 0.25;   // s, by outs: taking third, going home
+  // SAFETY_3 REFITTED (v1.15) on the ball of v1.11, the fielder's run of v1.12 and the runner's arc of v1.14, the same
+  // way (xbt_check 1,000 games at seeds 3 and 11, mob_check 600 at seed 3): [1.15, 0.95, 0.55] puts a man on first on
+  // third after a single .27 / .29 / .42 of the time with none, one and two out (league .28 / .30 / .42; it was .32 /
+  // .30 / .50). SAFETY_H could not be refitted: at every margin swept (0.6-1.0, 0.2-0.6, -0.2-0.2 by outs) a man on
+  // second scored on a single too seldom while a man on first scored on a double too often (at the kept values .29 /
+  // .49 / .69 against .36 / .51 / .83, and .42 / .56 / .61 against .34 / .31 / .52): the throw home beats him too
+  // easily on a single and too slowly on a double, so one margin cannot fit both. Kept as fitted in v1.9.
+  var SAFETY_3 = [1.15, 0.95, 0.55], SAFETY_H = [0.8, 0.2, 0.0], READ_SD = 0.25;   // s, by outs: taking third, going home
   // How sure a throw's arrival is: 0.15 s for an infield throw, and more the
   // longer it is beyond 40 m (footwork, a hop, the catcher moving for it); set
   // by hand, so runners are thrown out at third and home about as often as
   // the league's (1-5% of chances).
   var RACE_SD = 0.15, RACE_SD_M = 0.005;   // s, s per m beyond 40 m
   function raceSD(from, to) { return RACE_SD + RACE_SD_M * Math.max(0, dist(from, BASES[to]) - 40); }
-  // The double-play pivot: the man covering second catches the force, crosses the bag and releases the relay. 0.65 s,
-  // FITTED (v1.8) to how often the league's relay beat the batter once the force at second was made (statcast/
-  // men_on_base.py, 42 days of 2025: .60 of the time, and .73 / .59 / .47 for slow, middling and fast batters; the
-  // model .61 / .62 at seeds 3 / 11, and .76 / .58 / .49 by the batter's speed - the slope is the check, not fitted).
-  // It was 0.35 s, set by hand while the infield played at its usual depth with a man on: at double-play depth that
-  // relay beat the batter .90 of the time and double plays ran .61 of the chances against .40.
-  var PIVOT = 0.65;    // s
+  // The double-play pivot: the man covering second catches the force, crosses the bag and releases the relay. 0.87 s,
+  // REFITTED (v1.13) with the forced runner's break (V_CONTACT below) on the ball of v1.11 and the fielder's run of
+  // v1.12, to how often the league's relay beat the batter once the force at second was made (statcast/
+  // men_on_base.py, 42 days of 2025: .595, and .73 / .59 / .47 for slow, middling and fast batters) with the share of
+  // the infield's clean plays on a ground ball with a man on first and fewer than two out that forced him at second
+  // (.757): the model .603 / .598 and .770 / .745 at seeds 3 / 11 (mob_check, 600 games), .79-.76 / .56-.61 / .46-.42
+  // by the batter's speed (the slope is the check, not fitted). With 0.65 s (v1.8, fitted on the old, slower ball)
+  // the relay beat the batter .73 of the time and the force came off .89 of clean plays; double plays ran .63 of the
+  // chances against .40. (0.35 s, by hand, until v1.8.)
+  var PIVOT = 0.87;    // s
   var STD_AIR = BB.makeEnv({ fence: [9999, 9999, 9999, 9999, 9999] });
   // The league's run expectancy to the end of the inning from each base-out state (statcast/runs_league.py, 42 days of
   // 2025), by outs and the bases as bits (first 1, second 2, third 4): what a fielder's throw is worth (v1.8).
@@ -219,11 +233,17 @@ var BBField = (function () {
 
   // -------------------------------------------------------------- motion
   function isOF(pos) { return pos === 'LF' || pos === 'CF' || pos === 'RF'; }
-  function moveTime(pl, d) {              // a fielder, from his first step
-    var v = pl.speed * FT, a = ACC_F; d = Math.max(0, d) / pl.route;
-    var t = d < v * v / (2 * a) ? Math.sqrt(2 * d / a) : v / (2 * a) + d / v;
-    return pl.react + t;
+  // s to cover d m from rest with the speed rising as v (1 - exp(-t / tau)): v (t - tau (1 - exp(-t / tau))) = d,
+  // by Newton from the asymptote (the fielder's run, and a runner's from a standstill)
+  function sprintTime(v, tau, d) {
+    d = Math.max(0, d);
+    if (!d) return 0;
+    var t = d / v + tau;
+    for (var i = 0; i < 8; i++) { var e = Math.exp(-t / tau); t -= (v * (t - tau * (1 - e)) - d) / Math.max(v * (1 - e), 0.5); if (t < 1e-3) t = 1e-3; }
+    return t;
   }
+  function pathOf(pl, d) { d = Math.max(0, d); var r = Math.min(d, ROUTE_D); return r / pl.route + d - r; }   // the ground he runs to get d m from his spot
+  function moveTime(pl, d) { return pl.react + sprintTime(pl.speed * FT, TAU_F, pathOf(pl, d)); }   // a fielder, from the crack of the bat
   function runTime(pl, d, standing) {     // a runner
     var v = pl.speed * FT; d = Math.max(0, d);
     var t = d < v * v / (2 * ACC_R) ? Math.sqrt(2 * d / ACC_R) : v / (2 * ACC_R) + d / v;
@@ -233,10 +253,13 @@ var BBField = (function () {
   // A steal starts from a moving secondary lead: he is already walking off
   // the bag at about 3 m/s when the pitcher commits to the plate.
   var LEAD_STEAL = 3.7, V_SECONDARY = 3.0;   // m, m/s
-  // A runner who breaks on contact is shuffling at his secondary lead, slower
-  // than a man walking off on a steal: V_CONTACT, fitted to the league's double
-  // plays per game (the forced runner's race to second).
-  var V_CONTACT = 1.5;   // m/s
+  // A runner who breaks on contact is shuffling off his secondary lead: V_CONTACT,
+  // REFITTED (v1.13) with the pivot (PIVOT above) to the share of clean infield
+  // plays that force him at second (.757; the forced runner's race); not
+  // measured directly (Statcast gives his lead, 15.3 ft, not his speed). It was
+  // 1.5 m/s, fitted to the league's double plays per game on the old ball; 2.75
+  // is a little under the 3 m/s of a man walking off on a steal.
+  var V_CONTACT = 2.75;   // m/s
   // RUNNING FROM REST (v1.9). A runner on base who starts from a standstill - tagging up, held at the bag till a fly
   // drops, frozen at his lead till a grounder is through - runs the league's measured curve: his speed rises toward
   // his sprint speed as 1 - exp(-t / TAU_RUN), TAU_RUN 0.78 s, fitted to Statcast's running splits (549 hitters,
@@ -246,13 +269,15 @@ var BBField = (function () {
   // keeps that run (he finishes his swing first: Statcast's home to first runs .44 s longer than his running split
   // to 90 ft), and a man moving off his lead keeps ACC_R (the curve from 1.5 m/s is worth 4.35 m/s^2 over 90 ft).
   var TAU_RUN = 0.78;   // s
-  function restTime(pl, d) {   // s to cover d m from a standstill, on the curve
-    var v = pl.speed * FT; d = Math.max(0, d);
-    if (!d) return 0;
-    var t = d / v + TAU_RUN;   // the asymptote; Newton from there
-    for (var i = 0; i < 8; i++) { var e = Math.exp(-t / TAU_RUN); t -= (v * (t - TAU_RUN * (1 - e)) - d) / Math.max(v * (1 - e), 0.5); if (t < 1e-3) t = 1e-3; }
-    return t;
-  }
+  // ROUNDING A BASE (v1.14). A runner who goes on past a base turns on an arc outside the base line, which is longer
+  // than the two straight legs: ROUND_PATH m of extra ground for each base he runs through. MEASURED, roughly, from
+  // Statcast's fastest home-to-third times (Buxton 10.57 s, 2017; De La Cruz 10.84 s, 2023, both near 30 ft/s), which
+  // ran 0.4-0.6 s longer than this model's straight-line run for a 30-ft/s batter (10.2 s): 0.2-0.3 s, 6-9 ft, for each
+  // of the two bases turned on each man's best run; the optimal arc at a sprinter's lean is about 10 ft longer per
+  // base (Carozza, Johnson and Morgan, Williams College 2010). Until v1.14 the runner went straight through every
+  // base: a 30-ft/s batter reached third in 10.2 s, faster than Statcast has ever timed a triple.
+  var ROUND_PATH = 2.4;   // m
+  function restTime(pl, d) { return sprintTime(pl.speed * FT, TAU_RUN, d); }   // s to cover d m from a standstill, on the curve
   function stealTime(pl, d, v0) {
     var v = pl.speed * FT; v0 = v0 === undefined ? V_SECONDARY : v0;
     var dAcc = (v * v - v0 * v0) / (2 * ACC_R);
@@ -305,14 +330,15 @@ var BBField = (function () {
 
   // A long outfield throw goes through a cut-off man: two shorter throws
   // beat one lofted one. The estimate every fielder and runner works from.
-  // The cut-off man's catch, turn and release is the double play's pivot
-  // (v1.9): the same body's motion, measured there (0.65 s, PIVOT below);
-  // it was 0.45 s, set by hand when the cut-off man came in to curb triples.
-  var RELAY_FROM = 55, CUT = 35;   // m, m
+  // The cut-off man's catch, turn and release, RELAY_XFER: the double play's
+  // pivot as fitted on the old ball (v1.9: 0.65 s). The pivot refitted in v1.13
+  // (0.87 s) also carries the man crossing second ahead of the slide, which the
+  // cut-off man does not do, so the relay keeps 0.65 s. (0.45 s, by hand, until v1.9.)
+  var RELAY_FROM = 55, CUT = 35, RELAY_XFER = 0.65;   // m, m, s
   function throwArrival(F, from, to) {
     var d = dist(from, BASES[to]), direct = throwTime(F.pl.armMph, d);
     if (d <= RELAY_FROM) return direct;
-    return Math.min(direct, throwTime(F.pl.armMph, d - CUT) + PIVOT + throwTime(86, CUT));
+    return Math.min(direct, throwTime(F.pl.armMph, d - CUT) + RELAY_XFER + throwTime(86, CUT));
   }
 
   // ---------------------------------------------------------- the track
@@ -457,26 +483,25 @@ var BBField = (function () {
   var CLEAN_K = 0.015;
   // THE STOP AND TURN (v1.0). An outfielder who reaches the ball on the run
   // must shed the part of his speed that is not carrying him toward his
-  // throw before he can make it: v (1 - max(0, cos a)) at ACC_F, where a is
+  // throw before he can make it: v (1 - max(0, cos a)) at BRAKE_F, where a is
   // the angle between his run and his throw - nothing if he is charging
   // toward the target, his whole speed if he is running across or away. His
-  // speed at the ball is what his acceleration gives over the ground he ran,
-  // less what he could brake in any time he had to spare. Braking is taken as
-  // his acceleration (ACC_F, from Statcast's jump): an assumption, not a
-  // measurement. Until v1.0 he threw as soon as he had the ball, and the
+  // speed at the ball is what his run gives over the ground he covered (v1.12:
+  // the rising curve above), less what he could brake in any time he had to
+  // spare. Braking at BRAKE_F is an assumption, not a measurement. Until v1.0 he threw as soon as he had the ball, and the
   // fumbles of v0.8 (half of all outfield pickups) had stood in for this: the
   // throw beat a batter-runner to second by a median 1.6 s on the singles that
   // stayed singles, and liners landing 150-300 ft were doubles 2-3% of the
   // time against the league's 9-12%. Infielders are left as they were.
   function settleTime(F, from, to, moved, spare) {
     if (!isOF(F.pos) || !(moved > 0)) return 0;
-    var pl = F.pl, d = Math.max(0, moved - REACH * 0.5) / pl.route;
-    var v = Math.max(0, Math.min(pl.speed * FT, Math.sqrt(2 * ACC_F * d)) - ACC_F * Math.max(0, spare));
+    var pl = F.pl, vmax = pl.speed * FT, tr = sprintTime(vmax, TAU_F, pathOf(pl, moved - REACH * 0.5));
+    var v = Math.max(0, vmax * (1 - Math.exp(-tr / TAU_F)) - BRAKE_F * Math.max(0, spare));
     if (!v) return 0;
     var rx = from[0] - F.at[0], ry = from[1] - F.at[1], rm = Math.hypot(rx, ry) || 1;
     var tx = BASES[to][0] - from[0], ty = BASES[to][1] - from[1], tm = Math.hypot(tx, ty) || 1;
     var c = (rx * tx + ry * ty) / (rm * tm);
-    return v * (1 - Math.max(0, c)) / ACC_F;
+    return v * (1 - Math.max(0, c)) / BRAKE_F;
   }
   // THE SCORER. A fumble that costs the out is an error only on a chance an ordinary fielder handles
   // (the rulebook's ordinary effort): no harder than D = 1, a ball reaching him at 30 m/s (67 mph) or a
@@ -625,7 +650,7 @@ var BBField = (function () {
     // two outs an unforced runner freezes at his lead to see the ball caught
     // or through, and starts from there at rest.
     function arrive(r, to) {
-      var d = (to - r.base) * BASE - leadOf(r);
+      var d = (to - r.base) * BASE - leadOf(r) + ROUND_PATH * Math.max(0, to - r.base - 1);   // each base he runs through is turned on an arc (v1.14)
       if (r.base > 0 && r.start !== null && r.start < 0.5 && !r.midway && r.onContact) return r.start + stealTime(r.pl, d, V_CONTACT);
       if (r.base > 0) return r.start + (r.start >= 0.5 && !r.midway ? 0.15 : 0.05) + restTime(r.pl, d);   // from a standstill (v1.9)
       return r.start + runTime(r.pl, d, true);   // the batter, out of the box
@@ -763,7 +788,7 @@ var BBField = (function () {
     return best.c.p > 0 && rng.u() < best.c.p ? best : null;
   }
 
-  return { version: '1.11', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
+  return { version: '1.15', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack, restTime: restTime,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };
