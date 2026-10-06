@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v3.6 · 2026-10-06
+   bb_engine.js · v3.7 · 2026-10-06
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -66,6 +66,9 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v3.7  HE WATCHES THE BALL, NOT HIS BARREL (VD): met out front or deep, he steers to most of where the ball is and
+           keeps DESCENT_KEPT 0.3 of its descent, while his barrel's rise along its path is committed; launch minus
+           attack now falls with depth for every pitch kind as the league's; the aim under the ball 1.4 in with it
      v3.6  THE FOLD RETURNS on BC (fouls-chases-costs v3.2-v3.3, built and taken out there for its BABIP cost): the
            last look corrects a miss it can see (LOOK_GAIN 1.3, LOOK_SD 0.5 in), the raw barrel scatter x1.96 with it,
            the aim under the ball 1.0 in, VERT_MISS 0.09, and a graze goes back at the pitch's speed (MU_BAT 0.27);
@@ -80,10 +83,6 @@
            player at 0.25 s once the pool refit moved the mean to 0.035; now 0.05-0.8, mean 0.234 as fitted in v3.3
      v3.3  the batted ball carries its spin to the ground (landW, for bb_field's bounce); a fielder's first step fitted to both
            windows of Statcast's outfield jump (react 0.20 s for position players, was 0.47; the catcher's and pitcher's kept)
-     v3.2  THE RELEASE BEHIND HIS SHOULDER (PL): a batter reads a pitch worse, swings slower and meets it higher the
-           further the release sits toward his own side of his line of sight (a same-side pitcher, a sidearmer most),
-           measured from the league by release angle with batter, pitcher and pitch type held fixed; the model's
-           platoon split had the wrong sign because its batter read every release alike (statcast/platoon.py)
 ============================================================================ */
 
 var BB = (function () {
@@ -235,6 +234,21 @@ var BB = (function () {
   // The model had neither: its depth and attack were flat with height, and the breaking balls the league throws low
   // were met as far out front as a hanger.
   var PLAN_H = { depth: -0.111, attack: 4.1, h0: 0.47 };
+  // HE WATCHES THE BALL, NOT HIS BARREL (v3.7, VD). Met at a timing error that puts the contact s out front (or deep),
+  // his barrel has risen along its planned path by s tan(attack) - committed at launch, and he cannot see his own
+  // barrel in time - while the ball, which he does watch, is higher than at the plate by s tan(descent): he steers to
+  // most of that and keeps DESCENT_KEPT of it. In the league (42 days of 2025, tracked contact, height held) launch
+  // minus attack fell 0.8 deg per inch of depth, curving more steeply out front, the SAME for fastballs (descent -5.3
+  // deg), breaking balls and off-speed (-7.2 to -9.5), and from deep to far out front 31 deg for each: +22.7 to -8.4 on
+  // fastballs, +14.6 to -16.1 on slow pitches. Each pitch's own descent changed that slope a quarter as much as the
+  // whole descent would (per deg of descent, -0.08 to -0.12 deg per inch on slow pitches, +0.11 on fastballs, against
+  // the 0.24 of the full term). With the whole descent (to v3.6) the model's slope was -0.26 on fastballs and +0.18 on
+  // breaking balls: an out-front slow pitch, its descent about its attack, was not topped, and the fair ones were the
+  // ones struck under - pop-ups at .095-.105 per contact 8+ in out front against the league's .045-.056. The slope
+  // comes from the fouls: in the league balls in play kept about the same launch minus attack at every depth (+0.05
+  // per inch, slow pitches) while the fouls fell 1.6 (topped ones hooked foul out front, under-struck ones went back
+  // deep). FITTED to launch minus attack by depth and kind (0.2-0.5 all fit within a few deg; 0.3 kept).
+  var DESCENT_KEPT = 0.3;
   var LOC_FACE = 0.29;    // rad of extra pull per m inside, at the same depth
   // THE FACE AND THE PATH (v2.3). The bat's path at contact (its direction of
   // travel, which Statcast measures as the attack direction) and its face (the
@@ -637,7 +651,7 @@ var BB = (function () {
     athletic:  [0, 1, -4, 4],                // standard normal: the deep trait beneath swing power, arm strength and sprint speed (ATHLETIC, v2.6)
     swingTilt: [31.603, 3.808, 22, 44],     // deg: the tilt of his swing plane for a mid-zone pitch (2025 leaderboard swing_path_tilt: 32.3 +- 3.8)
     faceSD:    [8.351, 4, 4, 20],           // deg: swing-to-swing scatter of the bat face's horizontal angle about its path at contact; fitted to fair-ball spray by contact depth (pitch-level 2025)
-    undercut:  [1.025, 0.25, 0.25, 1.75],    // in: how far below the ball's centre he aims the barrel; REFITTED v3.2 (0.40 -> 1.0) to the league's barrel offset on fastball contact (0.85 in, read through the engine's own collision from launch minus attack: fastballs are met 25+ deg under the ball's middle .46 of the time, pitch-level 2025, 42 days), which the last look's correction allows without more whiffs
+    undercut:  [1.425, 0.25, 0.65, 2.15],    // in: how far below the ball's centre he aims the barrel; REFITTED v3.2 (0.40 -> 1.0) to the league's barrel offset on fastball contact read through the engine's own collision, and v3.7 (1.0 -> 1.4) with VD, so fastball contact's launch minus attack is the league's (18.1 deg; launch 23.6, in play 14.8; the model 18.4, 24.1, 14.8)
     timingSD:  [9.939, 1.66, 6.26, 15.26],  // ms at a 94-mph fastball's flight, growing with flight time (v2.9); x0.72 in v2.9 so contact depth about each batter's mean has the league's sd by kind: 7.4 in fastballs, 8.3 breaking, 8.2 off-speed (pitch-level 2025)
     longSD:    [3.43, 0.51, 1.9, 5.1],   // in: along-the-barrel scatter; fitted so contact struck square vertically is squared up .695 of the time (pitch-level 2025), then x0.88 with the aim toward the hands (v2.2: the miss table's tail past the end)
     spotIn:    [5.019, 0.87, 2.7, 8.1],     // in: how far a pitch must have left his expected path by the commit point for him to pick it up; x1.09 in v2.2 (the miss table)
@@ -1647,14 +1661,11 @@ var BB = (function () {
     // of it (spray), and its path rises by sin(tilt) of it away from his
     // usual contact point, where his attack angle trait and his full bat
     // speed belong. The timing error alone moves the strike up or down the
-    // ball, because out there the ball has yet to descend (higher by
-    // s tan(descent)) while the barrel rises along its planned path (higher
-    // by s tan(attack)): a path steeper than the pitch tops a ball met out
-    // front and gets under one met deep. The arc's own curve does not add to
-    // that, because a batter keeps the barrel on the pitch's line through the
-    // zone (pitch-level 2025: launch angle minus attack angle went steadily
-    // from +20 deg on contact met deep to -12 deg out front, which is the
-    // attack-against-descent term alone). Met deep, the barrel is slower:
+    // ball: met out front the barrel has risen along its planned path (higher
+    // by s tan(attack)), and the ball has yet to come down (higher by
+    // s tan(descent)) - but he watches the ball, not his barrel, so he steers
+    // to most of where the ball is and keeps only DESCENT_KEPT of that
+    // (v3.7, VD; see below). Met deep, the barrel is slower:
     // it is still gathering speed, and keeps gathering it until about 9 in out
     // front of his usual point (pitch-level 2025, full swings: 69.0 mph at
     // 10-20 in of depth, 71.8 at 25-30, 73.2 at 35-40). The speed lost goes as
@@ -1668,7 +1679,7 @@ var BB = (function () {
     var phiUsual = B.pullBias * DEG / Math.cos(tr), phiPlan = phiUsual + (LOC_DEPTH * inside + PLAN_H.depth * hz) / SWING_R, phi = phiPlan + sFwd / SWING_R;
     var theta = sb * (phi * Math.cos(tr)), faceTh = theta + sb * (LOC_FACE * inside + FACE_PATH * DEG) + face;   // the path, and the face that sends the ball
     var attackPlan = attack + (phiPlan - phiUsual) * Math.sin(tr) / DEG, attackAt = attack + (phi - phiUsual) * Math.sin(tr) / DEG;
-    D += sFwd * (Math.tan(descent) - Math.tan(attackPlan * DEG));
+    D += sFwd * (DESCENT_KEPT * Math.tan(descent) - Math.tan(attackPlan * DEG));   // he steers to the ball's height where he meets it, not his barrel's (DESCENT_KEPT)
     var depth = (phi - phiUsual) * SWING_R;   // m out front of his usual contact point
     var batAt = batMph * 1.015 * Math.pow(Math.max(0.2, 1 - Math.max(0, BAT_PEAK_M - depth) / ((B.swingLenFt || TRAITS.swingLenFt[0]) * FT)), BAT_GAIN_EXP);
     var bat = B.bat || BAT_DEFAULT, look = 0;
@@ -1830,7 +1841,7 @@ var BB = (function () {
   }
 
   return {
-    version: '3.6',
+    version: '3.7',
     SWING: { R: SWING_R, tiltPerH: TILT_PER_H },
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
@@ -1840,7 +1851,7 @@ var BB = (function () {
     batOf: batOf, batSpeedOf: batSpeedOf, swingPowerOf: swingPowerOf,
     batMass: batMass, batRadius: batRadius, qAt: qAt, corOf: corOf, BAT_MODES: BAT_MODES, BAT_SHAPE: BAT_SHAPE, SWEET_IN: SWEET_IN, BAT_DEFAULT: BAT_DEFAULT,
     flyPitch: flyPitch, flyBatted: flyBatted, spinVector: spinVector, dirOf: dirOf, aim: aim, SWING_THR: SWING_THR, ZONE_HALF: ZONE_HALF, PLAN_LOC: PLAN_LOC,
-    fatigueOf: fatigueOf, releasePoint: releasePoint, releaseAngle: releaseAngle, PL: PL, TIMING: TIMING, PLAN_H: PLAN_H, LOOK: { sd: LOOK_SD, gain: LOOK_GAIN }, VERT_MISS: VERT_MISS, batterSide: batterSide, inZone: inZone,
+    fatigueOf: fatigueOf, releasePoint: releasePoint, releaseAngle: releaseAngle, PL: PL, TIMING: TIMING, PLAN_H: PLAN_H, DESCENT_KEPT: DESCENT_KEPT, LOOK: { sd: LOOK_SD, gain: LOOK_GAIN }, VERT_MISS: VERT_MISS, batterSide: batterSide, inZone: inZone,
     planPitch: planPitch, expectPitch: expectPitch, throwPitch: throwPitch, ghostPitch: ghostPitch,
     readFactors: readFactors, decide: decide, callPitch: callPitch, swing: swing, collide: collide,
     battedBall: battedBall, simPA: simPA
