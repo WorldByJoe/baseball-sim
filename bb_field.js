@@ -20,8 +20,9 @@
    - who takes the ball (the fielder who can reach it first), whether he
      catches it (his margin of time, his glove), whether he fields a
      grounder cleanly (ball speed, ground covered, his glove, a bad hop)
-   - where he throws: the out that is most likely and most valuable, a
-     double play if the relay can beat the batter, or he holds the ball
+   - where he throws: the out worth the most runs (the league's run
+     expectancy), a double play if the relay can beat the batter, or he
+     holds the ball
    - how far each runner goes: as far as the throw cannot beat him by the
      margin he demands (his aggression), never past the runner ahead
    Everything the renderer needs to animate a play is in `events`, with
@@ -35,7 +36,9 @@
      v1.8  the infield stands where the league's did in 2025 (Savant's fielder positioning): by the batter's side,
            the first baseman holding a runner, double-play depth, the infield in with a man on third as the manager's
            call, and the 2023 rule (two infielders each side of second, all on the dirt);
-           the second baseman covers second on a ball to third; a double play's relay goes to the man covering first
+           the second baseman covers second on a ball to third; a double play's relay goes to the man covering first;
+           the throw goes for the out worth the most runs by the league's RE24 (it had counted outs, and took the lead
+           runner on .13 of single outs with a man on first, the league .60)
      v1.7  a force tried and thrown away is an error, not a fielder's choice (the bug audit): v1.5 had scored the
            batter a fielder's choice with nobody out when the throw to second got away
      v1.6  a batter thrown out past first base keeps the hit that got him there (rule 9.05; the bug audit): the play
@@ -87,6 +90,11 @@ var BBField = (function () {
   function raceSD(from, to) { return RACE_SD + RACE_SD_M * Math.max(0, dist(from, BASES[to]) - 40); }
   var PIVOT = 0.35;    // s: catch, pivot and release on a double-play relay
   var STD_AIR = BB.makeEnv({ fence: [9999, 9999, 9999, 9999, 9999] });
+  // The league's run expectancy to the end of the inning from each base-out state (statcast/runs_league.py, 42 days of
+  // 2025), by outs and the bases as bits (first 1, second 2, third 4): what a fielder's throw is worth (v1.8).
+  var RE24 = [[0.486, 0.898, 1.217, 1.650, 1.186, 1.746, 2.129, 2.888],
+              [0.249, 0.515, 0.671, 0.960, 0.917, 1.119, 1.324, 1.591],
+              [0.092, 0.203, 0.317, 0.461, 0.352, 0.403, 0.621, 0.754]];
 
   function Phi(z) { var t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989422804 * Math.exp(-z * z / 2);
     var p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; }
@@ -534,23 +542,36 @@ var BBField = (function () {
       r.target = Math.min(to, ahead - 1); ahead = r.target >= 4 ? 5 : r.target;
     });
 
-    // the fielder's throw: the most likely, most valuable out
-    var cands = [];
+    // THE THROW (v1.8): the out worth the most runs. For each runner he could play, the runs that would score plus
+    // the league's run expectancy of the bases and outs left (RE24), if the throw gets him and if it does not -
+    // and for a force at second with fewer than two out, if the relay gets the batter too - weighted by those
+    // chances; he throws for the lowest. No run scores on a third out made by a force or on the batter. Until v1.8
+    // he counted expected outs (home 1.4) and tried a force at second only when it was .6 likely: with a man on
+    // first the league's infielders took the lead runner on .60 of single outs, the model's .13.
+    function valueAfter(outR, batOut, force, tBall) {
+      var o = outs + (outR ? 1 : 0) + (batOut ? 1 : 0), occ = 0, runs = 0;
+      R.forEach(function (r) {
+        if (r === outR || (batOut && r.base === 0)) return;
+        if (r.target >= 4) { if (o < 3 || (!force && arrive(r, 4) < tBall)) runs++; }
+        else if (r.target > 0) occ |= 1 << (r.target - 1);
+      });
+      return runs + (o >= 3 ? 0 : RE24[o][occ]);
+    }
+    var cands = [], vNone = valueAfter(null, false, false, 0);
     R.forEach(function (r, i) {
       if (r.target <= r.base) return;
       var isForce = r.base === 0 ? true : (forced(i) && r.target === r.base + 1);
       var tRun = arrive(r, r.target), way = ballTo(r.target, tField, fieldAt);
       var tBall = way.t + (isForce ? 0 : TAG);
-      var p = Phi((tRun - tBall) / raceSD(fieldAt, r.target)), w = p * (r.target === 4 ? 1.4 : 1), pRelay = 0;
-      // the lead runner at second is worth going for only when it is a likely
-      // out; then the relay's chance at the batter counts too (expected outs)
-      if (isForce && r.target === 2 && r.base === 1 && outs < 2) {
+      var p = Phi((tRun - tBall) / raceSD(fieldAt, r.target)), pRelay = 0, vOut = valueAfter(r, false, isForce || r.base === 0, tBall);
+      if (isForce && r.target === 2 && r.base === 1 && outs < 2) {   // the relay's chance at the batter
         var bat = R[R.length - 1], t2 = relayAt1(tBall);
-        pRelay = Phi((arrive(bat, 1) - t2) / 0.15); w = p < 0.6 ? 0 : p * (1 + pRelay);
+        pRelay = Phi((arrive(bat, 1) - t2) / 0.15);
+        vOut = pRelay * valueAfter(r, true, true, tBall) + (1 - pRelay) * vOut;
       }
-      cands.push({ r: r, i: i, p: p, w: w, tRun: tRun, tBall: tBall, force: isForce, pRelay: pRelay, how: way.how });
+      cands.push({ r: r, i: i, p: p, v: p * vOut + (1 - p) * vNone, tRun: tRun, tBall: tBall, force: isForce, pRelay: pRelay, how: way.how });
     });
-    cands.sort(function (a, b) { return b.w - a.w; });
+    cands.sort(function (a, b) { return a.v - b.v; });
     var play = cands.length && cands[0].p > 0.12 ? cands[0] : null;
     if (T.groundRule) play = null;
     if (play) {

@@ -10,8 +10,8 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js headless/plays_check.js
 
    CHANGED
-     v0.7  the second baseman covers second on a ball to third; a double play's relay waits for the man covering first
-           (bb_field v1.8)
+     v0.7  the second baseman covers second on a ball to third; a double play's relay waits for the man covering first;
+           the throw goes for the out worth the most runs (bb_field v1.8)
      v0.6  a force tried and thrown away is an error, not a fielder's choice (bb_field v1.7)
      v0.5  a batter thrown out past first keeps the hit that got him there (bb_field v1.6)
      v0.4  a force tried and missed is a fielder's choice when the batter would have been out at first (bb_field v1.5)
@@ -139,6 +139,20 @@
     t8++; if (rel.arrive < Math.min(tP, tBack) - 1e-9 || rel.rcv === '1B') { w8++; if (!eg8) eg8 = where(o) + ' (relay at ' + rel.arrive.toFixed(2) + ' s, first covered at ' + Math.min(tP, tBack).toFixed(2) + ' s)'; }
   }); }); });
   check('a man on first, grounders to the first baseman turned two: the relay waits for the man covering first (' + t8 + ' relays)', t8 > 0 && w8 === 0, w8 ? w8 + ' to an empty bag, e.g. ' + eg8 : 'every relay to a covered bag');
+
+  // 9. The fielder throws for the out worth the most runs (bb_field v1.8). A slow man on first (25.5 ft/s), a fast
+  //    batter (29.5), none out, routine grounders to short and third: the force at second is all but sure and the
+  //    relay hopeless, and with the league's run expectancy the lead runner is worth more (a man on first and one
+  //    out, .515, against a man on second and one out, .671). Until v1.8 the fielder counted expected outs and
+  //    took the surer out at first.
+  var t9 = 0, w9 = 0, eg9 = '', R1s = runner(0, 25.5), Bf = runner(0, 29.5);
+  [[70, -6, -30], [70, -2, -30], [76, -6, -14], [70, -6, -20], [82, -6, -14]].forEach(function (q) {
+    var o = resolveAt(batted(q[0], q[1], q[2]), [null, R1s, null, null], 0, trueDice, -1, Bf);
+    var th = o.events.filter(function (e) { return e.kind === 'throw' || e.kind === 'carry'; })[0];
+    if (!o.fielded || !/^(SS|3B)$/.test(o.fielded.who) || !th) return;
+    t9++; if (th.to !== 2) { w9++; if (!eg9) eg9 = q.join(' ') + ': ' + where(o); }
+  });
+  check('a slow man on first and a fast batter, routine grounders to short and third: the throw goes to second (' + t9 + ' plays)', t9 > 0 && w9 === 0, w9 ? w9 + ' to first, e.g. ' + eg9 : 'all to second');
 
   print(fails ? 'FAIL: ' + fails + ' of ' + cases + ' cases' : 'PASS: ' + cases + ' cases');
 })();
