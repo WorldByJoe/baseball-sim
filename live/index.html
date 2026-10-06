@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Couch Analyst</title>
+<meta name="description" content="A live playoff game read through the baseball-sim model, in your browser.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a phone-first live companion; one column, two on a wide screen (the at-bat left, the running record right) */
+:root {
+  --bg: #0e1418; --panel: #162026; --ink: #e8eef0; --muted: #93a2aa; --rule: #26343c;
+  --away: #f2c14e; --home: #7cc4e8; --flag: #f08a4b; --flag-bg: #3a2418; --good: #6fcf97;
+  --display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --data: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  --bg: #f1f4f5; --panel: #ffffff; --ink: #142028; --muted: #5d6b73; --rule: #d6dee2;
+  --away: #9a6d00; --home: #1f6f9a; --flag: #b4501a; --flag-bg: #fbeee4; --good: #1e8a4c; color-scheme: light } }
+:root[data-theme="light"] {
+  --bg: #f1f4f5; --panel: #ffffff; --ink: #142028; --muted: #5d6b73; --rule: #d6dee2;
+  --away: #9a6d00; --home: #1f6f9a; --flag: #b4501a; --flag-bg: #fbeee4; --good: #1e8a4c; color-scheme: light }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.5 var(--body); padding-inline: 16px; padding-block: env(safe-area-inset-top, 0px) 40px; }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); background: var(--bg); padding-block: 12px 10px; border-bottom: 1px solid var(--rule); z-index: 2; display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: baseline; justify-content: space-between; }
+.score { font: 700 30px/1 var(--display); letter-spacing: 0.02em; display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; }
+.score .a { color: var(--away); } .score .h { color: var(--home); }
+.sit { font: 500 18px/1 var(--display); color: var(--muted); letter-spacing: 0.04em; display: flex; gap: 10px; align-items: center; }
+.diamond { display: inline-grid; grid-template-columns: 9px 9px; grid-template-rows: 9px 9px; gap: 2px; transform: rotate(45deg); margin-inline: 4px; }
+.diamond i { width: 9px; height: 9px; border: 1.5px solid var(--muted); display: block; }
+.diamond i.on { background: var(--away); border-color: var(--away); }
+.ctl { font-size: 13px; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+.ctl input { width: 64px; font: 500 14px var(--data); background: var(--panel); color: var(--ink); border: 1px solid var(--rule); border-radius: 4px; padding: 4px 6px; }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 16px; max-width: 1200px; }
+@media (min-width: 900px) { .grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); } }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 16px; min-width: 0; }
+h2 { font: 600 14px/1 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+.matchup { font: 600 26px/1.1 var(--display); letter-spacing: 0.01em; margin: 0 0 8px; text-wrap: balance; }
+.matchup span { color: var(--muted); font-weight: 500; }
+ul.watch { margin: 0 0 12px; padding-left: 18px; }
+ul.watch li { margin-bottom: 4px; }
+.probs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+.prob { border-top: 3px solid var(--rule); padding-top: 6px; }
+.prob b { display: block; font: 600 26px/1 var(--display); }
+.prob span { font-size: 12.5px; color: var(--muted); }
+ol.pitches { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+ol.pitches li, ol.events li { font-size: 15px; line-height: 1.4; padding: 6px 8px; border-radius: 5px; }
+ol.pitches li.flag, ol.events li.flag { background: var(--flag-bg); border-left: 3px solid var(--flag); }
+ol.events { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-height: 520px; overflow-y: auto; }
+ol.events li.pa { font-weight: 500; }
+ol.events li.up { color: var(--muted); font-size: 14px; }
+.tm { font: 500 12px var(--data); color: var(--muted); margin-right: 6px; }
+table.led { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+table.led th { font: 600 12px/1.2 var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-align: right; padding: 4px 6px; border-bottom: 1px solid var(--rule); }
+table.led th:first-child, table.led td:first-child { text-align: left; }
+table.led td { padding: 6px; text-align: right; font-family: var(--data); font-variant-numeric: tabular-nums; border-bottom: 1px solid var(--rule); }
+.note { font-size: 13px; color: var(--muted); margin-top: 8px; }
+.wp svg { display: block; width: 100%; height: auto; }
+.wp text { font: 11px var(--data); fill: var(--muted); }
+.empty { color: var(--muted); }
+
+.pick { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.pick a { font: 600 15px/1 var(--display); letter-spacing: 0.04em; padding: 9px 12px 8px; border: 1px solid var(--rule); border-radius: 4px; color: var(--ink); text-decoration: none; background: var(--panel); }
+.pick a.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.pick a:focus-visible { outline: 2px solid var(--home); outline-offset: 2px; }
+.status { font-size: 13px; color: var(--muted); min-height: 18px; margin-top: 8px; }
+.intro { max-width: 760px; color: var(--muted); font-size: 14.5px; margin-top: 10px; }
+.intro a { color: var(--home); }
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="score" id="score">Couch Analyst</div>
+  <div class="sit" id="sit"></div>
+  <div class="ctl"><label for="delay">TV delay, seconds</label><input id="delay" type="number" min="0" max="120" step="1" value="0"><span id="age"></span></div>
+</div>
+<nav class="pick" id="pick" aria-label="Today's games"></nav>
+<p class="intro">Today's postseason games, read pitch by pitch through the <a href="https://github.com/WorldByJoe/baseball-sim">baseball-sim</a> model: each player's traits fitted to his 2025-26 Statcast numbers, MLB's live feed, and the analysis run in your own browser. If the page runs ahead of your TV, set the delay.</p>
+<div class="status" id="status" role="status"></div>
+<div class="grid">
+  <div style="display:grid;gap:16px;min-width:0">
+    <section class="panel" id="plate"><h2>At the plate</h2><p class="empty">Pick a game above. Before the first pitch, the batter and the model's view appear here.</p></section>
+    <section class="panel"><h2>Just happened</h2><ol class="events" id="events"></ol></section>
+  </div>
+  <div style="display:grid;gap:16px;min-width:0;align-content:start">
+    <section class="panel"><h2>Luck ledger</h2><table class="led" id="ledger"></table><p class="note">Expected from each plate appearance's matchup, and from the league's balls like each one hit. Updated after every play.</p></section>
+    <section class="panel wp"><h2>Win probability</h2><div id="wp"></div></section>
+    <section class="panel" id="pre"><h2>Before the game</h2><p class="empty">The model's pregame chances appear once the lineups are posted.</p></section>
+  </div>
+</div>
+<script>
+(function () {
+  var buf = [], delay = 0;
+  try { delay = +(localStorage.getItem('couch-delay') || 0); } catch (e) {}
+  var din = document.getElementById('delay'); din.value = delay;
+  din.addEventListener('change', function () { delay = Math.max(0, +din.value || 0); try { localStorage.setItem('couch-delay', String(delay)); } catch (e) {} show(); });
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function pct(p) { return p == null ? '' : (p < 0.01 ? (100 * p).toFixed(1) : Math.round(100 * p)) + '%'; }
+  function hhmm(t) { var d = new Date(t * 1000); return d.toTimeString().slice(0, 5); }
+  // the games: today's postseason schedule (US Mountain date), or a game named in the link (?g=PK), or the replay (?replay)
+  var q = location.search, gq = (q.match(/[?&]g=(\d+)/) || [])[1], replay = /[?&]replay\b/.test(q), worker = null;
+  function start(pk) {
+    if (worker) worker.terminate();
+    buf = [];
+    worker = new Worker('analyst.js');
+    worker.onmessage = function (e) {
+      if (e.data.type === 'status') document.getElementById('status').textContent = e.data.text;
+      else if (e.data.type === 'state') { buf.push({ at: Date.now() / 1000, s: e.data.state }); if (buf.length > 400) buf.shift(); show(); }
+    };
+    worker.onerror = function (e) { document.getElementById('status').textContent = 'The analyst stopped: ' + e.message; };
+    worker.postMessage(replay ? { cmd: 'start', pk: 849839, replay: 'data/replay_849839_feed.json', replayWp: 'data/replay_849839_wp.json', dt: 1500 } : { cmd: 'start', pk: pk });
+  }
+  function poll() { show(); setTimeout(poll, 1000); }
+  var day = new Date(Date.now() - 6 * 3600 * 1000).toISOString().slice(0, 10);
+  fetch('https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=' + day + '&gameType=F,D,L,W').then(function (r) { return r.json(); }).then(function (s) {
+    var games = []; (s.dates || []).forEach(function (d) { d.games.forEach(function (g) { games.push(g); }); });
+    var nav = document.getElementById('pick'), pick = gq ? +gq : null;
+    if (!pick && !replay) { var live = games.filter(function (g) { return g.status.abstractGameState === 'Live'; })[0], next = games.filter(function (g) { return g.status.abstractGameState === 'Preview'; })[0]; pick = (live || next || games[0] || {}).gamePk; }
+    nav.innerHTML = games.map(function (g) {
+      var t = new Date(g.gameDate).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), a = g.teams.away.team.name.split(' ').pop(), h = g.teams.home.team.name.split(' ').pop();
+      return '<a href="?g=' + g.gamePk + '" class="' + (!replay && g.gamePk === pick ? 'on' : '') + '">' + a + ' at ' + h + ' \u00b7 ' + (g.status.abstractGameState === 'Preview' ? t : g.status.detailedState) + '</a>';
+    }).join('') + '<a href="?replay" class="' + (replay ? 'on' : '') + '">Replay: Yankees at Rays, Game 2</a>';
+    if (replay || pick) start(pick);
+    else document.getElementById('status').textContent = 'No postseason games today. Try the replay.';
+  }).catch(function () { if (replay || gq) start(+gq); else document.getElementById('status').textContent = 'MLB\'s schedule did not answer.'; });
+  function show() {
+    var now = Date.now() / 1000, pick = null;
+    for (var k = buf.length - 1; k >= 0; k--) if (buf[k].at <= now - delay) { pick = buf[k]; break; }
+    document.getElementById('age').textContent = buf.length ? (pick ? 'showing ' + Math.round(now - pick.at) + ' s ago' : 'holding') : '';
+    if (pick) render(pick.s);
+  }
+  function render(s) {
+    var A = s.teams.away, H = s.teams.home, ab = A.abbrev || A.name, hb = H.abbrev || H.name, n = s.now;
+    var sc = s.score || (n && !n.complete ? n.score : [s.final.away, s.final.home]);
+    document.getElementById('score').innerHTML = '<span class="a">' + esc(ab) + ' ' + sc[0] + '</span><span class="h">' + esc(hb) + ' ' + sc[1] + '</span>';
+    if (n) {
+      var d = '<span class="diamond">' + [n.bases[1], n.bases[0], n.bases[2], false].map(function (b, i) { return i === 3 ? '<i style="visibility:hidden"></i>' : '<i class="' + (b ? 'on' : '') + '"></i>'; }).join('') + '</span>';
+      document.getElementById('sit').innerHTML = (n.half === 'top' ? 'Top ' : 'Bottom ') + n.inning + ' · ' + n.outs + ' out ' + d + (s.status === 'Final' ? ' · Final' : '');
+      var p = n.probs, h = '<h2>At the plate</h2><p class="matchup">' + esc(n.batter) + ' <span>vs</span> ' + esc(n.pitcher) + '</p>';
+      h += '<ul class="watch">' + n.watch.slice(1).map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>';
+      if (p) {
+        var hit = p['1B'] + p['2B'] + p['3B'] + p.HR;
+        h += '<div class="probs">' + [['Strikeout', p.K], ['Walk', p.BB + p.HBP], ['Hit', hit], ['Home run', p.HR]].map(function (q) { return '<div class="prob"><b>' + pct(q[1]) + '</b><span>' + q[0] + '</span></div>'; }).join('') + '</div>';
+      }
+      h += '<ol class="pitches">' + n.pitches.map(function (q) { return '<li class="' + (q.flag ? 'flag' : '') + '">' + esc(q.text) + '</li>'; }).join('') + '</ol>';
+      document.getElementById('plate').innerHTML = h;
+    }
+    document.getElementById('events').innerHTML = s.events.slice().reverse().map(function (e) { return '<li class="' + e.kind + (e.flag ? ' flag' : '') + '"><span class="tm">' + hhmm(e.t) + '</span>' + esc(e.text) + '</li>'; }).join('');
+    var L = s.ledger, row = function (lab, k, f) { return '<tr><td>' + lab + '</td><td>' + f(L.away[k], 0) + '</td><td>' + f(L.away[k], 1) + '</td><td>' + f(L.home[k], 0) + '</td><td>' + f(L.home[k], 1) + '</td></tr>'; };
+    var pair = function (v, i) { return v ? v[i] : ''; }, w3 = function (v) { return v == null ? '' : v.toFixed(3).replace(/^0/, ''); };
+    document.getElementById('ledger').innerHTML = '<tr><th></th><th>' + esc(ab) + ' exp.</th><th>actual</th><th>' + esc(hb) + ' exp.</th><th>actual</th></tr>' +
+      row('Strikeouts', 'K', pair) + row('Walks', 'BB', pair) + row('Hits in play', 'hits', pair) +
+      '<tr><td>wOBA</td><td>' + w3(L.away.xwoba) + '</td><td>' + w3(L.away.woba) + '</td><td>' + w3(L.home.xwoba) + '</td><td>' + w3(L.home.woba) + '</td></tr>';
+    if (s.pregame) {
+      var g = s.pregame;
+      document.getElementById('pre').innerHTML = '<h2>Before the game</h2><p>' + esc(g.awaySP) + ' against ' + esc(g.homeSP) + '. In ' + g.n + ' replays of tonight\'s game: <b>' + esc(ab) + ' ' + pct(g.awayWin) + '</b>, ' + esc(hb) + ' ' + pct(1 - g.awayWin) + '. Expected runs ' + g.awayRuns.toFixed(1) + ' to ' + g.homeRuns.toFixed(1) + '.</p>';
+    }
+    var wp = s.wp || [];
+    if (wp.length) {
+      var W = 600, Hh = 150, x = function (i) { return 30 + (W - 40) * (i + 1) / Math.max(wp.length, 70); }, y = function (v) { return 10 + (Hh - 30) * (1 - v / 100); };
+      var path = wp.map(function (q, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ',' + y(100 - q[1]).toFixed(1); }).join(' ');
+      document.getElementById('wp').innerHTML = '<svg viewBox="0 0 ' + W + ' ' + Hh + '" role="img" aria-label="' + esc(ab) + ' win probability"><line x1="30" x2="' + (W - 10) + '" y1="' + y(50) + '" y2="' + y(50) + '" stroke="var(--rule)" stroke-dasharray="4 4"/><text x="4" y="' + (y(100) + 4) + '">100</text><text x="4" y="' + (y(50) + 4) + '">50</text><text x="4" y="' + (y(0) + 4) + '">0</text><path d="' + path + '" fill="none" stroke="var(--away)" stroke-width="2"/><text x="' + (W - 10) + '" y="' + (Hh - 4) + '" text-anchor="end">' + esc(ab) + ' chance, ' + Math.round(100 - wp[wp.length - 1][1]) + '%</text></svg>';
+    }
+  }
+  poll();
+})();
+</script>
+</body>
+</html>
