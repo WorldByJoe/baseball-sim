@@ -33,9 +33,8 @@
    cut-off man is a timing rule, not a player.
 
    CHANGED
-     v1.10 an infielder's throw scatters more when he is hurried (less than 0.5 s to spare), whatever its length:
-           throwing errors on infield ground balls .0030 -> .0123 (the league's), falling with the exit speed as theirs;
-           a tag play that makes the third out counts a run only if it crossed the plate before the tag (a time play)
+     v1.10 a tag play that makes the third out counts a run only if it crossed the plate before the tag (a time
+           play); the hurried throw of the last commit taken out again (recorded, not kept: the write-up)
      v1.9  a runner on base starting from a standstill runs the league's measured curve (Statcast's running splits:
            his speed rises as 1 - exp(-t / 0.78 s)): 90 ft in 4.11 s where he ran the batter's 4.40 s from the box;
            a fly the fielder was under and dropped puts the batter on by the error (rule 9.12), no longer a hit as well;
@@ -425,17 +424,6 @@ var BBField = (function () {
   // is a hit. (Until v0.9 any fumble that cost the out was an error: 0.59 a team-game against the
   // league's 0.25 non-throwing errors.)
   var ORDINARY_D = 1;
-  // THE HURRIED THROW (v1.10). Below HURRY_T s to spare on the play he makes, an infielder rushes, and his throw
-  // scatters by up to HURRY_K x his armAcc (m) more, added to the scatter that grows with the throw's length. The
-  // league's throwing errors on infield ground balls (statcast/men_on_base.py, 2025: .0123 a ground ball) rose with
-  // the batter's speed (.0054 / .0146 / .0167, slow to fast) and fell with the exit speed (.0149 under 80 mph, .0089
-  // over 100); the pitcher's were the most (.0219) on the shortest throws, so the hurry is not a long throw's. Until
-  // v1.10 only the length scattered a throw: .0030 a ground ball, flat with the batter and rising with the exit speed.
-  // HURRY_T is a definition (half a second); HURRY_K is FITTED to the overall rate (swept 0.7-1.4 in this additive
-  // form and 1.5-8 as a multiple of the length's scatter, 800 games each, seed 5); the slopes are the check.
-  // Outfielders are left out: their long throws already scatter too far (a receiver's reach on a long throw is
-  // missing, the write-up of 2026-10-05).
-  var HURRY_T = 0.5, HURRY_K = 1.1;   // s, x armAcc
 
   // ---------------------------------------------------------- the play
   // bases: [null, r1, r2, r3] players; returns what happened and how.
@@ -636,10 +624,7 @@ var BBField = (function () {
       if (play.how === 'run') ev.push({ t: tField, kind: 'carry', who: Ff.pos, from: fieldAt, to: to, arrive: play.tBall });   // carries it to the bag: nothing to throw away ('run' is a run scoring)
       else {
         if (play.how === 'cover') ev.push({ t: 0.3, kind: 'cover', who: 'P', to: 1, arrive: play.tBall });
-        // THE HURRIED THROW (v1.10): an infielder with less than HURRY_T s to spare on the play he makes rushes it, and
-        // his release scatters more, up to HURRY_K x his armAcc with no time to spare, whatever the throw's length.
-        var hurry = isOF(Ff.pos) ? 0 : Math.max(0, Math.min(1, 1 - (play.tRun - play.tBall) / HURRY_T));
-        err = Math.abs(rng.n(0, Ff.pl.armAcc * (d / 40 + HURRY_K * hurry)));
+        err = Math.abs(rng.n(0, Ff.pl.armAcc * d / 40));
         ev.push({ t: tField + settle(to, fieldAt) + Ff.pl.transfer, kind: 'throw', who: Ff.pos, from: fieldAt, to: to, arrive: play.tBall, wild: err > 1.6, rcv: play.how === 'cover' ? 'P' : coverOf(to, Ff.pos) });
       }
       var via = play.how === 'run' ? Ff.pos + ' unassisted' : play.how === 'cover' ? Ff.pos + ' to the pitcher covering' : Ff.pos + ' to ' + baseName(to);
