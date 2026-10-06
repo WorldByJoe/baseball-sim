@@ -113,7 +113,7 @@ class Analyst:
         bat, pit = self.rec.get(pa['batter'], {}), self.rec.get(pa['pitcher'], {})
         bs, ph = pa['batSide'], pa['pitchHand']
         side = 'same' if bs == ph else 'opp'
-        last = lambda n: n.split(' ')[-1]
+        last = lambda n: [w for w in n.split(' ') if w not in ('Jr.', 'Jr', 'Sr.', 'II', 'III', 'IV')][-1]
         k = sum(1 for q in game['pas'][:pa['i']] if q['batter'] == pa['batter'] and q['pitcher'] == pa['pitcher']) + 1
         lines.append('%s (bats %s) against %s (throws %s): %s matchup%s.' % (pa['batterName'], bs, pa['pitcherName'], ph,
                      'a same-side' if side == 'same' else 'an opposite-side', ', the %s time he has faced him tonight' % {2: 'second', 3: 'third', 4: 'fourth', 5: 'fifth'}.get(k, ordinal(k)) if k > 1 else ''))
