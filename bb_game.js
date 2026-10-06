@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_game.js · v1.4 · 2026-10-05
+   bb_game.js · v1.5 · 2026-10-05
 
    A whole game: two teams, nine innings or more, lineups that turn over,
    pitchers who tire and get replaced, managers with their own habits.
@@ -7,9 +7,12 @@
    screen needs to replay it pitch by pitch.
 
    RULES (Joe, 2026-09-29: pre-2023) - no pitch clock, no ghost runner in
-   extra innings, shifts allowed, no three-batter minimum. 'AL' plays a
-   designated hitter; 'NL' has the pitcher bat and the manager pinch-hit
-   for him. A game given no rules plays 'AL', the designated hitter for
+   extra innings, no three-batter minimum. Shifts: since bb_field v1.8 the
+   infield stands where 2025's did, under the 2023 rule (two infielders on
+   each side of second, all four on the dirt), as the men-on-base brief of
+   2026-10-05 asked - against Joe's 'shifts allowed', for him to decide.
+   'AL' plays a designated hitter; 'NL' has the pitcher bat and the manager
+   pinch-hit for him. A game given no rules plays 'AL', the designated hitter for
    both sides, as the majors and the minors have since 2022: the headless
    checks measure against 2025, when no pitcher batted. The schedule and
    the league season pass 'NL' in an NL club's park.
@@ -48,6 +51,8 @@
    at DH, the rest on the bench, the next man in the five-man rotation.
 
    CHANGED
+     v1.5  the infield is placed for the bases, the outs, the inning and the score at each plate appearance and again
+           as the ball is hit, with one draw a plate appearance for the manager's call to bring it in (bb_field v1.8)
      v1.4  a game given no rules plays a designated hitter for both sides (it had drawn AL or NL rules at
            random, so pitchers batted in half the headless checks' games, against 2025's league, where none did)
      v1.3  no pinch-hitter for the pitcher when the pen is empty (the bug audit): with every reliever used, in extra
@@ -57,7 +62,6 @@
            after its first pinch-hit, in 9% of its plate appearances; the play records the batting order
      v1.1  a steal's wild throw moves every runner up a base (the stealer from first had
            landed on a man already on third, who vanished: 16 times in 2,000 games)
-     v1.0  standing rosters for a league: makeRoster, teamFromRoster
 ============================================================================ */
 
 var BBGame = (function () {
@@ -181,8 +185,9 @@ var BBGame = (function () {
         var P = def.pitcher;
         // the batter (in the NL the pitcher's spot may be pinch-hit)
         var B = nextBatter(bat, inning, G.score[half] - G.score[1 - half], rng);
-        var D = def.defense, sb = BB.batterSide(B, P);
-        BBField.positionDefense(D, B, sb);
+        var D = def.defense, sb = BB.batterSide(B, P), posU = rng.u();   // posU: the manager's draw for bringing the infield in (bb_field v1.8)
+        var placeDefense = function () { BBField.positionDefense(D, B, sb, { bases: bases, outs: outs, inning: inning, lead: G.score[1 - half] - G.score[half], u: posU }); };
+        placeDefense();
         var seenOwn = bat.seen[P.id + ':' + B.id] || 0, seenTeam = bat.seenTeam[P.id] || 0;
         var outsAtPA = outs, basesAtPA = bases.slice();   // the play records the state he came up to (a steal or a pickoff during the at-bat changes it)
         var caughtFoul = null, S = G.stats[half], SD = G.stats[1 - half];
@@ -310,6 +315,7 @@ var BBGame = (function () {
           play.desc = r === 'BB' ? 'walk' : 'hit by pitch';
           runs += advanceForced(bases, B);
         } else {
+          placeDefense();   // the bases and outs as the ball was hit (a steal or a wild pitch during the at-bat moves the infield)
           var res = BBField.resolve(pa.bb, B, bases, outs, D, env, rng, { foulCaught: !!pa.foulCaught, side: sb, going: pa.pitches[n - 1].going || 0 });
           play.play = res; play.desc = res.desc;
           outs += res.outsMade; runs += res.runs; bases = res.bases;
@@ -516,7 +522,7 @@ var BBGame = (function () {
     return out.join('\n');
   }
 
-  return { version: '1.3', makeTeam: makeTeam, makeRoster: makeRoster, teamFromRoster: teamFromRoster, canPlay: canPlay, simGame: simGame, line: line, playByPlay: playByPlay, newStats: newStats };
+  return { version: '1.5', makeTeam: makeTeam, makeRoster: makeRoster, teamFromRoster: teamFromRoster, canPlay: canPlay, simGame: simGame, line: line, playByPlay: playByPlay, newStats: newStats };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = BBGame;

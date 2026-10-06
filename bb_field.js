@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.7 · 2026-10-05
+   bb_field.js · v1.8 · 2026-10-05
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -27,11 +27,14 @@
    Everything the renderer needs to animate a play is in `events`, with
    times from contact.
 
-   Not here yet: steals, wild pitches, pickoffs, the infield-fly rule,
-   positioning for the situation (infield in, no-doubles); ground-rule
-   doubles are approximate; the cut-off man is a timing rule, not a player.
+   Not here yet: steals, wild pitches, pickoffs, the infield-fly rule, the
+   outfield's no-doubles depth; ground-rule doubles are approximate; the
+   cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.8  the infield stands where the league's did in 2025 (Savant's fielder positioning): by the batter's side,
+           the first baseman holding a runner, double-play depth, the infield in with a man on third as the manager's
+           call, and the 2023 rule (two infielders each side of second, all on the dirt)
      v1.7  a force tried and thrown away is an error, not a fielder's choice (the bug audit): v1.5 had scored the
            batter a fielder's choice with nobody out when the throw to second got away
      v1.6  a batter thrown out past first base keeps the hit that got him there (rule 9.05; the bug audit): the play
@@ -40,8 +43,6 @@
            scorer's rule 9.05; the bug audit): the batter had been credited a single whenever the lead runner was safe
      v1.4  a throw that gets away moves every runner up a base, the men who held included (the bug audit): a holder
            stayed while the runner behind him took the base he was on, and the holder vanished (headless/plays_check.js)
-     v1.3  a runner tags up only to a base the man ahead leaves (the bug audit): a man could tag up onto one who
-           held, and the man who held vanished from the bases - 21 times in 2,000 games (headless/plays_check.js)
 ============================================================================ */
 
 var BBField = (function () {
@@ -96,21 +97,62 @@ var BBField = (function () {
   }
 
   // ------------------------------------------------------------ positions
-  // Standard spots (ft from home, degrees from the centre-field line, + toward
-  // right field). Infielders turn toward the hitter's pull side in proportion
-  // to his pull bias (never past 40 degrees): pre-2023 rules, shifts allowed.
-  // Outfielders stand where the league's did in 2025 (Statcast fielder
-  // positioning, eight teams, every pitch): the pull-side corner 300 ft out at
-  // 26 deg, the opposite corner 291 ft at 28 deg, centre 323 ft shaded 1.7 deg
-  // toward the opposite field - they do NOT turn toward his pull side. Everyone
-  // plays deeper for more bat speed (outfielders 3 ft per mph, set by hand so
-  // the depth varies about as much as the league's, sd 9-12 ft).
-  var STD = { P: [60.5, 0, 0], C: [-4.5, 0, 0], '1B': [110, 36, 0.2], '2B': [150, 15, 1.0], SS: [150, -13, 1.0], '3B': [115, -34, 0.8] };
+  // Spots are ft from home and degrees from the centre-field line, + toward
+  // right field. Outfielders stand where the league's did in 2025 (Statcast
+  // fielder positioning, eight teams, every pitch): the pull-side corner 300 ft
+  // out at 26 deg, the opposite corner 291 ft at 28 deg, centre 323 ft shaded
+  // 1.7 deg toward the opposite field - they do NOT turn toward his pull side.
+  // Everyone plays deeper for more bat speed (outfielders 3 ft per mph,
+  // infielders 1.5, set by hand so the depth varies about as much as the
+  // league's, sd 9-12 ft).
+  // INFIELDERS (v1.8) stand where the league's did in 2025 with the bases empty, against right- and left-handed
+  // hitters (Baseball Savant's fielder positioning, every fielder with 10+ plate appearances, weighted by them;
+  // statcast/infield_positioning.py), and shade from there toward a hitter's pull side in proportion to how far
+  // he pulls beyond the average hitter, at the rate that turns the right-handed spots into the left-handed ones
+  // over the average hitter's pull (2B and SS 0.54 deg per deg, 3B 0.42, 1B 0.36; until v1.8 1.0, 1.0, 0.8 and
+  // 0.2 from a central spot, set by hand: the middle infielders stood 5-7 deg too far round toward the pull
+  // side, and the opposite-field hole let through .46 of ground balls against the league's .31). The 2023 rule
+  // the league played under holds them: two infielders on each side of second base, all four on the dirt.
+  // WITH MEN ON (v1.8), the league's spots with a man on first only: the first baseman HOLDS him (88 ft out at
+  // 41 deg) whenever second base is open; with a force at second and fewer than two out the middle infielders
+  // and the third baseman play at DOUBLE-PLAY DEPTH, the 'first only' shift over the share of those pitches
+  // thrown with fewer than two out (.63), since with two out they play their usual depth; and with a man on
+  // third and fewer than two out the manager may bring the INFIELD IN, as often as the league's did by whether
+  // first base was open, the inning and his lead (Statcast's 'Strategic' infield alignment, less its .079 with
+  // third base empty: with first open 0.4-0.85 unless he led by two or more, when never). In, all four stand on
+  // the line through the bases at their angle (2B and SS about 102 ft out, 1B and 3B about 92): a definition,
+  // not a measurement - Statcast publishes no depths for it.
+  var STD = { P: [60.5, 0], C: [-4.5, 0] };
+  var INF = { '1B': { R: [113.7, 29.8], L: [123.6, 37.8] }, '2B': { R: [153.0, 6.8], L: [148.3, 19.0] },
+              SS: { R: [148.3, -18.1], L: [152.3, -6.0] }, '3B': { R: [122.3, -36.5], L: [116.0, -27.1] } };
+  var INF_FIRST = { '1B': { R: [87.9, 40.5], L: [88.8, 41.1] }, '2B': { R: [148.9, 6.7], L: [143.8, 18.8] },
+                    SS: { R: [145.0, -17.2], L: [149.1, -5.5] }, '3B': { R: [119.1, -36.6], L: [114.6, -27.3] } };
+  var FIRST_LT2 = 0.63;   // share of the league's pitches with a man on first only thrown with fewer than two out
+  var PULL_MEAN = BB.TRAITS.pullBias[0] + BB.FACE_PATH;   // the average hitter's pull, deg (his path's plus the face's, engine v2.3)
+  // P(infield in) with a man on third and fewer than two out: [first open, first occupied] x inning 1-3, 4-6, 7+ x
+  // the fielding side's lead -2 (trailing by two or more) .. +2 (leading by two or more)
+  var IN_P = [[[0.797, 0.695, 0.413, 0.365, 0.022], [0.83, 0.85, 0.682, 0.59, 0.013], [0.744, 0.779, 0.753, 0.784, 0]],
+              [[0, 0.008, 0, 0, 0], [0.25, 0, 0.071, 0, 0], [0.267, 0.437, 0.546, 0.205, 0]]];
   var OF_SPOT = { pull: [300, 26], oppo: [291, 28], CF: [323, -1.7] };   // ft, deg toward the pull side
-  function positionDefense(D, batter, side) {
-    var dv = batter.batSpeed - BB.TRAITS.batSpeed[0];
+  function dirtEdge(aDeg) {   // ft from home to the edge of the infield dirt (95 ft round the front of the rubber)
+    var a = aDeg * DEG, s = 60.5 * Math.sin(a);
+    return 60.5 * Math.cos(a) + Math.sqrt(95 * 95 - s * s);
+  }
+  function lineDepth(aDeg) {   // ft from home to the line through the bases at this angle
+    var a = Math.abs(aDeg) * DEG, c = 90 / Math.SQRT2;   // the line from first (c, c) to second (0, 2c)
+    return 2 * c / (Math.cos(a) + Math.sin(a));
+  }
+  // sit (optional): { bases: [null, r1, r2, r3], outs, inning, lead (the fielding side's), u (the manager's draw) }
+  function positionDefense(D, batter, side, sit) {
+    var dv = batter.batSpeed - BB.TRAITS.batSpeed[0], hand = side < 0 ? 'R' : 'L', pull = Math.max(0, batter.pullBias + BB.FACE_PATH);
+    var b = sit && sit.bases ? sit.bases : [], outs = sit ? sit.outs || 0 : 0;
+    var hold = !!b[1] && !b[2], dpDepth = !!b[1] && outs < 2, infieldIn = false;
+    if (b[3] && outs < 2 && sit) {
+      var lead = Math.max(-2, Math.min(2, Math.round(sit.lead || 0))), inn = (sit.inning || 1) <= 3 ? 0 : sit.inning <= 6 ? 1 : 2;
+      infieldIn = (sit.u === undefined ? 1 : sit.u) < IN_P[b[1] ? 1 : 0][inn][lead + 2];
+    }
     D.forEach(function (F) {
-      var s = STD[F.pos], spot;
+      var spot;
       if (isOF(F.pos)) {
         spot = F.pos === 'CF' ? OF_SPOT.CF : (F.pos === 'LF') === (side < 0) ? OF_SPOT.pull : OF_SPOT.oppo;   // a right-handed hitter pulls to left
         var a = F.pos === 'CF' ? side * spot[1] : (F.pos === 'LF' ? -1 : 1) * spot[1];
@@ -118,11 +160,20 @@ var BBField = (function () {
         F.at = polar(spot[0] + 3 * dv, a);
         return;
       }
-      var turn = side * Math.max(0, batter.pullBias + BB.FACE_PATH) * s[2];   // how far he pulls: his path's pull plus the face's (engine v2.3)
-      var ang = s[2] ? Math.max(-40, Math.min(40, s[1] + turn)) : s[1];
-      F.std = polar(s[0], s[1]);
-      F.at = polar(s[0] + (s[2] ? 1.5 * dv : 0), ang);
+      if (!INF[F.pos]) { F.std = F.at = polar(STD[F.pos][0], STD[F.pos][1]); return; }
+      var m = INF[F.pos][hand], first = INF_FIRST[F.pos][hand];
+      var halfSwing = (INF[F.pos].L[1] - INF[F.pos].R[1]) / 2;
+      var depth = m[0] + 1.5 * dv, ang = m[1] + side * (halfSwing / PULL_MEAN) * (pull - PULL_MEAN);
+      if (F.pos === '1B' && hold) { depth = first[0]; ang = first[1]; }
+      else if (F.pos !== '1B' && dpDepth) { depth += (first[0] - m[0]) / FIRST_LT2; ang += (first[1] - m[1]) / FIRST_LT2; }
+      if (F.pos === '2B') ang = Math.max(1, ang);         // two infielders on each side of second base
+      if (F.pos === 'SS') ang = Math.min(-1, ang);
+      if (infieldIn && !(F.pos === '1B' && hold)) depth = Math.min(depth, lineDepth(ang));
+      depth = Math.min(depth, dirtEdge(ang) - 1);          // and all four on the dirt
+      F.std = polar(m[0], m[1]);
+      F.at = polar(depth, ang);
     });
+    return { hold: hold, dpDepth: dpDepth, infieldIn: infieldIn };
   }
   function makeDefense(players) {         // players: array of {pos, ...traits}
     return players.map(function (pl) { return { pos: pl.pos, pl: pl, at: [0, 0], std: [0, 0] }; });
@@ -564,7 +615,7 @@ var BBField = (function () {
     return best.c.p > 0 && rng.u() < best.c.p ? best : null;
   }
 
-  return { version: '1.7', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
+  return { version: '1.8', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };
