@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v3.5 · 2026-10-06
+   bb_engine.js · v3.6 · 2026-10-06
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -66,6 +66,9 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v3.6  THE FOLD RETURNS on BC (fouls-chases-costs v3.2-v3.3, built and taken out there for its BABIP cost): the
+           last look corrects a miss it can see (LOOK_GAIN 1.3, LOOK_SD 0.5 in), the raw barrel scatter x1.96 with it,
+           the aim under the ball 1.0 in, VERT_MISS 0.09, and a graze goes back at the pitch's speed (MU_BAT 0.27)
      v3.5  BREAKING-BALL CONTACT (BC): the gap from the pitch he expected to the kind he picks up is the committed swing,
            re-timed by how early he picked it up (RETIME_S; a curveball shows itself early, a changeup late); and his
            planned depth and attack follow the pitch's height (PLAN_H: a low pitch met further out front, measured);
@@ -79,10 +82,6 @@
            further the release sits toward his own side of his line of sight (a same-side pitcher, a sidearmer most),
            measured from the league by release angle with batter, pitcher and pitch type held fixed; the model's
            platoon split had the wrong sign because its batter read every release alike (statcast/platoon.py)
-     v3.1  BREAKING BALLS READ AS THE LEAGUE'S: a breaking ball or changeup shows the eye only TUNNEL_SEP of its
-           separation from the fastball path at the commit point, and a batter who has not picked a pitch up
-           decides on where the ball is, not on its motion (DIR_READ_DEC); the swing policy fitted by count x
-           pitch kind (fit_swing_policy v0.5): breaking balls are now swung at and chased as the league's
 ============================================================================ */
 
 var BB = (function () {
@@ -185,7 +184,17 @@ var BB = (function () {
   var BAT_TAU = 0.001;    // s: how long ball and bat touch. A bending mode slower than this takes energy as if the bat were lighter there; a faster one hands it back
   var WOOD_C = 4300;      // m/s: sqrt(E/rho) of ash and maple; sets the mode frequencies
   var E_COR = [0.546, 0.51];   // the ball's own coefficient of restitution at 60 mph (the MLB specification) and at 140 mph (Nathan); linear between
-  var MU_BAT = 0.5;       // ball-bat friction; caps the tangential impulse on glancing contact
+  // BALL-BAT FRICTION caps the tangential impulse on glancing contact. Measured at 4 m/s it is at least 0.50 (Cross &
+  // Nathan, Am. J. Phys. 74, 896 (2006)); at game speeds a ball striking a wooden cylinder at more than about 40 deg
+  // of incidence slides with about 0.15 (Nathan et al., Procedia Engineering 34, 182 (2012)). FITTED to its own
+  // measurement in v3.3, the speed of a graze: in the league a third of fastball contact (.33; .25 over all kinds,
+  // 42 days of 2025, tracked) is a foul at 10-70 deg whose exit speed follows the pitch's speed (0.66 mph per mph)
+  // and not the bat's (0.006 mph per mph) - a ball that barely touched the bat and went on back - and it leaves at
+  // .817 of the release speed (sd .054). With 0.5 the model's grazes left at .65-.79 (the friction dragged them
+  // forward with the bat; a near-miss came off the top of the barrel as a soft pop-up instead), with 0.15 at .87-.90;
+  // 0.27 gives .82. Square contact is not touched: below about 45 deg of incidence the ball rolls on the bat
+  // (2/7 of the slip) within either cap.
+  var MU_BAT = 0.27;
   // THE SWING IS A TILTED CIRCLE. Near contact the sweet spot travels on an arc
   // of radius SWING_R in a plane tilted from the ground by the batter's swing
   // tilt (Statcast's swing_path_tilt), with the barrel below the hands. Meeting
@@ -246,7 +255,11 @@ var BB = (function () {
   // FITTED jointly with the timing scale, RESID_S and the aim under the ball to the league's launch angle minus attack
   // angle by pitch height and kind, whiffs by kind and by height in and above the zone, and contact depth by kind
   // (scratch random search, two seeds; CALIBRATION v3.1)
-  var VERT_MISS = 0.065;
+  // REFITTED in v3.2 (0.065 -> 0.09) with the aim under the ball and the raw barrel scatter, once the last look
+  // corrects a miss (LOOK_GAIN): the correction folds the far misses back to the edge of the ball, so the aim could
+  // sit where the league's barrel does, and the pull was refitted to the league's launch minus attack by height
+  // (-14.8 -3.5 7.0 18.4 25.9 30.4 from below the zone to above it; #31)
+  var VERT_MISS = 0.09;
   // TIMING SCATTER FOLLOWS THE TIME BEING JUDGED (v2.9). Judging when a ball arrives is timing an interval, and the
   // error of timing an interval grows with its length (a Weber fraction): a slower pitch, a longer flight, a larger
   // error. Until v2.9 the scatter grew with time pressure instead (faster = worse), and the model met fastballs over
@@ -615,14 +628,14 @@ var BB = (function () {
     swingLenFt: [7.239, 0.38, 6.2, 8.6], // ft: the bat head's path to contact, about the height line (0.047 per inch; r = .27)
     batOz:      [31.8, 0.6, 29, 35],     // oz: the bat he swings (plus 0.6 oz per 50 lb of hitter)
     swingPower: [25.224, 0.091, 10, 60],  // W/kg at 206 lb, lognormal with this log-sd; falls as weight^CHAIN.powerExp
-    motorIn:    [0.887, 0.14, 0.56, 1.4], // in: vertical bat-to-ball scatter AT 72 MPH; grows as bat speed squared (impulse variability); x1.4 in v2.2 (the miss table)
+    motorIn:    [1.734, 0.274, 1.09, 2.74], // in: vertical bat-to-ball scatter AT 72 MPH before his last look corrects it; grows as bat speed squared (impulse variability); x1.4 in v2.2 (the miss table); x1.7 in v3.2, REFITTED with LOOK_GAIN so the fastball whiffs stay the league's (.174) once the last look folds the near misses back; x1.15 in v3.3 with LOOK_SD 0.5 (the whiffs again)
     batSpeed:   [72.0, 2.65, 62, 82],    // mph - DERIVED from the chain; this entry only scales the display bars
     barrelSD:   [0.62, 0.11, 0.40, 1.1], // in - DERIVED (motorIn x (bat speed/72)^2); display scale only
     attack:    [9.502, 3.539, -2, 20],          // deg: upward tilt of the swing path at contact
     athletic:  [0, 1, -4, 4],                // standard normal: the deep trait beneath swing power, arm strength and sprint speed (ATHLETIC, v2.6)
     swingTilt: [31.697, 3.812, 22, 44],     // deg: the tilt of his swing plane for a mid-zone pitch (2025 leaderboard swing_path_tilt: 32.3 +- 3.8)
     faceSD:    [8.245, 4, 4, 20],           // deg: swing-to-swing scatter of the bat face's horizontal angle about its path at contact; fitted to fair-ball spray by contact depth (pitch-level 2025)
-    undercut:  [0.391, 0.25, -0.35, 1.15], // in: how far below the ball's centre he aims the barrel; -0.15 in v2.9 with VERT_MISS (the joint fit)
+    undercut:  [1.026, 0.25, 0.25, 1.75],    // in: how far below the ball's centre he aims the barrel; REFITTED v3.2 (0.40 -> 1.0) to the league's barrel offset on fastball contact (0.85 in, read through the engine's own collision from launch minus attack: fastballs are met 25+ deg under the ball's middle .46 of the time, pitch-level 2025, 42 days), which the last look's correction allows without more whiffs
     timingSD:  [9.984, 1.66, 6.26, 15.26],  // ms at a 94-mph fastball's flight, growing with flight time (v2.9); x0.72 in v2.9 so contact depth about each batter's mean has the league's sd by kind: 7.4 in fastballs, 8.3 breaking, 8.2 off-speed (pitch-level 2025)
     longSD:    [3.446, 0.51, 1.9, 5.1],   // in: along-the-barrel scatter; fitted so contact struck square vertically is squared up .695 of the time (pitch-level 2025), then x0.88 with the aim toward the hands (v2.2: the miss table's tail past the end)
     spotIn:    [5.009, 0.87, 2.7, 8.1],     // in: how far a pitch must have left his expected path by the commit point for him to pick it up; x1.09 in v2.2 (the miss table)
@@ -1563,6 +1576,24 @@ var BB = (function () {
   // mean (league 5.7%); the constants, refitted under this rule, reach 3.1% only if nobody ever
   // holds up, so they are left as fitted in v2.4 and the rest of the tail is an open question.
   var EFFORT_SD = 0.05, CHECK_IN = [2, 8], HOLD_P = 0.5, CHECK_SLOW = [0.05, 0.6];
+  // THE LAST LOOK CORRECTS A MISS (v3.2, from #31). A batter who picked the pitch up at the commit point still
+  // watches it in, and at his last look (STEER_S out) he sees whether the barrel will pass under or over the ball.
+  // He judges that gap with LOOK_SD of error, and if he judges a miss he moves the barrel toward the ball by
+  // LOOK_GAIN of the judged miss, no further than the STEER_IN a launched swing allows, and less the more he is
+  // reaching (as every execution error grows with the reach). Until v3.2 his execution error was simply added at
+  // contact, as if he never saw his own barrel: the model's fastball whiffs were far misses (3+ in: .024 of swings
+  // against the league's .014) while its contact sat too square (struck 25+ deg under the ball's middle .31 of the
+  // time against .46) and fouled .32 of swings against .45. The correction folds the near misses back to the edge
+  // of the ball - the league's fouls: grazes straight back and pop-ups at 70-85 mph - so the aim can sit where the
+  // league's barrel does. LOOK_GAIN is class O, fitted with the raw scatter (motorIn) to the fastball fouls and
+  // whiffs per swing (#31's scratch engine, 300 hitters: gain 1.0 / scatter x1.4 gave .384 and .174; 1.3 / x1.7
+  // .391 and .168; 1.5 / x1.7 .389 and .164). LOOK_SD, set by hand to 1 in in v3.2, is FITTED to its own measurement
+  // in v3.3: the misses the last look folds back to the edge of the ball are the grazes (see MU_BAT), and their share
+  // of contact says how sharply he judges the gap - .33 of the league's fastball contact and .25 over all kinds; at
+  // 1 in the model's were .18 and .14 (the correction scattered the folded swings back across the barrel, many of
+  // them square), at 0.5 in .30 and .24, with the raw scatter x1.15 to keep the fastball whiffs .17 (0.4 in: .30 /
+  // .24, whiffs .16; 0.6 in: .27 / .21).
+  var LOOK_SD = 0.5, LOOK_GAIN = 1.3;
   function checkChance(B, rf, pitch) {   // the chance he tries to check: nothing new to see once he had picked it up (v2.7)
     if (rf.detected) return 0;
     return clamp((reachOf(B, pitch.plate.x + rf.lastPic[0], pitch.plate.z + rf.lastPic[1]) / IN - CHECK_IN[0]) / (CHECK_IN[1] - CHECK_IN[0]), 0, 1);
@@ -1638,8 +1669,13 @@ var BB = (function () {
     D += sFwd * (Math.tan(descent) - Math.tan(attackPlan * DEG));
     var depth = (phi - phiUsual) * SWING_R;   // m out front of his usual contact point
     var batAt = batMph * 1.015 * Math.pow(Math.max(0.2, 1 - Math.max(0, BAT_PEAK_M - depth) / ((B.swingLenFt || TRAITS.swingLenFt[0]) * FT)), BAT_GAIN_EXP);
-    var bat = B.bat || BAT_DEFAULT;
-    var sw = { e: e, D: D, dLong: dLong, theta: theta, faceTh: faceTh, check: check || 0, batMph: batMph, batAt: batAt, adjMs: adjMs, attack: attack, attackAt: attackAt, tilt: tilt, side: sb,
+    var bat = B.bat || BAT_DEFAULT, look = 0;
+    if (rf.detected) {   // the last look: a miss he can see, he corrects (LOOK_GAIN), within what a launched swing allows and less when reaching
+      var edge = BALL_R + batRadius(bat, SWEET_IN - dLong / IN), gapJ = D + rng.n(0, LOOK_SD * IN * prot);
+      var missJ = Math.abs(gapJ) > edge ? gapJ - edge * (gapJ > 0 ? 1 : -1) : 0;
+      if (missJ) { look = clamp(LOOK_GAIN * missJ, -STEER_IN * IN / prot, STEER_IN * IN / prot); D -= look; }
+    }
+    var sw = { e: e, D: D, dLong: dLong, look: look, theta: theta, faceTh: faceTh, check: check || 0, batMph: batMph, batAt: batAt, adjMs: adjMs, attack: attack, attackAt: attackAt, tilt: tilt, side: sb,
                sFwd: sFwd, depth: depth, reach: reach, contact: false, why: '',
                bat: bat, qSweet: bat.q };   // his bat, and its collision efficiency at the sweet spot
     if (dLong > (TIP_IN + BAT_CAP_IN) * IN) { sw.why = 'off the end'; return sw; }   // past the end, unless the ball still catches the rounded cap
@@ -1792,7 +1828,7 @@ var BB = (function () {
   }
 
   return {
-    version: '3.5',
+    version: '3.6',
     SWING: { R: SWING_R, tiltPerH: TILT_PER_H },
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
@@ -1802,7 +1838,7 @@ var BB = (function () {
     batOf: batOf, batSpeedOf: batSpeedOf, swingPowerOf: swingPowerOf,
     batMass: batMass, batRadius: batRadius, qAt: qAt, corOf: corOf, BAT_MODES: BAT_MODES, BAT_SHAPE: BAT_SHAPE, SWEET_IN: SWEET_IN, BAT_DEFAULT: BAT_DEFAULT,
     flyPitch: flyPitch, flyBatted: flyBatted, spinVector: spinVector, dirOf: dirOf, aim: aim, SWING_THR: SWING_THR, ZONE_HALF: ZONE_HALF, PLAN_LOC: PLAN_LOC,
-    fatigueOf: fatigueOf, releasePoint: releasePoint, releaseAngle: releaseAngle, PL: PL, TIMING: TIMING, PLAN_H: PLAN_H, batterSide: batterSide, inZone: inZone,
+    fatigueOf: fatigueOf, releasePoint: releasePoint, releaseAngle: releaseAngle, PL: PL, TIMING: TIMING, PLAN_H: PLAN_H, LOOK: { sd: LOOK_SD, gain: LOOK_GAIN }, VERT_MISS: VERT_MISS, batterSide: batterSide, inZone: inZone,
     planPitch: planPitch, expectPitch: expectPitch, throwPitch: throwPitch, ghostPitch: ghostPitch,
     readFactors: readFactors, decide: decide, callPitch: callPitch, swing: swing, collide: collide,
     battedBall: battedBall, simPA: simPA
