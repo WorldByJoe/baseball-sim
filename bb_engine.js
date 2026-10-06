@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v3.4 · 2026-10-06
+   bb_engine.js · v3.5 · 2026-10-06
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -66,6 +66,9 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v3.5  BREAKING-BALL CONTACT (BC): the gap from the pitch he expected to the kind he picks up is the committed swing,
+           re-timed by how early he picked it up (RETIME_S; a curveball shows itself early, a changeup late); and his
+           planned depth and attack follow the pitch's height (PLAN_H: a low pitch met further out front, measured)
      v3.4  the route trait is the straight-line share of the ground a fielder covers while he reads the ball (bb_field v1.12);
            react's draw restored: the integration had brought back the old clip (0.25-0.7), which pinned every position
            player at 0.25 s once the pool refit moved the mean to 0.035; now 0.05-0.8, mean 0.234 as fitted in v3.3
@@ -79,9 +82,6 @@
            separation from the fastball path at the commit point, and a batter who has not picked a pitch up
            decides on where the ball is, not on its motion (DIR_READ_DEC); the swing policy fitted by count x
            pitch kind (fit_swing_policy v0.5): breaking balls are now swung at and chased as the league's
-     v3.0  THE BAT IS FASTEST WHERE THE SWING IS BUILT TO GO (BAT_LOC): bat speed rises low over the plate
-           and falls as a pitch pulls the swing up, away or in, measured from the league's swings about
-           each hitter's mean (reaching contact had kept the model's full bat speed); SWING_NORM 0.961
 ============================================================================ */
 
 var BB = (function () {
@@ -208,6 +208,16 @@ var BB = (function () {
   // up contact fell from .69 over the middle to .27 more than a foot inside and
   // .44 more than a foot away, on balls struck square vertically).
   var LOC_DEPTH = 0.157;  // m of planned contact depth per m the pitch is inside
+  // AND BY HEIGHT (v3.5, BC). A low pitch is met further out front and a high one deeper, at about the same attack:
+  // the league's fastballs (42 days of 2025, tracked contact, the speed gap and the inside distance held) were met
+  // 4.4 in deeper per zone height (from -0.2 in about each hitter's mean below the zone to -6.2 above), pulled as
+  // that depth says (the bat's direction followed depth, 1.53 deg per inch, with height adding -1.4 deg per zone), and
+  // at a given depth swung 4.1 deg more uphill per zone height. MEASURED: where on the arc he plans to meet the
+  // ball (PLAN_H.depth, m per zone height) and the attack he brings to it (PLAN_H.attack, deg per zone height), both
+  // about the league's mean contact height (h0, share of his zone), so his average depth and attack stay his traits.
+  // The model had neither: its depth and attack were flat with height, and the breaking balls the league throws low
+  // were met as far out front as a hanger.
+  var PLAN_H = { depth: -0.111, attack: 4.1, h0: 0.47 };
   var LOC_FACE = 0.29;    // rad of extra pull per m inside, at the same depth
   // THE FACE AND THE PATH (v2.3). The bat's path at contact (its direction of
   // travel, which Statcast measures as the attack direction) and its face (the
@@ -1275,7 +1285,10 @@ var BB = (function () {
   //           early on a breaking ball he has recognised and meets it out
   //           front (pitch-level 2025: breaking balls and off-speed pitches
   //           were met 8 in further out front than fastballs, 35-36 in
-  //           against 27-28). PRIOR_T is fitted to the 8 in.
+  //           against 27-28). PRIOR_T was fitted to the 8 in; since v3.5
+  //           it judges only how far the pitch strays from its kind's usual
+  //           speed, and the gap from the expected pitch to its kind is the
+  //           committed swing (THE EARLIER HE PICKS IT UP, below).
   //   where:  the barrel's path is steered to the pitch he has recognised,
   //           but he predicts its last few feet from what that kind of pitch
   //           usually does - the league's shape for the type (turning toward
@@ -1313,7 +1326,29 @@ var BB = (function () {
   // the curve of the pitch he expected (DIR_READ_DEC = 0 of its direction read), while the swing he has launched
   // still steers on what shows itself by the last look (DIR_READ). With half the direction read in the decision too,
   // a fooled batter judged a diving breaking ball most of the way to where it went, and seldom chased it.
-  var COMMIT_S = 0.175, STEER_S = 0.15, STEER_IN = 3, PRIOR_T = 5.0, PRIOR_S = 2.5, RESID_S = 0.035, DIR_READ = 0.5, TUNNEL_SEP = 0.5, DIR_READ_DEC = 0;
+  // THE EARLIER HE PICKS IT UP, THE MORE OF ITS TIMING HE CHANGES (v3.5, BC). A recognised pitch's timing error has
+  // two parts. How far this one strays from its kind's usual speed (ref.t, at this pitcher's usual speed for it) he
+  // misjudges by the prior's pull, as before (PRIOR_T, which the league's within-pitcher slope confirms: a pitch 1
+  // mph slower than his usual for its type was met 1.04 in further out front, the model's 1.06). The gap from the
+  // pitch he expected to the kind he now sees is the swing he had committed: picked up at the commit point, his swing
+  // keeps what a fooled swing keeps at launch, the share of the gap not yet shown (1 - tc^2); picked up earlier, he
+  // re-times by launching later, at full speed, and exp(-lead / RETIME_S) of that is left, lead = the time from his
+  // pickup to the commit point (a fixed share of 0.6 instead fitted as well: depth by type rms 0.59 in against 0.64,
+  // bat speed by type 0.39 mph against 0.48, with RETIME_S 0.12; the share from the geometry is kept, one constant
+  // fewer). His pickup is the same draw as pFooled:
+  // he needs a separation s* (exponential, mean his spot) and the separation grows as the square of the flight, so he
+  // picks it up at the share sqrt(s* / the separation at the plate) of it. Only the gap not re-timed is closed by
+  // altering the swing (ADJ_PER_MS). The pitch he sat on and got keeps the old form (his hedge, pulled by PRIOR_T).
+  // A curveball shows itself early (it leaves the hand going up) and a changeup late (it shares the fastball's
+  // tunnel). In the league (42 days of 2025, tracked contact, height and inside held) every slow type's depth
+  // followed its speed gap at the same rate, 0.73 in per mph across pitchers and 1.04 within a pitcher, with type
+  // offsets of -1.7 in (curveballs) to +2.2 (changeups); the model's breaking balls carried +3.6 to +4.6 in of
+  // out-front contact beyond their gap and its changeups +2.1. RETIME_S FITTED (class O) to the league's depth by type
+  // (8 types, two seeds; rms 1.72 in at v3.4 with the height plan, 0.64 with this). The model then met slow pitches as
+  // the league did by speed gap: -4.2, +0.8, +3.9, +5.9, +7.5, +9.0 in at 0, -4, -8, -10, -14, -16.5 mph (league -4.3,
+  // +0.8, +4.1, +5.1, +7.1, +8.6), where before it ran on at 1 in per mph to +9.2 at -14.
+  var TIMING = { prior: 5.0, retime: 0.11 };   // PRIOR_T (in: the pull's scale against his eye; unchanged) and RETIME_S (s)
+  var COMMIT_S = 0.175, STEER_S = 0.15, STEER_IN = 3, PRIOR_S = 2.5, RESID_S = 0.035, DIR_READ = 0.5, TUNNEL_SEP = 0.5, DIR_READ_DEC = 0;
   // THE RELEASE BEHIND HIS SHOULDER (v3.2, statcast/platoon.py). A same-side pitcher lets the ball go from the batter's
   // own side of his line of sight; an opposite-side pitcher from well in front of it. In the league (42 days of 2025,
   // batter and pitcher held fixed, pitch type held fixed) the batter's read worsens steadily as the release moves
@@ -1353,10 +1388,17 @@ var BB = (function () {
     var u = rng.u(), detectedD = same || u >= pFooled, detected = detectedD || !!sameKind;
     var late = !detected && rng.u() >= Math.exp(-gap * ts * ts / spot);
     var eye = B.eyeSD * tp * (1 - B.learn * (1 - Math.exp(-(seen || 0) / 40)));   // in: how unsure his judgement of this pitch is
-    var pullT = 1 / (1 + (PRIOR_T / eye) * (PRIOR_T / eye));
+    var pullT = 1 / (1 + (TIMING.prior / eye) * (TIMING.prior / eye));
+    var sepPlate = sep / (tc * tc || 1), lead = 0;   // the separation the pitch would show at the plate
+    if (detectedD && !same && sepPlate > 0) lead = Math.max(0, (tc - Math.sqrt(-spot * Math.log(Math.max(u, 1e-12)) / sepPlate)) * T);   // s from his pickup to the commit point
+    var retime = Math.exp(-lead / TIMING.retime);   // the share of the gap from the expected pitch to its kind left in his swing
+    var dev = ref.t - pitch.plate.t, kindGap = same ? 0 : gh.t - ref.t;   // s: this pitch against its kind's usual; the expected pitch against this kind
+    if (same) dev = gh.t - pitch.plate.t;   // he sat on it: his hedge, as before
+    var leftT = dev + retime * kindGap;   // s: the gap his swing still has to close by altering it
+    var judgedT = pullT * dev + (1 - tc * tc) * retime * kindGap;
     var ps = PRIOR_S * (PITCH_TYPES[pitch.type].ivbSD || 4), pullS = 1 / (1 + (ps / eye) * (ps / eye));
     var real = [pitch.plate.x, pitch.plate.z, pitch.plate.t];
-    var judged = [pullS * (ref.x - real[0]) + RESID_S * (gh.x - real[0]), pullS * (ref.z - real[1]) + RESID_S * (gh.z - real[1]), pullT * (gh.t - real[2])];   // how far off his judgement of a recognised pitch is
+    var judged = [pullS * (ref.x - real[0]) + RESID_S * (gh.x - real[0]), pullS * (ref.z - real[1]) + RESID_S * (gh.z - real[1]), judgedT];   // how far off his judgement of a recognised pitch is
     // What is left of the gap when he extrapolates from a look at a share f of
     // the flight. Across and up and down he reads where the ball is, f^2 of the
     // gap, and a share DIR_READ of the direction it is travelling, 2f(1 - f) of
@@ -1381,7 +1423,7 @@ var BB = (function () {
       var cx = target[0] - base[0], cz = target[1] - base[1], cm = Math.sqrt(cx * cx + cz * cz), k = cm > STEER_IN * IN ? STEER_IN * IN / cm : 1;
       err = [base[0] + k * cx, base[1] + k * cz, base[2] + k * (target[2] - base[2])];
     }
-    return { tp: tp, psi: psi, sep: sep, pFooled: pFooled, detected: detected, detectedD: detectedD, late: late, lastPic: lastPic, same: !!same, pullT: pullT, pullS: pullS, err: err, base: base, baseDec: baseDec };
+    return { tp: tp, psi: psi, sep: sep, pFooled: pFooled, detected: detected, detectedD: detectedD, late: late, lastPic: lastPic, same: !!same, pullT: pullT, retime: retime, lead: lead, leftT: leftT, pullS: pullS, err: err, base: base, baseDec: baseDec };
   }
   function misreadOf(rf) { return rf.err; }   // [x m, z m, t s]: how far off his judgement is, judged minus real
   // A pitch of one kind as he pictures it: from this release, along this
@@ -1533,8 +1575,9 @@ var BB = (function () {
     // swing, and it costs bat speed: ADJ_PER_MS of his speed per ms closed,
     // FITTED to the league's bat speed on breaking and off-speed pitches
     // against fastballs met at the same depth (pitch-level 2025, 42 days: about
-    // 2 mph slower). The pitch he sat on and got is met with his full swing.
-    var adjMs = Math.max(0, Math.abs(gh.t - pitch.plate.t) - Math.abs(m[2])) * 1000;
+    // 2 mph slower). The pitch he sat on and got is met with his full swing, and what he re-timed before the
+    // commit point (v3.5: the gap not in rf.leftT) he closed by launching later, also at full speed.
+    var adjMs = Math.max(0, Math.abs(rf.leftT === undefined ? gh.t - pitch.plate.t : rf.leftT) - Math.abs(m[2])) * 1000;
     var e = -m[2] + rng.n(0, B.timingSD / 1000 * prot * pitch.plate.t / FLIGHT_REF);    // + = bat early (he expected it sooner); scatter grows with the flight he is timing
     var D = -m[1] + B.undercut * IN + rng.n(0, B.barrelSD * IN * prot)   // + = ball above the barrel
           + VERT_MISS * (pitch.plate.z - (B.zone.bot + B.zone.top) / 2)    // the barrel falls short of the pitch's height away from the middle of his zone
@@ -1547,7 +1590,8 @@ var BB = (function () {
     // trait, which is what the leaderboard measures.
     var batMph = B.batSpeed * SWING_EFFORT[effortGroup(st)] * Math.max(0.7, 1 - ADJ_PER_MS * adjMs) * batLoc(B, pitch.plate.x, pitch.plate.z, sb) / SWING_NORM * Math.exp(rng.n(0, EFFORT_SD)) * (1 - (check || 0))   // a checked swing comes through slowed
                * (1 - PL.speed * behind);   // and a swing at a pitch released behind his shoulder is slower (the league's bat speed, -1.0 mph same-side)
-    var attack = B.attack + rng.n(0, 3);
+    var hz = clamp((pitch.plate.z - B.zone.bot) / (B.zone.top - B.zone.bot), -0.5, 1.5) - PLAN_H.h0;   // his zone height about the league's mean contact
+    var attack = B.attack + PLAN_H.attack * hz + rng.n(0, 3);
     var face = rng.n(0, (B.faceSD || TRAITS.faceSD[0]) * DEG * prot);   // the face's own horizontal scatter: hooks and slices, not misses
     // WHERE ON THE ARC HE MEETS IT. Spray comes from how far round the arc
     // the ball is met (pitch-level 2025: the bat's direction of travel turned
@@ -1582,7 +1626,7 @@ var BB = (function () {
     var vb = batMph * MPH, vp = norm(pitch.plate.v), descent = Math.atan2(-pitch.plate.v[2], -pitch.plate.v[1]), tr = tilt * DEG;
     var sFwd = vb * e * vp / (vb + vp);
     var inside = pitch.plate.x * sb;   // m toward the batter from the middle of the plate
-    var phiUsual = B.pullBias * DEG / Math.cos(tr), phiPlan = phiUsual + LOC_DEPTH * inside / SWING_R, phi = phiPlan + sFwd / SWING_R;
+    var phiUsual = B.pullBias * DEG / Math.cos(tr), phiPlan = phiUsual + (LOC_DEPTH * inside + PLAN_H.depth * hz) / SWING_R, phi = phiPlan + sFwd / SWING_R;
     var theta = sb * (phi * Math.cos(tr)), faceTh = theta + sb * (LOC_FACE * inside + FACE_PATH * DEG) + face;   // the path, and the face that sends the ball
     var attackPlan = attack + (phiPlan - phiUsual) * Math.sin(tr) / DEG, attackAt = attack + (phi - phiUsual) * Math.sin(tr) / DEG;
     D += sFwd * (Math.tan(descent) - Math.tan(attackPlan * DEG));
@@ -1742,7 +1786,7 @@ var BB = (function () {
   }
 
   return {
-    version: '3.3',
+    version: '3.5',
     SWING: { R: SWING_R, tiltPerH: TILT_PER_H },
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
@@ -1752,7 +1796,7 @@ var BB = (function () {
     batOf: batOf, batSpeedOf: batSpeedOf, swingPowerOf: swingPowerOf,
     batMass: batMass, batRadius: batRadius, qAt: qAt, corOf: corOf, BAT_MODES: BAT_MODES, BAT_SHAPE: BAT_SHAPE, SWEET_IN: SWEET_IN, BAT_DEFAULT: BAT_DEFAULT,
     flyPitch: flyPitch, flyBatted: flyBatted, spinVector: spinVector, dirOf: dirOf, aim: aim, SWING_THR: SWING_THR, ZONE_HALF: ZONE_HALF, PLAN_LOC: PLAN_LOC,
-    fatigueOf: fatigueOf, releasePoint: releasePoint, releaseAngle: releaseAngle, PL: PL, batterSide: batterSide, inZone: inZone,
+    fatigueOf: fatigueOf, releasePoint: releasePoint, releaseAngle: releaseAngle, PL: PL, TIMING: TIMING, PLAN_H: PLAN_H, batterSide: batterSide, inZone: inZone,
     planPitch: planPitch, expectPitch: expectPitch, throwPitch: throwPitch, ghostPitch: ghostPitch,
     readFactors: readFactors, decide: decide, callPitch: callPitch, swing: swing, collide: collide,
     battedBall: battedBall, simPA: simPA
