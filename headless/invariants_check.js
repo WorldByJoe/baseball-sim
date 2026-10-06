@@ -187,7 +187,7 @@
     if (G.score[0] !== score[0] || G.score[1] !== score[1]) flag('the final score is not the sum of the runs', 'seed ' + SEED + ' game ' + g);
     if (!G.over) flag('a game that did not finish', 'seed ' + SEED + ' game ' + g, G.finalInning + ' innings, ' + G.score.join('-'));
   }
-  print('invariants_check v0.2 · ' + nGames + ' games · seed ' + SEED + ' · ' + nPlays + ' plate appearances · ' + nPitches + ' pitches');
+  print('invariants_check v0.3 · ' + nGames + ' games · seed ' + SEED + ' · ' + nPlays + ' plate appearances · ' + nPitches + ' pitches');
   var kinds = Object.keys(V).sort(function (a, b) { return V[b] - V[a]; });
   if (!kinds.length) print('  no violations');
   kinds.forEach(function (k) { print('  ' + V[k] + '  ' + k); EX[k].forEach(function (e) { print('       e.g. ' + e); }); });

@@ -7,8 +7,9 @@
      A. hitting by base state (bases empty, a man on first only, a man in scoring
         position): BABIP, on the ground and in the air, K%, BB+HBP%; with 'csv' as
         the third argument every ball in play is printed as a CSV row (batter,
-        pitcher, state, hit, ground ball) for the league's fixed-effects fit
-        (python3 statcast/men_on_base.py --model FILE);
+        pitcher, state, hit, ground ball) - but these games draw fresh teams, so
+        a fixed-effects fit on them means nothing (each player has a handful of
+        plate appearances): it needs a season (bb_league);
      B. the ground-ball hit rate by the positioning the base-out state implies, by
         direction (the angle of the spot the ball was fielded, + toward right
         field, and in the batter's frame, + toward his pull side);
