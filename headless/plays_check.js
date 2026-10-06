@@ -10,7 +10,8 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js headless/plays_check.js
 
    CHANGED
-     v0.9  a fly the fielder was under and dropped is an error, not a hit (bb_field v1.9)
+     v0.9  a fly the fielder was under and dropped is an error, not a hit; the tag-up is a read, as a send home on a
+           hit is (bb_field v1.9)
      v0.8  the defence sets up on the pool's average bat speed and pull, and case 1 throws true, so a case does not
            move when the chain refits the pool (cases 1 and 5 had stopped testing what they were written for)
      v0.7  the second baseman covers second on a ball to third; a double play's relay waits for the man covering first;
@@ -166,6 +167,22 @@
     t10++; if (o.hit !== 'E' || !o.error) { w10++; if (!eg10) eg10 = q.join(' ') + ': ' + where(o); }
   });
   check('routine flies dropped: the batter reaches on the error (' + t10 + ' drops)', t10 > 0 && w10 === 0, w10 ? w10 + ' scored as hits, e.g. ' + eg10 : 'all errors');
+
+  // 11. The tag-up is a read, as a send home on a hit is (bb_field v1.9). A man on third, one out, flies caught in
+  //     the outfield from 220 to 380 ft, one seeded die per play: on the close ones he is sometimes sent and thrown
+  //     out at the plate, and on the deep ones he always scores. Until v1.9 he went only when no throw could get
+  //     him: never thrown out (the league's runners were, on .02 of their chances).
+  var thrown11 = 0, deep11 = 0, deepScored11 = 0, caught11 = 0, R3t = runner(0, 27);
+  [84, 87, 90, 93, 96, 100, 104].forEach(function (ev) { [28, 31, 34, 37].forEach(function (la) { [-25, -10, 0, 10, 25].forEach(function (sp, k) {
+    var bb11 = batted(ev, la, sp), o = resolve(bb11, [null, null, null, R3t], 1, BB.makeRng(100 + ev + la + k));
+    if (!o.events.some(function (e) { return e.kind === 'catch'; }) || bb11.dist < 220 || bb11.dist > 380) return;
+    caught11++;
+    var q = o.runners.filter(function (r) { return r.from === 3; })[0];
+    if (q.out) thrown11++;
+    if (bb11.dist >= 340) { deep11++; if (!q.out && q.to >= 4) deepScored11++; }
+  }); }); });
+  check('a man on third, one out, flies caught 220-380 ft out: some sent and thrown out, every deep one scores (' + caught11 + ' catches)', thrown11 > 0 && deep11 > 0 && deepScored11 === deep11,
+        thrown11 + ' thrown out at the plate; ' + deepScored11 + ' of ' + deep11 + ' caught 340+ ft out scored');
 
   print(fails ? 'FAIL: ' + fails + ' of ' + cases + ' cases' : 'PASS: ' + cases + ' cases');
 })();

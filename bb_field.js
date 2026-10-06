@@ -35,7 +35,9 @@
    CHANGED
      v1.9  a runner on base starting from a standstill runs the league's measured curve (Statcast's running splits:
            his speed rises as 1 - exp(-t / 0.78 s)): 90 ft in 4.11 s where he ran the batter's 4.40 s from the box;
-           a fly the fielder was under and dropped puts the batter on by the error (rule 9.12), no longer a hit as well
+           a fly the fielder was under and dropped puts the batter on by the error (rule 9.12), no longer a hit as well;
+           the tag-up for third or home is a read, as a send on a hit is (READ_SD, SAFETY_3 and SAFETY_H by the outs
+           after the catch, the throw's arrival as sure as raceSD): he went only when no throw could get him
      v1.8  the infield stands where the league's did in 2025 (Savant's fielder positioning): by the batter's side,
            the first baseman holding a runner, double-play depth, the infield in with a man on third as the manager's
            call, and the 2023 rule (two infielders each side of second, all on the dirt);
@@ -464,23 +466,29 @@ var BBField = (function () {
       if (outs + 1 >= 3) { out.desc += ', inning over'; finish(); return out; }
       // runners held; now they may tag up against this arm, once he has stopped and turned - the lead runner first,
       // and each only to a base the man ahead leaves (until v1.3 a man could tag up onto one who held, and the man
-      // who held vanished from the bases)
+      // who held vanished from the bases). THE TAG-UP (v1.9): he leaves the bag as the ball is caught (0.05 s) and
+      // runs from a standstill; for third or home he and the coach read the race as on a hit - the same read error
+      // (READ_SD) and the same margins (SAFETY_3, SAFETY_H) by the outs he now plays with, the catch's out included -
+      // and the throw's arrival is as sure as on a hit (raceSD). Until v1.9 he weighed the race with no error
+      // against SAFETY (0.30 s, the margin for taking second), from the batter's start out of the box: he went only
+      // when no throw could get him (no runner was ever thrown out tagging up, the league's .02 of chances), and a
+      // man on third scored on a fly caught 300-320 ft out .42 of the time, the league's .98.
       var tagging = [], aheadTag = 5;
       function settleC(to) { return settleTime(F, at, to, dist(F.at, at), best.c.m); }
       R.slice(0, -1).forEach(function (r) {
-        var to = r.base + 1, tRun = tc + 0.05 + restTime(r.pl, BASE);   // leaves the bag as the ball is caught, from a standstill (v1.9)
+        var to = r.base + 1, tRun = tc + 0.05 + restTime(r.pl, BASE), oNow = Math.min(outs + 1, 2);   // from a standstill; the outs he now plays with
         var tBall = Math.max(tc + settleC(to) + F.pl.transfer + throwArrival(F, at, to), rcvArrival(to, F.pos)) + TAG;
-        var goes = to < aheadTag && tRun + SAFETY + r.pl.runAggr < tBall;
+        var goes = to < aheadTag && (to >= 3 ? tBall - tRun + rng.n(0, READ_SD) > (to === 3 ? SAFETY_3 : SAFETY_H)[oNow] + r.pl.runAggr : tRun + SAFETY + r.pl.runAggr < tBall);
         if (goes) tagging.push({ r: r, to: to, tRun: tRun, tBall: tBall });
         aheadTag = goes ? to : r.base;
       });
       if (tagging.length) {
         var play = null;
-        tagging.forEach(function (q) { q.p = Phi((q.tRun - q.tBall) / 0.15) * (q.to === 4 ? 1.4 : 1); if (!play || q.p > play.p) play = q; });
+        tagging.forEach(function (q) { q.sd = raceSD(at, q.to); q.p = Phi((q.tRun - q.tBall) / q.sd) * (q.to === 4 ? 1.4 : 1); if (!play || q.p > play.p) play = q; });
         tagging.forEach(function (q) { q.r.target = q.to; q.r.start = tc; });
         if (play.p > 0.12) {
           ev.push({ t: tc + settleC(play.to) + F.pl.transfer, kind: 'throw', who: F.pos, from: at, to: play.to, arrive: play.tBall, rcv: coverOf(play.to, F.pos) });
-          if (rng.u() < Phi((play.tRun - play.tBall) / 0.15)) {
+          if (rng.u() < Phi((play.tRun - play.tBall) / play.sd)) {
             play.r.out = true; out.outsMade++; out.desc += ', ' + baseName(play.to) + ' tag: out';
           } else out.desc += ', runner ' + (play.to === 4 ? 'scores' : 'to ' + baseName(play.to)) + ' on the tag';
         } else out.desc += ', runner ' + (play.r === tagging[0].r && play.to === 4 ? 'scores' : 'tags to ' + baseName(play.to));
