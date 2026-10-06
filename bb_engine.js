@@ -66,7 +66,9 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
-     v3.4  the route trait is the straight-line share of the ground a fielder covers while he reads the ball (bb_field v1.12)
+     v3.4  the route trait is the straight-line share of the ground a fielder covers while he reads the ball (bb_field v1.12);
+           react's draw restored: the integration had brought back the old clip (0.25-0.7), which pinned every position
+           player at 0.25 s once the pool refit moved the mean to 0.035; now 0.05-0.8, mean 0.234 as fitted in v3.3
      v3.3  the batted ball carries its spin to the ground (landW, for bb_field's bounce); a fielder's first step fitted to both
            windows of Statcast's outfield jump (react 0.20 s for position players, was 0.47; the catcher's and pitcher's kept)
      v3.2  THE RELEASE BEHIND HIS SHOULDER (PL): a batter reads a pitch worse, swings slower and meets it higher the
@@ -646,7 +648,7 @@ var BB = (function () {
     framing:   [0, 0.35, -0.8, 0.8],  // in: how much he widens the edges
     // fielding and running (Statcast-shaped; position means in FIELD_MEANS)
     speed:     [27.013, 1.024, 22, 31],   // ft/s sprint speed
-    react:     [0.035, 0.06, 0.25, 0.7],   // s: reading the ball and taking the first step; with bb_field's acceleration, Statcast's outfield jump (33.9 +- 1.9 ft)
+    react:     [0.234, 0.06, 0.05, 0.8],   // s: the first step; with bb_field's run, fitted to Statcast's outfield jump (v3.3: the picks average 0.20; the catcher's and pitcher's offsets keep them near 0.57 and 0.62, so the clip runs to 0.8)
     route:     [0.885, 0.04, 0.75, 1],    // straight-line share of the ground he covers while he reads the ball (the first 34 ft; bb_field v1.12)
     glove:     [0.982, 0.008, 0.94, 0.999],// clean-play rate on a routine chance
     armMph:    [83.901, 3.5, 70, 100],    // throw speed
