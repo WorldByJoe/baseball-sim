@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.11 · 2026-10-06
+   bb_field.js · v1.12 · 2026-10-06
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -11,8 +11,10 @@
      friction on the slip with the spin carried, and the soil's crater, on
      a grass infield with a dirt skin), then a roll slowed by the air and
      the ground until it stops or reaches the fence
-   - a fielder's motion: first-step delay, acceleration to his sprint
-     speed, a route longer than the straight line by his route trait
+   - a fielder's motion: first-step delay, then his speed rising toward
+     his sprint speed as the league's runners' does (Statcast's jump), a
+     route longer than the straight line by his route trait while he reads
+     the ball
    - a runner's motion: the same, from a standing start or a lead
    - a throw: a real ball flight at his arm speed, launched at the angle
      that reaches the receiver soonest (solved and cached); a long one
@@ -35,6 +37,9 @@
    cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.12 the fielder's run (FM): his speed rises as 1 - exp(-t / 1.2 s) after his first step, fitted to Statcast's jump
+           windows, and his route costs him only over the read (34 ft); was a constant 5.0 m/s^2, the route a share of the
+           whole path. The league's catch rate on liners and flies by hang time and distance is the test (docs/sections)
      v1.11 ground balls by launch angle: a bounce from measured physics (Coulomb friction on the slip, the spin carried, the
            soil's crater fitted to Pennbounce), a grass infield inside the dirt skin, air drag on the roll, a catch anywhere
            along the flight, and the fielder's first step fitted to both windows of Statcast's jump (docs/sections)
@@ -54,8 +59,6 @@
            the throw goes for the out worth the most runs by the league's RE24 (it had counted outs, and took the lead
            runner on .13 of single outs with a man on first, the league .60);
            the pivot 0.65 s, fitted to the league's relay success once the force is made (was 0.35 s, by hand)
-     v1.7  a force tried and thrown away is an error, not a fielder's choice (the bug audit): v1.5 had scored the
-           batter a fielder's choice with nobody out when the throw to second got away
 ============================================================================ */
 
 var BBField = (function () {
@@ -65,18 +68,26 @@ var BBField = (function () {
   var BASE = 90 * FT, H2 = BASE / Math.SQRT2;
   var BASES = [[0, 0], [H2, H2], [0, 2 * H2], [-H2, H2], [0, 0]];   // home, 1st, 2nd, 3rd, home again
   var REACH = 1.2;     // m: glove plus a dive
-  // A fielder's acceleration and the react trait together reproduce Statcast's
-  // outfield JUMP in both its windows (2025 leaderboard, the raw feet): 6.9 ft
-  // covered in the first 1.5 s after the pitch is RELEASED (about 1.07 s after
-  // contact) and 34.0 ft toward the ball in 3 s. With a 0.20 s first step, 5.0
-  // m/s^2 and a route 0.90 of straight the model covers 6.2 and 37.8 ft; the
-  // 3-s figure runs over because fielders are run here at their top sprint
-  // speed where the league's average 24 ft/s on these plays. (From v0.7 to
-  // v1.7 the pair was 0.45 s and 5.5 m/s^2, fitted to the 3 s alone: it covered
-  // half the first window, and at the 1.3 s a hard ground ball allows an
-  // infielder it reached 1.9 m where this reaches 3.0. Until v0.7 outfielders
-  // reacted in 0.70 s and accelerated at 3.5 m/s^2.)
-  var ACC_F = 5.0, ACC_R = 4.5;   // m/s^2 (a runner's 4.5 puts the average home-to-first at 4.4 s, Statcast's average; 5.5 was tried and inflated BABIP to .315)
+  // A FIELDER'S RUN (v1.12, hypothesis FM). After his first step (the react trait) his speed rises toward his sprint
+  // speed as 1 - exp(-t / TAU_F), the form the league's runners follow from a standstill (Statcast's running splits,
+  // TAU_RUN below), and his path is longer than the straight line by his route trait only over the first ROUTE_D of
+  // ground, while he reads the ball; after that he runs straight at the spot. TAU_F is FITTED to Statcast's outfield
+  // jump (2025 leaderboard, the raw feet, 7,417 plays): with the 0.20 s first step he covers 6.9 ft in the first
+  // 1.5 s after the pitch is released (about 1.07 s after contact; the league 6.91) and 29.6 ft in the next 1.5 s
+  // (30.0), and is running 23.6 ft/s at the end of the window (the leaderboard's sprint speed on those plays, 24.0).
+  // ROUTE_D is the window's ground toward the ball, 34.0 ft, and the route trait's mean among major leaguers is the
+  // window's 34.0 ft toward the ball over 36.9 covered, 0.921 (tools/fit_population.js). Together they put half the
+  // catches at 25 ft from the nearest fielder's spot with 2.25 s of hang, 51 ft at 3.25 s and 106 ft at 5.25 s,
+  // as the league's are (statcast/air_balls.py): full sprint speed, 27-29 ft/s, after a lag of about 1.4 s.
+  // Until v1.12 he accelerated at a constant 5.0 m/s^2 to his sprint speed with the route a share of the whole
+  // path (0.885): that pair fitted the jump's first window but reached about 10 ft too far at 2-3 s of hang, so
+  // liners were caught too often, and a constant acceleration that fits all three windows tops out at an in-play
+  // speed (24 ft/s) that lets deep flies fall (the ground-balls section's variant H). (From v0.7 to v1.10 the pair
+  // was 0.45 s and 5.5 m/s^2, fitted to the jump's 3-s total alone; until v0.7 0.70 s and 3.5 m/s^2.)
+  var TAU_F = 1.2, ROUTE_D = 34.0 * FT;   // s, m
+  // An outfielder braking to make his throw (settleTime) sheds speed at BRAKE_F, the constant acceleration the model
+  // used until v1.12: an assumption, not a measurement.
+  var BRAKE_F = 5.0, ACC_R = 4.5;   // m/s^2 (a runner's 4.5 puts the average home-to-first at 4.4 s, Statcast's average; 5.5 was tried and inflated BABIP to .315)
   var REACH_GB = 1.5;  // m: a dive or full extension for a grounder
   var LEAD = 4.66;     // m: a runner's lead when the ball is hit: Statcast's average secondary lead, 15.3 ft (2025, runners on first)
   var TAG = 0.25;      // s: catch and apply a tag
@@ -219,11 +230,17 @@ var BBField = (function () {
 
   // -------------------------------------------------------------- motion
   function isOF(pos) { return pos === 'LF' || pos === 'CF' || pos === 'RF'; }
-  function moveTime(pl, d) {              // a fielder, from his first step
-    var v = pl.speed * FT, a = ACC_F; d = Math.max(0, d) / pl.route;
-    var t = d < v * v / (2 * a) ? Math.sqrt(2 * d / a) : v / (2 * a) + d / v;
-    return pl.react + t;
+  // s to cover d m from rest with the speed rising as v (1 - exp(-t / tau)): v (t - tau (1 - exp(-t / tau))) = d,
+  // by Newton from the asymptote (the fielder's run, and a runner's from a standstill)
+  function sprintTime(v, tau, d) {
+    d = Math.max(0, d);
+    if (!d) return 0;
+    var t = d / v + tau;
+    for (var i = 0; i < 8; i++) { var e = Math.exp(-t / tau); t -= (v * (t - tau * (1 - e)) - d) / Math.max(v * (1 - e), 0.5); if (t < 1e-3) t = 1e-3; }
+    return t;
   }
+  function pathOf(pl, d) { d = Math.max(0, d); var r = Math.min(d, ROUTE_D); return r / pl.route + d - r; }   // the ground he runs to get d m from his spot
+  function moveTime(pl, d) { return pl.react + sprintTime(pl.speed * FT, TAU_F, pathOf(pl, d)); }   // a fielder, from the crack of the bat
   function runTime(pl, d, standing) {     // a runner
     var v = pl.speed * FT; d = Math.max(0, d);
     var t = d < v * v / (2 * ACC_R) ? Math.sqrt(2 * d / ACC_R) : v / (2 * ACC_R) + d / v;
@@ -246,13 +263,7 @@ var BBField = (function () {
   // keeps that run (he finishes his swing first: Statcast's home to first runs .44 s longer than his running split
   // to 90 ft), and a man moving off his lead keeps ACC_R (the curve from 1.5 m/s is worth 4.35 m/s^2 over 90 ft).
   var TAU_RUN = 0.78;   // s
-  function restTime(pl, d) {   // s to cover d m from a standstill, on the curve
-    var v = pl.speed * FT; d = Math.max(0, d);
-    if (!d) return 0;
-    var t = d / v + TAU_RUN;   // the asymptote; Newton from there
-    for (var i = 0; i < 8; i++) { var e = Math.exp(-t / TAU_RUN); t -= (v * (t - TAU_RUN * (1 - e)) - d) / Math.max(v * (1 - e), 0.5); if (t < 1e-3) t = 1e-3; }
-    return t;
-  }
+  function restTime(pl, d) { return sprintTime(pl.speed * FT, TAU_RUN, d); }   // s to cover d m from a standstill, on the curve
   function stealTime(pl, d, v0) {
     var v = pl.speed * FT; v0 = v0 === undefined ? V_SECONDARY : v0;
     var dAcc = (v * v - v0 * v0) / (2 * ACC_R);
@@ -457,26 +468,25 @@ var BBField = (function () {
   var CLEAN_K = 0.015;
   // THE STOP AND TURN (v1.0). An outfielder who reaches the ball on the run
   // must shed the part of his speed that is not carrying him toward his
-  // throw before he can make it: v (1 - max(0, cos a)) at ACC_F, where a is
+  // throw before he can make it: v (1 - max(0, cos a)) at BRAKE_F, where a is
   // the angle between his run and his throw - nothing if he is charging
   // toward the target, his whole speed if he is running across or away. His
-  // speed at the ball is what his acceleration gives over the ground he ran,
-  // less what he could brake in any time he had to spare. Braking is taken as
-  // his acceleration (ACC_F, from Statcast's jump): an assumption, not a
-  // measurement. Until v1.0 he threw as soon as he had the ball, and the
+  // speed at the ball is what his run gives over the ground he covered (v1.12:
+  // the rising curve above), less what he could brake in any time he had to
+  // spare. Braking at BRAKE_F is an assumption, not a measurement. Until v1.0 he threw as soon as he had the ball, and the
   // fumbles of v0.8 (half of all outfield pickups) had stood in for this: the
   // throw beat a batter-runner to second by a median 1.6 s on the singles that
   // stayed singles, and liners landing 150-300 ft were doubles 2-3% of the
   // time against the league's 9-12%. Infielders are left as they were.
   function settleTime(F, from, to, moved, spare) {
     if (!isOF(F.pos) || !(moved > 0)) return 0;
-    var pl = F.pl, d = Math.max(0, moved - REACH * 0.5) / pl.route;
-    var v = Math.max(0, Math.min(pl.speed * FT, Math.sqrt(2 * ACC_F * d)) - ACC_F * Math.max(0, spare));
+    var pl = F.pl, vmax = pl.speed * FT, tr = sprintTime(vmax, TAU_F, pathOf(pl, moved - REACH * 0.5));
+    var v = Math.max(0, vmax * (1 - Math.exp(-tr / TAU_F)) - BRAKE_F * Math.max(0, spare));
     if (!v) return 0;
     var rx = from[0] - F.at[0], ry = from[1] - F.at[1], rm = Math.hypot(rx, ry) || 1;
     var tx = BASES[to][0] - from[0], ty = BASES[to][1] - from[1], tm = Math.hypot(tx, ty) || 1;
     var c = (rx * tx + ry * ty) / (rm * tm);
-    return v * (1 - Math.max(0, c)) / ACC_F;
+    return v * (1 - Math.max(0, c)) / BRAKE_F;
   }
   // THE SCORER. A fumble that costs the out is an error only on a chance an ordinary fielder handles
   // (the rulebook's ordinary effort): no harder than D = 1, a ball reaching him at 30 m/s (67 mph) or a
@@ -763,7 +773,7 @@ var BBField = (function () {
     return best.c.p > 0 && rng.u() < best.c.p ? best : null;
   }
 
-  return { version: '1.11', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
+  return { version: '1.12', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack, restTime: restTime,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };

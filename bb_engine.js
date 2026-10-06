@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v3.3 · 2026-10-06
+   bb_engine.js · v3.4 · 2026-10-06
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -66,6 +66,7 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v3.4  the route trait is the straight-line share of the ground a fielder covers while he reads the ball (bb_field v1.12)
      v3.3  the batted ball carries its spin to the ground (landW, for bb_field's bounce); a fielder's first step fitted to both
            windows of Statcast's outfield jump (react 0.20 s for position players, was 0.47; the catcher's and pitcher's kept)
      v3.2  THE RELEASE BEHIND HIS SHOULDER (PL): a batter reads a pitch worse, swings slower and meets it higher the
@@ -79,11 +80,6 @@
      v3.0  THE BAT IS FASTEST WHERE THE SWING IS BUILT TO GO (BAT_LOC): bat speed rises low over the plate
            and falls as a pitch pulls the swing up, away or in, measured from the league's swings about
            each hitter's mean (reaching contact had kept the model's full bat speed); SWING_NORM 0.961
-     v2.9  THE BARREL'S HEIGHT FOLLOWS THE PITCH LESS THAN FULLY: the up-down aim is pulled toward
-           the middle of his zone (VERT_MISS), as the league's launch angles climb with pitch
-           height; timing scatter grows with the time he is judging (flight time, a Weber
-           fraction), not with pitch speed, refitted to the league's contact depth by pitch kind;
-           a recognised breaking ball keeps half the misread it did (RESID_S); aim under the ball -0.15 in
 ============================================================================ */
 
 var BB = (function () {
@@ -651,7 +647,7 @@ var BB = (function () {
     // fielding and running (Statcast-shaped; position means in FIELD_MEANS)
     speed:     [27.013, 1.024, 22, 31],   // ft/s sprint speed
     react:     [0.035, 0.06, 0.25, 0.7],   // s: reading the ball and taking the first step; with bb_field's acceleration, Statcast's outfield jump (33.9 +- 1.9 ft)
-    route:     [0.885, 0.04, 0.75, 1],    // straight-line share of the path he actually runs
+    route:     [0.885, 0.04, 0.75, 1],    // straight-line share of the ground he covers while he reads the ball (the first 34 ft; bb_field v1.12)
     glove:     [0.982, 0.008, 0.94, 0.999],// clean-play rate on a routine chance
     armMph:    [83.901, 3.5, 70, 100],    // throw speed
     armAcc:    [0.604, 0.15, 0.25, 1.3],// m: throw scatter at 40 m
