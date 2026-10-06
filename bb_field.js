@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.7 · 2026-10-05
+   bb_field.js · v1.8 · 2026-10-05
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -7,9 +7,10 @@
 
    WHAT IS PHYSICS HERE
    - the ball's whole track: the engine's flight, a carom off the wall
-     (radial component reflected and damped), bounces (restitution and
-     friction differ on dirt and grass), then a roll that slows to a stop
-     or reaches the fence
+     (radial component reflected and damped), bounces (restitution, Coulomb
+     friction on the slip with the spin carried, and the soil's crater, on
+     a grass infield with a dirt skin), then a roll slowed by the air and
+     the ground until it stops or reaches the fence
    - a fielder's motion: first-step delay, acceleration to his sprint
      speed, a route longer than the straight line by his route trait
    - a runner's motion: the same, from a standing start or a lead
@@ -19,7 +20,8 @@
    WHAT IS A DECISION RULE
    - who takes the ball (the fielder who can reach it first), whether he
      catches it (his margin of time, his glove), whether he fields a
-     grounder cleanly (ball speed, ground covered, his glove, a bad hop)
+     grounder cleanly (ball speed, ground covered, his glove, a bad hop); a
+     liner can be caught anywhere along its flight a man can reach
    - where he throws: the out that is most likely and most valuable, a
      double play if the relay can beat the batter, or he holds the ball
    - how far each runner goes: as far as the throw cannot beat him by the
@@ -32,6 +34,9 @@
    doubles are approximate; the cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.8  ground balls by launch angle: a bounce from measured physics (Coulomb friction on the slip, the spin carried, the
+           soil's crater fitted to Pennbounce), a grass infield inside the dirt skin, air drag on the roll, a catch anywhere
+           along the flight, and the fielder's first step fitted to both windows of Statcast's jump (docs/sections)
      v1.7  a force tried and thrown away is an error, not a fielder's choice (the bug audit): v1.5 had scored the
            batter a fielder's choice with nobody out when the throw to second got away
      v1.6  a batter thrown out past first base keeps the hit that got him there (rule 9.05; the bug audit): the play
@@ -40,8 +45,6 @@
            scorer's rule 9.05; the bug audit): the batter had been credited a single whenever the lead runner was safe
      v1.4  a throw that gets away moves every runner up a base, the men who held included (the bug audit): a holder
            stayed while the runner behind him took the base he was on, and the holder vanished (headless/plays_check.js)
-     v1.3  a runner tags up only to a base the man ahead leaves (the bug audit): a man could tag up onto one who
-           held, and the man who held vanished from the bases - 21 times in 2,000 games (headless/plays_check.js)
 ============================================================================ */
 
 var BBField = (function () {
@@ -52,13 +55,17 @@ var BBField = (function () {
   var BASES = [[0, 0], [H2, H2], [0, 2 * H2], [-H2, H2], [0, 0]];   // home, 1st, 2nd, 3rd, home again
   var REACH = 1.2;     // m: glove plus a dive
   // A fielder's acceleration and the react trait together reproduce Statcast's
-  // average outfield JUMP: 33.9 ft covered toward the ball in the first 3 s
-  // after the pitch is RELEASED (2025 leaderboard), about 2.6 s after contact:
-  // 0.45 s to the first step, 5.5 m/s^2, a route 0.90 of straight gives 33.7 ft.
-  // (Until v0.7 outfielders reacted in 0.70 s and accelerated at 3.5 m/s^2, set
-  // to "30 ft in 3 s" counted from contact; they covered 18 ft in the jump's
-  // window, and fly balls to 300-400 ft fell in twice as often as the league's.)
-  var ACC_F = 5.5, ACC_R = 4.5;   // m/s^2 (a runner's 4.5 puts the average home-to-first at 4.4 s, Statcast's average; 5.5 was tried and inflated BABIP to .315)
+  // outfield JUMP in both its windows (2025 leaderboard, the raw feet): 6.9 ft
+  // covered in the first 1.5 s after the pitch is RELEASED (about 1.07 s after
+  // contact) and 34.0 ft toward the ball in 3 s. With a 0.20 s first step, 5.0
+  // m/s^2 and a route 0.90 of straight the model covers 6.2 and 37.8 ft; the
+  // 3-s figure runs over because fielders are run here at their top sprint
+  // speed where the league's average 24 ft/s on these plays. (From v0.7 to
+  // v1.7 the pair was 0.45 s and 5.5 m/s^2, fitted to the 3 s alone: it covered
+  // half the first window, and at the 1.3 s a hard ground ball allows an
+  // infielder it reached 1.9 m where this reaches 3.0. Until v0.7 outfielders
+  // reacted in 0.70 s and accelerated at 3.5 m/s^2.)
+  var ACC_F = 5.0, ACC_R = 4.5;   // m/s^2 (a runner's 4.5 puts the average home-to-first at 4.4 s, Statcast's average; 5.5 was tried and inflated BABIP to .315)
   var REACH_GB = 1.5;  // m: a dive or full extension for a grounder
   var LEAD = 4.66;     // m: a runner's lead when the ball is hit: Statcast's average secondary lead, 15.3 ft (2025, runners on first)
   var TAG = 0.25;      // s: catch and apply a tag
@@ -90,9 +97,16 @@ var BBField = (function () {
     var p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; }
   function dist(a, b) { return Math.hypot(a[0] - b[0], a[1] - b[1]); }
   function polar(rFt, aDeg) { var r = rFt * FT, a = aDeg * DEG; return [r * Math.sin(a), r * Math.cos(a)]; }
+  // The infield's surfaces (a grass infield, as every 2025 park has): dirt within the plate's circle (rule 2.01: 26 ft across)
+  // and the mound's (18 ft), and on the skin between the base paths and the outfield grass: the arc 95 ft from the rubber,
+  // less the grass diamond inside the base paths (taken as 3 ft inside each base line, the usual cut); the base paths
+  // home to first and third to home are dirt. Until v1.8 the whole circle 93 ft round the mound was dirt, a skinned
+  // infield, so a ground ball's first bounce, 20-70 ft out, was on dirt where the league's is on grass.
+  var GRASS_IN = (90 - 3 * Math.SQRT2) * FT / Math.SQRT2;   // the grass diamond's half-diagonal, 3 ft inside the base lines
   function onDirt(x, y) {
-    return Math.hypot(x, y) < 13 * FT ||
-      (Math.hypot(x, y - 60.5 * FT) < 93 * FT && Math.abs(Math.atan2(x, y)) <= 50 * DEG);
+    if (Math.hypot(x, y) < 13 * FT || Math.hypot(x, y - 60.5 * FT) < 9 * FT) return true;
+    if (Math.hypot(x, y - 60.5 * FT) >= 95 * FT) return false;
+    return Math.abs(x) + Math.abs(y - H2) > GRASS_IN;   // inside the arc: the skin, unless on the grass diamond
   }
 
   // ------------------------------------------------------------ positions
@@ -208,44 +222,76 @@ var BBField = (function () {
   }
 
   // ---------------------------------------------------------- the track
-  // A bounce: the ball keeps BOUNCE_E of its speed into the ground and
-  // BOUNCE_KF of its speed along it, less BOUNCE_C times its speed into the
-  // ground (the friction and the ploughing grow with how hard it lands), and
-  // never less than BOUNCE_FLOOR. KF and C were fitted, with E held at 0.45 on
-  // dirt and 0.35 on grass, to the share of speed a baseball kept bouncing off
-  // a skinned infield (.57 at 25 deg, .49 at 35 deg) and natural grass (.44,
-  // .32), measured at 31 and 40 m/s (Brosnan, McNitt & Schlossberg 2007, J.
-  // Testing & Evaluation 35(6)). The floor is set by hand: steeper than those
-  // tests, the friction would stop the ball dead. (Until v0.7 every bounce kept
-  // 0.50 / 0.72 on dirt and 0.42 / 0.62 on grass whatever the angle: a hard
-  // ball topped into the dirt hopped 60 ft high over the infield.)
-  var BOUNCE_E = { dirt: 0.45, grass: 0.35 }, BOUNCE_KF = 0.76, BOUNCE_C = { dirt: 0.35, grass: 0.65 }, BOUNCE_FLOOR = 0.2;
+  // A BOUNCE (v1.8). The ball keeps BOUNCE_E of its speed into the ground. Along
+  // the ground it loses two things. (1) Coulomb friction on the slip of its
+  // bottom point - the centre's horizontal speed plus what the spin adds there -
+  // an impulse of at most BOUNCE_MU times the normal impulse (1 + e) vn, and
+  // never more than the 2/7 of the slip that brings a solid sphere to rolling
+  // (Cross, Am. J. Phys. 70, 1093 (2002), eqs. 4-7: at low angles a ball slides
+  // throughout the bounce and its horizontal speed falls by mu (1 + e) vn; at
+  // steeper angles it grips, and real balls then spin a little faster than
+  // rolling). The spin follows the same impulse (I = 0.4 m R^2), so a topped
+  // ball keeps and gains topspin, which the hop's Magnus force then holds down.
+  // (2) The soil's crater: a share BOUNCE_KC of the normal speed taken from the
+  // centre on top of friction, which is how dirt and turf take more than a
+  // rigid surface can. BOUNCE_KC is fitted, with mu set so that the ball
+  // reaches rolling at the measured angles, to the share of speed a baseball
+  // kept bouncing off a skinned infield (.57 at 25 deg, .49 at 35 deg) and
+  // natural turf (.44, .32) at 31 and 40 m/s (Brosnan, McNitt & Schlossberg,
+  // J. Testing & Evaluation 35, 676 (2007), Pennbounce, table 5), and the
+  // level of each surface to the 2005 survey of major-league, minor-league and
+  // college fields at 25 deg and 40 m/s (Brosnan & McNitt, Penn State turfgrass
+  // annual report 2005: skinned .562, natural turf .479). E is held at the old
+  // values; those tests cannot separate it from the crater.
+  //   Until v1.8 the ball kept BOUNCE_KF - C vn/vh of its horizontal speed, a
+  // line through the same two points that extrapolated to a 24% loss at
+  // grazing incidence, where Coulomb friction allows a few percent: a 95-mph
+  // ground ball reached shortstop depth at 2.5 s doing 23 mph (now 1.5 s and
+  // 53 mph), and the infielders ranged a median 6-7 m to field choppers.
+  var BOUNCE_E = { dirt: 0.45, grass: 0.35 }, BOUNCE_MU = { dirt: 0.41, grass: 0.45 }, BOUNCE_KC = { dirt: 0.28, grass: 0.46 }, BOUNCE_FLOOR = 0.2;
+  function bounce(v, w, srf) {   // one bounce: v and w (rad/s, the field frame) changed in place
+    var e = BOUNCE_E[srf], vn = -v[2], P = (1 + e) * vn;
+    var ux = v[0] - BALL_R * w[1], uy = v[1] + BALL_R * w[0], s = Math.hypot(ux, uy);   // the slip of the bottom point
+    var J = Math.min(BOUNCE_MU[srf] * P, 2 * s / 7);          // Coulomb friction on the slip, until the ball rolls
+    if (s > 1e-6) {
+      var jx = -J * ux / s, jy = -J * uy / s;
+      v[0] += jx; v[1] += jy;
+      w[0] += 2.5 * jy / BALL_R; w[1] -= 2.5 * jx / BALL_R;      // the spin follows: a solid sphere, I = 0.4 m R^2
+    }
+    var vh = Math.hypot(v[0], v[1]), crater = BOUNCE_KC[srf] * vn, k = vh > 0 ? Math.max(BOUNCE_FLOOR, (vh - crater) / vh) : 0;   // the soil's crater
+    v[0] *= k; v[1] *= k; v[2] = e * vn;
+  }
+  // THE ROLL. Once a hop is under 1 m/s the ball runs along the ground, slowed by
+  // the air (the engine's batted-ball drag, which the hops already feel) and by
+  // the surface's own resistance, ROLL_RES, set by hand (v0.3). Until v1.8 the
+  // roll had no air drag: at 25 m/s that is 4.8 m/s^2, more than the surface.
+  var ROLL_RES = { dirt: 2.4, grass: 3.2 };   // m/s^2
+  var ROLL_DRAG = 0.5 * Math.PI * BALL_R * BALL_R / 0.145 * 0.3008 * 1.08;   // per unit air density, per speed squared: cdOf(0) x batCd over the ball's mass (5.125 oz)
   // Bounces and the roll after the ball comes down. Samples [t, x, y, z, speed].
-  function groundTrack(x, y, vx, vy, vz, t0, env, out) {
-    var t = t0, groundRule = false;
+  function groundTrack(x, y, vx, vy, vz, w0, t0, env, out) {
+    var t = t0, groundRule = false, v = [vx, vy, vz], w = w0 ? w0.slice() : [0, 0, 0];
     for (var b = 0; b < 10; b++) {
-      var srf = onDirt(x, y) ? 'dirt' : 'grass', vn = -vz, vh = Math.hypot(vx, vy);
-      var kh = vh > 0 ? Math.max(BOUNCE_FLOOR, BOUNCE_KF - BOUNCE_C[srf] * vn / vh) : 0;
-      vz = BOUNCE_E[srf] * vn; vx *= kh; vy *= kh;
-      if (vz < 1.0) break;
-      var fl = BB.flyBatted([x, y, BALL_R], [vx, vy, vz], [0, 0, 0], env, true);
-      var vh = Math.hypot(vx, vy);
+      var srf = onDirt(x, y) ? 'dirt' : 'grass';
+      bounce(v, w, srf);
+      if (v[2] < 1.0) break;
+      var fl = BB.flyBatted([x, y, BALL_R], v, w, env, true);
+      var vh = Math.hypot(v[0], v[1]);
       fl.path.forEach(function (q, i) { if (i) out.push([t + q[0], q[1], q[2], q[3], vh]); });
       x = fl.x; y = fl.y; t += fl.t;
-      if (fl.kind === 'over') { groundRule = true; vx = vy = vz = 0; break; }   // bounced over: ground-rule double
-      vx = fl.v[0]; vy = fl.v[1]; vz = fl.v[2];
+      if (fl.kind === 'over') { groundRule = true; v = [0, 0, 0]; break; }   // bounced over: ground-rule double
+      v = fl.v.slice(); w = fl.w.slice();
       if (fl.kind === 'wall') {                       // off the wall on a bounce
-        var r = Math.hypot(x, y), nx = -x / r, ny = -y / r, vn = vx * nx + vy * ny;
-        vx = (vx - 2 * vn * nx) * 0.45; vy = (vy - 2 * vn * ny) * 0.45; vz = -Math.abs(vz) * 0.5;
+        var r = Math.hypot(x, y), nx = -x / r, ny = -y / r, vn = v[0] * nx + v[1] * ny;
+        v[0] = (v[0] - 2 * vn * nx) * 0.45; v[1] = (v[1] - 2 * vn * ny) * 0.45; v[2] = -Math.abs(v[2]) * 0.5;
       }
     }
-    var v = Math.hypot(vx, vy), ux = v > 0 ? vx / v : 0, uy = v > 0 ? vy / v : 1, dt = 0.02;
-    while (v > 0.05 && t < t0 + 20) {
-      var a = onDirt(x, y) ? 2.4 : 3.2;
-      x += ux * v * dt; y += uy * v * dt; v = Math.max(0, v - a * dt); t += dt;
+    var vv = Math.hypot(v[0], v[1]), ux = vv > 0 ? v[0] / vv : 0, uy = vv > 0 ? v[1] / vv : 1, dt = 0.02;
+    while (vv > 0.05 && t < t0 + 20) {
+      var a = (onDirt(x, y) ? ROLL_RES.dirt : ROLL_RES.grass) + ROLL_DRAG * env.rho * vv * vv;
+      x += ux * vv * dt; y += uy * vv * dt; vv = Math.max(0, vv - a * dt); t += dt;
       var rr = Math.hypot(x, y), sp = Math.atan2(x, y) / DEG;
-      if (Math.abs(sp) <= 45 && rr >= BB.fenceAt(env, sp)) { v *= 0.35; ux = -ux; uy = -uy; }
-      out.push([t, x, y, 0, v]);
+      if (Math.abs(sp) <= 45 && rr >= BB.fenceAt(env, sp)) { vv *= 0.35; ux = -ux; uy = -uy; }
+      out.push([t, x, y, 0, vv]);
     }
     return { stop: [x, y], t: t, groundRule: groundRule };
   }
@@ -259,7 +305,7 @@ var BBField = (function () {
       fl.path.forEach(function (q, i) { if (i) T.ground.push([t + q[0], q[1], q[2], q[3], vh]); });
       x = fl.x; y = fl.y; v = fl.v; t += fl.t;
     }
-    var end = groundTrack(x, y, v[0], v[1], v[2], t, env, T.ground);
+    var end = groundTrack(x, y, v[0], v[1], v[2], bb.kind === 'wall' ? null : bb.landW, t, env, T.ground);   // a carom keeps no spin worth the name
     T.stop = end.stop; T.stopT = end.t; T.groundRule = end.groundRule;
     return T;
   }
@@ -271,10 +317,24 @@ var BBField = (function () {
   // the league's at each launch angle and exit velocity (statcast/bip.py,
   // headless/bip_check.js; 0.15 s, where -0.05 had been set by hand).
   var CATCH_SET = 0.15;
+  // A ball can be caught in the air anywhere along its flight that a man can
+  // reach (v1.8): at the landing point, or at a point of the path no higher than
+  // Z_CATCH, a standing man's glove overhead with a small jump, with the reach
+  // to the side the full REACH up to chest height (Z_LUNGE, where a lunge or
+  // dive works) and tapering to nothing straight overhead. The point taken is
+  // the one that gives him the most time to spare. Until v1.8 only the landing
+  // point counted, so a liner that passed an infielder at chest height went
+  // through untouched (gap 6 of CALIBRATION.md): the league catches .138 of
+  // balls at 5-10 deg in the air, the model caught .043.
+  var Z_CATCH = 2.6, Z_LUNGE = 1.3;   // m
   function catchChance(F, T) {
-    var L = T.land, m = L.t - moveTime(F.pl, dist(F.at, [L.x, L.y]) - REACH);
-    if (T.kind === 'wall' && L.z > 2.6) return { m: m, p: 0 };
-    return { m: m, p: Phi((m - CATCH_SET) / 0.2) * (1 - DROP_K * (1 - F.pl.glove)) };
+    var L = T.land, best = { m: -Infinity, t: L.t, at: [L.x, L.y] };
+    function tryPt(t, x, y, reach) { var m = t - moveTime(F.pl, dist(F.at, [x, y]) - reach); if (m > best.m) { best.m = m; best.t = t; best.at = [x, y]; } }
+    tryPt(L.t, L.x, L.y, REACH);
+    var P = T.air;
+    if (P) for (var i = 4; i < P.length; i += 4) { var q = P[i]; if (q[0] >= L.t) break; if (q[3] <= Z_CATCH) tryPt(q[0], q[1], q[2], q[3] <= Z_LUNGE ? REACH : REACH * (Z_CATCH - q[3]) / (Z_CATCH - Z_LUNGE)); }
+    if (T.kind === 'wall' && L.z > Z_CATCH && best.t >= L.t) return { m: best.m, p: 0, t: best.t, at: best.at };
+    return { m: best.m, p: Phi((best.m - CATCH_SET) / 0.2) * (1 - DROP_K * (1 - F.pl.glove)), t: best.t, at: best.at };
   }
   // A ball he is under is dropped DROP_K of his fumble rate on a grounder (1 - glove), FITTED to the
   // league's missed-catch errors (2025: about 0.023 a team-game, from the play descriptions' share of
@@ -365,10 +425,10 @@ var BBField = (function () {
     D.forEach(function (F) { var c = catchChance(F, T); if (!best || c.m > best.c.m) best = { F: F, c: c }; });
     var caught = o.foulCaught || (best.c.p > 0 && rng.u() < best.c.p);
     if (!caught && best.c.m > 0.6 && !o.foulCaught) {   // he was there and dropped it
-      out.error = true; ev.push({ t: T.land.t, kind: 'drop', who: best.F.pos, at: [T.land.x, T.land.y] });
+      out.error = true; ev.push({ t: best.c.t, kind: 'drop', who: best.F.pos, at: best.c.at });
     }
     if (caught) {
-      var F = best.F, tc = T.land.t, at = [T.land.x, T.land.y];
+      var F = best.F, tc = best.c.t, at = best.c.at;   // where and when he caught it (v1.8: anywhere along the flight)
       ev.push({ t: tc, kind: 'catch', who: F.pos, at: at });
       R[R.length - 1].out = true; out.outsMade = 1;
       out.hit = 'OUT'; out.desc = (out.type === 'PU' ? 'pop out' : out.type === 'LD' ? 'line out' : 'fly out') + ' to ' + F.pos;
@@ -564,7 +624,7 @@ var BBField = (function () {
     return best.c.p > 0 && rng.u() < best.c.p ? best : null;
   }
 
-  return { version: '1.7', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
+  return { version: '1.8', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };
