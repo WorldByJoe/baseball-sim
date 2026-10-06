@@ -38,7 +38,8 @@
            a fly the fielder was under and dropped puts the batter on by the error (rule 9.12), no longer a hit as well;
            the tag-up for third or home is a read, as a send on a hit is (READ_SD, SAFETY_3 and SAFETY_H by the outs
            after the catch, the throw's arrival as sure as raceSD): he went only when no throw could get him;
-           the cut-off man's catch, turn and throw takes the double play's pivot (0.65 s, measured), not 0.45 s by hand
+           the cut-off man's catch, turn and throw takes the double play's pivot (0.65 s, measured), not 0.45 s by hand;
+           SAFETY_3 and SAFETY_H refitted to the league's sends and tag-ups together: [0.95, 0.95, 0.35], [0.8, 0.2, 0]
      v1.8  the infield stands where the league's did in 2025 (Savant's fielder positioning): by the batter's side,
            the first baseman holding a runner, double-play depth, the infield in with a man on third as the manager's
            call, and the 2023 rule (two infielders each side of second, all on the dirt);
@@ -79,14 +80,17 @@ var BBField = (function () {
   // out and sometimes held when he would have made it. Third and home have
   // their own margins (v1.0): never make the first or third out at third
   // base, but risk the plate when a run is there, most of all with two out.
-  // Both FITTED (a sweep of 1,500 games a setting, seed 7) to how often the
-  // league's runners took the extra base (statcast/baserunning.py,
-  // headless/xbt_check.js): a runner on first held at second on a single
-  // .68 / .67 / .56 of the time with none, one and two out; a runner on second
-  // held at third on a single .60 / .42 / .13, a runner on first on a double
-  // .65 / .64 / .44. (One margin for both, [0.6, 0.5, 0.2], fitted before the
-  // outfielder had to stop and turn, sent too many to third and too few home.)
-  var SAFETY_3 = [0.75, 0.75, 0.35], SAFETY_H = [0.7, 0.2, -0.4], READ_SD = 0.25;   // s, by outs: taking third, going home
+  // REFITTED (v1.9) once the tag-up read the race as a send does and the runner on base ran from a standstill on
+  // the measured curve: one margin per base and outs for hits and tag-ups together - a tag-up uses the outs after
+  // the catch, so SAFETY_H[1] serves one-out hits and none-out tags, [2] two-out hits and one-out tags. A sweep
+  // of 1,000 games a setting (seed 7; xbt_check, mob_check) against the league's extra bases (statcast/
+  // baserunning.py: a man on second scored on a single .36 / .51 / .83 with none, one and two out, a man on first
+  // on a double .34 / .31 / .52, a man on first took third on a single .28 / .30 / .42) and tag-ups (statcast/
+  // men_on_base.py: a man on third scored on a caught ball .65 / .62 with none and one out, out .00 / .03; a man
+  // on second took third .21). Until v1.9 [0.75, 0.75, 0.35] and [0.7, 0.2, -0.4], fitted with bug A present
+  // (the second runner never sent) and the tag-up on its own rule: the two-out double sent a man on first home
+  // and lost him .12 of the time, the league .03.
+  var SAFETY_3 = [0.95, 0.95, 0.35], SAFETY_H = [0.8, 0.2, 0.0], READ_SD = 0.25;   // s, by outs: taking third, going home
   // How sure a throw's arrival is: 0.15 s for an infield throw, and more the
   // longer it is beyond 40 m (footwork, a hop, the catcher moving for it); set
   // by hand, so runners are thrown out at third and home about as often as
