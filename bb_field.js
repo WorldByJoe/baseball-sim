@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.12 · 2026-10-06
+   bb_field.js · v1.13 · 2026-10-06
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -37,6 +37,8 @@
    cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.13 the forced runner's break (V_CONTACT 2.75 m/s) and the double play's pivot (0.87 s) refitted on the new ball to
+           the league's forces at second and relays (mob_check); the cut-off man keeps 0.65 s (RELAY_XFER)
      v1.12 the fielder's run (FM): his speed rises as 1 - exp(-t / 1.2 s) after his first step, fitted to Statcast's jump
            windows, and his route costs him only over the read (34 ft); was a constant 5.0 m/s^2, the route a share of the
            whole path. The league's catch rate on liners and flies by hang time and distance is the test (docs/sections)
@@ -52,13 +54,6 @@
            after the catch, the throw's arrival as sure as raceSD): he went only when no throw could get him;
            the cut-off man's catch, turn and throw takes the double play's pivot (0.65 s, measured), not 0.45 s by hand;
            SAFETY_3 and SAFETY_H refitted to the league's sends and tag-ups together: [0.95, 0.95, 0.35], [0.8, 0.2, 0]
-     v1.8  the infield stands where the league's did in 2025 (Savant's fielder positioning): by the batter's side,
-           the first baseman holding a runner, double-play depth, the infield in with a man on third as the manager's
-           call, and the 2023 rule (two infielders each side of second, all on the dirt);
-           the second baseman covers second on a ball to third; a double play's relay goes to the man covering first;
-           the throw goes for the out worth the most runs by the league's RE24 (it had counted outs, and took the lead
-           runner on .13 of single outs with a man on first, the league .60);
-           the pivot 0.65 s, fitted to the league's relay success once the force is made (was 0.35 s, by hand)
 ============================================================================ */
 
 var BBField = (function () {
@@ -117,13 +112,16 @@ var BBField = (function () {
   // the league's (1-5% of chances).
   var RACE_SD = 0.15, RACE_SD_M = 0.005;   // s, s per m beyond 40 m
   function raceSD(from, to) { return RACE_SD + RACE_SD_M * Math.max(0, dist(from, BASES[to]) - 40); }
-  // The double-play pivot: the man covering second catches the force, crosses the bag and releases the relay. 0.65 s,
-  // FITTED (v1.8) to how often the league's relay beat the batter once the force at second was made (statcast/
-  // men_on_base.py, 42 days of 2025: .60 of the time, and .73 / .59 / .47 for slow, middling and fast batters; the
-  // model .61 / .62 at seeds 3 / 11, and .76 / .58 / .49 by the batter's speed - the slope is the check, not fitted).
-  // It was 0.35 s, set by hand while the infield played at its usual depth with a man on: at double-play depth that
-  // relay beat the batter .90 of the time and double plays ran .61 of the chances against .40.
-  var PIVOT = 0.65;    // s
+  // The double-play pivot: the man covering second catches the force, crosses the bag and releases the relay. 0.87 s,
+  // REFITTED (v1.13) with the forced runner's break (V_CONTACT below) on the ball of v1.11 and the fielder's run of
+  // v1.12, to how often the league's relay beat the batter once the force at second was made (statcast/
+  // men_on_base.py, 42 days of 2025: .595, and .73 / .59 / .47 for slow, middling and fast batters) with the share of
+  // the infield's clean plays on a ground ball with a man on first and fewer than two out that forced him at second
+  // (.757): the model .603 / .598 and .770 / .745 at seeds 3 / 11 (mob_check, 600 games), .79-.76 / .56-.61 / .46-.42
+  // by the batter's speed (the slope is the check, not fitted). With 0.65 s (v1.8, fitted on the old, slower ball)
+  // the relay beat the batter .73 of the time and the force came off .89 of clean plays; double plays ran .63 of the
+  // chances against .40. (0.35 s, by hand, until v1.8.)
+  var PIVOT = 0.87;    // s
   var STD_AIR = BB.makeEnv({ fence: [9999, 9999, 9999, 9999, 9999] });
   // The league's run expectancy to the end of the inning from each base-out state (statcast/runs_league.py, 42 days of
   // 2025), by outs and the bases as bits (first 1, second 2, third 4): what a fielder's throw is worth (v1.8).
@@ -252,10 +250,13 @@ var BBField = (function () {
   // A steal starts from a moving secondary lead: he is already walking off
   // the bag at about 3 m/s when the pitcher commits to the plate.
   var LEAD_STEAL = 3.7, V_SECONDARY = 3.0;   // m, m/s
-  // A runner who breaks on contact is shuffling at his secondary lead, slower
-  // than a man walking off on a steal: V_CONTACT, fitted to the league's double
-  // plays per game (the forced runner's race to second).
-  var V_CONTACT = 1.5;   // m/s
+  // A runner who breaks on contact is shuffling off his secondary lead: V_CONTACT,
+  // REFITTED (v1.13) with the pivot (PIVOT above) to the share of clean infield
+  // plays that force him at second (.757; the forced runner's race); not
+  // measured directly (Statcast gives his lead, 15.3 ft, not his speed). It was
+  // 1.5 m/s, fitted to the league's double plays per game on the old ball; 2.75
+  // is a little under the 3 m/s of a man walking off on a steal.
+  var V_CONTACT = 2.75;   // m/s
   // RUNNING FROM REST (v1.9). A runner on base who starts from a standstill - tagging up, held at the bag till a fly
   // drops, frozen at his lead till a grounder is through - runs the league's measured curve: his speed rises toward
   // his sprint speed as 1 - exp(-t / TAU_RUN), TAU_RUN 0.78 s, fitted to Statcast's running splits (549 hitters,
@@ -318,14 +319,15 @@ var BBField = (function () {
 
   // A long outfield throw goes through a cut-off man: two shorter throws
   // beat one lofted one. The estimate every fielder and runner works from.
-  // The cut-off man's catch, turn and release is the double play's pivot
-  // (v1.9): the same body's motion, measured there (0.65 s, PIVOT below);
-  // it was 0.45 s, set by hand when the cut-off man came in to curb triples.
-  var RELAY_FROM = 55, CUT = 35;   // m, m
+  // The cut-off man's catch, turn and release, RELAY_XFER: the double play's
+  // pivot as fitted on the old ball (v1.9: 0.65 s). The pivot refitted in v1.13
+  // (0.87 s) also carries the man crossing second ahead of the slide, which the
+  // cut-off man does not do, so the relay keeps 0.65 s. (0.45 s, by hand, until v1.9.)
+  var RELAY_FROM = 55, CUT = 35, RELAY_XFER = 0.65;   // m, m, s
   function throwArrival(F, from, to) {
     var d = dist(from, BASES[to]), direct = throwTime(F.pl.armMph, d);
     if (d <= RELAY_FROM) return direct;
-    return Math.min(direct, throwTime(F.pl.armMph, d - CUT) + PIVOT + throwTime(86, CUT));
+    return Math.min(direct, throwTime(F.pl.armMph, d - CUT) + RELAY_XFER + throwTime(86, CUT));
   }
 
   // ---------------------------------------------------------- the track
@@ -775,7 +777,7 @@ var BBField = (function () {
     return best.c.p > 0 && rng.u() < best.c.p ? best : null;
   }
 
-  return { version: '1.12', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
+  return { version: '1.13', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack, restTime: restTime,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };
