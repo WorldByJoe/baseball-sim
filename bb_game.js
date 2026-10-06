@@ -1,21 +1,24 @@
 /* ============================================================================
-   bb_game.js · v1.5 · 2026-10-05
+   bb_game.js · v1.6 · 2026-10-06
 
    A whole game: two teams, nine innings or more, lineups that turn over,
    pitchers who tire and get replaced, managers with their own habits.
    Pure and seeded like the rest; the game log carries everything the
    screen needs to replay it pitch by pitch.
 
-   RULES (Joe, 2026-09-29: pre-2023) - no pitch clock, no ghost runner in
-   extra innings, no three-batter minimum. Shifts: since bb_field v1.8 the
-   infield stands where 2025's did, under the 2023 rule (two infielders on
-   each side of second, all four on the dirt), as the men-on-base brief of
-   2026-10-05 asked - against Joe's 'shifts allowed', for him to decide.
-   'AL' plays a designated hitter; 'NL' has the pitcher bat and the manager
-   pinch-hit for him. A game given no rules plays 'AL', the designated hitter for
-   both sides, as the majors and the minors have since 2022: the headless
-   checks measure against 2025, when no pitcher batted. The schedule and
-   the league season pass 'NL' in an NL club's park.
+   RULES (Joe, 2026-10-06: the current rules, 2023 on; until then pre-2023).
+   The designated hitter bats for both sides ('AL', the default). The shift
+   ban: two infielders on each side of second, all four on the dirt (bb_field
+   v1.8 places them where 2025's stood). Every pitcher faces three batters or
+   finishes the half-inning. A pitcher throws over at most twice a plate
+   appearance (a third throw that missed would be a balk, so he does not make
+   one). The bases are 18 in square, 4.5 in nearer each other from first to
+   second and second to third. From the tenth inning of a regular-season game
+   each half starts with a runner on second, the man who batted before its
+   leadoff hitter (the postseason passes ghost: false). The pitch clock is not
+   modelled: it sets the pace, and nothing in the model depends on the time
+   between pitches. 'NL' rules (the pitcher bats, the manager pinch-hits for
+   him) remain for a caller who asks for them.
 
    THE MANAGER is two traits. `hook` is the fatigue at which he pulls a
    starter (0.3 quick, 0.85 patient; 0.5 is about 95 pitches); `warmAt` is
@@ -23,9 +26,10 @@
    inning at a time: one who has thrown a dozen pitches is replaced between
    innings while fresh arms remain. Warming up COSTS the reliever pitches (Joe):
    every half-inning in the pen adds load, and if he never gets in he
-   carries it anyway. A reliever is chosen for the hitters due up (a
-   left-hander for left-handed bats) among the freshest arms; the closer is
-   held for a save. In the NL a pitcher due up from the sixth inning on is
+   carries it anyway. A reliever must face three, so he is chosen for the
+   three hitters due up: among the freshest arms (within ten pitches of load
+   of the freshest), the one with the most of them on his own side; the
+   closer is held for a save. In the NL a pitcher due up from the sixth inning on is
    pinch-hit for when his manager is about to pull him anyway or the team
    is behind.
 
@@ -51,6 +55,9 @@
    at DH, the rest on the bench, the next man in the five-man rotation.
 
    CHANGED
+     v1.6  the current rules (Joe, 2026-10-06): the three-batter minimum, two throws over a plate appearance, the
+           18-in bases in the steal race, the extra-innings runner on second (o.ghost); the reliever is picked for
+           the three hitters due up (described since v0.4, but the hitters due up were never looked at)
      v1.5  the infield is placed for the bases, the outs, the inning and the score at each plate appearance and again
            as the ball is hit, with one draw a plate appearance for the manager's call to bring it in (bb_field v1.8)
      v1.4  a game given no rules plays a designated hitter for both sides (it had drawn AL or NL rules at
@@ -60,8 +67,6 @@
      v1.2  the pinch-hitter's spot goes back to the pitcher when the next pitcher comes in (the bug audit): the
            pinch-hitter had kept the spot for the rest of the game, so an NL side batted nine hitters and no pitcher
            after its first pinch-hit, in 9% of its plate appearances; the play records the batting order
-     v1.1  a steal's wild throw moves every runner up a base (the stealer from first had
-           landed on a man already on third, who vanished: 16 times in 2,000 games)
 ============================================================================ */
 
 var BBGame = (function () {
@@ -80,7 +85,7 @@ var BBGame = (function () {
   // plus his primary lead at diving speed. PK_T and PK_RATE are sized so pickoffs
   // and throws per game come out near the league's (2019/2022: 0.05 pickoffs per
   // team-game; throws over are not counted publicly - about one a game is assumed).
-  var PK_T = 0.915, PK_LEAD = 3.5, V_BACK = 6.0, PK_RATE = 0.042, PK_ERR = 0.012;
+  var PK_T = 0.915, PK_LEAD = 3.5, V_BACK = 6.0, PK_RATE = 0.042, PK_ERR = 0.012, PK_MAX = 2;   // PK_MAX: throws over a plate appearance (the 2023 rule)
 
   function named(rng, o, taken) {      // no two men on a roster share a surname
     var p;
@@ -167,9 +172,9 @@ var BBGame = (function () {
   function simGame(A, H, o) {
     o = o || {};
     var rng = o.rng || BB.makeRng(o.seed || 1);
-    var rules = o.rules || 'AL';
+    var rules = o.rules || 'AL', ghost = o.ghost !== false;   // ghost: the extra-innings runner on second (regular season)
     var env = o.env || BB.mlbEnv(rng), ump = o.ump || named(rng, BB.makeUmp(rng));
-    var G = { rules: rules, env: env, ump: ump, teams: [A, H], score: [0, 0], innings: [], plays: [], pitches: 0, over: false,
+    var G = { rules: rules, ghost: ghost, env: env, ump: ump, teams: [A, H], score: [0, 0], innings: [], plays: [], pitches: 0, over: false,
               hits: [0, 0], errors: [0, 0], lob: [0, 0], stats: [newStats(), newStats()], changes: [0, 0] };
     var side = [teamState(A, rules), teamState(H, rules)];
     var inning = 1, half = 0;   // half 0 = top (A bats), 1 = bottom (H bats)
@@ -178,7 +183,13 @@ var BBGame = (function () {
       var bat = side[half], def = side[1 - half], defTeam = G.teams[1 - half];
       var inn = { n: inning, half: half, runs: 0, plays: [] };
       var outs = 0, bases = [null, null, null, null], runsBefore = G.score[half];
+      def.opp = bat;   // the hitters due up, for the choice of a reliever
       startHalf(def, defTeam, inning, G.score[1 - half] - G.score[half], rng);
+      if (ghost && inning >= 10) {   // the extra-innings runner: the man who batted before this half's leadoff hitter
+        var gr = null;
+        for (var gk = 1; gk <= 9 && !gr; gk++) gr = bat.order[((bat.idx - gk) % 9 + 9) % 9];
+        bases[2] = gr; inn.ghost = { id: gr.id, name: gr.name };
+      }
       while (outs < 3) {
         // the pitcher
         managePitching(def, defTeam, inning, outs, bases, G.score[1 - half] - G.score[half], bat, G, half, rng);
@@ -200,7 +211,7 @@ var BBGame = (function () {
         // catcher a step. A pitch the catcher cannot hold - in the dirt, wide, over
         // his head, judged against his blocking - sends every runner up a base.
         // A third out on the bases mid-count ends the PA without charging one.
-        var going = null, paRuns = 0, C = def.catcher, basesAtPitch = null, BASE = 90 * BB.units.FT, pickN = 0, pickLog = [];
+        var going = null, paRuns = 0, C = def.catcher, basesAtPitch = null, BASE = 90 * BB.units.FT, BASE_CUT = 0.375 * BB.units.FT, pickN = 0, pickLog = [];
         // THE PICKOFF. With a man on first and second open the pitcher throws over now
         // and then: more often the more the runner threatens to steal (his own odds of
         // making it, as he weighs them below), less after each throw. The runner is off
@@ -209,8 +220,8 @@ var BBGame = (function () {
         // and throw (PK_T + pickMove), with scatter on both. A wild throw over gives him
         // second, now and then third.
         function pickoffs() {
-          while (bases[1] && !bases[2]) {
-            var pl = bases[1], tRun = pl.jump + BBField.stealTime(pl, BASE - BBField.LEAD_STEAL), tBall = P.holdTime + C.popTime;
+          while (bases[1] && !bases[2] && pickN < PK_MAX) {
+            var pl = bases[1], tRun = pl.jump + BBField.stealTime(pl, BASE - BASE_CUT - BBField.LEAD_STEAL), tBall = P.holdTime + C.popTime;
             var threat = Phi((tBall + 0.15 - tRun) / 0.2), pThrow = PK_RATE * (0.3 + threat) * Math.pow(0.55, pickN);
             if (rng.u() >= pThrow) return null;
             pickN++;
@@ -232,7 +243,7 @@ var BBGame = (function () {
           var from = bases[1] && !bases[2] ? 1 : bases[2] && !bases[3] && outs < 2 ? 2 : 0;
           if (!from) return null;
           var pl = bases[from], to = from + 1;
-          var tRun = pl.jump + BBField.stealTime(pl, BASE - BBField.LEAD_STEAL);
+          var tRun = pl.jump + BBField.stealTime(pl, BASE - BASE_CUT - BBField.LEAD_STEAL);
           var tBall = P.holdTime + C.popTime - (to === 3 ? 0.2 : 0);
           var p = Phi((tBall + 0.15 - tRun) / 0.2);
           if (p < 0.72 + pl.runAggr + (to === 3 ? 0.12 : 0) || rng.u() > 0.22) return null;   // he picks his pitch
@@ -249,7 +260,7 @@ var BBGame = (function () {
             var g = going, pl = bases[g.from], dirt = pk.z < 0.12 || Math.abs(pk.x) > 0.75;
             // the stopwatch: his jump varies, the pitcher's delivery varies (a slide step
             // or not), the throw is not always on the bag
-            var tRun = pl.jump + rng.n(0, 0.08) + BBField.stealTime(pl, BASE - BBField.LEAD_STEAL);
+            var tRun = pl.jump + rng.n(0, 0.08) + BBField.stealTime(pl, BASE - BASE_CUT - BBField.LEAD_STEAL);
             var tBall = P.holdTime + C.popTime - (g.to === 3 ? 0.2 : 0) + rng.n(0, 0.22) + (dirt ? 0.3 : 0);
             var wildThrow = rng.u() < 0.03, safe = wildThrow || tRun < tBall + 0.15;
             rec.steal = { id: g.id, from: g.from, to: g.to, safe: safe, tRun: tRun, tBall: tBall, wild: wildThrow };
@@ -306,7 +317,7 @@ var BBGame = (function () {
                      pinchPending: !!bat.pinchHitFor, defOrder: def.order.map(function (b) { return b ? b.id : null; }) };   // pinchPending: a pinch-hitter has the pitcher's spot until the next half
         def.justChanged = null; bat.justPinch = null; def.justSubs = null;
         var r = pa.result, runs = paRuns;
-        if (r !== 'END') S.pa++;
+        if (r !== 'END') { S.pa++; def.minLeft--; }   // the three-batter minimum counts down
         if (r === 'END') { play.desc = pa.pickoffsEnd ? 'picked off, inning over' : 'caught stealing, inning over'; bat.idx--; }   // no plate appearance: he leads off next inning
         else if (r === 'IBB') { S.bb++; S.ibb++; play.desc = 'intentional walk'; runs += advanceForced(bases, B); }
         else if (r === 'K') { outs++; S.ab++; S.k++; play.desc = 'strikeout' + (pa.pitches[n - 1].result === 'called_strike' ? ' looking' : ' swinging') + (pa.pitches[n - 1].steal && !pa.pitches[n - 1].steal.safe ? ', runner thrown out' : ''); }
@@ -362,7 +373,7 @@ var BBGame = (function () {
   function teamState(T, rules) {
     var fielders = T.lineup.filter(function (b) { return b.pos !== 'DH'; });
     var st = { team: T, rules: rules, order: T.lineup.slice(), idx: 0, pitcher: T.starter, used: [T.starter],
-               seen: {}, seenTeam: {}, bench: T.bench.slice(), warming: null, warmHalves: 0, catcher: T.lineup.filter(function (b) { return b.pos === 'C'; })[0] };
+               seen: {}, seenTeam: {}, bench: T.bench.slice(), warming: null, warmHalves: 0, minLeft: 3, catcher: T.lineup.filter(function (b) { return b.pos === 'C'; })[0] };
     if (rules === 'NL') st.order = st.order.map(function (b) { return b.pos === 'DH' ? null : b; });   // the pitcher bats in the DH's slot
     st.defense = BBField.makeDefense(fielders.concat([T.starter]));
     T.starter.used = true;
@@ -370,7 +381,7 @@ var BBGame = (function () {
   }
   function setPitcher(st, P) {
     st.justChanged = { out: st.pitcher, in: P };
-    st.pitcher = P; P.used = true; st.used.push(P);
+    st.pitcher = P; P.used = true; st.used.push(P); st.minLeft = 3;   // he faces three, or finishes the half
     st.defense = st.defense.map(function (F) { return F.pos === 'P' ? { pos: 'P', pl: P, at: F.at, std: F.std } : F; });
   }
   function nextBatter(st, inning, diff, rng) {
@@ -472,6 +483,7 @@ var BBGame = (function () {
   }
   function endHalf(def, bat) {
     def.pitcher.load = Math.max(0, def.pitcher.load - 0.75);         // a rest between innings recovers a little
+    def.minLeft = 0;                                                 // he finished the half: the three-batter rule is met
   }
   function managePitching(def, T, inning, outs, bases, lead, bat, G, half, rng) {
     var P = def.pitcher, f = BB.fatigueOf(P), M = T.manager, pull = false;
@@ -482,16 +494,21 @@ var BBGame = (function () {
     // a save situation in the ninth: the closer, if he is fresh
     var closer = T.closer;
     if (!pull && inning >= 9 && lead > 0 && lead <= 3 && P !== closer && !closer.used && outs === 0 && !(bases[1] || bases[2] || bases[3])) { pull = true; def.warming = closer; }
-    if (pull && T.bullpen.some(function (p) { return !p.used; })) { bringIn(def, T, inning, lead, rng); G.changes[1 - half]++; }
+    if (pull && def.minLeft <= 0 && T.bullpen.some(function (p) { return !p.used; })) { bringIn(def, T, inning, lead, rng); G.changes[1 - half]++; }   // not before he has faced three, or finished a half
   }
   function pickReliever(def, T, inning, lead) {
     var fresh = T.bullpen.filter(function (p) { return !p.used && p !== T.closer; });
     if (!fresh.length) fresh = T.bullpen.filter(function (p) { return !p.used; });
     if (!fresh.length) return null;
-    // a left-hander for a left-handed group due up
-    var due = [0, 1, 2].map(function (k) { return def.oppOrder ? def.oppOrder[k] : null; });
+    // he must face three: among the freshest arms (within ten pitches of load of the freshest), the one with the
+    // most of the three hitters due up on his own side (until v1.6 the hitters due up were never looked at)
     fresh.sort(function (a, b) { return a.load - b.load; });
-    return fresh[0];
+    var opp = def.opp, due = [];
+    if (opp) for (var k = 0; due.length < 3 && k < 9; k++) { var b = opp.order[(opp.idx + k) % 9]; if (b) due.push(b); }
+    function same(R) { return due.filter(function (h) { return BB.batterSide(h, R) === R.armSide; }).length; }
+    var near = fresh.filter(function (p) { return p.load <= fresh[0].load + 10; });
+    near.sort(function (a, b) { return same(b) - same(a) || a.load - b.load; });
+    return near[0];
   }
   function bringIn(def, T, inning, lead, rng) {
     var R = def.warming || pickReliever(def, T, inning, lead);
