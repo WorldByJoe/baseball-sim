@@ -1,5 +1,5 @@
 /* ============================================================================
-   fit_population.js · v0.6 · 2026-10-04
+   fit_population.js · v1.0 · 2026-10-06
 
    Fits the hitters' POPULATION in bb_engine.js's TRAITS so that the ones the
    farm picks (makeBatter: the best of FARM_N candidates by the scouts'
@@ -43,17 +43,17 @@
    to the picks'.
 
    CHANGED
+     v1.0  the raw barrel scatter's target x0.9 for engine v3.7 (VD)
+     v0.9  raw barrel scatter, aim-under, pull-bias and attack targets for engine v3.6 (the fold returns on BC)
+     v0.8  the picked fielders' route 0.921, Statcast's jump window (34.0 ft toward the ball of 36.9 covered; bb_field v1.12)
+     v0.7  the picked fielders' first step 0.20 s (bb_engine v3.2: both windows of Statcast's jump; was 0.45)
      v0.6  timing and aim-under targets for engine v2.9 (timing scatter by flight time, VERT_MISS)
-     v0.5  athleticism's loadings (engine v2.6)
-     v0.4  pullBias's target 1 deg (engine v2.3: the bat's path square to centre, the face pulls)
-     v0.3  skill targets for engine v2.2 (the swing's reach and read)
-     v0.2  picks across positions; the fielding traits (bb_engine v2.1)
 ============================================================================ */
 (function (A) {
   var ROUNDS = +A[0] || 8, NPICK = +A[1] || 6000, SEED = +A[2] || 5, T = BB.TRAITS;
   var POS9 = ['C', '1B', '2B', 'SS', '3B', 'LF', 'CF', 'RF', 'DH'];
   // the fielding traits' calibrated means (net of position) and the league's sprint speed among hitters (2025)
-  var FSK = { react: 0.45, route: 0.90, glove: 0.982, armMph: 85, armAcc: 0.6, transfer: 0.68 }, SPEED = [27.34, 1.35];
+  var FSK = { react: 0.20, route: 0.921, glove: 0.982, armMph: 85, armAcc: 0.6, transfer: 0.68 }, SPEED = [27.34, 1.35];   // react 0.20 since bb_engine v3.2 (both windows of the jump; was 0.45); route 0.921 since bb_field v1.12 (the jump window's share toward the ball; was 0.90)
   function net(b, t) { return b[t] - ((BB.FIELD_MEANS[b.pos] || {})[t] || 0); }
   var TG = { h: [72.0, 2.35], w: [206.3, 19.9], L: [7.32, 0.39], v: [71.2, 2.70] };
   // athleticism: the league's correlations (2025 qualified hitters) and the loadings one shared trait implies from them
@@ -91,7 +91,9 @@
   // (fixed here: TRAITS now holds the population, so reading the targets from it would shift them again on every refit)
   // (v0.3: motorIn x1.4, longSD x0.88, coverage x2.1, spotIn x1.09 and the fastball lean's excess x2.9, the engine v2.2 refit to the miss table)
   // (v0.6: timingSD x0.72 and undercut -0.15 in, engine v2.9's joint fit with the timing scatter following flight time and VERT_MISS)
-  var SK0 = { motorIn: 0.87, timingSD: 9.72, longSD: 3.35, faceSD: 8, undercut: 0.40, attack: 9, pullBias: 1, coverage: 6.3, spotIn: 4.9,
+  // (v0.9: motorIn x1.96, undercut 1.0 in, pullBias -1.5 deg and attack 7.8 deg, engine v3.6: the fold returns on BC - the last look corrects a miss, 0.5 in of error)
+  // (v1.0: motorIn x0.9, engine v3.7: VD's topped misses, the fastball whiffs back to the league's)
+  var SK0 = { motorIn: 1.53, timingSD: 9.72, longSD: 3.35, faceSD: 8, undercut: 1.0, attack: 7.8, pullBias: -1.5, coverage: 6.3, spotIn: 4.9,
               eyeSD: 5.0, aggr: 0, commit: 0.55, fbLean: 1.87, learn: 0.35, swingTilt: 32.3 };
   print('fit_population v0.6 · ' + ROUNDS + ' rounds x ' + NPICK + ' picks (best of ' + BB.FARM_N + ')');
   for (var k = 0; k < ROUNDS; k++) {

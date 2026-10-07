@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_schedule.js · v0.7 · 2026-10-04
+   bb_schedule.js · v0.8 · 2026-10-06
 
    The game and its schedule, shared by the screen (baseball.html) and the
    headless tools, so the broadcast script can be written and checked
@@ -39,6 +39,7 @@
    teams are drawn fresh as before.
 
    CHANGED
+     v0.8  the majors play the current rules: a designated hitter in every park (Joe, 2026-10-06)
      v0.7  holds: a segment waits for the lines the broadcast must say in it (the talk sets the pace)
      v0.6  more air for the omniscient broadcast: setup 4 s, a take 3.4, a foul 3.0, the batter's
            introduction 5.5, the end of a half 9 (13 in the middle of an inning), and 6 s after each
@@ -84,7 +85,7 @@ var BBSchedule = (function () {
       var n = ST.orgs.length, ia = Math.floor(rng.u() * n), ih; do { ih = Math.floor(rng.u() * n); } while (ih === ia);
       away = BBGame.teamFromRoster(ST.orgs[ia].clubs[level - 1], Math.floor(rng.u() * 5));
       home = BBGame.teamFromRoster(ST.orgs[ih].clubs[level - 1], Math.floor(rng.u() * 5));
-      rules = level === 1 ? ST.orgs[ih].league : 'AL';
+      rules = 'AL';   // the designated hitter in every park, majors and minors (the current rules)
     } else {
       var teams = BBNames.teams(rng);
       away = BBGame.makeTeam(rng, teams[0]); home = BBGame.makeTeam(rng, teams[1]);
