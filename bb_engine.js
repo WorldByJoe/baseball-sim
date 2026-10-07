@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v3.7 · 2026-10-06
+   bb_engine.js · v3.8 · 2026-10-06
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -66,6 +66,9 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v3.8  THE COMMIT POINT'S PICTURE (DF): every swing decision is made on where the ball is and how it moves at the
+           commit point, continued as the pitch he expected (DEC_LAMBDA 1.5 of the break still to come, measured from
+           the league's decisions); a pitch picked up was judged nearly exactly, one not yet picked up on four times this
      v3.7  HE WATCHES THE BALL, NOT HIS BARREL (VD): met out front or deep, he steers to most of where the ball is and
            keeps DESCENT_KEPT 0.3 of its descent, while his barrel's rise along its path is committed; launch minus
            attack now falls with depth for every pitch kind as the league's; the raw barrel scatter x0.9 so the
@@ -82,8 +85,6 @@
      v3.4  the route trait is the straight-line share of the ground a fielder covers while he reads the ball (bb_field v1.12);
            react's draw restored: the integration had brought back the old clip (0.25-0.7), which pinned every position
            player at 0.25 s once the pool refit moved the mean to 0.035; now 0.05-0.8, mean 0.234 as fitted in v3.3
-     v3.3  the batted ball carries its spin to the ground (landW, for bb_field's bounce); a fielder's first step fitted to both
-           windows of Statcast's outfield jump (react 0.20 s for position players, was 0.47; the catcher's and pitcher's kept)
 ============================================================================ */
 
 var BB = (function () {
@@ -1358,10 +1359,21 @@ var BB = (function () {
   // the joint fit) with the swing policy to the league's swings by count x pitch kind, breaking-ball whiffs and
   // strikeouts: 0.5. (Doubling every batter's spotIn instead, fastballs included, gave too many walks and too
   // many whiffs on changeups.)
-  // DECIDING ON A PITCH HE HAS NOT PICKED UP (v3.1): his decision uses where the ball is at the commit point and
-  // the curve of the pitch he expected (DIR_READ_DEC = 0 of its direction read), while the swing he has launched
-  // still steers on what shows itself by the last look (DIR_READ). With half the direction read in the decision too,
-  // a fooled batter judged a diving breaking ball most of the way to where it went, and seldom chased it.
+  // THE COMMIT POINT'S PICTURE (v3.8, DF). He decides at the commit point on where the ball is and how it is moving
+  // there, continued as the pitch he expected: the break still to come is not in it, whether or not he has picked the
+  // pitch up (recognition steers the swing he launches, not the decision). In the ghost's terms the break still to come
+  // after the commit point is (1 - tc)^2 of the gap to the pitch he expected, and his picture keeps DEC_LAMBDA of it.
+  // MEASURED from the league (42 days of 2025, every swing and take; tools/diag/df_league.py): with each pitch's
+  // constant-acceleration flight and the pitcher's own fastball's acceleration, the swing decision fitted best on a
+  // picture that kept 1.25 (breaking balls) and 1.5 (off-speed) of the break after the commit point, and 1.0 across
+  // (better than a picture of its place alone, with the fastball's whole path); breaking balls ending 9-12 in below the
+  // zone were swung at .25 when they had little break left at the commit point and .33-.35 when they had 3+ in.
+  // DEC_LAMBDA 1.5 gives the model's own decisions the league's 1.0-1.25 on breaking balls by the same fit. Until v3.7 a
+  // pitch picked up was judged to within its misread (no break kept; the fit gave 0.5) and one not yet picked up on the
+  // whole curve he expected without its motion ((1 - tc^2) of the gap, about four times this). From #31's v3.3
+  // (DEC_UNSEEN, recorded in fouls-chases-costs): half of the (1 - tc^2) for every picked-up pitch got the league's far
+  // chases but took breaking balls in the zone, pictured 6-7 in high.
+  var DEC_LAMBDA = 1.5;
   // THE EARLIER HE PICKS IT UP, THE MORE OF ITS TIMING HE CHANGES (v3.5, BC). A recognised pitch's timing error has
   // two parts. How far this one strays from its kind's usual speed (ref.t, at this pitcher's usual speed for it) he
   // misjudges by the prior's pull, as before (PRIOR_T, which the league's within-pitcher slope confirms: a pitch 1
@@ -1384,7 +1396,7 @@ var BB = (function () {
   // the league did by speed gap: -4.2, +0.8, +3.9, +5.9, +7.5, +9.0 in at 0, -4, -8, -10, -14, -16.5 mph (league -4.3,
   // +0.8, +4.1, +5.1, +7.1, +8.6), where before it ran on at 1 in per mph to +9.2 at -14.
   var TIMING = { prior: 5.0, retime: 0.11 };   // PRIOR_T (in: the pull's scale against his eye; unchanged) and RETIME_S (s)
-  var COMMIT_S = 0.175, STEER_S = 0.15, STEER_IN = 3, PRIOR_S = 2.5, RESID_S = 0.035, DIR_READ = 0.5, TUNNEL_SEP = 0.5, DIR_READ_DEC = 0;
+  var COMMIT_S = 0.175, STEER_S = 0.15, STEER_IN = 3, PRIOR_S = 2.5, RESID_S = 0.035, DIR_READ = 0.5, TUNNEL_SEP = 0.5;
   // THE RELEASE BEHIND HIS SHOULDER (v3.2, statcast/platoon.py). A same-side pitcher lets the ball go from the batter's
   // own side of his line of sight; an opposite-side pitcher from well in front of it. In the league (42 days of 2025,
   // batter and pitcher held fixed, pitch type held fixed) the batter's read worsens steadily as the release moves
@@ -1451,7 +1463,7 @@ var BB = (function () {
     function leftS(f) { return 1 - f * f - DIR_READ * 2 * f * (1 - f); }
     var g3 = [gh.x - real[0], gh.z - real[1], gh.t - real[2]], err = judged, lastPic = judged, launchedS = leftS(tc), launchedT = 1 - tc * tc;
     var base = [launchedS * g3[0], launchedS * g3[1], launchedT * g3[2]];   // the pitch he expected, corrected for what had shown itself by the commit point
-    var lsDec = 1 - tc * tc - DIR_READ_DEC * 2 * tc * (1 - tc), baseDec = [lsDec * g3[0], lsDec * g3[1], launchedT * g3[2]];   // the same, as his decision judges it
+    var lu = DEC_LAMBDA * (1 - tc) * (1 - tc), decPic = [lu * g3[0], lu * g3[1]];   // THE COMMIT POINT'S PICTURE (v3.8): where it is and how it moves there, continued as the pitch he expected
     if (!detected) {   // he launched on the pitch he expected
       // late: he steers toward his judgement; fooled: only by what has shown itself by the last look
       var lastS = leftS(ts), lastT = 1 - ts * ts;
@@ -1459,7 +1471,7 @@ var BB = (function () {
       var cx = target[0] - base[0], cz = target[1] - base[1], cm = Math.sqrt(cx * cx + cz * cz), k = cm > STEER_IN * IN ? STEER_IN * IN / cm : 1;
       err = [base[0] + k * cx, base[1] + k * cz, base[2] + k * (target[2] - base[2])];
     }
-    return { tp: tp, psi: psi, sep: sep, pFooled: pFooled, detected: detected, detectedD: detectedD, late: late, lastPic: lastPic, same: !!same, pullT: pullT, retime: retime, lead: lead, leftT: leftT, pullS: pullS, err: err, base: base, baseDec: baseDec };
+    return { tp: tp, psi: psi, sep: sep, pFooled: pFooled, detected: detected, detectedD: detectedD, late: late, lastPic: lastPic, same: !!same, pullT: pullT, retime: retime, lead: lead, leftT: leftT, pullS: pullS, err: err, base: base, decPic: decPic };
   }
   function misreadOf(rf) { return rf.err; }   // [x m, z m, t s]: how far off his judgement is, judged minus real
   // A pitch of one kind as he pictures it: from this release, along this
@@ -1493,9 +1505,8 @@ var BB = (function () {
 
   // -------------------------------------------------------------- DECIDE
   // THE SWING POLICY. He decides at the commit point, on what he could see by
-  // then: a pitch already picked up, as he judges it (THE PRIOR'S PULL); one
-  // not yet picked up, where the ball has got to on the curve of the pitch he
-  // expected (rf.baseDec, v3.1: no read of its direction yet); then his eye's scatter
+  // then: where the ball is and how it moves there, continued as the pitch he
+  // expected (THE COMMIT POINT'S PICTURE, v3.8); then his eye's scatter
   // (eyeSD, larger under time pressure). From that he judges his chance it is
   // a strike (pin) and swings when it passes his threshold for the count,
   // less his aggression. The threshold also depends on his read: 'on' when it
@@ -1513,7 +1524,7 @@ var BB = (function () {
     '2-0': [0.53, 0.63], '2-1': [0.28, 0.28], '2-2': [0.16, 0.16], '3-0': [0.91, 1.07], '3-1': [0.33, 0.40], '3-2': [0.15, 0.15]
   };
   function decide(B, pitch, gh, rf, st, rng) {
-    var m = rf.detected ? rf.err : rf.baseDec, mx = m[0], mz = m[1];   // a pitch not yet picked up: where it is, on the curve he expected (v3.1)
+    var m = rf.decPic, mx = m[0], mz = m[1];   // every pitch: the commit point's picture (v3.8)
     var eye = B.eyeSD * IN * rf.tp;
     var xp = pitch.plate.x + mx + rng.n(0, eye), zp = pitch.plate.z + mz + rng.n(0, eye);
     var pin = Phi((ZONE_HALF - Math.abs(xp)) / eye) * Phi((zp - (B.zone.bot - BALL_R)) / eye) * Phi((B.zone.top + BALL_R - zp) / eye);
@@ -1842,7 +1853,7 @@ var BB = (function () {
   }
 
   return {
-    version: '3.7',
+    version: '3.8',
     SWING: { R: SWING_R, tiltPerH: TILT_PER_H },
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
@@ -1852,7 +1863,7 @@ var BB = (function () {
     batOf: batOf, batSpeedOf: batSpeedOf, swingPowerOf: swingPowerOf,
     batMass: batMass, batRadius: batRadius, qAt: qAt, corOf: corOf, BAT_MODES: BAT_MODES, BAT_SHAPE: BAT_SHAPE, SWEET_IN: SWEET_IN, BAT_DEFAULT: BAT_DEFAULT,
     flyPitch: flyPitch, flyBatted: flyBatted, spinVector: spinVector, dirOf: dirOf, aim: aim, SWING_THR: SWING_THR, ZONE_HALF: ZONE_HALF, PLAN_LOC: PLAN_LOC,
-    fatigueOf: fatigueOf, releasePoint: releasePoint, releaseAngle: releaseAngle, PL: PL, TIMING: TIMING, PLAN_H: PLAN_H, DESCENT_KEPT: DESCENT_KEPT, LOOK: { sd: LOOK_SD, gain: LOOK_GAIN }, VERT_MISS: VERT_MISS, batterSide: batterSide, inZone: inZone,
+    fatigueOf: fatigueOf, releasePoint: releasePoint, releaseAngle: releaseAngle, PL: PL, TIMING: TIMING, PLAN_H: PLAN_H, DESCENT_KEPT: DESCENT_KEPT, DEC_LAMBDA: DEC_LAMBDA, LOOK: { sd: LOOK_SD, gain: LOOK_GAIN }, VERT_MISS: VERT_MISS, batterSide: batterSide, inZone: inZone,
     planPitch: planPitch, expectPitch: expectPitch, throwPitch: throwPitch, ghostPitch: ghostPitch,
     readFactors: readFactors, decide: decide, callPitch: callPitch, swing: swing, collide: collide,
     battedBall: battedBall, simPA: simPA
