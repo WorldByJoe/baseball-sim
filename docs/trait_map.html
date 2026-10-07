@@ -1,8 +1,10 @@
-<!-- trait_map.html · v3.7 · 2026-10-06
+<!-- trait_map.html · v3.8 · 2026-10-06
      The trait path map: distal traits -> proximate abilities -> the engine's stages
      (with every constant and where its value came from) -> statistics against the league.
      Keep it in step with bb_engine.js; publish to the same artifact URL.
      CHANGED
+       v3.8  engine v3.8 (DF): the swing decision's picture, the commit point's continuation for a picked-up pitch
+             (DEC_LAMBDA, replacing DIR_READ_DEC); the swing rows re-measured
        v3.7  engine v3.7 (VD): he watches the ball, not his barrel (DESCENT_KEPT); the raw barrel scatter x0.9; launch
              minus attack by depth now the league's
        v3.6  engine v3.5-v3.6 (BC and the fold): re-timing by how early a pitch is picked up (RETIME_S), the swing's plan by
@@ -14,7 +16,6 @@
        v3.4  the bug audit (bb_field v1.2-1.6, bb_game v1.2): the runner behind a man who scores may score too, a runner tags
              up only to a base the man ahead leaves, a throw that gets away moves every runner up, the pinch-hitter's spot
              goes back to the pitcher, two scorer's rules; the result rows re-measured
-       v3.3  engine v3.1: the tunnel (TUNNEL_SEP), the fooled batter's decision (DIR_READ_DEC), the policy by count x kind
 -->
 <meta charset="utf-8">
 <title>Ballgame Trait Map</title>
@@ -98,7 +99,7 @@ td.basis { color: var(--muted); }
 
 <div class="wrap">
   <div class="text">
-    <div class="eyebrow">Ballgame · engine v3.7 · 6 October 2026</div>
+    <div class="eyebrow">Ballgame · engine v3.8 · 6 October 2026</div>
     <h1>How a player's traits become the statistics we measure</h1>
     <p>Every statistic in Ballgame emerges from traits meeting physics, perception and noise. The map runs left to right: who the players are (distal), what they can do on a pitch (proximate), the engine's stages for every pitch with the constants inside them, and the statistics measured against the 2025 league. Each parameter carries a mark for where its value came from. The distal traits are drawn from the POOL of all professional players, majors and minors: the question is that pool's frequency distribution and how it meets the physics. Each major leaguer is the best of six candidates from it, and the next-best play at the levels below, so Triple-A's measurements test the pool from outside the majors.</p>
     <p class="hint">Hover or tap any box to trace its paths; tap again to release. Tap a class below to light up every parameter of that kind. The ledger under the map lists them all.</p>
@@ -122,7 +123,7 @@ td.basis { color: var(--muted); }
   </div>
 
   <div class="table-wrap"><table id="ledger"><thead><tr><th>Parameter</th><th>Where it acts</th><th>Value</th><th>Basis</th></tr></thead><tbody></tbody></table></div>
-  <p class="hint">Sources: bb_engine.js v3.7, bb_field.js v1.15 and bb_game.js v1.6; CALIBRATION.md v3.4 (with its open mysteries and the hypotheses for them) and the breaking-ball contact and barrel-depth write-ups (docs/sections/2026-10-06_breaking-contact.md, 2026-10-06_barrel-depth.md); the contact scorecard headless/contact_score.js; Triple-A from statcast/levels.py and headless/level_check.js (engine v2.4); miss distance from statcast/misses.py; league figures from statcast/fouls.py, discipline.py, pitch_spread.py, locations.py, bip.py, bat_direction.py, baserunning.py, pitcher_chain.py, the 2025 leaderboards and team totals (MLB Stats API) and run_games over seeds 3, 11 and 29. Fielding and the game layer are shown coarsely.</p>
+  <p class="hint">Sources: bb_engine.js v3.8, bb_field.js v1.15 and bb_game.js v1.6; CALIBRATION.md v3.4 (with its open mysteries and the hypotheses for them) and the breaking-ball contact, barrel-depth and decision-picture write-ups (docs/sections/2026-10-06_*.md); the contact scorecard headless/contact_score.js; Triple-A from statcast/levels.py and headless/level_check.js (engine v2.4); miss distance from statcast/misses.py; league figures from statcast/fouls.py, discipline.py, pitch_spread.py, locations.py, bip.py, bat_direction.py, baserunning.py, pitcher_chain.py, the 2025 leaderboards and team totals (MLB Stats API) and run_games over seeds 3, 11 and 29. Fielding and the game layer are shown coarsely.</p>
 </div>
 
 <script>
@@ -195,8 +196,8 @@ td.basis { color: var(--muted); }
     ['p_hold', 1, null, 'Time to the plate', '1.35 s with a man on', 'M', 'Statcast-shaped.'],
 
     ['e_zone', 3, 'ON THE PITCH', 'Zone rate', '.501 vs .509', 'match', 'Share of pitches in the rulebook zone. Where pitches went matched the league\'s band by band, within about .02, in every group of counts and for every pitch kind; pitches in the dirt 3.2% against 3.1%.'],
-    ['e_swing', 3, null, 'Swing and chase', '.461 / .258 vs .479 / .283', 'near', 'Swings per pitch and swings at pitches outside the zone, in games. Since v2.7 a batter can check only a pitch he had not picked up (the check had judged every swing again without his eye\'s error, undoing the swings far off the plate his eye misjudged): chase came to the league\'s; far off the plate he still swings less than the league\'s.'],
-    ['e_swingk', 3, null, 'Swings by pitch kind', 'rms .058 against the league', 'near', 'Since engine v3.1 (the tunnel, the fooled batter\'s decision, the policy fitted by count and kind) breaking balls are swung at as the league\'s in and near the zone; far outside they are still chased about half as often (6-9 in .15 against .28).'],
+    ['e_swing', 3, null, 'Swing and chase', '.464 / .257 vs .479 / .283', 'near', 'Swings per pitch and swings at pitches outside the zone (v3.8). Breaking balls chased below the zone .57 / .42 / .25 / .14 / .06 from 0-3 to 12+ in against .56 / .49 / .36 / .28 / .11: the rise with the break still to come is the league\'s, the far tail with little break left is short (.10 against .25 at 9-12 in).'],
+    ['e_swingk', 3, null, 'Swings by pitch kind', 'rms .041 against the league', 'near', 'The swing policy\'s fit to the league\'s swings by distance from the zone, by count (.040) and by pitch kind (.041), after the commit point\'s picture (v3.8; .046 and .055 before). Two strikes, breaking balls in the zone .89 / .87 / .85 against .96 / .92 / .88.'],
     ['e_whiff', 3, null, 'Whiffs per swing', '.25 in games vs .234', 'near', 'Per swing, 300-400 games. In-zone contact .80 against .85: breaking balls in the zone are missed too often and those diving out of it too rarely.'],
     ['e_whiffk', 3, null, 'Whiffs by pitch kind', '.17 / .28 / .32 vs .17 / .31 / .30', 'near', 'Fastball, breaking ball, off-speed (game familiarity). In the league\'s order since v2.2; before, fastballs were whiffed as often as breaking balls and more than off-speed.'],
     ['e_miss', 3, null, 'How far whiffs miss', 'fastballs past 3 in .04 vs .014', 'near', 'Statcast\'s miss distance (ball to the barrel half of the bat), share of swings. v2.1 .07; most of what is left is off the plate. Breaking balls .10 against .155: fooled swings do not yet gather on the pitches that dive out of the zone.'],
@@ -280,7 +281,7 @@ td.basis { color: var(--muted); }
       ['RETIME_S 0.11 s', 're-timing', 'O', 'The gap from the pitch he expected to the kind he picks up is the swing he committed (v3.5): picked up at the commit point he keeps the share not yet shown (1 - tc², as a fooled swing does), picked up earlier exp(-lead / RETIME_S) of it, re-timed by launching later at full speed. A curveball shows itself early and a changeup late. Fitted to the league\'s contact depth by pitch type (rms 1.72 -> 0.64 in); depth by speed gap then the league\'s (-4.2 to +9.0 in against -4.3 to +8.6).'],
       ['PRIOR_S 2.5', 'place pull', 'O', 'How strongly his judgement of where it ends up is pulled toward what that kind of pitch usually does. Fitted to the flat-fastball table and fastball whiffs; 1 (an ideal observer) gave whiffs of .36.'],
       ['TUNNEL_SEP 0.5', 'the tunnel', 'O', 'A breaking ball or changeup shows the eye half its separation from the fastball path at the commit point (v3.1): a position there is as easily a lower-aimed fastball. Fitted with the swing policy to the league\'s swings by count and pitch kind, breaking-ball whiffs and strikeouts.'],
-      ['DIR_READ_DEC 0', 'deciding unread', 'O', 'A batter who has not picked a pitch up decides on where the ball is, on the curve he expected, without reading its direction (v3.1); the swing still steers by the last look.'],
+      ['DEC_LAMBDA 1', 'the commit point\'s picture', 'D', 'A pitch he has picked up he decides on from where the ball is and how it moves at the commit point, continued as the pitch he expected: none of the break still to come (v3.8; the plain continuation, nothing fitted). One he has not picked up he decides on the curve he expected from where it is, the curve his swing follows. The league\'s decisions fitted a picture keeping 1.25 (breaking) and 1.5 (off-speed) of the break after the commit point; the model\'s now fit 1.0-1.25 and 1.5 (v3.7: 0.5 and 1.0).'],
       ['RESID_S 0.035', 'guess kept', 'O', 'Share of the gap to the guessed pitch that stays in his picture. Halved in v2.9 when VERT_MISS took over the topping that comes with any low pitch: within each band of height the league\'s breaking balls are met 7-9 deg lower than its fastballs.'],
       ['DIR_READ 0.5', 'half the motion', 'F', 'A batter fooled at the commit point sees where the ball is but reads only half of which way it is moving across and up and down, so more of the curve still fools him. Fitted to the league\'s misses by pitch kind and reach, whiffs by kind and strikeouts in games (v2.2; it read all of it, and fooled breaking balls were missed by a couple of inches where the league\'s are missed by a foot).'],
       ['Reads the slot', 'league shape at his slot', 'D', 'He pictures a pitch from the league\'s shape for that kind FROM THIS ARM SLOT (its tilt and spin efficiency turned by the slot as the league\'s are), since he sees the arm. Before v2.8 he pictured the average shape whatever the slot, a slot\'s ordinary movement fooled him, and a farm that could see it picked extreme slots.'],
