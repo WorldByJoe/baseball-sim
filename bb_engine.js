@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v3.8 · 2026-10-06
+   bb_engine.js · v3.9 · 2026-10-06
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -66,6 +66,9 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v3.9  HE AIMS TO SUIT HIS SWING (VS): a steeper swing aims higher on the ball, AIM_ATTACK 0.13 in per deg of his attack
+           trait above the picks' mean (AIM_REF 7.8); measured as the league's: a hitter whose attack is 1 deg steeper
+           launches his balls in play 0.86 deg higher (the model had 1.79, the collision's own lift on top of the swing's)
      v3.8  THE COMMIT POINT'S PICTURE (DF): a pitch he has picked up he decides on from where the ball is and how it
            moves at the commit point, continued as the pitch he expected (it was judged nearly exactly); the swing
            decisions then fit the league's picture of the break still to come (1.25 breaking, 1.5 off-speed)
@@ -82,9 +85,6 @@
            re-timed by how early he picked it up (RETIME_S; a curveball shows itself early, a changeup late); and his
            planned depth and attack follow the pitch's height (PLAN_H: a low pitch met further out front, measured);
            the arc's radius 0.81 m (was 0.87), re-measured with the pitch's height held
-     v3.4  the route trait is the straight-line share of the ground a fielder covers while he reads the ball (bb_field v1.12);
-           react's draw restored: the integration had brought back the old clip (0.25-0.7), which pinned every position
-           player at 0.25 s once the pool refit moved the mean to 0.035; now 0.05-0.8, mean 0.234 as fitted in v3.3
 ============================================================================ */
 
 var BB = (function () {
@@ -278,6 +278,15 @@ var BB = (function () {
   // sit where the league's barrel does, and the pull was refitted to the league's launch minus attack by height
   // (-14.8 -3.5 7.0 18.4 25.9 30.4 from below the zone to above it; #31)
   var VERT_MISS = 0.09;
+  // HE AIMS TO SUIT HIS SWING (v3.9, VS). A hitter learns where on the ball to aim for the swing he has: a steeper
+  // swing aims higher on the ball, AIM_ATTACK in per deg of his attack trait above AIM_REF (the picks' mean attack,
+  // so the league's aim under the ball stays the undercut trait's). In the league (42 days of 2025, hitters with 40+
+  // tracked balls in play, 293) a hitter whose mean attack was 1 deg steeper launched his balls in play 0.86 deg
+  // higher, launch minus attack -0.14 per deg (the noise in one swing's measured attack averages away over his 90
+  // balls); in the model, whose aim did not depend on the swing, 1.79 and +0.79: the collision's own lift (a square
+  // hit leaves at about twice the attack less the pitch's descent) on top of the swing's. MEASURED to that slope
+  // (the model twin diag_out/vs/byb_model.js, two seeds: 0.12 gave -0.08 and -0.01, 0.15 -0.42 and -0.39).
+  var AIM_ATTACK = 0.13, AIM_REF = 7.8;
   // TIMING SCATTER FOLLOWS THE TIME BEING JUDGED (v2.9). Judging when a ball arrives is timing an interval, and the
   // error of timing an interval grows with its length (a Weber fraction): a slower pitch, a longer flight, a larger
   // error. Until v2.9 the scatter grew with time pressure instead (faster = worse), and the model met fastballs over
@@ -653,7 +662,7 @@ var BB = (function () {
     athletic:  [0, 1, -4, 4],                // standard normal: the deep trait beneath swing power, arm strength and sprint speed (ATHLETIC, v2.6)
     swingTilt: [31.558, 3.812, 22, 44],     // deg: the tilt of his swing plane for a mid-zone pitch (2025 leaderboard swing_path_tilt: 32.3 +- 3.8)
     faceSD:    [8.387, 4, 4, 20],           // deg: swing-to-swing scatter of the bat face's horizontal angle about its path at contact; fitted to fair-ball spray by contact depth (pitch-level 2025)
-    undercut:  [1.014, 0.25, 0.25, 1.75],    // in: how far below the ball's centre he aims the barrel; REFITTED v3.2 (0.40 -> 1.0) to the league's barrel offset on fastball contact (0.85 in, read through the engine's own collision from launch minus attack: fastballs are met 25+ deg under the ball's middle .46 of the time, pitch-level 2025, 42 days), which the last look's correction allows without more whiffs; 1.4 tried with VD (v3.7): fastball launch minus attack the league's, but the batted-ball mix 38/17/28/16 and K% 25-26
+    undercut:  [1.014, 0.25, 0.25, 1.75],    // in: how far below the ball's centre he aims the barrel; REFITTED v3.2 (0.40 -> 1.0) to the league's barrel offset on fastball contact (0.85 in, read through the engine's own collision from launch minus attack: fastballs are met 25+ deg under the ball's middle .46 of the time, pitch-level 2025, 42 days), which the last look's correction allows without more whiffs; 1.4 tried with VD (v3.7): fastball launch minus attack the league's, but the batted-ball mix 38/17/28/16 and K% 25-26; v3.9: his aim for a swing of the picks' mean attack (AIM_REF), a steeper swing aiming higher (AIM_ATTACK)
     timingSD:  [9.925, 1.66, 6.26, 15.26],  // ms at a 94-mph fastball's flight, growing with flight time (v2.9); x0.72 in v2.9 so contact depth about each batter's mean has the league's sd by kind: 7.4 in fastballs, 8.3 breaking, 8.2 off-speed (pitch-level 2025)
     longSD:    [3.427, 0.51, 1.9, 5.1],   // in: along-the-barrel scatter; fitted so contact struck square vertically is squared up .695 of the time (pitch-level 2025), then x0.88 with the aim toward the hands (v2.2: the miss table's tail past the end)
     spotIn:    [5.038, 0.87, 2.7, 8.1],     // in: how far a pitch must have left his expected path by the commit point for him to pick it up; x1.09 in v2.2 (the miss table)
@@ -1645,7 +1654,7 @@ var BB = (function () {
     // commit point (v3.5: the gap not in rf.leftT) he closed by launching later, also at full speed.
     var adjMs = Math.max(0, Math.abs(rf.leftT === undefined ? gh.t - pitch.plate.t : rf.leftT) - Math.abs(m[2])) * 1000;
     var e = -m[2] + rng.n(0, B.timingSD / 1000 * prot * pitch.plate.t / FLIGHT_REF);    // + = bat early (he expected it sooner); scatter grows with the flight he is timing
-    var D = -m[1] + B.undercut * IN + rng.n(0, B.barrelSD * IN * prot)   // + = ball above the barrel
+    var D = -m[1] + (B.undercut - AIM_ATTACK * (B.attack - AIM_REF)) * IN + rng.n(0, B.barrelSD * IN * prot)   // + = ball above the barrel; his aim suits his swing (AIM_ATTACK)
           + VERT_MISS * (pitch.plate.z - (B.zone.bot + B.zone.top) / 2)    // the barrel falls short of the pitch's height away from the middle of his zone
           - PL.over * IN * behind;                                          // and sits higher on a ball released behind his shoulder (the league's launch minus attack, -2.8 deg same-side)
     var xAim = pitch.plate.x + m[0];
@@ -1854,7 +1863,7 @@ var BB = (function () {
   }
 
   return {
-    version: '3.8',
+    version: '3.9',
     SWING: { R: SWING_R, tiltPerH: TILT_PER_H },
     units: { MPH: MPH, FT: FT, IN: IN, RPM: RPM, DEG: DEG },
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
@@ -1864,7 +1873,7 @@ var BB = (function () {
     batOf: batOf, batSpeedOf: batSpeedOf, swingPowerOf: swingPowerOf,
     batMass: batMass, batRadius: batRadius, qAt: qAt, corOf: corOf, BAT_MODES: BAT_MODES, BAT_SHAPE: BAT_SHAPE, SWEET_IN: SWEET_IN, BAT_DEFAULT: BAT_DEFAULT,
     flyPitch: flyPitch, flyBatted: flyBatted, spinVector: spinVector, dirOf: dirOf, aim: aim, SWING_THR: SWING_THR, ZONE_HALF: ZONE_HALF, PLAN_LOC: PLAN_LOC,
-    fatigueOf: fatigueOf, releasePoint: releasePoint, releaseAngle: releaseAngle, PL: PL, TIMING: TIMING, PLAN_H: PLAN_H, DESCENT_KEPT: DESCENT_KEPT, DEC_LAMBDA: DEC_LAMBDA, LOOK: { sd: LOOK_SD, gain: LOOK_GAIN }, VERT_MISS: VERT_MISS, batterSide: batterSide, inZone: inZone,
+    fatigueOf: fatigueOf, releasePoint: releasePoint, releaseAngle: releaseAngle, PL: PL, TIMING: TIMING, PLAN_H: PLAN_H, DESCENT_KEPT: DESCENT_KEPT, DEC_LAMBDA: DEC_LAMBDA, LOOK: { sd: LOOK_SD, gain: LOOK_GAIN }, VERT_MISS: VERT_MISS, AIM: { attack: AIM_ATTACK, ref: AIM_REF }, batterSide: batterSide, inZone: inZone,
     planPitch: planPitch, expectPitch: expectPitch, throwPitch: throwPitch, ghostPitch: ghostPitch,
     readFactors: readFactors, decide: decide, callPitch: callPitch, swing: swing, collide: collide,
     battedBall: battedBall, simPA: simPA
