@@ -1,5 +1,5 @@
 """
-bip.py · v0.1 · 2026-10-02
+bip.py · v0.2 · 2026-10-04
 
 What happens to a ball in play in the league, from pitch-level Statcast, for
 judging the fielding layer apart from the contact that feeds it: the share of
@@ -19,9 +19,16 @@ for headless/bip_check.js.
   python3 statcast/bip.py 2025-05-05:2025-09-21
 
 CHANGED
+  v0.2  home plate in the hit coordinates fitted from fly-ball distances (126.0, 205.0; was 125.42, 198.27)
   v0.1  first build (the fielding layer's targets, carry, and Statcast's expected wOBA by exit velocity and launch angle)
 """
 import json, math, os, sys, collections
+
+# Home plate in Statcast's hit coordinates (hc_x, hc_y): fitted 2026-10-04 from 2025 balls in the air,
+# their projected distance against the hit coordinates (caught flies, with and without a catch offset,
+# and home runs: x0 125.97-126.03, y0 203.1-207.3, 2.36-2.41 ft per unit). The usual (125.42, 198.27)
+# sits about 7 units too shallow and inflated the spray of short balls - ground balls most.
+HC_X0, HC_Y0 = 126.0, 205.0
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from swing_geometry import load
 
@@ -64,8 +71,8 @@ def main(spec):
         if ev is None or la is None:
             continue
         spray = None
-        if hx is not None and hy is not None and hy < 198.27:
-            spray = math.degrees(math.atan2(hx - 125.42, 198.27 - hy))     # + toward right field
+        if hx is not None and hy is not None and hy < HC_Y0:
+            spray = math.degrees(math.atan2(hx - HC_X0, HC_Y0 - hy))     # + toward right field
             if r.get('stand') == 'R':
                 spray = -spray                                             # + toward his pull side
         B.append({'ev': ev, 'la': la, 'spray': spray, 'dist': d, 'hit': HITS.get(r.get('events'), None), 'xw': fl(r.get('estimated_woba_using_speedangle'))})

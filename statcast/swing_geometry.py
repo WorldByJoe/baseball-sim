@@ -1,5 +1,5 @@
 """
-swing_geometry.py · v0.2 · 2026-10-02
+swing_geometry.py · v0.3 · 2026-10-04
 
 Measures, from pitch-level Statcast, the swing geometry and contact relations
 the engine's swing (bb_engine v0.9) is built on: how contact depth moves the
@@ -19,10 +19,17 @@ Squared up is Statcast's rule: launch_speed >= 0.8 x (1.23 x bat_speed +
 of the plate from the batter.
 
 CHANGED
+  v0.3  home plate in the hit coordinates fitted from fly-ball distances (126.0, 205.0; was 125.42, 198.27)
   v0.2  table 7: bat speed by pitch kind at a contact depth, and by count (bb_engine v1.1's adjusted swing)
   v0.1  first build (the measurements behind bb_engine v0.9)
 """
 import csv, glob, math, os, statistics as st, sys, datetime
+
+# Home plate in Statcast's hit coordinates (hc_x, hc_y): fitted 2026-10-04 from 2025 balls in the air,
+# their projected distance against the hit coordinates (caught flies, with and without a catch offset,
+# and home runs: x0 125.97-126.03, y0 203.1-207.3, 2.36-2.41 ft per unit). The usual (125.42, 198.27)
+# sits about 7 units too shallow and inflated the spray of short balls - ground balls most.
+HC_X0, HC_Y0 = 126.0, 205.0
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CONTACT = ('foul', 'hit_into_play', 'foul_tip')
@@ -80,7 +87,7 @@ def main(spec):
         R = r['stand'] == 'R'
         g['away'] = (g['plate_x'] if R else -g['plate_x']) if g['plate_x'] is not None else None
         if g['hc_x'] is not None and g['hc_y'] is not None:
-            a = math.degrees(math.atan2(g['hc_x'] - 125.42, 198.27 - g['hc_y'])); g['pull'] = -a if R else a
+            a = math.degrees(math.atan2(g['hc_x'] - HC_X0, HC_Y0 - g['hc_y'])); g['pull'] = -a if R else a
         else:
             g['pull'] = None
         if g['launch_speed'] is not None and g['bat_speed'] and g['effective_speed']:

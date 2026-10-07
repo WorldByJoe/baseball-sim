@@ -1,0 +1,268 @@
+# Credits
+
+`CREDITS.md · v0.1 · 2026-10-02`
+
+Every sound file in this folder, by licence. The details of each file (segment, processing, loudness) are in `manifest.json`; `process.sh` is the processing chain.
+All Freesound files were made from the HQ preview of the sound (the original needs a login). The changes made to each file are listed under it.
+
+## Creative Commons Attribution (CC-BY)
+
+These recordings are used under CC-BY and must be credited. The changes made are listed under each file (all: resampled to 44.1 kHz, loudness normalised by linear gain with peaks limited at -1 dBFS, encoded as Ogg Vorbis).
+
+- **"WALLA Ballpark Applause Short 05"** by AshFox — <https://freesound.org/people/AshFox/sounds/191918/> — CC-BY 3.0 (<https://creativecommons.org/licenses/by/3.0/>)
+  - `crowd/applause_polite_03.ogg`: cut from 0 s, at most 8.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -18.4 LUFS; Ogg Vorbis
+- **"WALLA Ballpark Chatter"** by AshFox — <https://freesound.org/people/AshFox/sounds/191917/> — CC-BY 3.0 (<https://creativecommons.org/licenses/by/3.0/>)
+  - `beds/bed_normal_01.ogg`: seconds 18.0–80 cut out, made into a 60 s seamless loop (2 s crossfade), stereo; loudness normalised to -23.15 LUFS; Ogg Vorbis
+- **"WALLA Ballpark Cheer Short Foul"** by AshFox — <https://freesound.org/people/AshFox/sounds/191916/> — CC-BY 3.0 (<https://creativecommons.org/licenses/by/3.0/>)
+  - `crowd/letdown_01.ogg`: cut from 3.0 s, at most 12.0 s, mono, leading silence trimmed, fades 10 ms / 1.0 s; loudness normalised to -18.1 LUFS; Ogg Vorbis
+- **"WALLA Ballpark Let's Go Rangers"** by AshFox — <https://freesound.org/people/AshFox/sounds/191926/> — CC-BY 3.0 (<https://creativecommons.org/licenses/by/3.0/>)
+  - `crowd/clap_letsgo_01.ogg`: cut from 12.0 s, at most 12.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -19.21 LUFS; Ogg Vorbis
+- **"WALLA_Ballpark Organ Cheering Charge"** by AshFox — <https://freesound.org/people/AshFox/sounds/191928/> — CC-BY 3.0 (<https://creativecommons.org/licenses/by/3.0/>)
+  - `crowd/shout_charge_01.ogg`: cut from 13.0 s, at most 7.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -18.15 LUFS; Ogg Vorbis
+  - `crowd/shout_charge_02.ogg`: cut from 37.5 s, at most 6.5 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -18.18 LUFS; Ogg Vorbis
+- **"Bat dropping on concrete.wav"** by casemundy — <https://freesound.org/people/casemundy/sounds/384834/> — CC-BY 4.0 (<https://creativecommons.org/licenses/by/4.0/>)
+  - `field/bat_drop_03.ogg`: cut from 0 s, at most 1.5 s, mono, leading silence trimmed, fades 10 ms / 0.2 s; loudness normalised to -21.94 LUFS; Ogg Vorbis
+- **"wall ball.wav"** by cemagar — <https://freesound.org/people/cemagar/sounds/120357/> — CC-BY 3.0 (<https://creativecommons.org/licenses/by/3.0/>)
+  - `field/ball_wall_02.ogg`: cut from 0.6 s, at most 1.0 s, mono, leading silence trimmed, fades 10 ms / 0.05 s; loudness normalised to -20.1 LUFS; Ogg Vorbis
+- **"SPRTField-Samsung Galaxy Smartphone, CU_Bat, Baseball, Aluminum, Drop, Clatter_Nicholas Judy_TDC"** by designerschoice — <https://freesound.org/people/designerschoice/sounds/858912/> — CC-BY 4.0 (<https://creativecommons.org/licenses/by/4.0/>)
+  - `field/bat_drop_02.ogg`: cut from 0 s, at most 1.0 s, mono, leading silence trimmed, fades 10 ms / 0.2 s; loudness normalised to -22.01 LUFS; Ogg Vorbis
+- **"crowd noise.wav"** by LS — <https://freesound.org/people/LS/sounds/22380/> — CC-BY 3.0 (<https://creativecommons.org/licenses/by/3.0/>)
+  - `beds/bed_buzz_02.ogg`: seconds 0.5–58.5 cut out, made into a 56 s seamless loop (2 s crossfade), stereo; loudness normalised to -23.16 LUFS; Ogg Vorbis
+- **"08lesson01.wav"** by Pooleside — <https://freesound.org/people/Pooleside/sounds/59765/> — CC-BY 4.0 (<https://creativecommons.org/licenses/by/4.0/>)
+  - `beds/bed_sparse_02.ogg`: seconds 1.0–59 cut out, made into a 56 s seamless loop (2 s crossfade), stereo; loudness normalised to -23.09 LUFS; Ogg Vorbis
+- **"Football Crowd - Near Miss ooh - Southampton Vs Hull at Saint Mary's Stadium.wav"** by Quistard — <https://freesound.org/people/Quistard/sounds/237683/> — CC-BY 3.0 (<https://creativecommons.org/licenses/by/3.0/>)
+  - `crowd/letdown_03.ogg`: cut from 0 s, at most 10.0 s, mono, leading silence trimmed, fades 10 ms / 1.0 s; loudness normalised to -18.25 LUFS; Ogg Vorbis
+- **"Football Crowd - Near miss ooh 2 - Southampton Vs Hull at Saint Mary's Stadium.wav"** by Quistard — <https://freesound.org/people/Quistard/sounds/237684/> — CC-BY 3.0 (<https://creativecommons.org/licenses/by/3.0/>)
+  - `crowd/swell_fly_03.ogg`: cut from 0 s, at most 6.0 s, mono, leading silence trimmed, fades 10 ms / 1.5 s; loudness normalised to -18.22 LUFS; Ogg Vorbis
+- **"Baseball Hitting Glove.wav"** by SocializedArtist45 — <https://freesound.org/people/SocializedArtist45/sounds/266594/> — CC-BY 3.0 (<https://creativecommons.org/licenses/by/3.0/>)
+  - `field/glove_catch_04.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -23.05 LUFS; Ogg Vorbis
+- **"Sliding to Base.wav"** by SocializedArtist45 — <https://freesound.org/people/SocializedArtist45/sounds/266596/> — CC-BY 3.0 (<https://creativecommons.org/licenses/by/3.0/>)
+  - `field/slide_01.ogg`: cut from 0 s, at most 1.5 s, mono, leading silence trimmed, fades 10 ms / 0.1 s; loudness normalised to -20.59 LUFS; Ogg Vorbis
+- **"awww 01.wav"** by tim.kahn — <https://freesound.org/people/tim.kahn/sounds/336998/> — CC-BY 4.0 (<https://creativecommons.org/licenses/by/4.0/>)
+  - `crowd/groan_small_02.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.2 s; loudness normalised to -18.1 LUFS; Ogg Vorbis
+- **"ding_dong_ding.wav"** by uair01 — <https://freesound.org/people/uair01/sounds/57771/> — CC-BY 3.0 (<https://creativecommons.org/licenses/by/3.0/>)
+  - `park/pa_chime_01.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.3 s; loudness normalised to -18.06 LUFS; Ogg Vorbis
+- **"Disappointed_Crowd"** by unchaz — <https://freesound.org/people/unchaz/sounds/150956/> — CC-BY 4.0 (<https://creativecommons.org/licenses/by/4.0/>)
+  - `crowd/groan_big_02.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.3 s; loudness normalised to -18.13 LUFS; Ogg Vorbis
+- **"Fenway Park Sep 19 2010.wav"** by vflefevre — <https://freesound.org/people/vflefevre/sounds/166220/> — CC-BY 4.0 (<https://creativecommons.org/licenses/by/4.0/>)
+  - `beds/bed_normal_03.ogg`: seconds 0.5–40.5 cut out, made into a 38 s seamless loop (2 s crossfade), stereo; loudness normalised to -23.1 LUFS; Ogg Vorbis
+- **"Crowd Woos.wav"** by xtrgamr — <https://freesound.org/people/xtrgamr/sounds/329331/> — CC-BY 4.0 (<https://creativecommons.org/licenses/by/4.0/>)
+  - `crowd/cheer_sarcastic_02.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.3 s; loudness normalised to -18.08 LUFS; Ogg Vorbis
+- **"unimpressedyay_01.wav"** by xtrgamr — <https://freesound.org/people/xtrgamr/sounds/239594/> — CC-BY 4.0 (<https://creativecommons.org/licenses/by/4.0/>)
+  - `crowd/cheer_sarcastic_03.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.3 s; loudness normalised to -18.12 LUFS; Ogg Vorbis
+- **"Urheilukilpailut, yleisurheilu, kannustava yleisö / Large, supportive crowd, sports competition, athletics, audience cheering and clapping rhytmically in the stadium, some horns"** by YleArkisto — <https://freesound.org/people/YleArkisto/sounds/316719/> — CC-BY 4.0 (<https://creativecommons.org/licenses/by/4.0/>)
+  - `crowd/clap_rally_02.ogg`: cut from 30.0 s, at most 10.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -18.17 LUFS; Ogg Vorbis
+
+## BBC Sound Effects (RemArc licence)
+
+From the BBC Sound Effects archive (<https://sound-effects.bbcrewind.co.uk>), © BBC, used under the RemArc licence for personal, educational and research use only. This project is private and non-commercial; these files must be replaced before any commercial use. Same changes as above.
+
+- **"100 men, single cheer."** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07035067> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/cheer_small_02.ogg`: cut from 0 s, at most 6.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -18.09 LUFS; Ogg Vorbis
+- **"Association Football: Booing as player is sent off, (Arsenal v. Wolves)"** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07028045> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/boo_long_03.ogg`: cut from 0 s, at most 15.0 s, mono, leading silence trimmed, fades 10 ms / 1.5 s; loudness normalised to -18.09 LUFS; Ogg Vorbis
+- **"Association Football: Large ooh and applause from crowd, (Arsenal v. Wolves)"** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07028039> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/ooh_close_foul_01.ogg`: cut from 0 s, at most 6.0 s, mono, leading silence trimmed, fades 10 ms / 2.0 s; loudness normalised to -18.17 LUFS; Ogg Vorbis
+- **"Association Football: Mild ooh from crowd, (Arsenal v. Wolves)"** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07028038> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/swell_fly_01.ogg`: cut from 0 s, at most 6.5 s, mono, leading silence trimmed, fades 10 ms / 1.5 s; loudness normalised to -18.16 LUFS; Ogg Vorbis
+- **"Build up of cheering and whistling - July 1981 (2C9,reprocessed)"** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07057040> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/rumble_rising_02.ogg`: cut from 0 s, at most 12.0 s, mono, leading silence trimmed, fades 10 ms / 2.0 s; loudness normalised to -18.14 LUFS; Ogg Vorbis
+- **"County cricket match in Kent. Mild applause for resumption of play."** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07011360> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/applause_polite_02.ogg`: cut from 0 s, at most 8.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -19.07 LUFS; Ogg Vorbis
+- **"Cricket ovation"** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=00008039> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/ovation_03.ogg`: cut from 0 s, at most 15.0 s, mono, leading silence trimmed, fades 10 ms / 1.5 s; loudness normalised to -18.23 LUFS; Ogg Vorbis
+- **"Football League match, goal scored."** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07013070> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/eruption_02.ogg`: cut from 0 s, at most 14.0 s, mono, leading silence trimmed, fades 10 ms / 1.5 s; loudness normalised to -18.23 LUFS; Ogg Vorbis
+- **"Football League match, goal scored."** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07013071> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/eruption_03.ogg`: cut from 0 s, at most 14.0 s, mono, leading silence trimmed, fades 10 ms / 1.5 s; loudness normalised to -18.21 LUFS; Ogg Vorbis
+- **"Large Crowd: Outside St. Paul's Cathedral, cheering and whistling builds up."** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07031057> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/rumble_rising_03.ogg`: cut from 2.0 s, at most 12.0 s, mono, leading silence trimmed, fades 10 ms / 2.0 s; loudness normalised to -18.12 LUFS; Ogg Vorbis
+- **"Large crowd cheering continuously."** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07035075> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `beds/bed_rally_03.ogg`: seconds 36.0–98 cut out, made into a 60 s seamless loop (2 s crossfade), stereo; loudness normalised to -23.18 LUFS; Ogg Vorbis
+- **"Large crowd cheering."** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07035073> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/cheer_medium_03.ogg`: cut from 0 s, at most 9.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -18.26 LUFS; Ogg Vorbis
+- **"Large crowd cheering."** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07035074> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/cheer_big_02.ogg`: cut from 0 s, at most 12.0 s, mono, leading silence trimmed, fades 10 ms / 1.0 s; loudness normalised to -18.25 LUFS; Ogg Vorbis
+- **"Local football match, near miss."** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07013079> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/letdown_02.ogg`: cut from 0 s, at most 11.0 s, mono, leading silence trimmed, fades 10 ms / 1.0 s; loudness normalised to -18.18 LUFS; Ogg Vorbis
+- **"Six men cheering. (Farcical.)"** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07018024> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/pocket_visitors_03.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.5 s; loudness normalised to -18.01 LUFS; Ogg Vorbis
+- **"Sport: Association football, Derby v. Arsenal, crowd reaction of oohs and aahs."** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07028006> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/ooh_close_foul_02.ogg`: cut from 0.5 s, at most 7.0 s, mono, leading silence trimmed, fades 10 ms / 2.0 s; loudness normalised to -18.17 LUFS; Ogg Vorbis
+- **"Sport: Association football, Derby v. Arsenal, crowd reaction of oohs, aahs, applause."** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07028005> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/swell_fly_02.ogg`: cut from 0.5 s, at most 6.0 s, mono, leading silence trimmed, fades 10 ms / 1.5 s; loudness normalised to -18.18 LUFS; Ogg Vorbis
+- **"Sport: Association rugby, Middlesex v. Gloucester, people in stands before match."** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07028009> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `beds/bed_sparse_03.ogg`: seconds 110.0–172 cut out, made into a 60 s seamless loop (2 s crossfade), stereo; loudness normalised to -23.1 LUFS; Ogg Vorbis
+- **"Sports Crowd: Large restless crowd builds up, outdoor sports meeting"** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07028021> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `beds/bed_buzz_03.ogg`: seconds 250.0–312 cut out, made into a 60 s seamless loop (2 s crossfade), stereo; loudness normalised to -23.07 LUFS; Ogg Vorbis
+- **"Twelve men booing. (Farcical.)"** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07018035> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/boo_short_03.ogg`: cut from 0 s, at most 5.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -17.98 LUFS; Ogg Vorbis
+- **"Wrestling: Rhythmic stamping and slow handclap"** by BBC — <https://sound-effects.bbcrewind.co.uk/search?q=07028104> — BBC RemArc (<https://sound-effects.bbcrewind.co.uk/licensing>)
+  - `crowd/clap_rally_01.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.5 s; loudness normalised to -18.19 LUFS; Ogg Vorbis
+
+## CC0 (public domain dedication) — credited as a courtesy
+
+No attribution is required for these, but thank you to the recordists.
+
+- **"Group Ooh 1"** by CHallSmith — <https://freesound.org/people/CHallSmith/sounds/870650/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/ooh_close_foul_03.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.5 s; loudness normalised to -17.96 LUFS; Ogg Vorbis
+- **"GO Transit Station PA chime"** by chungus43A — <https://freesound.org/people/chungus43A/sounds/720565/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `park/pa_chime_02.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.1 s; loudness normalised to -20.54 LUFS; Ogg Vorbis
+- **"G28-24-Whispering Crowd Walla.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/438384/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/murmur_stunned_01.ogg`: cut from 0 s, at most 15.0 s, mono, leading silence trimmed, fades 10 ms / 1.5 s; loudness normalised to -22.32 LUFS; Ogg Vorbis
+- **"G28-35-Crowd Booing.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/438395/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/boo_long_02.ogg`: cut from 0 s, at most 15.0 s, mono, leading silence trimmed, fades 10 ms / 1.5 s; loudness normalised to -19.52 LUFS; Ogg Vorbis
+- **"G29-37-Large Sports Crowd.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/438397/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `beds/bed_buzz_01.ogg`: seconds 14.0–76 cut out, made into a 60 s seamless loop (2 s crossfade), stereo; loudness normalised to -23.18 LUFS; Ogg Vorbis
+- **"R02-08-Applause and Cheering.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/480684/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/ovation_01.ogg`: cut from 0 s, at most 15.0 s, mono, leading silence trimmed, fades 10 ms / 1.5 s; loudness normalised to -18.21 LUFS; Ogg Vorbis
+- **"R07-08-Applause and Whistles.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/480689/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/ovation_02.ogg`: cut from 0 s, at most 15.0 s, mono, leading silence trimmed, fades 10 ms / 1.5 s; loudness normalised to -18.16 LUFS; Ogg Vorbis
+- **"R07-20-Chorus of Boos.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/480745/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/boo_short_02.ogg`: cut from 0 s, at most 5.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -18.07 LUFS; Ogg Vorbis
+- **"R07-29-Loud Applause and Cheering.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/480691/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/cheer_medium_02.ogg`: cut from 0 s, at most 9.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -18.28 LUFS; Ogg Vorbis
+- **"R08-24-Large Crowd Screaming and Whistling.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/480725/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `beds/bed_rally_02.ogg`: seconds 30.0–75 cut out, made into a 43 s seamless loop (2 s crossfade), stereo; loudness normalised to -23.15 LUFS; Ogg Vorbis
+- **"R08-34-Men Booing.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/480795/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/boo_short_01.ogg`: cut from 0 s, at most 5.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -18.05 LUFS; Ogg Vorbis
+- **"R08-37-Large Group Murmur.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/480760/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/murmur_stunned_02.ogg`: cut from 5.0 s, at most 15.0 s, mono, leading silence trimmed, fades 10 ms / 1.5 s; loudness normalised to -18.07 LUFS; Ogg Vorbis
+- **"R08-38-Cheering Crowd at Sporting Event.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/486218/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `beds/bed_rally_01.ogg`: seconds 32.0–94 cut out, made into a 60 s seamless loop (2 s crossfade), stereo; loudness normalised to -23.15 LUFS; Ogg Vorbis
+- **"R08-54-Large Crowd Cheering at Event.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/480765/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/cheer_big_01.ogg`: cut from 0 s, at most 12.0 s, mono, leading silence trimmed, fades 10 ms / 1.0 s; loudness normalised to -18.22 LUFS; Ogg Vorbis
+- **"R19-34-Golf Crowd Applauds.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/479967/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/applause_polite_01.ogg`: cut from 0 s, at most 8.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -19.06 LUFS; Ogg Vorbis
+- **"R19-35-Golf Crowd Reacts to Good Shot.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/486219/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/cheer_small_01.ogg`: cut from 0 s, at most 6.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -18.05 LUFS; Ogg Vorbis
+- **"R27-22-Medium Group Talk and Cheer.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/482798/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/foul_souvenir_01.ogg`: cut from 0 s, at most 8.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -18.03 LUFS; Ogg Vorbis
+- **"R28-29-Large Crowd Quiet, Then Big Reaction.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/486199/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/rumble_rising_01.ogg`: cut from 22.0 s, at most 13.0 s, mono, leading silence trimmed, fades 10 ms / 1.5 s; loudness normalised to -18.14 LUFS; Ogg Vorbis
+  - `crowd/eruption_01.ogg`: cut from 26.0 s, at most 14.0 s, mono, leading silence trimmed, fades 10 ms / 1.5 s; loudness normalised to -18.13 LUFS; Ogg Vorbis
+- **"S12-03 Small group men cheering; encouraging.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/675103/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/pocket_visitors_02.ogg`: cut from 0 s, at most 8.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -18.03 LUFS; Ogg Vorbis
+- **"S14-02 Baseball walla from high in stands.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/675194/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `beds/bed_normal_02.ogg`: seconds 0.5–44.5 cut out, made into a 42 s seamless loop (2 s crossfade), stereo; loudness normalised to -23.11 LUFS; Ogg Vorbis
+- **"S30-06 Baseball crowd yells at umpire.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/675060/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/boo_long_01.ogg`: cut from 0 s, at most 15.0 s, mono, leading silence trimmed, fades 10 ms / 1.5 s; loudness normalised to -18.12 LUFS; Ogg Vorbis
+- **"S30-19 Unhappy baseball crowd.wav"** by craigsmith — <https://freesound.org/people/craigsmith/sounds/675066/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/groan_big_01.ogg`: cut from 0 s, at most 8.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -18.06 LUFS; Ogg Vorbis
+- **"Dropping Aluminum Baseball Bat"** by deleted_user_7146007 — <https://freesound.org/people/deleted_user_7146007/sounds/383459/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/bat_drop_01.ogg`: cut from 0 s, at most 1.5 s, mono, leading silence trimmed, fades 10 ms / 0.2 s; loudness normalised to -20.75 LUFS; Ogg Vorbis
+- **"BaseballGameApplause.wav"** by eeease — <https://freesound.org/people/eeease/sounds/354056/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/cheer_medium_01.ogg`: cut from 0 s, at most 9.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -18.29 LUFS; Ogg Vorbis
+- **"Falling In Dirt.wav"** by FocusBay — <https://freesound.org/people/FocusBay/sounds/210867/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/slide_02.ogg`: cut from 0 s, at most 1.5 s, mono, leading silence trimmed, fades 10 ms / 0.2 s; loudness normalised to -18.57 LUFS; Ogg Vorbis
+- **"Rhythmic_Jumps_ses2.wav"** by freesound — <https://freesound.org/people/freesound/sounds/25316/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/clap_rally_03.ogg`: cut from 26.0 s, at most 10.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -18.69 LUFS; Ogg Vorbis
+- **"Applause, loose, sarcastic"** by HenKonen — <https://freesound.org/people/HenKonen/sounds/757174/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/cheer_sarcastic_01.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.5 s; loudness normalised to -26.84 LUFS; Ogg Vorbis
+- **"Bouncing Ball.wav"** by JaenKleynhans — <https://freesound.org/people/JaenKleynhans/sounds/267882/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/ball_wall_03.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.05 s; loudness normalised to -22.56 LUFS; Ogg Vorbis
+- **"bb-clapRhm.mp3"** by jasinski — <https://freesound.org/people/jasinski/sounds/18364/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/clap_two_strike_01.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.3 s; loudness normalised to -18.22 LUFS; Ogg Vorbis
+- **"yells.mp3"** by jasinski — <https://freesound.org/people/jasinski/sounds/18365/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/cheer_medium_04.ogg`: cut from 0 s, at most 9.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -18.2 LUFS; Ogg Vorbis
+- **"rodeo audio cheer distant"** by jayfrosting — <https://freesound.org/people/jayfrosting/sounds/728774/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/pocket_visitors_01.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.5 s; loudness normalised to -18.12 LUFS; Ogg Vorbis
+- **""OOOH" group of males sound"** by jbledger1984 — <https://freesound.org/people/jbledger1984/sounds/613179/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/ooh_wince_03.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.3 s; loudness normalised to -17.98 LUFS; Ogg Vorbis
+- **"American Baseball The Umpire.wav"** by jcookvoice — <https://freesound.org/people/jcookvoice/sounds/625473/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/ump_strike_01.ogg`: cut from 8.35 s, at most 1.7 s, mono, leading silence trimmed, fades 10 ms / 0.1 s; loudness normalised to -18.04 LUFS; Ogg Vorbis
+  - `field/ump_out_safe_01.ogg`: cut from 1.75 s, at most 2.0 s, mono, leading silence trimmed, fades 10 ms / 0.1 s; loudness normalised to -18.1 LUFS; Ogg Vorbis
+  - `field/ump_out_safe_02.ogg`: cut from 4.75 s, at most 2.7 s, mono, leading silence trimmed, fades 10 ms / 0.1 s; loudness normalised to -18.13 LUFS; Ogg Vorbis
+  - `field/ump_out_safe_03.ogg`: cut from 11.3 s, at most 0.9 s, mono, leading silence trimmed, fades 10 ms / 0.1 s; loudness normalised to -19.45 LUFS; Ogg Vorbis
+- **"Beer Sale At the Game"** by jdbingle — <https://freesound.org/people/jdbingle/sounds/784896/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `park/vendor_01.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.5 s; loudness normalised to -18.04 LUFS; Ogg Vorbis
+- **"Crowd.Yay.Applause.25ppl.Short.wav"** by jessepash — <https://freesound.org/people/jessepash/sounds/139972/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/cheer_small_03.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.5 s; loudness normalised to -18.06 LUFS; Ogg Vorbis
+- **"Boots Gravel Feet Slide  1_5"** by Joao_Janz — <https://freesound.org/people/Joao_Janz/sounds/504383/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/slide_03.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.1 s; loudness normalised to -21.77 LUFS; Ogg Vorbis
+- **"crowd clap rhythmic.wav"** by johnnyguitar01 — <https://freesound.org/people/johnnyguitar01/sounds/424793/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/clap_two_strike_02.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.3 s; loudness normalised to -18.2 LUFS; Ogg Vorbis
+- **"Baseball Riverside Park AUGUST 27 2022.WAV"** by kvgarlic — <https://freesound.org/people/kvgarlic/sounds/649722/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `beds/bed_sparse_01.ogg`: seconds 368.0–430 cut out, made into a 60 s seamless loop (2 s crossfade), stereo; loudness normalised to -26.71 LUFS; Ogg Vorbis
+- **"Ball bounce"** by Luisa_Sanchez — <https://freesound.org/people/Luisa_Sanchez/sounds/813419/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/ball_dirt_02.ogg`: cut from 0.8 s, at most 1.0 s, mono, leading silence trimmed, fades 10 ms / 0.05 s; loudness normalised to -19.61 LUFS; Ogg Vorbis
+- **"Bat Hit 1 FF103.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/162863/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/bat_solid_01.ogg`: cut from 0 s, at most 0.8 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -32.36 LUFS; Ogg Vorbis
+- **"Bat Hit 10 FF094.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/162878/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/bat_weak_01.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -24.75 LUFS; Ogg Vorbis
+- **"Bat Hit 10 FF094.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/162874/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/bat_weak_02.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -29.78 LUFS; Ogg Vorbis
+- **"Bat Hit 11 FF093.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/162877/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/bat_medium_03.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -26.83 LUFS; Ogg Vorbis
+- **"Bat Hit 12 FF092.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/162876/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/bat_medium_04.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -26.45 LUFS; Ogg Vorbis
+- **"Bat Hit 18 FF086.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/162885/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/bat_solid_06.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -31.15 LUFS; Ogg Vorbis
+- **"Bat Hit 2 FF102.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/162862/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/bat_medium_02.ogg`: cut from 0 s, at most 0.5 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -28.35 LUFS; Ogg Vorbis
+- **"Bat Hit 3 FF101.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/162868/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/bat_medium_01.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -33.23 LUFS; Ogg Vorbis
+- **"Bat Hit 4 FF100.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/162867/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/bat_solid_02.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -28.95 LUFS; Ogg Vorbis
+- **"Bat Hit 6 FF098.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/162884/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/bat_solid_03.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -28.75 LUFS; Ogg Vorbis
+- **"Bat Hit 8 FF096.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/162882/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/bat_solid_04.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -26.75 LUFS; Ogg Vorbis
+- **"Bat Hit 9 FF095.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/162886/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/bat_solid_05.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -27.05 LUFS; Ogg Vorbis
+- **"Glove Catch 1 FF014.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/164499/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/mitt_pop_04.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -26.15 LUFS; Ogg Vorbis
+- **"Glove Catch 10 FF005.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/164525/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/foul_tip_01.ogg`: cut from 0 s, at most 0.5 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -25.15 LUFS; Ogg Vorbis
+- **"Glove Catch 11 FF004.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/164534/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/foul_tip_02.ogg`: cut from 0 s, at most 0.5 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -25.15 LUFS; Ogg Vorbis
+- **"Glove Catch 12 FF003.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/164536/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/mitt_pop_05.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -29.25 LUFS; Ogg Vorbis
+- **"Glove Catch 2 FF013.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/164526/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/mitt_pop_01.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -27.25 LUFS; Ogg Vorbis
+- **"Glove Catch 3 FF012.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/164527/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/mitt_pop_06.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -28.25 LUFS; Ogg Vorbis
+- **"Glove Catch 4 FF011.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/164528/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/mitt_pop_02.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -26.95 LUFS; Ogg Vorbis
+- **"Glove Catch 5 FF010.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/164529/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/mitt_pop_03.ogg`: cut from 0 s, at most 0.6 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -25.15 LUFS; Ogg Vorbis
+- **"Glove Catch 6 FF009.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/164530/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/glove_catch_01.ogg`: cut from 0 s, at most 0.7 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -25.85 LUFS; Ogg Vorbis
+- **"Glove Catch 7 FF008.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/164531/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/glove_catch_02.ogg`: cut from 0 s, at most 0.7 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -28.15 LUFS; Ogg Vorbis
+- **"Glove Catch 8 FF007.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/164532/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/foul_tip_03.ogg`: cut from 0 s, at most 0.5 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -24.35 LUFS; Ogg Vorbis
+- **"Glove Catch 9 FF006.aif"** by martinimeniscus — <https://freesound.org/people/martinimeniscus/sounds/164533/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/glove_catch_03.ogg`: cut from 0 s, at most 0.8 s, mono, leading silence trimmed, fades 10 ms / 0.03 s; loudness normalised to -27.85 LUFS; Ogg Vorbis
+- **"Ding Dong"** by MatthewWong — <https://freesound.org/people/MatthewWong/sounds/361564/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `park/pa_chime_03.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.2 s; loudness normalised to -17.95 LUFS; Ogg Vorbis
+- **"AF Crowd Boo Hiss Nat end .wav"** by mglennsound — <https://freesound.org/people/mglennsound/sounds/678539/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/boo_long_04.ogg`: cut from 0 s, at most 15.0 s, mono, leading silence trimmed, fades 10 ms / 1.5 s; loudness normalised to -18.06 LUFS; Ogg Vorbis
+- **"AF Crowd Oof Wince 1.wav"** by mglennsound — <https://freesound.org/people/mglennsound/sounds/678666/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/ooh_wince_01.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.3 s; loudness normalised to -18.04 LUFS; Ogg Vorbis
+- **"AF Crowd Oof Wince 2.wav"** by mglennsound — <https://freesound.org/people/mglennsound/sounds/678667/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/ooh_wince_02.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.3 s; loudness normalised to -18.02 LUFS; Ogg Vorbis
+- **"AF Crowd Suprised Murmur 1.wav"** by mglennsound — <https://freesound.org/people/mglennsound/sounds/678671/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/murmur_stunned_03.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.5 s; loudness normalised to -18.93 LUFS; Ogg Vorbis
+- **"Shells1.mp3"** by Mr Sensible — <https://freesound.org/people/Mr%20Sensible/sounds/14742/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `park/fireworks_01.ogg`: cut from 0 s, at most 8.0 s, mono, leading silence trimmed, fades 10 ms / 1.0 s; loudness normalised to -18.1 LUFS; Ogg Vorbis
+- **"crowd `oh - - disappointed.mp3"** by mrrap4food — <https://freesound.org/people/mrrap4food/sounds/619007/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/groan_small_03.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.3 s; loudness normalised to -18.05 LUFS; Ogg Vorbis
+- **"Bouncy Ball Bouncing on Muddy Pavement"** by NathanaelBray — <https://freesound.org/people/NathanaelBray/sounds/650982/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/ball_dirt_01.ogg`: cut from 0 s, at most 0.9 s, mono, leading silence trimmed, fades 10 ms / 0.05 s; loudness normalised to -26.0 LUFS; Ogg Vorbis
+- **"Voice_Crowd_Small_Expression_Awww_Stereo"** by Nox_Sound — <https://freesound.org/people/Nox_Sound/sounds/752706/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/groan_small_01.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.2 s; loudness normalised to -18.04 LUFS; Ogg Vorbis
+- **"Voice_Crowd_Small_Expression_Boo_Stereo"** by Nox_Sound — <https://freesound.org/people/Nox_Sound/sounds/752707/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/boo_short_04.ogg`: cut from 0 s, mono, leading silence trimmed, fades 10 ms / 0.3 s; loudness normalised to -18.0 LUFS; Ogg Vorbis
+- **"Cheers.m4a"** by thankzalotz — <https://freesound.org/people/thankzalotz/sounds/652571/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/foul_souvenir_02.ogg`: cut from 0 s, at most 8.0 s, mono, leading silence trimmed, fades 10 ms / 0.8 s; loudness normalised to -18.02 LUFS; Ogg Vorbis
+- **"MLB Crowd Cheer - 09032022.wav"** by tylermyers1992 — <https://freesound.org/people/tylermyers1992/sounds/649156/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `crowd/cheer_big_03.ogg`: cut from 8.0 s, at most 14.0 s, mono, leading silence trimmed, fades 10 ms / 1.0 s; loudness normalised to -18.15 LUFS; Ogg Vorbis
+- **"Hitting a padded wall Single Shot"** by velcronator — <https://freesound.org/people/velcronator/sounds/733141/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `field/ball_wall_01.ogg`: cut from 0 s, at most 0.8 s, mono, leading silence trimmed, fades 10 ms / 0.05 s; loudness normalised to -22.38 LUFS; Ogg Vorbis
+- **"Suburban_Fireworks1.wav"** by wagneric — <https://freesound.org/people/wagneric/sounds/611943/> — CC0 (<https://creativecommons.org/publicdomain/zero/1.0/>)
+  - `park/fireworks_02.ogg`: cut from 0 s, at most 8.0 s, mono, leading silence trimmed, fades 10 ms / 1.0 s; loudness normalised to -19.96 LUFS; Ogg Vorbis
+
+## The organ
+
+Synthesized by the page itself; no recordings, nothing to credit.

@@ -1,0 +1,8 @@
+{
+  "_about": "energy.json · v0.1 · 2026-10-02. How speech_server.py speaks each energy with Piper, which has no emotion control: the pause between sentences (s), Piper's two variability settings, a pitch lift (synthesised that much slower, then resampled up by the same factor, so the speed is unchanged) and a gain in dB. The pace itself comes with each line from bb_call.js. Kokoro uses gap, lift and gain only.",
+  "calm":     { "gap": 0.45, "noise": 0.60,  "noise_w": 0.70, "lift": 1.00, "gain_db": 0.0 },
+  "building": { "gap": 0.30, "noise": 0.667, "noise_w": 0.80, "lift": 1.01, "gain_db": 0.5 },
+  "excited":  { "gap": 0.15, "noise": 0.75,  "noise_w": 0.90, "lift": 1.04, "gain_db": 2.0 },
+  "peak":     { "gap": 0.10, "noise": 0.80,  "noise_w": 1.00, "lift": 1.07, "gain_db": 3.0 },
+  "deflated": { "gap": 0.50, "noise": 0.55,  "noise_w": 0.60, "lift": 0.98, "gain_db": -1.0 }
+}

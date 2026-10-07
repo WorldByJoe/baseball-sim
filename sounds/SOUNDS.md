@@ -1,6 +1,6 @@
 # The sounds of the park
 
-`SOUNDS.md · v0.1 · 2026-10-02`
+`SOUNDS.md · v0.2 · 2026-10-02`
 
 What the game should sound like, and the library of sound files that makes it. The crowd is the home crowd: it wants the home team to win, a small pocket of visiting fans is somewhere in the stands, and it reacts to what it sees, never to what it cannot know. The broadcast brief (`docs/briefs/2026-10-02_broadcast.md`) builds the player; this file is what it plays.
 
@@ -36,6 +36,8 @@ From those two numbers:
 Reactions are timed to the picture: a cheer starts when the ball drops or the runner is called safe, not at contact. The play-by-play voice always rides over the crowd: the crowd ducks a few decibels while a line is spoken.
 
 ## The library
+
+**What is here now (provisional, chosen without listening):** 124 files for all 42 sounds, 14.7 MB, in `beds/`, `crowd/`, `field/` and `park/`; `manifest.json` lists every file with its source, author, licence and processing; `CREDITS.md` credits the CC-BY files; `catalog.html` (open it from this folder) plays every file, says what to listen for, and offers up to ten further candidates per sound to swap in; `process.sh` is the processing chain. `manifest.js` is what the page loads (`python3 manifest_js.py` rewrites it after any change to `manifest.json`). `organ/` holds offline renders of the organ cues, for listening only.
 
 Each sound is a set of interchangeable recordings; the player picks one at random, with the pick seeded by the game so a replayed game sounds the same. "Variants" is how many to collect: 2 to 10, more for sounds that repeat often.
 

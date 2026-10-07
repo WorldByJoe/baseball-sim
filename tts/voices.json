@@ -1,0 +1,6 @@
+{
+  "_about": "voices.json · v0.1 · 2026-10-02. The voice for each role: 'piper:<model name>' (a .onnx in the voices folder) or 'kokoro:<voice>' (kokoro-v1.0 ONNX). Change a role here and restart speech_server.py; tts/samples/README.md lists the candidates. The three roles should sound different from each other.",
+  "pbp": "piper:en_US-ryan-medium",
+  "colour": "piper:en_US-norman-medium",
+  "pa": "piper:en_US-kristin-medium"
+}

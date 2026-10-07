@@ -1,5 +1,5 @@
 /* ============================================================================
-   pitcher_value.js · v0.2 · 2026-10-03
+   pitcher_value.js · v0.3 · 2026-10-04
 
    What makes a pitcher valuable in the model: draws N pitchers from the
    population (BB.drawPitcher), half starters and half relievers, lets each
@@ -14,6 +14,7 @@
    Run:  jsc bb_engine.js statcast/bip_2025.js tools/pitcher_value.js -- [N] [K] [seed]
 
    CHANGED
+     v0.3  the features are the engine's (BB.PITCHER_FEATURES, engine v2.8: what each pitch does against its type)
      v0.2  familiarity as in games: 40 x u x u pitches of this pitcher seen at the start of each PA (games: median 9 at a swing, mean 12.6; was uniform to 60-80)
      v0.1  first build (bb_engine v1.8)
 ============================================================================ */
@@ -23,7 +24,7 @@
   for (var i = 0; i < 300; i++) B.push(BB.makeBatter(rng, {}));
   function band(v, E) { for (var i = 0; i < E.length - 1; i++) if (v >= E[i] && v < E[i + 1]) return i; return -1; }
   function xw(bb) { var i = band(bb.ev, X.ev_edges), j = band(bb.la, X.la_edges); var v = i >= 0 && j >= 0 ? X.grid[i][j] : null; return v === null ? (bb.ev < 40 ? 0.05 : X.mean) : v; }
-  var FE = ['fbVelo', 'spinZ', 'cmdX', 'cmdZ', 'armAngle', 'ext', 'relHt', 'nPitches'];
+  var FE = BB.PITCHER_FEATURES;
   for (i = 0; i < N; i++) {
     var P = BB.drawPitcher(rng, { role: i % 2 ? 'RP' : 'SP' }), pa = 0, w = 0, k = 0, bb = 0;
     for (var j = 0; j < K; j++) {
@@ -50,7 +51,7 @@
   });
   for (a = 0; a < p; a++) { var piv = M[a][a]; for (b = a; b <= p; b++) M[a][b] /= piv; for (var c = 0; c < p; c++) if (c !== a) { var f2 = M[c][a]; for (b = a; b <= p; b++) M[c][b] -= f2 * M[a][b]; } }
   var beta = M.map(function (row) { return row[p]; }), pred = H.map(function (h) { var s = beta[0]; FE.forEach(function (t, j) { s += beta[j + 1] * (h[t] - mu[j]) / sg[j]; }); return s; });
-  print('pitcher_value v0.1 · ' + N + ' pitchers x ' + K + ' PA · seed ' + SEED + ' · expected wOBA allowed (lower is better)');
+  print('pitcher_value v0.3 · ' + N + ' pitchers x ' + K + ' PA · seed ' + SEED + ' · expected wOBA allowed (lower is better)');
   print('value: mean ' + mean(yv).toFixed(3) + ' sd ' + sd(yv).toFixed(3) + '; the features explain R2 ' + Math.pow(r(pred, yv), 2).toFixed(2));
   print('');
   print('   feature        correlation with value   weight (wOBA points per sd)');

@@ -1,5 +1,5 @@
 """
-bat_direction.py · v0.1 · 2026-10-03
+bat_direction.py · v0.2 · 2026-10-04
 
 The bat's horizontal direction at contact - Statcast's attack direction,
 the direction of the sweet spot's path at the moment of contact (or where
@@ -22,9 +22,16 @@ Writes statcast/bat_direction_<year>.json and .js (`var BATDIR = ...`).
   python3 statcast/bat_direction.py 2025
 
 CHANGED
+  v0.2  home plate in the hit coordinates fitted from fly-ball distances (126.0, 205.0; was 125.42, 198.27): ground balls 15.4 -> 13.4 deg pulled
   v0.1  first build
 """
 import csv, glob, json, math, os, statistics as st, sys
+
+# Home plate in Statcast's hit coordinates (hc_x, hc_y): fitted 2026-10-04 from 2025 balls in the air,
+# their projected distance against the hit coordinates (caught flies, with and without a catch offset,
+# and home runs: x0 125.97-126.03, y0 203.1-207.3, 2.36-2.41 ft per unit). The usual (125.42, 198.27)
+# sits about 7 units too shallow and inflated the spray of short balls - ground balls most.
+HC_X0, HC_Y0 = 126.0, 205.0
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SWING = {'swinging_strike', 'swinging_strike_blocked', 'foul', 'foul_tip', 'hit_into_play'}
@@ -57,7 +64,7 @@ def main(year):
                 bip.append(pull)
                 hx, hy, la = fl(r['hc_x']), fl(r['hc_y']), fl(r['launch_angle'])
                 if None in (hx, hy, la): continue
-                sp = math.degrees(math.atan2(hx - 125.42, 198.27 - hy)); spray = -sp if r['stand'] == 'R' else sp
+                sp = math.degrees(math.atan2(hx - HC_X0, HC_Y0 - hy)); spray = -sp if r['stand'] == 'R' else sp
                 k = 'GB' if la < 10 else 'LD' if la < 25 else 'FB' if la < 50 else None
                 if k: types[k][0].append(pull); types[k][1].append(spray)
     hm = [st.mean(v) for v in per.values() if len(v) >= 200]
