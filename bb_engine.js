@@ -66,9 +66,9 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
-     v3.8  THE COMMIT POINT'S PICTURE (DF): every swing decision is made on where the ball is and how it moves at the
-           commit point, continued as the pitch he expected (DEC_LAMBDA 1.5 of the break still to come, measured from
-           the league's decisions); a pitch picked up was judged nearly exactly, one not yet picked up on four times this
+     v3.8  THE COMMIT POINT'S PICTURE (DF): a pitch he has picked up he decides on from where the ball is and how it
+           moves at the commit point, continued as the pitch he expected (it was judged nearly exactly); the swing
+           decisions then fit the league's picture of the break still to come (1.25 breaking, 1.5 off-speed)
      v3.7  HE WATCHES THE BALL, NOT HIS BARREL (VD): met out front or deep, he steers to most of where the ball is and
            keeps DESCENT_KEPT 0.3 of its descent, while his barrel's rise along its path is committed; launch minus
            attack now falls with depth for every pitch kind as the league's; the raw barrel scatter x0.9 so the
@@ -1359,21 +1359,21 @@ var BB = (function () {
   // the joint fit) with the swing policy to the league's swings by count x pitch kind, breaking-ball whiffs and
   // strikeouts: 0.5. (Doubling every batter's spotIn instead, fastballs included, gave too many walks and too
   // many whiffs on changeups.)
-  // THE COMMIT POINT'S PICTURE (v3.8, DF). He decides at the commit point on where the ball is and how it is moving
-  // there, continued as the pitch he expected: the break still to come is not in it, whether or not he has picked the
-  // pitch up (recognition steers the swing he launches, not the decision). In the ghost's terms the break still to come
-  // after the commit point is (1 - tc)^2 of the gap to the pitch he expected, and his picture keeps DEC_LAMBDA of it.
-  // MEASURED from the league (42 days of 2025, every swing and take; tools/diag/df_league.py): with each pitch's
-  // constant-acceleration flight and the pitcher's own fastball's acceleration, the swing decision fitted best on a
-  // picture that kept 1.25 (breaking balls) and 1.5 (off-speed) of the break after the commit point, and 1.0 across
-  // (better than a picture of its place alone, with the fastball's whole path); breaking balls ending 9-12 in below the
-  // zone were swung at .25 when they had little break left at the commit point and .33-.35 when they had 3+ in.
-  // DEC_LAMBDA 1.5 gives the model's own decisions the league's 1.0-1.25 on breaking balls by the same fit. Until v3.7 a
-  // pitch picked up was judged to within its misread (no break kept; the fit gave 0.5) and one not yet picked up on the
-  // whole curve he expected without its motion ((1 - tc^2) of the gap, about four times this). From #31's v3.3
-  // (DEC_UNSEEN, recorded in fouls-chases-costs): half of the (1 - tc^2) for every picked-up pitch got the league's far
-  // chases but took breaking balls in the zone, pictured 6-7 in high.
-  var DEC_LAMBDA = 1.5;
+  // THE COMMIT POINT'S PICTURE (v3.8, DF). A pitch he has picked up he decides on at the commit point from where the ball
+  // is and how it is moving there, continued as the pitch he expected: the break still to come is not in it (picking
+  // it up steers the swing he launches, not the decision). In the ghost's terms that break is (1 - tc)^2 of the gap to
+  // the pitch he expected (DEC_LAMBDA 1: the plain continuation, nothing fitted). A pitch he has not picked up he
+  // decides on the curve he expected from where it is, without its motion ((1 - tc^2) of the gap; v3.1), the curve his
+  // swing follows. MEASURED in the league (42 days of 2025, every swing and take; tools/diag/df_league.py): with each
+  // pitch's constant-acceleration flight and the pitcher's own fastball's acceleration, the swing decisions fitted best
+  // on a picture that kept 1.25 (breaking balls) and 1.5 (off-speed) of the break after the commit point, and 1.0
+  // across; breaking balls ending 9-12 in below the zone were swung at .25 with little break left at the commit point
+  // and .33-.35 with 3+ in. The model's decisions by the same fit: 1.25 and 1.5 (v3.7, with a picked-up pitch judged to
+  // within its misread: 0.5 and 1.0). The same picture for every pitch, the unread ones too, took the fit to 1.0 for
+  // breaking balls with DEC_LAMBDA 1.5 but had the fooled batter swing at breaking balls in the zone his swing could not
+  // reach (whiffs .38 per swing against .31). From #31's v3.3 (DEC_UNSEEN, recorded in fouls-chases-costs): half of the
+  // (1 - tc^2) for every picked-up pitch got the league's far chases but took breaking balls in the zone, 6-7 in high.
+  var DEC_LAMBDA = 1;
   // THE EARLIER HE PICKS IT UP, THE MORE OF ITS TIMING HE CHANGES (v3.5, BC). A recognised pitch's timing error has
   // two parts. How far this one strays from its kind's usual speed (ref.t, at this pitcher's usual speed for it) he
   // misjudges by the prior's pull, as before (PRIOR_T, which the league's within-pitcher slope confirms: a pitch 1
@@ -1463,7 +1463,7 @@ var BB = (function () {
     function leftS(f) { return 1 - f * f - DIR_READ * 2 * f * (1 - f); }
     var g3 = [gh.x - real[0], gh.z - real[1], gh.t - real[2]], err = judged, lastPic = judged, launchedS = leftS(tc), launchedT = 1 - tc * tc;
     var base = [launchedS * g3[0], launchedS * g3[1], launchedT * g3[2]];   // the pitch he expected, corrected for what had shown itself by the commit point
-    var lu = DEC_LAMBDA * (1 - tc) * (1 - tc), decPic = [lu * g3[0], lu * g3[1]];   // THE COMMIT POINT'S PICTURE (v3.8): where it is and how it moves there, continued as the pitch he expected
+    var lu = detected ? DEC_LAMBDA * (1 - tc) * (1 - tc) : 1 - tc * tc, decPic = [lu * g3[0], lu * g3[1]];   // THE COMMIT POINT'S PICTURE (v3.8): picked up, where it is and how it moves there, continued as the pitch he expected; not, the curve he expected
     if (!detected) {   // he launched on the pitch he expected
       // late: he steers toward his judgement; fooled: only by what has shown itself by the last look
       var lastS = leftS(ts), lastT = 1 - ts * ts;
@@ -1505,7 +1505,8 @@ var BB = (function () {
 
   // -------------------------------------------------------------- DECIDE
   // THE SWING POLICY. He decides at the commit point, on what he could see by
-  // then: where the ball is and how it moves there, continued as the pitch he
+  // then: a pitch picked up, where the ball is and how it moves there, continued
+  // as the pitch he expected; one not yet picked up, where it is on the curve he
   // expected (THE COMMIT POINT'S PICTURE, v3.8); then his eye's scatter
   // (eyeSD, larger under time pressure). From that he judges his chance it is
   // a strike (pin) and swings when it passes his threshold for the count,
@@ -1524,7 +1525,7 @@ var BB = (function () {
     '2-0': [0.47, 0.70], '2-1': [0.23, 0.37], '2-2': [0.16, 0.16], '3-0': [0.91, 0.91], '3-1': [0.31, 0.55], '3-2': [0.16, 0.16]
   };
   function decide(B, pitch, gh, rf, st, rng) {
-    var m = rf.decPic, mx = m[0], mz = m[1];   // every pitch: the commit point's picture (v3.8)
+    var m = rf.decPic, mx = m[0], mz = m[1];   // the commit point's picture (v3.8)
     var eye = B.eyeSD * IN * rf.tp;
     var xp = pitch.plate.x + mx + rng.n(0, eye), zp = pitch.plate.z + mz + rng.n(0, eye);
     var pin = Phi((ZONE_HALF - Math.abs(xp)) / eye) * Phi((zp - (B.zone.bot - BALL_R)) / eye) * Phi((B.zone.top + BALL_R - zp) / eye);
