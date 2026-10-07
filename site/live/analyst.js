@@ -14,7 +14,8 @@
    CHANGED
      v0.1  first build (Brewers-Padres, NLDS Game 3, 2026-10-06)
 ============================================================================ */
-importScripts('engine/bb_engine.js', 'engine/bb_names.js', 'engine/bb_field.js', 'engine/bb_game.js', 'engine/players.js', 'data/playoff.js');
+var V = '?v=3.9';   // bump with each engine or bundle, as index.html's worker tag (GitHub Pages caches 10 min)
+importScripts('engine/bb_engine.js' + V, 'engine/bb_names.js' + V, 'engine/bb_field.js' + V, 'engine/bb_game.js' + V, 'engine/players.js' + V, 'data/playoff.js' + V);
 REVIEW.setData(PLAYOFF.recs, PLAYOFF.fits, PLAYOFF.pfit);
 
 var U = BB.units, MPH = U.MPH, FT = U.FT, DEG = U.DEG;
