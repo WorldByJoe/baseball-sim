@@ -2141,16 +2141,17 @@ Tested since v3.4 (sections above): BC confirmed in part and built (engine v3.5:
 | 5 | RX | A long throw's receiver does not move: outfield throwing errors 3.5 times the league's; unblocks T | 6 | likely |
 | 6 | DC | A pitcher's deception is a hidden trait: a multiplier on the batter's read noise, fitted per playoff pitcher to his strikeouts (0.79-1.68). For the main model: its spread in the pool and what it correlates with (release, extension, arm angle); it may also carry part of the far chases with little break left | 8, 3 | likely |
 | 7 | FT | The far tail of chases: breaking balls with little break left at the commit point chased .10 against .25 at 9-12 in below the zone. Suspects: the two-strike protection, the eye's tail under time pressure, deception (DC) | 3 | possible |
-| 8 | PB | The swing bias behind the shoulder: a same-side pitch's late lateral movement under-read, so he judges it nearer the zone and meets it off the sweet spot | 10, 7 | possible |
-| 9 | WC | Who comes up with men on: the model's BABIP talent varies too little between hitters and pitchers | 9 | possible |
-| 10 | BK | The adjusted swing that waits on a slow pitch is flatter and less pulled at the same depth | 11 | possible |
-| 11 | WB, IH | Who takes the ball between first and second; infield hits (the exchange, the routine throw's speed, balls knocked down; not in the public data) | 1 | likely, needs data |
-| 12 | CO | The cut-off's depth and the left-line share of balls: doubles are the league's on the totals now; the split by direction to re-measure | (1) | to re-measure |
-| 13 | 1C | plays_check case 4: passed on BC and VD with only two qualifying plays; keep open | (a test) | to check |
-| 14 | AA, YS, L, AB | The minors: no development (Triple-A's pitchers younger), pitchers judged more sharply, Triple-A's own conditions, command built from several distal traits | 12, 13 | plausible |
-| 15 | G, X, M-P, R | The bat's grip and batted-ball spin; a later checking point; swing style, sideways misreads, the release point, command by slot; long shots | 1, 14, 16 | possible |
+| 8 | EC | The commit on the schedule he expected: the commit point (COMMIT_S 0.175 s) and the last look (STEER_S 0.15 s) are timed from the ball's real arrival, so on a slow pitch he has not picked up he commits later in clock time than a fooled batter would on the fastball's schedule, and decides on more of the flight than he had. Test: both points timed from the arrival he expected; the far chases on breaking balls (FT), the pickups and whiffs by kind, and the decisions' picture (DF) with it. Expected cost: fewer early pickups, so more whiffs (Joe, 2026-10-06) | 3, 2 | possible |
+| 9 | PB | The swing bias behind the shoulder: a same-side pitch's late lateral movement under-read, so he judges it nearer the zone and meets it off the sweet spot | 10, 7 | possible |
+| 10 | WC | Who comes up with men on: the model's BABIP talent varies too little between hitters and pitchers | 9 | possible |
+| 11 | BK | The adjusted swing that waits on a slow pitch is flatter and less pulled at the same depth | 11 | possible |
+| 12 | WB, IH | Who takes the ball between first and second; infield hits (the exchange, the routine throw's speed, balls knocked down; not in the public data) | 1 | likely, needs data |
+| 13 | CO | The cut-off's depth and the left-line share of balls: doubles are the league's on the totals now; the split by direction to re-measure | (1) | to re-measure |
+| 14 | 1C | plays_check case 4: passed on BC and VD with only two qualifying plays; keep open | (a test) | to check |
+| 15 | AA, YS, L, AB | The minors: no development (Triple-A's pitchers younger), pitchers judged more sharply, Triple-A's own conditions, command built from several distal traits | 12, 13 | plausible |
+| 16 | G, X, M-P, R | The bat's grip and batted-ball spin; a later checking point; swing style, sideways misreads, the release point, command by slot; long shots | 1, 14, 16 | possible |
 
-Order to test (the off-season): TL, then RD and PU; then TB and RX (the bases and the errors); then DC and FT (the far chases and a pitcher's own deception); then the rest.
+Order to test (the off-season): TL, then RD and PU; then TB and RX (the bases and the errors); then DC, FT and EC (the far chases, a pitcher's own deception, and the commit on the schedule he expected); then the rest.
 
 ## Known gaps, to fix with mechanisms rather than knob-turning
 
