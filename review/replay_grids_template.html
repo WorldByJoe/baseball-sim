@@ -7,7 +7,7 @@
 :root {
   --bg: #f4f6f9; --panel: #ffffff; --ink: #121a26; --muted: #5b6676; --line: #d6dce4;
   --heat-lo: #cde2fb; --heat-hi: #0d366b; --on-cool: #121a26; --on-hot: #ffffff;
-  --tie: #e9edf2; --star: #e8a33d; --star-ring: #b8740f;
+  --tie: #e9edf2; --star: #e8a33d; --star-ring: #b8740f; --fit: #2a78d6;
   --f-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
   --f-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
   --f-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -15,11 +15,11 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #0f1318; --panel: #161b22; --ink: #e4e9f0; --muted: #96a1b0; --line: #2b3440;
   --heat-lo: #123b6e; --heat-hi: #cde2fb; --on-cool: #e4e9f0; --on-hot: #0f1318;
-  --tie: #1d242d; --star: #f2b552; --star-ring: #f2b552; color-scheme: dark } }
+  --tie: #1d242d; --star: #f2b552; --star-ring: #f2b552; --fit: #6da7ec; color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #0f1318; --panel: #161b22; --ink: #e4e9f0; --muted: #96a1b0; --line: #2b3440;
   --heat-lo: #123b6e; --heat-hi: #cde2fb; --on-cool: #e4e9f0; --on-hot: #0f1318;
-  --tie: #1d242d; --star: #f2b552; --star-ring: #f2b552; color-scheme: dark }
+  --tie: #1d242d; --star: #f2b552; --star-ring: #f2b552; --fit: #6da7ec; color-scheme: dark }
 body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
 .wrap { max-width: 1240px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; display: flex; flex-direction: column; gap: 34px; }
 header { display: flex; flex-direction: column; gap: 10px; max-width: 68ch; }
@@ -68,6 +68,21 @@ table.grid { border-collapse: separate; border-spacing: 2px; margin: 8px 0 0 8px
 .seg button:focus-visible { outline: 2px solid var(--star-ring); outline-offset: -2px; }
 .sum { margin: 0; font-size: 14px; font-variant-numeric: tabular-nums; }
 .wrap[data-show="season"] [data-set="pitched"], .wrap[data-show="pitched"] [data-set="season"] { display: none; }
+.logit-sec .lede { margin: 0; max-width: 72ch; }
+svg.logit { width: 100%; max-width: 820px; min-width: 560px; height: auto; display: block; font-family: var(--f-body); }
+svg.logit .gl { stroke: var(--line); stroke-width: 1; }
+svg.logit .tk { fill: var(--muted); font-size: 12px; font-family: var(--f-data); }
+svg.logit .ax { fill: var(--ink); font-size: 13px; }
+svg.logit .band { fill: var(--heat-lo); fill-opacity: 0.55; stroke: none; }
+svg.logit .diag { stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 5 4; fill: none; }
+svg.logit .fit { stroke: var(--fit); stroke-width: 2.5; fill: none; }
+svg.logit .pt circle { fill: var(--ink); stroke: var(--panel); stroke-width: 2; }
+svg.logit .pt:hover circle { fill: var(--star); }
+svg.logit .pl { fill: var(--muted); font-size: 10.5px; }
+.sw { display: inline-block; width: 26px; height: 10px; border-radius: 2px; }
+.sw.fit { height: 3px; background: var(--fit); }
+.sw.band { background: var(--heat-lo); opacity: 0.8; }
+.sw.diag { height: 0; border-top: 2px dashed var(--muted); }
 footer { font-size: 13px; color: var(--muted); max-width: 72ch; display: flex; flex-direction: column; gap: 6px; }
 footer p { margin: 0; }
 </style>

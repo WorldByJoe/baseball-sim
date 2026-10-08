@@ -98,6 +98,52 @@ def grid(pk, num, date, colTeam, rowTeam):
     return '\n'.join(out)
 
 
+def logit_section():
+    """The replays' win share against the real results (review/win_logit.py's fit), as an SVG that follows the page's theme."""
+    import numpy as np
+    from scipy import stats
+    from win_logit import rows, fit
+    D = rows(); x = np.array([d['p'] for d in D]); y = np.array([d['y'] for d in D], float)
+    b, cov, mu, ll1, ll0 = fit(x, y); se = np.sqrt(np.diag(cov))
+    p_wald = 2 * stats.norm.sf(abs(b[1] / se[1])); p_lr = stats.chi2.sf(2 * (ll1 - ll0), 1)
+    r2m = 1 - ll1 / ll0; r2t = mu[y == 1].mean() - mu[y == 0].mean()
+    W, H, L, R, T, B = 760, 470, 64, 20, 24, 56
+    def X(v): return L + v * (W - L - R)
+    def Y(v): return T + (1.08 - v) / 1.16 * (H - T - B)   # 1.08 at the top, -0.08 at the bottom
+    xs = np.linspace(0, 1, 101); Xs = np.column_stack([np.ones_like(xs), xs]); eta = Xs @ b
+    se_eta = np.sqrt(np.einsum('ij,jk,ik->i', Xs, cov, Xs)); sig = lambda z: 1 / (1 + np.exp(-z))
+    lo, hi, fitc = sig(eta - 1.96 * se_eta), sig(eta + 1.96 * se_eta), sig(eta)
+    band = 'M' + ' L'.join('%.1f,%.1f' % (X(a), Y(c)) for a, c in zip(xs, hi)) + ' L' + ' L'.join('%.1f,%.1f' % (X(a), Y(c)) for a, c in zip(xs[::-1], lo[::-1])) + ' Z'
+    curve = 'M' + ' L'.join('%.1f,%.1f' % (X(a), Y(c)) for a, c in zip(xs, fitc))
+    g = ['<svg class="logit" viewBox="0 0 %d %d" role="img" aria-label="Logistic regression of the real result on the replays\' win share, %d games">' % (W, H, len(D))]
+    for t in range(0, 11):   # grid and the x axis
+        v = t / 10; g.append('<line class="gl" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (X(v), Y(1.08), X(v), Y(-0.08)))
+        g.append('<text class="tk" x="%.1f" y="%.1f" text-anchor="middle">%d%%</text>' % (X(v), H - B + 18, 10 * t))
+    for v, lab in ((0, 'lost'), (0.25, '25%'), (0.5, '50%'), (0.75, '75%'), (1, 'won')):
+        g.append('<line class="gl" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (X(0), Y(v), X(1), Y(v)))
+        g.append('<text class="tk" x="%.1f" y="%.1f" text-anchor="end">%s</text>' % (L - 8, Y(v) + 4, lab))
+    g.append('<path class="band" d="%s"/>' % band)
+    g.append('<line class="diag" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (X(0), Y(0), X(1), Y(1)))
+    g.append('<path class="fit" d="%s"/>' % curve)
+    for d in D:
+        cx, cy = X(d['p']), Y(d['y'])
+        tip = '%s: home team won %d of 1,000 replays (%.0f%%); %s the real game' % (d['label'], round(1000 * d['p']), 100 * d['p'], 'won' if d['y'] else 'lost')
+        ty = cy - 9 if d['y'] == 0 else cy + 9
+        g.append('<g class="pt"><title>%s</title><circle cx="%.1f" cy="%.1f" r="5.5"/><text class="pl" transform="translate(%.1f,%.1f) rotate(-90)" text-anchor="%s" dominant-baseline="middle">%s</text></g>' % (
+            html.escape(tip), cx, cy, cx, ty, 'start' if d['y'] == 0 else 'end', html.escape(d['label'])))
+    g.append('<text class="ax" x="%.1f" y="%.1f" text-anchor="middle">Home team\'s share of 1,000 replays won (regular-season pitching)</text>' % ((X(0) + X(1)) / 2, H - 12))
+    g.append('<text class="ax" transform="translate(16,%.1f) rotate(-90)" text-anchor="middle">Real game, and the fitted chance of winning</text>' % ((Y(1) + Y(0)) / 2))
+    g.append('</svg>')
+    stats_line = 'Slope %.1f (standard error %.1f), Wald p = %.2f; likelihood-ratio p = %.2f; McFadden R² = %.2f, Tjur R² = %.2f.' % (b[1], se[1], p_wald, p_lr, r2m, r2t)
+    return ('<section class="series logit-sec" id="regression"><h2><span class="tag">FIT</span> Did the replays pick the winners?</h2>'
+            '<p class="lede">One point per game, from the home team&#39;s side: across, the share of the 1,000 replays (regular-season pitching) the home team won; '
+            'up or down, whether it won the real game. The blue curve is a logistic regression of the real result on that share, with its 95%% band; the dashed line is where a perfectly calibrated forecast would sit. '
+            'A higher replay share went with more real wins, but over %d games the slope is not significant at the usual 0.05 level.</p>'
+            '<div class="scroll">%s</div><p class="tally">%s</p>'
+            '<div class="howto"><span class="k"><span class="sw fit" aria-hidden="true"></span> logistic fit</span><span class="k"><span class="sw band" aria-hidden="true"></span> its 95%% band</span>'
+            '<span class="k"><span class="sw diag" aria-hidden="true"></span> a perfectly calibrated forecast</span></div></section>') % (len(D), '\n'.join(g), stats_line)
+
+
 def main(path):
     series = []; games = [g for g in GAMES if all(os.path.exists('%s/%d.jsonl' % (d, g[0])) for _, d in SETS)]
     for pk, ser, num, date in games:
@@ -111,6 +157,7 @@ def main(path):
         body.append('<section class="series"><h2><span class="tag">%s</span> %s vs %s</h2><div class="games">' % (s['name'], NICK[s['col']], NICK[s['row']]))
         for pk, num, date in s['games']: body.append(grid(pk, num, date, s['col'], s['row']))
         body.append('</div></section>')
+    body.append(logit_section())
     runs = {}
     for key, d in SETS:
         tot = n = 0
