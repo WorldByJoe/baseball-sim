@@ -7540,6 +7540,20 @@ null
 8
 ]
 },
+"status": "Final",
+"detailed": "Final",
+"now": {
+"inning": 9,
+"half": "Top",
+"outs": 3,
+"balls": 0,
+"strikes": 0,
+"bases": [
+false,
+false,
+false
+]
+},
 "innings": [
 [
 0,

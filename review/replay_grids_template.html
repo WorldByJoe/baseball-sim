@@ -1,0 +1,87 @@
+<title>Division Series Replays</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a scorebook page. Each series is a band; its games sit side by side as score grids that wrap on narrow screens. */
+:root {
+  --bg: #f4f6f9; --panel: #ffffff; --ink: #121a26; --muted: #5b6676; --line: #d6dce4;
+  --heat-lo: #cde2fb; --heat-hi: #0d366b; --on-cool: #121a26; --on-hot: #ffffff;
+  --tie: #e9edf2; --star: #e8a33d; --star-ring: #b8740f;
+  --f-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --f-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1318; --panel: #161b22; --ink: #e4e9f0; --muted: #96a1b0; --line: #2b3440;
+  --heat-lo: #123b6e; --heat-hi: #cde2fb; --on-cool: #e4e9f0; --on-hot: #0f1318;
+  --tie: #1d242d; --star: #f2b552; --star-ring: #f2b552; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1318; --panel: #161b22; --ink: #e4e9f0; --muted: #96a1b0; --line: #2b3440;
+  --heat-lo: #123b6e; --heat-hi: #cde2fb; --on-cool: #e4e9f0; --on-hot: #0f1318;
+  --tie: #1d242d; --star: #f2b552; --star-ring: #f2b552; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; display: flex; flex-direction: column; gap: 34px; }
+header { display: flex; flex-direction: column; gap: 10px; max-width: 68ch; }
+.eyebrow { font-family: var(--f-data); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(30px, 5vw, 44px); line-height: 1.05; margin: 0; text-wrap: balance; letter-spacing: 0.01em; }
+header p { margin: 0; }
+.howto { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: center; font-size: 13.5px; color: var(--muted); }
+.howto .k { display: inline-flex; align-items: center; gap: 7px; }
+.ramp { width: 96px; height: 12px; border-radius: 2px; background: linear-gradient(90deg, var(--heat-lo), var(--heat-hi)); border: 1px solid var(--line); }
+.chip { display: inline-grid; place-items: center; width: 22px; height: 18px; border-radius: 2px; font-family: var(--f-data); font-size: 11px; }
+.chip.star { background: var(--panel); box-shadow: inset 0 0 0 2.5px var(--star-ring); color: var(--star); font-size: 15px; }
+.chip.x { background: var(--panel); border: 1px solid var(--line); color: var(--muted); font-size: 9.5px; }
+.chip.tie { background: var(--tie); }
+.series { display: flex; flex-direction: column; gap: 14px; }
+.series h2 { font-family: var(--f-display); font-weight: 600; font-size: 26px; margin: 0; display: flex; align-items: baseline; gap: 10px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.tag { font-family: var(--f-data); font-size: 12px; letter-spacing: 0.08em; color: var(--muted); font-weight: 400; }
+.games { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+.game { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 10px; min-width: 0; max-width: 100%; }
+figcaption { display: flex; flex-direction: column; gap: 2px; }
+.game h3 { font-family: var(--f-display); font-weight: 600; font-size: 20px; margin: 0; }
+.when { font-family: var(--f-body); font-weight: 400; font-size: 13.5px; color: var(--muted); margin-left: 6px; }
+.final { margin: 0; font-weight: 600; }
+.tally { margin: 0; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.scroll { overflow-x: auto; max-width: 100%; }
+table.grid { border-collapse: separate; border-spacing: 2px; margin: 8px 0 0 8px; font-family: var(--f-data); font-variant-numeric: tabular-nums; }
+.grid th { font-weight: 400; color: var(--muted); font-size: 11px; padding: 0; }
+.grid th.c { height: 18px; text-align: center; }
+.grid th.r { width: 20px; text-align: right; padding-right: 4px; }
+.grid th.axis { font-family: var(--f-body); font-size: 12px; font-weight: 600; color: var(--ink); text-align: left; padding: 0 0 3px 2px; letter-spacing: 0.02em; }
+.grid th.side { width: 18px; padding: 0 2px 0 0; vertical-align: middle; }
+.grid th.side span { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; display: inline-block; }
+.grid td { position: relative; width: 30px; min-width: 30px; height: 28px; padding: 0; text-align: center; font-size: 11.5px; color: var(--on-cool);
+  background: color-mix(in oklab, var(--heat-hi) calc(var(--t, 0) * 100%), var(--heat-lo)); border-radius: 2px; }
+.grid td:not([style]) { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+.grid td.tie { background: var(--tie); box-shadow: none; }
+.grid td.hot { color: var(--on-hot); }
+.grid td.real { box-shadow: inset 0 0 0 2.5px var(--star-ring); }
+.grid td .star { position: absolute; top: -8px; left: -6px; z-index: 1; font-size: 17px; color: var(--star); line-height: 1; text-shadow: 0 0 1px var(--star-ring), 0 0 3px var(--panel), 0 0 3px var(--panel); }
+.grid td .x { position: absolute; right: 2px; bottom: 0; font-size: 8.5px; line-height: 1.1; opacity: 0.85; }
+.grid td .n { position: relative; top: 1px; }
+footer { font-size: 13px; color: var(--muted); max-width: 72ch; display: flex; flex-direction: column; gap: 6px; }
+footer p { margin: 0; }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">2026 postseason · baseball-sim engine v3.9</span>
+    <h1>Division Series Replays</h1>
+    <p>Each division series game finished so far, played again 1,000 times through the model with the lineups and pitchers it really had. Every replay used the real batting order, with each substitute taking his spot at the turn he really took it, and the real pitchers in their real order, each facing as many batters as he faced. Each replay also drew fresh values of every hitter's fitted traits, so the spread includes what is not known about the players as well as the game's own chance.</p>
+    <div class="howto">
+      <span class="k">Across: one team's runs. Down: the other's. Each cell counts the replays that ended at that score.</span>
+      <span class="k"><span class="ramp" aria-hidden="true"></span> fewer to more replays</span>
+      <span class="k"><span class="chip star" aria-hidden="true">★</span> the real final</span>
+      <span class="k"><span class="chip x" aria-hidden="true">x4</span> 4 of the cell's replays went to extra innings</span>
+      <span class="k"><span class="chip tie" aria-hidden="true"></span> a tie (no game ends tied)</span>
+    </div>
+  </header>
+
+<!--GRIDS-->
+
+  <footer>
+    <p>Each replay was played in the real park, with the designated hitter and no runner placed on second in extra innings, as in the postseason. A replay that ran longer than the real game went back to the model's manager and the rest of the playoff bullpen once the real game's pitchers were used up. Hover over a cell for its count and score.</p>
+    <p>Hitters' traits were fitted to their 2025-26 Statcast numbers and pitchers' to their strikeout and walk rates, on engine v3.9 (refit 2026-10-06).</p>
+  </footer>
+</div>
