@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>Couch Analyst</title>
 <!-- ============================================================================
-     couch.html · v1.0 · 2026-10-08
+     couch.html · v1.1 · 2026-10-08
 
      The couch analyst on the wall: a live postseason game read pitch by pitch through the baseball-sim model.
      The same analysis as the web companion (site/live/analyst.js: each player's traits fitted to his 2025-26
@@ -26,6 +26,7 @@
      guarded. Source: WorldByJoe/baseball-sim, branch yankees-review, site/wall/couch.html.
 
      CHANGED
+       v1.1  COUCH exposes the page's state for the wall's up-key card (about.js)
        v1.0  first build (Joe, 2026-10-08: "a version of the Couch for the Pi TV")
 ============================================================================ -->
 <script src="wall.js"></script>
@@ -145,6 +146,8 @@ window.postMessage = function (m) { if (COUCH.onmsg) COUCH.onmsg({ data: m }); }
   var CONFIG = { idleSec: 25, preMin: 20, postMin: 10, schedMs: 60000, nextPage: 'kiosk.html' };
   var S = { found: false, firstSeen: Date.now(), state: 'none', game: null, wentFinalAt: null, started: false };
   var buf = [], handedOff = false;
+  // what the up-key card (about.js, the wall chat's) reads: one global, COUCH, so nothing collides with the analyst's own names
+  COUCH.S = S; COUCH.CONFIG = CONFIG; COUCH.flags = { pinned: PINNED, replay: REPLAY, delay: DELAY }; COUCH.analyst = window.A; COUCH.lastState = null; COUCH.lastAt = null;
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function pct(p) { return p == null ? '' : (p < 0.01 ? (100 * p).toFixed(1) : Math.round(100 * p)) + '%'; }
@@ -206,6 +209,7 @@ window.postMessage = function (m) { if (COUCH.onmsg) COUCH.onmsg({ data: m }); }
     if (pick) render(pick.s);
   }
   function render(s) {
+    COUCH.lastState = s; COUCH.lastAt = Date.now();
     var A = s.teams.away, H = s.teams.home, n = s.now;
     var sc = s.score || (n && !n.complete ? n.score : [s.final.away, s.final.home]);
     $('aAb').textContent = A.abbrev || nick(A.name); $('hAb').textContent = H.abbrev || nick(H.name);
