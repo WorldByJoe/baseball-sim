@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Couch Analyst</title>
+<!-- ============================================================================
+     couch.html · v1.0 · 2026-10-08
+
+     The couch analyst on the wall: a live postseason game read pitch by pitch through the baseball-sim model.
+     The same analysis as the web companion (site/live/analyst.js: each player's traits fitted to his 2025-26
+     Statcast numbers, MLB's live feed, the model's chance of each outcome before every plate appearance, the
+     luck ledger, the pregame replays), laid out for the 3840x2160 wall.
+
+     The analyst runs on this page's own thread: a page opened from a file cannot start a Web Worker from a file,
+     so analyst.js is loaded as a plain script with postMessage and importScripts stood in for. Its scripts sit in
+     couch/ beside this file (couch/analyst.js, couch/engine/, couch/data/), apart from the Ballgame's engine.
+
+     It holds the wall while a postseason game is being played, from 20 minutes before the first pitch to
+     10 minutes after the last out, and otherwise stands aside within half a minute, as Game Day does. The decision
+     is a pure function, leaveReason(state, now), kept apart from the act of leaving.
+
+       ?g=<gamePk>   that game          ?replay   Yankees at Rays, ALDS Game 2, replayed (a test)
+       ?pin          never hand off      ?delay=N  show the game N seconds late (to sit behind a broadcast)
+
+     On the wall the shared ring script sits beside this file; standalone it is absent, so every use of Wall is
+     guarded. Source: WorldByJoe/baseball-sim, branch yankees-review, site/wall/couch.html.
+
+     CHANGED
+       v1.0  first build (Joe, 2026-10-08: "a version of the Couch for the Pi TV")
+============================================================================ -->
+<script src="wall.js"></script>
+<style>
+:root{
+  --wu: min(calc(100vw / 3840), calc(100vh / 2160));
+  --t0: calc(150 * var(--wu));
+  --t1: calc(93 * var(--wu));
+  --t2: calc(68 * var(--wu));
+  --t3: calc(51 * var(--wu));
+  --t4: calc(37 * var(--wu));
+  --t5: calc(30 * var(--wu));
+  --ink:   rgba(238,244,252,.95);
+  --ink-2: rgba(206,220,240,.78);
+  --ink-3: rgba(206,220,240,.50);
+  --ground: #0b0e14;
+  --plate: rgba(17,21,29,.94);
+  --edge:  rgba(255,255,255,.13);
+  --away:  #f2c14e;
+  --home:  #7cc4e8;
+  --flag:  #f08a4b;
+  --font-ui:   ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-num:  ui-monospace, "SF Mono", Menlo, monospace;
+  --font-name: Georgia, "Times New Roman", serif;
+  --r: calc(16 * var(--wu));
+  --pad: calc(30 * var(--wu));
+}
+html, body { margin:0; height:100%; background:var(--ground); color:var(--ink); overflow:hidden; font-family:var(--font-ui); }
+#stage { position:absolute; left:50%; top:50%; width:calc(3840 * var(--wu)); height:calc(2160 * var(--wu)); transform:translate(-50%, -50%); }
+#stage > * { position:absolute; box-sizing:border-box; }
+.plate { background:var(--plate); border:1px solid var(--edge); border-radius:var(--r); padding:var(--pad) calc(40 * var(--wu)); overflow:hidden; }
+.key { font:400 var(--t5)/1.3 var(--font-num); letter-spacing:.12em; text-transform:uppercase; color:var(--ink-2); margin:0 0 calc(18 * var(--wu)); }
+.a { color:var(--away); } .h { color:var(--home); }
+
+/* the scoreboard */
+#score { left:calc(120 * var(--wu)); top:calc(90 * var(--wu)); width:calc(2200 * var(--wu)); height:calc(260 * var(--wu)); display:flex; align-items:flex-end; gap:calc(70 * var(--wu)); }
+#score .team { display:flex; align-items:baseline; gap:calc(28 * var(--wu)); }
+#score .ab { font:600 var(--t2)/1 var(--font-ui); letter-spacing:.04em; }
+#score .runs { font:300 var(--t0)/0.9 var(--font-ui); font-variant-numeric:tabular-nums; }
+#sit { left:calc(120 * var(--wu)); top:calc(370 * var(--wu)); width:calc(2200 * var(--wu)); font:400 var(--t3)/1.2 var(--font-ui); color:var(--ink-2); display:flex; align-items:center; gap:calc(30 * var(--wu)); }
+.diamond { display:inline-grid; grid-template-columns:repeat(2, calc(34 * var(--wu))); grid-template-rows:repeat(2, calc(34 * var(--wu))); gap:calc(8 * var(--wu)); transform:rotate(45deg); margin:0 calc(24 * var(--wu)); }
+.diamond i { border:calc(4 * var(--wu)) solid var(--ink-3); display:block; }
+.diamond i.on { background:var(--ink); border-color:var(--ink); }
+.outs i { display:inline-block; width:calc(30 * var(--wu)); height:calc(30 * var(--wu)); border-radius:50%; border:calc(4 * var(--wu)) solid var(--ink-3); margin-left:calc(10 * var(--wu)); vertical-align:middle; }
+.outs i.on { background:var(--ink); border-color:var(--ink); }
+#title { right:calc(120 * var(--wu)); top:calc(100 * var(--wu)); width:calc(1300 * var(--wu)); text-align:right; }
+#title .name { font:italic 400 var(--t2)/1.1 var(--font-name); color:var(--ink); }
+#title .series { font:400 var(--t4)/1.4 var(--font-ui); color:var(--ink-2); margin-top:calc(12 * var(--wu)); }
+#title .status { font:400 var(--t5)/1.4 var(--font-num); color:var(--ink-3); margin-top:calc(8 * var(--wu)); letter-spacing:.06em; }
+
+/* at the plate */
+#plate { left:calc(120 * var(--wu)); top:calc(500 * var(--wu)); width:calc(2240 * var(--wu)); height:calc(1080 * var(--wu)); }
+#plate .matchup { font:500 var(--t1)/1.1 var(--font-ui); margin:0 0 calc(34 * var(--wu)); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#plate .matchup span { color:var(--ink-3); font-weight:300; }
+.probs { display:grid; grid-template-columns:repeat(4, 1fr); gap:calc(40 * var(--wu)); margin-bottom:calc(36 * var(--wu)); }
+.prob { border-top:calc(6 * var(--wu)) solid var(--edge); padding-top:calc(14 * var(--wu)); }
+.prob b { display:block; font:300 calc(120 * var(--wu))/1 var(--font-ui); font-variant-numeric:tabular-nums; }
+.prob span { font:400 var(--t4)/1.3 var(--font-ui); color:var(--ink-2); }
+ul.watch { margin:0 0 calc(30 * var(--wu)); padding-left:calc(44 * var(--wu)); font:400 var(--t4)/1.4 var(--font-ui); color:var(--ink-2); }
+ul.watch li { margin-bottom:calc(6 * var(--wu)); }
+ol.pitches { list-style:none; margin:0; padding:0; display:grid; gap:calc(10 * var(--wu)); font:400 var(--t4)/1.3 var(--font-ui); }
+ol.pitches li { padding:calc(8 * var(--wu)) calc(18 * var(--wu)); border-left:calc(6 * var(--wu)) solid transparent; }
+ol.pitches li.flag, ol.events li.flag { border-left-color:var(--flag); color:var(--ink); background:rgba(240,138,75,.10); }
+
+/* the right rail */
+#ledger { left:calc(2460 * var(--wu)); top:calc(500 * var(--wu)); width:calc(1260 * var(--wu)); height:calc(620 * var(--wu)); }
+table.led { width:100%; border-collapse:collapse; font:400 var(--t4)/1.2 var(--font-ui); }
+table.led th { font:400 var(--t5)/1.2 var(--font-num); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2); text-align:right; padding:calc(8 * var(--wu)) calc(10 * var(--wu)); border-bottom:1px solid var(--edge); }
+table.led th:first-child, table.led td:first-child { text-align:left; }
+table.led td { padding:calc(14 * var(--wu)) calc(10 * var(--wu)); text-align:right; font-family:var(--font-num); font-variant-numeric:tabular-nums; border-bottom:1px solid var(--edge); }
+table.led td.act { color:var(--ink); } table.led td.exp { color:var(--ink-2); }
+#ledger .note { font:400 var(--t5)/1.35 var(--font-ui); color:var(--ink-3); margin-top:calc(18 * var(--wu)); }
+#pre { left:calc(2460 * var(--wu)); top:calc(1150 * var(--wu)); width:calc(1260 * var(--wu)); height:calc(430 * var(--wu)); }
+#pre .line { font:400 var(--t4)/1.35 var(--font-ui); color:var(--ink-2); }
+#pre .big { font:300 var(--t2)/1.15 var(--font-ui); color:var(--ink); margin:calc(10 * var(--wu)) 0; }
+
+/* the bottom band */
+#events { left:calc(120 * var(--wu)); top:calc(1620 * var(--wu)); width:calc(2240 * var(--wu)); height:calc(440 * var(--wu)); }
+ol.events { list-style:none; margin:0; padding:0; display:grid; gap:calc(8 * var(--wu)); font:400 var(--t4)/1.3 var(--font-ui); color:var(--ink-2); }
+ol.events li { padding:calc(6 * var(--wu)) calc(18 * var(--wu)); border-left:calc(6 * var(--wu)) solid transparent; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+ol.events li.pa { color:var(--ink); }
+#wp { left:calc(2460 * var(--wu)); top:calc(1620 * var(--wu)); width:calc(1260 * var(--wu)); height:calc(440 * var(--wu)); }
+#wp svg { display:block; width:100%; height:calc(320 * var(--wu)); }
+#src { left:calc(120 * var(--wu)); top:calc(2085 * var(--wu)); width:calc(3600 * var(--wu)); font:400 var(--t5)/1.2 var(--font-num); letter-spacing:.06em; color:var(--ink-3); }
+.empty { color:var(--ink-3); font:400 var(--t4)/1.4 var(--font-ui); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="score"><div class="team"><span class="ab a" id="aAb">&nbsp;</span><span class="runs a" id="aR"></span></div><div class="team"><span class="ab h" id="hAb">&nbsp;</span><span class="runs h" id="hR"></span></div></div>
+  <div id="sit"></div>
+  <div id="title"><div class="name">Couch Analyst</div><div class="series" id="series">Looking for today's postseason games</div><div class="status" id="status"></div></div>
+  <section class="plate" id="plate"><h2 class="key">At the plate</h2><p class="empty">The batter, and the model's chance of each outcome, appear here once the game is under way.</p></section>
+  <section class="plate" id="ledger"><h2 class="key">Luck ledger</h2><table class="led" id="led"></table><p class="note">Expected from each plate appearance's matchup, and from the league's balls like each one hit.</p></section>
+  <section class="plate" id="pre"><h2 class="key">Before the game</h2><p class="empty">The model's pregame chances appear once the lineups are posted.</p></section>
+  <section class="plate" id="events"><h2 class="key">Just happened</h2><ol class="events" id="ev"></ol></section>
+  <section class="plate" id="wp"><h2 class="key">Win probability (MLB's)</h2><div id="wpc"></div></section>
+  <div id="src">WORLD BY JOE · live feed: MLB Stats API · the model: baseball-sim v3.9, each player’s traits fitted to his 2025-26 Statcast numbers · win probability: MLB’s</div>
+</div>
+<script>
+// stand-ins so analyst.js (written as a Web Worker) runs on this page's thread; its scripts are loaded below
+var COUCH = { onmsg: null };
+window.importScripts = function () {};
+window.postMessage = function (m) { if (COUCH.onmsg) COUCH.onmsg({ data: m }); };
+</script>
+<script src="couch/engine/bb_engine.js"></script>
+<script src="couch/engine/bb_names.js"></script>
+<script src="couch/engine/bb_field.js"></script>
+<script src="couch/engine/bb_game.js"></script>
+<script src="couch/engine/players.js"></script>
+<script src="couch/data/playoff.js"></script>
+<script src="couch/analyst.js"></script>
+<script>
+(function () {
+  var q = location.search, PINNED = /[?&]pin\b/.test(q), REPLAY = /[?&]replay\b/.test(q), GQ = +((q.match(/[?&]g=(\d+)/) || [])[1] || 0);
+  var DELAY = +((q.match(/[?&]delay=(\d+)/) || [])[1] || 0);
+  var CONFIG = { idleSec: 25, preMin: 20, postMin: 10, schedMs: 60000, nextPage: 'kiosk.html' };
+  var S = { found: false, firstSeen: Date.now(), state: 'none', game: null, wentFinalAt: null, started: false };
+  var buf = [], handedOff = false;
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function pct(p) { return p == null ? '' : (p < 0.01 ? (100 * p).toFixed(1) : Math.round(100 * p)) + '%'; }
+  function nick(name) { var w = String(name || '').split(' '); return w[w.length - 1]; }
+
+  // ------------------------------------------------------------ the analyst's messages
+  COUCH.onmsg = function (e) {
+    if (e.data.type === 'status') $('status').textContent = e.data.text;
+    else if (e.data.type === 'state') { buf.push({ at: Date.now() / 1000, s: e.data.state }); if (buf.length > 400) buf.shift(); show(); }
+  };
+  function start(msg) { if (S.started) return; S.started = true; try { onmessage({ data: msg }); } catch (err) { $('status').textContent = 'The analyst stopped: ' + err.message; } }
+
+  // ------------------------------------------------------------ which game: today's postseason schedule (US Mountain date)
+  function pickGame(games, now) {
+    var live = games.filter(function (g) { return g.status.abstractGameState === 'Live'; })[0];
+    if (live) return { g: live, state: 'in' };
+    var soon = games.filter(function (g) { return g.status.abstractGameState === 'Preview' && new Date(g.gameDate).getTime() - now < CONFIG.preMin * 60000; })[0];
+    if (soon) return { g: soon, state: 'pre' };
+    var fin = games.filter(function (g) { return g.status.abstractGameState === 'Final'; }).sort(function (a, b) { return new Date(b.gameDate) - new Date(a.gameDate); })[0];
+    if (fin) return { g: fin, state: 'post' };
+    return null;
+  }
+  function schedule() {
+    if (REPLAY) return;
+    var day = new Date(Date.now() - 6 * 3600 * 1000).toISOString().slice(0, 10);
+    fetch('https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=' + day + '&gameType=F,D,L,W').then(function (r) { return r.json(); }).then(function (s) {
+      var games = []; (s.dates || []).forEach(function (d) { d.games.forEach(function (g) { games.push(g); }); });
+      if (GQ) games = games.filter(function (g) { return g.gamePk === GQ; });
+      var p = GQ ? (games[0] ? { g: games[0], state: games[0].status.abstractGameState === 'Live' ? 'in' : games[0].status.abstractGameState === 'Final' ? 'post' : 'pre' } : null) : pickGame(games, Date.now());
+      if (GQ && !p) { p = { g: { gamePk: GQ, status: { abstractGameState: 'Live' } }, state: 'in' }; }
+      if (!p) { S.found = false; S.state = 'none'; $('series').textContent = games.length ? 'No postseason game on right now' : 'No postseason games today'; maybeHandOff(); return; }
+      S.found = true; S.state = p.state; S.game = p.g;
+      if (p.state === 'post' && !S.wentFinalAt) S.wentFinalAt = Date.now();
+      if (p.g.seriesDescription) $('series').textContent = p.g.seriesDescription + (p.g.seriesGameNumber ? ' · Game ' + p.g.seriesGameNumber : '') + (p.g.teams ? ' · ' + nick(p.g.teams.away.team.name) + ' at ' + nick(p.g.teams.home.team.name) : '');
+      start({ cmd: 'start', pk: p.g.gamePk });
+      maybeHandOff();
+    }).catch(function () { $('status').textContent = 'MLB’s schedule did not answer'; if (GQ) start({ cmd: 'start', pk: GQ }); });
+  }
+
+  /* THE DECISION, AS A PURE FUNCTION OF (state, now), apart from the act of leaving (gameday.html's lesson: probing the
+     combined version once navigated the wall away mid-game). Returns '' to stay, or the reason to go. */
+  function leaveReason(st, now) {
+    if (!st.found) return (now - st.firstSeen) > CONFIG.idleSec * 1000 ? 'nothing on' : '';
+    if (st.state === 'post') return (now - (st.wentFinalAt || st.firstSeen)) > CONFIG.postMin * 60000 ? 'game over' : '';
+    return '';                       // 'pre' (within 20 minutes) and 'in': the game holds the wall
+  }
+  function maybeHandOff() {
+    if (PINNED || REPLAY || GQ || handedOff) return;
+    if (!leaveReason(S, Date.now())) return;
+    handedOff = true;
+    setTimeout(function () { location.href = window.Wall && Wall.nextPage ? Wall.nextPage(CONFIG.nextPage) : CONFIG.nextPage; }, 1400);
+  }
+  window.COUCH_leaveReason = leaveReason;   // for testing the decision without its consequence
+
+  // ------------------------------------------------------------ drawing
+  function show() {
+    var now = Date.now() / 1000, pick = null;
+    for (var k = buf.length - 1; k >= 0; k--) if (buf[k].at <= now - DELAY) { pick = buf[k]; break; }
+    if (pick) render(pick.s);
+  }
+  function render(s) {
+    var A = s.teams.away, H = s.teams.home, n = s.now;
+    var sc = s.score || (n && !n.complete ? n.score : [s.final.away, s.final.home]);
+    $('aAb').textContent = A.abbrev || nick(A.name); $('hAb').textContent = H.abbrev || nick(H.name);
+    $('aR').textContent = sc[0]; $('hR').textContent = sc[1];
+    if (s.status === 'Final') S.state = 'post';
+    if (n) {
+      var d = '<span class="diamond">' + [n.bases[1], n.bases[0], n.bases[2], false].map(function (b, i) { return i === 3 ? '<i style="visibility:hidden"></i>' : '<i class="' + (b ? 'on' : '') + '"></i>'; }).join('') + '</span>';
+      var o = '<span class="outs">' + [0, 1, 2].map(function (i) { return '<i class="' + (i < n.outs ? 'on' : '') + '"></i>'; }).join('') + '</span>';
+      $('sit').innerHTML = (s.status === 'Final' ? 'Final' : (n.half === 'top' ? 'Top ' : 'Bottom ') + n.inning) + d + o;
+      var p = n.probs, h = '<h2 class="key">At the plate</h2><p class="matchup">' + esc(n.batter) + ' <span>vs</span> ' + esc(n.pitcher) + '</p>';
+      if (p) {
+        var hit = p['1B'] + p['2B'] + p['3B'] + p.HR;
+        h += '<div class="probs">' + [['Strikeout', p.K], ['Walk', p.BB + p.HBP], ['Hit', hit], ['Home run', p.HR]].map(function (x) { return '<div class="prob"><b>' + pct(x[1]) + '</b><span>' + x[0] + '</span></div>'; }).join('') + '</div>';
+      }
+      h += '<ul class="watch">' + n.watch.slice(1, 4).map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>';
+      h += '<ol class="pitches">' + n.pitches.slice(-6).map(function (x) { return '<li class="' + (x.flag ? 'flag' : '') + '">' + esc(x.text) + '</li>'; }).join('') + '</ol>';
+      $('plate').innerHTML = h;
+    }
+    var L = s.ledger, ab = esc(A.abbrev || nick(A.name)), hb = esc(H.abbrev || nick(H.name));
+    var pair = function (v, i) { return v ? v[i] : ''; }, w3 = function (v) { return v == null ? '' : v.toFixed(3).replace(/^0/, ''); };
+    var row = function (lab, k, f) { return '<tr><td>' + lab + '</td><td class="exp">' + f(L.away[k], 0) + '</td><td class="act">' + f(L.away[k], 1) + '</td><td class="exp">' + f(L.home[k], 0) + '</td><td class="act">' + f(L.home[k], 1) + '</td></tr>'; };
+    $('led').innerHTML = '<tr><th></th><th class="a">' + ab + ' exp.</th><th class="a">actual</th><th class="h">' + hb + ' exp.</th><th class="h">actual</th></tr>' +
+      row('Strikeouts', 'K', pair) + row('Walks', 'BB', pair) + row('Hits in play', 'hits', pair) +
+      '<tr><td>wOBA</td><td class="exp">' + w3(L.away.xwoba) + '</td><td class="act">' + w3(L.away.woba) + '</td><td class="exp">' + w3(L.home.xwoba) + '</td><td class="act">' + w3(L.home.woba) + '</td></tr>';
+    if (s.pregame) {
+      var g = s.pregame;
+      $('pre').innerHTML = '<h2 class="key">Before the game</h2><p class="line">' + esc(g.awaySP) + ' against ' + esc(g.homeSP) + ', in ' + g.n + ' replays of tonight’s game:</p>' +
+        '<p class="big"><span class="a">' + ab + ' ' + pct(g.awayWin) + '</span> &nbsp; <span class="h">' + hb + ' ' + pct(1 - g.awayWin) + '</span></p>' +
+        '<p class="line">Expected runs ' + g.awayRuns.toFixed(1) + ' to ' + g.homeRuns.toFixed(1) + '.</p>';
+    }
+    $('ev').innerHTML = s.events.slice(-6).reverse().map(function (e) { return '<li class="' + e.kind + (e.flag ? ' flag' : '') + '">' + esc(e.text) + '</li>'; }).join('');
+    var wp = s.wp || [];
+    if (wp.length) {
+      var W = 1180, Hh = 320, x = function (i) { return 70 + (W - 90) * (i + 1) / Math.max(wp.length, 75); }, y = function (v) { return 14 + (Hh - 40) * (1 - v / 100); };
+      var path = wp.map(function (q, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ',' + y(100 - q[1]).toFixed(1); }).join(' ');
+      var last = wp[wp.length - 1][1];
+      $('wpc').innerHTML = '<svg viewBox="0 0 ' + W + ' ' + Hh + '" role="img" aria-label="' + ab + ' win probability">' +
+        '<line x1="70" x2="' + (W - 20) + '" y1="' + y(50) + '" y2="' + y(50) + '" stroke="rgba(255,255,255,.18)" stroke-dasharray="6 6"/>' +
+        '<text x="56" y="' + (y(100) + 10) + '" text-anchor="end" fill="rgba(206,220,240,.5)" font-size="30" font-family="ui-monospace,Menlo,monospace">' + ab + '</text>' +
+        '<text x="56" y="' + (y(0) + 4) + '" text-anchor="end" fill="rgba(206,220,240,.5)" font-size="30" font-family="ui-monospace,Menlo,monospace">' + hb + '</text>' +
+        '<path d="' + path + '" fill="none" stroke="rgba(238,244,252,.9)" stroke-width="5"/>' +
+        '<text x="' + (x(wp.length - 1) + 14) + '" y="' + (y(100 - last) + 10) + '" fill="rgba(238,244,252,.95)" font-size="34" font-family="ui-sans-serif,system-ui">' + (last >= 50 ? hb + ' ' + Math.round(last) : ab + ' ' + Math.round(100 - last)) + '%</text></svg>';
+    }
+  }
+
+  // ------------------------------------------------------------ go
+  if (REPLAY) {
+    var sc = document.createElement('script'); sc.src = 'couch/data/replay_849839.js';
+    sc.onload = function () { $('series').textContent = 'Replay: AL Division Series · Game 2 · Yankees at Rays'; start({ cmd: 'start', pk: 849839, replay: 'couch/data/replay_849839.js', replayData: REPLAY_FEED, replayWpData: REPLAY_WP, dt: 1500 }); };
+    document.body.appendChild(sc);
+  } else {
+    schedule(); setInterval(schedule, CONFIG.schedMs);
+  }
+  setInterval(show, 1000);
+  setInterval(maybeHandOff, 5000);
+})();
+</script>
+</body>
+</html>
