@@ -1,20 +1,24 @@
 /* ============================================================================
-   analyst.js · v0.1 · 2026-10-06
+   analyst.js · v0.2 · 2026-10-08
 
    The couch analyst in the browser: a Web Worker that follows one game on
    MLB's live feed (statsapi.mlb.com, open to any page) and runs the model on
    it, in the viewer's own browser. It is review/live/poll.py, the feed parser
    review/game_feed.py, and the per-plate-appearance analysis of
    review/game_review.js and the pregame replays of review/pregame.js,
-   in one script, with the playoff players bundled in data/playoff.js.
+   in one script, with the playoff players bundled in data/playoff.js. The wall's couch.html loads it as a
+   plain script on its own thread (postMessage and importScripts stood in for).
 
    Messages in:  { cmd: 'start', pk, replay (a feed file, optional), dt }
    Messages out: { type: 'state', state }, { type: 'status', text }
 
    CHANGED
+     v0.2  MLB's win probability fetched once a step, not once a plate appearance, and the state sent again when it
+           lands (a finished game never drew its curve); a replay's feed may come in the message (replayData, replayWpData): the wall's page runs this on its own
+           thread from a local file and cannot fetch
      v0.1  first build (Brewers-Padres, NLDS Game 3, 2026-10-06)
 ============================================================================ */
-var V = '?v=3.9.2';   // bump with each engine or bundle, as index.html's worker tag (GitHub Pages caches 10 min)
+var V = '?v=3.9.3';   // bump with each engine or bundle, as index.html's worker tag (GitHub Pages caches 10 min)
 importScripts('engine/bb_engine.js' + V, 'engine/bb_names.js' + V, 'engine/bb_field.js' + V, 'engine/bb_game.js' + V, 'engine/players.js' + V, 'data/playoff.js' + V);
 REVIEW.setData(PLAYOFF.recs, PLAYOFF.fits, PLAYOFF.pfit);
 
@@ -282,12 +286,18 @@ function step(feed) {
     if (complete) {
       a.league = leagueHit(pa);
       var y = paText(pa, a, a.league); A.events.push({ t: now, kind: 'pa', text: y[0], flag: y[1] });
-      if (A.live) fetch('https://statsapi.mlb.com/api/v1/game/' + A.pk + '/winProbability').then(function (r) { return r.json(); }).then(function (w) { A.wp = w.map(function (x) { return [x.atBatIndex, x.homeTeamWinProbability]; }); }).catch(function () {});
+      A.wpDue = true;
     }
     A.done[i] = [pa.pitches.length, complete];
   });
   status('');
   postMessage({ type: 'state', state: stateOf(G, now) });
+  if (A.live && A.wpDue) {   // MLB's curve, once a step (not once a plate appearance), and drawn again when it lands
+    A.wpDue = false;
+    fetch('https://statsapi.mlb.com/api/v1/game/' + A.pk + '/winProbability').then(function (r) { return r.json(); }).then(function (w) {
+      A.wp = w.map(function (x) { return [x.atBatIndex, x.homeTeamWinProbability]; }); postMessage({ type: 'state', state: stateOf(G, Date.now() / 1000) });
+    }).catch(function () {});
+  }
   if (!A.pre && G.lineups.away.length && G.lineups.home.length) {   // the pregame replays, after the plays are caught up
     A.pre = pregame(G) || { failed: true }; status('');
     postMessage({ type: 'state', state: stateOf(G, now) });
@@ -337,7 +347,8 @@ onmessage = function (e) {
   if (m.replay) {
     A.live = false;
     status('Loading the replay');
-    Promise.all([fetch(m.replay).then(function (r) { return r.json(); }), m.replayWp ? fetch(m.replayWp).then(function (r) { return r.json(); }) : Promise.resolve([])]).then(function (x) {
+    (m.replayData ? Promise.resolve([m.replayData, m.replayWpData || []])   // the TV page hands the feed over itself (a page opened from a file cannot fetch files)
+      : Promise.all([fetch(m.replay).then(function (r) { return r.json(); }), m.replayWp ? fetch(m.replayWp).then(function (r) { return r.json(); }) : Promise.resolve([])])).then(function (x) {
       var next = replayFeeds(x[0]), wp = x[1], n = 0;
       (function tick() {
         var f = next(n++); if (!f) return;
