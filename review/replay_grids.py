@@ -1,5 +1,5 @@
 """
-replay_grids.py · v0.4 · 2026-10-08
+replay_grids.py · v0.5 · 2026-10-08
 
 The division series score grids: each finished game's replays (review/replay_game.js,
 diag_out/replays/<pk>.jsonl) as a table of one team's runs (columns) against the other's
@@ -7,9 +7,11 @@ diag_out/replays/<pk>.jsonl) as a table of one team's runs (columns) against the
 final starred, and the replays in the cell that went to extra innings counted in its corner.
 Within a series the same team keeps the columns (Game 1's visitor), so the grids line up.
 
-  python3 review/replay_grids.py OUT.html
+  python3 review/replay_grids.py OUT.html            (for the artifact)
+  python3 review/replay_grids.py OUT.html --page     (a whole document, for GitHub Pages)
 
 CHANGED
+  v0.5  the LCS and World Series forecast (review/series_forecast.json); the trait map as a second view; --page for GitHub Pages
   v0.4  the series picks: each series' chance for its winner from the replays' game chances, per set; the favourite's games won
   v0.3  a third set, each fielder's own error tendency (replay_game.js mode 'errors'); errors in the tallies and captions
   v0.2  two sets a reader flips between: the regular season's pitching and the pitching as it was that day
@@ -160,6 +162,62 @@ def picks_section(series):
             '<th scope="col">Series chance</th><th scope="col">The pick</th></tr></thead><tbody>%s</tbody></table></div><p class="tally">%s</p></section>') % ('\n'.join(rows), tally)
 
 
+def forecast_section(series):
+    """The League Championship Series and World Series played 2,000 times each before Game 1 (review/series_sim.js, review/series_summary.py)."""
+    F = json.load(open('review/series_forecast.json'))
+    def pct(v): return '%.0f%%' % (100 * v)
+    def lengths(d):   # four small columns, the chance the series takes 4, 5, 6 or 7 games
+        top = max(d.values())
+        return '<div class="len">' + ''.join('<div class="lc" title="%s games: %s of the simulated series"><span class="lb" style="height:%.0f%%"></span><span class="ln">%s</span><span class="lk">%s</span></div>' % (
+            k, pct(v), 100 * v / top, pct(v), k) for k, v in sorted(d.items())) + '</div>'
+    def split(win, hi, lo):   # one bar: the favourite's share from the left
+        a, b = win.get(hi, 0), win.get(lo, 0)
+        return ('<div class="split" role="img" aria-label="%s %s, %s %s"><span class="sa" style="width:%.1f%%"></span></div>'
+                '<div class="splitk"><span><b>%s</b> %s</span><span>%s <b>%s</b></span></div>') % (NICK[hi], pct(a), NICK[lo], pct(b), 100 * a, NICK[hi], pct(a), pct(b), NICK[lo])
+    def lcs(name, label):
+        d = F[name]; S = json.load(open('review/series/%s.json' % name)); hi, lo = S['hi'], S['lo']
+        fav = max(d['win'], key=d['win'].get); oth = lo if fav == hi else hi
+        return ('<div class="fc"><h3><span class="tag">%s</span> %s vs %s</h3>%s'
+                '<p class="tally">Home field: %s (games 1, 2, 6 and 7). %s runs a team a game in the simulations.</p>'
+                '<p class="lenh">Games the series takes</p>%s</div>') % (name, NICK[hi], NICK[lo], split(d['win'], fav, oth), NICK[hi], '%.1f' % d['runs'], lengths(d['length']))
+    # the ALDS still open, if any, for the assumption's wording
+    note = ''
+    for S in series:
+        A, B = S['col'], S['row']; w = {A: 0, B: 0}
+        for pk, num, date in S['games']:
+            G, _ = load(pk); ab = (G['teams']['away']['abbrev'], G['teams']['home']['abbrev'])
+            w[ab[0] if G['final']['away'] > G['final']['home'] else ab[1]] += 1
+        if max(w.values()) < 3:
+            al = json.load(open('review/series/ALCS.json')); t = al['hi'] if al['hi'] in w else al['lo']; o = B if t == A else A
+            note = ' The %s were assumed to beat the %s (the series stood %d-%d when this ran).' % (NICK[t], NICK[o], w[t], w[o])
+    rows = []
+    for name in sorted([k for k in F if k.startswith('WS_')], key=lambda k: -F[k]['chance']):
+        d = F[name]; S = json.load(open('review/series/%s.json' % name)); hi, lo = S['hi'], S['lo']
+        fav = max(d['win'], key=d['win'].get)
+        rows.append('<tr><th scope="row">%s vs %s</th><td class="num">%s</td><td>%s %s</td><td>%s</td></tr>' % (
+            NICK[hi], NICK[lo], pct(d['chance']), NICK[fav], pct(d['win'][fav]), ' &middot; '.join('%s in %s' % (pct(v), k) for k, v in sorted(d['length'].items()))))
+    champ = sorted(F['champion'].items(), key=lambda kv: -kv[1]); top = champ[0][1]
+    bars = ''.join('<div class="cb"><span class="cn">%s</span><span class="ct"><span class="cf" style="width:%.1f%%"></span></span><span class="cv">%s</span></div>' % (
+        NICK[t], 100 * v / top, pct(v)) for t, v in champ)
+    wl = F['wsLength']; mean = sum(int(k) * v for k, v in wl.items())
+    return ('<section class="series fc-sec" id="forecast"><h2><span class="tag">LCS</span> Who goes on: the League Championship Series and the World Series</h2>'
+            '<p class="lede">Each League Championship Series played 2,000 times before Game 1, and each possible World Series 2,000 times, through the same model and '
+            'with each fielder making errors at his own rate.%s</p>'
+            '<div class="fcs">%s%s</div>'
+            '<div class="fc wide"><h3><span class="tag">WS</span> The World Series</h3>'
+            '<div class="champ" aria-label="Chance to win the World Series">%s</div>'
+            '<p class="tally">The chance each team wins the World Series, over every pairing in proportion to its chance of happening. The series took %.1f games on average.</p>'
+            '<p class="lenh">Games the World Series takes</p>%s'
+            '<div class="scroll"><table class="picks ws"><thead><tr><th scope="col">Pairing</th><th scope="col">Chance it happens</th><th scope="col">Favourite</th><th scope="col">Games it takes</th></tr></thead>'
+            '<tbody>%s</tbody></table></div></div>'
+            '<ul class="assume"><li>Lineups: each team&#39;s last division series lineup, every man at the position he started.</li>'
+            '<li>Starters: each team&#39;s division series starters in order, filled to four from its regular season, turning over every four games.</li>'
+            '<li>Bullpens: the relievers on the playoff roster, run by the model&#39;s manager, rested at the start of every game.</li>'
+            '<li>Home field: the better regular-season record, games 1, 2, 6 and 7 at home; open parks at 60 F, roofed parks at 72 F.</li>'
+            '<li>Each simulated series drew every hitter&#39;s traits once and kept them all series.</li></ul></section>') % (
+        note, lcs('ALCS', 'American League'), lcs('NLCS', 'National League'), bars, mean, lengths(wl), '\n'.join(rows))
+
+
 def logit_section():
     """The replays' win share against the real results (review/win_logit.py's fit), as an SVG that follows the page's theme."""
     import numpy as np
@@ -230,9 +288,17 @@ def main(path):
         runs[key] = tot / n; errs[key] = te / n
     reale = sum(sum(json.load(open('playoffs/games/%d_feed.json' % g[0]))['liveData']['linescore']['teams'][s]['errors'] for s in ('away', 'home')) / 2 for g in games) / len(games)
     realr = sum((json.load(open('review/games/%d.json' % g[0]))['final']['away'] + json.load(open('review/games/%d.json' % g[0]))['final']['home']) / 2 for g in games) / len(games)
-    page = open('review/replay_grids_template.html').read().replace('<!--GRIDS-->', '\n'.join(body))
+    page = open('review/replay_grids_template.html').read().replace('<!--GRIDS-->', '\n'.join(body)).replace('<!--FORECAST-->', forecast_section(series))
     for key in runs: page = page.replace('<!--RUNS_%s-->' % key.upper(), '%.2f' % runs[key]).replace('<!--ERR_%s-->' % key.upper(), '%.2f' % errs[key])
     page = page.replace('<!--RUNS_REAL-->', '%.2f' % realr).replace('<!--ERR_REAL-->', '%.2f' % reale).replace('<!--NGAMES-->', str(len(games)))
+    # the trait map (docs/trait_map.html on main) rides along as a JSON string the page opens in a frame of its own; every '<' escaped so no tag inside can end this one
+    import subprocess
+    tm = subprocess.run(['git', 'show', 'origin/main:docs/trait_map.html'], capture_output=True, text=True, check=True).stdout
+    page = page.replace('<!--TRAITMAP-->', json.dumps(tm).replace('<', '\\u003c'))
+    if '--page' in sys.argv:   # a whole document for GitHub Pages (the artifact host adds this skeleton itself)
+        head, rest = page.split('</style>', 1)
+        page = ('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+                + head + '</style>\n</head>\n<body>\n' + rest + '\n</body>\n</html>\n')
     open(path, 'w').write(page)
     print('wrote', path, len(page), 'bytes')
 

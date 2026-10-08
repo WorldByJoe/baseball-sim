@@ -1,9 +1,10 @@
-<title>Division Series Replays</title>
+<title>Postseason Replays</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
 <style>
-/* Layout: a scorebook page. Each series is a band; its games sit side by side as score grids that wrap on narrow screens. */
+/* Layout: a scorebook page with two views, the postseason and the trait map (a frame of its own). The postseason view: the forecast,
+   then the replays block (its set switch sticks while the replays scroll), each series a band of score grids that wrap on narrow screens. */
 :root {
   --bg: #f4f6f9; --panel: #ffffff; --ink: #121a26; --muted: #5b6676; --line: #d6dce4;
   --heat-lo: #cde2fb; --heat-hi: #0d366b; --on-cool: #121a26; --on-hot: #ffffff;
@@ -20,7 +21,17 @@
   --bg: #0f1318; --panel: #161b22; --ink: #e4e9f0; --muted: #96a1b0; --line: #2b3440;
   --heat-lo: #123b6e; --heat-hi: #cde2fb; --on-cool: #e4e9f0; --on-hot: #0f1318;
   --tie: #1d242d; --star: #f2b552; --star-ring: #f2b552; --fit: #6da7ec; color-scheme: dark }
-body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+[hidden] { display: none !important; }
+.views { max-width: 1240px; margin: 0 auto; padding-inline: 16px; padding-block: 16px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.views .seg button { font-size: 15px; padding: 8px 16px; }
+.views .note { font-size: 13px; color: var(--muted); }
+#view-traits { min-height: 60vh; }
+#view-traits iframe { display: block; width: 100%; height: 80vh; border: 0; }
+.jump { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; }
+.jump a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+.jump a:hover { border-bottom-color: var(--ink); }
+.replays { display: flex; flex-direction: column; gap: 34px; min-width: 0; }
 .wrap { max-width: 1240px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; display: flex; flex-direction: column; gap: 34px; }
 header { display: flex; flex-direction: column; gap: 10px; max-width: 68ch; }
 .eyebrow { font-family: var(--f-data); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
@@ -90,7 +101,7 @@ table.picks { border-collapse: collapse; font-variant-numeric: tabular-nums; bac
 .picks tbody tr:last-child th, .picks tbody tr:last-child td { border-bottom: 0; }
 .picks thead th { font-family: var(--f-body); font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
 .picks tbody th { font-family: var(--f-display); font-weight: 600; font-size: 17px; }
-.picks th.g, .picks td:not(.res):not(:last-child) { text-align: right; font-family: var(--f-data); font-size: 13px; }
+table.picks:not(.ws) th.g, table.picks:not(.ws) td:not(.res):not(:last-child) { text-align: right; font-family: var(--f-data); font-size: 13px; }
 .picks td.na { color: var(--muted); }
 .picks td.ch { font-weight: 600; font-size: 15px; }
 .picks .wl { display: inline-block; width: 16px; text-align: center; font-size: 10.5px; border-radius: 2px; margin-left: 2px; }
@@ -99,23 +110,53 @@ table.picks { border-collapse: collapse; font-variant-numeric: tabular-nums; bac
 .picks .v.right { font-weight: 600; }
 .picks .v.missed { color: var(--muted); }
 .picks .v.open { color: var(--muted); font-style: italic; }
+.fc-sec .lede { margin: 0; max-width: 72ch; }
+.fcs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 18px; }
+.fc { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.fc h3 { font-family: var(--f-display); font-weight: 600; font-size: 21px; margin: 0; display: flex; align-items: baseline; gap: 8px; }
+.split { height: 14px; border-radius: 2px; background: var(--heat-lo); overflow: hidden; }
+.split .sa { display: block; height: 100%; background: var(--heat-hi); border-right: 2px solid var(--panel); }
+.splitk { display: flex; justify-content: space-between; font-size: 15px; font-variant-numeric: tabular-nums; }
+.splitk b { font-family: var(--f-display); font-weight: 600; font-size: 19px; }
+.lenh { margin: 4px 0 0; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.len { display: grid; grid-template-columns: repeat(4, minmax(0, 64px)); gap: 10px; align-items: end; }
+.lc { display: grid; grid-template-rows: 56px auto auto; justify-items: center; font-family: var(--f-data); font-variant-numeric: tabular-nums; }
+.lc .lb { align-self: end; width: 100%; background: var(--heat-hi); border-radius: 2px 2px 0 0; }
+.lc .ln { font-size: 12.5px; color: var(--ink); margin-top: 3px; }
+.lc .lk { font-size: 11px; color: var(--muted); }
+.champ { display: flex; flex-direction: column; gap: 7px; max-width: 560px; }
+.cb { display: grid; grid-template-columns: 92px 1fr 46px; align-items: center; gap: 10px; }
+.cb .cn { font-family: var(--f-display); font-weight: 600; font-size: 17px; }
+.cb .ct { height: 14px; background: var(--tie); border-radius: 2px; overflow: hidden; }
+.cb .cf { display: block; height: 100%; background: var(--heat-hi); border-radius: 0 2px 2px 0; }
+.cb .cv { font-family: var(--f-data); font-size: 13.5px; text-align: right; font-variant-numeric: tabular-nums; }
+table.ws { min-width: 600px; margin-top: 6px; }
+.ws td.num { text-align: right; font-family: var(--f-data); }
+.assume { margin: 0; padding-left: 20px; font-size: 13.5px; color: var(--muted); max-width: 80ch; display: flex; flex-direction: column; gap: 3px; }
 footer { font-size: 13px; color: var(--muted); max-width: 72ch; display: flex; flex-direction: column; gap: 6px; }
 footer p { margin: 0; }
 </style>
 
-<div class="wrap" data-show="season">
+<nav class="views" aria-label="Views">
+  <div class="seg">
+    <button type="button" aria-pressed="true" data-view="playoffs">Postseason</button>
+    <button type="button" aria-pressed="false" data-view="traits">Trait map</button>
+  </div>
+  <span class="note">The trait map: every trait, ability and engine constant behind these games, and where each value came from.</span>
+</nav>
+
+<div class="wrap" data-show="season" id="view-playoffs">
   <header>
     <span class="eyebrow">2026 postseason · baseball-sim engine v3.9</span>
-    <h1>Division Series Replays</h1>
+    <h1>Postseason Replays</h1>
     <p>Each division series game finished so far, played again 1,000 times through the model with the lineups and pitchers it really had. Every replay used the real batting order, with each substitute taking his spot at the turn he really took it, and the real pitchers in their real order, each facing as many batters as he faced. Each replay also drew fresh values of every hitter's fitted traits, so the spread includes what is not known about the players as well as the game's own chance.</p>
-    <div class="howto">
-      <span class="k">Across: one team's runs. Down: the other's. Each cell counts the replays that ended at that score.</span>
-      <span class="k"><span class="ramp" aria-hidden="true"></span> fewer to more replays</span>
-      <span class="k"><span class="chip star" aria-hidden="true">★</span> the real final</span>
-      <span class="k"><span class="chip x" aria-hidden="true">x4</span> 4 of the cell's replays went to extra innings</span>
-      <span class="k"><span class="chip tie" aria-hidden="true"></span> a tie (no game ends tied)</span>
-    </div>
+    <p>First, the model's forecast for the League Championship Series and the World Series, played before Game 1. The switch at the top opens the trait map: every trait, ability and engine constant behind these games.</p>
+    <nav class="jump" aria-label="On this page"><a href="#forecast">The LCS and World Series forecast</a><a href="#grids">Division series score grids</a><a href="#picks">Series picks</a><a href="#regression">Game picks</a></nav>
   </header>
+
+<!--FORECAST-->
+
+  <div class="replays" id="grids">
 
   <div class="switch" role="group" aria-label="Which pitching the replays used">
     <div class="seg">
@@ -128,7 +169,16 @@ footer p { margin: 0; }
     <p class="sum" data-set="errors">Regular-season pitching, and each fielder making errors at his own regular-season rate. The replays averaged <strong><!--RUNS_ERRORS--></strong> runs and <!--ERR_ERRORS--> errors a team; the <!--NGAMES--> real games, <!--RUNS_REAL--> and <!--ERR_REAL-->.</p>
   </div>
 
+  <div class="howto" id="legend">
+      <span class="k">Across: one team's runs. Down: the other's. Each cell counts the replays that ended at that score.</span>
+      <span class="k"><span class="ramp" aria-hidden="true"></span> fewer to more replays</span>
+      <span class="k"><span class="chip star" aria-hidden="true">★</span> the real final</span>
+      <span class="k"><span class="chip x" aria-hidden="true">x4</span> 4 of the cell's replays went to extra innings</span>
+      <span class="k"><span class="chip tie" aria-hidden="true"></span> a tie (no game ends tied)</span>
+    </div>
+
 <!--GRIDS-->
+  </div>
 
   <footer>
     <p>Each replay was played in the real park, with the designated hitter and no runner placed on second in extra innings, as in the postseason. A replay that ran longer than the real game went back to the model's manager and the rest of the playoff bullpen once the real game's pitchers were used up. Hover over a cell for its count and score.</p>
@@ -138,6 +188,9 @@ footer p { margin: 0; }
     <p>Hitters' traits were fitted to their 2025-26 Statcast numbers and pitchers' to their strikeout and walk rates, on engine v3.9 (refit 2026-10-06).</p>
   </footer>
 </div>
+
+<div id="view-traits" hidden><iframe title="Ballgame trait map" loading="lazy"></iframe></div>
+<script type="application/json" id="trait-map-src"><!--TRAITMAP--></script>
 <script>
 (function () {
   var wrap = document.querySelector('.wrap'), btns = document.querySelectorAll('.seg button');
@@ -151,5 +204,27 @@ footer p { margin: 0; }
   if (!start) { try { start = localStorage.getItem('ds-replays-set'); } catch (e) {} }
   if (location.hash === '#errors') start = 'errors';
   if (start === 'pitched' || start === 'season' || start === 'errors') show(start);
+
+  // the two views: the trait map is a page of its own, opened in a frame the first time it is shown, as tall as its content, in the page's theme
+  var vbtns = document.querySelectorAll('.views button'), vp = document.getElementById('view-playoffs'), vt = document.getElementById('view-traits'), frame = vt.querySelector('iframe');
+  function fit() { try { var d = frame.contentDocument; if (d && d.documentElement) frame.style.height = Math.max(d.documentElement.scrollHeight, 400) + 'px'; } catch (e) {} }
+  function theme() { try { var t = document.documentElement.getAttribute('data-theme'), r = frame.contentDocument.documentElement; if (t) r.setAttribute('data-theme', t); else r.removeAttribute('data-theme'); } catch (e) {} }
+  function openMap() {
+    if (frame.getAttribute('data-ready')) return;
+    frame.setAttribute('data-ready', '1');
+    frame.addEventListener('load', function () {
+      theme(); fit();
+      try { new ResizeObserver(fit).observe(frame.contentDocument.documentElement); } catch (e) { setInterval(fit, 1000); }
+    });
+    frame.srcdoc = JSON.parse(document.getElementById('trait-map-src').textContent);
+  }
+  new MutationObserver(theme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  function view(k) {
+    vp.hidden = k !== 'playoffs'; vt.hidden = k !== 'traits';
+    vbtns.forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-view') === k ? 'true' : 'false'); });
+    if (k === 'traits') { openMap(); setTimeout(fit, 50); }
+  }
+  vbtns.forEach(function (b) { b.addEventListener('click', function () { view(b.getAttribute('data-view')); window.scrollTo(0, 0); }); });
+  if (location.hash === '#traits') view('traits');
 })();
 </script>
