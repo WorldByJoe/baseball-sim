@@ -26,6 +26,7 @@
 "name": "Drake Baldwin",
 "order": 100,
 "pos": "C",
+"endPos": "C",
 "allPos": [
 "C"
 ]
@@ -35,6 +36,7 @@
 "name": "Ronald Acu\u00f1a Jr.",
 "order": 200,
 "pos": "RF",
+"endPos": "RF",
 "allPos": [
 "RF"
 ]
@@ -44,6 +46,7 @@
 "name": "Matt Olson",
 "order": 300,
 "pos": "1B",
+"endPos": "1B",
 "allPos": [
 "1B"
 ]
@@ -53,6 +56,7 @@
 "name": "Ozzie Albies",
 "order": 400,
 "pos": "2B",
+"endPos": "2B",
 "allPos": [
 "2B"
 ]
@@ -62,6 +66,7 @@
 "name": "Michael Harris II",
 "order": 500,
 "pos": "CF",
+"endPos": "CF",
 "allPos": [
 "CF"
 ]
@@ -71,6 +76,7 @@
 "name": "Mauricio Dub\u00f3n",
 "order": 600,
 "pos": "SS",
+"endPos": "SS",
 "allPos": [
 "SS"
 ]
@@ -80,6 +86,7 @@
 "name": "Sean Murphy",
 "order": 700,
 "pos": "DH",
+"endPos": "DH",
 "allPos": [
 "DH"
 ]
@@ -88,7 +95,8 @@
 "id": 642133,
 "name": "Rowdy Tellez",
 "order": 701,
-"pos": "DH",
+"pos": "PH",
+"endPos": "DH",
 "allPos": [
 "PH",
 "DH"
@@ -98,7 +106,8 @@
 "id": 676551,
 "name": "Brewer Hicklen",
 "order": 702,
-"pos": "DH",
+"pos": "PR",
+"endPos": "DH",
 "allPos": [
 "PR",
 "DH"
@@ -109,6 +118,7 @@
 "name": "Austin Riley",
 "order": 800,
 "pos": "3B",
+"endPos": "3B",
 "allPos": [
 "3B"
 ]
@@ -118,6 +128,7 @@
 "name": "Lane Thomas",
 "order": 900,
 "pos": "LF",
+"endPos": "LF",
 "allPos": [
 "LF"
 ]
@@ -126,7 +137,8 @@
 "id": 573262,
 "name": "Mike Yastrzemski",
 "order": 901,
-"pos": "LF",
+"pos": "PH",
+"endPos": "LF",
 "allPos": [
 "PH",
 "LF"
@@ -139,6 +151,7 @@
 "name": "Mookie Betts",
 "order": 100,
 "pos": "SS",
+"endPos": "SS",
 "allPos": [
 "SS"
 ]
@@ -148,6 +161,7 @@
 "name": "Shohei Ohtani",
 "order": 200,
 "pos": "DH",
+"endPos": "DH",
 "allPos": [
 "DH"
 ]
@@ -157,6 +171,7 @@
 "name": "Will Smith",
 "order": 300,
 "pos": "C",
+"endPos": "C",
 "allPos": [
 "C"
 ]
@@ -166,6 +181,7 @@
 "name": "Freddie Freeman",
 "order": 400,
 "pos": "1B",
+"endPos": "1B",
 "allPos": [
 "1B"
 ]
@@ -175,6 +191,7 @@
 "name": "Teoscar Hern\u00e1ndez",
 "order": 500,
 "pos": "LF",
+"endPos": "LF",
 "allPos": [
 "LF"
 ]
@@ -184,6 +201,7 @@
 "name": "Kyle Tucker",
 "order": 600,
 "pos": "RF",
+"endPos": "RF",
 "allPos": [
 "RF"
 ]
@@ -193,6 +211,7 @@
 "name": "Andy Pages",
 "order": 700,
 "pos": "CF",
+"endPos": "CF",
 "allPos": [
 "CF"
 ]
@@ -202,6 +221,7 @@
 "name": "Miguel Rojas",
 "order": 800,
 "pos": "3B",
+"endPos": "3B",
 "allPos": [
 "3B"
 ]
@@ -210,7 +230,8 @@
 "id": 571970,
 "name": "Max Muncy",
 "order": 801,
-"pos": "3B",
+"pos": "PH",
+"endPos": "3B",
 "allPos": [
 "PH",
 "3B"
@@ -221,6 +242,7 @@
 "name": "Tommy Edman",
 "order": 900,
 "pos": "2B",
+"endPos": "2B",
 "allPos": [
 "2B"
 ]
@@ -230,6 +252,7 @@
 "name": "Josue De Paula",
 "order": 901,
 "pos": "PH",
+"endPos": "PH",
 "allPos": [
 "PH"
 ]

@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_game.js · v1.6 · 2026-10-06
+   bb_game.js · v1.7 · 2026-10-07
 
    A whole game: two teams, nine innings or more, lineups that turn over,
    pitchers who tire and get replaced, managers with their own habits.
@@ -55,18 +55,16 @@
    at DH, the rest on the bench, the next man in the five-man rotation.
 
    CHANGED
+     v1.7  (the playoff review's branch) a game played as it was: T.plan, the pitchers in their order with the batters
+           each faced, and T.lineupPlan, who takes each spot in the order at which of its turns; a game that outruns
+           the one played goes back to the manager and the rest of the pen; o.maxInnings raises the 18-inning safety stop
+           (a tie at the 18th was left as a tie); a pitcher's and a catcher's errMult scale the pickoff throw's and the
+           steal throw's chance of getting away (bb_field v1.16). Unset, nothing changes
      v1.6  the current rules (Joe, 2026-10-06): the three-batter minimum, two throws over a plate appearance, the
            18-in bases in the steal race, the extra-innings runner on second (o.ghost); the reliever is picked for
            the three hitters due up (described since v0.4, but the hitters due up were never looked at)
      v1.5  the infield is placed for the bases, the outs, the inning and the score at each plate appearance and again
            as the ball is hit, with one draw a plate appearance for the manager's call to bring it in (bb_field v1.8)
-     v1.4  a game given no rules plays a designated hitter for both sides (it had drawn AL or NL rules at
-           random, so pitchers batted in half the headless checks' games, against 2025's league, where none did)
-     v1.3  no pinch-hitter for the pitcher when the pen is empty (the bug audit): with every reliever used, in extra
-           innings, the pitcher who had been hit for came back to pitch - an illegal substitution, one game in 2,000
-     v1.2  the pinch-hitter's spot goes back to the pitcher when the next pitcher comes in (the bug audit): the
-           pinch-hitter had kept the spot for the rest of the game, so an NL side batted nine hitters and no pitcher
-           after its first pinch-hit, in 9% of its plate appearances; the play records the batting order
 ============================================================================ */
 
 var BBGame = (function () {
@@ -179,7 +177,7 @@ var BBGame = (function () {
     var side = [teamState(A, rules), teamState(H, rules)];
     var inning = 1, half = 0;   // half 0 = top (A bats), 1 = bottom (H bats)
 
-    while (!G.over && inning <= 18) {
+    while (!G.over && inning <= (o.maxInnings || 18)) {   // a safety stop; the postseason has none, so the replays raise it
       var bat = side[half], def = side[1 - half], defTeam = G.teams[1 - half];
       var inn = { n: inning, half: half, runs: 0, plays: [] };
       var outs = 0, bases = [null, null, null, null], runsBefore = G.score[half];
@@ -226,7 +224,7 @@ var BBGame = (function () {
             if (rng.u() >= pThrow) return null;
             pickN++;
             var back = 0.5 * pl.jump + PK_LEAD / V_BACK + rng.n(0, 0.09), ball = PK_T + (P.pickMove || 0) + rng.n(0, 0.07);
-            var ev = { id: pl.id, from: 1, basesBefore: bases.slice(), outsBefore: outs, error: rng.u() < PK_ERR };
+            var ev = { id: pl.id, from: 1, basesBefore: bases.slice(), outsBefore: outs, error: rng.u() < PK_ERR * (P.errMult || 1) };   // errMult: his own (v1.7, review)
             ev.out = !ev.error && back > ball; ev.margin = +(ball - back).toFixed(3);
             pickLog.push(ev);
             if (ev.out) { bases[1] = null; outs++; S.po++; SD.pko++; }
@@ -262,7 +260,7 @@ var BBGame = (function () {
             // or not), the throw is not always on the bag
             var tRun = pl.jump + rng.n(0, 0.08) + BBField.stealTime(pl, BASE - BASE_CUT - BBField.LEAD_STEAL);
             var tBall = P.holdTime + C.popTime - (g.to === 3 ? 0.2 : 0) + rng.n(0, 0.22) + (dirt ? 0.3 : 0);
-            var wildThrow = rng.u() < 0.03, safe = wildThrow || tRun < tBall + 0.15;
+            var wildThrow = rng.u() < 0.03 * (C.errMult || 1), safe = wildThrow || tRun < tBall + 0.15;
             rec.steal = { id: g.id, from: g.from, to: g.to, safe: safe, tRun: tRun, tBall: tBall, wild: wildThrow };
             bases[g.from] = null;
             if (safe && wildThrow) {   // the throw gets away: everyone moves up a base, the stealer one past his target (until v1.1 he landed on a man already on third, who vanished)
@@ -375,6 +373,8 @@ var BBGame = (function () {
     var st = { team: T, rules: rules, order: T.lineup.slice(), idx: 0, pitcher: T.starter, used: [T.starter],
                seen: {}, seenTeam: {}, bench: T.bench.slice(), warming: null, warmHalves: 0, minLeft: 3, catcher: T.lineup.filter(function (b) { return b.pos === 'C'; })[0] };
     if (rules === 'NL') st.order = st.order.map(function (b) { return b.pos === 'DH' ? null : b; });   // the pitcher bats in the DH's slot
+    if (T.plan) st.plan = { list: T.plan, k: 0, bf: 0, done: false };   // a game played as it was (v1.7): T.plan[k] = { P, bf }
+    if (T.lineupPlan) { st.lineupPlan = T.lineupPlan; st.slotPA = [0, 0, 0, 0, 0, 0, 0, 0, 0]; }   // T.lineupPlan[slot][turn] = the man who takes the spot
     st.defense = BBField.makeDefense(fielders.concat([T.starter]));
     T.starter.used = true;
     return st;
@@ -385,6 +385,14 @@ var BBGame = (function () {
     st.defense = st.defense.map(function (F) { return F.pos === 'P' ? { pos: 'P', pl: P, at: F.at, std: F.std } : F; });
   }
   function nextBatter(st, inning, diff, rng) {
+    if (st.lineupPlan) {   // a game played as it was: the man who took this spot at this turn takes it now, at the position of the man he replaces
+      var sl = st.idx % 9, sub = (st.lineupPlan[sl] || {})[++st.slotPA[sl]], old = st.order[sl];
+      if (sub && sub !== old) {
+        var fi = -1; st.defense.forEach(function (F, k) { if (F.pl === old) fi = k; });
+        if (fi >= 0) { sub.pos = st.defense[fi].pos; st.defense[fi] = { pos: sub.pos, pl: sub, at: st.defense[fi].at, std: st.defense[fi].std }; } else sub.pos = 'DH';
+        st.order[sl] = sub;
+      }
+    }
     var B = st.order[st.idx % 9];
     if (B === null) {                       // the pitcher's spot (NL)
       var P = st.pitcher, f = BB.fatigueOf(P), M = st.team.manager;
@@ -413,6 +421,7 @@ var BBGame = (function () {
     if (def.pinchHitFor === def.pitcher) { def.order[def.pinchSlot] = null; bringIn(def, T, inning, lead, rng); def.pinchHitFor = null; }
     // a reliever who has had his inning gives way to a fresh arm (the closer keeps his save)
     var Pn = def.pitcher;
+    if (def.plan && !def.plan.done) { lateDefence(def, T, inning, lead); return; }   // a game played as it was: the plan changes the pitchers
     if (Pn.role === 'RP' && Pn.pitchesToday >= 12 && !(Pn === T.closer && inning >= 9 && lead > 0 && lead <= 3) &&
         T.bullpen.some(function (p) { return !p.used; })) { bringIn(def, T, inning, lead, rng); }
     // warming: keep an arm going if the starter is getting there, or late in the game
@@ -430,6 +439,7 @@ var BBGame = (function () {
   // FIELD_VALUE per ball in play, expected wOBA per plate appearance), by his own bar.
   // The catcher stays.
   function lateDefence(def, T, inning, lead) {
+    if (def.lineupPlan) return;   // a game played as it was: its own substitutions
     if (inning < 8 || lead < 1 || lead > 3 || !def.bench.length) return;
     var left = Math.max(1, 10 - inning), subs = [];
     def.defense.forEach(function (F, fi) {
@@ -486,6 +496,14 @@ var BBGame = (function () {
     def.minLeft = 0;                                                 // he finished the half: the three-batter rule is met
   }
   function managePitching(def, T, inning, outs, bases, lead, bat, G, half, rng) {
+    if (def.plan && !def.plan.done) {   // a game played as it was: each pitcher faces the batters he faced, then the next comes in
+      var pl = def.plan;
+      if (pl.bf >= pl.list[pl.k].bf) {
+        if (pl.k + 1 < pl.list.length) { pl.k++; pl.bf = 0; setPitcher(def, pl.list[pl.k].P); G.changes[1 - half]++; }
+        else pl.done = true;   // the game has outrun the one played: the manager and the rest of the pen from here
+      }
+      if (!pl.done) { pl.bf++; return; }
+    }
     var P = def.pitcher, f = BB.fatigueOf(P), M = T.manager, pull = false;
     if (P.role === 'SP') pull = f >= M.hook || P.pitchesToday >= 115;
     else pull = f >= 0.9 || (P.pitchesToday >= 35);
@@ -539,7 +557,7 @@ var BBGame = (function () {
     return out.join('\n');
   }
 
-  return { version: '1.6', makeTeam: makeTeam, makeRoster: makeRoster, teamFromRoster: teamFromRoster, canPlay: canPlay, simGame: simGame, line: line, playByPlay: playByPlay, newStats: newStats };
+  return { version: '1.7', makeTeam: makeTeam, makeRoster: makeRoster, teamFromRoster: teamFromRoster, canPlay: canPlay, simGame: simGame, line: line, playByPlay: playByPlay, newStats: newStats };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = BBGame;

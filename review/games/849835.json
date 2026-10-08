@@ -26,6 +26,7 @@
 "name": "Ben Rice",
 "order": 100,
 "pos": "DH",
+"endPos": "DH",
 "allPos": [
 "DH"
 ]
@@ -35,6 +36,7 @@
 "name": "Cody Bellinger",
 "order": 200,
 "pos": "LF",
+"endPos": "LF",
 "allPos": [
 "LF"
 ]
@@ -44,6 +46,7 @@
 "name": "Luis Garc\u00eda Jr.",
 "order": 300,
 "pos": "1B",
+"endPos": "1B",
 "allPos": [
 "1B"
 ]
@@ -53,6 +56,7 @@
 "name": "Spencer Jones",
 "order": 400,
 "pos": "RF",
+"endPos": "RF",
 "allPos": [
 "RF"
 ]
@@ -62,6 +66,7 @@
 "name": "George Lombard Jr.",
 "order": 500,
 "pos": "SS",
+"endPos": "SS",
 "allPos": [
 "SS"
 ]
@@ -71,6 +76,7 @@
 "name": "Jazz Chisholm Jr.",
 "order": 600,
 "pos": "2B",
+"endPos": "2B",
 "allPos": [
 "2B"
 ]
@@ -80,6 +86,7 @@
 "name": "Trent Grisham",
 "order": 700,
 "pos": "CF",
+"endPos": "CF",
 "allPos": [
 "CF"
 ]
@@ -89,6 +96,7 @@
 "name": "Austin Wells",
 "order": 800,
 "pos": "C",
+"endPos": "C",
 "allPos": [
 "C"
 ]
@@ -98,6 +106,7 @@
 "name": "Ryan McMahon",
 "order": 900,
 "pos": "3B",
+"endPos": "3B",
 "allPos": [
 "3B"
 ]
@@ -107,6 +116,7 @@
 "name": "Giancarlo Stanton",
 "order": 901,
 "pos": "PH",
+"endPos": "PH",
 "allPos": [
 "PH"
 ]
@@ -118,6 +128,7 @@
 "name": "Yandy D\u00edaz",
 "order": 100,
 "pos": "DH",
+"endPos": "DH",
 "allPos": [
 "DH"
 ]
@@ -127,6 +138,7 @@
 "name": "Jonathan Aranda",
 "order": 200,
 "pos": "1B",
+"endPos": "1B",
 "allPos": [
 "1B"
 ]
@@ -136,6 +148,7 @@
 "name": "Junior Caminero",
 "order": 300,
 "pos": "3B",
+"endPos": "3B",
 "allPos": [
 "3B"
 ]
@@ -145,6 +158,7 @@
 "name": "Jorge Mateo",
 "order": 301,
 "pos": "PR",
+"endPos": "PR",
 "allPos": [
 "PR"
 ]
@@ -154,6 +168,7 @@
 "name": "Ben Williamson",
 "order": 302,
 "pos": "3B",
+"endPos": "3B",
 "allPos": [
 "3B"
 ]
@@ -163,6 +178,7 @@
 "name": "Liam Hicks",
 "order": 400,
 "pos": "C",
+"endPos": "C",
 "allPos": [
 "C"
 ]
@@ -172,6 +188,7 @@
 "name": "Chandler Simpson",
 "order": 500,
 "pos": "LF",
+"endPos": "LF",
 "allPos": [
 "LF"
 ]
@@ -181,6 +198,7 @@
 "name": "Victor Mesa Jr.",
 "order": 600,
 "pos": "RF",
+"endPos": "RF",
 "allPos": [
 "RF"
 ]
@@ -190,6 +208,7 @@
 "name": "Jonny DeLuca",
 "order": 700,
 "pos": "CF",
+"endPos": "CF",
 "allPos": [
 "CF"
 ]
@@ -199,6 +218,7 @@
 "name": "Richie Palacios",
 "order": 800,
 "pos": "2B",
+"endPos": "2B",
 "allPos": [
 "2B"
 ]
@@ -208,6 +228,7 @@
 "name": "Taylor Walls",
 "order": 900,
 "pos": "SS",
+"endPos": "SS",
 "allPos": [
 "SS"
 ]

@@ -26,6 +26,7 @@
 "name": "Chase Meidroth",
 "order": 100,
 "pos": "2B",
+"endPos": "2B",
 "allPos": [
 "2B"
 ]
@@ -35,6 +36,7 @@
 "name": "Randal Grichuk",
 "order": 200,
 "pos": "LF",
+"endPos": "LF",
 "allPos": [
 "LF"
 ]
@@ -43,7 +45,8 @@
 "id": 671976,
 "name": "Tristan Peters",
 "order": 201,
-"pos": "LF",
+"pos": "PH",
+"endPos": "LF",
 "allPos": [
 "PH",
 "LF"
@@ -54,6 +57,7 @@
 "name": "Miguel Vargas",
 "order": 300,
 "pos": "3B",
+"endPos": "3B",
 "allPos": [
 "3B"
 ]
@@ -63,6 +67,7 @@
 "name": "Munetaka Murakami",
 "order": 400,
 "pos": "1B",
+"endPos": "1B",
 "allPos": [
 "1B"
 ]
@@ -72,6 +77,7 @@
 "name": "Tommy Pham",
 "order": 500,
 "pos": "DH",
+"endPos": "DH",
 "allPos": [
 "DH"
 ]
@@ -80,7 +86,8 @@
 "id": 803011,
 "name": "Sam Antonacci",
 "order": 501,
-"pos": "DH",
+"pos": "PH",
+"endPos": "DH",
 "allPos": [
 "PH",
 "DH"
@@ -91,6 +98,7 @@
 "name": "Brenton Doyle",
 "order": 600,
 "pos": "CF",
+"endPos": "CF",
 "allPos": [
 "CF"
 ]
@@ -100,6 +108,7 @@
 "name": "Kyle Teel",
 "order": 700,
 "pos": "C",
+"endPos": "C",
 "allPos": [
 "C"
 ]
@@ -109,6 +118,7 @@
 "name": "Braden Montgomery",
 "order": 800,
 "pos": "RF",
+"endPos": "RF",
 "allPos": [
 "RF"
 ]
@@ -118,6 +128,7 @@
 "name": "Colson Montgomery",
 "order": 900,
 "pos": "SS",
+"endPos": "SS",
 "allPos": [
 "SS"
 ]
@@ -129,6 +140,7 @@
 "name": "Steven Kwan",
 "order": 100,
 "pos": "CF",
+"endPos": "CF",
 "allPos": [
 "CF"
 ]
@@ -138,6 +150,7 @@
 "name": "Jos\u00e9 Ram\u00edrez",
 "order": 200,
 "pos": "3B",
+"endPos": "3B",
 "allPos": [
 "3B"
 ]
@@ -147,6 +160,7 @@
 "name": "Chase DeLauter",
 "order": 300,
 "pos": "RF",
+"endPos": "RF",
 "allPos": [
 "RF"
 ]
@@ -156,6 +170,7 @@
 "name": "Jo Adell",
 "order": 400,
 "pos": "DH",
+"endPos": "DH",
 "allPos": [
 "DH"
 ]
@@ -165,6 +180,7 @@
 "name": "Angel Mart\u00ednez",
 "order": 500,
 "pos": "LF",
+"endPos": "LF",
 "allPos": [
 "LF"
 ]
@@ -174,6 +190,7 @@
 "name": "David Fry",
 "order": 600,
 "pos": "1B",
+"endPos": "1B",
 "allPos": [
 "1B"
 ]
@@ -182,7 +199,8 @@
 "id": 663993,
 "name": "Nathaniel Lowe",
 "order": 601,
-"pos": "1B",
+"pos": "PH",
+"endPos": "1B",
 "allPos": [
 "PH",
 "1B"
@@ -193,6 +211,7 @@
 "name": "Travis Bazzana",
 "order": 700,
 "pos": "2B",
+"endPos": "2B",
 "allPos": [
 "2B"
 ]
@@ -202,6 +221,7 @@
 "name": "Austin Hedges",
 "order": 800,
 "pos": "C",
+"endPos": "C",
 "allPos": [
 "C"
 ]
@@ -210,7 +230,8 @@
 "id": 672275,
 "name": "Patrick Bailey",
 "order": 801,
-"pos": "C",
+"pos": "PH",
+"endPos": "C",
 "allPos": [
 "PH",
 "C"
@@ -221,6 +242,7 @@
 "name": "Brayan Rocchio",
 "order": 900,
 "pos": "SS",
+"endPos": "SS",
 "allPos": [
 "SS"
 ]

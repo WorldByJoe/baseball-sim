@@ -25,7 +25,8 @@
 "id": 680757,
 "name": "Steven Kwan",
 "order": 100,
-"pos": "LF",
+"pos": "CF",
+"endPos": "LF",
 "allPos": [
 "CF",
 "LF"
@@ -36,6 +37,7 @@
 "name": "Jos\u00e9 Ram\u00edrez",
 "order": 200,
 "pos": "3B",
+"endPos": "3B",
 "allPos": [
 "3B"
 ]
@@ -45,6 +47,7 @@
 "name": "Chase DeLauter",
 "order": 300,
 "pos": "RF",
+"endPos": "RF",
 "allPos": [
 "RF"
 ]
@@ -54,6 +57,7 @@
 "name": "Jo Adell",
 "order": 400,
 "pos": "DH",
+"endPos": "DH",
 "allPos": [
 "DH"
 ]
@@ -63,6 +67,7 @@
 "name": "Nathaniel Lowe",
 "order": 500,
 "pos": "1B",
+"endPos": "1B",
 "allPos": [
 "1B"
 ]
@@ -72,6 +77,7 @@
 "name": "Angel Mart\u00ednez",
 "order": 600,
 "pos": "LF",
+"endPos": "LF",
 "allPos": [
 "LF"
 ]
@@ -81,6 +87,7 @@
 "name": "Petey Halpin",
 "order": 601,
 "pos": "CF",
+"endPos": "CF",
 "allPos": [
 "CF"
 ]
@@ -90,6 +97,7 @@
 "name": "Travis Bazzana",
 "order": 700,
 "pos": "2B",
+"endPos": "2B",
 "allPos": [
 "2B"
 ]
@@ -99,6 +107,7 @@
 "name": "Angel Genao",
 "order": 701,
 "pos": "2B",
+"endPos": "2B",
 "allPos": [
 "2B"
 ]
@@ -108,6 +117,7 @@
 "name": "Patrick Bailey",
 "order": 800,
 "pos": "C",
+"endPos": "C",
 "allPos": [
 "C"
 ]
@@ -117,6 +127,7 @@
 "name": "Brayan Rocchio",
 "order": 900,
 "pos": "SS",
+"endPos": "SS",
 "allPos": [
 "SS"
 ]
@@ -128,6 +139,7 @@
 "name": "Sam Antonacci",
 "order": 100,
 "pos": "DH",
+"endPos": "DH",
 "allPos": [
 "DH"
 ]
@@ -137,6 +149,7 @@
 "name": "Miguel Vargas",
 "order": 200,
 "pos": "3B",
+"endPos": "3B",
 "allPos": [
 "3B"
 ]
@@ -146,6 +159,7 @@
 "name": "Munetaka Murakami",
 "order": 300,
 "pos": "1B",
+"endPos": "1B",
 "allPos": [
 "1B"
 ]
@@ -155,6 +169,7 @@
 "name": "Kyle Teel",
 "order": 400,
 "pos": "C",
+"endPos": "C",
 "allPos": [
 "C"
 ]
@@ -164,6 +179,7 @@
 "name": "Chase Meidroth",
 "order": 500,
 "pos": "2B",
+"endPos": "2B",
 "allPos": [
 "2B"
 ]
@@ -173,6 +189,7 @@
 "name": "Tristan Peters",
 "order": 600,
 "pos": "CF",
+"endPos": "CF",
 "allPos": [
 "CF"
 ]
@@ -182,6 +199,7 @@
 "name": "Braden Montgomery",
 "order": 700,
 "pos": "RF",
+"endPos": "RF",
 "allPos": [
 "RF"
 ]
@@ -191,6 +209,7 @@
 "name": "Randal Grichuk",
 "order": 800,
 "pos": "LF",
+"endPos": "LF",
 "allPos": [
 "LF"
 ]
@@ -200,6 +219,7 @@
 "name": "Colson Montgomery",
 "order": 900,
 "pos": "SS",
+"endPos": "SS",
 "allPos": [
 "SS"
 ]

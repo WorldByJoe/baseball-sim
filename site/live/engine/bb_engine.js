@@ -68,7 +68,8 @@
    CHANGED
      (the playoff review's branch adds to v3.9: a pitcher's own DECEPTION scales the batter's read of his pitches
            (P.deception, carried on the pitch; unset it is 1 and the engine is unchanged); typicalPitch exported;
-           both for review/fit_pitchers.js and the couch analyst)
+           both for review/fit_pitchers.js and the couch analyst; and a pitch's scoutUsage, the mix the batter's
+           report expects when a replay has him throw another (review/replay_game.js, mode 'pitched'))
      v3.9  HE AIMS TO SUIT HIS SWING (VS): a steeper swing aims higher on the ball, AIM_ATTACK 0.13 in per deg of his attack
            trait above the picks' mean (AIM_REF 7.8); measured as the league's: a hitter whose attack is 1 deg steeper
            launches his balls in play 0.86 deg higher (the model had 1.79, the collision's own lift on top of the swing's)
@@ -1142,10 +1143,10 @@ var BB = (function () {
   // modelling him: a scouting report knows his count and platoon habits,
   // not his next sequence); the league throws the same pitch again a little
   // more often than its usage predicts after a change, as often after two alike.
-  function typeWeights(P, sb, st, last) {
+  function typeWeights(P, sb, st, last, scout) {   // scout: the batter's report, from pt.scoutUsage when a replay changed the mix he threw (review)
     var side = sideKey(P, sb), si = side === 'same' ? 0 : 1, cu = PLAN_LOC.countUse[side][st.balls + '-' + st.strikes];
     return P.pitches.map(function (pt) {
-      var t = pt.type, m = pt.usage * PLAN_LOC.sideUse[t][si] * cu[KINDS.indexOf(PITCH_TYPES[t].kind)];
+      var t = pt.type, m = (scout && pt.scoutUsage !== undefined ? pt.scoutUsage : pt.usage) * PLAN_LOC.sideUse[t][si] * cu[KINDS.indexOf(PITCH_TYPES[t].kind)];
       if (last && last[0] === t) m *= last[1] === t ? PLAN_LOC.repeat[1] : PLAN_LOC.repeat[0];
       return m;
     });
@@ -1223,7 +1224,7 @@ var BB = (function () {
   // costs more than being fooled by a slow one: he looks fastball and adjusts), and blends his timing
   // toward the mix by how much he hedges. With two strikes he hedges more.
   function expectPitch(B, P, sb, st) {
-    var mix = normalize(typeWeights(P, sb, st, null));
+    var mix = normalize(typeWeights(P, sb, st, null, true));
     var g = 0, best = -1;
     mix.forEach(function (p, i) {
       var s = p * (PITCH_TYPES[P.pitches[i].type].kind === 'FB' ? B.fbLean : 1);

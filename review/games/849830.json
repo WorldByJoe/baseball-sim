@@ -25,7 +25,8 @@
 "id": 665487,
 "name": "Fernando Tatis Jr.",
 "order": 100,
-"pos": "2B",
+"pos": "RF",
+"endPos": "2B",
 "allPos": [
 "RF",
 "2B"
@@ -36,6 +37,7 @@
 "name": "Dustin Harris",
 "order": 200,
 "pos": "LF",
+"endPos": "LF",
 "allPos": [
 "LF"
 ]
@@ -45,6 +47,7 @@
 "name": "Manny Machado",
 "order": 300,
 "pos": "3B",
+"endPos": "3B",
 "allPos": [
 "3B"
 ]
@@ -54,6 +57,7 @@
 "name": "Ty France",
 "order": 400,
 "pos": "1B",
+"endPos": "1B",
 "allPos": [
 "1B"
 ]
@@ -63,6 +67,7 @@
 "name": "Jackson Merrill",
 "order": 500,
 "pos": "CF",
+"endPos": "CF",
 "allPos": [
 "CF"
 ]
@@ -72,6 +77,7 @@
 "name": "Xander Bogaerts",
 "order": 600,
 "pos": "SS",
+"endPos": "SS",
 "allPos": [
 "SS"
 ]
@@ -81,6 +87,7 @@
 "name": "Ethan Salas",
 "order": 700,
 "pos": "C",
+"endPos": "C",
 "allPos": [
 "C"
 ]
@@ -90,6 +97,7 @@
 "name": "Miguel Andujar",
 "order": 701,
 "pos": "PH",
+"endPos": "PH",
 "allPos": [
 "PH"
 ]
@@ -98,7 +106,8 @@
 "id": 669392,
 "name": "Samad Taylor",
 "order": 702,
-"pos": "RF",
+"pos": "PR",
+"endPos": "RF",
 "allPos": [
 "PR",
 "RF"
@@ -109,6 +118,7 @@
 "name": "Luis Campusano",
 "order": 800,
 "pos": "DH",
+"endPos": "DH",
 "allPos": [
 "DH"
 ]
@@ -117,7 +127,8 @@
 "id": 687749,
 "name": "Jase Bowen",
 "order": 801,
-"pos": "DH",
+"pos": "PR",
+"endPos": "DH",
 "allPos": [
 "PR",
 "DH"
@@ -128,6 +139,7 @@
 "name": "Jake Cronenworth",
 "order": 900,
 "pos": "2B",
+"endPos": "2B",
 "allPos": [
 "2B"
 ]
@@ -137,6 +149,7 @@
 "name": "Austin Hays",
 "order": 901,
 "pos": "PH",
+"endPos": "PH",
 "allPos": [
 "PH"
 ]
@@ -146,6 +159,7 @@
 "name": "Freddy Fermin",
 "order": 902,
 "pos": "C",
+"endPos": "C",
 "allPos": [
 "C"
 ]
@@ -157,6 +171,7 @@
 "name": "Jackson Chourio",
 "order": 100,
 "pos": "LF",
+"endPos": "LF",
 "allPos": [
 "LF"
 ]
@@ -166,6 +181,7 @@
 "name": "Brice Turang",
 "order": 200,
 "pos": "2B",
+"endPos": "2B",
 "allPos": [
 "2B"
 ]
@@ -175,6 +191,7 @@
 "name": "William Contreras",
 "order": 300,
 "pos": "C",
+"endPos": "C",
 "allPos": [
 "C"
 ]
@@ -184,6 +201,7 @@
 "name": "Jake Bauers",
 "order": 400,
 "pos": "1B",
+"endPos": "1B",
 "allPos": [
 "1B"
 ]
@@ -193,6 +211,7 @@
 "name": "Christian Yelich",
 "order": 500,
 "pos": "DH",
+"endPos": "DH",
 "allPos": [
 "DH"
 ]
@@ -201,7 +220,8 @@
 "id": 683734,
 "name": "Andrew Vaughn",
 "order": 501,
-"pos": "DH",
+"pos": "PH",
+"endPos": "DH",
 "allPos": [
 "PH",
 "DH"
@@ -212,6 +232,7 @@
 "name": "Cooper Pratt",
 "order": 600,
 "pos": "SS",
+"endPos": "SS",
 "allPos": [
 "SS"
 ]
@@ -221,6 +242,7 @@
 "name": "Luis Lara",
 "order": 700,
 "pos": "RF",
+"endPos": "RF",
 "allPos": [
 "RF"
 ]
@@ -230,6 +252,7 @@
 "name": "Garrett Mitchell",
 "order": 800,
 "pos": "CF",
+"endPos": "CF",
 "allPos": [
 "CF"
 ]
@@ -239,6 +262,7 @@
 "name": "Joey Ortiz",
 "order": 900,
 "pos": "3B",
+"endPos": "3B",
 "allPos": [
 "3B"
 ]

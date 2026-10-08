@@ -64,7 +64,8 @@
       var men = L.filter(function (p) { return Math.floor(p.order / 100) === k; }).sort(function (a, b) { return a.order - b.order; });
       var turns = 0, list = [];
       men.forEach(function (p, j) {
-        list.push({ id: p.id, pos: p.pos, from: turns + 1 });   // he takes the spot at its next turn after the men before him
+        var fp = (p.allPos || [p.pos]).filter(function (q) { return q && q !== 'PH' && q !== 'PR'; })[0] || 'DH';   // his first place in the field (a pinch-hitter's is where he went after)
+        list.push({ id: p.id, pos: j === 0 ? p.pos : fp, from: turns + 1 });   // he takes the spot at its next turn after the men before him
         turns += G.pas.filter(function (pa) { return pa.batter === p.id; }).length;
       });
       out.push(list);

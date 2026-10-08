@@ -26,6 +26,7 @@
 "name": "Drake Baldwin",
 "order": 100,
 "pos": "DH",
+"endPos": "DH",
 "allPos": [
 "DH"
 ]
@@ -35,6 +36,7 @@
 "name": "Ronald Acu\u00f1a Jr.",
 "order": 200,
 "pos": "RF",
+"endPos": "RF",
 "allPos": [
 "RF"
 ]
@@ -44,6 +46,7 @@
 "name": "Ozzie Albies",
 "order": 300,
 "pos": "2B",
+"endPos": "2B",
 "allPos": [
 "2B"
 ]
@@ -53,6 +56,7 @@
 "name": "Matt Olson",
 "order": 400,
 "pos": "1B",
+"endPos": "1B",
 "allPos": [
 "1B"
 ]
@@ -62,6 +66,7 @@
 "name": "Michael Harris II",
 "order": 500,
 "pos": "CF",
+"endPos": "CF",
 "allPos": [
 "CF"
 ]
@@ -70,7 +75,8 @@
 "id": 643289,
 "name": "Mauricio Dub\u00f3n",
 "order": 600,
-"pos": "SS",
+"pos": "LF",
+"endPos": "SS",
 "allPos": [
 "LF",
 "SS"
@@ -81,6 +87,7 @@
 "name": "Austin Riley",
 "order": 700,
 "pos": "3B",
+"endPos": "3B",
 "allPos": [
 "3B"
 ]
@@ -90,6 +97,7 @@
 "name": "Sean Murphy",
 "order": 800,
 "pos": "C",
+"endPos": "C",
 "allPos": [
 "C"
 ]
@@ -99,6 +107,7 @@
 "name": "Ha-Seong Kim",
 "order": 900,
 "pos": "SS",
+"endPos": "SS",
 "allPos": [
 "SS"
 ]
@@ -107,7 +116,8 @@
 "id": 657041,
 "name": "Lane Thomas",
 "order": 901,
-"pos": "LF",
+"pos": "PH",
+"endPos": "LF",
 "allPos": [
 "PH",
 "LF"
@@ -120,6 +130,7 @@
 "name": "Mookie Betts",
 "order": 100,
 "pos": "SS",
+"endPos": "SS",
 "allPos": [
 "SS"
 ]
@@ -129,6 +140,7 @@
 "name": "Shohei Ohtani",
 "order": 200,
 "pos": "DH",
+"endPos": "DH",
 "allPos": [
 "DH"
 ]
@@ -138,6 +150,7 @@
 "name": "Will Smith",
 "order": 300,
 "pos": "C",
+"endPos": "C",
 "allPos": [
 "C"
 ]
@@ -147,6 +160,7 @@
 "name": "Freddie Freeman",
 "order": 400,
 "pos": "1B",
+"endPos": "1B",
 "allPos": [
 "1B"
 ]
@@ -156,6 +170,7 @@
 "name": "Teoscar Hern\u00e1ndez",
 "order": 500,
 "pos": "LF",
+"endPos": "LF",
 "allPos": [
 "LF"
 ]
@@ -165,6 +180,7 @@
 "name": "Enrique Hern\u00e1ndez",
 "order": 501,
 "pos": "LF",
+"endPos": "LF",
 "allPos": [
 "LF"
 ]
@@ -174,6 +190,7 @@
 "name": "Kyle Tucker",
 "order": 600,
 "pos": "RF",
+"endPos": "RF",
 "allPos": [
 "RF"
 ]
@@ -183,6 +200,7 @@
 "name": "Andy Pages",
 "order": 700,
 "pos": "CF",
+"endPos": "CF",
 "allPos": [
 "CF"
 ]
@@ -192,6 +210,7 @@
 "name": "Max Muncy",
 "order": 800,
 "pos": "3B",
+"endPos": "3B",
 "allPos": [
 "3B"
 ]
@@ -201,6 +220,7 @@
 "name": "Tommy Edman",
 "order": 900,
 "pos": "2B",
+"endPos": "2B",
 "allPos": [
 "2B"
 ]

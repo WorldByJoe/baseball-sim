@@ -1,5 +1,5 @@
 """
-game_feed.py · v0.2 · 2026-10-06
+game_feed.py · v0.3 · 2026-10-07
 
 One postseason game from MLB's live feed (playoffs/games/<gamePk>_feed.json,
 statsapi.mlb.com/api/v1.1/game/<pk>/feed/live) as the review reads it:
@@ -12,6 +12,7 @@ with their positions; who pitched for each side and in what order.
   python3 review/game_feed.py 849839   ->  review/games/849839.json
 
 CHANGED
+  v0.3  each man's position is where he started (allPositions[0]), not where he ended; endPos keeps the other
   v0.2  parse(feed) returns the game, for the live watcher (review/live/poll.py); a play still in progress keeps
         its pitches so far and no outcome
   v0.1  first build (the Yankees-Rays review)
@@ -37,8 +38,11 @@ def parse(d, pk):
         for key, p in box[s]['players'].items():
             bo = p.get('battingOrder')
             if bo:
-                L.append({'id': p['person']['id'], 'name': p['person']['fullName'], 'order': int(bo), 'pos': (p.get('position') or {}).get('abbreviation'),
-                          'allPos': [x.get('abbreviation') for x in p.get('allPositions', [])]})
+                allp = [x.get('abbreviation') for x in p.get('allPositions', [])]
+                # the position he STARTED at (v0.3): 'position' is where he ended, and a man moved during the game had left two
+                # starters at one position and none at another in 8 lineups of the division series
+                L.append({'id': p['person']['id'], 'name': p['person']['fullName'], 'order': int(bo),
+                          'pos': allp[0] if allp else (p.get('position') or {}).get('abbreviation'), 'endPos': (p.get('position') or {}).get('abbreviation'), 'allPos': allp})
         L.sort(key=lambda x: x['order'])
         lineups[s] = L
         pitchers[s] = box[s]['pitchers']
