@@ -1,0 +1,16760 @@
+[
+{
+"n": 87,
+"types": {
+"CH": {
+"n": 23,
+"v": {
+"game": 87.16,
+"season": 85.91,
+"delta": 1.25,
+"z": 1.75,
+"games": 32
+},
+"s": {
+"game": 1974.43,
+"season": 1856.36,
+"delta": 118.07,
+"z": 1.67,
+"games": 32
+},
+"ivb": {
+"game": 0.75,
+"season": 1.63,
+"delta": -0.88,
+"z": -1.05,
+"games": 32
+},
+"hb": {
+"game": 16.47,
+"season": 14.79,
+"delta": 1.68,
+"z": 1.5,
+"games": 32
+},
+"ext": {
+"game": 6.21,
+"season": 6.29,
+"delta": -0.08,
+"z": -0.83,
+"games": 32
+}
+},
+"FF": {
+"n": 37,
+"v": {
+"game": 96.26,
+"season": 94.25,
+"delta": 2.01,
+"z": 2.34,
+"games": 32
+},
+"s": {
+"game": 2215.43,
+"season": 2175.69,
+"delta": 39.74,
+"z": 0.92,
+"games": 32
+},
+"ivb": {
+"game": 16.87,
+"season": 16.58,
+"delta": 0.29,
+"z": 0.42,
+"games": 32
+},
+"hb": {
+"game": 6.96,
+"season": 5.35,
+"delta": 1.61,
+"z": 1.69,
+"games": 32
+},
+"ext": {
+"game": 6.48,
+"season": 6.54,
+"delta": -0.06,
+"z": -0.53,
+"games": 32
+}
+},
+"SI": {
+"n": 19,
+"v": {
+"game": 94.48,
+"season": 92.78,
+"delta": 1.71,
+"z": 1.87,
+"games": 29
+},
+"s": {
+"game": 2111.21,
+"season": 2069.81,
+"delta": 41.4,
+"z": 0.77,
+"games": 29
+},
+"ivb": {
+"game": 9.36,
+"season": 10.06,
+"delta": -0.7,
+"z": -0.97,
+"games": 29
+},
+"hb": {
+"game": 14.76,
+"season": 13.18,
+"delta": 1.58,
+"z": 1.76,
+"games": 29
+},
+"ext": {
+"game": 6.43,
+"season": 6.49,
+"delta": -0.07,
+"z": -0.57,
+"games": 29
+}
+},
+"SL": {
+"n": 5,
+"v": {
+"game": 88.14,
+"season": 86.99,
+"delta": 1.15,
+"z": 1.99,
+"games": 18
+},
+"s": {
+"game": 2500.8,
+"season": 2382.05,
+"delta": 118.75,
+"z": 2.71,
+"games": 18
+},
+"ivb": {
+"game": 4.44,
+"season": 4.01,
+"delta": 0.43,
+"z": 0.37,
+"games": 18
+},
+"hb": {
+"game": -3.28,
+"season": -5.52,
+"delta": 2.24,
+"z": 1.7,
+"games": 18
+},
+"ext": {
+"game": 6.43,
+"season": 6.51,
+"delta": -0.08,
+"z": -0.83,
+"games": 18
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.264,
+0.236
+],
+"CU": [
+0.034,
+0.084
+],
+"FC": [
+0.0,
+0.047
+],
+"FF": [
+0.425,
+0.417
+],
+"SI": [
+0.218,
+0.15
+],
+"SL": [
+0.057,
+0.065
+]
+},
+"zone": {
+"game": 0.425,
+"season": 0.43,
+"z": -0.08
+},
+"pitches": {
+"game": 87,
+"season_mean": 92.3,
+"season_max": 112
+},
+"pk": 849829,
+"pitcher": 800048,
+"name": "Parker Messick",
+"team": "CLE",
+"seasonGames": 32
+},
+{
+"n": 51,
+"types": {
+"FC": {
+"n": 9,
+"v": {
+"game": 88.91,
+"season": 88.35,
+"delta": 0.56,
+"z": 0.84,
+"games": 8
+},
+"s": {
+"game": 2547.33,
+"season": 2474.49,
+"delta": 72.84,
+"z": 2.14,
+"games": 8
+},
+"ivb": {
+"game": 6.82,
+"season": 5.79,
+"delta": 1.04,
+"z": 1.18,
+"games": 8
+},
+"hb": {
+"game": -2.09,
+"season": -3.4,
+"delta": 1.31,
+"z": 2.14,
+"games": 8
+},
+"ext": {
+"game": 6.9,
+"season": 6.86,
+"delta": 0.04,
+"z": 0.26,
+"games": 8
+}
+},
+"FF": {
+"n": 27,
+"v": {
+"game": 95.0,
+"season": 93.76,
+"delta": 1.24,
+"z": 2.34,
+"games": 17
+},
+"s": {
+"game": 2446.63,
+"season": 2402.73,
+"delta": 43.9,
+"z": 1.05,
+"games": 17
+},
+"ivb": {
+"game": 14.43,
+"season": 13.96,
+"delta": 0.47,
+"z": 0.62,
+"games": 17
+},
+"hb": {
+"game": 9.43,
+"season": 7.96,
+"delta": 1.47,
+"z": 0.99,
+"games": 17
+},
+"ext": {
+"game": 6.94,
+"season": 6.87,
+"delta": 0.07,
+"z": 0.72,
+"games": 17
+}
+},
+"SL": {
+"n": 15,
+"v": {
+"game": 83.52,
+"season": 83.03,
+"delta": 0.49,
+"z": 0.84,
+"games": 13
+},
+"s": {
+"game": 2526.07,
+"season": 2410.86,
+"delta": 115.2,
+"z": 3.23,
+"games": 13
+},
+"ivb": {
+"game": -3.34,
+"season": -3.66,
+"delta": 0.32,
+"z": 0.37,
+"games": 13
+},
+"hb": {
+"game": -6.35,
+"season": -5.2,
+"delta": -1.15,
+"z": -1.23,
+"games": 13
+},
+"ext": {
+"game": 6.82,
+"season": 6.86,
+"delta": -0.04,
+"z": -0.3,
+"games": 13
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.0,
+0.023
+],
+"FC": [
+0.176,
+0.19
+],
+"FF": [
+0.529,
+0.484
+],
+"SL": [
+0.294,
+0.303
+]
+},
+"zone": {
+"game": 0.294,
+"season": 0.421,
+"z": -1.29
+},
+"pitches": {
+"game": 51,
+"season_mean": 26.1,
+"season_max": 48
+},
+"pk": 849829,
+"pitcher": 696146,
+"name": "Hagen Smith",
+"team": "CWS",
+"seasonGames": 18
+},
+{
+"n": 6,
+"types": {},
+"flags": [],
+"mix": {
+"FC": [
+0.0,
+0.012
+],
+"FF": [
+0.667,
+0.659
+],
+"SI": [
+0.0,
+0.04
+],
+"ST": [
+0.333,
+0.283
+]
+},
+"zone": {
+"game": 0.5,
+"season": 0.518,
+"z": -0.13
+},
+"pitches": {
+"game": 6,
+"season_mean": 15.2,
+"season_max": 33
+},
+"pk": 849829,
+"pitcher": 663542,
+"name": "Bryan Hudson",
+"team": "CWS",
+"seasonGames": 70
+},
+{
+"n": 17,
+"types": {
+"FF": {
+"n": 13,
+"v": {
+"game": 101.05,
+"season": 99.49,
+"delta": 1.57,
+"z": 3.17,
+"games": 17
+},
+"s": {
+"game": 2336.15,
+"season": 2302.28,
+"delta": 33.87,
+"z": 0.45,
+"games": 17
+},
+"ivb": {
+"game": 15.29,
+"season": 14.63,
+"delta": 0.66,
+"z": 0.67,
+"games": 17
+},
+"hb": {
+"game": -8.49,
+"season": -10.66,
+"delta": 2.17,
+"z": 1.4,
+"games": 17
+},
+"ext": {
+"game": 6.24,
+"season": 6.33,
+"delta": -0.1,
+"z": -0.83,
+"games": 17
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.765,
+"season": 0.204,
+"z": 3.46
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.118,
+"season": 0.449,
+"z": -1.76
+},
+{
+"what": "mix",
+"type": "ST",
+"game": 0.118,
+"season": 0.299,
+"z": -1.3
+}
+],
+"mix": {
+"FF": [
+0.765,
+0.204
+],
+"FS": [
+0.0,
+0.034
+],
+"SI": [
+0.118,
+0.449
+],
+"ST": [
+0.118,
+0.299
+]
+},
+"zone": {
+"game": 0.176,
+"season": 0.412,
+"z": -2.55
+},
+"pitches": {
+"game": 17,
+"season_mean": 17.0,
+"season_max": 35
+},
+"pk": 849829,
+"pitcher": 663855,
+"name": "Jordan Hicks",
+"team": "CWS",
+"seasonGames": 53
+},
+{
+"n": 22,
+"types": {
+"SI": {
+"n": 7,
+"v": {
+"game": 97.0,
+"season": 95.32,
+"delta": 1.68,
+"z": 2.57,
+"games": 33
+},
+"s": {
+"game": 2304.71,
+"season": 2267.64,
+"delta": 37.07,
+"z": 0.5,
+"games": 33
+},
+"ivb": {
+"game": 6.59,
+"season": 5.16,
+"delta": 1.42,
+"z": 1.59,
+"games": 33
+},
+"hb": {
+"game": 15.93,
+"season": 16.07,
+"delta": -0.14,
+"z": -0.1,
+"games": 33
+},
+"ext": {
+"game": 5.92,
+"season": 5.86,
+"delta": 0.06,
+"z": 0.52,
+"games": 33
+}
+},
+"ST": {
+"n": 8,
+"v": {
+"game": 83.89,
+"season": 82.65,
+"delta": 1.24,
+"z": 1.93,
+"games": 33
+},
+"s": {
+"game": 2529.25,
+"season": 2441.57,
+"delta": 87.68,
+"z": 1.43,
+"games": 33
+},
+"ivb": {
+"game": -1.41,
+"season": 0.18,
+"delta": -1.59,
+"z": -1.34,
+"games": 33
+},
+"hb": {
+"game": -15.19,
+"season": -12.98,
+"delta": -2.21,
+"z": -1.59,
+"games": 33
+},
+"ext": {
+"game": 5.87,
+"season": 5.76,
+"delta": 0.11,
+"z": 1.25,
+"games": 33
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "SI",
+"game": 0.318,
+"season": 0.18,
+"z": 2.29
+},
+{
+"what": "mix",
+"type": "ST",
+"game": 0.364,
+"season": 0.237,
+"z": 1.75
+}
+],
+"mix": {
+"CH": [
+0.045,
+0.143
+],
+"FC": [
+0.091,
+0.163
+],
+"FF": [
+0.182,
+0.215
+],
+"SI": [
+0.318,
+0.18
+],
+"SL": [
+0.0,
+0.061
+],
+"ST": [
+0.364,
+0.237
+]
+},
+"zone": {
+"game": 0.364,
+"season": 0.399,
+"z": -0.68
+},
+"pitches": {
+"game": 22,
+"season_mean": 84.6,
+"season_max": 101
+},
+"pk": 849829,
+"pitcher": 641743,
+"name": "Anthony Kay",
+"team": "CWS",
+"seasonGames": 33
+},
+{
+"n": 12,
+"types": {
+"FF": {
+"n": 6,
+"v": {
+"game": 98.8,
+"season": 98.85,
+"delta": -0.05,
+"z": -0.08,
+"games": 14
+},
+"s": {
+"game": 2517.67,
+"season": 2436.3,
+"delta": 81.36,
+"z": 1.86,
+"games": 14
+},
+"ivb": {
+"game": 18.67,
+"season": 16.88,
+"delta": 1.79,
+"z": 1.92,
+"games": 14
+},
+"hb": {
+"game": -6.55,
+"season": -7.08,
+"delta": 0.53,
+"z": 0.28,
+"games": 14
+},
+"ext": {
+"game": 6.55,
+"season": 6.7,
+"delta": -0.15,
+"z": -1.31,
+"games": 14
+}
+},
+"SL": {
+"n": 5,
+"v": {
+"game": 90.98,
+"season": 91.95,
+"delta": -0.97,
+"z": -1.21,
+"games": 9
+},
+"s": {
+"game": 2315.0,
+"season": 2340.52,
+"delta": -25.52,
+"z": -0.6,
+"games": 9
+},
+"ivb": {
+"game": 4.48,
+"season": 3.81,
+"delta": 0.67,
+"z": 0.62,
+"games": 9
+},
+"hb": {
+"game": 2.0,
+"season": 3.44,
+"delta": -1.44,
+"z": -1.04,
+"games": 9
+},
+"ext": {
+"game": 6.38,
+"season": 6.58,
+"delta": -0.2,
+"z": -1.74,
+"games": 9
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.5,
+"season": 0.619,
+"z": -1.58
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.417,
+"season": 0.289,
+"z": 1.06
+}
+],
+"mix": {
+"CU": [
+0.083,
+0.092
+],
+"FF": [
+0.5,
+0.619
+],
+"SL": [
+0.417,
+0.289
+]
+},
+"zone": {
+"game": 0.167,
+"season": 0.429,
+"z": -2.16
+},
+"pitches": {
+"game": 12,
+"season_mean": 19.5,
+"season_max": 35
+},
+"pk": 849829,
+"pitcher": 682982,
+"name": "Daniel Espino",
+"team": "CLE",
+"seasonGames": 14
+},
+{
+"n": 20,
+"types": {
+"FF": {
+"n": 12,
+"v": {
+"game": 93.32,
+"season": 94.12,
+"delta": -0.8,
+"z": -1.14,
+"games": 49
+},
+"s": {
+"game": 2510.58,
+"season": 2538.06,
+"delta": -27.47,
+"z": -0.62,
+"games": 49
+},
+"ivb": {
+"game": 20.37,
+"season": 19.28,
+"delta": 1.09,
+"z": 1.17,
+"games": 49
+},
+"hb": {
+"game": 10.08,
+"season": 10.01,
+"delta": 0.07,
+"z": 0.07,
+"games": 49
+},
+"ext": {
+"game": 6.48,
+"season": 6.61,
+"delta": -0.13,
+"z": -1.03,
+"games": 49
+}
+},
+"SL": {
+"n": 7,
+"v": {
+"game": 86.94,
+"season": 86.37,
+"delta": 0.57,
+"z": 0.61,
+"games": 7
+},
+"s": {
+"game": 2541.33,
+"season": 2558.63,
+"delta": -17.29,
+"z": -0.18,
+"games": 7
+},
+"ivb": {
+"game": 6.83,
+"season": 3.84,
+"delta": 2.99,
+"z": 1.21,
+"games": 7
+},
+"hb": {
+"game": -1.26,
+"season": -2.29,
+"delta": 1.03,
+"z": 1.76,
+"games": 7
+},
+"ext": {
+"game": 6.55,
+"season": 6.55,
+"delta": -0.01,
+"z": -0.05,
+"games": 7
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CU",
+"game": 0.05,
+"season": 0.185,
+"z": -1.02
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.35,
+"season": 0.16,
+"z": 1.16
+}
+],
+"mix": {
+"CU": [
+0.05,
+0.185
+],
+"FF": [
+0.6,
+0.64
+],
+"SL": [
+0.35,
+0.16
+]
+},
+"zone": {
+"game": 0.35,
+"season": 0.418,
+"z": -0.59
+},
+"pitches": {
+"game": 20,
+"season_mean": 13.9,
+"season_max": 24
+},
+"pk": 849829,
+"pitcher": 681870,
+"name": "Erik Sabrowski",
+"team": "CLE",
+"seasonGames": 60
+},
+{
+"n": 42,
+"types": {
+"CU": {
+"n": 16,
+"v": {
+"game": 83.74,
+"season": 83.9,
+"delta": -0.16,
+"z": -0.16,
+"games": 38
+},
+"s": {
+"game": 2616.88,
+"season": 2517.64,
+"delta": 99.24,
+"z": 1.71,
+"games": 38
+},
+"ivb": {
+"game": -16.96,
+"season": -15.6,
+"delta": -1.36,
+"z": -1.81,
+"games": 38
+},
+"hb": {
+"game": 4.37,
+"season": 1.85,
+"delta": 2.52,
+"z": 1.94,
+"games": 38
+},
+"ext": {
+"game": 6.83,
+"season": 7.03,
+"delta": -0.2,
+"z": -1.38,
+"games": 38
+}
+},
+"FF": {
+"n": 19,
+"v": {
+"game": 98.12,
+"season": 98.08,
+"delta": 0.04,
+"z": 0.05,
+"games": 50
+},
+"s": {
+"game": 2334.74,
+"season": 2333.0,
+"delta": 1.74,
+"z": 0.02,
+"games": 50
+},
+"ivb": {
+"game": 16.48,
+"season": 16.61,
+"delta": -0.13,
+"z": -0.14,
+"games": 50
+},
+"hb": {
+"game": -1.98,
+"season": -1.78,
+"delta": -0.2,
+"z": -0.15,
+"games": 50
+},
+"ext": {
+"game": 6.86,
+"season": 7.18,
+"delta": -0.33,
+"z": -2.59,
+"games": 50
+}
+},
+"SL": {
+"n": 6,
+"v": {
+"game": 89.32,
+"season": 89.46,
+"delta": -0.14,
+"z": -0.14,
+"games": 22
+},
+"s": {
+"game": 2588.0,
+"season": 2620.85,
+"delta": -32.85,
+"z": -0.94,
+"games": 22
+},
+"ivb": {
+"game": -1.85,
+"season": 0.32,
+"delta": -2.17,
+"z": -1.1,
+"games": 22
+},
+"hb": {
+"game": 8.88,
+"season": 6.2,
+"delta": 2.69,
+"z": 1.08,
+"games": 22
+},
+"ext": {
+"game": 6.8,
+"season": 6.99,
+"delta": -0.19,
+"z": -1.48,
+"games": 22
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CU",
+"game": 0.381,
+"season": 0.271,
+"z": 1.31
+}
+],
+"mix": {
+"CU": [
+0.381,
+0.271
+],
+"FC": [
+0.0,
+0.003
+],
+"FF": [
+0.452,
+0.437
+],
+"SI": [
+0.024,
+0.123
+],
+"SL": [
+0.143,
+0.166
+]
+},
+"zone": {
+"game": 0.548,
+"season": 0.45,
+"z": 0.91
+},
+"pitches": {
+"game": 42,
+"season_mean": 22.2,
+"season_max": 40
+},
+"pk": 849829,
+"pitcher": 691799,
+"name": "Grant Taylor",
+"team": "CWS",
+"seasonGames": 60
+},
+{
+"n": 4,
+"types": {},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.5,
+"season": 0.199,
+"z": 2.68
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.25,
+"season": 0.498,
+"z": -1.61
+}
+],
+"mix": {
+"CH": [
+0.5,
+0.199
+],
+"FF": [
+0.25,
+0.295
+],
+"FS": [
+0.0,
+0.007
+],
+"SL": [
+0.25,
+0.498
+]
+},
+"zone": {
+"game": 0.75,
+"season": 0.43,
+"z": 2.38
+},
+"pitches": {
+"game": 4,
+"season_mean": 14.5,
+"season_max": 25
+},
+"pk": 849829,
+"pitcher": 683769,
+"name": "Hunter Gaddis",
+"team": "CLE",
+"seasonGames": 68
+},
+{
+"n": 14,
+"types": {
+"CU": {
+"n": 8,
+"v": {
+"game": 81.25,
+"season": 80.33,
+"delta": 0.92,
+"z": 1.31,
+"games": 28
+},
+"s": {
+"game": 2442.38,
+"season": 2322.73,
+"delta": 119.64,
+"z": 2.18,
+"games": 28
+},
+"ivb": {
+"game": -3.74,
+"season": -3.64,
+"delta": -0.1,
+"z": -0.09,
+"games": 28
+},
+"hb": {
+"game": -12.86,
+"season": -11.26,
+"delta": -1.6,
+"z": -1.03,
+"games": 28
+},
+"ext": {
+"game": 6.14,
+"season": 6.27,
+"delta": -0.13,
+"z": -0.86,
+"games": 28
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CU",
+"game": 0.571,
+"season": 0.3,
+"z": 1.95
+},
+{
+"what": "mix",
+"type": "FF",
+"game": 0.0,
+"season": 0.196,
+"z": -1.48
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.004
+],
+"CU": [
+0.571,
+0.3
+],
+"FF": [
+0.0,
+0.196
+],
+"SI": [
+0.143,
+0.238
+],
+"SL": [
+0.286,
+0.251
+]
+},
+"zone": {
+"game": 0.5,
+"season": 0.411,
+"z": 0.69
+},
+"pitches": {
+"game": 14,
+"season_mean": 14.8,
+"season_max": 31
+},
+"pk": 849829,
+"pitcher": 682120,
+"name": "Tim Herrin",
+"team": "CLE",
+"seasonGames": 67
+},
+{
+"n": 12,
+"types": {
+"FF": {
+"n": 7,
+"v": {
+"game": 96.3,
+"season": 97.38,
+"delta": -1.08,
+"z": -0.92,
+"games": 65
+},
+"s": {
+"game": 2441.0,
+"season": 2365.17,
+"delta": 75.83,
+"z": 0.9,
+"games": 65
+},
+"ivb": {
+"game": 17.61,
+"season": 16.74,
+"delta": 0.87,
+"z": 0.99,
+"games": 65
+},
+"hb": {
+"game": -6.39,
+"season": -7.67,
+"delta": 1.29,
+"z": 1.09,
+"games": 65
+},
+"ext": {
+"game": 7.33,
+"season": 7.41,
+"delta": -0.08,
+"z": -0.69,
+"games": 65
+}
+}
+},
+"flags": [],
+"mix": {
+"FF": [
+0.583,
+0.636
+],
+"FS": [
+0.25,
+0.249
+],
+"ST": [
+0.167,
+0.103
+]
+},
+"zone": {
+"game": 0.583,
+"season": 0.44,
+"z": 1.33
+},
+"pitches": {
+"game": 12,
+"season_mean": 18.0,
+"season_max": 38
+},
+"pk": 849829,
+"pitcher": 671922,
+"name": "Cade Smith",
+"team": "CLE",
+"seasonGames": 69
+},
+{
+"n": 98,
+"types": {
+"FF": {
+"n": 38,
+"v": {
+"game": 99.49,
+"season": 97.61,
+"delta": 1.88,
+"z": 1.87,
+"games": 32
+},
+"s": {
+"game": 2309.11,
+"season": 2295.62,
+"delta": 13.48,
+"z": 0.39,
+"games": 32
+},
+"ivb": {
+"game": 14.91,
+"season": 14.32,
+"delta": 0.58,
+"z": 0.64,
+"games": 32
+},
+"hb": {
+"game": -9.12,
+"season": -10.57,
+"delta": 1.45,
+"z": 1.64,
+"games": 32
+},
+"ext": {
+"game": 6.97,
+"season": 7.06,
+"delta": -0.09,
+"z": -0.71,
+"games": 32
+}
+},
+"KC": {
+"n": 19
+},
+"SI": {
+"n": 15,
+"v": {
+"game": 98.89,
+"season": 97.02,
+"delta": 1.87,
+"z": 1.66,
+"games": 30
+},
+"s": {
+"game": 2075.0,
+"season": 2051.93,
+"delta": 23.07,
+"z": 0.43,
+"games": 30
+},
+"ivb": {
+"game": 9.57,
+"season": 9.32,
+"delta": 0.25,
+"z": 0.28,
+"games": 30
+},
+"hb": {
+"game": -16.05,
+"season": -15.43,
+"delta": -0.61,
+"z": -0.53,
+"games": 30
+},
+"ext": {
+"game": 6.98,
+"season": 7.06,
+"delta": -0.08,
+"z": -0.65,
+"games": 30
+}
+},
+"ST": {
+"n": 22,
+"v": {
+"game": 89.35,
+"season": 87.56,
+"delta": 1.8,
+"z": 2.2,
+"games": 32
+},
+"s": {
+"game": 2337.36,
+"season": 2295.39,
+"delta": 41.97,
+"z": 0.77,
+"games": 32
+},
+"ivb": {
+"game": -1.98,
+"season": -0.65,
+"delta": -1.33,
+"z": -0.93,
+"games": 32
+},
+"hb": {
+"game": 13.27,
+"season": 11.16,
+"delta": 2.11,
+"z": 1.31,
+"games": 32
+},
+"ext": {
+"game": 6.87,
+"season": 6.91,
+"delta": -0.04,
+"z": -0.37,
+"games": 32
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CU",
+"game": 0.0,
+"season": 0.222,
+"z": -3.1
+},
+{
+"what": "mix",
+"type": "FF",
+"game": 0.388,
+"season": 0.27,
+"z": 1.1
+}
+],
+"mix": {
+"CU": [
+0.0,
+0.222
+],
+"FC": [
+0.041,
+0.058
+],
+"FF": [
+0.388,
+0.27
+],
+"KC": [
+0.194,
+0.0
+],
+"SI": [
+0.153,
+0.154
+],
+"ST": [
+0.224,
+0.285
+]
+},
+"zone": {
+"game": 0.408,
+"season": 0.436,
+"z": -0.42
+},
+"pitches": {
+"game": 98,
+"season_mean": 93.5,
+"season_max": 113
+},
+"pk": 849834,
+"pitcher": 668909,
+"name": "Gavin Williams",
+"team": "CLE",
+"seasonGames": 32
+},
+{
+"n": 17,
+"types": {
+"SI": {
+"n": 10,
+"v": {
+"game": 96.73,
+"season": 95.32,
+"delta": 1.41,
+"z": 2.16,
+"games": 33
+},
+"s": {
+"game": 2293.8,
+"season": 2267.64,
+"delta": 26.16,
+"z": 0.36,
+"games": 33
+},
+"ivb": {
+"game": 5.98,
+"season": 5.16,
+"delta": 0.82,
+"z": 0.92,
+"games": 33
+},
+"hb": {
+"game": 17.52,
+"season": 16.07,
+"delta": 1.45,
+"z": 1.03,
+"games": 33
+},
+"ext": {
+"game": 5.89,
+"season": 5.86,
+"delta": 0.03,
+"z": 0.25,
+"games": 33
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.0,
+"season": 0.143,
+"z": -2.41
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.588,
+"season": 0.18,
+"z": 6.84
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.143
+],
+"FC": [
+0.118,
+0.163
+],
+"FF": [
+0.118,
+0.215
+],
+"SI": [
+0.588,
+0.18
+],
+"SL": [
+0.0,
+0.061
+],
+"ST": [
+0.176,
+0.237
+]
+},
+"zone": {
+"game": 0.412,
+"season": 0.399,
+"z": 0.23
+},
+"pitches": {
+"game": 17,
+"season_mean": 84.6,
+"season_max": 101
+},
+"pk": 849834,
+"pitcher": 641743,
+"name": "Anthony Kay",
+"team": "CWS",
+"seasonGames": 33
+},
+{
+"n": 40,
+"types": {
+"FF": {
+"n": 15,
+"v": {
+"game": 97.28,
+"season": 94.82,
+"delta": 2.46,
+"z": 3.01,
+"games": 50
+},
+"s": {
+"game": 2304.87,
+"season": 2257.47,
+"delta": 47.39,
+"z": 0.73,
+"games": 50
+},
+"ivb": {
+"game": 13.97,
+"season": 14.28,
+"delta": -0.3,
+"z": -0.3,
+"games": 50
+},
+"hb": {
+"game": 11.88,
+"season": 10.45,
+"delta": 1.43,
+"z": 1.3,
+"games": 50
+},
+"ext": {
+"game": 5.91,
+"season": 5.8,
+"delta": 0.11,
+"z": 1.23,
+"games": 50
+}
+},
+"SI": {
+"n": 11,
+"v": {
+"game": 95.56,
+"season": 93.72,
+"delta": 1.85,
+"z": 2.16,
+"games": 28
+},
+"s": {
+"game": 2390.91,
+"season": 2263.37,
+"delta": 127.53,
+"z": 2.26,
+"games": 28
+},
+"ivb": {
+"game": 2.97,
+"season": 3.78,
+"delta": -0.81,
+"z": -0.72,
+"games": 28
+},
+"hb": {
+"game": 16.28,
+"season": 16.91,
+"delta": -0.62,
+"z": -0.62,
+"games": 28
+},
+"ext": {
+"game": 6.06,
+"season": 5.8,
+"delta": 0.26,
+"z": 2.29,
+"games": 28
+}
+},
+"SV": {
+"n": 11,
+"v": {
+"game": 83.37,
+"season": 83.0,
+"delta": 0.37,
+"z": 0.39,
+"games": 46
+},
+"s": {
+"game": 2876.0,
+"season": 2854.84,
+"delta": 21.16,
+"z": 0.33,
+"games": 46
+},
+"ivb": {
+"game": -5.43,
+"season": -4.59,
+"delta": -0.84,
+"z": -0.71,
+"games": 46
+},
+"hb": {
+"game": -19.9,
+"season": -17.71,
+"delta": -2.19,
+"z": -0.95,
+"games": 46
+},
+"ext": {
+"game": 5.81,
+"season": 5.61,
+"delta": 0.2,
+"z": 1.9,
+"games": 46
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.0,
+0.028
+],
+"CU": [
+0.075,
+0.043
+],
+"FC": [
+0.0,
+0.016
+],
+"FF": [
+0.375,
+0.391
+],
+"SI": [
+0.275,
+0.208
+],
+"SV": [
+0.275,
+0.308
+]
+},
+"zone": {
+"game": 0.475,
+"season": 0.467,
+"z": 0.08
+},
+"pitches": {
+"game": 40,
+"season_mean": 24.7,
+"season_max": 51
+},
+"pk": 849834,
+"pitcher": 656794,
+"name": "Sean Newcomb",
+"team": "CWS",
+"seasonGames": 60
+},
+{
+"n": 83,
+"types": {
+"FC": {
+"n": 14,
+"v": {
+"game": 88.64,
+"season": 90.11,
+"delta": -1.47,
+"z": -1.64,
+"games": 26
+},
+"s": {
+"game": 2678.57,
+"season": 2645.59,
+"delta": 32.98,
+"z": 0.55,
+"games": 26
+},
+"ivb": {
+"game": 6.31,
+"season": 9.66,
+"delta": -3.34,
+"z": -1.77,
+"games": 26
+},
+"hb": {
+"game": 4.41,
+"season": 3.5,
+"delta": 0.91,
+"z": 0.87,
+"games": 26
+},
+"ext": {
+"game": 6.59,
+"season": 6.75,
+"delta": -0.17,
+"z": -2.17,
+"games": 26
+}
+},
+"FF": {
+"n": 33,
+"v": {
+"game": 94.63,
+"season": 94.77,
+"delta": -0.14,
+"z": -0.17,
+"games": 32
+},
+"s": {
+"game": 2576.0,
+"season": 2582.33,
+"delta": -6.33,
+"z": -0.13,
+"games": 32
+},
+"ivb": {
+"game": 19.73,
+"season": 18.5,
+"delta": 1.24,
+"z": 1.37,
+"games": 32
+},
+"hb": {
+"game": -3.87,
+"season": -4.33,
+"delta": 0.47,
+"z": 0.31,
+"games": 32
+},
+"ext": {
+"game": 6.7,
+"season": 6.82,
+"delta": -0.12,
+"z": -1.64,
+"games": 32
+}
+},
+"KC": {
+"n": 18,
+"v": {
+"game": 77.54,
+"season": 79.02,
+"delta": -1.48,
+"z": -1.27,
+"games": 32
+},
+"s": {
+"game": 2499.44,
+"season": 2452.82,
+"delta": 46.63,
+"z": 1.18,
+"games": 32
+},
+"ivb": {
+"game": -15.07,
+"season": -14.06,
+"delta": -1.01,
+"z": -1.11,
+"games": 32
+},
+"hb": {
+"game": 8.96,
+"season": 5.47,
+"delta": 3.49,
+"z": 1.79,
+"games": 32
+},
+"ext": {
+"game": 6.63,
+"season": 6.78,
+"delta": -0.15,
+"z": -2.07,
+"games": 32
+}
+},
+"SI": {
+"n": 8,
+"v": {
+"game": 95.21,
+"season": 94.66,
+"delta": 0.55,
+"z": 0.86,
+"games": 32
+},
+"s": {
+"game": 2434.0,
+"season": 2402.78,
+"delta": 31.22,
+"z": 0.57,
+"games": 32
+},
+"ivb": {
+"game": 14.51,
+"season": 14.39,
+"delta": 0.12,
+"z": 0.12,
+"games": 32
+},
+"hb": {
+"game": -14.07,
+"season": -12.83,
+"delta": -1.25,
+"z": -0.99,
+"games": 32
+},
+"ext": {
+"game": 6.72,
+"season": 6.84,
+"delta": -0.12,
+"z": -1.46,
+"games": 32
+}
+},
+"SL": {
+"n": 10,
+"v": {
+"game": 86.17,
+"season": 86.35,
+"delta": -0.18,
+"z": -0.22,
+"games": 31
+},
+"s": {
+"game": 2642.4,
+"season": 2529.08,
+"delta": 113.32,
+"z": 2.09,
+"games": 31
+},
+"ivb": {
+"game": 2.19,
+"season": 3.4,
+"delta": -1.21,
+"z": -0.75,
+"games": 31
+},
+"hb": {
+"game": 5.5,
+"season": 5.5,
+"delta": -0.0,
+"z": -0.0,
+"games": 31
+},
+"ext": {
+"game": 6.6,
+"season": 6.77,
+"delta": -0.16,
+"z": -1.91,
+"games": 31
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.0,
+0.018
+],
+"FC": [
+0.169,
+0.104
+],
+"FF": [
+0.398,
+0.371
+],
+"KC": [
+0.217,
+0.201
+],
+"SI": [
+0.096,
+0.138
+],
+"SL": [
+0.12,
+0.167
+]
+},
+"zone": {
+"game": 0.446,
+"season": 0.444,
+"z": 0.03
+},
+"pitches": {
+"game": 83,
+"season_mean": 90.0,
+"season_max": 104
+},
+"pk": 849834,
+"pitcher": 680732,
+"name": "Sean Burke",
+"team": "CWS",
+"seasonGames": 32
+},
+{
+"n": 11,
+"types": {
+"FF": {
+"n": 6,
+"v": {
+"game": 94.63,
+"season": 94.12,
+"delta": 0.51,
+"z": 0.73,
+"games": 49
+},
+"s": {
+"game": 2634.67,
+"season": 2538.06,
+"delta": 96.61,
+"z": 2.17,
+"games": 49
+},
+"ivb": {
+"game": 19.53,
+"season": 19.28,
+"delta": 0.26,
+"z": 0.28,
+"games": 49
+},
+"hb": {
+"game": 11.47,
+"season": 10.01,
+"delta": 1.46,
+"z": 1.44,
+"games": 49
+},
+"ext": {
+"game": 6.64,
+"season": 6.61,
+"delta": 0.03,
+"z": 0.22,
+"games": 49
+}
+},
+"SL": {
+"n": 5,
+"v": {
+"game": 87.2,
+"season": 86.37,
+"delta": 0.83,
+"z": 0.88,
+"games": 7
+},
+"s": {
+"game": 2521.4,
+"season": 2558.63,
+"delta": -37.23,
+"z": -0.38,
+"games": 7
+},
+"ivb": {
+"game": 7.44,
+"season": 3.84,
+"delta": 3.6,
+"z": 1.45,
+"games": 7
+},
+"hb": {
+"game": 0.62,
+"season": -2.29,
+"delta": 2.91,
+"z": 4.94,
+"games": 7
+},
+"ext": {
+"game": 6.62,
+"season": 6.55,
+"delta": 0.07,
+"z": 0.6,
+"games": 7
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CU",
+"game": 0.0,
+"season": 0.185,
+"z": -1.43
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.455,
+"season": 0.16,
+"z": 1.79
+}
+],
+"mix": {
+"CU": [
+0.0,
+0.185
+],
+"FF": [
+0.545,
+0.64
+],
+"SL": [
+0.455,
+0.16
+]
+},
+"zone": {
+"game": 0.364,
+"season": 0.418,
+"z": -0.47
+},
+"pitches": {
+"game": 11,
+"season_mean": 13.9,
+"season_max": 24
+},
+"pk": 849834,
+"pitcher": 681870,
+"name": "Erik Sabrowski",
+"team": "CLE",
+"seasonGames": 60
+},
+{
+"n": 17,
+"types": {
+"SL": {
+"n": 11,
+"v": {
+"game": 90.11,
+"season": 89.49,
+"delta": 0.62,
+"z": 0.56,
+"games": 53
+},
+"s": {
+"game": 2310.91,
+"season": 2287.97,
+"delta": 22.94,
+"z": 0.39,
+"games": 53
+},
+"ivb": {
+"game": 2.34,
+"season": 4.74,
+"delta": -2.41,
+"z": -1.27,
+"games": 53
+},
+"hb": {
+"game": 6.2,
+"season": 6.05,
+"delta": 0.15,
+"z": 0.16,
+"games": 53
+},
+"ext": {
+"game": 6.95,
+"season": 6.9,
+"delta": 0.05,
+"z": 0.38,
+"games": 53
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "SL",
+"game": 0.647,
+"season": 0.498,
+"z": 0.99
+}
+],
+"mix": {
+"CH": [
+0.118,
+0.199
+],
+"FF": [
+0.235,
+0.295
+],
+"FS": [
+0.0,
+0.007
+],
+"SL": [
+0.647,
+0.498
+]
+},
+"zone": {
+"game": 0.353,
+"season": 0.43,
+"z": -0.57
+},
+"pitches": {
+"game": 17,
+"season_mean": 14.5,
+"season_max": 25
+},
+"pk": 849834,
+"pitcher": 683769,
+"name": "Hunter Gaddis",
+"team": "CLE",
+"seasonGames": 68
+},
+{
+"n": 16,
+"types": {
+"FF": {
+"n": 5,
+"v": {
+"game": 92.76,
+"season": 93.46,
+"delta": -0.7,
+"z": -0.94,
+"games": 21
+},
+"s": {
+"game": 2297.0,
+"season": 2228.84,
+"delta": 68.16,
+"z": 1.2,
+"games": 21
+},
+"ivb": {
+"game": 16.28,
+"season": 15.36,
+"delta": 0.92,
+"z": 0.64,
+"games": 21
+},
+"hb": {
+"game": -8.38,
+"season": -6.2,
+"delta": -2.18,
+"z": -1.95,
+"games": 21
+},
+"ext": {
+"game": 6.47,
+"season": 6.59,
+"delta": -0.11,
+"z": -0.95,
+"games": 21
+}
+},
+"ST": {
+"n": 7,
+"v": {
+"game": 85.71,
+"season": 84.47,
+"delta": 1.25,
+"z": 2.17,
+"games": 17
+},
+"s": {
+"game": 2637.86,
+"season": 2580.06,
+"delta": 57.79,
+"z": 0.94,
+"games": 17
+},
+"ivb": {
+"game": 10.71,
+"season": 9.67,
+"delta": 1.05,
+"z": 0.6,
+"games": 17
+},
+"hb": {
+"game": 10.89,
+"season": 12.5,
+"delta": -1.61,
+"z": -0.84,
+"games": 17
+},
+"ext": {
+"game": 6.46,
+"season": 6.58,
+"delta": -0.11,
+"z": -1.12,
+"games": 17
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FC",
+"game": 0.125,
+"season": 0.239,
+"z": -0.94
+},
+{
+"what": "mix",
+"type": "ST",
+"game": 0.438,
+"season": 0.278,
+"z": 1.3
+}
+],
+"mix": {
+"FC": [
+0.125,
+0.239
+],
+"FF": [
+0.312,
+0.307
+],
+"SI": [
+0.125,
+0.169
+],
+"ST": [
+0.438,
+0.278
+]
+},
+"zone": {
+"game": 0.375,
+"season": 0.467,
+"z": -0.73
+},
+"pitches": {
+"game": 16,
+"season_mean": 15.4,
+"season_max": 29
+},
+"pk": 849834,
+"pitcher": 542888,
+"name": "Shawn Armstrong",
+"team": "CLE",
+"seasonGames": 41
+},
+{
+"n": 7,
+"types": {},
+"flags": [
+{
+"what": "mix",
+"type": "CU",
+"game": 0.571,
+"season": 0.271,
+"z": 3.62
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.0,
+"season": 0.123,
+"z": -1.27
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.0,
+"season": 0.166,
+"z": -1.59
+}
+],
+"mix": {
+"CU": [
+0.571,
+0.271
+],
+"FC": [
+0.0,
+0.003
+],
+"FF": [
+0.429,
+0.437
+],
+"SI": [
+0.0,
+0.123
+],
+"SL": [
+0.0,
+0.166
+]
+},
+"zone": {
+"game": 0.857,
+"season": 0.45,
+"z": 3.8
+},
+"pitches": {
+"game": 7,
+"season_mean": 22.2,
+"season_max": 40
+},
+"pk": 849834,
+"pitcher": 691799,
+"name": "Grant Taylor",
+"team": "CWS",
+"seasonGames": 60
+},
+{
+"n": 5,
+"types": {},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.8,
+"season": 0.636,
+"z": 1.2
+},
+{
+"what": "mix",
+"type": "ST",
+"game": 0.0,
+"season": 0.103,
+"z": -1.1
+}
+],
+"mix": {
+"FF": [
+0.8,
+0.636
+],
+"FS": [
+0.2,
+0.249
+],
+"ST": [
+0.0,
+0.103
+]
+},
+"zone": {
+"game": 0.8,
+"season": 0.44,
+"z": 3.34
+},
+"pitches": {
+"game": 5,
+"season_mean": 18.0,
+"season_max": 38
+},
+"pk": 849834,
+"pitcher": 671922,
+"name": "Cade Smith",
+"team": "CLE",
+"seasonGames": 69
+},
+{
+"n": 22,
+"types": {
+"FF": {
+"n": 9,
+"v": {
+"game": 96.81,
+"season": 94.82,
+"delta": 1.99,
+"z": 2.44,
+"games": 50
+},
+"s": {
+"game": 2218.33,
+"season": 2257.47,
+"delta": -39.14,
+"z": -0.6,
+"games": 50
+},
+"ivb": {
+"game": 13.48,
+"season": 14.28,
+"delta": -0.8,
+"z": -0.78,
+"games": 50
+},
+"hb": {
+"game": 8.04,
+"season": 10.45,
+"delta": -2.41,
+"z": -2.19,
+"games": 50
+},
+"ext": {
+"game": 5.88,
+"season": 5.8,
+"delta": 0.08,
+"z": 0.91,
+"games": 50
+}
+},
+"SI": {
+"n": 7,
+"v": {
+"game": 95.57,
+"season": 93.72,
+"delta": 1.85,
+"z": 2.17,
+"games": 28
+},
+"s": {
+"game": 2327.14,
+"season": 2263.37,
+"delta": 63.77,
+"z": 1.13,
+"games": 28
+},
+"ivb": {
+"game": 1.61,
+"season": 3.78,
+"delta": -2.17,
+"z": -1.92,
+"games": 28
+},
+"hb": {
+"game": 14.06,
+"season": 16.91,
+"delta": -2.85,
+"z": -2.81,
+"games": 28
+},
+"ext": {
+"game": 5.94,
+"season": 5.8,
+"delta": 0.14,
+"z": 1.21,
+"games": 28
+}
+},
+"SV": {
+"n": 6,
+"v": {
+"game": 83.57,
+"season": 83.0,
+"delta": 0.56,
+"z": 0.59,
+"games": 46
+},
+"s": {
+"game": 2940.0,
+"season": 2854.84,
+"delta": 85.16,
+"z": 1.32,
+"games": 46
+},
+"ivb": {
+"game": -5.12,
+"season": -4.59,
+"delta": -0.52,
+"z": -0.45,
+"games": 46
+},
+"hb": {
+"game": -20.75,
+"season": -17.71,
+"delta": -3.04,
+"z": -1.32,
+"games": 46
+},
+"ext": {
+"game": 5.79,
+"season": 5.61,
+"delta": 0.18,
+"z": 1.72,
+"games": 46
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "SI",
+"game": 0.318,
+"season": 0.208,
+"z": 0.93
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.028
+],
+"CU": [
+0.0,
+0.043
+],
+"FC": [
+0.0,
+0.016
+],
+"FF": [
+0.409,
+0.391
+],
+"SI": [
+0.318,
+0.208
+],
+"SV": [
+0.273,
+0.308
+]
+},
+"zone": {
+"game": 0.455,
+"season": 0.467,
+"z": -0.13
+},
+"pitches": {
+"game": 22,
+"season_mean": 24.7,
+"season_max": 51
+},
+"pk": 849833,
+"pitcher": 656794,
+"name": "Sean Newcomb",
+"team": "CWS",
+"seasonGames": 60
+},
+{
+"n": 20,
+"types": {
+"FF": {
+"n": 16,
+"v": {
+"game": 99.81,
+"season": 98.85,
+"delta": 0.97,
+"z": 1.61,
+"games": 14
+},
+"s": {
+"game": 2529.38,
+"season": 2436.3,
+"delta": 93.07,
+"z": 2.13,
+"games": 14
+},
+"ivb": {
+"game": 16.61,
+"season": 16.88,
+"delta": -0.27,
+"z": -0.29,
+"games": 14
+},
+"hb": {
+"game": -10.38,
+"season": -7.08,
+"delta": -3.3,
+"z": -1.76,
+"games": 14
+},
+"ext": {
+"game": 6.66,
+"season": 6.7,
+"delta": -0.03,
+"z": -0.29,
+"games": 14
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.8,
+"season": 0.619,
+"z": 2.31
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.15,
+"season": 0.289,
+"z": -1.11
+}
+],
+"mix": {
+"CU": [
+0.05,
+0.092
+],
+"FF": [
+0.8,
+0.619
+],
+"SL": [
+0.15,
+0.289
+]
+},
+"zone": {
+"game": 0.3,
+"season": 0.429,
+"z": -1.06
+},
+"pitches": {
+"game": 20,
+"season_mean": 19.5,
+"season_max": 35
+},
+"pk": 849833,
+"pitcher": 682982,
+"name": "Daniel Espino",
+"team": "CLE",
+"seasonGames": 14
+},
+{
+"n": 53,
+"types": {
+"FC": {
+"n": 8,
+"v": {
+"game": 88.76,
+"season": 88.5,
+"delta": 0.27,
+"z": 0.36,
+"games": 31
+},
+"s": {
+"game": 2183.75,
+"season": 2244.3,
+"delta": -60.55,
+"z": -1.35,
+"games": 31
+},
+"ivb": {
+"game": 7.39,
+"season": 7.56,
+"delta": -0.17,
+"z": -0.21,
+"games": 31
+},
+"hb": {
+"game": -5.65,
+"season": -4.51,
+"delta": -1.14,
+"z": -1.26,
+"games": 31
+},
+"ext": {
+"game": 6.29,
+"season": 6.26,
+"delta": 0.03,
+"z": 0.4,
+"games": 31
+}
+},
+"FF": {
+"n": 11,
+"v": {
+"game": 92.28,
+"season": 91.47,
+"delta": 0.81,
+"z": 1.43,
+"games": 30
+},
+"s": {
+"game": 2043.18,
+"season": 2087.98,
+"delta": -44.8,
+"z": -1.02,
+"games": 30
+},
+"ivb": {
+"game": 14.33,
+"season": 15.98,
+"delta": -1.65,
+"z": -1.63,
+"games": 30
+},
+"hb": {
+"game": 2.81,
+"season": 4.57,
+"delta": -1.76,
+"z": -1.92,
+"games": 30
+},
+"ext": {
+"game": 6.49,
+"season": 6.41,
+"delta": 0.08,
+"z": 1.27,
+"games": 30
+}
+},
+"SI": {
+"n": 13,
+"v": {
+"game": 92.85,
+"season": 91.43,
+"delta": 1.42,
+"z": 2.68,
+"games": 28
+},
+"s": {
+"game": 1990.54,
+"season": 2043.16,
+"delta": -52.62,
+"z": -1.03,
+"games": 28
+},
+"ivb": {
+"game": 8.19,
+"season": 10.13,
+"delta": -1.94,
+"z": -2.11,
+"games": 28
+},
+"hb": {
+"game": 13.93,
+"season": 14.65,
+"delta": -0.72,
+"z": -0.79,
+"games": 28
+},
+"ext": {
+"game": 6.46,
+"season": 6.38,
+"delta": 0.07,
+"z": 1.23,
+"games": 28
+}
+},
+"ST": {
+"n": 16,
+"v": {
+"game": 81.33,
+"season": 80.29,
+"delta": 1.04,
+"z": 1.15,
+"games": 29
+},
+"s": {
+"game": 2466.19,
+"season": 2526.32,
+"delta": -60.13,
+"z": -0.92,
+"games": 29
+},
+"ivb": {
+"game": -0.55,
+"season": -0.8,
+"delta": 0.25,
+"z": 0.17,
+"games": 29
+},
+"hb": {
+"game": -17.21,
+"season": -16.66,
+"delta": -0.56,
+"z": -0.34,
+"games": 29
+},
+"ext": {
+"game": 6.12,
+"season": 6.11,
+"delta": 0.02,
+"z": 0.25,
+"games": 29
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FC",
+"game": 0.151,
+"season": 0.325,
+"z": -2.69
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.245,
+"season": 0.103,
+"z": 2.76
+},
+{
+"what": "mix",
+"type": "ST",
+"game": 0.302,
+"season": 0.15,
+"z": 2.55
+}
+],
+"mix": {
+"CH": [
+0.075,
+0.115
+],
+"CU": [
+0.0,
+0.089
+],
+"FC": [
+0.151,
+0.325
+],
+"FF": [
+0.208,
+0.161
+],
+"FS": [
+0.019,
+0.056
+],
+"SI": [
+0.245,
+0.103
+],
+"ST": [
+0.302,
+0.15
+]
+},
+"zone": {
+"game": 0.434,
+"season": 0.446,
+"z": -0.24
+},
+"pitches": {
+"game": 53,
+"season_mean": 91.5,
+"season_max": 112
+},
+"pk": 849833,
+"pitcher": 656492,
+"name": "Foster Griffin",
+"team": "CLE",
+"seasonGames": 31
+},
+{
+"n": 16,
+"types": {
+"FF": {
+"n": 11,
+"v": {
+"game": 90.92,
+"season": 91.82,
+"delta": -0.9,
+"z": -0.95,
+"games": 64
+},
+"s": {
+"game": 2203.55,
+"season": 2186.77,
+"delta": 16.78,
+"z": 0.18,
+"games": 64
+},
+"ivb": {
+"game": 10.45,
+"season": 11.97,
+"delta": -1.52,
+"z": -1.19,
+"games": 64
+},
+"hb": {
+"game": 10.44,
+"season": 10.27,
+"delta": 0.17,
+"z": 0.15,
+"games": 64
+},
+"ext": {
+"game": 7.31,
+"season": 7.34,
+"delta": -0.03,
+"z": -0.23,
+"games": 64
+}
+},
+"ST": {
+"n": 5,
+"v": {
+"game": 79.88,
+"season": 79.97,
+"delta": -0.09,
+"z": -0.08,
+"games": 28
+},
+"s": {
+"game": 2029.0,
+"season": 2087.32,
+"delta": -58.32,
+"z": -1.05,
+"games": 28
+},
+"ivb": {
+"game": -5.16,
+"season": -4.49,
+"delta": -0.67,
+"z": -0.6,
+"games": 28
+},
+"hb": {
+"game": -16.48,
+"season": -14.79,
+"delta": -1.69,
+"z": -1.23,
+"games": 28
+},
+"ext": {
+"game": 7.21,
+"season": 7.18,
+"delta": 0.03,
+"z": 0.28,
+"games": 28
+}
+}
+},
+"flags": [],
+"mix": {
+"FC": [
+0.0,
+0.012
+],
+"FF": [
+0.688,
+0.659
+],
+"SI": [
+0.0,
+0.04
+],
+"ST": [
+0.312,
+0.283
+]
+},
+"zone": {
+"game": 0.5,
+"season": 0.518,
+"z": -0.13
+},
+"pitches": {
+"game": 16,
+"season_mean": 15.2,
+"season_max": 33
+},
+"pk": 849833,
+"pitcher": 663542,
+"name": "Bryan Hudson",
+"team": "CWS",
+"seasonGames": 70
+},
+{
+"n": 21,
+"types": {
+"FC": {
+"n": 8,
+"v": {
+"game": 89.9,
+"season": 88.35,
+"delta": 1.55,
+"z": 2.33,
+"games": 8
+},
+"s": {
+"game": 2501.25,
+"season": 2474.49,
+"delta": 26.76,
+"z": 0.79,
+"games": 8
+},
+"ivb": {
+"game": 6.5,
+"season": 5.79,
+"delta": 0.71,
+"z": 0.82,
+"games": 8
+},
+"hb": {
+"game": -3.39,
+"season": -3.4,
+"delta": 0.01,
+"z": 0.02,
+"games": 8
+},
+"ext": {
+"game": 6.82,
+"season": 6.86,
+"delta": -0.04,
+"z": -0.26,
+"games": 8
+}
+},
+"FF": {
+"n": 9,
+"v": {
+"game": 94.72,
+"season": 93.76,
+"delta": 0.96,
+"z": 1.81,
+"games": 17
+},
+"s": {
+"game": 2414.67,
+"season": 2402.73,
+"delta": 11.94,
+"z": 0.29,
+"games": 17
+},
+"ivb": {
+"game": 14.07,
+"season": 13.96,
+"delta": 0.11,
+"z": 0.14,
+"games": 17
+},
+"hb": {
+"game": 6.92,
+"season": 7.96,
+"delta": -1.04,
+"z": -0.7,
+"games": 17
+},
+"ext": {
+"game": 6.88,
+"season": 6.87,
+"delta": 0.01,
+"z": 0.1,
+"games": 17
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FC",
+"game": 0.381,
+"season": 0.19,
+"z": 1.24
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.19,
+"season": 0.303,
+"z": -0.83
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.023
+],
+"FC": [
+0.381,
+0.19
+],
+"FF": [
+0.429,
+0.484
+],
+"SL": [
+0.19,
+0.303
+]
+},
+"zone": {
+"game": 0.286,
+"season": 0.421,
+"z": -1.37
+},
+"pitches": {
+"game": 21,
+"season_mean": 26.1,
+"season_max": 48
+},
+"pk": 849833,
+"pitcher": 696146,
+"name": "Hagen Smith",
+"team": "CWS",
+"seasonGames": 18
+},
+{
+"n": 45,
+"types": {
+"FC": {
+"n": 11,
+"v": {
+"game": 91.59,
+"season": 89.92,
+"delta": 1.67,
+"z": 2.47,
+"games": 18
+},
+"s": {
+"game": 2577.45,
+"season": 2629.54,
+"delta": -52.08,
+"z": -0.68,
+"games": 18
+},
+"ivb": {
+"game": 8.96,
+"season": 8.93,
+"delta": 0.03,
+"z": 0.03,
+"games": 18
+},
+"hb": {
+"game": -2.29,
+"season": -2.27,
+"delta": -0.02,
+"z": -0.01,
+"games": 18
+},
+"ext": {
+"game": 6.53,
+"season": 6.32,
+"delta": 0.2,
+"z": 1.9,
+"games": 18
+}
+},
+"SI": {
+"n": 14,
+"v": {
+"game": 96.91,
+"season": 95.21,
+"delta": 1.71,
+"z": 2.0,
+"games": 18
+},
+"s": {
+"game": 2570.57,
+"season": 2434.01,
+"delta": 136.56,
+"z": 1.37,
+"games": 18
+},
+"ivb": {
+"game": 5.64,
+"season": 6.53,
+"delta": -0.9,
+"z": -0.83,
+"games": 18
+},
+"hb": {
+"game": 16.46,
+"season": 17.75,
+"delta": -1.29,
+"z": -1.52,
+"games": 18
+},
+"ext": {
+"game": 6.37,
+"season": 6.24,
+"delta": 0.13,
+"z": 1.42,
+"games": 18
+}
+},
+"ST": {
+"n": 18,
+"v": {
+"game": 82.18,
+"season": 82.42,
+"delta": -0.24,
+"z": -0.33,
+"games": 15
+},
+"s": {
+"game": 2694.0,
+"season": 2805.79,
+"delta": -111.79,
+"z": -1.83,
+"games": 15
+},
+"ivb": {
+"game": -1.96,
+"season": 0.62,
+"delta": -2.57,
+"z": -1.7,
+"games": 15
+},
+"hb": {
+"game": -14.36,
+"season": -14.87,
+"delta": 0.51,
+"z": 0.37,
+"games": 15
+},
+"ext": {
+"game": 6.47,
+"season": 6.3,
+"delta": 0.18,
+"z": 1.64,
+"games": 15
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.0,
+"season": 0.217,
+"z": -2.29
+},
+{
+"what": "mix",
+"type": "ST",
+"game": 0.4,
+"season": 0.173,
+"z": 2.89
+}
+],
+"mix": {
+"CH": [
+0.044,
+0.096
+],
+"CU": [
+0.0,
+0.032
+],
+"FC": [
+0.244,
+0.221
+],
+"FF": [
+0.0,
+0.217
+],
+"SI": [
+0.311,
+0.261
+],
+"ST": [
+0.4,
+0.173
+]
+},
+"zone": {
+"game": 0.533,
+"season": 0.467,
+"z": 0.78
+},
+"pitches": {
+"game": 45,
+"season_mean": 66.4,
+"season_max": 92
+},
+"pk": 849833,
+"pitcher": 702273,
+"name": "Noah Schultz",
+"team": "CWS",
+"seasonGames": 19
+},
+{
+"n": 5,
+"types": {},
+"flags": [
+{
+"what": "mix",
+"type": "SI",
+"game": 0.0,
+"season": 0.169,
+"z": -1.54
+},
+{
+"what": "mix",
+"type": "ST",
+"game": 0.4,
+"season": 0.278,
+"z": 1.0
+}
+],
+"mix": {
+"FC": [
+0.2,
+0.239
+],
+"FF": [
+0.4,
+0.307
+],
+"SI": [
+0.0,
+0.169
+],
+"ST": [
+0.4,
+0.278
+]
+},
+"zone": {
+"game": 0.6,
+"season": 0.467,
+"z": 1.06
+},
+"pitches": {
+"game": 5,
+"season_mean": 15.4,
+"season_max": 29
+},
+"pk": 849833,
+"pitcher": 542888,
+"name": "Shawn Armstrong",
+"team": "CLE",
+"seasonGames": 41
+},
+{
+"n": 25,
+"types": {
+"CU": {
+"n": 10,
+"v": {
+"game": 81.07,
+"season": 79.83,
+"delta": 1.24,
+"z": 1.36,
+"games": 33
+},
+"s": {
+"game": 2598.3,
+"season": 2654.55,
+"delta": -56.25,
+"z": -1.0,
+"games": 33
+},
+"ivb": {
+"game": -17.73,
+"season": -17.03,
+"delta": -0.7,
+"z": -0.67,
+"games": 33
+},
+"hb": {
+"game": -9.96,
+"season": -9.49,
+"delta": -0.47,
+"z": -0.36,
+"games": 33
+},
+"ext": {
+"game": 7.18,
+"season": 6.95,
+"delta": 0.23,
+"z": 1.68,
+"games": 33
+}
+},
+"FC": {
+"n": 6,
+"v": {
+"game": 88.55,
+"season": 87.1,
+"delta": 1.45,
+"z": 2.15,
+"games": 19
+},
+"s": {
+"game": 2044.83,
+"season": 2013.72,
+"delta": 31.12,
+"z": 0.59,
+"games": 19
+},
+"ivb": {
+"game": 5.83,
+"season": 6.81,
+"delta": -0.97,
+"z": -0.82,
+"games": 19
+},
+"hb": {
+"game": -3.57,
+"season": -2.6,
+"delta": -0.96,
+"z": -0.91,
+"games": 19
+},
+"ext": {
+"game": 7.15,
+"season": 7.16,
+"delta": -0.01,
+"z": -0.08,
+"games": 19
+}
+},
+"FF": {
+"n": 6,
+"v": {
+"game": 93.87,
+"season": 92.36,
+"delta": 1.5,
+"z": 1.87,
+"games": 33
+},
+"s": {
+"game": 1962.5,
+"season": 1881.94,
+"delta": 80.56,
+"z": 1.72,
+"games": 33
+},
+"ivb": {
+"game": 15.68,
+"season": 16.25,
+"delta": -0.57,
+"z": -0.57,
+"games": 33
+},
+"hb": {
+"game": 5.02,
+"season": 6.87,
+"delta": -1.86,
+"z": -1.59,
+"games": 33
+},
+"ext": {
+"game": 7.55,
+"season": 7.3,
+"delta": 0.25,
+"z": 1.68,
+"games": 33
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.12,
+"season": 0.243,
+"z": -1.39
+},
+{
+"what": "mix",
+"type": "FC",
+"game": 0.24,
+"season": 0.081,
+"z": 2.07
+}
+],
+"mix": {
+"CH": [
+0.12,
+0.243
+],
+"CU": [
+0.4,
+0.306
+],
+"FC": [
+0.24,
+0.081
+],
+"FF": [
+0.24,
+0.327
+],
+"SL": [
+0.0,
+0.04
+],
+"UN": [
+0.0,
+0.0
+]
+},
+"zone": {
+"game": 0.4,
+"season": 0.426,
+"z": -0.47
+},
+"pitches": {
+"game": 25,
+"season_mean": 83.4,
+"season_max": 102
+},
+"pk": 849833,
+"pitcher": 676282,
+"name": "Joey Cantillo",
+"team": "CLE",
+"seasonGames": 33
+},
+{
+"n": 12,
+"types": {
+"FF": {
+"n": 6,
+"v": {
+"game": 95.55,
+"season": 95.14,
+"delta": 0.41,
+"z": 0.56,
+"games": 27
+},
+"s": {
+"game": 2225.83,
+"season": 2245.94,
+"delta": -20.1,
+"z": -0.35,
+"games": 27
+},
+"ivb": {
+"game": 16.73,
+"season": 16.72,
+"delta": 0.01,
+"z": 0.01,
+"games": 27
+},
+"hb": {
+"game": -5.22,
+"season": -6.71,
+"delta": 1.49,
+"z": 0.94,
+"games": 27
+},
+"ext": {
+"game": 7.33,
+"season": 6.98,
+"delta": 0.35,
+"z": 2.58,
+"games": 27
+}
+},
+"SL": {
+"n": 5,
+"v": {
+"game": 89.78,
+"season": 89.49,
+"delta": 0.29,
+"z": 0.26,
+"games": 53
+},
+"s": {
+"game": 2311.8,
+"season": 2287.97,
+"delta": 23.83,
+"z": 0.4,
+"games": 53
+},
+"ivb": {
+"game": 2.06,
+"season": 4.74,
+"delta": -2.68,
+"z": -1.42,
+"games": 53
+},
+"hb": {
+"game": 4.2,
+"season": 6.05,
+"delta": -1.85,
+"z": -2.04,
+"games": 53
+},
+"ext": {
+"game": 7.31,
+"season": 6.9,
+"delta": 0.41,
+"z": 3.06,
+"games": 53
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.083,
+"season": 0.199,
+"z": -1.09
+},
+{
+"what": "mix",
+"type": "FF",
+"game": 0.5,
+"season": 0.295,
+"z": 1.51
+}
+],
+"mix": {
+"CH": [
+0.083,
+0.199
+],
+"FF": [
+0.5,
+0.295
+],
+"FS": [
+0.0,
+0.007
+],
+"SL": [
+0.417,
+0.498
+]
+},
+"zone": {
+"game": 0.417,
+"season": 0.43,
+"z": -0.1
+},
+"pitches": {
+"game": 12,
+"season_mean": 14.5,
+"season_max": 25
+},
+"pk": 849833,
+"pitcher": 683769,
+"name": "Hunter Gaddis",
+"team": "CLE",
+"seasonGames": 68
+},
+{
+"n": 21,
+"types": {
+"FF": {
+"n": 10,
+"v": {
+"game": 94.88,
+"season": 96.19,
+"delta": -1.31,
+"z": -2.41,
+"games": 24
+},
+"s": {
+"game": 2374.9,
+"season": 2400.77,
+"delta": -25.87,
+"z": -0.6,
+"games": 24
+},
+"ivb": {
+"game": 17.08,
+"season": 18.29,
+"delta": -1.21,
+"z": -1.05,
+"games": 24
+},
+"hb": {
+"game": -10.49,
+"season": -7.98,
+"delta": -2.51,
+"z": -1.37,
+"games": 24
+},
+"ext": {
+"game": 6.88,
+"season": 6.81,
+"delta": 0.07,
+"z": 1.02,
+"games": 24
+}
+},
+"SL": {
+"n": 8,
+"v": {
+"game": 87.96,
+"season": 87.37,
+"delta": 0.59,
+"z": 0.48,
+"games": 15
+},
+"s": {
+"game": 2529.5,
+"season": 2560.16,
+"delta": -30.66,
+"z": -0.57,
+"games": 15
+},
+"ivb": {
+"game": 1.57,
+"season": 0.18,
+"delta": 1.39,
+"z": 0.74,
+"games": 15
+},
+"hb": {
+"game": 3.31,
+"season": 5.93,
+"delta": -2.62,
+"z": -2.2,
+"games": 15
+},
+"ext": {
+"game": 6.86,
+"season": 6.76,
+"delta": 0.11,
+"z": 1.62,
+"games": 15
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.476,
+"season": 0.61,
+"z": -1.27
+}
+],
+"mix": {
+"FF": [
+0.476,
+0.61
+],
+"FS": [
+0.143,
+0.062
+],
+"SL": [
+0.381,
+0.31
+]
+},
+"zone": {
+"game": 0.429,
+"season": 0.42,
+"z": 0.08
+},
+"pitches": {
+"game": 21,
+"season_mean": 16.0,
+"season_max": 30
+},
+"pk": 849833,
+"pitcher": 699823,
+"name": "Tyler Davis",
+"team": "CWS",
+"seasonGames": 31
+},
+{
+"n": 18,
+"types": {
+"CU": {
+"n": 9,
+"v": {
+"game": 79.26,
+"season": 80.33,
+"delta": -1.07,
+"z": -1.52,
+"games": 28
+},
+"s": {
+"game": 2369.22,
+"season": 2322.73,
+"delta": 46.49,
+"z": 0.85,
+"games": 28
+},
+"ivb": {
+"game": -5.09,
+"season": -3.64,
+"delta": -1.45,
+"z": -1.34,
+"games": 28
+},
+"hb": {
+"game": -14.12,
+"season": -11.26,
+"delta": -2.86,
+"z": -1.84,
+"games": 28
+},
+"ext": {
+"game": 6.39,
+"season": 6.27,
+"delta": 0.13,
+"z": 0.88,
+"games": 28
+}
+},
+"SI": {
+"n": 8,
+"v": {
+"game": 93.72,
+"season": 93.58,
+"delta": 0.15,
+"z": 0.15,
+"games": 18
+},
+"s": {
+"game": 2249.75,
+"season": 2194.03,
+"delta": 55.72,
+"z": 0.78,
+"games": 18
+},
+"ivb": {
+"game": 4.73,
+"season": 5.0,
+"delta": -0.28,
+"z": -0.23,
+"games": 18
+},
+"hb": {
+"game": 15.21,
+"season": 15.47,
+"delta": -0.26,
+"z": -0.21,
+"games": 18
+},
+"ext": {
+"game": 6.74,
+"season": 6.5,
+"delta": 0.25,
+"z": 2.35,
+"games": 18
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CU",
+"game": 0.5,
+"season": 0.3,
+"z": 1.46
+},
+{
+"what": "mix",
+"type": "FF",
+"game": 0.0,
+"season": 0.196,
+"z": -1.48
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.444,
+"season": 0.238,
+"z": 1.4
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.056,
+"season": 0.251,
+"z": -1.5
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.004
+],
+"CU": [
+0.5,
+0.3
+],
+"FF": [
+0.0,
+0.196
+],
+"SI": [
+0.444,
+0.238
+],
+"SL": [
+0.056,
+0.251
+]
+},
+"zone": {
+"game": 0.389,
+"season": 0.411,
+"z": -0.17
+},
+"pitches": {
+"game": 18,
+"season_mean": 14.8,
+"season_max": 31
+},
+"pk": 849833,
+"pitcher": 682120,
+"name": "Tim Herrin",
+"team": "CLE",
+"seasonGames": 67
+},
+{
+"n": 22,
+"types": {
+"CU": {
+"n": 7,
+"v": {
+"game": 83.31,
+"season": 83.21,
+"delta": 0.11,
+"z": 0.19,
+"games": 8
+},
+"s": {
+"game": 2490.0,
+"season": 2574.47,
+"delta": -84.47,
+"z": -1.27,
+"games": 8
+},
+"ivb": {
+"game": -8.23,
+"season": -8.21,
+"delta": -0.02,
+"z": -0.02,
+"games": 8
+},
+"hb": {
+"game": 4.17,
+"season": 4.54,
+"delta": -0.36,
+"z": -0.56,
+"games": 8
+},
+"ext": {
+"game": 6.69,
+"season": 6.51,
+"delta": 0.18,
+"z": 1.99,
+"games": 8
+}
+},
+"FC": {
+"n": 6,
+"v": {
+"game": 91.98,
+"season": 91.21,
+"delta": 0.78,
+"z": 1.06,
+"games": 7
+},
+"s": {
+"game": 2266.0,
+"season": 2363.44,
+"delta": -97.44,
+"z": -1.31,
+"games": 7
+},
+"ivb": {
+"game": 8.72,
+"season": 6.6,
+"delta": 2.12,
+"z": 1.2,
+"games": 7
+},
+"hb": {
+"game": 2.87,
+"season": 3.61,
+"delta": -0.74,
+"z": -0.9,
+"games": 7
+},
+"ext": {
+"game": 6.67,
+"season": 6.53,
+"delta": 0.14,
+"z": 2.03,
+"games": 7
+}
+},
+"ST": {
+"n": 8,
+"v": {
+"game": 87.05,
+"season": 86.13,
+"delta": 0.92,
+"z": 1.26,
+"games": 6
+},
+"s": {
+"game": 2414.38,
+"season": 2633.35,
+"delta": -218.97,
+"z": -9.97,
+"games": 6
+},
+"ivb": {
+"game": 0.57,
+"season": 0.66,
+"delta": -0.08,
+"z": -0.05,
+"games": 6
+},
+"hb": {
+"game": 4.29,
+"season": 9.07,
+"delta": -4.78,
+"z": -1.98,
+"games": 6
+},
+"ext": {
+"game": 6.7,
+"season": 6.54,
+"delta": 0.17,
+"z": 1.32,
+"games": 6
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.045,
+"season": 0.313,
+"z": -2.45
+},
+{
+"what": "mix",
+"type": "ST",
+"game": 0.364,
+"season": 0.13,
+"z": 2.18
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.063
+],
+"CU": [
+0.318,
+0.221
+],
+"FC": [
+0.273,
+0.182
+],
+"FF": [
+0.045,
+0.313
+],
+"SI": [
+0.0,
+0.091
+],
+"ST": [
+0.364,
+0.13
+]
+},
+"zone": {
+"game": 0.409,
+"season": 0.421,
+"z": -0.25
+},
+"pitches": {
+"game": 22,
+"season_mean": 79.8,
+"season_max": 96
+},
+"pk": 849833,
+"pitcher": 689818,
+"name": "David Sandlin",
+"team": "CWS",
+"seasonGames": 8
+},
+{
+"n": 19,
+"types": {
+"FF": {
+"n": 11,
+"v": {
+"game": 98.42,
+"season": 97.38,
+"delta": 1.04,
+"z": 0.89,
+"games": 65
+},
+"s": {
+"game": 2461.55,
+"season": 2365.17,
+"delta": 96.37,
+"z": 1.14,
+"games": 65
+},
+"ivb": {
+"game": 16.85,
+"season": 16.74,
+"delta": 0.11,
+"z": 0.12,
+"games": 65
+},
+"hb": {
+"game": -8.48,
+"season": -7.67,
+"delta": -0.81,
+"z": -0.68,
+"games": 65
+},
+"ext": {
+"game": 7.59,
+"season": 7.41,
+"delta": 0.18,
+"z": 1.56,
+"games": 65
+}
+},
+"FS": {
+"n": 5,
+"v": {
+"game": 88.34,
+"season": 87.14,
+"delta": 1.2,
+"z": 1.14,
+"games": 31
+},
+"s": {
+"game": 718.8,
+"season": 575.77,
+"delta": 143.03,
+"z": 2.59,
+"games": 31
+},
+"ivb": {
+"game": -4.08,
+"season": -5.43,
+"delta": 1.35,
+"z": 0.73,
+"games": 31
+},
+"hb": {
+"game": -7.16,
+"season": -5.86,
+"delta": -1.3,
+"z": -0.63,
+"games": 31
+},
+"ext": {
+"game": 7.64,
+"season": 7.32,
+"delta": 0.31,
+"z": 2.67,
+"games": 31
+}
+}
+},
+"flags": [],
+"mix": {
+"FF": [
+0.579,
+0.636
+],
+"FS": [
+0.263,
+0.249
+],
+"ST": [
+0.158,
+0.103
+]
+},
+"zone": {
+"game": 0.684,
+"season": 0.44,
+"z": 2.27
+},
+"pitches": {
+"game": 19,
+"season_mean": 18.0,
+"season_max": 38
+},
+"pk": 849833,
+"pitcher": 671922,
+"name": "Cade Smith",
+"team": "CLE",
+"seasonGames": 69
+},
+{
+"n": 31,
+"types": {
+"CU": {
+"n": 7,
+"v": {
+"game": 82.34,
+"season": 81.72,
+"delta": 0.62,
+"z": 1.05,
+"games": 28
+},
+"s": {
+"game": 2893.43,
+"season": 2873.41,
+"delta": 20.02,
+"z": 0.34,
+"games": 28
+},
+"ivb": {
+"game": -10.47,
+"season": -7.72,
+"delta": -2.75,
+"z": -1.95,
+"games": 28
+},
+"hb": {
+"game": 12.09,
+"season": 13.86,
+"delta": -1.78,
+"z": -1.17,
+"games": 28
+},
+"ext": {
+"game": 6.3,
+"season": 6.21,
+"delta": 0.09,
+"z": 0.68,
+"games": 28
+}
+},
+"FC": {
+"n": 9,
+"v": {
+"game": 90.43,
+"season": 89.67,
+"delta": 0.77,
+"z": 1.2,
+"games": 22
+},
+"s": {
+"game": 2608.78,
+"season": 2572.47,
+"delta": 36.31,
+"z": 0.72,
+"games": 22
+},
+"ivb": {
+"game": 7.14,
+"season": 7.12,
+"delta": 0.03,
+"z": 0.03,
+"games": 22
+},
+"hb": {
+"game": 1.73,
+"season": 1.49,
+"delta": 0.24,
+"z": 0.21,
+"games": 22
+},
+"ext": {
+"game": 6.38,
+"season": 6.28,
+"delta": 0.1,
+"z": 1.2,
+"games": 22
+}
+},
+"FF": {
+"n": 6,
+"v": {
+"game": 95.03,
+"season": 93.85,
+"delta": 1.19,
+"z": 1.87,
+"games": 29
+},
+"s": {
+"game": 2449.0,
+"season": 2408.67,
+"delta": 40.33,
+"z": 0.79,
+"games": 29
+},
+"ivb": {
+"game": 12.63,
+"season": 13.87,
+"delta": -1.23,
+"z": -1.06,
+"games": 29
+},
+"hb": {
+"game": -5.22,
+"season": -5.3,
+"delta": 0.08,
+"z": 0.07,
+"games": 29
+},
+"ext": {
+"game": 6.52,
+"season": 6.38,
+"delta": 0.14,
+"z": 1.21,
+"games": 29
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FC",
+"game": 0.29,
+"season": 0.125,
+"z": 2.64
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.065,
+"season": 0.183,
+"z": -1.65
+}
+],
+"mix": {
+"CH": [
+0.097,
+0.146
+],
+"CU": [
+0.226,
+0.143
+],
+"FC": [
+0.29,
+0.125
+],
+"FF": [
+0.194,
+0.263
+],
+"SI": [
+0.065,
+0.183
+],
+"SL": [
+0.129,
+0.126
+],
+"UN": [
+0.0,
+0.0
+]
+},
+"zone": {
+"game": 0.516,
+"season": 0.43,
+"z": 1.23
+},
+"pitches": {
+"game": 31,
+"season_mean": 81.0,
+"season_max": 106
+},
+"pk": 849833,
+"pitcher": 663436,
+"name": "Davis Martin",
+"team": "CWS",
+"seasonGames": 29
+},
+{
+"n": 101,
+"types": {
+"CH": {
+"n": 28,
+"v": {
+"game": 88.89,
+"season": 89.66,
+"delta": -0.77,
+"z": -1.08,
+"games": 26
+},
+"s": {
+"game": 1096.54,
+"season": 1215.08,
+"delta": -118.54,
+"z": -1.13,
+"games": 26
+},
+"ivb": {
+"game": 0.96,
+"season": 2.67,
+"delta": -1.71,
+"z": -1.31,
+"games": 26
+},
+"hb": {
+"game": -9.28,
+"season": -11.59,
+"delta": 2.32,
+"z": 1.37,
+"games": 26
+},
+"ext": {
+"game": 6.45,
+"season": 6.48,
+"delta": -0.03,
+"z": -0.3,
+"games": 26
+}
+},
+"FC": {
+"n": 34,
+"v": {
+"game": 89.34,
+"season": 89.93,
+"delta": -0.58,
+"z": -0.98,
+"games": 30
+},
+"s": {
+"game": 2659.47,
+"season": 2631.54,
+"delta": 27.93,
+"z": 0.6,
+"games": 30
+},
+"ivb": {
+"game": 3.29,
+"season": 3.93,
+"delta": -0.64,
+"z": -0.66,
+"games": 30
+},
+"hb": {
+"game": 4.45,
+"season": 4.43,
+"delta": 0.02,
+"z": 0.04,
+"games": 30
+},
+"ext": {
+"game": 6.47,
+"season": 6.46,
+"delta": 0.0,
+"z": 0.01,
+"games": 30
+}
+},
+"FF": {
+"n": 23,
+"v": {
+"game": 96.15,
+"season": 95.85,
+"delta": 0.31,
+"z": 0.85,
+"games": 30
+},
+"s": {
+"game": 2519.09,
+"season": 2503.7,
+"delta": 15.39,
+"z": 0.32,
+"games": 30
+},
+"ivb": {
+"game": 19.61,
+"season": 17.85,
+"delta": 1.76,
+"z": 1.59,
+"games": 30
+},
+"hb": {
+"game": -4.09,
+"season": -4.51,
+"delta": 0.42,
+"z": 0.45,
+"games": 30
+},
+"ext": {
+"game": 6.58,
+"season": 6.52,
+"delta": 0.05,
+"z": 0.48,
+"games": 30
+}
+},
+"SI": {
+"n": 16,
+"v": {
+"game": 94.54,
+"season": 95.3,
+"delta": -0.76,
+"z": -1.86,
+"games": 30
+},
+"s": {
+"game": 2364.56,
+"season": 2408.58,
+"delta": -44.02,
+"z": -0.97,
+"games": 30
+},
+"ivb": {
+"game": 11.69,
+"season": 12.37,
+"delta": -0.68,
+"z": -0.81,
+"games": 30
+},
+"hb": {
+"game": -16.8,
+"season": -16.34,
+"delta": -0.46,
+"z": -0.42,
+"games": 30
+},
+"ext": {
+"game": 6.54,
+"season": 6.56,
+"delta": -0.02,
+"z": -0.24,
+"games": 30
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.277,
+"season": 0.133,
+"z": 2.73
+}
+],
+"mix": {
+"CH": [
+0.277,
+0.133
+],
+"CU": [
+0.0,
+0.035
+],
+"FC": [
+0.337,
+0.289
+],
+"FF": [
+0.228,
+0.28
+],
+"SI": [
+0.158,
+0.238
+],
+"ST": [
+0.0,
+0.026
+]
+},
+"zone": {
+"game": 0.465,
+"season": 0.446,
+"z": 0.47
+},
+"pitches": {
+"game": 101,
+"season_mean": 88.7,
+"season_max": 114
+},
+"pk": 849835,
+"pitcher": 656876,
+"name": "Drew Rasmussen",
+"team": "TB",
+"seasonGames": 30
+},
+{
+"n": 82,
+"types": {
+"CH": {
+"n": 5,
+"v": {
+"game": 84.92,
+"season": 85.85,
+"delta": -0.93,
+"z": -1.09,
+"games": 22
+},
+"s": {
+"game": 1764.0,
+"season": 1917.78,
+"delta": -153.78,
+"z": -2.85,
+"games": 22
+},
+"ivb": {
+"game": 8.68,
+"season": 8.46,
+"delta": 0.22,
+"z": 0.24,
+"games": 22
+},
+"hb": {
+"game": -16.18,
+"season": -14.81,
+"delta": -1.37,
+"z": -1.4,
+"games": 22
+},
+"ext": {
+"game": 6.39,
+"season": 6.4,
+"delta": -0.01,
+"z": -0.08,
+"games": 22
+}
+},
+"FF": {
+"n": 46,
+"v": {
+"game": 96.76,
+"season": 96.78,
+"delta": -0.02,
+"z": -0.05,
+"games": 22
+},
+"s": {
+"game": 2310.5,
+"season": 2325.11,
+"delta": -14.61,
+"z": -0.47,
+"games": 22
+},
+"ivb": {
+"game": 17.46,
+"season": 16.84,
+"delta": 0.62,
+"z": 0.9,
+"games": 22
+},
+"hb": {
+"game": -9.7,
+"season": -9.77,
+"delta": 0.08,
+"z": 0.1,
+"games": 22
+},
+"ext": {
+"game": 6.2,
+"season": 6.25,
+"delta": -0.05,
+"z": -0.63,
+"games": 22
+}
+},
+"KC": {
+"n": 18,
+"v": {
+"game": 83.27,
+"season": 83.21,
+"delta": 0.06,
+"z": 0.07,
+"games": 22
+},
+"s": {
+"game": 2809.56,
+"season": 2812.85,
+"delta": -3.3,
+"z": -0.09,
+"games": 22
+},
+"ivb": {
+"game": -15.24,
+"season": -14.01,
+"delta": -1.23,
+"z": -1.53,
+"games": 22
+},
+"hb": {
+"game": 12.56,
+"season": 12.0,
+"delta": 0.56,
+"z": 0.48,
+"games": 22
+},
+"ext": {
+"game": 6.09,
+"season": 6.04,
+"delta": 0.05,
+"z": 0.6,
+"games": 22
+}
+},
+"SI": {
+"n": 6,
+"v": {
+"game": 95.92,
+"season": 95.81,
+"delta": 0.1,
+"z": 0.18,
+"games": 6
+},
+"s": {
+"game": 2262.5,
+"season": 2308.15,
+"delta": -45.65,
+"z": -1.91,
+"games": 6
+},
+"ivb": {
+"game": 14.05,
+"season": 11.54,
+"delta": 2.51,
+"z": 1.35,
+"games": 6
+},
+"hb": {
+"game": -16.28,
+"season": -16.34,
+"delta": 0.06,
+"z": 0.05,
+"games": 6
+},
+"ext": {
+"game": 6.29,
+"season": 6.31,
+"delta": -0.02,
+"z": -0.28,
+"games": 6
+}
+},
+"SL": {
+"n": 7,
+"v": {
+"game": 89.37,
+"season": 89.45,
+"delta": -0.08,
+"z": -0.16,
+"games": 22
+},
+"s": {
+"game": 2479.29,
+"season": 2496.78,
+"delta": -17.49,
+"z": -0.39,
+"games": 22
+},
+"ivb": {
+"game": 2.93,
+"season": 2.52,
+"delta": 0.4,
+"z": 0.44,
+"games": 22
+},
+"hb": {
+"game": 5.3,
+"season": 4.51,
+"delta": 0.79,
+"z": 1.17,
+"games": 22
+},
+"ext": {
+"game": 6.1,
+"season": 6.13,
+"delta": -0.03,
+"z": -0.46,
+"games": 22
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "SL",
+"game": 0.085,
+"season": 0.197,
+"z": -1.97
+}
+],
+"mix": {
+"CH": [
+0.061,
+0.127
+],
+"FC": [
+0.0,
+0.004
+],
+"FF": [
+0.561,
+0.484
+],
+"KC": [
+0.22,
+0.139
+],
+"SI": [
+0.073,
+0.035
+],
+"SL": [
+0.085,
+0.197
+]
+},
+"zone": {
+"game": 0.5,
+"season": 0.486,
+"z": 0.25
+},
+"pitches": {
+"game": 82,
+"season_mean": 88.8,
+"season_max": 105
+},
+"pk": 849835,
+"pitcher": 543037,
+"name": "Gerrit Cole",
+"team": "NYY",
+"seasonGames": 22
+},
+{
+"n": 9,
+"types": {},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.0,
+"season": 0.253,
+"z": -4.27
+},
+{
+"what": "mix",
+"type": "FF",
+"game": 0.111,
+"season": 0.222,
+"z": -1.01
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.333,
+"season": 0.208,
+"z": 1.26
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.222,
+"season": 0.117,
+"z": 1.37
+},
+{
+"what": "mix",
+"type": "ST",
+"game": 0.333,
+"season": 0.201,
+"z": 2.53
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.253
+],
+"FF": [
+0.111,
+0.222
+],
+"SI": [
+0.333,
+0.208
+],
+"SL": [
+0.222,
+0.117
+],
+"ST": [
+0.333,
+0.201
+]
+},
+"zone": {
+"game": 0.556,
+"season": 0.423,
+"z": 2.52
+},
+"pitches": {
+"game": 9,
+"season_mean": 91.2,
+"season_max": 107
+},
+"pk": 849835,
+"pitcher": 677960,
+"name": "Ryan Weathers",
+"team": "NYY",
+"seasonGames": 25
+},
+{
+"n": 25,
+"types": {
+"CH": {
+"n": 6,
+"v": {
+"game": 88.3,
+"season": 87.5,
+"delta": 0.8,
+"z": 1.74,
+"games": 28
+},
+"s": {
+"game": 1872.83,
+"season": 1793.42,
+"delta": 79.41,
+"z": 1.11,
+"games": 28
+},
+"ivb": {
+"game": 6.5,
+"season": 6.37,
+"delta": 0.13,
+"z": 0.1,
+"games": 28
+},
+"hb": {
+"game": -14.73,
+"season": -13.02,
+"delta": -1.71,
+"z": -1.26,
+"games": 28
+},
+"ext": {
+"game": 6.25,
+"season": 6.24,
+"delta": 0.01,
+"z": 0.11,
+"games": 28
+}
+},
+"SI": {
+"n": 7,
+"v": {
+"game": 94.29,
+"season": 94.28,
+"delta": 0.01,
+"z": 0.01,
+"games": 41
+},
+"s": {
+"game": 2076.57,
+"season": 2025.53,
+"delta": 51.04,
+"z": 0.64,
+"games": 41
+},
+"ivb": {
+"game": 10.34,
+"season": 9.79,
+"delta": 0.55,
+"z": 0.35,
+"games": 41
+},
+"hb": {
+"game": -15.07,
+"season": -13.7,
+"delta": -1.38,
+"z": -1.07,
+"games": 41
+},
+"ext": {
+"game": 6.22,
+"season": 6.24,
+"delta": -0.02,
+"z": -0.29,
+"games": 41
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FC",
+"game": 0.08,
+"season": 0.195,
+"z": -0.78
+}
+],
+"mix": {
+"CH": [
+0.24,
+0.213
+],
+"CU": [
+0.16,
+0.144
+],
+"FC": [
+0.08,
+0.195
+],
+"FF": [
+0.12,
+0.027
+],
+"PO": [
+0.0,
+0.001
+],
+"SI": [
+0.28,
+0.338
+],
+"SL": [
+0.0,
+0.005
+],
+"ST": [
+0.12,
+0.073
+]
+},
+"zone": {
+"game": 0.48,
+"season": 0.414,
+"z": 0.6
+},
+"pitches": {
+"game": 25,
+"season_mean": 20.0,
+"season_max": 43
+},
+"pk": 849835,
+"pitcher": 621112,
+"name": "Paul Blackburn",
+"team": "NYY",
+"seasonGames": 62
+},
+{
+"n": 12,
+"types": {
+"FF": {
+"n": 7,
+"v": {
+"game": 92.56,
+"season": 94.15,
+"delta": -1.59,
+"z": -2.21,
+"games": 62
+},
+"s": {
+"game": 2181.86,
+"season": 2311.45,
+"delta": -129.59,
+"z": -2.07,
+"games": 62
+},
+"ivb": {
+"game": 18.94,
+"season": 17.51,
+"delta": 1.43,
+"z": 1.38,
+"games": 62
+},
+"hb": {
+"game": 7.1,
+"season": 8.1,
+"delta": -1.0,
+"z": -0.72,
+"games": 62
+},
+"ext": {
+"game": 7.08,
+"season": 6.94,
+"delta": 0.14,
+"z": 1.1,
+"games": 62
+}
+},
+"SL": {
+"n": 5,
+"v": {
+"game": 83.84,
+"season": 84.31,
+"delta": -0.47,
+"z": -0.47,
+"games": 37
+},
+"s": {
+"game": 1884.8,
+"season": 2032.03,
+"delta": -147.23,
+"z": -2.05,
+"games": 37
+},
+"ivb": {
+"game": 7.38,
+"season": 4.75,
+"delta": 2.63,
+"z": 1.88,
+"games": 37
+},
+"hb": {
+"game": -2.04,
+"season": -2.92,
+"delta": 0.88,
+"z": 0.75,
+"games": 37
+},
+"ext": {
+"game": 6.9,
+"season": 6.81,
+"delta": 0.09,
+"z": 0.77,
+"games": 37
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FS",
+"game": 0.0,
+"season": 0.126,
+"z": -1.02
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.417,
+"season": 0.3,
+"z": 0.79
+}
+],
+"mix": {
+"FF": [
+0.583,
+0.485
+],
+"FS": [
+0.0,
+0.126
+],
+"SI": [
+0.0,
+0.087
+],
+"SL": [
+0.417,
+0.3
+]
+},
+"zone": {
+"game": 0.417,
+"season": 0.431,
+"z": -0.12
+},
+"pitches": {
+"game": 12,
+"season_mean": 15.9,
+"season_max": 32
+},
+"pk": 849835,
+"pitcher": 687396,
+"name": "Brent Headrick",
+"team": "NYY",
+"seasonGames": 81
+},
+{
+"n": 14,
+"types": {
+"CH": {
+"n": 10,
+"v": {
+"game": 84.67,
+"season": 85.15,
+"delta": -0.48,
+"z": -0.28,
+"games": 48
+},
+"s": {
+"game": 1813.0,
+"season": 1840.47,
+"delta": -27.47,
+"z": -0.49,
+"games": 48
+},
+"ivb": {
+"game": 9.06,
+"season": 8.74,
+"delta": 0.32,
+"z": 0.31,
+"games": 48
+},
+"hb": {
+"game": -13.99,
+"season": -14.91,
+"delta": 0.92,
+"z": 0.71,
+"games": 48
+},
+"ext": {
+"game": 6.31,
+"season": 6.36,
+"delta": -0.05,
+"z": -0.52,
+"games": 48
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.714,
+"season": 0.436,
+"z": 1.89
+},
+{
+"what": "mix",
+"type": "FF",
+"game": 0.286,
+"season": 0.527,
+"z": -1.62
+}
+],
+"mix": {
+"CH": [
+0.714,
+0.436
+],
+"FF": [
+0.286,
+0.527
+],
+"SL": [
+0.0,
+0.033
+]
+},
+"zone": {
+"game": 0.5,
+"season": 0.461,
+"z": 0.31
+},
+"pitches": {
+"game": 14,
+"season_mean": 15.1,
+"season_max": 31
+},
+"pk": 849835,
+"pitcher": 641329,
+"name": "Bryan Baker",
+"team": "TB",
+"seasonGames": 65
+},
+{
+"n": 66,
+"types": {
+"CH": {
+"n": 20,
+"v": {
+"game": 88.42,
+"season": 87.34,
+"delta": 1.08,
+"z": 1.51,
+"games": 32
+},
+"s": {
+"game": 1912.05,
+"season": 1961.55,
+"delta": -49.5,
+"z": -0.65,
+"games": 32
+},
+"ivb": {
+"game": 4.49,
+"season": 3.47,
+"delta": 1.02,
+"z": 0.86,
+"games": 32
+},
+"hb": {
+"game": -19.12,
+"season": -17.57,
+"delta": -1.55,
+"z": -1.0,
+"games": 32
+},
+"ext": {
+"game": 6.57,
+"season": 6.46,
+"delta": 0.1,
+"z": 0.78,
+"games": 32
+}
+},
+"FF": {
+"n": 43,
+"v": {
+"game": 96.79,
+"season": 94.36,
+"delta": 2.42,
+"z": 2.68,
+"games": 32
+},
+"s": {
+"game": 2495.49,
+"season": 2429.42,
+"delta": 66.07,
+"z": 1.71,
+"games": 32
+},
+"ivb": {
+"game": 17.98,
+"season": 16.72,
+"delta": 1.26,
+"z": 1.05,
+"games": 32
+},
+"hb": {
+"game": -8.09,
+"season": -7.04,
+"delta": -1.06,
+"z": -0.94,
+"games": 32
+},
+"ext": {
+"game": 6.72,
+"season": 6.57,
+"delta": 0.15,
+"z": 1.15,
+"games": 32
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.652,
+"season": 0.53,
+"z": 1.43
+}
+],
+"mix": {
+"CH": [
+0.303,
+0.234
+],
+"CS": [
+0.0,
+0.009
+],
+"CU": [
+0.045,
+0.129
+],
+"FF": [
+0.652,
+0.53
+],
+"SL": [
+0.0,
+0.04
+],
+"ST": [
+0.0,
+0.057
+]
+},
+"zone": {
+"game": 0.455,
+"season": 0.388,
+"z": 1.13
+},
+"pitches": {
+"game": 66,
+"season_mean": 92.5,
+"season_max": 108
+},
+"pk": 849839,
+"pitcher": 642547,
+"name": "Freddy Peralta",
+"team": "TB",
+"seasonGames": 32
+},
+{
+"n": 76,
+"types": {
+"CU": {
+"n": 14,
+"v": {
+"game": 85.43,
+"season": 86.02,
+"delta": -0.59,
+"z": -0.41,
+"games": 27
+},
+"s": {
+"game": 2573.29,
+"season": 2527.77,
+"delta": 45.52,
+"z": 0.8,
+"games": 27
+},
+"ivb": {
+"game": -10.89,
+"season": -10.5,
+"delta": -0.4,
+"z": -0.27,
+"games": 27
+},
+"hb": {
+"game": 8.84,
+"season": 6.23,
+"delta": 2.61,
+"z": 1.39,
+"games": 27
+},
+"ext": {
+"game": 6.61,
+"season": 6.77,
+"delta": -0.16,
+"z": -1.51,
+"games": 27
+}
+},
+"FC": {
+"n": 17,
+"v": {
+"game": 94.24,
+"season": 94.57,
+"delta": -0.34,
+"z": -0.37,
+"games": 33
+},
+"s": {
+"game": 2716.88,
+"season": 2591.89,
+"delta": 124.99,
+"z": 1.15,
+"games": 33
+},
+"ivb": {
+"game": 11.51,
+"season": 10.34,
+"delta": 1.16,
+"z": 0.82,
+"games": 33
+},
+"hb": {
+"game": 5.96,
+"season": 5.67,
+"delta": 0.29,
+"z": 0.34,
+"games": 33
+},
+"ext": {
+"game": 6.63,
+"season": 6.73,
+"delta": -0.1,
+"z": -1.08,
+"games": 33
+}
+},
+"FF": {
+"n": 29,
+"v": {
+"game": 98.22,
+"season": 97.97,
+"delta": 0.24,
+"z": 0.35,
+"games": 33
+},
+"s": {
+"game": 2647.66,
+"season": 2532.55,
+"delta": 115.1,
+"z": 1.15,
+"games": 33
+},
+"ivb": {
+"game": 18.61,
+"season": 16.85,
+"delta": 1.76,
+"z": 2.34,
+"games": 33
+},
+"hb": {
+"game": -5.47,
+"season": -5.22,
+"delta": -0.25,
+"z": -0.23,
+"games": 33
+},
+"ext": {
+"game": 6.61,
+"season": 6.77,
+"delta": -0.16,
+"z": -1.6,
+"games": 33
+}
+},
+"SI": {
+"n": 16,
+"v": {
+"game": 98.14,
+"season": 97.82,
+"delta": 0.31,
+"z": 0.5,
+"games": 33
+},
+"s": {
+"game": 2601.69,
+"season": 2385.73,
+"delta": 215.95,
+"z": 1.71,
+"games": 33
+},
+"ivb": {
+"game": 11.94,
+"season": 10.9,
+"delta": 1.04,
+"z": 1.34,
+"games": 33
+},
+"hb": {
+"game": -15.07,
+"season": -13.49,
+"delta": -1.58,
+"z": -1.4,
+"games": 33
+},
+"ext": {
+"game": 6.67,
+"season": 6.82,
+"delta": -0.15,
+"z": -1.49,
+"games": 33
+}
+}
+},
+"flags": [],
+"mix": {
+"CU": [
+0.184,
+0.098
+],
+"FC": [
+0.224,
+0.255
+],
+"FF": [
+0.382,
+0.444
+],
+"PO": [
+0.0,
+0.0
+],
+"SI": [
+0.211,
+0.193
+],
+"SL": [
+0.0,
+0.009
+]
+},
+"zone": {
+"game": 0.408,
+"season": 0.452,
+"z": -0.85
+},
+"pitches": {
+"game": 76,
+"season_mean": 92.2,
+"season_max": 106
+},
+"pk": 849839,
+"pitcher": 693645,
+"name": "Cam Schlittler",
+"team": "NYY",
+"seasonGames": 33
+},
+{
+"n": 8,
+"types": {
+"FC": {
+"n": 5,
+"v": {
+"game": 89.18,
+"season": 88.36,
+"delta": 0.82,
+"z": 0.84,
+"games": 25
+},
+"s": {
+"game": 2213.4,
+"season": 2118.6,
+"delta": 94.8,
+"z": 1.36,
+"games": 25
+},
+"ivb": {
+"game": 5.54,
+"season": 3.87,
+"delta": 1.67,
+"z": 1.44,
+"games": 25
+},
+"hb": {
+"game": -2.86,
+"season": -3.48,
+"delta": 0.62,
+"z": 0.67,
+"games": 25
+},
+"ext": {
+"game": 6.48,
+"season": 6.51,
+"delta": -0.04,
+"z": -0.42,
+"games": 25
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FC",
+"game": 0.625,
+"season": 0.427,
+"z": 1.45
+},
+{
+"what": "mix",
+"type": "ST",
+"game": 0.0,
+"season": 0.106,
+"z": -1.03
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.012
+],
+"FC": [
+0.625,
+0.427
+],
+"FF": [
+0.375,
+0.453
+],
+"ST": [
+0.0,
+0.106
+]
+},
+"zone": {
+"game": 0.375,
+"season": 0.453,
+"z": -0.71
+},
+"pitches": {
+"game": 8,
+"season_mean": 13.7,
+"season_max": 34
+},
+"pk": 849839,
+"pitcher": 592155,
+"name": "Cam Booser",
+"team": "TB",
+"seasonGames": 42
+},
+{
+"n": 18,
+"types": {
+"FF": {
+"n": 10,
+"v": {
+"game": 93.18,
+"season": 94.15,
+"delta": -0.97,
+"z": -1.35,
+"games": 62
+},
+"s": {
+"game": 2220.2,
+"season": 2311.45,
+"delta": -91.25,
+"z": -1.45,
+"games": 62
+},
+"ivb": {
+"game": 19.07,
+"season": 17.51,
+"delta": 1.56,
+"z": 1.51,
+"games": 62
+},
+"hb": {
+"game": 7.7,
+"season": 8.1,
+"delta": -0.4,
+"z": -0.28,
+"games": 62
+},
+"ext": {
+"game": 6.98,
+"season": 6.94,
+"delta": 0.03,
+"z": 0.27,
+"games": 62
+}
+},
+"SL": {
+"n": 7,
+"v": {
+"game": 84.37,
+"season": 84.31,
+"delta": 0.06,
+"z": 0.06,
+"games": 37
+},
+"s": {
+"game": 1932.43,
+"season": 2032.03,
+"delta": -99.6,
+"z": -1.39,
+"games": 37
+},
+"ivb": {
+"game": 6.53,
+"season": 4.75,
+"delta": 1.78,
+"z": 1.27,
+"games": 37
+},
+"hb": {
+"game": -1.17,
+"season": -2.92,
+"delta": 1.75,
+"z": 1.5,
+"games": 37
+},
+"ext": {
+"game": 6.78,
+"season": 6.81,
+"delta": -0.03,
+"z": -0.29,
+"games": 37
+}
+}
+},
+"flags": [],
+"mix": {
+"FF": [
+0.556,
+0.485
+],
+"FS": [
+0.056,
+0.126
+],
+"SI": [
+0.0,
+0.087
+],
+"SL": [
+0.389,
+0.3
+]
+},
+"zone": {
+"game": 0.278,
+"season": 0.431,
+"z": -1.29
+},
+"pitches": {
+"game": 18,
+"season_mean": 15.9,
+"season_max": 32
+},
+"pk": 849839,
+"pitcher": 687396,
+"name": "Brent Headrick",
+"team": "NYY",
+"seasonGames": 81
+},
+{
+"n": 41,
+"types": {
+"CH": {
+"n": 6,
+"v": {
+"game": 84.47,
+"season": 83.39,
+"delta": 1.08,
+"z": 1.52,
+"games": 38
+},
+"s": {
+"game": 1565.67,
+"season": 1608.01,
+"delta": -42.34,
+"z": -0.4,
+"games": 38
+},
+"ivb": {
+"game": 9.27,
+"season": 7.74,
+"delta": 1.52,
+"z": 1.35,
+"games": 38
+},
+"hb": {
+"game": 16.57,
+"season": 15.87,
+"delta": 0.7,
+"z": 0.47,
+"games": 38
+},
+"ext": {
+"game": 6.19,
+"season": 6.25,
+"delta": -0.06,
+"z": -0.68,
+"games": 38
+}
+},
+"FF": {
+"n": 8,
+"v": {
+"game": 91.31,
+"season": 91.41,
+"delta": -0.1,
+"z": -0.17,
+"games": 31
+},
+"s": {
+"game": 2130.75,
+"season": 2171.37,
+"delta": -40.62,
+"z": -0.81,
+"games": 31
+},
+"ivb": {
+"game": 16.94,
+"season": 17.11,
+"delta": -0.17,
+"z": -0.13,
+"games": 31
+},
+"hb": {
+"game": 7.45,
+"season": 6.79,
+"delta": 0.66,
+"z": 0.36,
+"games": 31
+},
+"ext": {
+"game": 6.3,
+"season": 6.31,
+"delta": -0.01,
+"z": -0.15,
+"games": 31
+}
+},
+"SI": {
+"n": 17,
+"v": {
+"game": 89.55,
+"season": 89.95,
+"delta": -0.4,
+"z": -0.6,
+"games": 28
+},
+"s": {
+"game": 1917.0,
+"season": 1970.45,
+"delta": -53.45,
+"z": -1.03,
+"games": 28
+},
+"ivb": {
+"game": 9.74,
+"season": 10.44,
+"delta": -0.7,
+"z": -0.46,
+"games": 28
+},
+"hb": {
+"game": 17.0,
+"season": 14.87,
+"delta": 2.13,
+"z": 1.3,
+"games": 28
+},
+"ext": {
+"game": 6.23,
+"season": 6.31,
+"delta": -0.08,
+"z": -1.14,
+"games": 28
+}
+},
+"ST": {
+"n": 9,
+"v": {
+"game": 81.91,
+"season": 81.78,
+"delta": 0.13,
+"z": 0.15,
+"games": 31
+},
+"s": {
+"game": 2177.89,
+"season": 2170.96,
+"delta": 6.93,
+"z": 0.13,
+"games": 31
+},
+"ivb": {
+"game": 10.33,
+"season": 10.05,
+"delta": 0.28,
+"z": 0.11,
+"games": 31
+},
+"hb": {
+"game": -12.29,
+"season": -11.71,
+"delta": -0.58,
+"z": -0.35,
+"games": 31
+},
+"ext": {
+"game": 6.34,
+"season": 6.34,
+"delta": 0.0,
+"z": 0.04,
+"games": 31
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.146,
+"season": 0.286,
+"z": -2.04
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.415,
+"season": 0.163,
+"z": 2.54
+}
+],
+"mix": {
+"CH": [
+0.146,
+0.286
+],
+"CU": [
+0.0,
+0.007
+],
+"FC": [
+0.0,
+0.005
+],
+"FF": [
+0.195,
+0.273
+],
+"SI": [
+0.415,
+0.163
+],
+"SL": [
+0.024,
+0.065
+],
+"ST": [
+0.22,
+0.195
+]
+},
+"zone": {
+"game": 0.512,
+"season": 0.446,
+"z": 0.73
+},
+"pitches": {
+"game": 41,
+"season_mean": 45.5,
+"season_max": 98
+},
+"pk": 849839,
+"pitcher": 693855,
+"name": "Ian Seymour",
+"team": "TB",
+"seasonGames": 47
+},
+{
+"n": 15,
+"types": {
+"FF": {
+"n": 6,
+"v": {
+"game": 94.58,
+"season": 93.75,
+"delta": 0.83,
+"z": 0.78,
+"games": 26
+},
+"s": {
+"game": 2338.17,
+"season": 2278.67,
+"delta": 59.5,
+"z": 1.08,
+"games": 26
+},
+"ivb": {
+"game": 11.47,
+"season": 10.23,
+"delta": 1.24,
+"z": 1.11,
+"games": 26
+},
+"hb": {
+"game": -10.95,
+"season": -10.67,
+"delta": -0.28,
+"z": -0.17,
+"games": 26
+},
+"ext": {
+"game": 6.54,
+"season": 6.48,
+"delta": 0.06,
+"z": 0.54,
+"games": 26
+}
+},
+"SI": {
+"n": 5,
+"v": {
+"game": 93.36,
+"season": 93.28,
+"delta": 0.08,
+"z": 0.08,
+"games": 28
+},
+"s": {
+"game": 2200.4,
+"season": 2218.6,
+"delta": -18.2,
+"z": -0.26,
+"games": 28
+},
+"ivb": {
+"game": -1.8,
+"season": -1.81,
+"delta": 0.01,
+"z": 0.02,
+"games": 28
+},
+"hb": {
+"game": -17.16,
+"season": -15.96,
+"delta": -1.2,
+"z": -0.62,
+"games": 28
+},
+"ext": {
+"game": 6.58,
+"season": 6.49,
+"delta": 0.09,
+"z": 0.74,
+"games": 28
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.4,
+"season": 0.276,
+"z": 0.78
+},
+{
+"what": "mix",
+"type": "ST",
+"game": 0.133,
+"season": 0.267,
+"z": -1.27
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.064
+],
+"FC": [
+0.133,
+0.125
+],
+"FF": [
+0.4,
+0.276
+],
+"SI": [
+0.333,
+0.254
+],
+"ST": [
+0.133,
+0.267
+]
+},
+"zone": {
+"game": 0.267,
+"season": 0.432,
+"z": -1.64
+},
+"pitches": {
+"game": 15,
+"season_mean": 15.3,
+"season_max": 30
+},
+"pk": 849839,
+"pitcher": 670167,
+"name": "John Schreiber",
+"team": "NYY",
+"seasonGames": 66
+},
+{
+"n": 13,
+"types": {
+"SL": {
+"n": 5,
+"v": {
+"game": 85.96,
+"season": 86.88,
+"delta": -0.92,
+"z": -0.93,
+"games": 19
+},
+"s": {
+"game": 2666.4,
+"season": 2653.91,
+"delta": 12.49,
+"z": 0.27,
+"games": 19
+},
+"ivb": {
+"game": -0.04,
+"season": 1.12,
+"delta": -1.16,
+"z": -0.89,
+"games": 19
+},
+"hb": {
+"game": -5.44,
+"season": -3.78,
+"delta": -1.66,
+"z": -2.44,
+"games": 19
+},
+"ext": {
+"game": 5.76,
+"season": 5.75,
+"delta": 0.0,
+"z": 0.03,
+"games": 19
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.0,
+"season": 0.253,
+"z": -4.27
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.385,
+"season": 0.117,
+"z": 3.45
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.253
+],
+"FF": [
+0.154,
+0.222
+],
+"SI": [
+0.308,
+0.208
+],
+"SL": [
+0.385,
+0.117
+],
+"ST": [
+0.154,
+0.201
+]
+},
+"zone": {
+"game": 0.462,
+"season": 0.423,
+"z": 0.73
+},
+"pitches": {
+"game": 13,
+"season_mean": 91.2,
+"season_max": 107
+},
+"pk": 849839,
+"pitcher": 677960,
+"name": "Ryan Weathers",
+"team": "NYY",
+"seasonGames": 25
+},
+{
+"n": 12,
+"types": {
+"SI": {
+"n": 5,
+"v": {
+"game": 94.58,
+"season": 94.28,
+"delta": 0.3,
+"z": 0.47,
+"games": 41
+},
+"s": {
+"game": 2045.8,
+"season": 2025.53,
+"delta": 20.27,
+"z": 0.25,
+"games": 41
+},
+"ivb": {
+"game": 9.36,
+"season": 9.79,
+"delta": -0.43,
+"z": -0.27,
+"games": 41
+},
+"hb": {
+"game": -15.42,
+"season": -13.7,
+"delta": -1.72,
+"z": -1.34,
+"games": 41
+},
+"ext": {
+"game": 6.18,
+"season": 6.24,
+"delta": -0.07,
+"z": -0.79,
+"games": 41
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CU",
+"game": 0.333,
+"season": 0.144,
+"z": 1.95
+},
+{
+"what": "mix",
+"type": "FC",
+"game": 0.083,
+"season": 0.195,
+"z": -0.76
+}
+],
+"mix": {
+"CH": [
+0.167,
+0.213
+],
+"CU": [
+0.333,
+0.144
+],
+"FC": [
+0.083,
+0.195
+],
+"FF": [
+0.0,
+0.027
+],
+"PO": [
+0.0,
+0.001
+],
+"SI": [
+0.417,
+0.338
+],
+"SL": [
+0.0,
+0.005
+],
+"ST": [
+0.0,
+0.073
+]
+},
+"zone": {
+"game": 0.583,
+"season": 0.414,
+"z": 1.54
+},
+"pitches": {
+"game": 12,
+"season_mean": 20.0,
+"season_max": 43
+},
+"pk": 849839,
+"pitcher": 621112,
+"name": "Paul Blackburn",
+"team": "NYY",
+"seasonGames": 62
+},
+{
+"n": 3,
+"types": {},
+"flags": [
+{
+"what": "mix",
+"type": "CU",
+"game": 0.0,
+"season": 0.181,
+"z": -1.53
+},
+{
+"what": "mix",
+"type": "FF",
+"game": 1.0,
+"season": 0.403,
+"z": 3.98
+},
+{
+"what": "mix",
+"type": "FS",
+"game": 0.0,
+"season": 0.41,
+"z": -2.5
+}
+],
+"mix": {
+"CU": [
+0.0,
+0.181
+],
+"FF": [
+1.0,
+0.403
+],
+"FS": [
+0.0,
+0.41
+]
+},
+"zone": {
+"game": 0.667,
+"season": 0.406,
+"z": 2.58
+},
+"pitches": {
+"game": 3,
+"season_mean": 18.1,
+"season_max": 40
+},
+"pk": 849839,
+"pitcher": 670280,
+"name": "David Bednar",
+"team": "NYY",
+"seasonGames": 64
+},
+{
+"n": 9,
+"types": {
+"FF": {
+"n": 5,
+"v": {
+"game": 94.26,
+"season": 96.36,
+"delta": -2.1,
+"z": -1.83,
+"games": 52
+},
+"s": {
+"game": 2212.0,
+"season": 2287.05,
+"delta": -75.05,
+"z": -1.01,
+"games": 52
+},
+"ivb": {
+"game": 19.24,
+"season": 19.18,
+"delta": 0.06,
+"z": 0.05,
+"games": 52
+},
+"hb": {
+"game": -3.04,
+"season": -3.82,
+"delta": 0.78,
+"z": 0.67,
+"games": 52
+},
+"ext": {
+"game": 6.4,
+"season": 6.39,
+"delta": 0.01,
+"z": 0.1,
+"games": 52
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.444,
+0.436
+],
+"FF": [
+0.556,
+0.527
+],
+"SL": [
+0.0,
+0.033
+]
+},
+"zone": {
+"game": 0.556,
+"season": 0.461,
+"z": 0.75
+},
+"pitches": {
+"game": 9,
+"season_mean": 15.1,
+"season_max": 31
+},
+"pk": 849839,
+"pitcher": 641329,
+"name": "Bryan Baker",
+"team": "TB",
+"seasonGames": 65
+},
+{
+"n": 80,
+"types": {
+"CH": {
+"n": 6,
+"v": {
+"game": 85.85,
+"season": 85.46,
+"delta": 0.39,
+"z": 0.34,
+"games": 19
+},
+"s": {
+"game": 1524.67,
+"season": 1617.69,
+"delta": -93.03,
+"z": -0.78,
+"games": 19
+},
+"ivb": {
+"game": 5.58,
+"season": 4.82,
+"delta": 0.76,
+"z": 0.55,
+"games": 19
+},
+"hb": {
+"game": 16.22,
+"season": 14.68,
+"delta": 1.53,
+"z": 0.79,
+"games": 19
+},
+"ext": {
+"game": 6.79,
+"season": 6.64,
+"delta": 0.14,
+"z": 1.38,
+"games": 19
+}
+},
+"CU": {
+"n": 9,
+"v": {
+"game": 75.09,
+"season": 73.63,
+"delta": 1.46,
+"z": 1.79,
+"games": 19
+},
+"s": {
+"game": 2891.44,
+"season": 2798.5,
+"delta": 92.95,
+"z": 0.97,
+"games": 19
+},
+"ivb": {
+"game": -17.96,
+"season": -16.63,
+"delta": -1.33,
+"z": -1.09,
+"games": 19
+},
+"hb": {
+"game": -9.47,
+"season": -10.2,
+"delta": 0.73,
+"z": 0.38,
+"games": 19
+},
+"ext": {
+"game": 6.4,
+"season": 6.36,
+"delta": 0.05,
+"z": 0.56,
+"games": 19
+}
+},
+"FC": {
+"n": 10,
+"v": {
+"game": 91.82,
+"season": 91.81,
+"delta": 0.01,
+"z": 0.01,
+"games": 20
+},
+"s": {
+"game": 2354.0,
+"season": 2285.46,
+"delta": 68.54,
+"z": 1.35,
+"games": 20
+},
+"ivb": {
+"game": 7.18,
+"season": 7.07,
+"delta": 0.11,
+"z": 0.11,
+"games": 20
+},
+"hb": {
+"game": -1.33,
+"season": -2.4,
+"delta": 1.07,
+"z": 1.26,
+"games": 20
+},
+"ext": {
+"game": 6.46,
+"season": 6.42,
+"delta": 0.04,
+"z": 0.44,
+"games": 20
+}
+},
+"FF": {
+"n": 19,
+"v": {
+"game": 95.63,
+"season": 94.76,
+"delta": 0.87,
+"z": 1.19,
+"games": 20
+},
+"s": {
+"game": 2247.84,
+"season": 2122.49,
+"delta": 125.35,
+"z": 2.29,
+"games": 20
+},
+"ivb": {
+"game": 17.42,
+"season": 16.3,
+"delta": 1.12,
+"z": 1.39,
+"games": 20
+},
+"hb": {
+"game": 4.13,
+"season": 3.33,
+"delta": 0.8,
+"z": 0.62,
+"games": 20
+},
+"ext": {
+"game": 6.57,
+"season": 6.57,
+"delta": 0.01,
+"z": 0.09,
+"games": 20
+}
+},
+"SI": {
+"n": 19,
+"v": {
+"game": 93.81,
+"season": 93.18,
+"delta": 0.62,
+"z": 0.94,
+"games": 20
+},
+"s": {
+"game": 2056.58,
+"season": 2071.91,
+"delta": -15.33,
+"z": -0.27,
+"games": 20
+},
+"ivb": {
+"game": 3.63,
+"season": 4.27,
+"delta": -0.65,
+"z": -0.63,
+"games": 20
+},
+"hb": {
+"game": 11.32,
+"season": 10.19,
+"delta": 1.13,
+"z": 0.79,
+"games": 20
+},
+"ext": {
+"game": 6.54,
+"season": 6.52,
+"delta": 0.02,
+"z": 0.36,
+"games": 20
+}
+},
+"ST": {
+"n": 16,
+"v": {
+"game": 79.4,
+"season": 79.79,
+"delta": -0.39,
+"z": -0.39,
+"games": 18
+},
+"s": {
+"game": 2857.75,
+"season": 2758.98,
+"delta": 98.77,
+"z": 1.19,
+"games": 18
+},
+"ivb": {
+"game": -7.63,
+"season": -3.79,
+"delta": -3.84,
+"z": -1.13,
+"games": 18
+},
+"hb": {
+"game": -16.98,
+"season": -17.52,
+"delta": 0.54,
+"z": 0.27,
+"games": 18
+},
+"ext": {
+"game": 6.37,
+"season": 6.28,
+"delta": 0.09,
+"z": 1.24,
+"games": 18
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FC",
+"game": 0.125,
+"season": 0.225,
+"z": -1.78
+}
+],
+"mix": {
+"CH": [
+0.075,
+0.121
+],
+"CU": [
+0.113,
+0.136
+],
+"FC": [
+0.125,
+0.225
+],
+"FF": [
+0.237,
+0.175
+],
+"SI": [
+0.237,
+0.209
+],
+"SL": [
+0.013,
+0.009
+],
+"ST": [
+0.2,
+0.123
+]
+},
+"zone": {
+"game": 0.475,
+"season": 0.419,
+"z": 0.96
+},
+"pitches": {
+"game": 80,
+"season_mean": 84.8,
+"season_max": 107
+},
+"pk": 849838,
+"pitcher": 608331,
+"name": "Max Fried",
+"team": "NYY",
+"seasonGames": 20
+},
+{
+"n": 63,
+"types": {
+"CH": {
+"n": 19,
+"v": {
+"game": 77.79,
+"season": 78.27,
+"delta": -0.48,
+"z": -0.65,
+"games": 31
+},
+"s": {
+"game": 1845.74,
+"season": 1864.98,
+"delta": -19.25,
+"z": -0.23,
+"games": 31
+},
+"ivb": {
+"game": 1.36,
+"season": 3.03,
+"delta": -1.66,
+"z": -1.14,
+"games": 31
+},
+"hb": {
+"game": -10.79,
+"season": -12.36,
+"delta": 1.57,
+"z": 1.31,
+"games": 31
+},
+"ext": {
+"game": 6.04,
+"season": 5.98,
+"delta": 0.06,
+"z": 0.76,
+"games": 31
+}
+},
+"FC": {
+"n": 18,
+"v": {
+"game": 90.22,
+"season": 89.17,
+"delta": 1.05,
+"z": 1.78,
+"games": 31
+},
+"s": {
+"game": 2272.28,
+"season": 2325.73,
+"delta": -53.46,
+"z": -1.68,
+"games": 31
+},
+"ivb": {
+"game": 11.79,
+"season": 11.26,
+"delta": 0.53,
+"z": 0.41,
+"games": 31
+},
+"hb": {
+"game": 0.26,
+"season": 1.15,
+"delta": -0.89,
+"z": -1.18,
+"games": 31
+},
+"ext": {
+"game": 6.0,
+"season": 5.91,
+"delta": 0.1,
+"z": 1.36,
+"games": 31
+}
+},
+"FF": {
+"n": 8,
+"v": {
+"game": 93.49,
+"season": 92.67,
+"delta": 0.82,
+"z": 1.1,
+"games": 27
+},
+"s": {
+"game": 2274.75,
+"season": 2264.89,
+"delta": 9.86,
+"z": 0.3,
+"games": 27
+},
+"ivb": {
+"game": 17.22,
+"season": 16.89,
+"delta": 0.33,
+"z": 0.28,
+"games": 27
+},
+"hb": {
+"game": -7.11,
+"season": -6.08,
+"delta": -1.03,
+"z": -0.78,
+"games": 27
+},
+"ext": {
+"game": 5.97,
+"season": 5.91,
+"delta": 0.05,
+"z": 0.75,
+"games": 27
+}
+},
+"SI": {
+"n": 13,
+"v": {
+"game": 93.08,
+"season": 92.44,
+"delta": 0.63,
+"z": 1.02,
+"games": 31
+},
+"s": {
+"game": 2287.77,
+"season": 2298.85,
+"delta": -11.08,
+"z": -0.34,
+"games": 31
+},
+"ivb": {
+"game": 12.45,
+"season": 12.35,
+"delta": 0.11,
+"z": 0.09,
+"games": 31
+},
+"hb": {
+"game": -14.28,
+"season": -15.22,
+"delta": 0.94,
+"z": 0.71,
+"games": 31
+},
+"ext": {
+"game": 6.1,
+"season": 5.96,
+"delta": 0.15,
+"z": 2.16,
+"games": 31
+}
+},
+"SL": {
+"n": 5,
+"v": {
+"game": 85.4,
+"season": 84.96,
+"delta": 0.44,
+"z": 0.48,
+"games": 8
+},
+"s": {
+"game": 2389.4,
+"season": 2395.89,
+"delta": -6.49,
+"z": -0.15,
+"games": 8
+},
+"ivb": {
+"game": 1.26,
+"season": 2.89,
+"delta": -1.63,
+"z": -1.23,
+"games": 8
+},
+"hb": {
+"game": 1.2,
+"season": 1.15,
+"delta": 0.05,
+"z": 0.04,
+"games": 8
+},
+"ext": {
+"game": 5.95,
+"season": 5.94,
+"delta": 0.0,
+"z": 0.05,
+"games": 8
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "SI",
+"game": 0.206,
+"season": 0.317,
+"z": -1.42
+}
+],
+"mix": {
+"CH": [
+0.302,
+0.258
+],
+"CU": [
+0.0,
+0.041
+],
+"FC": [
+0.286,
+0.22
+],
+"FF": [
+0.127,
+0.126
+],
+"PO": [
+0.0,
+0.001
+],
+"SI": [
+0.206,
+0.317
+],
+"SL": [
+0.079,
+0.038
+]
+},
+"zone": {
+"game": 0.429,
+"season": 0.476,
+"z": -0.84
+},
+"pitches": {
+"game": 63,
+"season_mean": 81.5,
+"season_max": 101
+},
+"pk": 849838,
+"pitcher": 607259,
+"name": "Nick Martinez",
+"team": "TB",
+"seasonGames": 31
+},
+{
+"n": 23,
+"types": {
+"FF": {
+"n": 7,
+"v": {
+"game": 92.29,
+"season": 91.41,
+"delta": 0.87,
+"z": 1.53,
+"games": 31
+},
+"s": {
+"game": 2072.29,
+"season": 2171.37,
+"delta": -99.08,
+"z": -1.99,
+"games": 31
+},
+"ivb": {
+"game": 15.14,
+"season": 17.11,
+"delta": -1.96,
+"z": -1.48,
+"games": 31
+},
+"hb": {
+"game": 8.63,
+"season": 6.79,
+"delta": 1.84,
+"z": 1.0,
+"games": 31
+},
+"ext": {
+"game": 6.46,
+"season": 6.31,
+"delta": 0.15,
+"z": 2.04,
+"games": 31
+}
+},
+"SI": {
+"n": 8,
+"v": {
+"game": 90.84,
+"season": 89.95,
+"delta": 0.88,
+"z": 1.32,
+"games": 28
+},
+"s": {
+"game": 1936.38,
+"season": 1970.45,
+"delta": -34.08,
+"z": -0.66,
+"games": 28
+},
+"ivb": {
+"game": 9.68,
+"season": 10.44,
+"delta": -0.76,
+"z": -0.5,
+"games": 28
+},
+"hb": {
+"game": 16.45,
+"season": 14.87,
+"delta": 1.58,
+"z": 0.96,
+"games": 28
+},
+"ext": {
+"game": 6.42,
+"season": 6.31,
+"delta": 0.12,
+"z": 1.63,
+"games": 28
+}
+},
+"ST": {
+"n": 6,
+"v": {
+"game": 81.67,
+"season": 81.78,
+"delta": -0.12,
+"z": -0.14,
+"games": 31
+},
+"s": {
+"game": 2212.5,
+"season": 2170.96,
+"delta": 41.54,
+"z": 0.76,
+"games": 31
+},
+"ivb": {
+"game": 8.97,
+"season": 10.05,
+"delta": -1.09,
+"z": -0.42,
+"games": 31
+},
+"hb": {
+"game": -12.18,
+"season": -11.71,
+"delta": -0.48,
+"z": -0.29,
+"games": 31
+},
+"ext": {
+"game": 6.6,
+"season": 6.34,
+"delta": 0.26,
+"z": 2.68,
+"games": 31
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.087,
+"season": 0.286,
+"z": -2.82
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.348,
+"season": 0.163,
+"z": 1.83
+}
+],
+"mix": {
+"CH": [
+0.087,
+0.286
+],
+"CU": [
+0.0,
+0.007
+],
+"FC": [
+0.0,
+0.005
+],
+"FF": [
+0.304,
+0.273
+],
+"SI": [
+0.348,
+0.163
+],
+"SL": [
+0.0,
+0.065
+],
+"ST": [
+0.261,
+0.195
+]
+},
+"zone": {
+"game": 0.435,
+"season": 0.446,
+"z": -0.12
+},
+"pitches": {
+"game": 23,
+"season_mean": 45.5,
+"season_max": 98
+},
+"pk": 849838,
+"pitcher": 693855,
+"name": "Ian Seymour",
+"team": "TB",
+"seasonGames": 47
+},
+{
+"n": 7,
+"types": {},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.0,
+"season": 0.213,
+"z": -1.82
+},
+{
+"what": "mix",
+"type": "CU",
+"game": 0.286,
+"season": 0.144,
+"z": 1.44
+},
+{
+"what": "mix",
+"type": "FC",
+"game": 0.571,
+"season": 0.195,
+"z": 2.89
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.143,
+"season": 0.338,
+"z": -1.31
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.213
+],
+"CU": [
+0.286,
+0.144
+],
+"FC": [
+0.571,
+0.195
+],
+"FF": [
+0.0,
+0.027
+],
+"PO": [
+0.0,
+0.001
+],
+"SI": [
+0.143,
+0.338
+],
+"SL": [
+0.0,
+0.005
+],
+"ST": [
+0.0,
+0.073
+]
+},
+"zone": {
+"game": 0.571,
+"season": 0.414,
+"z": 1.43
+},
+"pitches": {
+"game": 7,
+"season_mean": 20.0,
+"season_max": 43
+},
+"pk": 849838,
+"pitcher": 621112,
+"name": "Paul Blackburn",
+"team": "NYY",
+"seasonGames": 62
+},
+{
+"n": 32,
+"types": {
+"CH": {
+"n": 12,
+"v": {
+"game": 91.82,
+"season": 90.9,
+"delta": 0.92,
+"z": 1.22,
+"games": 25
+},
+"s": {
+"game": 2032.75,
+"season": 1887.13,
+"delta": 145.62,
+"z": 1.95,
+"games": 25
+},
+"ivb": {
+"game": 2.42,
+"season": 3.89,
+"delta": -1.47,
+"z": -1.21,
+"games": 25
+},
+"hb": {
+"game": -15.26,
+"season": -15.92,
+"delta": 0.66,
+"z": 0.57,
+"games": 25
+},
+"ext": {
+"game": 6.36,
+"season": 6.36,
+"delta": 0.0,
+"z": 0.01,
+"games": 25
+}
+},
+"SI": {
+"n": 5,
+"v": {
+"game": 96.42,
+"season": 95.44,
+"delta": 0.98,
+"z": 1.44,
+"games": 26
+},
+"s": {
+"game": 2494.8,
+"season": 2532.07,
+"delta": -37.27,
+"z": -0.82,
+"games": 26
+},
+"ivb": {
+"game": 9.28,
+"season": 11.27,
+"delta": -1.99,
+"z": -2.09,
+"games": 26
+},
+"hb": {
+"game": -14.92,
+"season": -16.49,
+"delta": 1.57,
+"z": 1.43,
+"games": 26
+},
+"ext": {
+"game": 6.32,
+"season": 6.36,
+"delta": -0.04,
+"z": -0.42,
+"games": 26
+}
+},
+"ST": {
+"n": 7,
+"v": {
+"game": 88.09,
+"season": 87.73,
+"delta": 0.36,
+"z": 0.38,
+"games": 29
+},
+"s": {
+"game": 3020.14,
+"season": 3018.35,
+"delta": 1.79,
+"z": 0.04,
+"games": 29
+},
+"ivb": {
+"game": -1.7,
+"season": -0.77,
+"delta": -0.93,
+"z": -0.65,
+"games": 29
+},
+"hb": {
+"game": 12.99,
+"season": 12.45,
+"delta": 0.53,
+"z": 0.26,
+"games": 29
+},
+"ext": {
+"game": 6.19,
+"season": 6.31,
+"delta": -0.13,
+"z": -1.22,
+"games": 29
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.375,
+"season": 0.225,
+"z": 1.85
+}
+],
+"mix": {
+"CH": [
+0.375,
+0.225
+],
+"CU": [
+0.125,
+0.087
+],
+"FC": [
+0.031,
+0.029
+],
+"FF": [
+0.094,
+0.18
+],
+"SI": [
+0.156,
+0.226
+],
+"ST": [
+0.219,
+0.249
+]
+},
+"zone": {
+"game": 0.438,
+"season": 0.41,
+"z": 0.4
+},
+"pitches": {
+"game": 32,
+"season_mean": 50.9,
+"season_max": 93
+},
+"pk": 849838,
+"pitcher": 643377,
+"name": "Griffin Jax",
+"team": "TB",
+"seasonGames": 34
+},
+{
+"n": 22,
+"types": {
+"FF": {
+"n": 10,
+"v": {
+"game": 96.3,
+"season": 96.1,
+"delta": 0.2,
+"z": 0.35,
+"games": 45
+},
+"s": {
+"game": 2230.5,
+"season": 2357.83,
+"delta": -127.33,
+"z": -1.51,
+"games": 45
+},
+"ivb": {
+"game": 17.38,
+"season": 18.01,
+"delta": -0.63,
+"z": -0.57,
+"games": 45
+},
+"hb": {
+"game": -7.32,
+"season": -8.92,
+"delta": 1.6,
+"z": 1.31,
+"games": 45
+},
+"ext": {
+"game": 6.62,
+"season": 6.6,
+"delta": 0.02,
+"z": 0.18,
+"games": 45
+}
+},
+"FS": {
+"n": 9,
+"v": {
+"game": 89.56,
+"season": 90.83,
+"delta": -1.28,
+"z": -1.99,
+"games": 48
+},
+"s": {
+"game": 1317.89,
+"season": 1641.88,
+"delta": -323.99,
+"z": -2.76,
+"games": 48
+},
+"ivb": {
+"game": 2.91,
+"season": 3.43,
+"delta": -0.52,
+"z": -0.51,
+"games": 48
+},
+"hb": {
+"game": -6.69,
+"season": -8.7,
+"delta": 2.02,
+"z": 1.28,
+"games": 48
+},
+"ext": {
+"game": 6.52,
+"season": 6.52,
+"delta": 0.0,
+"z": 0.02,
+"games": 48
+}
+}
+},
+"flags": [],
+"mix": {
+"CU": [
+0.136,
+0.181
+],
+"FF": [
+0.455,
+0.403
+],
+"FS": [
+0.409,
+0.41
+]
+},
+"zone": {
+"game": 0.364,
+"season": 0.406,
+"z": -0.41
+},
+"pitches": {
+"game": 22,
+"season_mean": 18.1,
+"season_max": 40
+},
+"pk": 849838,
+"pitcher": 670280,
+"name": "David Bednar",
+"team": "NYY",
+"seasonGames": 64
+},
+{
+"n": 8,
+"types": {},
+"flags": [
+{
+"what": "mix",
+"type": "ST",
+"game": 0.0,
+"season": 0.106,
+"z": -1.03
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.012
+],
+"FC": [
+0.5,
+0.427
+],
+"FF": [
+0.5,
+0.453
+],
+"ST": [
+0.0,
+0.106
+]
+},
+"zone": {
+"game": 0.625,
+"season": 0.453,
+"z": 1.57
+},
+"pitches": {
+"game": 8,
+"season_mean": 13.7,
+"season_max": 34
+},
+"pk": 849838,
+"pitcher": 592155,
+"name": "Cam Booser",
+"team": "TB",
+"seasonGames": 42
+},
+{
+"n": 5,
+"types": {},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.6,
+"season": 0.277,
+"z": 2.74
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.4,
+"season": 0.569,
+"z": -1.13
+}
+],
+"mix": {
+"CH": [
+0.6,
+0.277
+],
+"FC": [
+0.0,
+0.003
+],
+"FF": [
+0.0,
+0.07
+],
+"SI": [
+0.4,
+0.569
+],
+"ST": [
+0.0,
+0.069
+]
+},
+"zone": {
+"game": 0.4,
+"season": 0.464,
+"z": -0.49
+},
+"pitches": {
+"game": 5,
+"season_mean": 14.1,
+"season_max": 33
+},
+"pk": 849838,
+"pitcher": 687330,
+"name": "Kevin Kelly",
+"team": "TB",
+"seasonGames": 71
+},
+{
+"n": 17,
+"types": {
+"CH": {
+"n": 9,
+"v": {
+"game": 83.72,
+"season": 85.15,
+"delta": -1.43,
+"z": -0.83,
+"games": 48
+},
+"s": {
+"game": 1824.11,
+"season": 1840.47,
+"delta": -16.36,
+"z": -0.29,
+"games": 48
+},
+"ivb": {
+"game": 8.54,
+"season": 8.74,
+"delta": -0.2,
+"z": -0.19,
+"games": 48
+},
+"hb": {
+"game": -12.54,
+"season": -14.91,
+"delta": 2.36,
+"z": 1.83,
+"games": 48
+},
+"ext": {
+"game": 6.46,
+"season": 6.36,
+"delta": 0.1,
+"z": 1.03,
+"games": 48
+}
+},
+"FF": {
+"n": 8,
+"v": {
+"game": 94.81,
+"season": 96.36,
+"delta": -1.55,
+"z": -1.35,
+"games": 52
+},
+"s": {
+"game": 2329.62,
+"season": 2287.05,
+"delta": 42.58,
+"z": 0.57,
+"games": 52
+},
+"ivb": {
+"game": 18.56,
+"season": 19.18,
+"delta": -0.61,
+"z": -0.53,
+"games": 52
+},
+"hb": {
+"game": -0.2,
+"season": -3.82,
+"delta": 3.62,
+"z": 3.11,
+"games": 52
+},
+"ext": {
+"game": 6.59,
+"season": 6.39,
+"delta": 0.2,
+"z": 2.07,
+"games": 52
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.529,
+0.436
+],
+"FF": [
+0.471,
+0.527
+],
+"SL": [
+0.0,
+0.033
+]
+},
+"zone": {
+"game": 0.353,
+"season": 0.461,
+"z": -0.86
+},
+"pitches": {
+"game": 17,
+"season_mean": 15.1,
+"season_max": 31
+},
+"pk": 849838,
+"pitcher": 641329,
+"name": "Bryan Baker",
+"team": "TB",
+"seasonGames": 65
+},
+{
+"n": 94,
+"types": {
+"CH": {
+"n": 24,
+"v": {
+"game": 89.38,
+"season": 87.65,
+"delta": 1.73,
+"z": 1.79,
+"games": 26
+},
+"s": {
+"game": 1905.21,
+"season": 1844.07,
+"delta": 61.14,
+"z": 1.08,
+"games": 26
+},
+"ivb": {
+"game": 6.15,
+"season": 4.86,
+"delta": 1.29,
+"z": 1.55,
+"games": 26
+},
+"hb": {
+"game": 13.42,
+"season": 13.64,
+"delta": -0.22,
+"z": -0.17,
+"games": 26
+},
+"ext": {
+"game": 6.34,
+"season": 6.3,
+"delta": 0.05,
+"z": 0.45,
+"games": 26
+}
+},
+"CU": {
+"n": 7,
+"v": {
+"game": 80.99,
+"season": 80.24,
+"delta": 0.75,
+"z": 1.04,
+"games": 12
+},
+"s": {
+"game": 2577.43,
+"season": 2529.97,
+"delta": 47.46,
+"z": 0.79,
+"games": 12
+},
+"ivb": {
+"game": -5.09,
+"season": -4.87,
+"delta": -0.22,
+"z": -0.26,
+"games": 12
+},
+"hb": {
+"game": -8.63,
+"season": -8.34,
+"delta": -0.29,
+"z": -0.35,
+"games": 12
+},
+"ext": {
+"game": 6.48,
+"season": 6.34,
+"delta": 0.14,
+"z": 1.41,
+"games": 12
+}
+},
+"FF": {
+"n": 33,
+"v": {
+"game": 98.07,
+"season": 96.8,
+"delta": 1.27,
+"z": 2.49,
+"games": 26
+},
+"s": {
+"game": 2376.88,
+"season": 2329.66,
+"delta": 47.22,
+"z": 1.23,
+"games": 26
+},
+"ivb": {
+"game": 16.03,
+"season": 17.06,
+"delta": -1.03,
+"z": -1.56,
+"games": 26
+},
+"hb": {
+"game": 3.82,
+"season": 3.28,
+"delta": 0.54,
+"z": 0.63,
+"games": 26
+},
+"ext": {
+"game": 6.39,
+"season": 6.38,
+"delta": 0.01,
+"z": 0.09,
+"games": 26
+}
+},
+"SI": {
+"n": 19,
+"v": {
+"game": 97.63,
+"season": 96.78,
+"delta": 0.84,
+"z": 1.46,
+"games": 25
+},
+"s": {
+"game": 2249.26,
+"season": 2201.58,
+"delta": 47.68,
+"z": 1.01,
+"games": 25
+},
+"ivb": {
+"game": 13.39,
+"season": 12.58,
+"delta": 0.81,
+"z": 0.66,
+"games": 25
+},
+"hb": {
+"game": 11.03,
+"season": 13.08,
+"delta": -2.04,
+"z": -1.85,
+"games": 25
+},
+"ext": {
+"game": 6.37,
+"season": 6.4,
+"delta": -0.03,
+"z": -0.34,
+"games": 25
+}
+},
+"SL": {
+"n": 11,
+"v": {
+"game": 91.35,
+"season": 89.76,
+"delta": 1.59,
+"z": 1.96,
+"games": 26
+},
+"s": {
+"game": 2158.27,
+"season": 2196.36,
+"delta": -38.08,
+"z": -0.78,
+"games": 26
+},
+"ivb": {
+"game": 4.72,
+"season": 4.05,
+"delta": 0.67,
+"z": 0.79,
+"games": 26
+},
+"hb": {
+"game": -3.68,
+"season": -3.25,
+"delta": -0.43,
+"z": -0.78,
+"games": 26
+},
+"ext": {
+"game": 6.37,
+"season": 6.38,
+"delta": -0.01,
+"z": -0.14,
+"games": 26
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.255,
+0.256
+],
+"CU": [
+0.074,
+0.05
+],
+"FF": [
+0.351,
+0.38
+],
+"SI": [
+0.202,
+0.175
+],
+"SL": [
+0.117,
+0.139
+]
+},
+"zone": {
+"game": 0.415,
+"season": 0.457,
+"z": -0.82
+},
+"pitches": {
+"game": 94,
+"season_mean": 90.7,
+"season_max": 109
+},
+"pk": 849828,
+"pitcher": 669373,
+"name": "Tarik Skubal",
+"team": "LAD",
+"seasonGames": 26
+},
+{
+"n": 47,
+"types": {
+"FC": {
+"n": 24,
+"v": {
+"game": 87.23,
+"season": 87.18,
+"delta": 0.05,
+"z": 0.06,
+"games": 28
+},
+"s": {
+"game": 2093.17,
+"season": 2063.78,
+"delta": 29.39,
+"z": 0.55,
+"games": 28
+},
+"ivb": {
+"game": 3.98,
+"season": 6.14,
+"delta": -2.16,
+"z": -1.7,
+"games": 28
+},
+"hb": {
+"game": -0.1,
+"season": 1.81,
+"delta": -1.91,
+"z": -1.05,
+"games": 28
+},
+"ext": {
+"game": 6.15,
+"season": 6.23,
+"delta": -0.08,
+"z": -0.94,
+"games": 28
+}
+},
+"SI": {
+"n": 23,
+"v": {
+"game": 95.17,
+"season": 93.83,
+"delta": 1.35,
+"z": 2.3,
+"games": 42
+},
+"s": {
+"game": 2144.43,
+"season": 2176.12,
+"delta": -31.69,
+"z": -0.79,
+"games": 42
+},
+"ivb": {
+"game": 15.46,
+"season": 17.45,
+"delta": -1.99,
+"z": -1.9,
+"games": 42
+},
+"hb": {
+"game": 8.97,
+"season": 8.39,
+"delta": 0.59,
+"z": 0.58,
+"games": 42
+},
+"ext": {
+"game": 6.12,
+"season": 6.21,
+"delta": -0.09,
+"z": -1.1,
+"games": 42
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FC",
+"game": 0.511,
+"season": 0.35,
+"z": 1.19
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.489,
+"season": 0.598,
+"z": -0.76
+}
+],
+"mix": {
+"FC": [
+0.511,
+0.35
+],
+"FF": [
+0.0,
+0.001
+],
+"SI": [
+0.489,
+0.598
+],
+"SL": [
+0.0,
+0.046
+]
+},
+"zone": {
+"game": 0.532,
+"season": 0.411,
+"z": 1.05
+},
+"pitches": {
+"game": 47,
+"season_mean": 16.3,
+"season_max": 39
+},
+"pk": 849828,
+"pitcher": 689266,
+"name": "Dylan Dodd",
+"team": "ATL",
+"seasonGames": 48
+},
+{
+"n": 11,
+"types": {
+"FF": {
+"n": 5,
+"v": {
+"game": 98.2,
+"season": 97.31,
+"delta": 0.89,
+"z": 0.91,
+"games": 14
+},
+"s": {
+"game": 2462.6,
+"season": 2441.43,
+"delta": 21.17,
+"z": 0.32,
+"games": 14
+},
+"ivb": {
+"game": 12.8,
+"season": 12.93,
+"delta": -0.13,
+"z": -0.14,
+"games": 14
+},
+"hb": {
+"game": -9.02,
+"season": -10.77,
+"delta": 1.75,
+"z": 1.48,
+"games": 14
+},
+"ext": {
+"game": 6.25,
+"season": 6.62,
+"delta": -0.37,
+"z": -2.15,
+"games": 14
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.455,
+"season": 0.235,
+"z": 1.27
+}
+],
+"mix": {
+"FC": [
+0.364,
+0.463
+],
+"FF": [
+0.455,
+0.235
+],
+"FS": [
+0.091,
+0.128
+],
+"SI": [
+0.091,
+0.129
+],
+"SL": [
+0.0,
+0.003
+],
+"ST": [
+0.0,
+0.039
+]
+},
+"zone": {
+"game": 0.364,
+"season": 0.385,
+"z": -0.24
+},
+"pitches": {
+"game": 11,
+"season_mean": 19.6,
+"season_max": 36
+},
+"pk": 849828,
+"pitcher": 682989,
+"name": "Victor Mederos",
+"team": "ATL",
+"seasonGames": 30
+},
+{
+"n": 53,
+"types": {
+"CU": {
+"n": 7,
+"v": {
+"game": 78.33,
+"season": 76.03,
+"delta": 2.3,
+"z": 2.08,
+"games": 7
+},
+"s": {
+"game": 2524.29,
+"season": 2351.27,
+"delta": 173.01,
+"z": 4.33,
+"games": 7
+},
+"ivb": {
+"game": -12.36,
+"season": -11.19,
+"delta": -1.16,
+"z": -0.89,
+"games": 7
+},
+"hb": {
+"game": 10.11,
+"season": 12.19,
+"delta": -2.08,
+"z": -1.71,
+"games": 7
+},
+"ext": {
+"game": 6.63,
+"season": 6.61,
+"delta": 0.02,
+"z": 0.18,
+"games": 7
+}
+},
+"FF": {
+"n": 23,
+"v": {
+"game": 98.0,
+"season": 96.55,
+"delta": 1.46,
+"z": 1.15,
+"games": 9
+},
+"s": {
+"game": 2232.0,
+"season": 2173.87,
+"delta": 58.13,
+"z": 1.32,
+"games": 9
+},
+"ivb": {
+"game": 14.38,
+"season": 15.74,
+"delta": -1.36,
+"z": -1.49,
+"games": 9
+},
+"hb": {
+"game": -9.79,
+"season": -10.97,
+"delta": 1.17,
+"z": 1.12,
+"games": 9
+},
+"ext": {
+"game": 6.65,
+"season": 6.68,
+"delta": -0.03,
+"z": -0.33,
+"games": 9
+}
+},
+"FS": {
+"n": 22,
+"v": {
+"game": 86.36,
+"season": 83.59,
+"delta": 2.77,
+"z": 1.86,
+"games": 9
+},
+"s": {
+"game": 1405.23,
+"season": 1319.6,
+"delta": 85.63,
+"z": 1.17,
+"games": 9
+},
+"ivb": {
+"game": 1.66,
+"season": 1.73,
+"delta": -0.07,
+"z": -0.08,
+"games": 9
+},
+"hb": {
+"game": -11.77,
+"season": -12.07,
+"delta": 0.3,
+"z": 0.24,
+"games": 9
+},
+"ext": {
+"game": 6.86,
+"season": 6.86,
+"delta": -0.01,
+"z": -0.06,
+"games": 9
+}
+}
+},
+"flags": [],
+"mix": {
+"CU": [
+0.132,
+0.101
+],
+"FC": [
+0.0,
+0.035
+],
+"FF": [
+0.434,
+0.391
+],
+"FS": [
+0.415,
+0.356
+],
+"SI": [
+0.0,
+0.073
+],
+"SL": [
+0.019,
+0.044
+]
+},
+"zone": {
+"game": 0.377,
+"season": 0.412,
+"z": -0.47
+},
+"pitches": {
+"game": 53,
+"season_mean": 63.7,
+"season_max": 90
+},
+"pk": 849828,
+"pitcher": 700363,
+"name": "AJ Smith-Shawver",
+"team": "ATL",
+"seasonGames": 9
+},
+{
+"n": 13,
+"types": {},
+"flags": [],
+"mix": {
+"CH": [
+0.077,
+0.147
+],
+"FC": [
+0.154,
+0.088
+],
+"FF": [
+0.308,
+0.364
+],
+"SI": [
+0.231,
+0.142
+],
+"ST": [
+0.231,
+0.245
+]
+},
+"zone": {
+"game": 0.308,
+"season": 0.441,
+"z": -0.98
+},
+"pitches": {
+"game": 13,
+"season_mean": 13.8,
+"season_max": 29
+},
+"pk": 849828,
+"pitcher": 592779,
+"name": "Brock Stewart",
+"team": "LAD",
+"seasonGames": 28
+},
+{
+"n": 33,
+"types": {
+"FF": {
+"n": 8,
+"v": {
+"game": 90.22,
+"season": 87.81,
+"delta": 2.41,
+"z": 2.57,
+"games": 34
+},
+"s": {
+"game": 2238.75,
+"season": 2198.63,
+"delta": 40.12,
+"z": 0.97,
+"games": 34
+},
+"ivb": {
+"game": 13.65,
+"season": 15.42,
+"delta": -1.77,
+"z": -2.0,
+"games": 34
+},
+"hb": {
+"game": -1.65,
+"season": -0.7,
+"delta": -0.95,
+"z": -0.74,
+"games": 34
+},
+"ext": {
+"game": 7.48,
+"season": 7.41,
+"delta": 0.06,
+"z": 0.56,
+"games": 34
+}
+},
+"SI": {
+"n": 20,
+"v": {
+"game": 90.47,
+"season": 88.99,
+"delta": 1.48,
+"z": 1.89,
+"games": 41
+},
+"s": {
+"game": 2139.5,
+"season": 2131.58,
+"delta": 7.92,
+"z": 0.19,
+"games": 41
+},
+"ivb": {
+"game": 10.22,
+"season": 12.49,
+"delta": -2.27,
+"z": -2.24,
+"games": 41
+},
+"hb": {
+"game": 10.29,
+"season": 11.7,
+"delta": -1.42,
+"z": -1.45,
+"games": 41
+},
+"ext": {
+"game": 7.44,
+"season": 7.43,
+"delta": 0.01,
+"z": 0.1,
+"games": 41
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.091,
+"season": 0.271,
+"z": -2.14
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.606,
+"season": 0.341,
+"z": 2.07
+}
+],
+"mix": {
+"CH": [
+0.091,
+0.271
+],
+"FF": [
+0.242,
+0.257
+],
+"SI": [
+0.606,
+0.341
+],
+"SL": [
+0.061,
+0.126
+]
+},
+"zone": {
+"game": 0.455,
+"season": 0.446,
+"z": 0.08
+},
+"pitches": {
+"game": 33,
+"season_mean": 28.4,
+"season_max": 55
+},
+"pk": 849828,
+"pitcher": 608718,
+"name": "Brent Suter",
+"team": "ATL",
+"seasonGames": 54
+},
+{
+"n": 15,
+"types": {
+"FF": {
+"n": 9,
+"v": {
+"game": 93.08,
+"season": 92.09,
+"delta": 0.99,
+"z": 1.13,
+"games": 53
+},
+"s": {
+"game": 2571.44,
+"season": 2510.65,
+"delta": 60.8,
+"z": 1.16,
+"games": 53
+},
+"ivb": {
+"game": 19.53,
+"season": 21.18,
+"delta": -1.65,
+"z": -1.34,
+"games": 53
+},
+"hb": {
+"game": 4.99,
+"season": 4.37,
+"delta": 0.62,
+"z": 0.63,
+"games": 53
+},
+"ext": {
+"game": 6.33,
+"season": 6.42,
+"delta": -0.09,
+"z": -0.81,
+"games": 53
+}
+},
+"SL": {
+"n": 6,
+"v": {
+"game": 86.3,
+"season": 84.46,
+"delta": 1.84,
+"z": 1.71,
+"games": 31
+},
+"s": {
+"game": 2355.83,
+"season": 2380.91,
+"delta": -25.08,
+"z": -0.47,
+"games": 31
+},
+"ivb": {
+"game": 3.4,
+"season": 3.35,
+"delta": 0.05,
+"z": 0.04,
+"games": 31
+},
+"hb": {
+"game": -6.65,
+"season": -5.8,
+"delta": -0.85,
+"z": -1.26,
+"games": 31
+},
+"ext": {
+"game": 6.41,
+"season": 6.34,
+"delta": 0.06,
+"z": 0.6,
+"games": 31
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.0,
+"season": 0.139,
+"z": -1.22
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.4,
+"season": 0.298,
+"z": 0.73
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.139
+],
+"FF": [
+0.6,
+0.551
+],
+"SL": [
+0.4,
+0.298
+]
+},
+"zone": {
+"game": 0.6,
+"season": 0.424,
+"z": 1.18
+},
+"pitches": {
+"game": 15,
+"season_mean": 14.2,
+"season_max": 32
+},
+"pk": 849828,
+"pitcher": 681911,
+"name": "Alex Vesia",
+"team": "LAD",
+"seasonGames": 72
+},
+{
+"n": 12,
+"types": {
+"FF": {
+"n": 5,
+"v": {
+"game": 98.42,
+"season": 96.85,
+"delta": 1.57,
+"z": 2.04,
+"games": 51
+},
+"s": {
+"game": 2476.2,
+"season": 2544.31,
+"delta": -68.11,
+"z": -1.26,
+"games": 51
+},
+"ivb": {
+"game": 14.28,
+"season": 16.22,
+"delta": -1.94,
+"z": -2.34,
+"games": 51
+},
+"hb": {
+"game": 5.12,
+"season": 6.64,
+"delta": -1.52,
+"z": -1.67,
+"games": 51
+},
+"ext": {
+"game": 6.28,
+"season": 6.17,
+"delta": 0.11,
+"z": 1.33,
+"games": 51
+}
+},
+"SL": {
+"n": 7,
+"v": {
+"game": 90.71,
+"season": 89.43,
+"delta": 1.29,
+"z": 1.34,
+"games": 51
+},
+"s": {
+"game": 2637.14,
+"season": 2649.64,
+"delta": -12.5,
+"z": -0.21,
+"games": 51
+},
+"ivb": {
+"game": 0.27,
+"season": 1.92,
+"delta": -1.65,
+"z": -1.36,
+"games": 51
+},
+"hb": {
+"game": -5.86,
+"season": -5.99,
+"delta": 0.14,
+"z": 0.19,
+"games": 51
+},
+"ext": {
+"game": 6.24,
+"season": 6.2,
+"delta": 0.04,
+"z": 0.4,
+"games": 51
+}
+}
+},
+"flags": [],
+"mix": {
+"FF": [
+0.417,
+0.483
+],
+"SL": [
+0.583,
+0.501
+]
+},
+"zone": {
+"game": 0.583,
+"season": 0.448,
+"z": 0.96
+},
+"pitches": {
+"game": 12,
+"season_mean": 14.2,
+"season_max": 28
+},
+"pk": 849828,
+"pitcher": 656945,
+"name": "Tanner Scott",
+"team": "LAD",
+"seasonGames": 69
+},
+{
+"n": 12,
+"types": {
+"FF": {
+"n": 5,
+"v": {
+"game": 97.32,
+"season": 96.84,
+"delta": 0.48,
+"z": 0.65,
+"games": 20
+},
+"s": {
+"game": 2460.0,
+"season": 2433.49,
+"delta": 26.51,
+"z": 0.45,
+"games": 20
+},
+"ivb": {
+"game": 14.26,
+"season": 15.4,
+"delta": -1.14,
+"z": -1.28,
+"games": 20
+},
+"hb": {
+"game": -9.58,
+"season": -9.51,
+"delta": -0.07,
+"z": -0.06,
+"games": 20
+},
+"ext": {
+"game": 6.37,
+"season": 6.38,
+"delta": -0.02,
+"z": -0.21,
+"games": 20
+}
+},
+"ST": {
+"n": 7,
+"v": {
+"game": 87.44,
+"season": 86.17,
+"delta": 1.28,
+"z": 1.8,
+"games": 17
+},
+"s": {
+"game": 2698.43,
+"season": 2586.24,
+"delta": 112.18,
+"z": 1.57,
+"games": 17
+},
+"ivb": {
+"game": -2.56,
+"season": -2.31,
+"delta": -0.25,
+"z": -0.19,
+"games": 17
+},
+"hb": {
+"game": 14.93,
+"season": 16.51,
+"delta": -1.59,
+"z": -1.07,
+"games": 17
+},
+"ext": {
+"game": 6.25,
+"season": 6.21,
+"delta": 0.04,
+"z": 0.37,
+"games": 17
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "ST",
+"game": 0.583,
+"season": 0.361,
+"z": 2.19
+}
+],
+"mix": {
+"FC": [
+0.0,
+0.099
+],
+"FF": [
+0.417,
+0.439
+],
+"SI": [
+0.0,
+0.074
+],
+"ST": [
+0.583,
+0.361
+]
+},
+"zone": {
+"game": 0.417,
+"season": 0.452,
+"z": -0.26
+},
+"pitches": {
+"game": 12,
+"season_mean": 14.0,
+"season_max": 26
+},
+"pk": 849828,
+"pitcher": 623465,
+"name": "Evan Phillips",
+"team": "LAD",
+"seasonGames": 31
+},
+{
+"n": 90,
+"types": {
+"CH": {
+"n": 13,
+"v": {
+"game": 85.41,
+"season": 84.96,
+"delta": 0.45,
+"z": 0.4,
+"games": 8
+},
+"s": {
+"game": 1781.62,
+"season": 1821.22,
+"delta": -39.61,
+"z": -0.74,
+"games": 8
+},
+"ivb": {
+"game": 6.22,
+"season": 8.24,
+"delta": -2.01,
+"z": -1.18,
+"games": 8
+},
+"hb": {
+"game": 13.11,
+"season": 12.92,
+"delta": 0.19,
+"z": 0.16,
+"games": 8
+},
+"ext": {
+"game": 6.79,
+"season": 6.75,
+"delta": 0.04,
+"z": 0.31,
+"games": 8
+}
+},
+"CU": {
+"n": 26,
+"v": {
+"game": 80.45,
+"season": 79.8,
+"delta": 0.66,
+"z": 0.64,
+"games": 9
+},
+"s": {
+"game": 2411.65,
+"season": 2445.54,
+"delta": -33.89,
+"z": -0.96,
+"games": 9
+},
+"ivb": {
+"game": -10.51,
+"season": -8.75,
+"delta": -1.76,
+"z": -2.5,
+"games": 9
+},
+"hb": {
+"game": -12.38,
+"season": -13.86,
+"delta": 1.48,
+"z": 0.76,
+"games": 9
+},
+"ext": {
+"game": 6.64,
+"season": 6.61,
+"delta": 0.03,
+"z": 0.21,
+"games": 9
+}
+},
+"FF": {
+"n": 38,
+"v": {
+"game": 97.0,
+"season": 95.9,
+"delta": 1.1,
+"z": 1.71,
+"games": 9
+},
+"s": {
+"game": 2493.68,
+"season": 2482.42,
+"delta": 11.26,
+"z": 0.28,
+"games": 9
+},
+"ivb": {
+"game": 18.06,
+"season": 18.65,
+"delta": -0.59,
+"z": -0.5,
+"games": 9
+},
+"hb": {
+"game": 5.03,
+"season": 5.58,
+"delta": -0.55,
+"z": -0.7,
+"games": 9
+},
+"ext": {
+"game": 6.77,
+"season": 6.74,
+"delta": 0.04,
+"z": 0.33,
+"games": 9
+}
+},
+"SL": {
+"n": 13,
+"v": {
+"game": 89.3,
+"season": 89.09,
+"delta": 0.21,
+"z": 0.21,
+"games": 8
+},
+"s": {
+"game": 2363.31,
+"season": 2370.11,
+"delta": -6.8,
+"z": -0.22,
+"games": 8
+},
+"ivb": {
+"game": 4.94,
+"season": 7.34,
+"delta": -2.4,
+"z": -2.05,
+"games": 8
+},
+"hb": {
+"game": -4.63,
+"season": -3.6,
+"delta": -1.03,
+"z": -1.84,
+"games": 8
+},
+"ext": {
+"game": 6.74,
+"season": 6.66,
+"delta": 0.08,
+"z": 0.66,
+"games": 8
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.144,
+0.178
+],
+"CU": [
+0.289,
+0.218
+],
+"FF": [
+0.422,
+0.495
+],
+"SL": [
+0.144,
+0.108
+]
+},
+"zone": {
+"game": 0.289,
+"season": 0.37,
+"z": -1.48
+},
+"pitches": {
+"game": 90,
+"season_mean": 82.4,
+"season_max": 101
+},
+"pk": 849823,
+"pitcher": 605483,
+"name": "Blake Snell",
+"team": "LAD",
+"seasonGames": 9
+},
+{
+"n": 42,
+"types": {
+"CU": {
+"n": 18,
+"v": {
+"game": 80.98,
+"season": 81.23,
+"delta": -0.25,
+"z": -0.48,
+"games": 7
+},
+"s": {
+"game": 1965.22,
+"season": 2028.19,
+"delta": -62.97,
+"z": -1.35,
+"games": 7
+},
+"ivb": {
+"game": -3.81,
+"season": -3.69,
+"delta": -0.11,
+"z": -0.12,
+"games": 7
+},
+"hb": {
+"game": -0.8,
+"season": -1.08,
+"delta": 0.28,
+"z": 0.41,
+"games": 7
+},
+"ext": {
+"game": 6.13,
+"season": 6.27,
+"delta": -0.14,
+"z": -1.15,
+"games": 7
+}
+},
+"FC": {
+"n": 9
+},
+"FF": {
+"n": 6,
+"v": {
+"game": 94.43,
+"season": 94.99,
+"delta": -0.56,
+"z": -0.73,
+"games": 8
+},
+"s": {
+"game": 2183.0,
+"season": 2259.09,
+"delta": -76.09,
+"z": -0.92,
+"games": 8
+},
+"ivb": {
+"game": 12.8,
+"season": 14.84,
+"delta": -2.04,
+"z": -2.2,
+"games": 8
+},
+"hb": {
+"game": 7.95,
+"season": 8.69,
+"delta": -0.74,
+"z": -1.03,
+"games": 8
+},
+"ext": {
+"game": 6.19,
+"season": 6.23,
+"delta": -0.03,
+"z": -0.26,
+"games": 8
+}
+},
+"SI": {
+"n": 7,
+"v": {
+"game": 93.27,
+"season": 94.69,
+"delta": -1.42,
+"z": -2.68,
+"games": 6
+},
+"s": {
+"game": 2037.71,
+"season": 2063.75,
+"delta": -26.03,
+"z": -0.86,
+"games": 6
+},
+"ivb": {
+"game": 9.06,
+"season": 10.44,
+"delta": -1.38,
+"z": -4.08,
+"games": 6
+},
+"hb": {
+"game": 14.16,
+"season": 15.14,
+"delta": -0.99,
+"z": -0.88,
+"games": 6
+},
+"ext": {
+"game": 6.19,
+"season": 6.21,
+"delta": -0.03,
+"z": -0.18,
+"games": 6
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CU",
+"game": 0.429,
+"season": 0.311,
+"z": 0.68
+},
+{
+"what": "mix",
+"type": "FC",
+"game": 0.214,
+"season": 0.038,
+"z": 4.0
+},
+{
+"what": "mix",
+"type": "FF",
+"game": 0.143,
+"season": 0.358,
+"z": -2.54
+}
+],
+"mix": {
+"CS": [
+0.048,
+0.066
+],
+"CU": [
+0.429,
+0.311
+],
+"FC": [
+0.214,
+0.038
+],
+"FF": [
+0.143,
+0.358
+],
+"SI": [
+0.167,
+0.226
+]
+},
+"zone": {
+"game": 0.357,
+"season": 0.459,
+"z": -0.65
+},
+"pitches": {
+"game": 42,
+"season_mean": 23.6,
+"season_max": 35
+},
+"pk": 849823,
+"pitcher": 678061,
+"name": "Ray Kerr",
+"team": "ATL",
+"seasonGames": 9
+},
+{
+"n": 17,
+"types": {
+"SL": {
+"n": 7,
+"v": {
+"game": 87.1,
+"season": 85.42,
+"delta": 1.68,
+"z": 2.66,
+"games": 31
+},
+"s": {
+"game": 2770.71,
+"season": 2721.19,
+"delta": 49.52,
+"z": 1.11,
+"games": 31
+},
+"ivb": {
+"game": -2.33,
+"season": -2.61,
+"delta": 0.29,
+"z": 0.16,
+"games": 31
+},
+"hb": {
+"game": 1.83,
+"season": 1.94,
+"delta": -0.12,
+"z": -0.21,
+"games": 31
+},
+"ext": {
+"game": 6.01,
+"season": 6.01,
+"delta": 0.0,
+"z": 0.03,
+"games": 31
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.176,
+"season": 0.282,
+"z": -1.08
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.073
+],
+"CU": [
+0.118,
+0.077
+],
+"FC": [
+0.118,
+0.081
+],
+"FF": [
+0.176,
+0.282
+],
+"SI": [
+0.176,
+0.125
+],
+"SL": [
+0.412,
+0.361
+]
+},
+"zone": {
+"game": 0.412,
+"season": 0.41,
+"z": 0.03
+},
+"pitches": {
+"game": 17,
+"season_mean": 76.9,
+"season_max": 99
+},
+"pk": 849823,
+"pitcher": 656550,
+"name": "Grant Holmes",
+"team": "ATL",
+"seasonGames": 31
+},
+{
+"n": 2,
+"types": {},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.0,
+"season": 0.147,
+"z": -1.39
+},
+{
+"what": "mix",
+"type": "FF",
+"game": 0.0,
+"season": 0.364,
+"z": -3.13
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.5,
+"season": 0.142,
+"z": 3.57
+},
+{
+"what": "mix",
+"type": "ST",
+"game": 0.5,
+"season": 0.245,
+"z": 2.51
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.147
+],
+"FC": [
+0.0,
+0.088
+],
+"FF": [
+0.0,
+0.364
+],
+"SI": [
+0.5,
+0.142
+],
+"ST": [
+0.5,
+0.245
+]
+},
+"zone": {
+"game": 1.0,
+"season": 0.441,
+"z": 4.14
+},
+"pitches": {
+"game": 2,
+"season_mean": 13.8,
+"season_max": 29
+},
+"pk": 849823,
+"pitcher": 592779,
+"name": "Brock Stewart",
+"team": "LAD",
+"seasonGames": 28
+},
+{
+"n": 14,
+"types": {
+"FF": {
+"n": 5,
+"v": {
+"game": 94.64,
+"season": 93.28,
+"delta": 1.36,
+"z": 1.46,
+"games": 37
+},
+"s": {
+"game": 2414.6,
+"season": 2378.44,
+"delta": 36.16,
+"z": 0.56,
+"games": 37
+},
+"ivb": {
+"game": 18.78,
+"season": 19.8,
+"delta": -1.02,
+"z": -1.02,
+"games": 37
+},
+"hb": {
+"game": 7.16,
+"season": 7.64,
+"delta": -0.48,
+"z": -0.43,
+"games": 37
+},
+"ext": {
+"game": 6.23,
+"season": 6.23,
+"delta": 0.0,
+"z": 0.0,
+"games": 37
+}
+},
+"SL": {
+"n": 8,
+"v": {
+"game": 85.85,
+"season": 82.93,
+"delta": 2.92,
+"z": 3.32,
+"games": 59
+},
+"s": {
+"game": 2123.12,
+"season": 2150.62,
+"delta": -27.49,
+"z": -0.62,
+"games": 59
+},
+"ivb": {
+"game": 4.94,
+"season": 3.38,
+"delta": 1.55,
+"z": 1.05,
+"games": 59
+},
+"hb": {
+"game": -2.47,
+"season": -1.56,
+"delta": -0.92,
+"z": -1.46,
+"games": 59
+},
+"ext": {
+"game": 6.45,
+"season": 6.29,
+"delta": 0.16,
+"z": 1.43,
+"games": 59
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.071,
+0.161
+],
+"FF": [
+0.357,
+0.316
+],
+"SL": [
+0.571,
+0.518
+]
+},
+"zone": {
+"game": 0.286,
+"season": 0.45,
+"z": -1.59
+},
+"pitches": {
+"game": 14,
+"season_mean": 14.9,
+"season_max": 30
+},
+"pk": 849823,
+"pitcher": 669276,
+"name": "Dylan Lee",
+"team": "ATL",
+"seasonGames": 71
+},
+{
+"n": 17,
+"types": {
+"CH": {
+"n": 5,
+"v": {
+"game": 86.6,
+"season": 85.87,
+"delta": 0.73,
+"z": 1.59,
+"games": 10
+},
+"s": {
+"game": 1285.4,
+"season": 1512.87,
+"delta": -227.47,
+"z": -2.28,
+"games": 10
+},
+"ivb": {
+"game": 0.74,
+"season": -0.25,
+"delta": 0.99,
+"z": 1.21,
+"games": 10
+},
+"hb": {
+"game": 7.04,
+"season": 9.3,
+"delta": -2.26,
+"z": -2.21,
+"games": 10
+},
+"ext": {
+"game": 6.67,
+"season": 6.71,
+"delta": -0.04,
+"z": -0.34,
+"games": 10
+}
+},
+"FF": {
+"n": 5,
+"v": {
+"game": 93.38,
+"season": 92.31,
+"delta": 1.07,
+"z": 1.0,
+"games": 12
+},
+"s": {
+"game": 2360.4,
+"season": 2392.84,
+"delta": -32.44,
+"z": -0.78,
+"games": 12
+},
+"ivb": {
+"game": 16.3,
+"season": 17.07,
+"delta": -0.77,
+"z": -1.07,
+"games": 12
+},
+"hb": {
+"game": 3.24,
+"season": 2.47,
+"delta": 0.77,
+"z": 0.81,
+"games": 12
+},
+"ext": {
+"game": 6.99,
+"season": 6.84,
+"delta": 0.15,
+"z": 1.37,
+"games": 12
+}
+},
+"ST": {
+"n": 6,
+"v": {
+"game": 85.08,
+"season": 82.66,
+"delta": 2.42,
+"z": 2.72,
+"games": 10
+},
+"s": {
+"game": 2633.17,
+"season": 2607.88,
+"delta": 25.29,
+"z": 0.39,
+"games": 10
+},
+"ivb": {
+"game": -3.47,
+"season": -4.06,
+"delta": 0.59,
+"z": 0.7,
+"games": 10
+},
+"hb": {
+"game": -11.33,
+"season": -13.59,
+"delta": 2.25,
+"z": 1.66,
+"games": 10
+},
+"ext": {
+"game": 6.74,
+"season": 6.62,
+"delta": 0.12,
+"z": 0.93,
+"games": 10
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.294,
+"season": 0.413,
+"z": -1.12
+},
+{
+"what": "mix",
+"type": "ST",
+"game": 0.353,
+"season": 0.168,
+"z": 1.71
+}
+],
+"mix": {
+"CH": [
+0.294,
+0.205
+],
+"FF": [
+0.294,
+0.413
+],
+"SI": [
+0.059,
+0.128
+],
+"SL": [
+0.0,
+0.085
+],
+"ST": [
+0.353,
+0.168
+]
+},
+"zone": {
+"game": 0.353,
+"season": 0.479,
+"z": -1.32
+},
+"pitches": {
+"game": 17,
+"season_mean": 63.1,
+"season_max": 100
+},
+"pk": 849823,
+"pitcher": 663460,
+"name": "Kris Bubic",
+"team": "LAD",
+"seasonGames": 14
+},
+{
+"n": 4,
+"types": {},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.25,
+"season": 0.439,
+"z": -1.38
+},
+{
+"what": "mix",
+"type": "ST",
+"game": 0.75,
+"season": 0.361,
+"z": 3.89
+}
+],
+"mix": {
+"FC": [
+0.0,
+0.099
+],
+"FF": [
+0.25,
+0.439
+],
+"SI": [
+0.0,
+0.074
+],
+"ST": [
+0.75,
+0.361
+]
+},
+"zone": {
+"game": 0.5,
+"season": 0.452,
+"z": 0.37
+},
+"pitches": {
+"game": 4,
+"season_mean": 14.0,
+"season_max": 26
+},
+"pk": 849823,
+"pitcher": 623465,
+"name": "Evan Phillips",
+"team": "LAD",
+"seasonGames": 31
+},
+{
+"n": 15,
+"types": {
+"FF": {
+"n": 10,
+"v": {
+"game": 100.0,
+"season": 98.85,
+"delta": 1.15,
+"z": 2.57,
+"games": 22
+},
+"s": {
+"game": 2350.9,
+"season": 2405.38,
+"delta": -54.48,
+"z": -1.19,
+"games": 22
+},
+"ivb": {
+"game": 16.11,
+"season": 17.17,
+"delta": -1.06,
+"z": -0.99,
+"games": 22
+},
+"hb": {
+"game": -6.11,
+"season": -5.54,
+"delta": -0.57,
+"z": -0.41,
+"games": 22
+},
+"ext": {
+"game": 6.87,
+"season": 6.72,
+"delta": 0.14,
+"z": 1.38,
+"games": 22
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.2,
+"season": 0.316,
+"z": -0.88
+},
+{
+"what": "mix",
+"type": "FF",
+"game": 0.667,
+"season": 0.48,
+"z": 1.22
+}
+],
+"mix": {
+"CH": [
+0.2,
+0.316
+],
+"FC": [
+0.067,
+0.141
+],
+"FF": [
+0.667,
+0.48
+],
+"SI": [
+0.067,
+0.061
+]
+},
+"zone": {
+"game": 0.2,
+"season": 0.419,
+"z": -1.91
+},
+"pitches": {
+"game": 15,
+"season_mean": 14.8,
+"season_max": 30
+},
+"pk": 849823,
+"pitcher": 663158,
+"name": "Robert Suarez",
+"team": "ATL",
+"seasonGames": 33
+},
+{
+"n": 12,
+"types": {
+"FF": {
+"n": 6,
+"v": {
+"game": 99.95,
+"season": 96.48,
+"delta": 3.47,
+"z": 5.01,
+"games": 18
+},
+"s": {
+"game": 2407.5,
+"season": 2327.74,
+"delta": 79.76,
+"z": 1.72,
+"games": 18
+},
+"ivb": {
+"game": 10.83,
+"season": 11.89,
+"delta": -1.05,
+"z": -0.77,
+"games": 18
+},
+"hb": {
+"game": -14.5,
+"season": -12.28,
+"delta": -2.22,
+"z": -1.3,
+"games": 18
+},
+"ext": {
+"game": 7.35,
+"season": 7.15,
+"delta": 0.21,
+"z": 2.09,
+"games": 18
+}
+},
+"SL": {
+"n": 6,
+"v": {
+"game": 91.52,
+"season": 89.44,
+"delta": 2.07,
+"z": 2.31,
+"games": 19
+},
+"s": {
+"game": 2356.0,
+"season": 2294.28,
+"delta": 61.72,
+"z": 1.28,
+"games": 19
+},
+"ivb": {
+"game": 4.17,
+"season": 3.93,
+"delta": 0.23,
+"z": 0.15,
+"games": 19
+},
+"hb": {
+"game": 1.65,
+"season": 1.58,
+"delta": 0.07,
+"z": 0.07,
+"games": 19
+},
+"ext": {
+"game": 6.87,
+"season": 6.98,
+"delta": -0.11,
+"z": -0.58,
+"games": 19
+}
+}
+},
+"flags": [],
+"mix": {
+"FF": [
+0.5,
+0.55
+],
+"SI": [
+0.0,
+0.005
+],
+"SL": [
+0.5,
+0.428
+]
+},
+"zone": {
+"game": 0.5,
+"season": 0.433,
+"z": 0.63
+},
+"pitches": {
+"game": 12,
+"season_mean": 19.1,
+"season_max": 33
+},
+"pk": 849823,
+"pitcher": 621242,
+"name": "Edwin D\u00edaz",
+"team": "LAD",
+"seasonGames": 21
+},
+{
+"n": 47,
+"types": {
+"FF": {
+"n": 25,
+"v": {
+"game": 99.39,
+"season": 97.25,
+"delta": 2.14,
+"z": 2.25,
+"games": 53
+},
+"s": {
+"game": 2142.8,
+"season": 2098.82,
+"delta": 43.98,
+"z": 0.72,
+"games": 53
+},
+"ivb": {
+"game": 13.95,
+"season": 14.65,
+"delta": -0.7,
+"z": -0.7,
+"games": 53
+},
+"hb": {
+"game": -9.44,
+"season": -10.03,
+"delta": 0.59,
+"z": 0.44,
+"games": 53
+},
+"ext": {
+"game": 6.94,
+"season": 6.9,
+"delta": 0.05,
+"z": 0.32,
+"games": 53
+}
+},
+"FS": {
+"n": 8,
+"v": {
+"game": 88.63,
+"season": 89.09,
+"delta": -0.47,
+"z": -0.32,
+"games": 3
+},
+"s": {
+"game": 1756.62,
+"season": 1957.65,
+"delta": -201.03,
+"z": -4.0,
+"games": 3
+},
+"ivb": {
+"game": 3.45,
+"season": 6.45,
+"delta": -3.0,
+"z": -1.89,
+"games": 3
+},
+"hb": {
+"game": -17.26,
+"season": -17.57,
+"delta": 0.31,
+"z": 1.17,
+"games": 3
+},
+"ext": {
+"game": 6.98,
+"season": 6.83,
+"delta": 0.16,
+"z": 1.69,
+"games": 3
+}
+},
+"SL": {
+"n": 14,
+"v": {
+"game": 84.95,
+"season": 85.48,
+"delta": -0.53,
+"z": -0.39,
+"games": 31
+},
+"s": {
+"game": 2571.29,
+"season": 2476.01,
+"delta": 95.28,
+"z": 1.39,
+"games": 31
+},
+"ivb": {
+"game": -2.59,
+"season": 0.59,
+"delta": -3.18,
+"z": -1.41,
+"games": 31
+},
+"hb": {
+"game": 9.0,
+"season": 6.03,
+"delta": 2.97,
+"z": 1.33,
+"games": 31
+},
+"ext": {
+"game": 6.86,
+"season": 6.82,
+"delta": 0.04,
+"z": 0.21,
+"games": 31
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.532,
+"season": 0.684,
+"z": -1.17
+},
+{
+"what": "mix",
+"type": "FS",
+"game": 0.17,
+"season": 0.067,
+"z": 1.79
+}
+],
+"mix": {
+"CU": [
+0.0,
+0.004
+],
+"FF": [
+0.532,
+0.684
+],
+"FS": [
+0.17,
+0.067
+],
+"SL": [
+0.298,
+0.239
+]
+},
+"zone": {
+"game": 0.447,
+"season": 0.449,
+"z": -0.02
+},
+"pitches": {
+"game": 47,
+"season_mean": 21.4,
+"season_max": 74
+},
+"pk": 849823,
+"pitcher": 800311,
+"name": "Didier Fuentes",
+"team": "ATL",
+"seasonGames": 58
+},
+{
+"n": 21,
+"types": {
+"FF": {
+"n": 10,
+"v": {
+"game": 101.73,
+"season": 100.81,
+"delta": 0.92,
+"z": 1.06,
+"games": 35
+},
+"s": {
+"game": 2567.6,
+"season": 2546.01,
+"delta": 21.59,
+"z": 0.21,
+"games": 35
+},
+"ivb": {
+"game": 16.16,
+"season": 15.54,
+"delta": 0.62,
+"z": 0.41,
+"games": 35
+},
+"hb": {
+"game": -8.74,
+"season": -8.4,
+"delta": -0.34,
+"z": -0.31,
+"games": 35
+},
+"ext": {
+"game": 6.67,
+"season": 6.57,
+"delta": 0.11,
+"z": 0.95,
+"games": 35
+}
+},
+"SI": {
+"n": 5,
+"v": {
+"game": 101.86,
+"season": 100.59,
+"delta": 1.27,
+"z": 1.58,
+"games": 25
+},
+"s": {
+"game": 2428.8,
+"season": 2479.27,
+"delta": -50.47,
+"z": -0.55,
+"games": 25
+},
+"ivb": {
+"game": 11.04,
+"season": 11.89,
+"delta": -0.85,
+"z": -0.72,
+"games": 25
+},
+"hb": {
+"game": -15.82,
+"season": -15.83,
+"delta": 0.01,
+"z": 0.01,
+"games": 25
+},
+"ext": {
+"game": 6.6,
+"season": 6.52,
+"delta": 0.08,
+"z": 1.03,
+"games": 25
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.476,
+"season": 0.343,
+"z": 0.87
+}
+],
+"mix": {
+"CU": [
+0.0,
+0.042
+],
+"FC": [
+0.143,
+0.145
+],
+"FF": [
+0.476,
+0.343
+],
+"SI": [
+0.238,
+0.248
+],
+"SL": [
+0.143,
+0.218
+]
+},
+"zone": {
+"game": 0.524,
+"season": 0.416,
+"z": 0.95
+},
+"pitches": {
+"game": 21,
+"season_mean": 15.9,
+"season_max": 34
+},
+"pk": 849823,
+"pitcher": 683618,
+"name": "Edgardo Henriquez",
+"team": "LAD",
+"seasonGames": 61
+},
+{
+"n": 36,
+"types": {
+"FF": {
+"n": 15,
+"v": {
+"game": 99.84,
+"season": 98.01,
+"delta": 1.83,
+"z": 1.79,
+"games": 26
+},
+"s": {
+"game": 2454.67,
+"season": 2297.7,
+"delta": 156.97,
+"z": 1.37,
+"games": 26
+},
+"ivb": {
+"game": 16.21,
+"season": 16.03,
+"delta": 0.17,
+"z": 0.15,
+"games": 26
+},
+"hb": {
+"game": -11.31,
+"season": -9.91,
+"delta": -1.39,
+"z": -0.94,
+"games": 26
+},
+"ext": {
+"game": 6.88,
+"season": 7.1,
+"delta": -0.22,
+"z": -2.64,
+"games": 26
+}
+},
+"FS": {
+"n": 16,
+"v": {
+"game": 91.53,
+"season": 90.26,
+"delta": 1.27,
+"z": 1.59,
+"games": 20
+},
+"s": {
+"game": 1132.19,
+"season": 924.31,
+"delta": 207.88,
+"z": 2.33,
+"games": 20
+},
+"ivb": {
+"game": 0.51,
+"season": 1.08,
+"delta": -0.58,
+"z": -0.5,
+"games": 20
+},
+"hb": {
+"game": -6.46,
+"season": -7.37,
+"delta": 0.92,
+"z": 0.5,
+"games": 20
+},
+"ext": {
+"game": 6.88,
+"season": 7.17,
+"delta": -0.29,
+"z": -4.14,
+"games": 20
+}
+},
+"SL": {
+"n": 5,
+"v": {
+"game": 87.5,
+"season": 86.56,
+"delta": 0.94,
+"z": 1.1,
+"games": 23
+},
+"s": {
+"game": 2065.4,
+"season": 2050.65,
+"delta": 14.75,
+"z": 0.33,
+"games": 23
+},
+"ivb": {
+"game": -2.44,
+"season": -1.66,
+"delta": -0.78,
+"z": -0.76,
+"games": 23
+},
+"hb": {
+"game": 0.6,
+"season": 1.27,
+"delta": -0.67,
+"z": -1.09,
+"games": 23
+},
+"ext": {
+"game": 6.71,
+"season": 7.08,
+"delta": -0.37,
+"z": -4.84,
+"games": 23
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FS",
+"game": 0.444,
+"season": 0.292,
+"z": 1.07
+}
+],
+"mix": {
+"FF": [
+0.417,
+0.42
+],
+"FO": [
+0.0,
+0.072
+],
+"FS": [
+0.444,
+0.292
+],
+"SL": [
+0.139,
+0.216
+]
+},
+"zone": {
+"game": 0.444,
+"season": 0.419,
+"z": 0.45
+},
+"pitches": {
+"game": 36,
+"season_mean": 80.8,
+"season_max": 104
+},
+"pk": 849823,
+"pitcher": 808963,
+"name": "Roki Sasaki",
+"team": "LAD",
+"seasonGames": 26
+},
+{
+"n": 3,
+"types": {},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.667,
+"season": 0.365,
+"z": 1.9
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.0,
+"season": 0.2,
+"z": -1.6
+}
+],
+"mix": {
+"CH": [
+0.333,
+0.356
+],
+"FF": [
+0.667,
+0.365
+],
+"SI": [
+0.0,
+0.2
+],
+"SL": [
+0.0,
+0.074
+]
+},
+"zone": {
+"game": 0.667,
+"season": 0.444,
+"z": 1.98
+},
+"pitches": {
+"game": 3,
+"season_mean": 15.5,
+"season_max": 30
+},
+"pk": 849823,
+"pitcher": 628452,
+"name": "Raisel Iglesias",
+"team": "ATL",
+"seasonGames": 59
+},
+{
+"n": 95,
+"types": {
+"CH": {
+"n": 6,
+"v": {
+"game": 89.93,
+"season": 88.6,
+"delta": 1.33,
+"z": 0.96,
+"games": 25
+},
+"s": {
+"game": 1937.83,
+"season": 1862.38,
+"delta": 75.45,
+"z": 1.33,
+"games": 25
+},
+"ivb": {
+"game": 0.03,
+"season": -0.15,
+"delta": 0.18,
+"z": 0.2,
+"games": 25
+},
+"hb": {
+"game": 15.42,
+"season": 16.49,
+"delta": -1.07,
+"z": -1.03,
+"games": 25
+},
+"ext": {
+"game": 6.97,
+"season": 6.67,
+"delta": 0.3,
+"z": 3.29,
+"games": 25
+}
+},
+"FF": {
+"n": 41,
+"v": {
+"game": 97.19,
+"season": 96.1,
+"delta": 1.08,
+"z": 1.04,
+"games": 27
+},
+"s": {
+"game": 2365.46,
+"season": 2347.71,
+"delta": 17.75,
+"z": 0.26,
+"games": 27
+},
+"ivb": {
+"game": 8.87,
+"season": 9.89,
+"delta": -1.02,
+"z": -1.67,
+"games": 27
+},
+"hb": {
+"game": 14.54,
+"season": 14.61,
+"delta": -0.07,
+"z": -0.09,
+"games": 27
+},
+"ext": {
+"game": 6.81,
+"season": 6.61,
+"delta": 0.19,
+"z": 2.29,
+"games": 27
+}
+},
+"SI": {
+"n": 8,
+"v": {
+"game": 97.15,
+"season": 95.62,
+"delta": 1.53,
+"z": 1.68,
+"games": 18
+},
+"s": {
+"game": 2249.75,
+"season": 2215.95,
+"delta": 33.8,
+"z": 0.52,
+"games": 18
+},
+"ivb": {
+"game": 1.43,
+"season": 2.36,
+"delta": -0.93,
+"z": -0.9,
+"games": 18
+},
+"hb": {
+"game": 17.73,
+"season": 17.96,
+"delta": -0.23,
+"z": -0.32,
+"games": 18
+},
+"ext": {
+"game": 6.89,
+"season": 6.65,
+"delta": 0.25,
+"z": 3.07,
+"games": 18
+}
+},
+"SL": {
+"n": 40,
+"v": {
+"game": 80.23,
+"season": 79.69,
+"delta": 0.54,
+"z": 0.47,
+"games": 27
+},
+"s": {
+"game": 2614.07,
+"season": 2527.83,
+"delta": 86.24,
+"z": 1.09,
+"games": 27
+},
+"ivb": {
+"game": -4.59,
+"season": -4.23,
+"delta": -0.35,
+"z": -0.74,
+"games": 27
+},
+"hb": {
+"game": -13.25,
+"season": -12.48,
+"delta": -0.77,
+"z": -0.62,
+"games": 27
+},
+"ext": {
+"game": 6.56,
+"season": 6.41,
+"delta": 0.14,
+"z": 1.79,
+"games": 27
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.063,
+0.103
+],
+"FF": [
+0.432,
+0.414
+],
+"SI": [
+0.084,
+0.084
+],
+"SL": [
+0.421,
+0.399
+]
+},
+"zone": {
+"game": 0.474,
+"season": 0.444,
+"z": 0.7
+},
+"pitches": {
+"game": 95,
+"season_mean": 95.4,
+"season_max": 109
+},
+"pk": 849819,
+"pitcher": 519242,
+"name": "Chris Sale",
+"team": "ATL",
+"seasonGames": 27
+},
+{
+"n": 98,
+"types": {
+"CU": {
+"n": 15,
+"v": {
+"game": 77.67,
+"season": 76.85,
+"delta": 0.81,
+"z": 1.07,
+"games": 28
+},
+"s": {
+"game": 2820.4,
+"season": 2805.11,
+"delta": 15.29,
+"z": 0.26,
+"games": 28
+},
+"ivb": {
+"game": -17.02,
+"season": -15.97,
+"delta": -1.05,
+"z": -1.5,
+"games": 28
+},
+"hb": {
+"game": 12.25,
+"season": 12.4,
+"delta": -0.14,
+"z": -0.14,
+"games": 28
+},
+"ext": {
+"game": 6.69,
+"season": 6.59,
+"delta": 0.1,
+"z": 1.14,
+"games": 28
+}
+},
+"FC": {
+"n": 12,
+"v": {
+"game": 92.72,
+"season": 91.64,
+"delta": 1.09,
+"z": 1.51,
+"games": 28
+},
+"s": {
+"game": 2453.08,
+"season": 2478.13,
+"delta": -25.05,
+"z": -0.44,
+"games": 28
+},
+"ivb": {
+"game": 8.46,
+"season": 8.15,
+"delta": 0.31,
+"z": 0.34,
+"games": 28
+},
+"hb": {
+"game": 1.91,
+"season": 3.18,
+"delta": -1.27,
+"z": -1.3,
+"games": 28
+},
+"ext": {
+"game": 6.61,
+"season": 6.52,
+"delta": 0.09,
+"z": 1.56,
+"games": 28
+}
+},
+"FF": {
+"n": 33,
+"v": {
+"game": 96.61,
+"season": 96.07,
+"delta": 0.55,
+"z": 0.93,
+"games": 28
+},
+"s": {
+"game": 2210.88,
+"season": 2251.83,
+"delta": -40.95,
+"z": -1.13,
+"games": 28
+},
+"ivb": {
+"game": 14.96,
+"season": 16.18,
+"delta": -1.22,
+"z": -1.56,
+"games": 28
+},
+"hb": {
+"game": -8.57,
+"season": -8.29,
+"delta": -0.28,
+"z": -0.49,
+"games": 28
+},
+"ext": {
+"game": 6.66,
+"season": 6.56,
+"delta": 0.1,
+"z": 1.6,
+"games": 28
+}
+},
+"FS": {
+"n": 28,
+"v": {
+"game": 92.03,
+"season": 91.53,
+"delta": 0.5,
+"z": 0.9,
+"games": 28
+},
+"s": {
+"game": 1356.96,
+"season": 1440.64,
+"delta": -83.67,
+"z": -1.16,
+"games": 28
+},
+"ivb": {
+"game": 0.47,
+"season": 1.77,
+"delta": -1.3,
+"z": -1.86,
+"games": 28
+},
+"hb": {
+"game": -11.85,
+"season": -11.78,
+"delta": -0.07,
+"z": -0.04,
+"games": 28
+},
+"ext": {
+"game": 6.68,
+"season": 6.6,
+"delta": 0.08,
+"z": 1.39,
+"games": 28
+}
+},
+"SI": {
+"n": 6,
+"v": {
+"game": 96.02,
+"season": 95.48,
+"delta": 0.53,
+"z": 0.97,
+"games": 27
+},
+"s": {
+"game": 2368.17,
+"season": 2308.77,
+"delta": 59.4,
+"z": 1.66,
+"games": 27
+},
+"ivb": {
+"game": 11.43,
+"season": 11.7,
+"delta": -0.27,
+"z": -0.22,
+"games": 27
+},
+"hb": {
+"game": -15.37,
+"season": -14.4,
+"delta": -0.97,
+"z": -1.06,
+"games": 27
+},
+"ext": {
+"game": 6.76,
+"season": 6.56,
+"delta": 0.2,
+"z": 2.93,
+"games": 27
+}
+}
+},
+"flags": [],
+"mix": {
+"CU": [
+0.153,
+0.131
+],
+"FC": [
+0.122,
+0.148
+],
+"FF": [
+0.337,
+0.261
+],
+"FS": [
+0.286,
+0.266
+],
+"SI": [
+0.061,
+0.131
+],
+"SL": [
+0.041,
+0.061
+]
+},
+"zone": {
+"game": 0.367,
+"season": 0.431,
+"z": -1.38
+},
+"pitches": {
+"game": 98,
+"season_mean": 97.9,
+"season_max": 109
+},
+"pk": 849819,
+"pitcher": 808967,
+"name": "Yoshinobu Yamamoto",
+"team": "LAD",
+"seasonGames": 28
+},
+{
+"n": 17,
+"types": {
+"SI": {
+"n": 13,
+"v": {
+"game": 94.27,
+"season": 93.83,
+"delta": 0.44,
+"z": 0.76,
+"games": 42
+},
+"s": {
+"game": 2143.77,
+"season": 2176.12,
+"delta": -32.36,
+"z": -0.81,
+"games": 42
+},
+"ivb": {
+"game": 18.23,
+"season": 17.45,
+"delta": 0.78,
+"z": 0.75,
+"games": 42
+},
+"hb": {
+"game": 7.53,
+"season": 8.39,
+"delta": -0.86,
+"z": -0.84,
+"games": 42
+},
+"ext": {
+"game": 6.21,
+"season": 6.21,
+"delta": -0.0,
+"z": -0.05,
+"games": 42
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FC",
+"game": 0.235,
+"season": 0.35,
+"z": -0.78
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.765,
+"season": 0.598,
+"z": 1.11
+}
+],
+"mix": {
+"FC": [
+0.235,
+0.35
+],
+"FF": [
+0.0,
+0.001
+],
+"SI": [
+0.765,
+0.598
+],
+"SL": [
+0.0,
+0.046
+]
+},
+"zone": {
+"game": 0.176,
+"season": 0.411,
+"z": -2.03
+},
+"pitches": {
+"game": 17,
+"season_mean": 16.3,
+"season_max": 39
+},
+"pk": 849819,
+"pitcher": 689266,
+"name": "Dylan Dodd",
+"team": "ATL",
+"seasonGames": 48
+},
+{
+"n": 9,
+"types": {},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.444,
+"season": 0.316,
+"z": 1.04
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.333,
+"season": 0.518,
+"z": -1.61
+}
+],
+"mix": {
+"CH": [
+0.222,
+0.161
+],
+"FF": [
+0.444,
+0.316
+],
+"SL": [
+0.333,
+0.518
+]
+},
+"zone": {
+"game": 0.778,
+"season": 0.45,
+"z": 3.18
+},
+"pitches": {
+"game": 9,
+"season_mean": 14.9,
+"season_max": 30
+},
+"pk": 849819,
+"pitcher": 669276,
+"name": "Dylan Lee",
+"team": "ATL",
+"seasonGames": 71
+},
+{
+"n": 21,
+"types": {
+"FF": {
+"n": 9,
+"v": {
+"game": 89.28,
+"season": 87.81,
+"delta": 1.47,
+"z": 1.56,
+"games": 34
+},
+"s": {
+"game": 2271.89,
+"season": 2198.63,
+"delta": 73.26,
+"z": 1.77,
+"games": 34
+},
+"ivb": {
+"game": 16.08,
+"season": 15.42,
+"delta": 0.66,
+"z": 0.75,
+"games": 34
+},
+"hb": {
+"game": -0.01,
+"season": -0.7,
+"delta": 0.68,
+"z": 0.53,
+"games": 34
+},
+"ext": {
+"game": 7.66,
+"season": 7.41,
+"delta": 0.24,
+"z": 2.18,
+"games": 34
+}
+},
+"SI": {
+"n": 8,
+"v": {
+"game": 90.61,
+"season": 88.99,
+"delta": 1.62,
+"z": 2.07,
+"games": 41
+},
+"s": {
+"game": 2100.75,
+"season": 2131.58,
+"delta": -30.83,
+"z": -0.75,
+"games": 41
+},
+"ivb": {
+"game": 10.94,
+"season": 12.49,
+"delta": -1.55,
+"z": -1.53,
+"games": 41
+},
+"hb": {
+"game": 12.48,
+"season": 11.7,
+"delta": 0.77,
+"z": 0.79,
+"games": 41
+},
+"ext": {
+"game": 7.58,
+"season": 7.43,
+"delta": 0.15,
+"z": 1.33,
+"games": 41
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.095,
+"season": 0.271,
+"z": -2.09
+},
+{
+"what": "mix",
+"type": "FF",
+"game": 0.429,
+"season": 0.257,
+"z": 1.62
+}
+],
+"mix": {
+"CH": [
+0.095,
+0.271
+],
+"FF": [
+0.429,
+0.257
+],
+"SI": [
+0.381,
+0.341
+],
+"SL": [
+0.095,
+0.126
+]
+},
+"zone": {
+"game": 0.238,
+"season": 0.446,
+"z": -1.98
+},
+"pitches": {
+"game": 21,
+"season_mean": 28.4,
+"season_max": 55
+},
+"pk": 849819,
+"pitcher": 608718,
+"name": "Brent Suter",
+"team": "ATL",
+"seasonGames": 54
+},
+{
+"n": 19,
+"types": {
+"FF": {
+"n": 10,
+"v": {
+"game": 97.39,
+"season": 96.85,
+"delta": 0.54,
+"z": 0.7,
+"games": 51
+},
+"s": {
+"game": 2499.5,
+"season": 2544.31,
+"delta": -44.81,
+"z": -0.83,
+"games": 51
+},
+"ivb": {
+"game": 16.04,
+"season": 16.22,
+"delta": -0.18,
+"z": -0.22,
+"games": 51
+},
+"hb": {
+"game": 5.8,
+"season": 6.64,
+"delta": -0.84,
+"z": -0.92,
+"games": 51
+},
+"ext": {
+"game": 6.3,
+"season": 6.17,
+"delta": 0.12,
+"z": 1.49,
+"games": 51
+}
+},
+"SL": {
+"n": 9,
+"v": {
+"game": 89.67,
+"season": 89.43,
+"delta": 0.24,
+"z": 0.25,
+"games": 51
+},
+"s": {
+"game": 2626.67,
+"season": 2649.64,
+"delta": -22.98,
+"z": -0.39,
+"games": 51
+},
+"ivb": {
+"game": 0.84,
+"season": 1.92,
+"delta": -1.07,
+"z": -0.88,
+"games": 51
+},
+"hb": {
+"game": -5.47,
+"season": -5.99,
+"delta": 0.53,
+"z": 0.73,
+"games": 51
+},
+"ext": {
+"game": 6.38,
+"season": 6.2,
+"delta": 0.18,
+"z": 2.05,
+"games": 51
+}
+}
+},
+"flags": [],
+"mix": {
+"FF": [
+0.526,
+0.483
+],
+"SL": [
+0.474,
+0.501
+]
+},
+"zone": {
+"game": 0.474,
+"season": 0.448,
+"z": 0.19
+},
+"pitches": {
+"game": 19,
+"season_mean": 14.2,
+"season_max": 28
+},
+"pk": 849819,
+"pitcher": 656945,
+"name": "Tanner Scott",
+"team": "LAD",
+"seasonGames": 69
+},
+{
+"n": 22,
+"types": {
+"CH": {
+"n": 6,
+"v": {
+"game": 89.15,
+"season": 88.33,
+"delta": 0.82,
+"z": 1.28,
+"games": 38
+},
+"s": {
+"game": 1987.5,
+"season": 1905.87,
+"delta": 81.63,
+"z": 1.61,
+"games": 38
+},
+"ivb": {
+"game": 6.48,
+"season": 4.8,
+"delta": 1.69,
+"z": 1.27,
+"games": 38
+},
+"hb": {
+"game": -15.23,
+"season": -15.37,
+"delta": 0.14,
+"z": 0.1,
+"games": 38
+},
+"ext": {
+"game": 6.39,
+"season": 6.15,
+"delta": 0.24,
+"z": 2.11,
+"games": 38
+}
+},
+"FF": {
+"n": 9,
+"v": {
+"game": 94.99,
+"season": 94.43,
+"delta": 0.56,
+"z": 0.6,
+"games": 33
+},
+"s": {
+"game": 2379.56,
+"season": 2329.42,
+"delta": 50.14,
+"z": 0.98,
+"games": 33
+},
+"ivb": {
+"game": 15.91,
+"season": 14.72,
+"delta": 1.19,
+"z": 1.7,
+"games": 33
+},
+"hb": {
+"game": -8.29,
+"season": -8.88,
+"delta": 0.59,
+"z": 0.45,
+"games": 33
+},
+"ext": {
+"game": 6.38,
+"season": 6.2,
+"delta": 0.18,
+"z": 1.34,
+"games": 33
+}
+},
+"SI": {
+"n": 5,
+"v": {
+"game": 94.62,
+"season": 94.34,
+"delta": 0.28,
+"z": 0.31,
+"games": 16
+},
+"s": {
+"game": 2412.8,
+"season": 2351.03,
+"delta": 61.77,
+"z": 1.31,
+"games": 16
+},
+"ivb": {
+"game": 8.74,
+"season": 8.04,
+"delta": 0.7,
+"z": 0.79,
+"games": 16
+},
+"hb": {
+"game": -17.34,
+"season": -17.08,
+"delta": -0.26,
+"z": -0.27,
+"games": 16
+},
+"ext": {
+"game": 6.31,
+"season": 6.19,
+"delta": 0.12,
+"z": 1.07,
+"games": 16
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.273,
+0.356
+],
+"FF": [
+0.409,
+0.365
+],
+"SI": [
+0.227,
+0.2
+],
+"SL": [
+0.091,
+0.074
+]
+},
+"zone": {
+"game": 0.455,
+"season": 0.444,
+"z": 0.09
+},
+"pitches": {
+"game": 22,
+"season_mean": 15.5,
+"season_max": 30
+},
+"pk": 849819,
+"pitcher": 628452,
+"name": "Raisel Iglesias",
+"team": "ATL",
+"seasonGames": 59
+},
+{
+"n": 19,
+"types": {
+"FF": {
+"n": 10,
+"v": {
+"game": 97.85,
+"season": 96.48,
+"delta": 1.37,
+"z": 1.98,
+"games": 18
+},
+"s": {
+"game": 2355.5,
+"season": 2327.74,
+"delta": 27.76,
+"z": 0.6,
+"games": 18
+},
+"ivb": {
+"game": 10.82,
+"season": 11.89,
+"delta": -1.07,
+"z": -0.78,
+"games": 18
+},
+"hb": {
+"game": -12.69,
+"season": -12.28,
+"delta": -0.41,
+"z": -0.24,
+"games": 18
+},
+"ext": {
+"game": 7.23,
+"season": 7.15,
+"delta": 0.09,
+"z": 0.88,
+"games": 18
+}
+},
+"SL": {
+"n": 8,
+"v": {
+"game": 90.14,
+"season": 89.44,
+"delta": 0.69,
+"z": 0.77,
+"games": 19
+},
+"s": {
+"game": 2210.62,
+"season": 2294.28,
+"delta": -83.65,
+"z": -1.73,
+"games": 19
+},
+"ivb": {
+"game": 4.34,
+"season": 3.93,
+"delta": 0.4,
+"z": 0.27,
+"games": 19
+},
+"hb": {
+"game": 0.89,
+"season": 1.58,
+"delta": -0.69,
+"z": -0.65,
+"games": 19
+},
+"ext": {
+"game": 7.26,
+"season": 6.98,
+"delta": 0.27,
+"z": 1.41,
+"games": 19
+}
+}
+},
+"flags": [],
+"mix": {
+"FF": [
+0.526,
+0.55
+],
+"SI": [
+0.053,
+0.005
+],
+"SL": [
+0.421,
+0.428
+]
+},
+"zone": {
+"game": 0.421,
+"season": 0.433,
+"z": -0.11
+},
+"pitches": {
+"game": 19,
+"season_mean": 19.1,
+"season_max": 33
+},
+"pk": 849819,
+"pitcher": 621242,
+"name": "Edwin D\u00edaz",
+"team": "LAD",
+"seasonGames": 21
+},
+{
+"n": 85,
+"types": {
+"FF": {
+"n": 34,
+"v": {
+"game": 94.8,
+"season": 92.82,
+"delta": 1.98,
+"z": 2.6,
+"games": 27
+},
+"s": {
+"game": 2380.79,
+"season": 2302.84,
+"delta": 77.96,
+"z": 1.65,
+"games": 27
+},
+"ivb": {
+"game": 16.09,
+"season": 17.39,
+"delta": -1.3,
+"z": -1.07,
+"games": 27
+},
+"hb": {
+"game": -13.26,
+"season": -11.27,
+"delta": -1.99,
+"z": -2.37,
+"games": 27
+},
+"ext": {
+"game": 6.72,
+"season": 6.66,
+"delta": 0.05,
+"z": 0.37,
+"games": 27
+}
+},
+"FS": {
+"n": 47,
+"v": {
+"game": 88.28,
+"season": 86.14,
+"delta": 2.13,
+"z": 2.16,
+"games": 27
+},
+"s": {
+"game": 1639.83,
+"season": 1627.07,
+"delta": 12.76,
+"z": 0.22,
+"games": 27
+},
+"ivb": {
+"game": 2.29,
+"season": 4.74,
+"delta": -2.45,
+"z": -1.85,
+"games": 27
+},
+"hb": {
+"game": -14.46,
+"season": -13.36,
+"delta": -1.1,
+"z": -0.78,
+"games": 27
+},
+"ext": {
+"game": 6.77,
+"season": 6.6,
+"delta": 0.17,
+"z": 0.98,
+"games": 27
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FC",
+"game": 0.024,
+"season": 0.149,
+"z": -1.44
+},
+{
+"what": "mix",
+"type": "FS",
+"game": 0.553,
+"season": 0.297,
+"z": 3.32
+}
+],
+"mix": {
+"FC": [
+0.024,
+0.149
+],
+"FF": [
+0.4,
+0.483
+],
+"FS": [
+0.553,
+0.297
+],
+"SI": [
+0.0,
+0.007
+],
+"SL": [
+0.024,
+0.064
+]
+},
+"zone": {
+"game": 0.424,
+"season": 0.416,
+"z": 0.16
+},
+"pitches": {
+"game": 85,
+"season_mean": 89.0,
+"season_max": 104
+},
+"pk": 849822,
+"pitcher": 641816,
+"name": "Tyler Mahle",
+"team": "ATL",
+"seasonGames": 27
+},
+{
+"n": 78,
+"types": {
+"FF": {
+"n": 36,
+"v": {
+"game": 96.75,
+"season": 95.58,
+"delta": 1.17,
+"z": 2.9,
+"games": 12
+},
+"s": {
+"game": 2573.42,
+"season": 2521.17,
+"delta": 52.24,
+"z": 0.94,
+"games": 12
+},
+"ivb": {
+"game": 17.6,
+"season": 16.2,
+"delta": 1.41,
+"z": 1.58,
+"games": 12
+},
+"hb": {
+"game": -1.55,
+"season": -0.73,
+"delta": -0.82,
+"z": -0.88,
+"games": 12
+},
+"ext": {
+"game": 7.65,
+"season": 7.49,
+"delta": 0.17,
+"z": 1.73,
+"games": 12
+}
+},
+"KC": {
+"n": 15,
+"v": {
+"game": 82.14,
+"season": 80.73,
+"delta": 1.41,
+"z": 2.08,
+"games": 12
+},
+"s": {
+"game": 2923.47,
+"season": 2824.93,
+"delta": 98.54,
+"z": 1.94,
+"games": 12
+},
+"ivb": {
+"game": -15.34,
+"season": -16.0,
+"delta": 0.66,
+"z": 1.1,
+"games": 12
+},
+"hb": {
+"game": 8.54,
+"season": 7.03,
+"delta": 1.51,
+"z": 1.65,
+"games": 12
+},
+"ext": {
+"game": 7.34,
+"season": 7.18,
+"delta": 0.16,
+"z": 1.32,
+"games": 12
+}
+},
+"SI": {
+"n": 11,
+"v": {
+"game": 96.92,
+"season": 95.76,
+"delta": 1.16,
+"z": 4.34,
+"games": 12
+},
+"s": {
+"game": 2507.64,
+"season": 2496.91,
+"delta": 10.73,
+"z": 0.28,
+"games": 12
+},
+"ivb": {
+"game": 14.58,
+"season": 14.29,
+"delta": 0.3,
+"z": 0.31,
+"games": 12
+},
+"hb": {
+"game": -11.3,
+"season": -10.86,
+"delta": -0.44,
+"z": -0.59,
+"games": 12
+},
+"ext": {
+"game": 7.61,
+"season": 7.53,
+"delta": 0.09,
+"z": 0.9,
+"games": 12
+}
+},
+"SL": {
+"n": 16,
+"v": {
+"game": 90.85,
+"season": 89.8,
+"delta": 1.05,
+"z": 1.73,
+"games": 13
+},
+"s": {
+"game": 2602.81,
+"season": 2635.26,
+"delta": -32.45,
+"z": -0.66,
+"games": 13
+},
+"ivb": {
+"game": 4.87,
+"season": 1.98,
+"delta": 2.89,
+"z": 1.33,
+"games": 13
+},
+"hb": {
+"game": 4.69,
+"season": 3.96,
+"delta": 0.72,
+"z": 0.75,
+"games": 13
+},
+"ext": {
+"game": 7.44,
+"season": 7.38,
+"delta": 0.06,
+"z": 0.48,
+"games": 13
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.462,
+"season": 0.345,
+"z": 0.87
+}
+],
+"mix": {
+"CU": [
+0.0,
+0.049
+],
+"FF": [
+0.462,
+0.345
+],
+"KC": [
+0.192,
+0.212
+],
+"SI": [
+0.141,
+0.212
+],
+"SL": [
+0.205,
+0.176
+]
+},
+"zone": {
+"game": 0.436,
+"season": 0.417,
+"z": 0.41
+},
+"pitches": {
+"game": 78,
+"season_mean": 88.9,
+"season_max": 106
+},
+"pk": 849822,
+"pitcher": 607192,
+"name": "Tyler Glasnow",
+"team": "LAD",
+"seasonGames": 13
+},
+{
+"n": 9,
+"types": {
+"FF": {
+"n": 5,
+"v": {
+"game": 91.9,
+"season": 92.09,
+"delta": -0.19,
+"z": -0.21,
+"games": 53
+},
+"s": {
+"game": 2501.2,
+"season": 2510.65,
+"delta": -9.45,
+"z": -0.18,
+"games": 53
+},
+"ivb": {
+"game": 21.2,
+"season": 21.18,
+"delta": 0.02,
+"z": 0.01,
+"games": 53
+},
+"hb": {
+"game": 5.92,
+"season": 4.37,
+"delta": 1.55,
+"z": 1.58,
+"games": 53
+},
+"ext": {
+"game": 6.55,
+"season": 6.42,
+"delta": 0.13,
+"z": 1.16,
+"games": 53
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.222,
+0.139
+],
+"FF": [
+0.556,
+0.551
+],
+"SL": [
+0.222,
+0.298
+]
+},
+"zone": {
+"game": 0.556,
+"season": 0.424,
+"z": 0.88
+},
+"pitches": {
+"game": 9,
+"season_mean": 14.2,
+"season_max": 32
+},
+"pk": 849822,
+"pitcher": 681911,
+"name": "Alex Vesia",
+"team": "LAD",
+"seasonGames": 72
+},
+{
+"n": 15,
+"types": {
+"SI": {
+"n": 11,
+"v": {
+"game": 101.23,
+"season": 100.59,
+"delta": 0.64,
+"z": 0.79,
+"games": 25
+},
+"s": {
+"game": 2379.45,
+"season": 2479.27,
+"delta": -99.81,
+"z": -1.08,
+"games": 25
+},
+"ivb": {
+"game": 11.69,
+"season": 11.89,
+"delta": -0.2,
+"z": -0.17,
+"games": 25
+},
+"hb": {
+"game": -16.4,
+"season": -15.83,
+"delta": -0.57,
+"z": -0.67,
+"games": 25
+},
+"ext": {
+"game": 6.7,
+"season": 6.52,
+"delta": 0.18,
+"z": 2.17,
+"games": 25
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FC",
+"game": 0.0,
+"season": 0.145,
+"z": -1.33
+},
+{
+"what": "mix",
+"type": "FF",
+"game": 0.067,
+"season": 0.343,
+"z": -1.77
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.733,
+"season": 0.248,
+"z": 3.42
+}
+],
+"mix": {
+"CU": [
+0.0,
+0.042
+],
+"FC": [
+0.0,
+0.145
+],
+"FF": [
+0.067,
+0.343
+],
+"SI": [
+0.733,
+0.248
+],
+"SL": [
+0.2,
+0.218
+]
+},
+"zone": {
+"game": 0.533,
+"season": 0.416,
+"z": 1.03
+},
+"pitches": {
+"game": 15,
+"season_mean": 15.9,
+"season_max": 34
+},
+"pk": 849822,
+"pitcher": 683618,
+"name": "Edgardo Henriquez",
+"team": "LAD",
+"seasonGames": 61
+},
+{
+"n": 14,
+"types": {
+"FF": {
+"n": 5,
+"v": {
+"game": 95.9,
+"season": 97.25,
+"delta": -1.35,
+"z": -1.42,
+"games": 53
+},
+"s": {
+"game": 2045.0,
+"season": 2098.82,
+"delta": -53.82,
+"z": -0.88,
+"games": 53
+},
+"ivb": {
+"game": 14.48,
+"season": 14.65,
+"delta": -0.17,
+"z": -0.17,
+"games": 53
+},
+"hb": {
+"game": -7.58,
+"season": -10.03,
+"delta": 2.45,
+"z": 1.83,
+"games": 53
+},
+"ext": {
+"game": 6.85,
+"season": 6.9,
+"delta": -0.05,
+"z": -0.33,
+"games": 53
+}
+},
+"SL": {
+"n": 6,
+"v": {
+"game": 82.93,
+"season": 85.48,
+"delta": -2.55,
+"z": -1.85,
+"games": 31
+},
+"s": {
+"game": 2469.5,
+"season": 2476.01,
+"delta": -6.51,
+"z": -0.09,
+"games": 31
+},
+"ivb": {
+"game": -0.95,
+"season": 0.59,
+"delta": -1.54,
+"z": -0.68,
+"games": 31
+},
+"hb": {
+"game": 7.35,
+"season": 6.03,
+"delta": 1.32,
+"z": 0.59,
+"games": 31
+},
+"ext": {
+"game": 6.79,
+"season": 6.82,
+"delta": -0.02,
+"z": -0.13,
+"games": 31
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.357,
+"season": 0.684,
+"z": -2.49
+},
+{
+"what": "mix",
+"type": "FS",
+"game": 0.214,
+"season": 0.067,
+"z": 2.52
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.429,
+"season": 0.239,
+"z": 1.32
+}
+],
+"mix": {
+"CU": [
+0.0,
+0.004
+],
+"FF": [
+0.357,
+0.684
+],
+"FS": [
+0.214,
+0.067
+],
+"SL": [
+0.429,
+0.239
+]
+},
+"zone": {
+"game": 0.286,
+"season": 0.449,
+"z": -1.29
+},
+"pitches": {
+"game": 14,
+"season_mean": 21.4,
+"season_max": 74
+},
+"pk": 849822,
+"pitcher": 800311,
+"name": "Didier Fuentes",
+"team": "ATL",
+"seasonGames": 58
+},
+{
+"n": 8,
+"types": {},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.125,
+"season": 0.316,
+"z": -1.51
+},
+{
+"what": "mix",
+"type": "FC",
+"game": 0.25,
+"season": 0.141,
+"z": 0.9
+}
+],
+"mix": {
+"CH": [
+0.125,
+0.316
+],
+"FC": [
+0.25,
+0.141
+],
+"FF": [
+0.5,
+0.48
+],
+"SI": [
+0.125,
+0.061
+]
+},
+"zone": {
+"game": 0.5,
+"season": 0.419,
+"z": 0.7
+},
+"pitches": {
+"game": 8,
+"season_mean": 14.8,
+"season_max": 30
+},
+"pk": 849822,
+"pitcher": 663158,
+"name": "Robert Suarez",
+"team": "ATL",
+"seasonGames": 33
+},
+{
+"n": 16,
+"types": {
+"FF": {
+"n": 6,
+"v": {
+"game": 93.87,
+"season": 93.28,
+"delta": 0.58,
+"z": 0.63,
+"games": 37
+},
+"s": {
+"game": 2382.33,
+"season": 2378.44,
+"delta": 3.89,
+"z": 0.06,
+"games": 37
+},
+"ivb": {
+"game": 19.37,
+"season": 19.8,
+"delta": -0.43,
+"z": -0.43,
+"games": 37
+},
+"hb": {
+"game": 8.02,
+"season": 7.64,
+"delta": 0.38,
+"z": 0.34,
+"games": 37
+},
+"ext": {
+"game": 6.26,
+"season": 6.23,
+"delta": 0.03,
+"z": 0.22,
+"games": 37
+}
+},
+"SL": {
+"n": 10,
+"v": {
+"game": 83.97,
+"season": 82.93,
+"delta": 1.04,
+"z": 1.18,
+"games": 59
+},
+"s": {
+"game": 2161.1,
+"season": 2150.62,
+"delta": 10.48,
+"z": 0.24,
+"games": 59
+},
+"ivb": {
+"game": 4.46,
+"season": 3.38,
+"delta": 1.08,
+"z": 0.73,
+"games": 59
+},
+"hb": {
+"game": -2.08,
+"season": -1.56,
+"delta": -0.52,
+"z": -0.83,
+"games": 59
+},
+"ext": {
+"game": 6.36,
+"season": 6.29,
+"delta": 0.07,
+"z": 0.65,
+"games": 59
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.0,
+"season": 0.161,
+"z": -1.66
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.625,
+"season": 0.518,
+"z": 0.94
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.161
+],
+"FF": [
+0.375,
+0.316
+],
+"SL": [
+0.625,
+0.518
+]
+},
+"zone": {
+"game": 0.562,
+"season": 0.45,
+"z": 1.09
+},
+"pitches": {
+"game": 16,
+"season_mean": 14.9,
+"season_max": 30
+},
+"pk": 849822,
+"pitcher": 669276,
+"name": "Dylan Lee",
+"team": "ATL",
+"seasonGames": 71
+},
+{
+"n": 13,
+"types": {
+"SL": {
+"n": 10,
+"v": {
+"game": 90.27,
+"season": 89.43,
+"delta": 0.84,
+"z": 0.87,
+"games": 51
+},
+"s": {
+"game": 2622.8,
+"season": 2649.64,
+"delta": -26.84,
+"z": -0.46,
+"games": 51
+},
+"ivb": {
+"game": 2.85,
+"season": 1.92,
+"delta": 0.93,
+"z": 0.77,
+"games": 51
+},
+"hb": {
+"game": -5.04,
+"season": -5.99,
+"delta": 0.95,
+"z": 1.32,
+"games": 51
+},
+"ext": {
+"game": 6.34,
+"season": 6.2,
+"delta": 0.14,
+"z": 1.56,
+"games": 51
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.231,
+"season": 0.483,
+"z": -1.65
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.769,
+"season": 0.501,
+"z": 1.69
+}
+],
+"mix": {
+"FF": [
+0.231,
+0.483
+],
+"SL": [
+0.769,
+0.501
+]
+},
+"zone": {
+"game": 0.462,
+"season": 0.448,
+"z": 0.1
+},
+"pitches": {
+"game": 13,
+"season_mean": 14.2,
+"season_max": 28
+},
+"pk": 849822,
+"pitcher": 656945,
+"name": "Tanner Scott",
+"team": "LAD",
+"seasonGames": 69
+},
+{
+"n": 17,
+"types": {
+"CH": {
+"n": 5,
+"v": {
+"game": 88.52,
+"season": 88.33,
+"delta": 0.19,
+"z": 0.3,
+"games": 38
+},
+"s": {
+"game": 1918.0,
+"season": 1905.87,
+"delta": 12.13,
+"z": 0.24,
+"games": 38
+},
+"ivb": {
+"game": 5.36,
+"season": 4.8,
+"delta": 0.56,
+"z": 0.42,
+"games": 38
+},
+"hb": {
+"game": -16.44,
+"season": -15.37,
+"delta": -1.07,
+"z": -0.82,
+"games": 38
+},
+"ext": {
+"game": 6.21,
+"season": 6.15,
+"delta": 0.06,
+"z": 0.56,
+"games": 38
+}
+},
+"FF": {
+"n": 6,
+"v": {
+"game": 94.88,
+"season": 94.43,
+"delta": 0.46,
+"z": 0.48,
+"games": 33
+},
+"s": {
+"game": 2345.67,
+"season": 2329.42,
+"delta": 16.25,
+"z": 0.32,
+"games": 33
+},
+"ivb": {
+"game": 14.75,
+"season": 14.72,
+"delta": 0.03,
+"z": 0.05,
+"games": 33
+},
+"hb": {
+"game": -10.52,
+"season": -8.88,
+"delta": -1.64,
+"z": -1.23,
+"games": 33
+},
+"ext": {
+"game": 6.26,
+"season": 6.2,
+"delta": 0.05,
+"z": 0.41,
+"games": 33
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.294,
+0.356
+],
+"FF": [
+0.353,
+0.365
+],
+"SI": [
+0.235,
+0.2
+],
+"SL": [
+0.118,
+0.074
+]
+},
+"zone": {
+"game": 0.412,
+"season": 0.444,
+"z": -0.29
+},
+"pitches": {
+"game": 17,
+"season_mean": 15.5,
+"season_max": 30
+},
+"pk": 849822,
+"pitcher": 628452,
+"name": "Raisel Iglesias",
+"team": "ATL",
+"seasonGames": 59
+},
+{
+"n": 8,
+"types": {
+"FF": {
+"n": 6,
+"v": {
+"game": 98.05,
+"season": 96.48,
+"delta": 1.57,
+"z": 2.27,
+"games": 18
+},
+"s": {
+"game": 2319.0,
+"season": 2327.74,
+"delta": -8.74,
+"z": -0.19,
+"games": 18
+},
+"ivb": {
+"game": 9.15,
+"season": 11.89,
+"delta": -2.74,
+"z": -2.01,
+"games": 18
+},
+"hb": {
+"game": -15.75,
+"season": -12.28,
+"delta": -3.47,
+"z": -2.04,
+"games": 18
+},
+"ext": {
+"game": 7.14,
+"season": 7.15,
+"delta": -0.01,
+"z": -0.11,
+"games": 18
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.75,
+"season": 0.55,
+"z": 1.38
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.25,
+"season": 0.428,
+"z": -1.47
+}
+],
+"mix": {
+"FF": [
+0.75,
+0.55
+],
+"SI": [
+0.0,
+0.005
+],
+"SL": [
+0.25,
+0.428
+]
+},
+"zone": {
+"game": 0.75,
+"season": 0.433,
+"z": 2.97
+},
+"pitches": {
+"game": 8,
+"season_mean": 19.1,
+"season_max": 33
+},
+"pk": 849822,
+"pitcher": 621242,
+"name": "Edwin D\u00edaz",
+"team": "LAD",
+"seasonGames": 21
+},
+{
+"n": 88,
+"types": {
+"CU": {
+"n": 11,
+"v": {
+"game": 87.86,
+"season": 88.01,
+"delta": -0.15,
+"z": -0.14,
+"games": 23
+},
+"s": {
+"game": 2001.64,
+"season": 2244.13,
+"delta": -242.49,
+"z": -3.27,
+"games": 23
+},
+"ivb": {
+"game": -6.2,
+"season": -8.15,
+"delta": 1.95,
+"z": 1.6,
+"games": 23
+},
+"hb": {
+"game": 5.62,
+"season": 5.6,
+"delta": 0.01,
+"z": 0.01,
+"games": 23
+},
+"ext": {
+"game": 7.18,
+"season": 7.27,
+"delta": -0.08,
+"z": -0.57,
+"games": 23
+}
+},
+"FC": {
+"n": 11,
+"v": {
+"game": 95.64,
+"season": 95.96,
+"delta": -0.32,
+"z": -0.46,
+"games": 24
+},
+"s": {
+"game": 2420.64,
+"season": 2587.93,
+"delta": -167.3,
+"z": -2.92,
+"games": 24
+},
+"ivb": {
+"game": 6.44,
+"season": 7.29,
+"delta": -0.86,
+"z": -0.79,
+"games": 24
+},
+"hb": {
+"game": 1.72,
+"season": 1.25,
+"delta": 0.47,
+"z": 0.42,
+"games": 24
+},
+"ext": {
+"game": 7.52,
+"season": 7.56,
+"delta": -0.04,
+"z": -0.38,
+"games": 24
+}
+},
+"FF": {
+"n": 60,
+"v": {
+"game": 101.24,
+"season": 100.54,
+"delta": 0.7,
+"z": 0.62,
+"games": 30
+},
+"s": {
+"game": 2568.35,
+"season": 2633.38,
+"delta": -65.03,
+"z": -1.41,
+"games": 30
+},
+"ivb": {
+"game": 14.34,
+"season": 15.3,
+"delta": -0.96,
+"z": -0.99,
+"games": 30
+},
+"hb": {
+"game": -12.45,
+"season": -11.21,
+"delta": -1.24,
+"z": -1.14,
+"games": 30
+},
+"ext": {
+"game": 7.44,
+"season": 7.56,
+"delta": -0.13,
+"z": -1.37,
+"games": 30
+}
+},
+"SL": {
+"n": 6,
+"v": {
+"game": 92.07,
+"season": 91.8,
+"delta": 0.27,
+"z": 0.23,
+"games": 21
+},
+"s": {
+"game": 2540.5,
+"season": 2526.79,
+"delta": 13.71,
+"z": 0.09,
+"games": 21
+},
+"ivb": {
+"game": -1.55,
+"season": 1.11,
+"delta": -2.66,
+"z": -0.67,
+"games": 21
+},
+"hb": {
+"game": 3.62,
+"season": 3.56,
+"delta": 0.06,
+"z": 0.05,
+"games": 21
+},
+"ext": {
+"game": 7.44,
+"season": 7.49,
+"delta": -0.06,
+"z": -0.35,
+"games": 21
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.0,
+0.011
+],
+"CU": [
+0.125,
+0.103
+],
+"FC": [
+0.125,
+0.139
+],
+"FF": [
+0.682,
+0.633
+],
+"SI": [
+0.0,
+0.001
+],
+"SL": [
+0.068,
+0.112
+]
+},
+"zone": {
+"game": 0.5,
+"season": 0.463,
+"z": 0.51
+},
+"pitches": {
+"game": 88,
+"season_mean": 88.3,
+"season_max": 107
+},
+"pk": 849830,
+"pitcher": 694819,
+"name": "Jacob Misiorowski",
+"team": "MIL",
+"seasonGames": 30
+},
+{
+"n": 45,
+"types": {
+"CH": {
+"n": 6,
+"v": {
+"game": 87.55,
+"season": 86.22,
+"delta": 1.33,
+"z": 1.78,
+"games": 30
+},
+"s": {
+"game": 1635.33,
+"season": 1622.69,
+"delta": 12.65,
+"z": 0.27,
+"games": 30
+},
+"ivb": {
+"game": 11.23,
+"season": 10.65,
+"delta": 0.58,
+"z": 0.55,
+"games": 30
+},
+"hb": {
+"game": 11.17,
+"season": 11.05,
+"delta": 0.12,
+"z": 0.08,
+"games": 30
+},
+"ext": {
+"game": 6.4,
+"season": 6.24,
+"delta": 0.17,
+"z": 1.41,
+"games": 30
+}
+},
+"SI": {
+"n": 29,
+"v": {
+"game": 94.11,
+"season": 92.68,
+"delta": 1.43,
+"z": 2.9,
+"games": 21
+},
+"s": {
+"game": 2299.86,
+"season": 2240.39,
+"delta": 59.47,
+"z": 1.42,
+"games": 21
+},
+"ivb": {
+"game": 12.67,
+"season": 11.81,
+"delta": 0.86,
+"z": 0.76,
+"games": 21
+},
+"hb": {
+"game": 15.26,
+"season": 14.61,
+"delta": 0.65,
+"z": 0.63,
+"games": 21
+},
+"ext": {
+"game": 6.29,
+"season": 6.29,
+"delta": 0.01,
+"z": 0.08,
+"games": 21
+}
+},
+"SL": {
+"n": 6,
+"v": {
+"game": 87.07,
+"season": 86.21,
+"delta": 0.86,
+"z": 0.62,
+"games": 30
+},
+"s": {
+"game": 2153.67,
+"season": 2225.76,
+"delta": -72.09,
+"z": -1.19,
+"games": 30
+},
+"ivb": {
+"game": 7.15,
+"season": 6.42,
+"delta": 0.73,
+"z": 0.46,
+"games": 30
+},
+"hb": {
+"game": -2.6,
+"season": -1.02,
+"delta": -1.58,
+"z": -1.64,
+"games": 30
+},
+"ext": {
+"game": 6.27,
+"season": 6.2,
+"delta": 0.07,
+"z": 0.71,
+"games": 30
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.089,
+"season": 0.313,
+"z": -1.53
+},
+{
+"what": "mix",
+"type": "KC",
+"game": 0.0,
+"season": 0.116,
+"z": -2.13
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.644,
+"season": 0.152,
+"z": 3.63
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.133,
+"season": 0.234,
+"z": -1.17
+}
+],
+"mix": {
+"CH": [
+0.133,
+0.186
+],
+"FF": [
+0.089,
+0.313
+],
+"KC": [
+0.0,
+0.116
+],
+"SI": [
+0.644,
+0.152
+],
+"SL": [
+0.133,
+0.234
+]
+},
+"zone": {
+"game": 0.4,
+"season": 0.388,
+"z": 0.23
+},
+"pitches": {
+"game": 45,
+"season_mean": 92.1,
+"season_max": 109
+},
+"pk": 849830,
+"pitcher": 592662,
+"name": "Robbie Ray",
+"team": "SD",
+"seasonGames": 31
+},
+{
+"n": 19,
+"types": {
+"FF": {
+"n": 6,
+"v": {
+"game": 99.03,
+"season": 98.31,
+"delta": 0.73,
+"z": 0.93,
+"games": 32
+},
+"s": {
+"game": 2506.67,
+"season": 2416.28,
+"delta": 90.38,
+"z": 1.21,
+"games": 32
+},
+"ivb": {
+"game": 18.02,
+"season": 17.06,
+"delta": 0.96,
+"z": 0.45,
+"games": 32
+},
+"hb": {
+"game": -6.18,
+"season": -5.66,
+"delta": -0.52,
+"z": -0.21,
+"games": 32
+},
+"ext": {
+"game": 6.15,
+"season": 6.21,
+"delta": -0.06,
+"z": -0.5,
+"games": 32
+}
+},
+"SI": {
+"n": 9,
+"v": {
+"game": 98.92,
+"season": 97.74,
+"delta": 1.18,
+"z": 1.87,
+"games": 27
+},
+"s": {
+"game": 2379.89,
+"season": 2282.35,
+"delta": 97.54,
+"z": 1.53,
+"games": 27
+},
+"ivb": {
+"game": 13.33,
+"season": 11.68,
+"delta": 1.66,
+"z": 1.3,
+"games": 27
+},
+"hb": {
+"game": -14.1,
+"season": -14.65,
+"delta": 0.55,
+"z": 0.39,
+"games": 27
+},
+"ext": {
+"game": 6.16,
+"season": 6.18,
+"delta": -0.01,
+"z": -0.18,
+"games": 27
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.211,
+"season": 0.425,
+"z": -1.68
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.474,
+"season": 0.252,
+"z": 1.8
+}
+],
+"mix": {
+"CH": [
+0.211,
+0.425
+],
+"FF": [
+0.316,
+0.263
+],
+"SI": [
+0.474,
+0.252
+],
+"SL": [
+0.0,
+0.06
+]
+},
+"zone": {
+"game": 0.579,
+"season": 0.456,
+"z": 0.99
+},
+"pitches": {
+"game": 19,
+"season_mean": 17.4,
+"season_max": 38
+},
+"pk": 849830,
+"pitcher": 699134,
+"name": "Bradgley Rodriguez",
+"team": "SD",
+"seasonGames": 68
+},
+{
+"n": 11,
+"types": {
+"SI": {
+"n": 7,
+"v": {
+"game": 98.79,
+"season": 97.07,
+"delta": 1.72,
+"z": 1.59,
+"games": 22
+},
+"s": {
+"game": 2242.29,
+"season": 2213.17,
+"delta": 29.12,
+"z": 0.73,
+"games": 22
+},
+"ivb": {
+"game": 5.71,
+"season": 6.55,
+"delta": -0.84,
+"z": -1.06,
+"games": 22
+},
+"hb": {
+"game": -14.06,
+"season": -14.16,
+"delta": 0.11,
+"z": 0.07,
+"games": 22
+},
+"ext": {
+"game": 6.39,
+"season": 6.31,
+"delta": 0.08,
+"z": 0.84,
+"games": 22
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.091,
+"season": 0.303,
+"z": -1.06
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.636,
+"season": 0.209,
+"z": 2.38
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.045
+],
+"CU": [
+0.0,
+0.084
+],
+"FC": [
+0.273,
+0.333
+],
+"FF": [
+0.091,
+0.303
+],
+"SI": [
+0.636,
+0.209
+],
+"SL": [
+0.0,
+0.018
+]
+},
+"zone": {
+"game": 0.545,
+"season": 0.433,
+"z": 1.07
+},
+"pitches": {
+"game": 11,
+"season_mean": 20.6,
+"season_max": 43
+},
+"pk": 849830,
+"pitcher": 622608,
+"name": "Antonio Senzatela",
+"team": "MIL",
+"seasonGames": 57
+},
+{
+"n": 23,
+"types": {
+"SI": {
+"n": 15,
+"v": {
+"game": 98.68,
+"season": 97.7,
+"delta": 0.98,
+"z": 1.71,
+"games": 69
+},
+"s": {
+"game": 2142.67,
+"season": 2091.54,
+"delta": 51.12,
+"z": 0.76,
+"games": 69
+},
+"ivb": {
+"game": 11.21,
+"season": 8.29,
+"delta": 2.92,
+"z": 2.58,
+"games": 69
+},
+"hb": {
+"game": 13.33,
+"season": 13.84,
+"delta": -0.51,
+"z": -0.35,
+"games": 69
+},
+"ext": {
+"game": 5.48,
+"season": 5.52,
+"delta": -0.04,
+"z": -0.4,
+"games": 69
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CU",
+"game": 0.043,
+"season": 0.223,
+"z": -1.66
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.652,
+"season": 0.52,
+"z": 1.3
+}
+],
+"mix": {
+"CH": [
+0.174,
+0.119
+],
+"CU": [
+0.043,
+0.223
+],
+"FF": [
+0.0,
+0.018
+],
+"SI": [
+0.652,
+0.52
+],
+"SL": [
+0.13,
+0.118
+]
+},
+"zone": {
+"game": 0.478,
+"season": 0.389,
+"z": 1.03
+},
+"pitches": {
+"game": 23,
+"season_mean": 21.1,
+"season_max": 45
+},
+"pk": 849830,
+"pitcher": 676879,
+"name": "Aaron Ashby",
+"team": "MIL",
+"seasonGames": 75
+},
+{
+"n": 15,
+"types": {
+"FF": {
+"n": 5,
+"v": {
+"game": 93.18,
+"season": 91.95,
+"delta": 1.23,
+"z": 2.15,
+"games": 43
+},
+"s": {
+"game": 2555.0,
+"season": 2448.7,
+"delta": 106.3,
+"z": 1.6,
+"games": 43
+},
+"ivb": {
+"game": 20.46,
+"season": 19.15,
+"delta": 1.31,
+"z": 1.21,
+"games": 43
+},
+"hb": {
+"game": 3.44,
+"season": 4.77,
+"delta": -1.33,
+"z": -1.13,
+"games": 43
+},
+"ext": {
+"game": 5.85,
+"season": 5.81,
+"delta": 0.03,
+"z": 0.27,
+"games": 43
+}
+},
+"SL": {
+"n": 8,
+"v": {
+"game": 85.2,
+"season": 84.86,
+"delta": 0.34,
+"z": 0.33,
+"games": 39
+},
+"s": {
+"game": 2830.5,
+"season": 2730.03,
+"delta": 100.47,
+"z": 1.34,
+"games": 39
+},
+"ivb": {
+"game": 0.04,
+"season": 2.91,
+"delta": -2.87,
+"z": -1.02,
+"games": 39
+},
+"hb": {
+"game": -5.12,
+"season": -4.24,
+"delta": -0.89,
+"z": -0.92,
+"games": 39
+},
+"ext": {
+"game": 5.62,
+"season": 5.71,
+"delta": -0.09,
+"z": -0.74,
+"games": 39
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FS",
+"game": 0.0,
+"season": 0.256,
+"z": -2.07
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.133,
+"season": 0.028,
+"z": 2.71
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.533,
+"season": 0.299,
+"z": 1.97
+}
+],
+"mix": {
+"FF": [
+0.333,
+0.377
+],
+"FS": [
+0.0,
+0.256
+],
+"SI": [
+0.133,
+0.028
+],
+"SL": [
+0.533,
+0.299
+],
+"ST": [
+0.0,
+0.028
+]
+},
+"zone": {
+"game": 0.4,
+"season": 0.374,
+"z": 0.24
+},
+"pitches": {
+"game": 15,
+"season_mean": 20.4,
+"season_max": 50
+},
+"pk": 849830,
+"pitcher": 673513,
+"name": "Yuki Matsui",
+"team": "SD",
+"seasonGames": 54
+},
+{
+"n": 16,
+"types": {
+"CH": {
+"n": 5,
+"v": {
+"game": 88.72,
+"season": 88.11,
+"delta": 0.61,
+"z": 0.96,
+"games": 20
+},
+"s": {
+"game": 1939.2,
+"season": 2040.22,
+"delta": -101.02,
+"z": -1.11,
+"games": 20
+},
+"ivb": {
+"game": 3.9,
+"season": 3.11,
+"delta": 0.79,
+"z": 0.52,
+"games": 20
+},
+"hb": {
+"game": -14.86,
+"season": -15.95,
+"delta": 1.09,
+"z": 0.55,
+"games": 20
+},
+"ext": {
+"game": 6.23,
+"season": 6.3,
+"delta": -0.07,
+"z": -0.56,
+"games": 20
+}
+},
+"SL": {
+"n": 7,
+"v": {
+"game": 85.1,
+"season": 84.55,
+"delta": 0.55,
+"z": 0.81,
+"games": 24
+},
+"s": {
+"game": 2511.86,
+"season": 2520.63,
+"delta": -8.77,
+"z": -0.13,
+"games": 24
+},
+"ivb": {
+"game": 0.49,
+"season": 0.75,
+"delta": -0.26,
+"z": -0.24,
+"games": 24
+},
+"hb": {
+"game": 0.91,
+"season": -0.36,
+"delta": 1.27,
+"z": 1.44,
+"games": 24
+},
+"ext": {
+"game": 6.31,
+"season": 6.25,
+"delta": 0.06,
+"z": 0.4,
+"games": 24
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.312,
+0.326
+],
+"FF": [
+0.25,
+0.23
+],
+"SL": [
+0.438,
+0.377
+],
+"ST": [
+0.0,
+0.067
+]
+},
+"zone": {
+"game": 0.438,
+"season": 0.41,
+"z": 0.26
+},
+"pitches": {
+"game": 16,
+"season_mean": 15.3,
+"season_max": 30
+},
+"pk": 849830,
+"pitcher": 592094,
+"name": "Jason Adam",
+"team": "SD",
+"seasonGames": 38
+},
+{
+"n": 16,
+"types": {
+"SI": {
+"n": 11,
+"v": {
+"game": 100.44,
+"season": 98.78,
+"delta": 1.66,
+"z": 1.99,
+"games": 53
+},
+"s": {
+"game": 2340.45,
+"season": 2300.43,
+"delta": 40.03,
+"z": 0.63,
+"games": 53
+},
+"ivb": {
+"game": 6.35,
+"season": 6.76,
+"delta": -0.42,
+"z": -0.4,
+"games": 53
+},
+"hb": {
+"game": -14.95,
+"season": -13.8,
+"delta": -1.16,
+"z": -0.84,
+"games": 53
+},
+"ext": {
+"game": 6.54,
+"season": 6.48,
+"delta": 0.06,
+"z": 0.55,
+"games": 53
+}
+},
+"SL": {
+"n": 5,
+"v": {
+"game": 90.44,
+"season": 87.93,
+"delta": 2.51,
+"z": 1.84,
+"games": 39
+},
+"s": {
+"game": 2599.4,
+"season": 2534.48,
+"delta": 64.92,
+"z": 0.82,
+"games": 39
+},
+"ivb": {
+"game": 7.22,
+"season": 4.23,
+"delta": 2.99,
+"z": 2.04,
+"games": 39
+},
+"hb": {
+"game": 7.2,
+"season": 10.23,
+"delta": -3.03,
+"z": -1.28,
+"games": 39
+},
+"ext": {
+"game": 6.52,
+"season": 6.52,
+"delta": 0.01,
+"z": 0.05,
+"games": 39
+}
+}
+},
+"flags": [],
+"mix": {
+"FF": [
+0.0,
+0.002
+],
+"SI": [
+0.688,
+0.612
+],
+"SL": [
+0.312,
+0.376
+]
+},
+"zone": {
+"game": 0.375,
+"season": 0.439,
+"z": -0.59
+},
+"pitches": {
+"game": 16,
+"season_mean": 15.2,
+"season_max": 33
+},
+"pk": 849830,
+"pitcher": 682842,
+"name": "Abner Uribe",
+"team": "MIL",
+"seasonGames": 61
+},
+{
+"n": 20,
+"types": {
+"CH": {
+"n": 6,
+"v": {
+"game": 84.12,
+"season": 84.99,
+"delta": -0.87,
+"z": -1.09,
+"games": 12
+},
+"s": {
+"game": 2302.67,
+"season": 2094.79,
+"delta": 207.88,
+"z": 2.57,
+"games": 12
+},
+"ivb": {
+"game": 8.02,
+"season": 7.53,
+"delta": 0.48,
+"z": 0.61,
+"games": 12
+},
+"hb": {
+"game": 15.47,
+"season": 15.71,
+"delta": -0.24,
+"z": -0.23,
+"games": 12
+},
+"ext": {
+"game": 6.77,
+"season": 6.91,
+"delta": -0.14,
+"z": -1.59,
+"games": 12
+}
+},
+"SI": {
+"n": 11,
+"v": {
+"game": 97.24,
+"season": 95.62,
+"delta": 1.62,
+"z": 1.5,
+"games": 35
+},
+"s": {
+"game": 2333.73,
+"season": 2178.24,
+"delta": 155.49,
+"z": 2.01,
+"games": 35
+},
+"ivb": {
+"game": 10.36,
+"season": 10.2,
+"delta": 0.16,
+"z": 0.19,
+"games": 35
+},
+"hb": {
+"game": 16.95,
+"season": 15.94,
+"delta": 1.02,
+"z": 1.18,
+"games": 35
+},
+"ext": {
+"game": 6.77,
+"season": 6.96,
+"delta": -0.2,
+"z": -1.91,
+"games": 35
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.3,
+"season": 0.154,
+"z": 1.48
+},
+{
+"what": "mix",
+"type": "CU",
+"game": 0.05,
+"season": 0.166,
+"z": -1.48
+},
+{
+"what": "mix",
+"type": "FF",
+"game": 0.0,
+"season": 0.121,
+"z": -1.16
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.55,
+"season": 0.363,
+"z": 1.63
+}
+],
+"mix": {
+"CH": [
+0.3,
+0.154
+],
+"CU": [
+0.05,
+0.166
+],
+"FC": [
+0.05,
+0.01
+],
+"FF": [
+0.0,
+0.121
+],
+"SI": [
+0.55,
+0.363
+],
+"SL": [
+0.05,
+0.105
+],
+"ST": [
+0.0,
+0.079
+]
+},
+"zone": {
+"game": 0.45,
+"season": 0.44,
+"z": 0.1
+},
+"pitches": {
+"game": 20,
+"season_mean": 21.2,
+"season_max": 47
+},
+"pk": 849830,
+"pitcher": 669084,
+"name": "DL Hall",
+"team": "MIL",
+"seasonGames": 47
+},
+{
+"n": 31,
+"types": {
+"CH": {
+"n": 11,
+"v": {
+"game": 91.01,
+"season": 92.07,
+"delta": -1.06,
+"z": -2.34,
+"games": 26
+},
+"s": {
+"game": 947.0,
+"season": 1055.22,
+"delta": -108.22,
+"z": -0.98,
+"games": 26
+},
+"ivb": {
+"game": -1.2,
+"season": -1.12,
+"delta": -0.08,
+"z": -0.04,
+"games": 26
+},
+"hb": {
+"game": 9.6,
+"season": 10.99,
+"delta": -1.39,
+"z": -0.69,
+"games": 26
+},
+"ext": {
+"game": 5.95,
+"season": 6.2,
+"delta": -0.25,
+"z": -2.67,
+"games": 26
+}
+},
+"SI": {
+"n": 17,
+"v": {
+"game": 98.63,
+"season": 99.53,
+"delta": -0.9,
+"z": -1.72,
+"games": 60
+},
+"s": {
+"game": 2390.76,
+"season": 2404.63,
+"delta": -13.86,
+"z": -0.27,
+"games": 60
+},
+"ivb": {
+"game": 10.06,
+"season": 9.21,
+"delta": 0.85,
+"z": 0.85,
+"games": 60
+},
+"hb": {
+"game": 16.86,
+"season": 16.0,
+"delta": 0.87,
+"z": 0.73,
+"games": 60
+},
+"ext": {
+"game": 5.96,
+"season": 6.24,
+"delta": -0.28,
+"z": -2.41,
+"games": 60
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.355,
+"season": 0.226,
+"z": 0.98
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.032,
+"season": 0.149,
+"z": -1.09
+}
+],
+"mix": {
+"CH": [
+0.355,
+0.226
+],
+"FF": [
+0.065,
+0.139
+],
+"SI": [
+0.548,
+0.467
+],
+"SL": [
+0.032,
+0.149
+]
+},
+"zone": {
+"game": 0.419,
+"season": 0.44,
+"z": -0.19
+},
+"pitches": {
+"game": 31,
+"season_mean": 17.7,
+"season_max": 40
+},
+"pk": 849830,
+"pitcher": 670970,
+"name": "Adrian Morejon",
+"team": "SD",
+"seasonGames": 76
+},
+{
+"n": 17,
+"types": {
+"FF": {
+"n": 15,
+"v": {
+"game": 99.12,
+"season": 97.93,
+"delta": 1.19,
+"z": 1.79,
+"games": 59
+},
+"s": {
+"game": 2520.87,
+"season": 2402.62,
+"delta": 118.25,
+"z": 2.21,
+"games": 59
+},
+"ivb": {
+"game": 19.39,
+"season": 18.96,
+"delta": 0.42,
+"z": 0.39,
+"games": 59
+},
+"hb": {
+"game": -2.41,
+"season": -4.07,
+"delta": 1.66,
+"z": 1.54,
+"games": 59
+},
+"ext": {
+"game": 6.61,
+"season": 6.61,
+"delta": 0.0,
+"z": 0.02,
+"games": 59
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.882,
+"season": 0.638,
+"z": 1.76
+},
+{
+"what": "mix",
+"type": "KC",
+"game": 0.118,
+"season": 0.349,
+"z": -1.69
+}
+],
+"mix": {
+"FF": [
+0.882,
+0.638
+],
+"KC": [
+0.118,
+0.349
+]
+},
+"zone": {
+"game": 0.588,
+"season": 0.453,
+"z": 1.15
+},
+"pitches": {
+"game": 17,
+"season_mean": 14.1,
+"season_max": 26
+},
+"pk": 849830,
+"pitcher": 656730,
+"name": "Trevor Megill",
+"team": "MIL",
+"seasonGames": 63
+},
+{
+"n": 72,
+"types": {
+"CH": {
+"n": 29,
+"v": {
+"game": 84.23,
+"season": 82.93,
+"delta": 1.3,
+"z": 1.25,
+"games": 18
+},
+"s": {
+"game": 2557.14,
+"season": 2558.12,
+"delta": -0.98,
+"z": -0.04,
+"games": 18
+},
+"ivb": {
+"game": 6.21,
+"season": 6.76,
+"delta": -0.54,
+"z": -0.58,
+"games": 18
+},
+"hb": {
+"game": -19.03,
+"season": -19.37,
+"delta": 0.34,
+"z": 0.38,
+"games": 18
+},
+"ext": {
+"game": 6.35,
+"season": 6.27,
+"delta": 0.08,
+"z": 0.74,
+"games": 18
+}
+},
+"FC": {
+"n": 6,
+"v": {
+"game": 88.15,
+"season": 87.96,
+"delta": 0.19,
+"z": 0.19,
+"games": 18
+},
+"s": {
+"game": 2334.17,
+"season": 2372.86,
+"delta": -38.69,
+"z": -1.19,
+"games": 18
+},
+"ivb": {
+"game": 10.9,
+"season": 12.36,
+"delta": -1.46,
+"z": -1.12,
+"games": 18
+},
+"hb": {
+"game": -0.48,
+"season": 0.18,
+"delta": -0.66,
+"z": -0.44,
+"games": 18
+},
+"ext": {
+"game": 6.38,
+"season": 6.27,
+"delta": 0.1,
+"z": 1.29,
+"games": 18
+}
+},
+"FF": {
+"n": 34,
+"v": {
+"game": 94.39,
+"season": 93.12,
+"delta": 1.27,
+"z": 4.18,
+"games": 18
+},
+"s": {
+"game": 2359.29,
+"season": 2325.9,
+"delta": 33.39,
+"z": 0.63,
+"games": 18
+},
+"ivb": {
+"game": 16.81,
+"season": 16.98,
+"delta": -0.16,
+"z": -0.17,
+"games": 18
+},
+"hb": {
+"game": -12.33,
+"season": -11.41,
+"delta": -0.92,
+"z": -1.18,
+"games": 18
+},
+"ext": {
+"game": 6.32,
+"season": 6.28,
+"delta": 0.05,
+"z": 0.62,
+"games": 18
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.403,
+0.352
+],
+"FC": [
+0.083,
+0.153
+],
+"FF": [
+0.472,
+0.464
+],
+"ST": [
+0.042,
+0.031
+]
+},
+"zone": {
+"game": 0.5,
+"season": 0.497,
+"z": 0.05
+},
+"pitches": {
+"game": 72,
+"season_mean": 83.6,
+"season_max": 102
+},
+"pk": 849825,
+"pitcher": 701656,
+"name": "Logan Henderson",
+"team": "MIL",
+"seasonGames": 18
+},
+{
+"n": 72,
+"types": {
+"CH": {
+"n": 18,
+"v": {
+"game": 88.89,
+"season": 86.52,
+"delta": 2.37,
+"z": 3.9,
+"games": 32
+},
+"s": {
+"game": 1900.28,
+"season": 1867.36,
+"delta": 32.91,
+"z": 0.93,
+"games": 32
+},
+"ivb": {
+"game": 5.03,
+"season": 4.55,
+"delta": 0.48,
+"z": 0.36,
+"games": 32
+},
+"hb": {
+"game": -16.47,
+"season": -16.66,
+"delta": 0.19,
+"z": 0.11,
+"games": 32
+},
+"ext": {
+"game": 6.03,
+"season": 5.99,
+"delta": 0.03,
+"z": 0.25,
+"games": 32
+}
+},
+"FF": {
+"n": 15,
+"v": {
+"game": 95.64,
+"season": 94.21,
+"delta": 1.43,
+"z": 3.14,
+"games": 32
+},
+"s": {
+"game": 2444.6,
+"season": 2348.41,
+"delta": 96.19,
+"z": 2.23,
+"games": 32
+},
+"ivb": {
+"game": 15.62,
+"season": 15.08,
+"delta": 0.54,
+"z": 0.38,
+"games": 32
+},
+"hb": {
+"game": -6.25,
+"season": -7.69,
+"delta": 1.44,
+"z": 1.52,
+"games": 32
+},
+"ext": {
+"game": 5.93,
+"season": 5.88,
+"delta": 0.06,
+"z": 0.45,
+"games": 32
+}
+},
+"SI": {
+"n": 16,
+"v": {
+"game": 94.53,
+"season": 93.18,
+"delta": 1.35,
+"z": 2.03,
+"games": 32
+},
+"s": {
+"game": 2336.81,
+"season": 2260.33,
+"delta": 76.48,
+"z": 1.39,
+"games": 32
+},
+"ivb": {
+"game": 7.02,
+"season": 5.15,
+"delta": 1.86,
+"z": 1.16,
+"games": 32
+},
+"hb": {
+"game": -15.92,
+"season": -16.68,
+"delta": 0.76,
+"z": 0.54,
+"games": 32
+},
+"ext": {
+"game": 5.97,
+"season": 5.91,
+"delta": 0.06,
+"z": 0.49,
+"games": 32
+}
+},
+"SL": {
+"n": 11,
+"v": {
+"game": 87.32,
+"season": 85.37,
+"delta": 1.94,
+"z": 2.03,
+"games": 16
+},
+"s": {
+"game": 2666.73,
+"season": 2529.09,
+"delta": 137.64,
+"z": 1.71,
+"games": 16
+},
+"ivb": {
+"game": -0.35,
+"season": 1.61,
+"delta": -1.97,
+"z": -0.96,
+"games": 16
+},
+"hb": {
+"game": 3.54,
+"season": 3.7,
+"delta": -0.16,
+"z": -0.18,
+"games": 16
+},
+"ext": {
+"game": 5.85,
+"season": 5.84,
+"delta": 0.0,
+"z": 0.02,
+"games": 16
+}
+},
+"ST": {
+"n": 12,
+"v": {
+"game": 83.81,
+"season": 81.98,
+"delta": 1.82,
+"z": 2.42,
+"games": 32
+},
+"s": {
+"game": 2858.25,
+"season": 2835.06,
+"delta": 23.19,
+"z": 0.38,
+"games": 32
+},
+"ivb": {
+"game": 2.71,
+"season": 2.96,
+"delta": -0.25,
+"z": -0.18,
+"games": 32
+},
+"hb": {
+"game": 15.88,
+"season": 13.47,
+"delta": 2.42,
+"z": 1.37,
+"games": 32
+},
+"ext": {
+"game": 5.81,
+"season": 5.85,
+"delta": -0.03,
+"z": -0.18,
+"games": 32
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.25,
+0.264
+],
+"FF": [
+0.208,
+0.203
+],
+"SI": [
+0.222,
+0.279
+],
+"SL": [
+0.153,
+0.066
+],
+"ST": [
+0.167,
+0.188
+]
+},
+"zone": {
+"game": 0.458,
+"season": 0.427,
+"z": 0.55
+},
+"pitches": {
+"game": 72,
+"season_mean": 93.2,
+"season_max": 106
+},
+"pk": 849825,
+"pitcher": 650633,
+"name": "Michael King",
+"team": "SD",
+"seasonGames": 32
+},
+{
+"n": 15,
+"types": {
+"CH": {
+"n": 5,
+"v": {
+"game": 88.08,
+"season": 87.17,
+"delta": 0.91,
+"z": 1.25,
+"games": 7
+},
+"s": {
+"game": 1569.0,
+"season": 1267.97,
+"delta": 301.03,
+"z": 1.69,
+"games": 7
+},
+"ivb": {
+"game": 0.52,
+"season": -1.93,
+"delta": 2.45,
+"z": 1.77,
+"games": 7
+},
+"hb": {
+"game": 13.54,
+"season": 11.11,
+"delta": 2.43,
+"z": 1.31,
+"games": 7
+},
+"ext": {
+"game": 5.51,
+"season": 5.42,
+"delta": 0.09,
+"z": 0.79,
+"games": 7
+}
+},
+"SI": {
+"n": 6,
+"v": {
+"game": 93.5,
+"season": 93.68,
+"delta": -0.18,
+"z": -0.24,
+"games": 48
+},
+"s": {
+"game": 2185.83,
+"season": 2206.06,
+"delta": -20.23,
+"z": -0.43,
+"games": 48
+},
+"ivb": {
+"game": 0.43,
+"season": 0.77,
+"delta": -0.34,
+"z": -0.3,
+"games": 48
+},
+"hb": {
+"game": 14.1,
+"season": 15.76,
+"delta": -1.66,
+"z": -0.81,
+"games": 48
+},
+"ext": {
+"game": 5.51,
+"season": 5.38,
+"delta": 0.13,
+"z": 1.32,
+"games": 48
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.333,
+"season": 0.166,
+"z": 1.99
+}
+],
+"mix": {
+"CH": [
+0.333,
+0.166
+],
+"FF": [
+0.0,
+0.016
+],
+"SI": [
+0.4,
+0.449
+],
+"ST": [
+0.267,
+0.36
+]
+},
+"zone": {
+"game": 0.267,
+"season": 0.43,
+"z": -1.68
+},
+"pitches": {
+"game": 15,
+"season_mean": 16.9,
+"season_max": 35
+},
+"pk": 849825,
+"pitcher": 668941,
+"name": "JoJo Romero",
+"team": "MIL",
+"seasonGames": 55
+},
+{
+"n": 26,
+"types": {
+"SI": {
+"n": 12,
+"v": {
+"game": 97.92,
+"season": 98.78,
+"delta": -0.86,
+"z": -1.03,
+"games": 53
+},
+"s": {
+"game": 2308.17,
+"season": 2300.43,
+"delta": 7.74,
+"z": 0.12,
+"games": 53
+},
+"ivb": {
+"game": 6.47,
+"season": 6.76,
+"delta": -0.3,
+"z": -0.29,
+"games": 53
+},
+"hb": {
+"game": -13.33,
+"season": -13.8,
+"delta": 0.46,
+"z": 0.34,
+"games": 53
+},
+"ext": {
+"game": 6.63,
+"season": 6.48,
+"delta": 0.15,
+"z": 1.46,
+"games": 53
+}
+},
+"SL": {
+"n": 14,
+"v": {
+"game": 88.86,
+"season": 87.93,
+"delta": 0.93,
+"z": 0.68,
+"games": 39
+},
+"s": {
+"game": 2504.79,
+"season": 2534.48,
+"delta": -29.7,
+"z": -0.38,
+"games": 39
+},
+"ivb": {
+"game": 5.62,
+"season": 4.23,
+"delta": 1.39,
+"z": 0.95,
+"games": 39
+},
+"hb": {
+"game": 8.24,
+"season": 10.23,
+"delta": -1.99,
+"z": -0.84,
+"games": 39
+},
+"ext": {
+"game": 6.64,
+"season": 6.52,
+"delta": 0.12,
+"z": 1.05,
+"games": 39
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "SI",
+"game": 0.462,
+"season": 0.612,
+"z": -1.05
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.538,
+"season": 0.376,
+"z": 1.07
+}
+],
+"mix": {
+"FF": [
+0.0,
+0.002
+],
+"SI": [
+0.462,
+0.612
+],
+"SL": [
+0.538,
+0.376
+]
+},
+"zone": {
+"game": 0.385,
+"season": 0.439,
+"z": -0.5
+},
+"pitches": {
+"game": 26,
+"season_mean": 15.2,
+"season_max": 33
+},
+"pk": 849825,
+"pitcher": 682842,
+"name": "Abner Uribe",
+"team": "MIL",
+"seasonGames": 61
+},
+{
+"n": 27,
+"types": {
+"FF": {
+"n": 17,
+"v": {
+"game": 91.91,
+"season": 91.95,
+"delta": -0.04,
+"z": -0.07,
+"games": 43
+},
+"s": {
+"game": 2433.59,
+"season": 2448.7,
+"delta": -15.11,
+"z": -0.23,
+"games": 43
+},
+"ivb": {
+"game": 19.28,
+"season": 19.15,
+"delta": 0.13,
+"z": 0.12,
+"games": 43
+},
+"hb": {
+"game": 5.86,
+"season": 4.77,
+"delta": 1.1,
+"z": 0.93,
+"games": 43
+},
+"ext": {
+"game": 5.88,
+"season": 5.81,
+"delta": 0.07,
+"z": 0.58,
+"games": 43
+}
+},
+"SL": {
+"n": 6,
+"v": {
+"game": 84.43,
+"season": 84.86,
+"delta": -0.43,
+"z": -0.41,
+"games": 39
+},
+"s": {
+"game": 2785.17,
+"season": 2730.03,
+"delta": 55.14,
+"z": 0.73,
+"games": 39
+},
+"ivb": {
+"game": 1.67,
+"season": 2.91,
+"delta": -1.24,
+"z": -0.44,
+"games": 39
+},
+"hb": {
+"game": -3.38,
+"season": -4.24,
+"delta": 0.86,
+"z": 0.89,
+"games": 39
+},
+"ext": {
+"game": 5.72,
+"season": 5.71,
+"delta": 0.01,
+"z": 0.11,
+"games": 39
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.63,
+"season": 0.377,
+"z": 1.97
+},
+{
+"what": "mix",
+"type": "FS",
+"game": 0.111,
+"season": 0.256,
+"z": -1.17
+}
+],
+"mix": {
+"FF": [
+0.63,
+0.377
+],
+"FS": [
+0.111,
+0.256
+],
+"SI": [
+0.037,
+0.028
+],
+"SL": [
+0.222,
+0.299
+],
+"ST": [
+0.0,
+0.028
+]
+},
+"zone": {
+"game": 0.444,
+"season": 0.374,
+"z": 0.65
+},
+"pitches": {
+"game": 27,
+"season_mean": 20.4,
+"season_max": 50
+},
+"pk": 849825,
+"pitcher": 673513,
+"name": "Yuki Matsui",
+"team": "SD",
+"seasonGames": 54
+},
+{
+"n": 13,
+"types": {
+"SI": {
+"n": 5,
+"v": {
+"game": 98.8,
+"season": 97.74,
+"delta": 1.06,
+"z": 1.67,
+"games": 27
+},
+"s": {
+"game": 2378.2,
+"season": 2282.35,
+"delta": 95.85,
+"z": 1.5,
+"games": 27
+},
+"ivb": {
+"game": 11.6,
+"season": 11.68,
+"delta": -0.08,
+"z": -0.06,
+"games": 27
+},
+"hb": {
+"game": -13.38,
+"season": -14.65,
+"delta": 1.27,
+"z": 0.91,
+"games": 27
+},
+"ext": {
+"game": 6.27,
+"season": 6.18,
+"delta": 0.09,
+"z": 1.18,
+"games": 27
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.308,
+"season": 0.425,
+"z": -0.91
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.385,
+"season": 0.252,
+"z": 1.09
+}
+],
+"mix": {
+"CH": [
+0.308,
+0.425
+],
+"FF": [
+0.308,
+0.263
+],
+"SI": [
+0.385,
+0.252
+],
+"SL": [
+0.0,
+0.06
+]
+},
+"zone": {
+"game": 0.462,
+"season": 0.456,
+"z": 0.05
+},
+"pitches": {
+"game": 13,
+"season_mean": 17.4,
+"season_max": 38
+},
+"pk": 849825,
+"pitcher": 699134,
+"name": "Bradgley Rodriguez",
+"team": "SD",
+"seasonGames": 68
+},
+{
+"n": 12,
+"types": {
+"SI": {
+"n": 8,
+"v": {
+"game": 98.56,
+"season": 97.7,
+"delta": 0.86,
+"z": 1.5,
+"games": 69
+},
+"s": {
+"game": 2154.5,
+"season": 2091.54,
+"delta": 62.96,
+"z": 0.94,
+"games": 69
+},
+"ivb": {
+"game": 11.28,
+"season": 8.29,
+"delta": 2.98,
+"z": 2.63,
+"games": 69
+},
+"hb": {
+"game": 14.53,
+"season": 13.84,
+"delta": 0.68,
+"z": 0.47,
+"games": 69
+},
+"ext": {
+"game": 5.62,
+"season": 5.52,
+"delta": 0.11,
+"z": 1.16,
+"games": 69
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.25,
+"season": 0.119,
+"z": 1.46
+},
+{
+"what": "mix",
+"type": "CU",
+"game": 0.083,
+"season": 0.223,
+"z": -1.29
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.667,
+"season": 0.52,
+"z": 1.44
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.0,
+"season": 0.118,
+"z": -1.26
+}
+],
+"mix": {
+"CH": [
+0.25,
+0.119
+],
+"CU": [
+0.083,
+0.223
+],
+"FF": [
+0.0,
+0.018
+],
+"SI": [
+0.667,
+0.52
+],
+"SL": [
+0.0,
+0.118
+]
+},
+"zone": {
+"game": 0.667,
+"season": 0.389,
+"z": 3.2
+},
+"pitches": {
+"game": 12,
+"season_mean": 21.1,
+"season_max": 45
+},
+"pk": 849825,
+"pitcher": 676879,
+"name": "Aaron Ashby",
+"team": "MIL",
+"seasonGames": 75
+},
+{
+"n": 40,
+"types": {
+"FF": {
+"n": 18,
+"v": {
+"game": 102.02,
+"season": 101.47,
+"delta": 0.56,
+"z": 0.84,
+"games": 56
+},
+"s": {
+"game": 2438.89,
+"season": 2512.74,
+"delta": -73.85,
+"z": -1.16,
+"games": 56
+},
+"ivb": {
+"game": 16.07,
+"season": 16.43,
+"delta": -0.36,
+"z": -0.26,
+"games": 56
+},
+"hb": {
+"game": -5.46,
+"season": -5.97,
+"delta": 0.51,
+"z": 0.44,
+"games": 56
+},
+"ext": {
+"game": 6.89,
+"season": 6.76,
+"delta": 0.12,
+"z": 1.26,
+"games": 56
+}
+},
+"SL": {
+"n": 22,
+"v": {
+"game": 89.12,
+"season": 88.03,
+"delta": 1.09,
+"z": 1.97,
+"games": 59
+},
+"s": {
+"game": 2482.5,
+"season": 2409.97,
+"delta": 72.53,
+"z": 0.99,
+"games": 59
+},
+"ivb": {
+"game": -4.52,
+"season": -3.99,
+"delta": -0.53,
+"z": -0.62,
+"games": 59
+},
+"hb": {
+"game": 11.82,
+"season": 9.88,
+"delta": 1.94,
+"z": 1.19,
+"games": 59
+},
+"ext": {
+"game": 6.85,
+"season": 6.77,
+"delta": 0.09,
+"z": 0.76,
+"games": 59
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.0,
+0.019
+],
+"FF": [
+0.45,
+0.481
+],
+"SI": [
+0.0,
+0.001
+],
+"SL": [
+0.55,
+0.495
+]
+},
+"zone": {
+"game": 0.475,
+"season": 0.405,
+"z": 0.76
+},
+"pitches": {
+"game": 40,
+"season_mean": 17.5,
+"season_max": 34
+},
+"pk": 849825,
+"pitcher": 695243,
+"name": "Mason Miller",
+"team": "SD",
+"seasonGames": 66
+},
+{
+"n": 9,
+"types": {
+"FF": {
+"n": 5,
+"v": {
+"game": 97.84,
+"season": 97.93,
+"delta": -0.09,
+"z": -0.14,
+"games": 59
+},
+"s": {
+"game": 2433.8,
+"season": 2402.62,
+"delta": 31.18,
+"z": 0.58,
+"games": 59
+},
+"ivb": {
+"game": 18.8,
+"season": 18.96,
+"delta": -0.16,
+"z": -0.15,
+"games": 59
+},
+"hb": {
+"game": -4.2,
+"season": -4.07,
+"delta": -0.13,
+"z": -0.12,
+"games": 59
+},
+"ext": {
+"game": 6.66,
+"season": 6.61,
+"delta": 0.05,
+"z": 0.7,
+"games": 59
+}
+}
+},
+"flags": [],
+"mix": {
+"FF": [
+0.556,
+0.638
+],
+"KC": [
+0.444,
+0.349
+]
+},
+"zone": {
+"game": 0.556,
+"season": 0.453,
+"z": 0.87
+},
+"pitches": {
+"game": 9,
+"season_mean": 14.1,
+"season_max": 26
+},
+"pk": 849825,
+"pitcher": 656730,
+"name": "Trevor Megill",
+"team": "MIL",
+"seasonGames": 63
+},
+{
+"n": 69,
+"types": {
+"CU": {
+"n": 18,
+"v": {
+"game": 79.02,
+"season": 79.07,
+"delta": -0.05,
+"z": -0.07,
+"games": 7
+},
+"s": {
+"game": 2670.83,
+"season": 2734.26,
+"delta": -63.43,
+"z": -1.02,
+"games": 7
+},
+"ivb": {
+"game": -13.52,
+"season": -14.91,
+"delta": 1.39,
+"z": 0.95,
+"games": 7
+},
+"hb": {
+"game": 6.53,
+"season": 6.72,
+"delta": -0.18,
+"z": -0.2,
+"games": 7
+},
+"ext": {
+"game": 6.76,
+"season": 6.79,
+"delta": -0.03,
+"z": -0.32,
+"games": 7
+}
+},
+"FC": {
+"n": 10,
+"v": {
+"game": 91.6,
+"season": 91.0,
+"delta": 0.6,
+"z": 1.01,
+"games": 7
+},
+"s": {
+"game": 2279.5,
+"season": 2380.32,
+"delta": -100.82,
+"z": -1.37,
+"games": 7
+},
+"ivb": {
+"game": 15.31,
+"season": 13.49,
+"delta": 1.82,
+"z": 1.54,
+"games": 7
+},
+"hb": {
+"game": 0.55,
+"season": 2.79,
+"delta": -2.24,
+"z": -0.84,
+"games": 7
+},
+"ext": {
+"game": 6.89,
+"season": 6.8,
+"delta": 0.08,
+"z": 0.92,
+"games": 7
+}
+},
+"FF": {
+"n": 35,
+"v": {
+"game": 93.4,
+"season": 93.93,
+"delta": -0.53,
+"z": -1.18,
+"games": 8
+},
+"s": {
+"game": 2343.54,
+"season": 2347.49,
+"delta": -3.95,
+"z": -0.25,
+"games": 8
+},
+"ivb": {
+"game": 19.13,
+"season": 20.18,
+"delta": -1.05,
+"z": -1.88,
+"games": 8
+},
+"hb": {
+"game": -3.39,
+"season": -3.62,
+"delta": 0.23,
+"z": 0.15,
+"games": 8
+},
+"ext": {
+"game": 6.91,
+"season": 6.91,
+"delta": 0.0,
+"z": 0.04,
+"games": 8
+}
+},
+"ST": {
+"n": 6,
+"v": {
+"game": 80.78,
+"season": 81.6,
+"delta": -0.82,
+"z": -1.7,
+"games": 6
+},
+"s": {
+"game": 2336.33,
+"season": 2387.73,
+"delta": -51.4,
+"z": -0.55,
+"games": 6
+},
+"ivb": {
+"game": 2.32,
+"season": 3.34,
+"delta": -1.02,
+"z": -0.49,
+"games": 6
+},
+"hb": {
+"game": 11.62,
+"season": 12.31,
+"delta": -0.69,
+"z": -0.47,
+"games": 6
+},
+"ext": {
+"game": 6.68,
+"season": 6.76,
+"delta": -0.08,
+"z": -0.56,
+"games": 6
+}
+}
+},
+"flags": [],
+"mix": {
+"CU": [
+0.261,
+0.221
+],
+"FC": [
+0.145,
+0.133
+],
+"FF": [
+0.507,
+0.522
+],
+"SI": [
+0.0,
+0.009
+],
+"SL": [
+0.0,
+0.003
+],
+"ST": [
+0.087,
+0.111
+]
+},
+"zone": {
+"game": 0.58,
+"season": 0.441,
+"z": 1.74
+},
+"pitches": {
+"game": 69,
+"season_mean": 72.2,
+"season_max": 87
+},
+"pk": 849826,
+"pitcher": 601713,
+"name": "Nick Pivetta",
+"team": "SD",
+"seasonGames": 8
+},
+{
+"n": 51,
+"types": {
+"FC": {
+"n": 21,
+"v": {
+"game": 94.65,
+"season": 93.35,
+"delta": 1.29,
+"z": 2.41,
+"games": 30
+},
+"s": {
+"game": 2514.43,
+"season": 2465.51,
+"delta": 48.91,
+"z": 0.9,
+"games": 30
+},
+"ivb": {
+"game": 10.06,
+"season": 9.38,
+"delta": 0.68,
+"z": 0.66,
+"games": 30
+},
+"hb": {
+"game": 1.33,
+"season": 1.25,
+"delta": 0.09,
+"z": 0.08,
+"games": 30
+},
+"ext": {
+"game": 6.69,
+"season": 6.71,
+"delta": -0.02,
+"z": -0.18,
+"games": 30
+}
+},
+"FF": {
+"n": 9,
+"v": {
+"game": 97.73,
+"season": 96.86,
+"delta": 0.88,
+"z": 1.76,
+"games": 30
+},
+"s": {
+"game": 2413.67,
+"season": 2341.7,
+"delta": 71.97,
+"z": 1.53,
+"games": 30
+},
+"ivb": {
+"game": 16.34,
+"season": 15.27,
+"delta": 1.07,
+"z": 1.24,
+"games": 30
+},
+"hb": {
+"game": -9.67,
+"season": -9.75,
+"delta": 0.08,
+"z": 0.11,
+"games": 30
+},
+"ext": {
+"game": 6.74,
+"season": 6.73,
+"delta": 0.02,
+"z": 0.18,
+"games": 30
+}
+},
+"SI": {
+"n": 14,
+"v": {
+"game": 98.26,
+"season": 96.59,
+"delta": 1.67,
+"z": 3.26,
+"games": 29
+},
+"s": {
+"game": 2346.29,
+"season": 2365.0,
+"delta": -18.71,
+"z": -0.41,
+"games": 29
+},
+"ivb": {
+"game": 8.05,
+"season": 6.34,
+"delta": 1.71,
+"z": 1.16,
+"games": 29
+},
+"hb": {
+"game": -17.14,
+"season": -17.41,
+"delta": 0.27,
+"z": 0.3,
+"games": 29
+},
+"ext": {
+"game": 6.65,
+"season": 6.65,
+"delta": -0.0,
+"z": -0.03,
+"games": 29
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FC",
+"game": 0.412,
+"season": 0.237,
+"z": 2.21
+},
+{
+"what": "mix",
+"type": "ST",
+"game": 0.059,
+"season": 0.177,
+"z": -1.8
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.061
+],
+"CU": [
+0.078,
+0.076
+],
+"FC": [
+0.412,
+0.237
+],
+"FF": [
+0.176,
+0.248
+],
+"PO": [
+0.0,
+0.0
+],
+"SI": [
+0.275,
+0.2
+],
+"ST": [
+0.059,
+0.177
+]
+},
+"zone": {
+"game": 0.471,
+"season": 0.441,
+"z": 0.74
+},
+"pitches": {
+"game": 51,
+"season_mean": 77.4,
+"season_max": 101
+},
+"pk": 849826,
+"pitcher": 669160,
+"name": "Dustin May",
+"team": "MIL",
+"seasonGames": 31
+},
+{
+"n": 31,
+"types": {
+"SI": {
+"n": 13,
+"v": {
+"game": 93.99,
+"season": 93.68,
+"delta": 0.32,
+"z": 0.44,
+"games": 48
+},
+"s": {
+"game": 2203.85,
+"season": 2206.06,
+"delta": -2.21,
+"z": -0.05,
+"games": 48
+},
+"ivb": {
+"game": -0.28,
+"season": 0.77,
+"delta": -1.06,
+"z": -0.93,
+"games": 48
+},
+"hb": {
+"game": 14.15,
+"season": 15.76,
+"delta": -1.61,
+"z": -0.79,
+"games": 48
+},
+"ext": {
+"game": 5.52,
+"season": 5.38,
+"delta": 0.15,
+"z": 1.5,
+"games": 48
+}
+},
+"ST": {
+"n": 14,
+"v": {
+"game": 83.21,
+"season": 82.98,
+"delta": 0.23,
+"z": 0.31,
+"games": 35
+},
+"s": {
+"game": 2912.86,
+"season": 2855.13,
+"delta": 57.72,
+"z": 0.84,
+"games": 35
+},
+"ivb": {
+"game": -1.13,
+"season": -0.47,
+"delta": -0.66,
+"z": -0.44,
+"games": 35
+},
+"hb": {
+"game": -16.66,
+"season": -16.54,
+"delta": -0.13,
+"z": -0.08,
+"games": 35
+},
+"ext": {
+"game": 5.29,
+"season": 5.33,
+"delta": -0.04,
+"z": -0.44,
+"games": 35
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.129,
+0.166
+],
+"FF": [
+0.0,
+0.016
+],
+"SI": [
+0.419,
+0.449
+],
+"ST": [
+0.452,
+0.36
+]
+},
+"zone": {
+"game": 0.613,
+"season": 0.43,
+"z": 1.88
+},
+"pitches": {
+"game": 31,
+"season_mean": 16.9,
+"season_max": 35
+},
+"pk": 849826,
+"pitcher": 668941,
+"name": "JoJo Romero",
+"team": "MIL",
+"seasonGames": 55
+},
+{
+"n": 13,
+"types": {
+"SL": {
+"n": 7,
+"v": {
+"game": 84.09,
+"season": 84.55,
+"delta": -0.47,
+"z": -0.7,
+"games": 24
+},
+"s": {
+"game": 2459.29,
+"season": 2520.63,
+"delta": -61.34,
+"z": -0.88,
+"games": 24
+},
+"ivb": {
+"game": -1.04,
+"season": 0.75,
+"delta": -1.79,
+"z": -1.61,
+"games": 24
+},
+"hb": {
+"game": -0.51,
+"season": -0.36,
+"delta": -0.15,
+"z": -0.17,
+"games": 24
+},
+"ext": {
+"game": 6.35,
+"season": 6.25,
+"delta": 0.1,
+"z": 0.7,
+"games": 24
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.077,
+"season": 0.23,
+"z": -1.32
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.538,
+"season": 0.377,
+"z": 1.13
+}
+],
+"mix": {
+"CH": [
+0.231,
+0.326
+],
+"FF": [
+0.077,
+0.23
+],
+"SL": [
+0.538,
+0.377
+],
+"ST": [
+0.154,
+0.067
+]
+},
+"zone": {
+"game": 0.462,
+"season": 0.41,
+"z": 0.49
+},
+"pitches": {
+"game": 13,
+"season_mean": 15.3,
+"season_max": 30
+},
+"pk": 849826,
+"pitcher": 592094,
+"name": "Jason Adam",
+"team": "SD",
+"seasonGames": 38
+},
+{
+"n": 23,
+"types": {
+"FF": {
+"n": 11,
+"v": {
+"game": 91.64,
+"season": 91.95,
+"delta": -0.32,
+"z": -0.56,
+"games": 43
+},
+"s": {
+"game": 2492.36,
+"season": 2448.7,
+"delta": 43.66,
+"z": 0.66,
+"games": 43
+},
+"ivb": {
+"game": 18.22,
+"season": 19.15,
+"delta": -0.93,
+"z": -0.85,
+"games": 43
+},
+"hb": {
+"game": 5.61,
+"season": 4.77,
+"delta": 0.84,
+"z": 0.71,
+"games": 43
+},
+"ext": {
+"game": 5.64,
+"season": 5.81,
+"delta": -0.17,
+"z": -1.45,
+"games": 43
+}
+},
+"SL": {
+"n": 8,
+"v": {
+"game": 84.41,
+"season": 84.86,
+"delta": -0.45,
+"z": -0.43,
+"games": 39
+},
+"s": {
+"game": 2809.12,
+"season": 2730.03,
+"delta": 79.1,
+"z": 1.05,
+"games": 39
+},
+"ivb": {
+"game": 1.06,
+"season": 2.91,
+"delta": -1.85,
+"z": -0.65,
+"games": 39
+},
+"hb": {
+"game": -4.34,
+"season": -4.24,
+"delta": -0.1,
+"z": -0.1,
+"games": 39
+},
+"ext": {
+"game": 5.55,
+"season": 5.71,
+"delta": -0.16,
+"z": -1.26,
+"games": 39
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.478,
+"season": 0.377,
+"z": 0.81
+}
+],
+"mix": {
+"FF": [
+0.478,
+0.377
+],
+"FS": [
+0.174,
+0.256
+],
+"SI": [
+0.0,
+0.028
+],
+"SL": [
+0.348,
+0.299
+],
+"ST": [
+0.0,
+0.028
+]
+},
+"zone": {
+"game": 0.348,
+"season": 0.374,
+"z": -0.24
+},
+"pitches": {
+"game": 23,
+"season_mean": 20.4,
+"season_max": 50
+},
+"pk": 849826,
+"pitcher": 673513,
+"name": "Yuki Matsui",
+"team": "SD",
+"seasonGames": 54
+},
+{
+"n": 14,
+"types": {
+"FC": {
+"n": 6,
+"v": {
+"game": 92.07,
+"season": 92.3,
+"delta": -0.23,
+"z": -0.23,
+"games": 39
+},
+"s": {
+"game": 2309.5,
+"season": 2264.87,
+"delta": 44.63,
+"z": 0.71,
+"games": 39
+},
+"ivb": {
+"game": 6.68,
+"season": 7.12,
+"delta": -0.44,
+"z": -0.33,
+"games": 39
+},
+"hb": {
+"game": 4.17,
+"season": 2.55,
+"delta": 1.61,
+"z": 1.48,
+"games": 39
+},
+"ext": {
+"game": 6.28,
+"season": 6.23,
+"delta": 0.05,
+"z": 0.45,
+"games": 39
+}
+},
+"SI": {
+"n": 8,
+"v": {
+"game": 97.45,
+"season": 97.07,
+"delta": 0.38,
+"z": 0.35,
+"games": 22
+},
+"s": {
+"game": 2285.75,
+"season": 2213.17,
+"delta": 72.58,
+"z": 1.82,
+"games": 22
+},
+"ivb": {
+"game": 7.55,
+"season": 6.55,
+"delta": 1.0,
+"z": 1.27,
+"games": 22
+},
+"hb": {
+"game": -13.57,
+"season": -14.16,
+"delta": 0.59,
+"z": 0.4,
+"games": 22
+},
+"ext": {
+"game": 6.32,
+"season": 6.31,
+"delta": 0.01,
+"z": 0.08,
+"games": 22
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "FF",
+"game": 0.0,
+"season": 0.303,
+"z": -1.56
+},
+{
+"what": "mix",
+"type": "SI",
+"game": 0.571,
+"season": 0.209,
+"z": 2.0
+}
+],
+"mix": {
+"CH": [
+0.0,
+0.045
+],
+"CU": [
+0.0,
+0.084
+],
+"FC": [
+0.429,
+0.333
+],
+"FF": [
+0.0,
+0.303
+],
+"SI": [
+0.571,
+0.209
+],
+"SL": [
+0.0,
+0.018
+]
+},
+"zone": {
+"game": 0.571,
+"season": 0.433,
+"z": 1.32
+},
+"pitches": {
+"game": 14,
+"season_mean": 20.6,
+"season_max": 43
+},
+"pk": 849826,
+"pitcher": 622608,
+"name": "Antonio Senzatela",
+"team": "MIL",
+"seasonGames": 57
+},
+{
+"n": 21,
+"types": {
+"CH": {
+"n": 11,
+"v": {
+"game": 91.45,
+"season": 90.1,
+"delta": 1.34,
+"z": 1.13,
+"games": 53
+},
+"s": {
+"game": 1966.27,
+"season": 1801.06,
+"delta": 165.21,
+"z": 2.66,
+"games": 53
+},
+"ivb": {
+"game": 7.85,
+"season": 8.19,
+"delta": -0.33,
+"z": -0.21,
+"games": 53
+},
+"hb": {
+"game": -17.29,
+"season": -16.66,
+"delta": -0.63,
+"z": -0.37,
+"games": 53
+},
+"ext": {
+"game": 6.37,
+"season": 6.39,
+"delta": -0.02,
+"z": -0.22,
+"games": 53
+}
+},
+"FF": {
+"n": 5,
+"v": {
+"game": 99.64,
+"season": 98.31,
+"delta": 1.33,
+"z": 1.7,
+"games": 32
+},
+"s": {
+"game": 2476.0,
+"season": 2416.28,
+"delta": 59.72,
+"z": 0.8,
+"games": 32
+},
+"ivb": {
+"game": 17.32,
+"season": 17.06,
+"delta": 0.26,
+"z": 0.12,
+"games": 32
+},
+"hb": {
+"game": -6.38,
+"season": -5.66,
+"delta": -0.72,
+"z": -0.29,
+"games": 32
+},
+"ext": {
+"game": 6.1,
+"season": 6.21,
+"delta": -0.11,
+"z": -0.94,
+"games": 32
+}
+},
+"SI": {
+"n": 5,
+"v": {
+"game": 98.3,
+"season": 97.74,
+"delta": 0.56,
+"z": 0.88,
+"games": 27
+},
+"s": {
+"game": 2297.8,
+"season": 2282.35,
+"delta": 15.45,
+"z": 0.24,
+"games": 27
+},
+"ivb": {
+"game": 14.1,
+"season": 11.68,
+"delta": 2.42,
+"z": 1.9,
+"games": 27
+},
+"hb": {
+"game": -13.42,
+"season": -14.65,
+"delta": 1.23,
+"z": 0.88,
+"games": 27
+},
+"ext": {
+"game": 6.2,
+"season": 6.18,
+"delta": 0.02,
+"z": 0.28,
+"games": 27
+}
+}
+},
+"flags": [],
+"mix": {
+"CH": [
+0.524,
+0.425
+],
+"FF": [
+0.238,
+0.263
+],
+"SI": [
+0.238,
+0.252
+],
+"SL": [
+0.0,
+0.06
+]
+},
+"zone": {
+"game": 0.714,
+"season": 0.456,
+"z": 2.07
+},
+"pitches": {
+"game": 21,
+"season_mean": 17.4,
+"season_max": 38
+},
+"pk": 849826,
+"pitcher": 699134,
+"name": "Bradgley Rodriguez",
+"team": "SD",
+"seasonGames": 68
+},
+{
+"n": 29,
+"types": {
+"CU": {
+"n": 5,
+"v": {
+"game": 84.76,
+"season": 81.89,
+"delta": 2.87,
+"z": 1.98,
+"games": 15
+},
+"s": {
+"game": 2886.8,
+"season": 2753.85,
+"delta": 132.95,
+"z": 1.65,
+"games": 15
+},
+"ivb": {
+"game": -11.18,
+"season": -12.46,
+"delta": 1.28,
+"z": 1.26,
+"games": 15
+},
+"hb": {
+"game": -8.94,
+"season": -10.34,
+"delta": 1.4,
+"z": 1.09,
+"games": 15
+},
+"ext": {
+"game": 6.56,
+"season": 6.74,
+"delta": -0.18,
+"z": -0.8,
+"games": 15
+}
+},
+"SI": {
+"n": 16,
+"v": {
+"game": 97.03,
+"season": 95.62,
+"delta": 1.41,
+"z": 1.3,
+"games": 35
+},
+"s": {
+"game": 2289.31,
+"season": 2178.24,
+"delta": 111.07,
+"z": 1.44,
+"games": 35
+},
+"ivb": {
+"game": 9.88,
+"season": 10.2,
+"delta": -0.32,
+"z": -0.38,
+"games": 35
+},
+"hb": {
+"game": 16.19,
+"season": 15.94,
+"delta": 0.25,
+"z": 0.29,
+"games": 35
+},
+"ext": {
+"game": 6.72,
+"season": 6.96,
+"delta": -0.24,
+"z": -2.35,
+"games": 35
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "SI",
+"game": 0.552,
+"season": 0.363,
+"z": 1.65
+}
+],
+"mix": {
+"CH": [
+0.138,
+0.154
+],
+"CU": [
+0.172,
+0.166
+],
+"FC": [
+0.0,
+0.01
+],
+"FF": [
+0.034,
+0.121
+],
+"SI": [
+0.552,
+0.363
+],
+"SL": [
+0.103,
+0.105
+],
+"ST": [
+0.0,
+0.079
+]
+},
+"zone": {
+"game": 0.448,
+"season": 0.44,
+"z": 0.08
+},
+"pitches": {
+"game": 29,
+"season_mean": 21.2,
+"season_max": 47
+},
+"pk": 849826,
+"pitcher": 669084,
+"name": "DL Hall",
+"team": "MIL",
+"seasonGames": 47
+},
+{
+"n": 40,
+"types": {
+"CH": {
+"n": 6,
+"v": {
+"game": 88.07,
+"season": 86.52,
+"delta": 1.55,
+"z": 2.54,
+"games": 32
+},
+"s": {
+"game": 1867.17,
+"season": 1867.36,
+"delta": -0.2,
+"z": -0.01,
+"games": 32
+},
+"ivb": {
+"game": 7.05,
+"season": 4.55,
+"delta": 2.5,
+"z": 1.84,
+"games": 32
+},
+"hb": {
+"game": -16.18,
+"season": -16.66,
+"delta": 0.47,
+"z": 0.27,
+"games": 32
+},
+"ext": {
+"game": 6.08,
+"season": 5.99,
+"delta": 0.09,
+"z": 0.64,
+"games": 32
+}
+},
+"FF": {
+"n": 15,
+"v": {
+"game": 95.93,
+"season": 94.21,
+"delta": 1.72,
+"z": 3.77,
+"games": 32
+},
+"s": {
+"game": 2363.8,
+"season": 2348.41,
+"delta": 15.39,
+"z": 0.36,
+"games": 32
+},
+"ivb": {
+"game": 15.33,
+"season": 15.08,
+"delta": 0.25,
+"z": 0.17,
+"games": 32
+},
+"hb": {
+"game": -6.25,
+"season": -7.69,
+"delta": 1.44,
+"z": 1.52,
+"games": 32
+},
+"ext": {
+"game": 6.0,
+"season": 5.88,
+"delta": 0.13,
+"z": 1.01,
+"games": 32
+}
+},
+"SI": {
+"n": 10,
+"v": {
+"game": 95.34,
+"season": 93.18,
+"delta": 2.16,
+"z": 3.24,
+"games": 32
+},
+"s": {
+"game": 2292.2,
+"season": 2260.33,
+"delta": 31.87,
+"z": 0.58,
+"games": 32
+},
+"ivb": {
+"game": 6.53,
+"season": 5.15,
+"delta": 1.38,
+"z": 0.86,
+"games": 32
+},
+"hb": {
+"game": -17.41,
+"season": -16.68,
+"delta": -0.73,
+"z": -0.52,
+"games": 32
+},
+"ext": {
+"game": 6.01,
+"season": 5.91,
+"delta": 0.1,
+"z": 0.82,
+"games": 32
+}
+},
+"SL": {
+"n": 6,
+"v": {
+"game": 86.4,
+"season": 85.37,
+"delta": 1.03,
+"z": 1.07,
+"games": 16
+},
+"s": {
+"game": 2629.67,
+"season": 2529.09,
+"delta": 100.58,
+"z": 1.25,
+"games": 16
+},
+"ivb": {
+"game": -0.13,
+"season": 1.61,
+"delta": -1.75,
+"z": -0.85,
+"games": 16
+},
+"hb": {
+"game": 5.47,
+"season": 3.7,
+"delta": 1.77,
+"z": 1.9,
+"games": 16
+},
+"ext": {
+"game": 5.99,
+"season": 5.84,
+"delta": 0.15,
+"z": 0.65,
+"games": 16
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "CH",
+"game": 0.15,
+"season": 0.264,
+"z": -1.71
+},
+{
+"what": "mix",
+"type": "FF",
+"game": 0.375,
+"season": 0.203,
+"z": 3.15
+},
+{
+"what": "mix",
+"type": "ST",
+"game": 0.075,
+"season": 0.188,
+"z": -2.26
+}
+],
+"mix": {
+"CH": [
+0.15,
+0.264
+],
+"FF": [
+0.375,
+0.203
+],
+"SI": [
+0.25,
+0.279
+],
+"SL": [
+0.15,
+0.066
+],
+"ST": [
+0.075,
+0.188
+]
+},
+"zone": {
+"game": 0.4,
+"season": 0.427,
+"z": -0.46
+},
+"pitches": {
+"game": 40,
+"season_mean": 93.2,
+"season_max": 106
+},
+"pk": 849826,
+"pitcher": 650633,
+"name": "Michael King",
+"team": "SD",
+"seasonGames": 32
+},
+{
+"n": 7,
+"types": {
+"SI": {
+"n": 6,
+"v": {
+"game": 98.73,
+"season": 98.78,
+"delta": -0.04,
+"z": -0.05,
+"games": 53
+},
+"s": {
+"game": 2454.0,
+"season": 2300.43,
+"delta": 153.57,
+"z": 2.42,
+"games": 53
+},
+"ivb": {
+"game": 5.55,
+"season": 6.76,
+"delta": -1.21,
+"z": -1.18,
+"games": 53
+},
+"hb": {
+"game": -13.5,
+"season": -13.8,
+"delta": 0.3,
+"z": 0.22,
+"games": 53
+},
+"ext": {
+"game": 6.55,
+"season": 6.48,
+"delta": 0.07,
+"z": 0.69,
+"games": 53
+}
+}
+},
+"flags": [
+{
+"what": "mix",
+"type": "SI",
+"game": 0.857,
+"season": 0.612,
+"z": 1.8
+},
+{
+"what": "mix",
+"type": "SL",
+"game": 0.143,
+"season": 0.376,
+"z": -1.65
+}
+],
+"mix": {
+"FF": [
+0.0,
+0.002
+],
+"SI": [
+0.857,
+0.612
+],
+"SL": [
+0.143,
+0.376
+]
+},
+"zone": {
+"game": 0.571,
+"season": 0.439,
+"z": 1.22
+},
+"pitches": {
+"game": 7,
+"season_mean": 15.2,
+"season_max": 33
+},
+"pk": 849826,
+"pitcher": 682842,
+"name": "Abner Uribe",
+"team": "MIL",
+"seasonGames": 61
+}
+]

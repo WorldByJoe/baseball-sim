@@ -57,7 +57,8 @@
    CHANGED
      v1.7  (the playoff review's branch) a game played as it was: T.plan, the pitchers in their order with the batters
            each faced, and T.lineupPlan, who takes each spot in the order at which of its turns; a game that outruns
-           the one played goes back to the manager and the rest of the pen. Unset, nothing changes
+           the one played goes back to the manager and the rest of the pen; o.maxInnings raises the 18-inning safety stop
+           (a tie at the 18th was left as a tie). Unset, nothing changes
      v1.6  the current rules (Joe, 2026-10-06): the three-batter minimum, two throws over a plate appearance, the
            18-in bases in the steal race, the extra-innings runner on second (o.ghost); the reliever is picked for
            the three hitters due up (described since v0.4, but the hitters due up were never looked at)
@@ -175,7 +176,7 @@ var BBGame = (function () {
     var side = [teamState(A, rules), teamState(H, rules)];
     var inning = 1, half = 0;   // half 0 = top (A bats), 1 = bottom (H bats)
 
-    while (!G.over && inning <= 18) {
+    while (!G.over && inning <= (o.maxInnings || 18)) {   // a safety stop; the postseason has none, so the replays raise it
       var bat = side[half], def = side[1 - half], defTeam = G.teams[1 - half];
       var inn = { n: inning, half: half, runs: 0, plays: [] };
       var outs = 0, bases = [null, null, null, null], runsBefore = G.score[half];

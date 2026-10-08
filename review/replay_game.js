@@ -85,7 +85,7 @@
   for (var g = 0; g < N; g++) {
     if (g % PARTS !== PART) continue;
     var ta = team('away', g % 40), th = team('home', (g * 7 + 3) % 40);
-    var GM = BBGame.simGame(ta, th, { rng: rng, env: env, rules: 'AL', ghost: false });
+    var GM = BBGame.simGame(ta, th, { rng: rng, env: env, rules: 'AL', ghost: false, maxInnings: 60 });   // no tie: the postseason plays on
     print(JSON.stringify({ g: g, score: GM.score, innings: GM.finalInning, hits: GM.hits }));
   }
 })(typeof arguments !== 'undefined' ? arguments : []);
