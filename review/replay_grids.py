@@ -1,5 +1,5 @@
 """
-replay_grids.py · v0.6 · 2026-10-08
+replay_grids.py · v0.7 · 2026-10-08
 
 The division series score grids: each finished game's replays (review/replay_game.js,
 diag_out/replays/<pk>.jsonl) as a table of one team's runs (columns) against the other's
@@ -11,6 +11,7 @@ Within a series the same team keeps the columns (Game 1's visitor), so the grids
   python3 review/replay_grids.py OUT.html --page     (a whole document, for GitHub Pages)
 
 CHANGED
+  v0.7  the couch companion (live/) as a third view: live on GitHub Pages, its replay inside the artifact (published with live/ beside it)
   v0.6  a game not yet played shows its prediction before first pitch (diag_out/predict, review/pregame.js) as a card of its own; once played, its card says what the prediction gave
   v0.5  the LCS and World Series forecast (review/series_forecast.json); the trait map as a second view; --page for GitHub Pages
   v0.4  the series picks: each series' chance for its winner from the replays' game chances, per set; the favourite's games won

@@ -28,6 +28,10 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f
 .views .note { font-size: 13px; color: var(--muted); }
 #view-traits { min-height: 60vh; }
 #view-traits iframe { display: block; width: 100%; height: 80vh; border: 0; }
+#view-couch { max-width: 1240px; margin: 0 auto; padding-inline: 16px; padding-block: 12px 24px; display: flex; flex-direction: column; gap: 10px; }
+#view-couch iframe { display: block; width: 100%; height: max(620px, calc(100vh - 150px)); border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.couch-note { margin: 0; font-size: 14px; color: var(--muted); max-width: 80ch; }
+.couch-note a { color: var(--ink); }
 .jump { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; }
 .jump a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
 .jump a:hover { border-bottom-color: var(--ink); }
@@ -144,6 +148,7 @@ footer p { margin: 0; }
   <div class="seg">
     <button type="button" aria-pressed="true" data-view="playoffs">Postseason</button>
     <button type="button" aria-pressed="false" data-view="traits">Trait map</button>
+    <button type="button" aria-pressed="false" data-view="couch">Couch companion</button>
   </div>
   <span class="note">The trait map: every trait, ability and engine constant the model uses, what each one does, and where its value came from.</span>
 </nav>
@@ -193,6 +198,10 @@ footer p { margin: 0; }
 </div>
 
 <div id="view-traits" hidden><iframe title="Ballgame trait map" loading="lazy"></iframe></div>
+<div id="view-couch" hidden>
+  <p class="couch-note" id="couch-note"></p>
+  <iframe title="Couch companion"></iframe>
+</div>
 <script type="application/json" id="trait-map-src"><!--TRAITMAP--></script>
 <script>
 (function () {
@@ -222,12 +231,26 @@ footer p { margin: 0; }
     frame.srcdoc = JSON.parse(document.getElementById('trait-map-src').textContent);
   }
   new MutationObserver(theme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  // the couch companion: a page of its own (live/). On GitHub Pages it follows today's game through MLB's live feed; inside the
+  // artifact host no page can reach that feed, so it replays a finished game from its own files.
+  var vc = document.getElementById('view-couch'), cframe = vc.querySelector('iframe');
+  function openCouch() {
+    if (cframe.getAttribute('src')) return;
+    var gh = /github\.io$/.test(location.hostname), live = 'https://worldbyjoe.github.io/baseball-sim/live/';
+    document.getElementById('couch-note').innerHTML = gh
+      ? 'The couch companion follows a postseason game pitch by pitch through the same model: the chance of each outcome at the plate, the pitches that surprised it, and a running ledger of what each side was expected to do against what it did. It picks today&#39;s game from MLB&#39;s schedule; with no game on, choose the replay. <a href="' + live + '" target="_blank" rel="noopener">Open it on its own page</a>.'
+      : 'The couch companion follows a postseason game pitch by pitch through the same model: the chance of each outcome at the plate, the pitches that surprised it, and a running ledger of what each side was expected to do against what it did. This page cannot reach MLB&#39;s live feed, so here it replays ALDS Game 2 (Yankees at Rays). For a game in progress, open <a href="' + live + '" target="_blank" rel="noopener">the live version</a>.';
+    cframe.addEventListener('load', function () { try { var t = document.documentElement.getAttribute('data-theme'), r = cframe.contentDocument.documentElement; if (t) r.setAttribute('data-theme', t); } catch (e) {} });
+    cframe.setAttribute('src', gh ? '../live/' : 'live/index.html?replay');
+  }
   function view(k) {
-    vp.hidden = k !== 'playoffs'; vt.hidden = k !== 'traits';
+    vp.hidden = k !== 'playoffs'; vt.hidden = k !== 'traits'; vc.hidden = k !== 'couch';
+    if (k === 'couch') openCouch();
     vbtns.forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-view') === k ? 'true' : 'false'); });
     if (k === 'traits') { openMap(); setTimeout(fit, 50); }
   }
   vbtns.forEach(function (b) { b.addEventListener('click', function () { view(b.getAttribute('data-view')); window.scrollTo(0, 0); }); });
   if (location.hash === '#traits') view('traits');
+  if (location.hash === '#couch') view('couch');
 })();
 </script>
