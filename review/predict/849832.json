@@ -1,0 +1,3 @@
+{"pk": 849832, "source": 849833, "away": "CLE", "home": "CWS", "starters": {"CLE": [800048, "Parker Messick"], "CWS": [696146, "Hagen Smith"]},
+ "lineups": "each team's Game 3 lineup", "ran": "2026-10-08", "park": "Rate Field, 60 F",
+ "run": "tools/diag/run.sh ... review/pregame.js -- 849833 1000 21 PART 8 800048 696146 'Rate Field' - '' [1.77]"}

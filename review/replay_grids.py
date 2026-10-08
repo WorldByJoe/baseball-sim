@@ -1,5 +1,5 @@
 """
-replay_grids.py · v0.5 · 2026-10-08
+replay_grids.py · v0.6 · 2026-10-08
 
 The division series score grids: each finished game's replays (review/replay_game.js,
 diag_out/replays/<pk>.jsonl) as a table of one team's runs (columns) against the other's
@@ -11,6 +11,7 @@ Within a series the same team keeps the columns (Game 1's visitor), so the grids
   python3 review/replay_grids.py OUT.html --page     (a whole document, for GitHub Pages)
 
 CHANGED
+  v0.6  a game not yet played shows its prediction before first pitch (diag_out/predict, review/pregame.js) as a card of its own; once played, its card says what the prediction gave
   v0.5  the LCS and World Series forecast (review/series_forecast.json); the trait map as a second view; --page for GitHub Pages
   v0.4  the series picks: each series' chance for its winner from the replays' game chances, per set; the favourite's games won
   v0.3  a third set, each fielder's own error tendency (replay_game.js mode 'errors'); errors in the tallies and captions
@@ -71,6 +72,62 @@ def table(R, ci, ri, n_c, n_r, top, real, colTeam, rowTeam, cn, rn, home, num, k
     return ''.join(out)
 
 
+def load_pred(pk):
+    """A game's prediction before first pitch, if one was run: its notes and its simulations per set (no game-day pitching
+    exists before a game, so the as-pitched set shows the regular-season one)."""
+    import glob
+    meta = 'diag_out/predict/%d.json' % pk
+    if not os.path.exists(meta): return None, None
+    M = json.load(open(meta)); RS = {}
+    for key in ('season', 'errors'):
+        RS[key] = [json.loads(l) for f in sorted(glob.glob('diag_out/predict/%d_%s_*.jsonl' % (pk, key))) for l in open(f) if l.startswith('{')]
+    if not all(RS.values()): return None, None
+    RS = {'season': RS['season'], 'pitched': RS['season'], 'errors': RS['errors']}
+    return M, RS
+
+
+def pred_line(pk, ab):
+    """After the game: what the prediction before first pitch gave each side, per set."""
+    M, RS = load_pred(pk)
+    if not M: return ''
+    out = []
+    for key, R in RS.items():
+        hw = sum(1 for r in R if r['score'][1] > r['score'][0]) / len(R)
+        out.append('<p class="tally pred" data-set="%s">Before first pitch the model gave %s %.0f%%, %s %.0f%%.</p>' % (key, NICK[ab['home']], 100 * hw, NICK[ab['away']], 100 * (1 - hw)))
+    return ''.join(out)
+
+
+def pred_grid(pk, num, date, colTeam, rowTeam):
+    """A game not yet played: its simulations before first pitch as a score grid, no star (there is no final yet)."""
+    M, RS = load_pred(pk)
+    ab = {'away': M['away'], 'home': M['home']}; side = {ab['away']: 0, ab['home']: 1}
+    ci, ri = side[colTeam], side[rowTeam]
+    allR = [r for R in RS.values() for r in R]
+    n_c = max(r['score'][ci] for r in allR); n_r = max(r['score'][ri] for r in allR)
+    top = 0
+    for R in RS.values():
+        c = {}
+        for r in R: k = (r['score'][ci], r['score'][ri]); c[k] = c.get(k, 0) + 1
+        top = max(top, max(c.values()))
+    home = ab['home']; d = datetime.date.fromisoformat(date); when = d.strftime('%b ') + str(d.day)
+    cn, rn = NICK[colTeam], NICK[rowTeam]
+    st = M['starters']
+    out = ['<figure class="game pred" id="g%d">' % pk,
+           '<figcaption><h3>Game %d <span class="when">%s · at %s</span> <span class="badge">Prediction</span></h3>' % (num, when, html.escape(NICK[home])),
+           '<p class="final">Not yet played. Starters: %s for the %s, %s for the %s; lineups as in Game 3.</p>' % (
+               html.escape(st[ab['away']][1]), NICK[ab['away']], html.escape(st[ab['home']][1]), NICK[ab['home']])]
+    for key, R in RS.items():
+        N = len(R); colWins = sum(1 for r in R if r['score'][ci] > r['score'][ri]); extras = sum(1 for r in R if r['innings'] > 9)
+        runs = sum(sum(r['score']) for r in R) / N / 2
+        extra = ' No game-day pitching exists before the game, so this is the regular-season set.' if key == 'pitched' else ''
+        out.append('<p class="tally" data-set="%s">Simulations won: %s %s, %s %s · %s went to extra innings · %.1f runs a team on average.%s</p>' % (
+            key, cn, f'{colWins:,}', rn, f'{N - colWins:,}', f'{extras:,}', runs, extra))
+    out.append('</figcaption><div class="scroll">')
+    for key, R in RS.items(): out.append(table(R, ci, ri, n_c, n_r, top, {colTeam: -1, rowTeam: -1}, colTeam, rowTeam, cn, rn, home, num, key))
+    out.append('</div></figure>')
+    return '\n'.join(out)
+
+
 def grid(pk, num, date, colTeam, rowTeam):
     G, RS = load(pk)
     ab = {'away': G['teams']['away']['abbrev'], 'home': G['teams']['home']['abbrev']}
@@ -100,6 +157,7 @@ def grid(pk, num, date, colTeam, rowTeam):
         runs = sum(sum(r['score']) for r in R) / N / 2; ers = sum(sum(r.get('errors', [0, 0])) for r in R) / N / 2
         out.append('<p class="tally" data-set="%s">Replays won: %s %s, %s %s · %s went to extra innings · %.1f runs and %.2f errors a team on average</p>' % (
             key, cn, f'{colWins:,}', rn, f'{N - colWins:,}', f'{extras:,}', runs, ers))
+    out.append(pred_line(pk, ab))
     out.append('</figcaption><div class="scroll">')
     for key, R in RS.items(): out.append(table(R, ci, ri, n_c, n_r, top, real, colTeam, rowTeam, cn, rn, home, num, key))
     out.append('</div></figure>')
@@ -265,10 +323,18 @@ def main(path):
         if not series or series[-1]['key'] != key:
             series.append({'key': key, 'name': ser, 'col': G['teams']['away']['abbrev'], 'row': G['teams']['home']['abbrev'], 'games': []})
         series[-1]['games'].append((pk, num, date))
+    played = set(g[0] for g in games)
+    for pk, ser, num, date in GAMES:
+        if pk in played: continue
+        M, _ = load_pred(pk)
+        if not M: continue
+        for s in series:
+            if s['key'] == frozenset((M['away'], M['home'])): s.setdefault('pred', []).append((pk, num, date))
     body = []
     for s in series:
         body.append('<section class="series"><h2><span class="tag">%s</span> %s vs %s</h2><div class="games">' % (s['name'], NICK[s['col']], NICK[s['row']]))
         for pk, num, date in s['games']: body.append(grid(pk, num, date, s['col'], s['row']))
+        for pk, num, date in s.get('pred', []): body.append(pred_grid(pk, num, date, s['col'], s['row']))
         body.append('</div></section>')
     body.append(picks_section(series))
     body.append(logit_section())
