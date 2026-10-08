@@ -66,6 +66,8 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     review  (yankees-review only) pitch.mishit: a pitcher's scale on the batter's miss along the barrel, fitted to the squareness
+             of the contact he allows (review/fit_mishit.py); absent = 1, so the season's engine is unchanged
      (the playoff review's branch adds to v3.9: a pitcher's own DECEPTION scales the batter's read of his pitches
            (P.deception, carried on the pitch; unset it is 1 and the engine is unchanged); typicalPitch exported;
            both for review/fit_pitchers.js and the couch analyst; and a pitch's scoutUsage, the mix the batter's
@@ -1273,7 +1275,7 @@ var BB = (function () {
     var w0 = spinVector(d, rpmA, tiltA, effA, P.armSide);
     var fl = flyPitch(relA, v0, w0, env, false, seamA, P.armSide);
     return { type: pt.type, rel: relA, v0: v0, w0: w0, seam: seamA, armSide: P.armSide, mph: vA / MPH, rpm: rpmA, tilt: tiltA, eff: effA,
-             fatigue: f, cmdIn: cmdIn, deception: P.deception, plate: { x: fl.x, z: fl.z, t: fl.t, v: fl.v, w: fl.w } };
+             fatigue: f, cmdIn: cmdIn, deception: P.deception, mishit: P.mishit, plate: { x: fl.x, z: fl.z, t: fl.t, v: fl.v, w: fl.w } };
   }
 
   // ---------------------------------------------------------------- READ
@@ -1662,7 +1664,7 @@ var BB = (function () {
           + VERT_MISS * (pitch.plate.z - (B.zone.bot + B.zone.top) / 2)    // the barrel falls short of the pitch's height away from the middle of his zone
           - PL.over * IN * behind;                                          // and sits higher on a ball released behind his shoulder (the league's launch minus attack, -2.8 deg same-side)
     var xAim = pitch.plate.x + m[0];
-    var dLong = (pitch.plate.x - xAim) * (-sb) + rng.n(0, B.longSD * IN * prot)   // + toward the tip
+    var dLong = (pitch.plate.x - xAim) * (-sb) + rng.n(0, B.longSD * IN * prot * (pitch.mishit || 1))   // + toward the tip; a pitcher's MISHIT widens it (review hook: the playoff fit of the contact he allows)
               - pitch.plate.x * sb * HAND_MISS - AIM_HANDS * IN;   // what the hands did not cover (jammed inside, toward the end outside), and his aim inside the ball
     // His effort follows the count (SWING_EFFORT), and an adjusted swing is
     // slower; SWING_NORM keeps his average over his swings at his bat speed
