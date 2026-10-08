@@ -2,16 +2,18 @@
 
 **Open it: [worldbyjoe.github.io/baseball-sim/playoffs/](https://worldbyjoe.github.io/baseball-sim/playoffs/)** (draft, 2026-10-08)
 
-The 2026 postseason through the model (engine v3.9), on one page with two views.
+The 2026 postseason through the model (engine v3.9), on one page with three views.
 
 **Postseason**
 - The League Championship Series and the World Series, each played 2,000 times before Game 1.
 - Every finished division series game played again 1,000 times with the lineups and pitchers it really had. Each game is a score grid with the real final starred, in three sets: regular-season pitching, pitching as it was that day, and each fielder making errors at his own rate.
 - Whether those replays picked the series winners and the game winners (a logistic regression of the real results on the replays' win share).
 
+**Couch companion**: a postseason game followed pitch by pitch through the same model (the page in [live/](../live/), shown in a frame; it follows today's game through MLB's live feed, or replays ALDS Game 2).
+
 **Trait map**: every trait, ability and engine constant behind these games, and where each value came from (the same page as [docs/trait_map.html](../docs/trait_map.html)).
 
-`index.html` is self-contained: the data, the figures and the trait map are all inside it.
+`index.html` holds its own data, figures and the trait map; the couch companion view opens `../live/`.
 
 ## How it is built
 
