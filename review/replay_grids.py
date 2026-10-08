@@ -1,5 +1,5 @@
 """
-replay_grids.py · v0.2 · 2026-10-07
+replay_grids.py · v0.3 · 2026-10-07
 
 The division series score grids: each finished game's replays (review/replay_game.js,
 diag_out/replays/<pk>.jsonl) as a table of one team's runs (columns) against the other's
@@ -10,6 +10,7 @@ Within a series the same team keeps the columns (Game 1's visitor), so the grids
   python3 review/replay_grids.py OUT.html
 
 CHANGED
+  v0.3  a third set, each fielder's own error tendency (replay_game.js mode 'errors'); errors in the tallies and captions
   v0.2  two sets a reader flips between: the regular season's pitching and the pitching as it was that day
         (review/replay_game.js mode 'pitched'), on shared axes and colours; a game shows once both sets exist
   v0.1  first build (Joe, 2026-10-07)
@@ -25,7 +26,8 @@ GAMES = [  # pk, series, game number, date (MLB's schedule)
 NICK = {'CWS': 'White Sox', 'CLE': 'Guardians', 'NYY': 'Yankees', 'TB': 'Rays', 'ATL': 'Braves', 'LAD': 'Dodgers', 'SD': 'Padres', 'MIL': 'Brewers'}
 
 
-SETS = (('season', 'diag_out/replays'), ('pitched', 'diag_out/replays_pitched'))
+SETS = (('season', 'diag_out/replays'), ('pitched', 'diag_out/replays_pitched'), ('errors', 'diag_out/replays_errors'))
+SET_NAME = {'season': 'regular-season pitching', 'pitched': 'as pitched that day', 'errors': "fielders' own error rates"}
 
 
 def load(pk):
@@ -41,7 +43,7 @@ def table(R, ci, ri, n_c, n_r, top, real, colTeam, rowTeam, cn, rn, home, num, k
         cnt[w][c] += 1
         if r['innings'] > 9: ext[w][c] += 1
     N = len(R)
-    out = ['<table class="grid" data-set="%s" aria-label="Game %d replays (%s): %s runs across, %s runs down">' % (key, num, 'regular-season pitching' if key == 'season' else 'as pitched that day', cn, rn),
+    out = ['<table class="grid" data-set="%s" aria-label="Game %d replays (%s): %s runs across, %s runs down">' % (key, num, SET_NAME[key], cn, rn),
            '<thead><tr><th class="corner" rowspan="2" colspan="2"></th><th class="axis" colspan="%d">%s runs%s</th></tr><tr>' % (n_c + 1, cn, ' (home)' if colTeam == home else ''),
            ''.join('<th class="c">%d</th>' % c for c in range(n_c + 1)), '</tr></thead><tbody>']
     for w in range(n_r + 1):
@@ -79,6 +81,8 @@ def grid(pk, num, date, colTeam, rowTeam):
         c = {}
         for r in R: k = (r['score'][ci], r['score'][ri]); c[k] = c.get(k, 0) + 1
         top = max(top, max(c.values()))
+    feed = json.load(open('playoffs/games/%d_feed.json' % pk)); lsc = feed['liveData']['linescore']['teams']
+    errs = {ab['away']: lsc['away']['errors'], ab['home']: lsc['home']['errors']}
     home = ab['home']; d = datetime.date.fromisoformat(date)
     when = d.strftime('%b ') + str(d.day)
     cn, rn = NICK[colTeam], NICK[rowTeam]
@@ -86,12 +90,13 @@ def grid(pk, num, date, colTeam, rowTeam):
     loser = rowTeam if winner == colTeam else colTeam
     out = ['<figure class="game" id="g%d">' % pk,
            '<figcaption><h3>Game %d <span class="when">%s · at %s</span></h3>' % (num, when, html.escape(NICK[home])),
-           '<p class="final">Final: %s %d, %s %d</p>' % (NICK[winner], real[winner], NICK[loser], real[loser])]
+           '<p class="final">Final: %s %d, %s %d <span class="errs">· errors: %s %d, %s %d</span></p>' % (NICK[winner], real[winner], NICK[loser], real[loser],
+               cn, errs[colTeam], rn, errs[rowTeam])]
     for key, R in RS.items():
         N = len(R); colWins = sum(1 for r in R if r['score'][ci] > r['score'][ri]); extras = sum(1 for r in R if r['innings'] > 9)
-        runs = sum(sum(r['score']) for r in R) / N / 2
-        out.append('<p class="tally" data-set="%s">Replays won: %s %s, %s %s · extra innings %s · %.1f runs a team</p>' % (
-            key, cn, f'{colWins:,}', rn, f'{N - colWins:,}', f'{extras:,}', runs))
+        runs = sum(sum(r['score']) for r in R) / N / 2; ers = sum(sum(r.get('errors', [0, 0])) for r in R) / N / 2
+        out.append('<p class="tally" data-set="%s">Replays won: %s %s, %s %s · extra innings %s · %.1f runs and %.2f errors a team</p>' % (
+            key, cn, f'{colWins:,}', rn, f'{N - colWins:,}', f'{extras:,}', runs, ers))
     out.append('</figcaption><div class="scroll">')
     for key, R in RS.items(): out.append(table(R, ci, ri, n_c, n_r, top, real, colTeam, rowTeam, cn, rn, home, num, key))
     out.append('</div></figure>')
@@ -158,16 +163,18 @@ def main(path):
         for pk, num, date in s['games']: body.append(grid(pk, num, date, s['col'], s['row']))
         body.append('</div></section>')
     body.append(logit_section())
-    runs = {}
+    runs = {}; errs = {}
     for key, d in SETS:
-        tot = n = 0
+        tot = te = n = 0
         for pk, _, _, _ in games:
             R = [json.loads(l) for l in open('%s/%d.jsonl' % (d, pk)) if l.startswith('{')]
-            tot += sum(sum(r['score']) for r in R) / len(R) / 2; n += 1
-        runs[key] = tot / n
+            tot += sum(sum(r['score']) for r in R) / len(R) / 2; te += sum(sum(r.get('errors', [0, 0])) for r in R) / len(R) / 2; n += 1
+        runs[key] = tot / n; errs[key] = te / n
+    reale = sum(sum(json.load(open('playoffs/games/%d_feed.json' % g[0]))['liveData']['linescore']['teams'][s]['errors'] for s in ('away', 'home')) / 2 for g in games) / len(games)
     realr = sum((json.load(open('review/games/%d.json' % g[0]))['final']['away'] + json.load(open('review/games/%d.json' % g[0]))['final']['home']) / 2 for g in games) / len(games)
     page = open('review/replay_grids_template.html').read().replace('<!--GRIDS-->', '\n'.join(body))
-    page = page.replace('<!--RUNS_SEASON-->', '%.2f' % runs['season']).replace('<!--RUNS_PITCHED-->', '%.2f' % runs['pitched']).replace('<!--RUNS_REAL-->', '%.2f' % realr).replace('<!--NGAMES-->', str(len(games)))
+    for key in runs: page = page.replace('<!--RUNS_%s-->' % key.upper(), '%.2f' % runs[key]).replace('<!--ERR_%s-->' % key.upper(), '%.2f' % errs[key])
+    page = page.replace('<!--RUNS_REAL-->', '%.2f' % realr).replace('<!--ERR_REAL-->', '%.2f' % reale).replace('<!--NGAMES-->', str(len(games)))
     open(path, 'w').write(page)
     print('wrote', path, len(page), 'bytes')
 

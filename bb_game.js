@@ -58,7 +58,8 @@
      v1.7  (the playoff review's branch) a game played as it was: T.plan, the pitchers in their order with the batters
            each faced, and T.lineupPlan, who takes each spot in the order at which of its turns; a game that outruns
            the one played goes back to the manager and the rest of the pen; o.maxInnings raises the 18-inning safety stop
-           (a tie at the 18th was left as a tie). Unset, nothing changes
+           (a tie at the 18th was left as a tie); a pitcher's and a catcher's errMult scale the pickoff throw's and the
+           steal throw's chance of getting away (bb_field v1.16). Unset, nothing changes
      v1.6  the current rules (Joe, 2026-10-06): the three-batter minimum, two throws over a plate appearance, the
            18-in bases in the steal race, the extra-innings runner on second (o.ghost); the reliever is picked for
            the three hitters due up (described since v0.4, but the hitters due up were never looked at)
@@ -223,7 +224,7 @@ var BBGame = (function () {
             if (rng.u() >= pThrow) return null;
             pickN++;
             var back = 0.5 * pl.jump + PK_LEAD / V_BACK + rng.n(0, 0.09), ball = PK_T + (P.pickMove || 0) + rng.n(0, 0.07);
-            var ev = { id: pl.id, from: 1, basesBefore: bases.slice(), outsBefore: outs, error: rng.u() < PK_ERR };
+            var ev = { id: pl.id, from: 1, basesBefore: bases.slice(), outsBefore: outs, error: rng.u() < PK_ERR * (P.errMult || 1) };   // errMult: his own (v1.7, review)
             ev.out = !ev.error && back > ball; ev.margin = +(ball - back).toFixed(3);
             pickLog.push(ev);
             if (ev.out) { bases[1] = null; outs++; S.po++; SD.pko++; }
@@ -259,7 +260,7 @@ var BBGame = (function () {
             // or not), the throw is not always on the bag
             var tRun = pl.jump + rng.n(0, 0.08) + BBField.stealTime(pl, BASE - BASE_CUT - BBField.LEAD_STEAL);
             var tBall = P.holdTime + C.popTime - (g.to === 3 ? 0.2 : 0) + rng.n(0, 0.22) + (dirt ? 0.3 : 0);
-            var wildThrow = rng.u() < 0.03, safe = wildThrow || tRun < tBall + 0.15;
+            var wildThrow = rng.u() < 0.03 * (C.errMult || 1), safe = wildThrow || tRun < tBall + 0.15;
             rec.steal = { id: g.id, from: g.from, to: g.to, safe: safe, tRun: tRun, tBall: tBall, wild: wildThrow };
             bases[g.from] = null;
             if (safe && wildThrow) {   // the throw gets away: everyone moves up a base, the stealer one past his target (until v1.1 he landed on a man already on third, who vanished)

@@ -1,5 +1,5 @@
 /* ============================================================================
-   replay_game.js · v0.2 · 2026-10-07
+   replay_game.js · v0.3 · 2026-10-07
 
    A postseason game played again as it was played: the real batting order with
    its substitutions (each man takes his spot at the turn he took it, at the
@@ -18,13 +18,19 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js bb_game.js review/players.js review/replay_game.js -- PK [games] [seed] [part] [parts] [pitched]
 
    'pitched': each pitcher at his game-day speeds and mix (review/as_pitched.py); without it, his regular season.
+   'errors' (then G, the league factor): each fielder's own error tendency (review/err_mult.py); 'pitched+errors' both.
 
    CHANGED
+     v0.3  mode 'errors': each fielder's own error tendency; every replay prints the errors charged to each side
      v0.2  mode 'pitched': the pitchers as they pitched that day (Joe, 2026-10-07); no tie at the 18th
      v0.1  first build (the division series score grids, 2026-10-07)
 ============================================================================ */
 (function (A) {
-  var PK = A[0], N = +A[1] || 200, SEED = +A[2] || 1, PART = +A[3] || 0, PARTS = +A[4] || 1, PITCHED = A[5] === 'pitched';
+  var PK = A[0], N = +A[1] || 200, SEED = +A[2] || 1, PART = +A[3] || 0, PARTS = +A[4] || 1, MODE = (A[5] || '').split('+'), PITCHED = MODE.indexOf('pitched') >= 0;
+  // ERRORS (mode 'errors'): each fielder's own error tendency, his season errors per chance against his positions'
+  // (review/err_mult.py) times one league factor G (A[6]), as errMult on his drops, fumbles and wild throws (bb_field v1.16)
+  var ERR = MODE.indexOf('errors') >= 0 ? JSON.parse(read('review/err_mult.json')).players : null, GERR = +A[6] || 1;
+  function errOf(id) { var e = ERR && ERR[id]; return ERR ? GERR * (e ? e.rel : 1) : undefined; }
   // AS PITCHED (mode 'pitched'): each man in the plan throws his game-day speed for every type he threw 3+ times
   // (his season speed plus that day's change, review/as_pitched.py) and his game-day mix; the batter's scouting report
   // keeps his season mix (scoutUsage), since nobody knew that day's mix before it was thrown
@@ -80,7 +86,7 @@
     SLOTS[s].forEach(function (list, k) {
       var plan = {};
       list.forEach(function (m, j) {
-        var h = REVIEW.hitter(D.fits[m.id], rng, draw, m.pos === 'DH' ? 'DH' : m.pos); h.pos = m.pos; h.homePos = m.pos;
+        var h = REVIEW.hitter(D.fits[m.id], rng, draw, m.pos === 'DH' ? 'DH' : m.pos); h.pos = m.pos; h.homePos = m.pos; if (ERR) h.errMult = errOf(m.id);
         if (j === 0) lineup.push(h); else plan[m.from] = h;
       });
       lineupPlan.push(plan);
@@ -88,12 +94,12 @@
     var used = G.pitchers[s];
     // each faces the batters he faced; a reliever's 35-pitch stamina would leave a long man (a bullpen game's 50 pitches) far past
     // his limit by the plan's own doing, so his stamina is at least the pitches he threw that day over 0.85 (fatigue just begun)
-    var plan = used.map(function (id, k) { var P = fresh(pitcher(id, k > 0)); asPitched(id, P); P.stamina = Math.max(P.stamina, (thrown[id] || 0) / 0.85); return { P: P, bf: faced[s][id] || 0 }; })
+    var plan = used.map(function (id, k) { var P = fresh(pitcher(id, k > 0)); asPitched(id, P); if (ERR) P.errMult = errOf(id); P.stamina = Math.max(P.stamina, (thrown[id] || 0) / 0.85); return { P: P, bf: faced[s][id] || 0 }; })
       .filter(function (q, k) { return k === 0 || q.bf > 0; });
     var pen = Object.keys(D.recs).map(function (k) { return D.recs[k]; }).filter(function (r) {
       if (r.team !== ab || r.kind === 'position' || used.indexOf(r.id) >= 0) return false;
       return ((r.summaries.pitching && r.summaries.pitching.role || {}).role) === 'RP';
-    }).map(function (r) { return fresh(pitcher(r.id, true)); });
+    }).map(function (r) { var P = fresh(pitcher(r.id, true)); if (ERR) P.errMult = errOf(r.id); return P; });
     if (!pen.length) pen = plan.slice(1).map(function (q) { return q.P; });
     var saves = function (P) { var ss = (D.recs[P.mlbId].seasonStats || {}).pitching_2026 || {}; return ss.SV || 0; };
     var closer = pen.slice().sort(function (a, b) { return saves(b) - saves(a); })[0];
@@ -104,6 +110,6 @@
     if (g % PARTS !== PART) continue;
     var ta = team('away', g % 40), th = team('home', (g * 7 + 3) % 40);
     var GM = BBGame.simGame(ta, th, { rng: rng, env: env, rules: 'AL', ghost: false, maxInnings: 60 });   // no tie: the postseason plays on
-    print(JSON.stringify({ g: g, score: GM.score, innings: GM.finalInning, hits: GM.hits }));
+    print(JSON.stringify({ g: g, score: GM.score, innings: GM.finalInning, hits: GM.hits, errors: GM.errors }));
   }
 })(typeof arguments !== 'undefined' ? arguments : []);
