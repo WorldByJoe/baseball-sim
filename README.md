@@ -8,6 +8,8 @@ The engine is pure JavaScript, seeded and deterministic; a whole game simulates 
 
 **Watch a game: [worldbyjoe.github.io/baseball-sim/baseball.html](https://worldbyjoe.github.io/baseball-sim/baseball.html)** (runs in the browser; nothing to install).
 
+**The 2026 postseason through the model: [worldbyjoe.github.io/baseball-sim/playoffs/](https://worldbyjoe.github.io/baseball-sim/playoffs/)** (score grids of every division series game replayed 1,000 times, the League Championship Series and World Series forecast, and the trait map; draft).
+
 ## Files
 
 - `bb_engine.js` — the plate appearance: plan, expect, throw, read, decide, call, swing, collide, fly. Traits and the power chain live here.
