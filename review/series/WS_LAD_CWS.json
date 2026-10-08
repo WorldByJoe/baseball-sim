@@ -1,0 +1,190 @@
+{
+ "name": "WS_LAD_CWS",
+ "hi": "LAD",
+ "lo": "CWS",
+ "homeOf": [
+  "hi",
+  "hi",
+  "lo",
+  "lo",
+  "lo",
+  "hi",
+  "hi"
+ ],
+ "teams": {
+  "LAD": {
+   "lineup": [
+    {
+     "id": 605141,
+     "name": "Mookie Betts",
+     "pos": "SS"
+    },
+    {
+     "id": 518692,
+     "name": "Freddie Freeman",
+     "pos": "1B"
+    },
+    {
+     "id": 669257,
+     "name": "Will Smith",
+     "pos": "C"
+    },
+    {
+     "id": 660271,
+     "name": "Shohei Ohtani",
+     "pos": "DH"
+    },
+    {
+     "id": 606192,
+     "name": "Teoscar Hern\u00e1ndez",
+     "pos": "LF"
+    },
+    {
+     "id": 571970,
+     "name": "Max Muncy",
+     "pos": "3B"
+    },
+    {
+     "id": 571771,
+     "name": "Enrique Hern\u00e1ndez",
+     "pos": "2B"
+    },
+    {
+     "id": 663656,
+     "name": "Kyle Tucker",
+     "pos": "RF"
+    },
+    {
+     "id": 681624,
+     "name": "Andy Pages",
+     "pos": "CF"
+    }
+   ],
+   "rotation": [
+    669373,
+    605483,
+    808967,
+    607192
+   ],
+   "venue": {
+    "id": 22,
+    "name": "UNIQLO Field at Dodger Stadium",
+    "city": "Los Angeles",
+    "state": "CA",
+    "lat": 34.07368,
+    "lon": -118.24053,
+    "elevFt": 515,
+    "azimuthDeg": 26.0,
+    "roof": "Open",
+    "turf": "Grass",
+    "capacity": 56000,
+    "dims": {
+     "leftLine": 330,
+     "left": null,
+     "leftCenter": 385,
+     "center": 395,
+     "rightCenter": 385,
+     "right": null,
+     "rightLine": 330
+    },
+    "fence": [
+     330,
+     385,
+     395,
+     385,
+     330
+    ],
+    "homeOf": [
+     "LAD"
+    ]
+   }
+  },
+  "CWS": {
+   "lineup": [
+    {
+     "id": 803011,
+     "name": "Sam Antonacci",
+     "pos": "DH"
+    },
+    {
+     "id": 678246,
+     "name": "Miguel Vargas",
+     "pos": "3B"
+    },
+    {
+     "id": 808959,
+     "name": "Munetaka Murakami",
+     "pos": "1B"
+    },
+    {
+     "id": 691019,
+     "name": "Kyle Teel",
+     "pos": "C"
+    },
+    {
+     "id": 805367,
+     "name": "Chase Meidroth",
+     "pos": "2B"
+    },
+    {
+     "id": 671976,
+     "name": "Tristan Peters",
+     "pos": "CF"
+    },
+    {
+     "id": 695731,
+     "name": "Braden Montgomery",
+     "pos": "RF"
+    },
+    {
+     "id": 545341,
+     "name": "Randal Grichuk",
+     "pos": "LF"
+    },
+    {
+     "id": 695657,
+     "name": "Colson Montgomery",
+     "pos": "SS"
+    }
+   ],
+   "rotation": [
+    696146,
+    641743,
+    656794,
+    663436
+   ],
+   "venue": {
+    "id": 4,
+    "name": "Rate Field",
+    "city": "Chicago",
+    "state": "IL",
+    "lat": 41.83,
+    "lon": -87.634167,
+    "elevFt": 595,
+    "azimuthDeg": 127.0,
+    "roof": "Open",
+    "turf": "Grass",
+    "capacity": 40126,
+    "dims": {
+     "leftLine": 330,
+     "left": null,
+     "leftCenter": 377,
+     "center": 400,
+     "rightCenter": 372,
+     "right": null,
+     "rightLine": 335
+    },
+    "fence": [
+     330,
+     377,
+     400,
+     372,
+     335
+    ],
+    "homeOf": [
+     "CWS"
+    ]
+   }
+  }
+ }
+}

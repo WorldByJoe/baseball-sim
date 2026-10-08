@@ -1,0 +1,190 @@
+{
+ "name": "WS_LAD_TB",
+ "hi": "LAD",
+ "lo": "TB",
+ "homeOf": [
+  "hi",
+  "hi",
+  "lo",
+  "lo",
+  "lo",
+  "hi",
+  "hi"
+ ],
+ "teams": {
+  "LAD": {
+   "lineup": [
+    {
+     "id": 605141,
+     "name": "Mookie Betts",
+     "pos": "SS"
+    },
+    {
+     "id": 518692,
+     "name": "Freddie Freeman",
+     "pos": "1B"
+    },
+    {
+     "id": 669257,
+     "name": "Will Smith",
+     "pos": "C"
+    },
+    {
+     "id": 660271,
+     "name": "Shohei Ohtani",
+     "pos": "DH"
+    },
+    {
+     "id": 606192,
+     "name": "Teoscar Hern\u00e1ndez",
+     "pos": "LF"
+    },
+    {
+     "id": 571970,
+     "name": "Max Muncy",
+     "pos": "3B"
+    },
+    {
+     "id": 571771,
+     "name": "Enrique Hern\u00e1ndez",
+     "pos": "2B"
+    },
+    {
+     "id": 663656,
+     "name": "Kyle Tucker",
+     "pos": "RF"
+    },
+    {
+     "id": 681624,
+     "name": "Andy Pages",
+     "pos": "CF"
+    }
+   ],
+   "rotation": [
+    669373,
+    605483,
+    808967,
+    607192
+   ],
+   "venue": {
+    "id": 22,
+    "name": "UNIQLO Field at Dodger Stadium",
+    "city": "Los Angeles",
+    "state": "CA",
+    "lat": 34.07368,
+    "lon": -118.24053,
+    "elevFt": 515,
+    "azimuthDeg": 26.0,
+    "roof": "Open",
+    "turf": "Grass",
+    "capacity": 56000,
+    "dims": {
+     "leftLine": 330,
+     "left": null,
+     "leftCenter": 385,
+     "center": 395,
+     "rightCenter": 385,
+     "right": null,
+     "rightLine": 330
+    },
+    "fence": [
+     330,
+     385,
+     395,
+     385,
+     330
+    ],
+    "homeOf": [
+     "LAD"
+    ]
+   }
+  },
+  "TB": {
+   "lineup": [
+    {
+     "id": 650490,
+     "name": "Yandy D\u00edaz",
+     "pos": "DH"
+    },
+    {
+     "id": 666018,
+     "name": "Jonathan Aranda",
+     "pos": "1B"
+    },
+    {
+     "id": 691406,
+     "name": "Junior Caminero",
+     "pos": "3B"
+    },
+    {
+     "id": 683748,
+     "name": "Victor Mesa Jr.",
+     "pos": "LF"
+    },
+    {
+     "id": 668723,
+     "name": "Ryan Vilade",
+     "pos": "RF"
+    },
+    {
+     "id": 689414,
+     "name": "Liam Hicks",
+     "pos": "C"
+    },
+    {
+     "id": 676356,
+     "name": "Jonny DeLuca",
+     "pos": "CF"
+    },
+    {
+     "id": 680700,
+     "name": "Richie Palacios",
+     "pos": "2B"
+    },
+    {
+     "id": 670764,
+     "name": "Taylor Walls",
+     "pos": "SS"
+    }
+   ],
+   "rotation": [
+    656876,
+    642547,
+    607259,
+    643377
+   ],
+   "venue": {
+    "id": 12,
+    "name": "Tropicana Field",
+    "city": "St. Petersburg",
+    "state": "FL",
+    "lat": 27.767778,
+    "lon": -82.6525,
+    "elevFt": 15,
+    "azimuthDeg": 359.0,
+    "roof": "Dome",
+    "turf": "Artificial Turf",
+    "capacity": 25025,
+    "dims": {
+     "leftLine": 315,
+     "left": 370,
+     "leftCenter": 410,
+     "center": 404,
+     "rightCenter": 404,
+     "right": 370,
+     "rightLine": 322
+    },
+    "fence": [
+     315,
+     410,
+     404,
+     404,
+     322
+    ],
+    "homeOf": [
+     "TB"
+    ]
+   }
+  }
+ }
+}

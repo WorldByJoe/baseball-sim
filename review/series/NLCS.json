@@ -1,0 +1,190 @@
+{
+ "name": "NLCS",
+ "hi": "MIL",
+ "lo": "LAD",
+ "homeOf": [
+  "hi",
+  "hi",
+  "lo",
+  "lo",
+  "lo",
+  "hi",
+  "hi"
+ ],
+ "teams": {
+  "MIL": {
+   "lineup": [
+    {
+     "id": 694192,
+     "name": "Jackson Chourio",
+     "pos": "LF"
+    },
+    {
+     "id": 592885,
+     "name": "Christian Yelich",
+     "pos": "DH"
+    },
+    {
+     "id": 661388,
+     "name": "William Contreras",
+     "pos": "C"
+    },
+    {
+     "id": 668930,
+     "name": "Brice Turang",
+     "pos": "2B"
+    },
+    {
+     "id": 641343,
+     "name": "Jake Bauers",
+     "pos": "1B"
+    },
+    {
+     "id": 806198,
+     "name": "Cooper Pratt",
+     "pos": "SS"
+    },
+    {
+     "id": 686217,
+     "name": "Sal Frelick",
+     "pos": "RF"
+    },
+    {
+     "id": 669003,
+     "name": "Garrett Mitchell",
+     "pos": "CF"
+    },
+    {
+     "id": 687401,
+     "name": "Joey Ortiz",
+     "pos": "3B"
+    }
+   ],
+   "rotation": [
+    694819,
+    701656,
+    669160,
+    688107
+   ],
+   "venue": {
+    "id": 32,
+    "name": "American Family Field",
+    "city": "Milwaukee",
+    "state": "WI",
+    "lat": 43.02838,
+    "lon": -87.97099,
+    "elevFt": 597,
+    "azimuthDeg": 129.0,
+    "roof": "Retractable",
+    "turf": "Grass",
+    "capacity": 40100,
+    "dims": {
+     "leftLine": 344,
+     "left": null,
+     "leftCenter": 371,
+     "center": 400,
+     "rightCenter": 374,
+     "right": null,
+     "rightLine": 345
+    },
+    "fence": [
+     344,
+     371,
+     400,
+     374,
+     345
+    ],
+    "homeOf": [
+     "MIL"
+    ]
+   }
+  },
+  "LAD": {
+   "lineup": [
+    {
+     "id": 605141,
+     "name": "Mookie Betts",
+     "pos": "SS"
+    },
+    {
+     "id": 518692,
+     "name": "Freddie Freeman",
+     "pos": "1B"
+    },
+    {
+     "id": 669257,
+     "name": "Will Smith",
+     "pos": "C"
+    },
+    {
+     "id": 660271,
+     "name": "Shohei Ohtani",
+     "pos": "DH"
+    },
+    {
+     "id": 606192,
+     "name": "Teoscar Hern\u00e1ndez",
+     "pos": "LF"
+    },
+    {
+     "id": 571970,
+     "name": "Max Muncy",
+     "pos": "3B"
+    },
+    {
+     "id": 571771,
+     "name": "Enrique Hern\u00e1ndez",
+     "pos": "2B"
+    },
+    {
+     "id": 663656,
+     "name": "Kyle Tucker",
+     "pos": "RF"
+    },
+    {
+     "id": 681624,
+     "name": "Andy Pages",
+     "pos": "CF"
+    }
+   ],
+   "rotation": [
+    669373,
+    605483,
+    808967,
+    607192
+   ],
+   "venue": {
+    "id": 22,
+    "name": "UNIQLO Field at Dodger Stadium",
+    "city": "Los Angeles",
+    "state": "CA",
+    "lat": 34.07368,
+    "lon": -118.24053,
+    "elevFt": 515,
+    "azimuthDeg": 26.0,
+    "roof": "Open",
+    "turf": "Grass",
+    "capacity": 56000,
+    "dims": {
+     "leftLine": 330,
+     "left": null,
+     "leftCenter": 385,
+     "center": 395,
+     "rightCenter": 385,
+     "right": null,
+     "rightLine": 330
+    },
+    "fence": [
+     330,
+     385,
+     395,
+     385,
+     330
+    ],
+    "homeOf": [
+     "LAD"
+    ]
+   }
+  }
+ }
+}

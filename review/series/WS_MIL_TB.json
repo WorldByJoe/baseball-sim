@@ -1,0 +1,190 @@
+{
+ "name": "WS_MIL_TB",
+ "hi": "MIL",
+ "lo": "TB",
+ "homeOf": [
+  "hi",
+  "hi",
+  "lo",
+  "lo",
+  "lo",
+  "hi",
+  "hi"
+ ],
+ "teams": {
+  "MIL": {
+   "lineup": [
+    {
+     "id": 694192,
+     "name": "Jackson Chourio",
+     "pos": "LF"
+    },
+    {
+     "id": 592885,
+     "name": "Christian Yelich",
+     "pos": "DH"
+    },
+    {
+     "id": 661388,
+     "name": "William Contreras",
+     "pos": "C"
+    },
+    {
+     "id": 668930,
+     "name": "Brice Turang",
+     "pos": "2B"
+    },
+    {
+     "id": 641343,
+     "name": "Jake Bauers",
+     "pos": "1B"
+    },
+    {
+     "id": 806198,
+     "name": "Cooper Pratt",
+     "pos": "SS"
+    },
+    {
+     "id": 686217,
+     "name": "Sal Frelick",
+     "pos": "RF"
+    },
+    {
+     "id": 669003,
+     "name": "Garrett Mitchell",
+     "pos": "CF"
+    },
+    {
+     "id": 687401,
+     "name": "Joey Ortiz",
+     "pos": "3B"
+    }
+   ],
+   "rotation": [
+    694819,
+    701656,
+    669160,
+    688107
+   ],
+   "venue": {
+    "id": 32,
+    "name": "American Family Field",
+    "city": "Milwaukee",
+    "state": "WI",
+    "lat": 43.02838,
+    "lon": -87.97099,
+    "elevFt": 597,
+    "azimuthDeg": 129.0,
+    "roof": "Retractable",
+    "turf": "Grass",
+    "capacity": 40100,
+    "dims": {
+     "leftLine": 344,
+     "left": null,
+     "leftCenter": 371,
+     "center": 400,
+     "rightCenter": 374,
+     "right": null,
+     "rightLine": 345
+    },
+    "fence": [
+     344,
+     371,
+     400,
+     374,
+     345
+    ],
+    "homeOf": [
+     "MIL"
+    ]
+   }
+  },
+  "TB": {
+   "lineup": [
+    {
+     "id": 650490,
+     "name": "Yandy D\u00edaz",
+     "pos": "DH"
+    },
+    {
+     "id": 666018,
+     "name": "Jonathan Aranda",
+     "pos": "1B"
+    },
+    {
+     "id": 691406,
+     "name": "Junior Caminero",
+     "pos": "3B"
+    },
+    {
+     "id": 683748,
+     "name": "Victor Mesa Jr.",
+     "pos": "LF"
+    },
+    {
+     "id": 668723,
+     "name": "Ryan Vilade",
+     "pos": "RF"
+    },
+    {
+     "id": 689414,
+     "name": "Liam Hicks",
+     "pos": "C"
+    },
+    {
+     "id": 676356,
+     "name": "Jonny DeLuca",
+     "pos": "CF"
+    },
+    {
+     "id": 680700,
+     "name": "Richie Palacios",
+     "pos": "2B"
+    },
+    {
+     "id": 670764,
+     "name": "Taylor Walls",
+     "pos": "SS"
+    }
+   ],
+   "rotation": [
+    656876,
+    642547,
+    607259,
+    643377
+   ],
+   "venue": {
+    "id": 12,
+    "name": "Tropicana Field",
+    "city": "St. Petersburg",
+    "state": "FL",
+    "lat": 27.767778,
+    "lon": -82.6525,
+    "elevFt": 15,
+    "azimuthDeg": 359.0,
+    "roof": "Dome",
+    "turf": "Artificial Turf",
+    "capacity": 25025,
+    "dims": {
+     "leftLine": 315,
+     "left": 370,
+     "leftCenter": 410,
+     "center": 404,
+     "rightCenter": 404,
+     "right": 370,
+     "rightLine": 322
+    },
+    "fence": [
+     315,
+     410,
+     404,
+     404,
+     322
+    ],
+    "homeOf": [
+     "TB"
+    ]
+   }
+  }
+ }
+}

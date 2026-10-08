@@ -1,0 +1,190 @@
+{
+ "name": "ALCS",
+ "hi": "TB",
+ "lo": "CWS",
+ "homeOf": [
+  "hi",
+  "hi",
+  "lo",
+  "lo",
+  "lo",
+  "hi",
+  "hi"
+ ],
+ "teams": {
+  "TB": {
+   "lineup": [
+    {
+     "id": 650490,
+     "name": "Yandy D\u00edaz",
+     "pos": "DH"
+    },
+    {
+     "id": 666018,
+     "name": "Jonathan Aranda",
+     "pos": "1B"
+    },
+    {
+     "id": 691406,
+     "name": "Junior Caminero",
+     "pos": "3B"
+    },
+    {
+     "id": 683748,
+     "name": "Victor Mesa Jr.",
+     "pos": "LF"
+    },
+    {
+     "id": 668723,
+     "name": "Ryan Vilade",
+     "pos": "RF"
+    },
+    {
+     "id": 689414,
+     "name": "Liam Hicks",
+     "pos": "C"
+    },
+    {
+     "id": 676356,
+     "name": "Jonny DeLuca",
+     "pos": "CF"
+    },
+    {
+     "id": 680700,
+     "name": "Richie Palacios",
+     "pos": "2B"
+    },
+    {
+     "id": 670764,
+     "name": "Taylor Walls",
+     "pos": "SS"
+    }
+   ],
+   "rotation": [
+    656876,
+    642547,
+    607259,
+    643377
+   ],
+   "venue": {
+    "id": 12,
+    "name": "Tropicana Field",
+    "city": "St. Petersburg",
+    "state": "FL",
+    "lat": 27.767778,
+    "lon": -82.6525,
+    "elevFt": 15,
+    "azimuthDeg": 359.0,
+    "roof": "Dome",
+    "turf": "Artificial Turf",
+    "capacity": 25025,
+    "dims": {
+     "leftLine": 315,
+     "left": 370,
+     "leftCenter": 410,
+     "center": 404,
+     "rightCenter": 404,
+     "right": 370,
+     "rightLine": 322
+    },
+    "fence": [
+     315,
+     410,
+     404,
+     404,
+     322
+    ],
+    "homeOf": [
+     "TB"
+    ]
+   }
+  },
+  "CWS": {
+   "lineup": [
+    {
+     "id": 803011,
+     "name": "Sam Antonacci",
+     "pos": "DH"
+    },
+    {
+     "id": 678246,
+     "name": "Miguel Vargas",
+     "pos": "3B"
+    },
+    {
+     "id": 808959,
+     "name": "Munetaka Murakami",
+     "pos": "1B"
+    },
+    {
+     "id": 691019,
+     "name": "Kyle Teel",
+     "pos": "C"
+    },
+    {
+     "id": 805367,
+     "name": "Chase Meidroth",
+     "pos": "2B"
+    },
+    {
+     "id": 671976,
+     "name": "Tristan Peters",
+     "pos": "CF"
+    },
+    {
+     "id": 695731,
+     "name": "Braden Montgomery",
+     "pos": "RF"
+    },
+    {
+     "id": 545341,
+     "name": "Randal Grichuk",
+     "pos": "LF"
+    },
+    {
+     "id": 695657,
+     "name": "Colson Montgomery",
+     "pos": "SS"
+    }
+   ],
+   "rotation": [
+    696146,
+    641743,
+    656794,
+    663436
+   ],
+   "venue": {
+    "id": 4,
+    "name": "Rate Field",
+    "city": "Chicago",
+    "state": "IL",
+    "lat": 41.83,
+    "lon": -87.634167,
+    "elevFt": 595,
+    "azimuthDeg": 127.0,
+    "roof": "Open",
+    "turf": "Grass",
+    "capacity": 40126,
+    "dims": {
+     "leftLine": 330,
+     "left": null,
+     "leftCenter": 377,
+     "center": 400,
+     "rightCenter": 372,
+     "right": null,
+     "rightLine": 335
+    },
+    "fence": [
+     330,
+     377,
+     400,
+     372,
+     335
+    ],
+    "homeOf": [
+     "CWS"
+    ]
+   }
+  }
+ }
+}
