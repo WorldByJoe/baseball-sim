@@ -60,11 +60,19 @@ table.grid { border-collapse: separate; border-spacing: 2px; margin: 8px 0 0 8px
 .grid td .star { position: absolute; top: -8px; left: -6px; z-index: 1; font-size: 17px; color: var(--star); line-height: 1; text-shadow: 0 0 1px var(--star-ring), 0 0 3px var(--panel), 0 0 3px var(--panel); }
 .grid td .x { position: absolute; right: 2px; bottom: 0; font-size: 8.5px; line-height: 1.1; opacity: 0.85; }
 .grid td .n { position: relative; top: 1px; }
+.switch { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 12px 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { font: 600 14px var(--f-body); padding: 7px 14px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--heat-hi); color: var(--on-hot); }
+.seg button:focus-visible { outline: 2px solid var(--star-ring); outline-offset: -2px; }
+.sum { margin: 0; font-size: 14px; font-variant-numeric: tabular-nums; }
+.wrap[data-show="season"] [data-set="pitched"], .wrap[data-show="pitched"] [data-set="season"] { display: none; }
 footer { font-size: 13px; color: var(--muted); max-width: 72ch; display: flex; flex-direction: column; gap: 6px; }
 footer p { margin: 0; }
 </style>
 
-<div class="wrap">
+<div class="wrap" data-show="season">
   <header>
     <span class="eyebrow">2026 postseason · baseball-sim engine v3.9</span>
     <h1>Division Series Replays</h1>
@@ -78,10 +86,34 @@ footer p { margin: 0; }
     </div>
   </header>
 
+  <div class="switch" role="group" aria-label="Which pitching the replays used">
+    <div class="seg">
+      <button type="button" id="set-season" aria-pressed="true" data-pick="season">Regular-season pitching</button>
+      <button type="button" id="set-pitched" aria-pressed="false" data-pick="pitched">Pitching as it was that day</button>
+    </div>
+    <p class="sum" data-set="season">Each pitcher at his regular-season speeds and pitch mix. The replays averaged <strong><!--RUNS_SEASON--></strong> runs a team; the <!--NGAMES--> real games, <!--RUNS_REAL-->.</p>
+    <p class="sum" data-set="pitched">Each pitcher at that day's speeds and pitch mix; the batters still expect his regular-season mix. The replays averaged <strong><!--RUNS_PITCHED--></strong> runs a team; the <!--NGAMES--> real games, <!--RUNS_REAL-->.</p>
+  </div>
+
 <!--GRIDS-->
 
   <footer>
     <p>Each replay was played in the real park, with the designated hitter and no runner placed on second in extra innings, as in the postseason. A replay that ran longer than the real game went back to the model's manager and the rest of the playoff bullpen once the real game's pitchers were used up. Hover over a cell for its count and score.</p>
+    <p>Pitching as it was that day: for every pitch type a pitcher threw three or more times, his regular-season speed plus that day's change (his game average against his season average), and his mix as that day's share of each type. Pitchers in the postseason threw their fastballs 0.7 mph harder than in their own regular seasons on average and changed their mixes often.</p>
     <p>Hitters' traits were fitted to their 2025-26 Statcast numbers and pitchers' to their strikeout and walk rates, on engine v3.9 (refit 2026-10-06).</p>
   </footer>
 </div>
+<script>
+(function () {
+  var wrap = document.querySelector('.wrap'), btns = document.querySelectorAll('.seg button');
+  function show(k) {
+    wrap.setAttribute('data-show', k);
+    btns.forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-pick') === k ? 'true' : 'false'); });
+    try { localStorage.setItem('ds-replays-set', k); } catch (e) {}
+  }
+  btns.forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-pick')); }); });
+  var start = location.hash === '#pitched' ? 'pitched' : null;
+  if (!start) { try { start = localStorage.getItem('ds-replays-set'); } catch (e) {} }
+  if (start === 'pitched' || start === 'season') show(start);
+})();
+</script>

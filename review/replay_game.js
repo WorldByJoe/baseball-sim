@@ -1,5 +1,5 @@
 /* ============================================================================
-   replay_game.js · v0.1 · 2026-10-07
+   replay_game.js · v0.2 · 2026-10-07
 
    A postseason game played again as it was played: the real batting order with
    its substitutions (each man takes his spot at the turn he took it, at the
@@ -15,13 +15,31 @@
    A planned pitcher's stamina is at least the pitches he threw that day over 0.85, so the plan's workload leaves him
    only lightly tired, as the real one did; a reliever's usual 35 would wear down a long man past what he showed.
 
-   Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js bb_game.js review/players.js review/replay_game.js -- PK [games] [seed] [part] [parts]
+   Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js bb_game.js review/players.js review/replay_game.js -- PK [games] [seed] [part] [parts] [pitched]
+
+   'pitched': each pitcher at his game-day speeds and mix (review/as_pitched.py); without it, his regular season.
 
    CHANGED
+     v0.2  mode 'pitched': the pitchers as they pitched that day (Joe, 2026-10-07); no tie at the 18th
      v0.1  first build (the division series score grids, 2026-10-07)
 ============================================================================ */
 (function (A) {
-  var PK = A[0], N = +A[1] || 200, SEED = +A[2] || 1, PART = +A[3] || 0, PARTS = +A[4] || 1;
+  var PK = A[0], N = +A[1] || 200, SEED = +A[2] || 1, PART = +A[3] || 0, PARTS = +A[4] || 1, PITCHED = A[5] === 'pitched';
+  // AS PITCHED (mode 'pitched'): each man in the plan throws his game-day speed for every type he threw 3+ times
+  // (his season speed plus that day's change, review/as_pitched.py) and his game-day mix; the batter's scouting report
+  // keeps his season mix (scoutUsage), since nobody knew that day's mix before it was thrown
+  var ASP = PITCHED ? JSON.parse(read('review/as_pitched/' + PK + '.json')) : null, TMAP = { CS: 'CU', KC: 'CU', SV: 'SL', FO: 'FS', SC: 'CH' };
+  function asPitched(id, P) {
+    var a = ASP && ASP[id]; if (!a || P.asPitched) return; P.asPitched = true;
+    var share = {}, dv = {};
+    Object.keys(a.types).forEach(function (t0) { var t = TMAP[t0] || t0, r = a.types[t0]; share[t] = (share[t] || 0) + r.share; if (r.dv !== undefined && dv[t] === undefined) dv[t] = r.dv; });
+    var tot = 0; P.pitches.forEach(function (q) { tot += share[q.type] || 0; });
+    P.pitches.forEach(function (q) {
+      if (dv[q.type] !== undefined) { q.velo += dv[q.type]; q.aimCache = { ok: false }; }
+      q.scoutUsage = q.usage;
+      if (tot > 0) q.usage = (share[q.type] || 0) / tot;
+    });
+  }
   var G = JSON.parse(read('review/games/' + PK + '.json')), D = REVIEW.load(), rng = BB.makeRng(SEED * 977 + PART);
   var venues = JSON.parse(read('playoffs/venues.json')); venues = venues.venues || venues;
   var vlist = Array.isArray(venues) ? venues : Object.keys(venues).map(function (k) { return venues[k]; });
@@ -70,7 +88,7 @@
     var used = G.pitchers[s];
     // each faces the batters he faced; a reliever's 35-pitch stamina would leave a long man (a bullpen game's 50 pitches) far past
     // his limit by the plan's own doing, so his stamina is at least the pitches he threw that day over 0.85 (fatigue just begun)
-    var plan = used.map(function (id, k) { var P = fresh(pitcher(id, k > 0)); P.stamina = Math.max(P.stamina, (thrown[id] || 0) / 0.85); return { P: P, bf: faced[s][id] || 0 }; })
+    var plan = used.map(function (id, k) { var P = fresh(pitcher(id, k > 0)); asPitched(id, P); P.stamina = Math.max(P.stamina, (thrown[id] || 0) / 0.85); return { P: P, bf: faced[s][id] || 0 }; })
       .filter(function (q, k) { return k === 0 || q.bf > 0; });
     var pen = Object.keys(D.recs).map(function (k) { return D.recs[k]; }).filter(function (r) {
       if (r.team !== ab || r.kind === 'position' || used.indexOf(r.id) >= 0) return false;
