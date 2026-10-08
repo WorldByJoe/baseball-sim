@@ -1466,6 +1466,21 @@
    "measuredK": 0.2092,
    "measuredBB": 0.1292,
    "measuredChase": 0.2588
+  },
+  "621111": {
+   "name": "Walker Buehler",
+   "team": "SD",
+   "role": "RP",
+   "deception": 0.867,
+   "cmdScale": 1.011,
+   "K": 0.212,
+   "BB": 0.118,
+   "chase": 0.253,
+   "targetK": 0.228,
+   "targetBB": 0.11,
+   "measuredK": 0.1903,
+   "measuredBB": 0.0914,
+   "measuredChase": 0.2637
   }
  }
 }

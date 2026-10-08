@@ -4221,6 +4221,27 @@
    "on40Man": true,
    "szTop": 3.13,
    "szBot": 1.58
+  },
+  {
+   "id": 621111,
+   "name": "Walker Buehler",
+   "team": 135,
+   "teamAbbrev": "SD",
+   "jersey": "10",
+   "position": "P",
+   "primaryPosition": "P",
+   "kind": "pitcher",
+   "bats": "R",
+   "throws": "R",
+   "heightIn": 74,
+   "weightLb": 185,
+   "birthDate": "1994-07-28",
+   "age": 32.19,
+   "mlbDebut": "2017-09-07",
+   "on40Man": true,
+   "szTop": 3.29,
+   "szBot": 1.6,
+   "addedLater": "2026-10-07: pitched in NLDS Game 4, not on the 2026-10-04 roster pull"
   }
  ]
 }

@@ -1,0 +1,129 @@
+{
+ "n": 14,
+ "a": -3.7893735641795625,
+ "b": 6.375325086356093,
+ "se_a": 2.43142267170039,
+ "se_b": 4.26966774657354,
+ "z": 1.4931665564545082,
+ "p_wald": 0.13539359400834464,
+ "lr": 2.939631797288019,
+ "p_lr": 0.08643043287596745,
+ "r2_mcfadden": 0.15373495962416717,
+ "r2_tjur": 0.19081230905110425,
+ "brier": 0.21294899999999997,
+ "brier_coin": 0.25,
+ "rows": [
+  {
+   "pk": 849829,
+   "label": "ALDS G1 Guardians",
+   "home": "CLE",
+   "away": "CWS",
+   "p": 0.492,
+   "y": 0
+  },
+  {
+   "pk": 849834,
+   "label": "ALDS G2 Guardians",
+   "home": "CLE",
+   "away": "CWS",
+   "p": 0.508,
+   "y": 0
+  },
+  {
+   "pk": 849833,
+   "label": "ALDS G3 White Sox",
+   "home": "CWS",
+   "away": "CLE",
+   "p": 0.656,
+   "y": 0
+  },
+  {
+   "pk": 849835,
+   "label": "ALDS G1 Rays",
+   "home": "TB",
+   "away": "NYY",
+   "p": 0.588,
+   "y": 1
+  },
+  {
+   "pk": 849839,
+   "label": "ALDS G2 Rays",
+   "home": "TB",
+   "away": "NYY",
+   "p": 0.431,
+   "y": 1
+  },
+  {
+   "pk": 849838,
+   "label": "ALDS G3 Yankees",
+   "home": "NYY",
+   "away": "TB",
+   "p": 0.567,
+   "y": 0
+  },
+  {
+   "pk": 849828,
+   "label": "NLDS G1 Dodgers",
+   "home": "LAD",
+   "away": "ATL",
+   "p": 0.867,
+   "y": 1
+  },
+  {
+   "pk": 849823,
+   "label": "NLDS G2 Dodgers",
+   "home": "LAD",
+   "away": "ATL",
+   "p": 0.592,
+   "y": 0
+  },
+  {
+   "pk": 849819,
+   "label": "NLDS G3 Braves",
+   "home": "ATL",
+   "away": "LAD",
+   "p": 0.418,
+   "y": 0
+  },
+  {
+   "pk": 849822,
+   "label": "NLDS G4 Braves",
+   "home": "ATL",
+   "away": "LAD",
+   "p": 0.349,
+   "y": 0
+  },
+  {
+   "pk": 849830,
+   "label": "NLDS G1 Brewers",
+   "home": "MIL",
+   "away": "SD",
+   "p": 0.818,
+   "y": 1
+  },
+  {
+   "pk": 849825,
+   "label": "NLDS G2 Brewers",
+   "home": "MIL",
+   "away": "SD",
+   "p": 0.651,
+   "y": 1
+  },
+  {
+   "pk": 849826,
+   "label": "NLDS G3 Padres",
+   "home": "SD",
+   "away": "MIL",
+   "p": 0.404,
+   "y": 1
+  },
+  {
+   "pk": 849827,
+   "label": "NLDS G4 Padres",
+   "home": "SD",
+   "away": "MIL",
+   "p": 0.247,
+   "y": 0
+  }
+ ]
+}
