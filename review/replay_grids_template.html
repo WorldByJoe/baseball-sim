@@ -142,15 +142,15 @@ footer p { margin: 0; }
     <button type="button" aria-pressed="true" data-view="playoffs">Postseason</button>
     <button type="button" aria-pressed="false" data-view="traits">Trait map</button>
   </div>
-  <span class="note">The trait map: every trait, ability and engine constant behind these games, and where each value came from.</span>
+  <span class="note">The trait map: every trait, ability and engine constant the model uses, what each one does, and where its value came from.</span>
 </nav>
 
 <div class="wrap" data-show="season" id="view-playoffs">
   <header>
     <span class="eyebrow">2026 postseason · baseball-sim engine v3.9</span>
     <h1>Postseason Replays</h1>
-    <p>Each division series game finished so far, played again 1,000 times through the model with the lineups and pitchers it really had. Every replay used the real batting order, with each substitute taking his spot at the turn he really took it, and the real pitchers in their real order, each facing as many batters as he faced. Each replay also drew fresh values of every hitter's fitted traits, so the spread includes what is not known about the players as well as the game's own chance.</p>
-    <p>First, the model's forecast for the League Championship Series and the World Series, played before Game 1. The switch at the top opens the trait map: every trait, ability and engine constant behind these games.</p>
+    <p>This page asks how likely each real postseason result was. Each division series game finished so far was played again 1,000 times by a simulation that plays every pitch from the players' traits. The traits come in two kinds: measured ones, taken straight from Statcast and held fixed, such as how fast a hitter swings and how hard a pitcher throws each pitch; and fitted ones, hidden qualities inferred from a hitter's statistics, such as how well he reads a pitch and how steady his timing is (the trait map lists them all). Each replay kept what the real game had: the batting order, each substitute entering at the turn he really took, and the real pitchers in their real order, each facing as many batters as he faced. Two things varied from replay to replay: the pitch-by-pitch chance of the game itself, and a fresh draw of every hitter's fitted traits from the range his statistics leave open. The spread of scores therefore includes what is not known about the players as well as the luck of the game.</p>
+    <p>The page opens with the model's forecast for the League Championship Series and the World Series, made before Game 1 of each. Then come the division series replays: a score grid for every game, and two checks on whether the replays picked the winners. The switch at the top opens the trait map, which lists every trait, ability and engine constant behind these games and where each value came from.</p>
     <nav class="jump" aria-label="On this page"><a href="#forecast">The LCS and World Series forecast</a><a href="#grids">Division series score grids</a><a href="#picks">Series picks</a><a href="#regression">Game picks</a></nav>
   </header>
 
@@ -164,28 +164,28 @@ footer p { margin: 0; }
       <button type="button" id="set-pitched" aria-pressed="false" data-pick="pitched">Pitching as it was that day</button>
       <button type="button" id="set-errors" aria-pressed="false" data-pick="errors">Fielders' own error rates</button>
     </div>
-    <p class="sum" data-set="season">Each pitcher at his regular-season speeds and pitch mix. The replays averaged <strong><!--RUNS_SEASON--></strong> runs and <!--ERR_SEASON--> errors a team; the <!--NGAMES--> real games, <!--RUNS_REAL--> and <!--ERR_REAL-->.</p>
-    <p class="sum" data-set="pitched">Each pitcher at that day's speeds and pitch mix; the batters still expect his regular-season mix. The replays averaged <strong><!--RUNS_PITCHED--></strong> runs and <!--ERR_PITCHED--> errors a team; the <!--NGAMES--> real games, <!--RUNS_REAL--> and <!--ERR_REAL-->.</p>
-    <p class="sum" data-set="errors">Regular-season pitching, and each fielder making errors at his own regular-season rate. The replays averaged <strong><!--RUNS_ERRORS--></strong> runs and <!--ERR_ERRORS--> errors a team; the <!--NGAMES--> real games, <!--RUNS_REAL--> and <!--ERR_REAL-->.</p>
+    <p class="sum" data-set="season">Each pitcher throws at his regular-season speeds and pitch mix, and every fielder makes errors at the model's default rate. The replays averaged <strong><!--RUNS_SEASON--></strong> runs and <!--ERR_SEASON--> errors a team; the <!--NGAMES--> real games averaged <!--RUNS_REAL--> runs and <!--ERR_REAL--> errors.</p>
+    <p class="sum" data-set="pitched">Each pitcher throws at the speeds and pitch mix he had that day, while the batters still expect his regular-season mix (how the day's values are built is in the notes below). The replays averaged <strong><!--RUNS_PITCHED--></strong> runs and <!--ERR_PITCHED--> errors a team; the <!--NGAMES--> real games averaged <!--RUNS_REAL--> runs and <!--ERR_REAL--> errors.</p>
+    <p class="sum" data-set="errors">Regular-season pitching, with each fielder making errors at his own regular-season rate instead of the model's default (how the rates are built is in the notes below). The replays averaged <strong><!--RUNS_ERRORS--></strong> runs and <!--ERR_ERRORS--> errors a team; the <!--NGAMES--> real games averaged <!--RUNS_REAL--> runs and <!--ERR_REAL--> errors.</p>
   </div>
 
   <div class="howto" id="legend">
-      <span class="k">Across: one team's runs. Down: the other's. Each cell counts the replays that ended at that score.</span>
+      <span class="k">Across: one team's runs. Down: the other's. Each cell counts how many of the 1,000 replays ended at that score.</span>
       <span class="k"><span class="ramp" aria-hidden="true"></span> fewer to more replays</span>
       <span class="k"><span class="chip star" aria-hidden="true">★</span> the real final</span>
       <span class="k"><span class="chip x" aria-hidden="true">x4</span> 4 of the cell's replays went to extra innings</span>
-      <span class="k"><span class="chip tie" aria-hidden="true"></span> a tie (no game ends tied)</span>
+      <span class="k"><span class="chip tie" aria-hidden="true"></span> a tie: no game ends there</span>
     </div>
 
 <!--GRIDS-->
   </div>
 
   <footer>
-    <p>Each replay was played in the real park, with the designated hitter and no runner placed on second in extra innings, as in the postseason. A replay that ran longer than the real game went back to the model's manager and the rest of the playoff bullpen once the real game's pitchers were used up. Hover over a cell for its count and score.</p>
-    <p>Pitching as it was that day: for every pitch type a pitcher threw three or more times, his regular-season speed plus that day's change (his game average against his season average), and his mix as that day's share of each type. Pitchers in the postseason threw their fastballs 0.7 mph harder than in their own regular seasons on average and changed their mixes often.</p>
-    <p>Fielders' own error rates: each fielder's errors per chance in 2025-26 against the usual rate at the positions he played (players with few chances pulled toward that rate), scaling his chance of dropping a ball, fumbling a grounder or throwing one away; one league-wide factor then brings the replays' errors near these fielders' own regular-season rate (0.43 a team per game against their 0.44), where the model on its own makes 0.26. The most error-prone of them errs about twice his position's rate and the surest about a third of it.</p>
-    <p>Corrected 2026-10-08: each starter now plays the position he started at. Before, a man who moved during a game was placed at the position he ended at, so in 8 lineups (7 games) two men shared one position and another was left empty; that had inflated the replays' scoring (4.24 runs a team, now 3.62) and their margins in those games.</p>
-    <p>Hitters' traits were fitted to their 2025-26 Statcast numbers and pitchers' to their strikeout and walk rates, on engine v3.9 (refit 2026-10-06).</p>
+    <p>Each replay was played in the real park, with the designated hitter and, as in the real postseason, no runner placed on second base in extra innings. When a replay ran longer than the real game, the real game's pitchers ran out, and the model's manager took over with the rest of the playoff bullpen. Hover over a cell for its count and score.</p>
+    <p>Pitching as it was that day: for every pitch type a pitcher threw three or more times in the game, his speed is his regular-season speed plus that day's change (his average in the game against his season average), and his mix is that day's share of each type. The setting exists because postseason pitching differed from the regular season: on average, pitchers threw their fastballs 0.7 mph harder than in their own regular seasons, and they often changed their mixes.</p>
+    <p>Fielders' own error rates: each fielder's errors per chance in 2025-26 are compared with the usual rate at the positions he played, and the ratio scales his chance in the model of dropping a ball, fumbling a grounder or throwing one away (a player with few chances is pulled toward the usual rate, because a handful of plays says little about him). The model on its own makes 0.26 errors a team per game, fewer than real fielders make, so one league-wide factor is applied on top to bring the replays' errors near these fielders' own regular-season rate: 0.43 a team per game against their 0.44. The spread among them is wide: the most error-prone errs at about twice his position's rate and the surest at about a third of it.</p>
+    <p>Corrected 2026-10-08: each starter now plays the position he started at. Before the correction, a man who changed positions during a game was placed at the position he ended at, so in 8 lineups (7 games) two men shared one position and another position stood empty. In the model each fielder stands at the spot of his listed position, so the two men stood on the same spot and nobody stood at the empty one; a ball hit toward the empty position had to be reached by a fielder starting farther away, and more of those balls went for hits. Game 3 of White Sox vs Guardians, for example, listed two Cleveland left fielders and no centre fielder. That inflated the replays' scoring (4.24 runs a team, now 3.62) and widened their margins in those games.</p>
+    <p>Every hitter's traits were fitted to his 2025-26 Statcast measurements and every pitcher's to his strikeout and walk rates, on engine v3.9 (refit 2026-10-06); the trait map shows what each trait does and where its value came from.</p>
   </footer>
 </div>
 

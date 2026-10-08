@@ -98,7 +98,7 @@ def grid(pk, num, date, colTeam, rowTeam):
     for key, R in RS.items():
         N = len(R); colWins = sum(1 for r in R if r['score'][ci] > r['score'][ri]); extras = sum(1 for r in R if r['innings'] > 9)
         runs = sum(sum(r['score']) for r in R) / N / 2; ers = sum(sum(r.get('errors', [0, 0])) for r in R) / N / 2
-        out.append('<p class="tally" data-set="%s">Replays won: %s %s, %s %s · extra innings %s · %.1f runs and %.2f errors a team</p>' % (
+        out.append('<p class="tally" data-set="%s">Replays won: %s %s, %s %s · %s went to extra innings · %.1f runs and %.2f errors a team on average</p>' % (
             key, cn, f'{colWins:,}', rn, f'{N - colWins:,}', f'{extras:,}', runs, ers))
     out.append('</figcaption><div class="scroll">')
     for key, R in RS.items(): out.append(table(R, ci, ri, n_c, n_r, top, real, colTeam, rowTeam, cn, rn, home, num, key))
@@ -150,13 +150,9 @@ def picks_section(series):
             verdict.append('<span data-set="%s" class="v %s">%s</span>' % (k, v.split(',')[0], v))
         rows.append('<tr><th scope="row"><span class="tag">%s</span> %s vs %s</th><td class="res">%s</td>%s<td class="ch">%s</td><td>%s</td></tr>' % (
             S['name'], NICK[A], NICK[B], status, ''.join(cells), ''.join(ch), ''.join(verdict)))
-    tally = ''.join('<span data-set="%s">The replays&#39; favourite won %d of the %d games.</span>' % (k, right[k], ngames) for k, _ in SETS)
+    tally = ''.join('<span data-set="%s">The team the replays favoured won %d of the %d games played so far.</span>' % (k, right[k], ngames) for k, _ in SETS)
     return ('<section class="series picks-sec" id="picks"><h2><span class="tag">SERIES</span> Did the replays pick the series winners?</h2>'
-            '<p class="lede">Each game&#39;s share of replays won by the team that won or leads the series, combined into its chance of winning a best-of-five; '
-            'a game not yet played counts at that series&#39; average. W or L: whether that team won the real game. These are not forecasts: '
-            'each game&#39;s replays used the lineups and pitchers that really played, known only once the game began. '
-            'Before the correction of 2026-10-08 (see the notes below), the regular-season set gave the Dodgers 80%%, the Brewers 85%%, the Rays 47%% and the White Sox 60%%: '
-            'the same calls, made with more confidence than the corrected replays support.</p>'
+            '<p class="lede">The table takes the team that won or leads each series and shows, for each game, the share of the 1,000 replays that team won under whichever setting the switch above shows, marked W or L for whether it won the real game. The series chance combines those game shares into the chance of winning a best-of-five, with any game not yet played counted at the series&#39; average share; the pick is the side that chance favours. These are not forecasts. Each game&#39;s replays used the lineups and pitchers that really played, which were known only once the game began, so the table asks a narrower question: given who played, did the replays lean the way the games went? Before the correction of 2026-10-08 (see the notes below), the regular-season setting gave the Dodgers 80%%, the Brewers 85%%, the Rays 47%% and the White Sox 60%%: the same calls, made with more confidence than the corrected replays support.</p>'
             '<div class="scroll"><table class="picks"><thead><tr><th scope="col">Series</th><th scope="col">Result</th>'
             + ''.join('<th scope="col" class="g">G%d</th>' % g for g in range(1, 6)) +
             '<th scope="col">Series chance</th><th scope="col">The pick</th></tr></thead><tbody>%s</tbody></table></div><p class="tally">%s</p></section>') % ('\n'.join(rows), tally)
@@ -178,7 +174,7 @@ def forecast_section(series):
         d = F[name]; S = json.load(open('review/series/%s.json' % name)); hi, lo = S['hi'], S['lo']
         fav = max(d['win'], key=d['win'].get); oth = lo if fav == hi else hi
         return ('<div class="fc"><h3><span class="tag">%s</span> %s vs %s</h3>%s'
-                '<p class="tally">Home field: %s (games 1, 2, 6 and 7). %s runs a team a game in the simulations.</p>'
+                '<p class="tally">Home field: %s (games 1, 2, 6 and 7). The simulated games averaged %s runs a team.</p>'
                 '<p class="lenh">Games the series takes</p>%s</div>') % (name, NICK[hi], NICK[lo], split(d['win'], fav, oth), NICK[hi], '%.1f' % d['runs'], lengths(d['length']))
     # the ALDS still open, if any, for the assumption's wording
     note = ''
@@ -189,7 +185,7 @@ def forecast_section(series):
             w[ab[0] if G['final']['away'] > G['final']['home'] else ab[1]] += 1
         if max(w.values()) < 3:
             al = json.load(open('review/series/ALCS.json')); t = al['hi'] if al['hi'] in w else al['lo']; o = B if t == A else A
-            note = ' The %s were assumed to beat the %s (the series stood %d-%d when this ran).' % (NICK[t], NICK[o], w[t], w[o])
+            note = ' The %s were assumed to beat the %s, whose series stood %d-%d when the forecast ran.' % (NICK[t], NICK[o], w[t], w[o])
     rows = []
     for name in sorted([k for k in F if k.startswith('WS_')], key=lambda k: -F[k]['chance']):
         d = F[name]; S = json.load(open('review/series/%s.json' % name)); hi, lo = S['hi'], S['lo']
@@ -201,20 +197,19 @@ def forecast_section(series):
         NICK[t], 100 * v / top, pct(v)) for t, v in champ)
     wl = F['wsLength']; mean = sum(int(k) * v for k, v in wl.items())
     return ('<section class="series fc-sec" id="forecast"><h2><span class="tag">LCS</span> Who goes on: the League Championship Series and the World Series</h2>'
-            '<p class="lede">Each League Championship Series played 2,000 times before Game 1, and each possible World Series 2,000 times, through the same model and '
-            'with each fielder making errors at his own rate.%s</p>'
+            '<p class="lede">Each League Championship Series was played 2,000 times before its Game 1, and each possible World Series pairing 2,000 times, by the same simulation, with each fielder making errors at his own regular-season rate (the third of the pitching and fielding settings described below). The bars give the share of those series each team won; the columns give how many games the series took.%s</p>'
             '<div class="fcs">%s%s</div>'
             '<div class="fc wide"><h3><span class="tag">WS</span> The World Series</h3>'
             '<div class="champ" aria-label="Chance to win the World Series">%s</div>'
-            '<p class="tally">The chance each team wins the World Series, over every pairing in proportion to its chance of happening. The series took %.1f games on average.</p>'
+            '<p class="tally">Each team&#39;s chance of winning the World Series: its chance in each pairing, weighted by how likely that pairing is to happen (the table below). The simulated series lasted %.1f games on average.</p>'
             '<p class="lenh">Games the World Series takes</p>%s'
             '<div class="scroll"><table class="picks ws"><thead><tr><th scope="col">Pairing</th><th scope="col">Chance it happens</th><th scope="col">Favourite</th><th scope="col">Games it takes</th></tr></thead>'
             '<tbody>%s</tbody></table></div></div>'
             '<ul class="assume"><li>Lineups: each team&#39;s last division series lineup, every man at the position he started.</li>'
-            '<li>Starters: each team&#39;s division series starters in order, filled to four from its regular season, turning over every four games.</li>'
-            '<li>Bullpens: the relievers on the playoff roster, run by the model&#39;s manager, rested at the start of every game.</li>'
-            '<li>Home field: the better regular-season record, games 1, 2, 6 and 7 at home; open parks at 60 F, roofed parks at 72 F.</li>'
-            '<li>Each simulated series drew every hitter&#39;s traits once and kept them all series.</li></ul></section>') % (
+            '<li>Starting pitchers: each team&#39;s division series starters in order, with regular-season starters added to make a four-man rotation.</li>'
+            '<li>Bullpens: the relievers on the playoff roster, brought in by the model&#39;s manager, all rested at the start of every game.</li>'
+            '<li>Home field: the team with the better regular-season record plays games 1, 2, 6 and 7 at home; open-air parks at 60 F, roofed parks at 72 F.</li>'
+            '<li>Each simulated series drew every hitter&#39;s traits once, at its start, and kept them for the whole series.</li></ul></section>') % (
         note, lcs('ALCS', 'American League'), lcs('NLCS', 'National League'), bars, mean, lengths(wl), '\n'.join(rows))
 
 
@@ -256,9 +251,7 @@ def logit_section():
     g.append('</svg>')
     stats_line = 'Slope %.1f (standard error %.1f), Wald p = %.2f; likelihood-ratio p = %.2f; McFadden R² = %.2f, Tjur R² = %.2f.' % (b[1], se[1], p_wald, p_lr, r2m, r2t)
     return ('<section class="series logit-sec" id="regression"><h2><span class="tag">FIT</span> Did the replays pick the game winners?</h2>'
-            '<p class="lede">One point per game, from the home team&#39;s side: across, the share of the 1,000 replays (regular-season pitching) the home team won; '
-            'up or down, whether it won the real game. The blue curve is a logistic regression of the real result on that share, with its 95%% band; the dashed line is where a perfectly calibrated forecast would sit. '
-            'A higher replay share went with more real wins, but over %d games the slope is not significant at the usual 0.05 level.</p>'
+            '<p class="lede">Each point is one game, seen from the home team&#39;s side: across, the share of the 1,000 replays (regular-season pitching) the home team won; up or down, whether it won the real game. The blue curve is a logistic regression, the curve that best turns the replay share into a probability of the real win, with its 95%% band. The dashed line is where the points would sit if the replay share were exactly the chance of winning, so that a team which won most of its replays won the real game just as often. The curve rises, so a higher replay share went with more real wins, but with only %d games the rise is not significant at the usual 0.05 level: the uncertainty is wide enough to include no relationship at all.</p>'
             '<div class="scroll">%s</div><p class="tally">%s</p>'
             '<div class="howto"><span class="k"><span class="sw fit" aria-hidden="true"></span> logistic fit</span><span class="k"><span class="sw band" aria-hidden="true"></span> its 95%% band</span>'
             '<span class="k"><span class="sw diag" aria-hidden="true"></span> a perfectly calibrated forecast</span></div></section>') % (len(D), '\n'.join(g), stats_line)

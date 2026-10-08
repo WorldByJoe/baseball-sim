@@ -4,9 +4,11 @@ Page: https://worldbyjoe.github.io/baseball-sim/playoffs/ (draft). Every passage
 Edit the text under each ID in place. Keep the IDs. Words in {braces} are numbers or names the page fills in; keep them (move them if the sentence needs it).
 Headings and button labels are listed too; they can change. The trait map view is the trait map page itself and is not part of this file.
 
+Edited 2026-10-08 to the explanatory writing rules (OneDrive/Claude/Explanatory Writing/Explanatory Writing Rules.md): every term defined where it is first used, every "so" and "because" given its step, no number changed.
+
 ## V1 (top of the page, the note beside the Postseason / Trait map switch)
 
-The trait map: every trait, ability and engine constant behind these games, and where each value came from.
+The trait map: every trait, ability and engine constant the model uses, what each one does, and where its value came from.
 
 ## H1 (eyebrow and title)
 
@@ -16,11 +18,11 @@ Postseason Replays
 
 ## H2 (the header, paragraph 1)
 
-Each division series game finished so far, played again 1,000 times through the model with the lineups and pitchers it really had. Every replay used the real batting order, with each substitute taking his spot at the turn he really took it, and the real pitchers in their real order, each facing as many batters as he faced. Each replay also drew fresh values of every hitter's fitted traits, so the spread includes what is not known about the players as well as the game's own chance.
+This page asks how likely each real postseason result was. Each division series game finished so far was played again 1,000 times by a simulation that plays every pitch from the players' traits. The traits come in two kinds: measured ones, taken straight from Statcast and held fixed, such as how fast a hitter swings and how hard a pitcher throws each pitch; and fitted ones, hidden qualities inferred from a hitter's statistics, such as how well he reads a pitch and how steady his timing is (the trait map lists them all). Each replay kept what the real game had: the batting order, each substitute entering at the turn he really took, and the real pitchers in their real order, each facing as many batters as he faced. Two things varied from replay to replay: the pitch-by-pitch chance of the game itself, and a fresh draw of every hitter's fitted traits from the range his statistics leave open. The spread of scores therefore includes what is not known about the players as well as the luck of the game.
 
 ## H3 (the header, paragraph 2)
 
-First, the model's forecast for the League Championship Series and the World Series, played before Game 1. The switch at the top opens the trait map: every trait, ability and engine constant behind these games.
+The page opens with the model's forecast for the League Championship Series and the World Series, made before Game 1 of each. Then come the division series replays: a score grid for every game, and two checks on whether the replays picked the winners. The switch at the top opens the trait map, which lists every trait, ability and engine constant behind these games and where each value came from.
 
 ## H4 (the header, jump links)
 
@@ -32,11 +34,11 @@ Who goes on: the League Championship Series and the World Series
 
 ## F2 (forecast section, the paragraph under the heading)
 
-Each League Championship Series played 2,000 times before Game 1, and each possible World Series 2,000 times, through the same model and with each fielder making errors at his own rate. The {White Sox} were assumed to beat the {Guardians} (the series stood {2-1} when this ran).
+Each League Championship Series was played 2,000 times before its Game 1, and each possible World Series pairing 2,000 times, by the same simulation, with each fielder making errors at his own regular-season rate (the third of the pitching and fielding settings described below). The bars give the share of those series each team won; the columns give how many games the series took. The {White Sox} were assumed to beat the {Guardians}, whose series stood {2-1} when the forecast ran.
 
 ## F3 (forecast, each LCS card: the line under the bar)
 
-Home field: {Rays} (games 1, 2, 6 and 7). {3.8} runs a team a game in the simulations.
+Home field: {Rays} (games 1, 2, 6 and 7). The simulated games averaged {3.8} runs a team.
 
 ## F4 (forecast, the small heading over the length columns)
 
@@ -44,7 +46,7 @@ Games the series takes  /  Games the World Series takes
 
 ## F5 (forecast, World Series card: the line under the champion bars)
 
-The chance each team wins the World Series, over every pairing in proportion to its chance of happening. The series took {5.6} games on average.
+Each team's chance of winning the World Series: its chance in each pairing, weighted by how likely that pairing is to happen (the table below). The simulated series lasted {5.6} games on average.
 
 ## F6 (forecast, World Series table column heads)
 
@@ -53,10 +55,10 @@ Pairing · Chance it happens · Favourite · Games it takes
 ## F7 (forecast, the assumptions (a bulleted list))
 
 - Lineups: each team's last division series lineup, every man at the position he started.
-- Starters: each team's division series starters in order, filled to four from its regular season, turning over every four games.
-- Bullpens: the relievers on the playoff roster, run by the model's manager, rested at the start of every game.
-- Home field: the better regular-season record, games 1, 2, 6 and 7 at home; open parks at 60 F, roofed parks at 72 F.
-- Each simulated series drew every hitter's traits once and kept them all series.
+- Starting pitchers: each team's division series starters in order, with regular-season starters added to make a four-man rotation.
+- Bullpens: the relievers on the playoff roster, brought in by the model's manager, all rested at the start of every game.
+- Home field: the team with the better regular-season record plays games 1, 2, 6 and 7 at home; open-air parks at 60 F, roofed parks at 72 F.
+- Each simulated series drew every hitter's traits once, at its start, and kept them for the whole series.
 
 ## S1 (the replays switch, its three buttons)
 
@@ -64,29 +66,29 @@ Regular-season pitching · Pitching as it was that day · Fielders' own error ra
 
 ## S2 (the replays switch, the line shown with the "season" set)
 
-Each pitcher at his regular-season speeds and pitch mix. The replays averaged {RUNS_SEASON} runs and {ERR_SEASON} errors a team; the {NGAMES} real games, {RUNS_REAL} and {ERR_REAL}.
+Each pitcher throws at his regular-season speeds and pitch mix, and every fielder makes errors at the model's default rate. The replays averaged {RUNS_SEASON} runs and {ERR_SEASON} errors a team; the {NGAMES} real games averaged {RUNS_REAL} runs and {ERR_REAL} errors.
 
 ## S3 (the replays switch, the line shown with the "pitched" set)
 
-Each pitcher at that day's speeds and pitch mix; the batters still expect his regular-season mix. The replays averaged {RUNS_PITCHED} runs and {ERR_PITCHED} errors a team; the {NGAMES} real games, {RUNS_REAL} and {ERR_REAL}.
+Each pitcher throws at the speeds and pitch mix he had that day, while the batters still expect his regular-season mix (how the day's values are built is in the notes below). The replays averaged {RUNS_PITCHED} runs and {ERR_PITCHED} errors a team; the {NGAMES} real games averaged {RUNS_REAL} runs and {ERR_REAL} errors.
 
 ## S4 (the replays switch, the line shown with the "errors" set)
 
-Regular-season pitching, and each fielder making errors at his own regular-season rate. The replays averaged {RUNS_ERRORS} runs and {ERR_ERRORS} errors a team; the {NGAMES} real games, {RUNS_REAL} and {ERR_REAL}.
+Regular-season pitching, with each fielder making errors at his own regular-season rate instead of the model's default (how the rates are built is in the notes below). The replays averaged {RUNS_ERRORS} runs and {ERR_ERRORS} errors a team; the {NGAMES} real games averaged {RUNS_REAL} runs and {ERR_REAL} errors.
 
 ## L1 (the score-grid legend (five keys))
 
-- Across: one team's runs. Down: the other's. Each cell counts the replays that ended at that score.
+- Across: one team's runs. Down: the other's. Each cell counts how many of the 1,000 replays ended at that score.
 - fewer to more replays
 - ★ the real final
 - x4 4 of the cell's replays went to extra innings
-- a tie (no game ends tied)
+- a tie: no game ends there
 
 ## G1 (each game card: the lines over its grid)
 
 Game {number} {date} · at {home team}
 Final: {winner} {runs}, {loser} {runs} · errors: {team} {errors}, {team} {errors}
-Replays won: {team} {count}, {team} {count} · extra innings {count} · {runs} runs and {errors} errors a team
+Replays won: {team} {count}, {team} {count} · {count} went to extra innings · {runs} runs and {errors} errors a team on average
 
 ## P1 (series picks section, heading)
 
@@ -94,7 +96,7 @@ Did the replays pick the series winners?
 
 ## P2 (series picks, the paragraph under the heading)
 
-Each game's share of replays won by the team that won or leads the series, combined into its chance of winning a best-of-five; a game not yet played counts at that series' average. W or L: whether that team won the real game. These are not forecasts: each game's replays used the lineups and pitchers that really played, known only once the game began. Before the correction of 2026-10-08 (see the notes below), the regular-season set gave the Dodgers 80%, the Brewers 85%, the Rays 47% and the White Sox 60%: the same calls, made with more confidence than the corrected replays support.
+The table takes the team that won or leads each series and shows, for each game, the share of the 1,000 replays that team won under whichever setting the switch above shows, marked W or L for whether it won the real game. The series chance combines those game shares into the chance of winning a best-of-five, with any game not yet played counted at the series' average share; the pick is the side that chance favours. These are not forecasts. Each game's replays used the lineups and pitchers that really played, which were known only once the game began, so the table asks a narrower question: given who played, did the replays lean the way the games went? Before the correction of 2026-10-08 (see the notes below), the regular-season setting gave the Dodgers 80%, the Brewers 85%, the Rays 47% and the White Sox 60%: the same calls, made with more confidence than the corrected replays support.
 
 ## P3 (series picks, table column heads and verdicts)
 
@@ -104,7 +106,7 @@ Result: {Dodgers} won {3-1} / {White Sox} lead {2-1}
 
 ## P4 (series picks, the line under the table)
 
-The replays' favourite won {8} of the {14} games.
+The team the replays favoured won {8} of the {14} games played so far.
 
 ## R1 (regression section, heading)
 
@@ -112,7 +114,7 @@ Did the replays pick the game winners?
 
 ## R2 (regression, the paragraph under the heading)
 
-One point per game, from the home team's side: across, the share of the 1,000 replays (regular-season pitching) the home team won; up or down, whether it won the real game. The blue curve is a logistic regression of the real result on that share, with its 95% band; the dashed line is where a perfectly calibrated forecast would sit. A higher replay share went with more real wins, but over {14} games the slope is not significant at the usual 0.05 level.
+Each point is one game, seen from the home team's side: across, the share of the 1,000 replays (regular-season pitching) the home team won; up or down, whether it won the real game. The blue curve is a logistic regression, the curve that best turns the replay share into a probability of the real win, with its 95% band. The dashed line is where the points would sit if the replay share were exactly the chance of winning, so that a team which won most of its replays won the real game just as often. The curve rises, so a higher replay share went with more real wins, but with only {14} games the rise is not significant at the usual 0.05 level: the uncertainty is wide enough to include no relationship at all.
 
 ## R3 (regression, axis titles and the statistics line)
 
@@ -123,20 +125,20 @@ Key: logistic fit · its 95% band · a perfectly calibrated forecast
 
 ## N1 (the notes at the bottom, paragraph 1)
 
-Each replay was played in the real park, with the designated hitter and no runner placed on second in extra innings, as in the postseason. A replay that ran longer than the real game went back to the model's manager and the rest of the playoff bullpen once the real game's pitchers were used up. Hover over a cell for its count and score.
+Each replay was played in the real park, with the designated hitter and, as in the real postseason, no runner placed on second base in extra innings. When a replay ran longer than the real game, the real game's pitchers ran out, and the model's manager took over with the rest of the playoff bullpen. Hover over a cell for its count and score.
 
 ## N2 (the notes at the bottom, paragraph 2)
 
-Pitching as it was that day: for every pitch type a pitcher threw three or more times, his regular-season speed plus that day's change (his game average against his season average), and his mix as that day's share of each type. Pitchers in the postseason threw their fastballs 0.7 mph harder than in their own regular seasons on average and changed their mixes often.
+Pitching as it was that day: for every pitch type a pitcher threw three or more times in the game, his speed is his regular-season speed plus that day's change (his average in the game against his season average), and his mix is that day's share of each type. The setting exists because postseason pitching differed from the regular season: on average, pitchers threw their fastballs 0.7 mph harder than in their own regular seasons, and they often changed their mixes.
 
 ## N3 (the notes at the bottom, paragraph 3)
 
-Fielders' own error rates: each fielder's errors per chance in 2025-26 against the usual rate at the positions he played (players with few chances pulled toward that rate), scaling his chance of dropping a ball, fumbling a grounder or throwing one away; one league-wide factor then brings the replays' errors near these fielders' own regular-season rate (0.43 a team per game against their 0.44), where the model on its own makes 0.26. The most error-prone of them errs about twice his position's rate and the surest about a third of it.
+Fielders' own error rates: each fielder's errors per chance in 2025-26 are compared with the usual rate at the positions he played, and the ratio scales his chance in the model of dropping a ball, fumbling a grounder or throwing one away (a player with few chances is pulled toward the usual rate, because a handful of plays says little about him). The model on its own makes 0.26 errors a team per game, fewer than real fielders make, so one league-wide factor is applied on top to bring the replays' errors near these fielders' own regular-season rate: 0.43 a team per game against their 0.44. The spread among them is wide: the most error-prone errs at about twice his position's rate and the surest at about a third of it.
 
 ## N4 (the notes at the bottom, paragraph 4)
 
-Corrected 2026-10-08: each starter now plays the position he started at. Before, a man who moved during a game was placed at the position he ended at, so in 8 lineups (7 games) two men shared one position and another was left empty; that had inflated the replays' scoring (4.24 runs a team, now 3.62) and their margins in those games.
+Corrected 2026-10-08: each starter now plays the position he started at. Before the correction, a man who changed positions during a game was placed at the position he ended at, so in 8 lineups (7 games) two men shared one position and another position stood empty. In the model each fielder stands at the spot of his listed position, so the two men stood on the same spot and nobody stood at the empty one; a ball hit toward the empty position had to be reached by a fielder starting farther away, and more of those balls went for hits. Game 3 of White Sox vs Guardians, for example, listed two Cleveland left fielders and no centre fielder. That inflated the replays' scoring (4.24 runs a team, now 3.62) and widened their margins in those games.
 
 ## N5 (the notes at the bottom, paragraph 5)
 
-Hitters' traits were fitted to their 2025-26 Statcast numbers and pitchers' to their strikeout and walk rates, on engine v3.9 (refit 2026-10-06).
+Every hitter's traits were fitted to his 2025-26 Statcast measurements and every pitcher's to his strikeout and walk rates, on engine v3.9 (refit 2026-10-06); the trait map shows what each trait does and where its value came from.
