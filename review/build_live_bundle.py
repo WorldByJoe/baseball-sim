@@ -5,7 +5,7 @@ The couch analyst's web bundle (site/live): copies the engine as this branch has
 it (bb_engine, bb_names, bb_field, bb_game, review/players.js) into site/live/engine,
 and writes site/live/data/playoff.js: the playoff rosters' measured traits (only
 the fields the analyst reads), the hitters' fitted hidden traits (24 draws each),
-the pitchers' fitted deception and command, the league's 2025 balls in play (for
+the pitchers' fitted deception, command and mishit, the league's 2025 balls in play (for
 the expected hit of a batted ball), and the parks.
 
   python3 review/build_live_bundle.py
@@ -58,7 +58,7 @@ P = json.load(open('review/pitchers_fit.json'))
 z = np.load('diag_out/league_bip.npz', allow_pickle=True)
 code = {'OUT': 'O', '1B': '1', '2B': '2', '3B': '3', 'HR': 'H', 'E': 'E'}
 venues = json.load(open('playoffs/venues.json')); venues = venues.get('venues', venues) if isinstance(venues, dict) else venues
-B = {'recs': R, 'fits': F, 'pfit': {'pitchers': {k: {kk: v[kk] for kk in ('deception', 'cmdScale', 'name', 'team')} for k, v in P['pitchers'].items()}},
+B = {'recs': R, 'fits': F, 'pfit': {'pitchers': {k: {kk: v[kk] for kk in ('deception', 'cmdScale', 'mishit', 'name', 'team') if kk in v} for k, v in P['pitchers'].items()}},
      'league': {'X': [round(float(v), 1) for v in z['X'].flatten()], 'C': ''.join(code[c] for c in z['C'])}, 'venues': venues}
 s = 'var PLAYOFF = ' + json.dumps(B, separators=(',', ':')) + ';\n'
 open('site/live/data/playoff.js', 'w').write(s)

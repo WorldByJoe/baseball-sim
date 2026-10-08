@@ -20,7 +20,8 @@
    scatter per type over the type's own multiplier, usage-weighted. Usage is
    his overall mix; the league's count and side multipliers do the rest.
    When review/pitchers_fit.json exists, his two fitted hidden traits are
-   applied: deception, and the scale on his command (review/fit_pitchers.js).
+   applied: deception, and the scale on his command (review/fit_pitchers.js); his mishit, the scale on the batter's miss
+   along the barrel, when fitted (review/fit_mishit.py).
 
    CHANGED
      v0.2  setData(recs, fits, pfit) for a browser, which has no read(): the live page hands its bundle in
@@ -112,7 +113,7 @@ var REVIEW = (function () {
     if (use26 && use26.pitchesPerApp) P.stamina = role === 'SP' ? Math.max(75, use26.pitchesPerApp.mean) : Math.max(15, 1.2 * use26.pitchesPerApp.mean);
     P.role = role;
     var pf = PFIT && PFIT.pitchers[rec.id];   // the fitted hidden traits, when review/fit_pitchers.js has run
-    if (pf) { P.deception = pf.deception; P.cmd = [P.cmd[0] * pf.cmdScale, P.cmd[1] * pf.cmdScale]; P.command = Math.sqrt((P.cmd[0] * P.cmd[0] + P.cmd[1] * P.cmd[1]) / 2); }
+    if (pf) { P.deception = pf.deception; P.cmd = [P.cmd[0] * pf.cmdScale, P.cmd[1] * pf.cmdScale]; P.command = Math.sqrt((P.cmd[0] * P.cmd[0] + P.cmd[1] * P.cmd[1]) / 2); if (pf.mishit) P.mishit = pf.mishit; }
     return P;
   }
   var PFIT = null;

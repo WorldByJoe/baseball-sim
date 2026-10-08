@@ -105,7 +105,7 @@ table.led td { padding: 6px; text-align: right; font-family: var(--data); font-v
   function start(pk) {
     if (worker) worker.terminate();
     buf = [];
-    worker = new Worker('analyst.js?v=3.9.1');   // bump with each engine or bundle (GitHub Pages caches 10 min)
+    worker = new Worker('analyst.js?v=3.9.2');   // bump with each engine or bundle (GitHub Pages caches 10 min)
     worker.onmessage = function (e) {
       if (e.data.type === 'status') document.getElementById('status').textContent = e.data.text;
       else if (e.data.type === 'state') { buf.push({ at: Date.now() / 1000, s: e.data.state }); if (buf.length > 400) buf.shift(); show(); }

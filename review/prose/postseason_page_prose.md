@@ -141,4 +141,4 @@ Corrected 2026-10-08: each starter now plays the position he started at. Before 
 
 ## N5 (the notes at the bottom, paragraph 5)
 
-Every hitter's traits were fitted to his 2025-26 Statcast measurements and every pitcher's to his strikeout and walk rates, on engine v3.9 (refit 2026-10-06); the trait map shows what each trait does and where its value came from.
+Every hitter's traits were fitted to his 2025-26 Statcast measurements, and every pitcher's to his strikeout and walk rates and to how squarely batters hit him (his exit speeds against the most each swing could give; refit 2026-10-08), on engine v3.9; the trait map shows what each trait does and where its value came from.
