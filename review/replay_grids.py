@@ -1,5 +1,5 @@
 """
-replay_grids.py · v0.3 · 2026-10-07
+replay_grids.py · v0.4 · 2026-10-08
 
 The division series score grids: each finished game's replays (review/replay_game.js,
 diag_out/replays/<pk>.jsonl) as a table of one team's runs (columns) against the other's
@@ -10,6 +10,7 @@ Within a series the same team keeps the columns (Game 1's visitor), so the grids
   python3 review/replay_grids.py OUT.html
 
 CHANGED
+  v0.4  the series picks: each series' chance for its winner from the replays' game chances, per set; the favourite's games won
   v0.3  a third set, each fielder's own error tendency (replay_game.js mode 'errors'); errors in the tallies and captions
   v0.2  two sets a reader flips between: the regular season's pitching and the pitching as it was that day
         (review/replay_game.js mode 'pitched'), on shared axes and colours; a game shows once both sets exist
@@ -103,6 +104,62 @@ def grid(pk, num, date, colTeam, rowTeam):
     return '\n'.join(out)
 
 
+def series_chance(ps, n=5):
+    """The chance a team wins a best-of-n, given its chance in each game played; a game not yet played takes the series' average."""
+    import itertools
+    m = sum(ps) / len(ps); ps = ps + [m] * (n - len(ps)); tot = 0
+    for o in itertools.product((0, 1), repeat=n):   # play all n: winning a majority is the same as winning first
+        pr = 1
+        for w, p in zip(o, ps): pr *= p if w else 1 - p
+        if sum(o) > n // 2: tot += pr
+    return tot
+
+
+def picks_section(series):
+    """Each series' chance for its winner (or leader) from the replays' chance in each game, per set; and how often the favourite won a game."""
+    rows = []; right = {k: 0 for k, _ in SETS}; ngames = 0
+    for S in series:
+        A, B = S['col'], S['row']; wins = {A: 0, B: 0}; games = []
+        for pk, num, date in S['games']:
+            G, RS = load(pk); ab = (G['teams']['away']['abbrev'], G['teams']['home']['abbrev'])
+            w = ab[0] if G['final']['away'] > G['final']['home'] else ab[1]; wins[w] += 1
+            pA = {k: sum(1 for r in R if (r['score'][0] > r['score'][1]) == (ab[0] == A)) / len(R) for k, R in RS.items()}
+            games.append((num, w, pA))
+            for k in pA: right[k] += (pA[k] > 0.5) == (w == A)
+            ngames += 1
+        lead = A if wins[A] >= wins[B] else B; other = B if lead == A else A
+        done = max(wins.values()) == 3
+        status = '%s %s %d-%d' % (NICK[lead], 'won' if done else ('lead' if wins[lead] > wins[other] else 'tied with %s at' % NICK[other]), wins[lead], wins[other])
+        if wins[lead] == wins[other]: status = '%s and %s tied %d-%d' % (NICK[A], NICK[B], wins[A], wins[B])
+        cells = []
+        for g in range(1, 6):
+            hit = [x for x in games if x[0] == g]
+            if not hit: cells.append('<td class="na">&middot;</td>'); continue
+            num, w, pA = hit[0]
+            res = 'W' if w == lead else 'L'
+            cells.append('<td>' + ''.join('<span data-set="%s">%.0f%%</span>' % (k, 100 * (pA[k] if lead == A else 1 - pA[k])) for k, _ in SETS) +
+                         ' <span class="wl %s" title="%s %s the real game">%s</span></td>' % (res.lower(), NICK[lead], 'won' if res == 'W' else 'lost', res))
+        ch, verdict = [], []
+        for k, _ in SETS:
+            c = series_chance([(x[2][k] if lead == A else 1 - x[2][k]) for x in games])
+            ch.append('<span data-set="%s">%.0f%%</span>' % (k, 100 * c))
+            if done: v = 'right' if c > 0.5 else 'missed'
+            else: v = 'open, leans %s' % NICK[lead if c > 0.5 else other]
+            verdict.append('<span data-set="%s" class="v %s">%s</span>' % (k, v.split(',')[0], v))
+        rows.append('<tr><th scope="row"><span class="tag">%s</span> %s vs %s</th><td class="res">%s</td>%s<td class="ch">%s</td><td>%s</td></tr>' % (
+            S['name'], NICK[A], NICK[B], status, ''.join(cells), ''.join(ch), ''.join(verdict)))
+    tally = ''.join('<span data-set="%s">The replays&#39; favourite won %d of the %d games.</span>' % (k, right[k], ngames) for k, _ in SETS)
+    return ('<section class="series picks-sec" id="picks"><h2><span class="tag">SERIES</span> Did the replays pick the series winners?</h2>'
+            '<p class="lede">Each game&#39;s share of replays won by the team that won or leads the series, combined into its chance of winning a best-of-five; '
+            'a game not yet played counts at that series&#39; average. W or L: whether that team won the real game. These are not forecasts: '
+            'each game&#39;s replays used the lineups and pitchers that really played, known only once the game began. '
+            'Before the correction of 2026-10-08 (see the notes below), the regular-season set gave the Dodgers 80%%, the Brewers 85%%, the Rays 47%% and the White Sox 60%%: '
+            'the same calls, made with more confidence than the corrected replays support.</p>'
+            '<div class="scroll"><table class="picks"><thead><tr><th scope="col">Series</th><th scope="col">Result</th>'
+            + ''.join('<th scope="col" class="g">G%d</th>' % g for g in range(1, 6)) +
+            '<th scope="col">Series chance</th><th scope="col">The pick</th></tr></thead><tbody>%s</tbody></table></div><p class="tally">%s</p></section>') % ('\n'.join(rows), tally)
+
+
 def logit_section():
     """The replays' win share against the real results (review/win_logit.py's fit), as an SVG that follows the page's theme."""
     import numpy as np
@@ -140,7 +197,7 @@ def logit_section():
     g.append('<text class="ax" transform="translate(16,%.1f) rotate(-90)" text-anchor="middle">Real game, and the fitted chance of winning</text>' % ((Y(1) + Y(0)) / 2))
     g.append('</svg>')
     stats_line = 'Slope %.1f (standard error %.1f), Wald p = %.2f; likelihood-ratio p = %.2f; McFadden R² = %.2f, Tjur R² = %.2f.' % (b[1], se[1], p_wald, p_lr, r2m, r2t)
-    return ('<section class="series logit-sec" id="regression"><h2><span class="tag">FIT</span> Did the replays pick the winners?</h2>'
+    return ('<section class="series logit-sec" id="regression"><h2><span class="tag">FIT</span> Did the replays pick the game winners?</h2>'
             '<p class="lede">One point per game, from the home team&#39;s side: across, the share of the 1,000 replays (regular-season pitching) the home team won; '
             'up or down, whether it won the real game. The blue curve is a logistic regression of the real result on that share, with its 95%% band; the dashed line is where a perfectly calibrated forecast would sit. '
             'A higher replay share went with more real wins, but over %d games the slope is not significant at the usual 0.05 level.</p>'
@@ -162,6 +219,7 @@ def main(path):
         body.append('<section class="series"><h2><span class="tag">%s</span> %s vs %s</h2><div class="games">' % (s['name'], NICK[s['col']], NICK[s['row']]))
         for pk, num, date in s['games']: body.append(grid(pk, num, date, s['col'], s['row']))
         body.append('</div></section>')
+    body.append(picks_section(series))
     body.append(logit_section())
     runs = {}; errs = {}
     for key, d in SETS:
