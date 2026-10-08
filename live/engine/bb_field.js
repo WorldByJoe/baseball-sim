@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.15 · 2026-10-06
+   bb_field.js · v1.16 · 2026-10-07
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -38,6 +38,9 @@
    cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.16 (the playoff review's branch) a fielder's own error tendency, pl.errMult: it scales his chance of dropping a
+           ball he is under, of fumbling a grounder, and of throwing one away (exactly: the wild throw's chance times
+           errMult); unset, nothing changes (review/replay_game.js mode 'errors')
      v1.15 SAFETY_3 refitted on the new ball, the fielder's run and the runner's arc: [1.15, 0.95, 0.55]; SAFETY_H kept
      v1.14 a runner who goes on past a base turns on an arc: 2.4 m of extra ground for each base he runs through (Statcast's
            fastest home-to-third times); he had run straight through every base
@@ -46,9 +49,6 @@
      v1.12 the fielder's run (FM): his speed rises as 1 - exp(-t / 1.2 s) after his first step, fitted to Statcast's jump
            windows, and his route costs him only over the read (34 ft); was a constant 5.0 m/s^2, the route a share of the
            whole path. The league's catch rate on liners and flies by hang time and distance is the test (docs/sections)
-     v1.11 ground balls by launch angle: a bounce from measured physics (Coulomb friction on the slip, the spin carried, the
-           soil's crater fitted to Pennbounce), a grass infield inside the dirt skin, air drag on the roll, a catch anywhere
-           along the flight, and the fielder's first step fitted to both windows of Statcast's jump (docs/sections)
 ============================================================================ */
 
 var BBField = (function () {
@@ -454,7 +454,7 @@ var BBField = (function () {
     var P = T.air;
     if (P) for (var i = 4; i < P.length; i += 4) { var q = P[i]; if (q[0] >= L.t) break; if (q[3] <= Z_CATCH) tryPt(q[0], q[1], q[2], q[3] <= Z_LUNGE ? REACH : REACH * (Z_CATCH - q[3]) / (Z_CATCH - Z_LUNGE)); }
     if (T.kind === 'wall' && L.z > Z_CATCH && best.t >= L.t) return { m: best.m, p: 0, t: best.t, at: best.at };
-    return { m: best.m, p: Phi((best.m - CATCH_SET) / 0.2) * (1 - DROP_K * (1 - F.pl.glove)), t: best.t, at: best.at };
+    return { m: best.m, p: Phi((best.m - CATCH_SET) / 0.2) * (1 - Math.min(1, DROP_K * (1 - F.pl.glove) * (F.pl.errMult || 1))), t: best.t, at: best.at };   // errMult: his own error tendency (v1.16)
   }
   // A ball he is under is dropped DROP_K of his fumble rate on a grounder (1 - glove), FITTED to the
   // league's missed-catch errors (2025: about 0.023 a team-game, from the play descriptions' share of
@@ -479,7 +479,7 @@ var BBField = (function () {
   // .0145, and flat with exit velocity, 1.3-1.9% from 70 to 130 mph): .015 gave .014-.016 over 600 games.
   // It was 0.10, set by hand, and 10% of grounders were fumbled.
   function chanceD(F, ic) { return Math.pow(ic.v / 30, 2) + (isOF(F.pos) ? 0 : Math.pow(ic.moved / 10, 2)); }
-  function cleanChance(F, ic) { return F.pl.glove * Math.exp(-CLEAN_K * chanceD(F, ic)); }
+  function cleanChance(F, ic) { var c = F.pl.glove * Math.exp(-CLEAN_K * chanceD(F, ic)); return F.pl.errMult ? Math.max(0, 1 - F.pl.errMult * (1 - c)) : c; }   // errMult scales his fumbles (v1.16)
   var CLEAN_K = 0.015;
   // THE STOP AND TURN (v1.0). An outfielder who reaches the ball on the run
   // must shed the part of his speed that is not carrying him toward his
@@ -710,6 +710,12 @@ var BBField = (function () {
       else {
         if (play.how === 'cover') ev.push({ t: 0.3, kind: 'cover', who: 'P', to: 1, arrive: play.tBall });
         err = Math.abs(rng.n(0, Ff.pl.armAcc * d / 40));
+        var em = Ff.pl.errMult;
+        if (em && em !== 1) {   // his own error tendency (v1.16): the wild throw's chance becomes errMult times its chance q, exactly
+          var q = 2 * (1 - Phi(1.6 / Math.max(1e-6, Ff.pl.armAcc * d / 40)));
+          if (em > 1 && err <= 1.6 && q < 1 && rng.u() < (em * q - q) / (1 - q)) err = 1.61;
+          else if (em < 1 && err > 1.6 && rng.u() >= em) err = 1.59;
+        }
         ev.push({ t: tField + settle(to, fieldAt) + Ff.pl.transfer, kind: 'throw', who: Ff.pos, from: fieldAt, to: to, arrive: play.tBall, wild: err > 1.6, rcv: play.how === 'cover' ? 'P' : coverOf(to, Ff.pos) });
       }
       var via = play.how === 'run' ? Ff.pos + ' unassisted' : play.how === 'cover' ? Ff.pos + ' to the pitcher covering' : Ff.pos + ' to ' + baseName(to);
