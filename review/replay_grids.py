@@ -117,13 +117,13 @@ def pred_grid(pk, num, date, colTeam, rowTeam):
     st = M['starters']
     out = ['<figure class="game pred" id="g%d">' % pk,
            '<figcaption><h3>Game %d <span class="when">%s · at %s</span> <span class="badge">Prediction</span></h3>' % (num, when, html.escape(NICK[home])),
-           '<p class="final">Not yet played. Starters: %s for the %s, %s for the %s%s; %s.</p>' % (
-               html.escape(st[ab['away']][1]), NICK[ab['away']], html.escape(st[ab['home']][1]), NICK[ab['home']],
-               ' (assumed: MLB had not named them)' if M.get('assumed') else '', html.escape(M.get('lineups', 'lineups from the last game')))]
+           '<p class="final">Not yet played. Starters%s: %s for the %s, %s for the %s; %s.</p>' % (
+               ' assumed, since MLB had not named them' if M.get('assumed') else '', html.escape(st[ab['away']][1]), NICK[ab['away']], html.escape(st[ab['home']][1]), NICK[ab['home']],
+               html.escape(M.get('lineups', 'lineups from the last game')))]
     for key, R in RS.items():
         N = len(R); colWins = sum(1 for r in R if r['score'][ci] > r['score'][ri]); extras = sum(1 for r in R if r['innings'] > 9)
         runs = sum(sum(r['score']) for r in R) / N / 2
-        extra = ' No game-day pitching exists before the game, so this is the regular-season set.' if key == 'pitched' else ''
+        extra = ' There is no game-day pitching before a game is played, so this view shows the regular-season setting.' if key == 'pitched' else ''
         out.append('<p class="tally" data-set="%s">Simulations won: %s %s, %s %s · %s went to extra innings · %.1f runs a team on average.%s</p>' % (
             key, cn, f'{colWins:,}', rn, f'{N - colWins:,}', f'{extras:,}', runs, extra))
     out.append('</figcaption><div class="scroll">')
@@ -247,13 +247,16 @@ def forecast_section(series):
         ifs = []
         for t in sorted(w, key=lambda t: -w[t]):
             d = F['ALCS_' + t]
-            ifs.append('<li>If the %s go through (%s in the model&#39;s call of the fifth game): Rays %s, %s %s.</li>' % (NICK[t], pct(w[t]), pct(d['win'].get('TB', 0)), NICK[t], pct(d['win'].get(t, 0))))
+            ifs.append('<li>If the %s win Game 5 (a %s chance in the model): Rays %s, %s %s.</li>' % (NICK[t], pct(w[t]), pct(d['win'].get('TB', 0)), NICK[t], pct(d['win'].get(t, 0))))
+        t1, t2 = sorted(w, key=lambda t: -w[t])
+        how_bar = ('<p class="tally">Each team&#39;s chance of the pennant, counting Game 5: the Rays&#39; %s is their %s if the %s come through and %s if the %s do, weighted %.0f to %.0f.</p>' % (
+            pct(pen['TB']), pct(F['ALCS_' + t1]['win'].get('TB', 0)), NICK[t1], pct(F['ALCS_' + t2]['win'].get('TB', 0)), NICK[t2], 100 * w[t1], 100 * w[t2]))
         return ('<div class="fc"><h3><span class="tag">ALCS</span> Rays vs the ALDS winner</h3>'
-                '<p class="lenh">The American League pennant</p><div class="split three" role="img" aria-label="%s">%s</div><div class="splitk three">%s</div>'
+                '<p class="lenh">The American League pennant</p><div class="split three" role="img" aria-label="%s">%s</div><div class="splitk three">%s</div>%s'
                 '<ul class="ifs">%s</ul>'
                 '<p class="tally">Home field: Rays (games 1, 2, 6 and 7) against either team.</p>'
                 '<p class="lenh">Games the series takes</p>%s</div>') % (
-            ', '.join('%s %s' % (NICK[t], pct(pen[t])) for t in order), ''.join(segs), key, ''.join(ifs), lengths(F['ALCS']['length']))
+            ', '.join('%s %s' % (NICK[t], pct(pen[t])) for t in order), ''.join(segs), key, how_bar, ''.join(ifs), lengths(F['ALCS']['length']))
     # the ALDS still open, if any, for the assumption's wording
     note = ''
     for S in series:
@@ -267,8 +270,8 @@ def forecast_section(series):
     if 'ALCS_CLE' in F:   # the Guardians won Game 4: the American League's other finalist is open until the fifth game
         odds, how = F['alCentral']['odds'], F['alCentral']['how']
         if how == 'predicted':
-            note = (' The American League&#39;s other finalist was still open: the Guardians and the White Sox play a fifth game, which the model gave the Guardians %s,'
-                    ' so each possible ALCS counts in proportion to that.') % pct(odds['CLE'])
+            note = (' The American League&#39;s other finalist was still open: the Guardians and the White Sox play a fifth game, which the model gives the Guardians a %s chance'
+                    ' of winning, so each possible ALCS is weighted by its chance of happening.') % pct(odds['CLE'])
         else:
             note = ' The %s won the fifth game.' % NICK[max(odds, key=odds.get)]
     rows = []
