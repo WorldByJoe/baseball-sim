@@ -1,5 +1,5 @@
 """
-replay_grids.py · v0.7 · 2026-10-08
+replay_grids.py · v0.8 · 2026-10-08
 
 The division series score grids: each finished game's replays (review/replay_game.js,
 diag_out/replays/<pk>.jsonl) as a table of one team's runs (columns) against the other's
@@ -11,6 +11,8 @@ Within a series the same team keeps the columns (Game 1's visitor), so the grids
   python3 review/replay_grids.py OUT.html --page     (a whole document, for GitHub Pages)
 
 CHANGED
+  v0.8  the ALCS against either AL Central team while their fifth game is to come (the pennant over three teams, each ALCS
+        weighted by the model's call of the game); once it is played, the winner's ALCS
   v0.7  the couch companion (live/) as a third view: live on GitHub Pages, its replay inside the artifact (published with live/ beside it)
   v0.6  a game not yet played shows its prediction before first pitch (diag_out/predict, review/pregame.js) as a card of its own; once played, its card says what the prediction gave
   v0.5  the LCS and World Series forecast (review/series_forecast.json); the trait map as a second view; --page for GitHub Pages
@@ -115,8 +117,9 @@ def pred_grid(pk, num, date, colTeam, rowTeam):
     st = M['starters']
     out = ['<figure class="game pred" id="g%d">' % pk,
            '<figcaption><h3>Game %d <span class="when">%s · at %s</span> <span class="badge">Prediction</span></h3>' % (num, when, html.escape(NICK[home])),
-           '<p class="final">Not yet played. Starters: %s for the %s, %s for the %s; lineups as in Game 3.</p>' % (
-               html.escape(st[ab['away']][1]), NICK[ab['away']], html.escape(st[ab['home']][1]), NICK[ab['home']])]
+           '<p class="final">Not yet played. Starters: %s for the %s, %s for the %s%s; %s.</p>' % (
+               html.escape(st[ab['away']][1]), NICK[ab['away']], html.escape(st[ab['home']][1]), NICK[ab['home']],
+               ' (assumed: MLB had not named them)' if M.get('assumed') else '', html.escape(M.get('lineups', 'lineups from the last game')))]
     for key, R in RS.items():
         N = len(R); colWins = sum(1 for r in R if r['score'][ci] > r['score'][ri]); extras = sum(1 for r in R if r['innings'] > 9)
         runs = sum(sum(r['score']) for r in R) / N / 2
@@ -230,11 +233,27 @@ def forecast_section(series):
         return ('<div class="split" role="img" aria-label="%s %s, %s %s"><span class="sa" style="width:%.1f%%"></span></div>'
                 '<div class="splitk"><span><b>%s</b> %s</span><span>%s <b>%s</b></span></div>') % (NICK[hi], pct(a), NICK[lo], pct(b), 100 * a, NICK[hi], pct(a), pct(b), NICK[lo])
     def lcs(name, label):
-        d = F[name]; S = json.load(open('review/series/%s.json' % name)); hi, lo = S['hi'], S['lo']
+        d = F[name]; S = json.load(open('review/series/%s.json' % ('ALCS' if name == 'ALCS_CWS' else name))); hi, lo = S['hi'], S['lo']
         fav = max(d['win'], key=d['win'].get); oth = lo if fav == hi else hi
         return ('<div class="fc"><h3><span class="tag">%s</span> %s vs %s</h3>%s'
                 '<p class="tally">Home field: %s (games 1, 2, 6 and 7). The simulated games averaged %s runs a team.</p>'
-                '<p class="lenh">Games the series takes</p>%s</div>') % (name, NICK[hi], NICK[lo], split(d['win'], fav, oth), NICK[hi], '%.1f' % d['runs'], lengths(d['length']))
+                '<p class="lenh">Games the series takes</p>%s</div>') % (name[:4], NICK[hi], NICK[lo], split(d['win'], fav, oth), NICK[hi], '%.1f' % d['runs'], lengths(d['length']))
+    def alcs_open():
+        w, how = F['alCentral']['odds'], F['alCentral']['how']; pen = F['ALCS']['win']
+        order = sorted(pen, key=lambda t: -pen[t]); x = 0; segs = []
+        for j, t in enumerate(order):
+            segs.append('<span class="s%d" style="left:%.1f%%;width:%.1f%%"></span>' % (j, 100 * x, 100 * pen[t])); x += pen[t]
+        key = ''.join('<span><i class="k%d"></i><b>%s</b> %s</span>' % (j, NICK[t], pct(pen[t])) for j, t in enumerate(order))
+        ifs = []
+        for t in sorted(w, key=lambda t: -w[t]):
+            d = F['ALCS_' + t]
+            ifs.append('<li>If the %s go through (%s in the model&#39;s call of the fifth game): Rays %s, %s %s.</li>' % (NICK[t], pct(w[t]), pct(d['win'].get('TB', 0)), NICK[t], pct(d['win'].get(t, 0))))
+        return ('<div class="fc"><h3><span class="tag">ALCS</span> Rays vs the ALDS winner</h3>'
+                '<p class="lenh">The American League pennant</p><div class="split three" role="img" aria-label="%s">%s</div><div class="splitk three">%s</div>'
+                '<ul class="ifs">%s</ul>'
+                '<p class="tally">Home field: Rays (games 1, 2, 6 and 7) against either team.</p>'
+                '<p class="lenh">Games the series takes</p>%s</div>') % (
+            ', '.join('%s %s' % (NICK[t], pct(pen[t])) for t in order), ''.join(segs), key, ''.join(ifs), lengths(F['ALCS']['length']))
     # the ALDS still open, if any, for the assumption's wording
     note = ''
     for S in series:
@@ -245,6 +264,13 @@ def forecast_section(series):
         if max(w.values()) < 3:
             al = json.load(open('review/series/ALCS.json')); t = al['hi'] if al['hi'] in w else al['lo']; o = B if t == A else A
             note = ' The %s were assumed to beat the %s, whose series stood %d-%d when the forecast ran.' % (NICK[t], NICK[o], w[t], w[o])
+    if 'ALCS_CLE' in F:   # the Guardians won Game 4: the American League's other finalist is open until the fifth game
+        odds, how = F['alCentral']['odds'], F['alCentral']['how']
+        if how == 'predicted':
+            note = (' The American League&#39;s other finalist was still open: the Guardians and the White Sox play a fifth game, which the model gave the Guardians %s,'
+                    ' so each possible ALCS counts in proportion to that.') % pct(odds['CLE'])
+        else:
+            note = ' The %s won the fifth game.' % NICK[max(odds, key=odds.get)]
     rows = []
     for name in sorted([k for k in F if k.startswith('WS_')], key=lambda k: -F[k]['chance']):
         d = F[name]; S = json.load(open('review/series/%s.json' % name)); hi, lo = S['hi'], S['lo']
@@ -269,7 +295,8 @@ def forecast_section(series):
             '<li>Bullpens: the relievers on the playoff roster, brought in by the model&#39;s manager, all rested at the start of every game.</li>'
             '<li>Home field: the team with the better regular-season record plays games 1, 2, 6 and 7 at home; open-air parks at 60 F, roofed parks at 72 F.</li>'
             '<li>Each simulated series drew every hitter&#39;s traits once, at its start, and kept them for the whole series.</li></ul></section>') % (
-        note, lcs('ALCS', 'American League'), lcs('NLCS', 'National League'), bars, mean, lengths(wl), '\n'.join(rows))
+        note, alcs_open() if 'ALCS_CLE' in F and F['alCentral']['how'] == 'predicted' else lcs('ALCS' if 'ALCS_CLE' not in F else ('ALCS_' + max(F['alCentral']['odds'], key=F['alCentral']['odds'].get)), 'American League'),
+        lcs('NLCS', 'National League'), bars, mean, lengths(wl), '\n'.join(rows))
 
 
 def logit_section():

@@ -1,0 +1,3 @@
+{"pk": 849831, "source": 849832, "away": "CWS", "home": "CLE", "starters": {"CWS": [641743, "Anthony Kay"], "CLE": [668909, "Gavin Williams"]},
+ "lineups": "each team's Game 4 lineup", "assumed": "MLB had not named the starters: each team's Game 2 starter, on regular rest", "ran": "2026-10-08", "park": "Progressive Field, 60 F",
+ "run": "tools/diag/run.sh ... review/pregame.js -- 849832 1000 23 PART 8 641743 668909 'Progressive Field' swap '' [1.77]"}

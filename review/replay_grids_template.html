@@ -124,6 +124,14 @@ table.picks:not(.ws) th.g, table.picks:not(.ws) td:not(.res):not(:last-child) { 
 .split { height: 14px; border-radius: 2px; background: var(--heat-lo); overflow: hidden; }
 .split .sa { display: block; height: 100%; background: var(--heat-hi); border-right: 2px solid var(--panel); }
 .splitk { display: flex; justify-content: space-between; font-size: 15px; font-variant-numeric: tabular-nums; }
+.split.three { position:relative; background:var(--tie); }
+.split.three span { position:absolute; top:0; bottom:0; display:block; border-right:2px solid var(--panel); }
+.split.three .s0, .splitk.three .k0 { background:var(--heat-hi); }
+.split.three .s1, .splitk.three .k1 { background:color-mix(in oklab, var(--heat-hi) 55%, var(--heat-lo)); }
+.split.three .s2, .splitk.three .k2 { background:var(--heat-lo); }
+.splitk.three { justify-content:flex-start; flex-wrap:wrap; gap:6px 22px; }
+.splitk.three i { display:inline-block; width:14px; height:14px; border-radius:2px; margin-right:6px; vertical-align:-1px; }
+.ifs { margin:0; padding-left:20px; font-size:14px; color:var(--muted); display:flex; flex-direction:column; gap:3px; }
 .splitk b { font-family: var(--f-display); font-weight: 600; font-size: 19px; }
 .lenh { margin: 4px 0 0; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
 .len { display: grid; grid-template-columns: repeat(4, minmax(0, 64px)); gap: 10px; align-items: end; }
