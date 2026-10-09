@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>Couch Analyst</title>
 <!-- ============================================================================
-     couch.html · v1.1 · 2026-10-08
+     couch.html · v1.2 · 2026-10-08
 
      The couch analyst on the wall: a live postseason game read pitch by pitch through the baseball-sim model.
      The same analysis as the web companion (site/live/analyst.js: each player's traits fitted to his 2025-26
@@ -21,11 +21,14 @@
 
        ?g=<gamePk>   that game          ?replay   Yankees at Rays, ALDS Game 2, replayed (a test)
        ?pin          never hand off      ?delay=N  show the game N seconds late (to sit behind a broadcast)
+       ?mute         no sound            ?novoice  the park without the announcers     keys: v voices, c the park
 
      On the wall the shared ring script sits beside this file; standalone it is absent, so every use of Wall is
      guarded. Source: WorldByJoe/baseball-sim, branch yankees-review, site/wall/couch.html.
 
      CHANGED
+       v1.2  the catcher's view (each pitch where Statcast measured it crossing, the last one's measured flight, and where the
+             model's batter expected it); the park's sound (couch/sound.js: real events, a guessed crowd, the announcers)
        v1.1  COUCH exposes the page's state for the wall's up-key card (about.js)
        v1.0  first build (Joe, 2026-10-08: "a version of the Couch for the Pi TV")
 ============================================================================ -->
@@ -79,15 +82,21 @@ html, body { margin:0; height:100%; background:var(--ground); color:var(--ink); 
 
 /* at the plate */
 #plate { left:calc(120 * var(--wu)); top:calc(500 * var(--wu)); width:calc(2240 * var(--wu)); height:calc(1080 * var(--wu)); }
-#plate .matchup { font:500 var(--t1)/1.1 var(--font-ui); margin:0 0 calc(34 * var(--wu)); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#plate .matchup { font:500 var(--t1)/1.1 var(--font-ui); margin:0 0 calc(30 * var(--wu)); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pl-cols { display:grid; grid-template-columns:minmax(0, 1fr) calc(820 * var(--wu)); gap:calc(50 * var(--wu)); }
+.pl-cols > div { min-width:0; }
+#cv { display:block; width:calc(820 * var(--wu)); height:calc(610 * var(--wu)); }
+.cvtitle { font:400 var(--t4)/1.2 var(--font-ui); color:var(--ink); margin:0 0 calc(6 * var(--wu)); min-height:calc(44 * var(--wu)); }
+.cvkey { font:400 var(--t5)/1.35 var(--font-ui); color:var(--ink-3); margin-top:calc(8 * var(--wu)); }
+.cvkey b { font-weight:400; color:var(--ink-2); }
 #plate .matchup span { color:var(--ink-3); font-weight:300; }
 .probs { display:grid; grid-template-columns:repeat(4, 1fr); gap:calc(40 * var(--wu)); margin-bottom:calc(36 * var(--wu)); }
 .prob { border-top:calc(6 * var(--wu)) solid var(--edge); padding-top:calc(14 * var(--wu)); }
-.prob b { display:block; font:300 calc(120 * var(--wu))/1 var(--font-ui); font-variant-numeric:tabular-nums; }
+.prob b { display:block; font:300 calc(100 * var(--wu))/1 var(--font-ui); font-variant-numeric:tabular-nums; }
 .prob span { font:400 var(--t4)/1.3 var(--font-ui); color:var(--ink-2); }
-ul.watch { margin:0 0 calc(30 * var(--wu)); padding-left:calc(44 * var(--wu)); font:400 var(--t4)/1.4 var(--font-ui); color:var(--ink-2); }
+ul.watch { margin:0 0 calc(24 * var(--wu)); padding-left:calc(40 * var(--wu)); font:400 var(--t5)/1.4 var(--font-ui); color:var(--ink-2); }
 ul.watch li { margin-bottom:calc(6 * var(--wu)); }
-ol.pitches { list-style:none; margin:0; padding:0; display:grid; gap:calc(10 * var(--wu)); font:400 var(--t4)/1.3 var(--font-ui); }
+ol.pitches { list-style:none; margin:0; padding:0; display:grid; gap:calc(8 * var(--wu)); font:400 var(--t5)/1.3 var(--font-ui); }
 ol.pitches li { padding:calc(8 * var(--wu)) calc(18 * var(--wu)); border-left:calc(6 * var(--wu)) solid transparent; }
 ol.pitches li.flag, ol.events li.flag { border-left-color:var(--flag); color:var(--ink); background:rgba(240,138,75,.10); }
 
@@ -139,6 +148,8 @@ window.postMessage = function (m) { if (COUCH.onmsg) COUCH.onmsg({ data: m }); }
 <script src="couch/engine/players.js"></script>
 <script src="couch/data/playoff.js"></script>
 <script src="couch/analyst.js"></script>
+<script src="sounds/manifest.js"></script>
+<script src="couch/sound.js"></script>
 <script>
 (function () {
   var q = location.search, PINNED = /[?&]pin\b/.test(q), REPLAY = /[?&]replay\b/.test(q), GQ = +((q.match(/[?&]g=(\d+)/) || [])[1] || 0);
@@ -210,6 +221,7 @@ window.postMessage = function (m) { if (COUCH.onmsg) COUCH.onmsg({ data: m }); }
   }
   function render(s) {
     COUCH.lastState = s; COUCH.lastAt = Date.now();
+    try { sound(s); } catch (err) { $('status').textContent = 'Sound: ' + err.message; }
     var A = s.teams.away, H = s.teams.home, n = s.now;
     var sc = s.score || (n && !n.complete ? n.score : [s.final.away, s.final.home]);
     $('aAb').textContent = A.abbrev || nick(A.name); $('hAb').textContent = H.abbrev || nick(H.name);
@@ -219,14 +231,14 @@ window.postMessage = function (m) { if (COUCH.onmsg) COUCH.onmsg({ data: m }); }
       var d = '<span class="diamond">' + [n.bases[1], n.bases[0], n.bases[2], false].map(function (b, i) { return i === 3 ? '<i style="visibility:hidden"></i>' : '<i class="' + (b ? 'on' : '') + '"></i>'; }).join('') + '</span>';
       var o = '<span class="outs">' + [0, 1, 2].map(function (i) { return '<i class="' + (i < n.outs ? 'on' : '') + '"></i>'; }).join('') + '</span>';
       $('sit').innerHTML = (s.status === 'Final' ? 'Final' : (n.half === 'top' ? 'Top ' : 'Bottom ') + n.inning) + d + o;
-      var p = n.probs, h = '<h2 class="key">At the plate</h2><p class="matchup">' + esc(n.batter) + ' <span>vs</span> ' + esc(n.pitcher) + '</p>';
+      var p = n.probs, head = '<h2 class="key">At the plate</h2><p class="matchup">' + esc(n.batter) + ' <span>vs</span> ' + esc(n.pitcher) + '</p>', body = '';
       if (p) {
         var hit = p['1B'] + p['2B'] + p['3B'] + p.HR;
-        h += '<div class="probs">' + [['Strikeout', p.K], ['Walk', p.BB + p.HBP], ['Hit', hit], ['Home run', p.HR]].map(function (x) { return '<div class="prob"><b>' + pct(x[1]) + '</b><span>' + x[0] + '</span></div>'; }).join('') + '</div>';
+        body += '<div class="probs">' + [['Strikeout', p.K], ['Walk', p.BB + p.HBP], ['Hit', hit], ['Home run', p.HR]].map(function (x) { return '<div class="prob"><b>' + pct(x[1]) + '</b><span>' + x[0] + '</span></div>'; }).join('') + '</div>';
       }
-      h += '<ul class="watch">' + n.watch.slice(1, 4).map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>';
-      h += '<ol class="pitches">' + n.pitches.slice(-6).map(function (x) { return '<li class="' + (x.flag ? 'flag' : '') + '">' + esc(x.text) + '</li>'; }).join('') + '</ol>';
-      $('plate').innerHTML = h;
+      body += '<ul class="watch">' + n.watch.slice(1, 4).map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>';
+      body += '<ol class="pitches">' + n.pitches.filter(function (x) { return x.text; }).slice(-6).map(function (x) { return '<li class="' + (x.flag ? 'flag' : '') + '">' + esc(x.text) + '</li>'; }).join('') + '</ol>';
+      $('plate').innerHTML = head + '<div class="pl-cols"><div>' + body + '</div><div>' + catcherView(n) + '</div></div>';
     }
     var L = s.ledger, ab = esc(A.abbrev || nick(A.name)), hb = esc(H.abbrev || nick(H.name));
     var pair = function (v, i) { return v ? v[i] : ''; }, w3 = function (v) { return v == null ? '' : v.toFixed(3).replace(/^0/, ''); };
@@ -254,6 +266,71 @@ window.postMessage = function (m) { if (COUCH.onmsg) COUCH.onmsg({ data: m }); }
         '<text x="' + (x(wp.length - 1) + 14) + '" y="' + (y(100 - last) + 10) + '" fill="rgba(238,244,252,.95)" font-size="34" font-family="ui-sans-serif,system-ui">' + (last >= 50 ? hb + ' ' + Math.round(last) : ab + ' ' + Math.round(100 - last)) + '%</text></svg>';
     }
   }
+
+  /* ------------------------------------------------------------ the catcher's view
+     From behind the plate. Each pitch of the at-bat where Statcast measured it crossing the front of the plate (pX, pZ;
+     the zone is the batter's, from the feed); the last pitch's flight from Statcast's own nine-parameter fit, seen in
+     perspective from a catcher's eye (3 ft behind the plate, 2.6 ft up), so it starts small near the middle and grows;
+     and where the MODEL's batter expected that pitch: the mean of 120 of his pictures of it (ghostPitch), with the type
+     he was most often looking for. The batter's expectation is the model's, never measured; the pitch is measured. */
+  var KINDINK = { FB: 'rgba(238,244,252,.95)', BR: '#b79cf2', OS: '#86d39a' };
+  function kindOf(t) { var M = { FF: 'FB', SI: 'FB', FC: 'FB', SL: 'BR', ST: 'BR', CU: 'BR', KC: 'BR', SV: 'BR', CS: 'BR', CH: 'OS', FS: 'OS', FO: 'OS', SC: 'OS', KN: 'OS' }; return M[t] || 'FB'; }
+  function typeName(t) { return (window.NAMES && NAMES[t]) || t || ''; }
+  function catcherView(n) {
+    var W = 820, H = 610, k = 118, cx = W / 2, gy = H - 26;
+    function X(x) { return cx + x * k; } function Y(z) { return gy - z * k; }
+    var P = n.pitches.filter(function (q) { return q.px != null && q.pz != null; });
+    var top = 3.4, bot = 1.6; P.forEach(function (q) { if (q.top) top = q.top; if (q.bot) bot = q.bot; });
+    var g = ['<svg id="cv" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="The catcher’s view of this at-bat">'];
+    var side = n.batSide === 'L' ? 1 : -1;   // a right-handed batter stands on the catcher's left
+    g.push('<rect x="' + (side > 0 ? X(1.45) : X(-2.45)) + '" y="' + Y(5.6) + '" width="' + (1.0 * k) + '" height="' + (5.6 * k) + '" rx="' + (0.35 * k) + '" fill="rgba(206,220,240,.06)"/>');
+    g.push('<line x1="' + X(-0.708) + '" x2="' + X(0.708) + '" y1="' + gy + '" y2="' + gy + '" stroke="rgba(238,244,252,.5)" stroke-width="6"/>');
+    var zx0 = X(-0.83), zw = 1.66 * k, zy0 = Y(top), zh = (top - bot) * k;
+    g.push('<rect x="' + zx0 + '" y="' + zy0 + '" width="' + zw + '" height="' + zh + '" fill="none" stroke="rgba(238,244,252,.55)" stroke-width="3"/>');
+    for (var i = 1; i < 3; i++) {
+      g.push('<line x1="' + (zx0 + zw * i / 3) + '" x2="' + (zx0 + zw * i / 3) + '" y1="' + zy0 + '" y2="' + (zy0 + zh) + '" stroke="rgba(238,244,252,.14)" stroke-width="2"/>');
+      g.push('<line x1="' + zx0 + '" x2="' + (zx0 + zw) + '" y1="' + (zy0 + zh * i / 3) + '" y2="' + (zy0 + zh * i / 3) + '" stroke="rgba(238,244,252,.14)" stroke-width="2"/>');
+    }
+    var L = P[P.length - 1];
+    if (L && L.tr) {   // the last pitch's measured flight, in perspective: x(t) = x0 + vx0 t + ax t^2 / 2, likewise y and z, to the plate's front (y = 17/12 ft)
+      var tr = L.tr, ye = -3, ze = 2.6, yp = 17 / 12, pts = [];
+      for (var t = 0; t < 1; t += 0.01) {
+        var y = tr[1] + tr[4] * t + 0.5 * tr[7] * t * t; if (y < yp) break;
+        var x = tr[0] + tr[3] * t + 0.5 * tr[6] * t * t, z = tr[2] + tr[5] * t + 0.5 * tr[8] * t * t, sc = (yp - ye) / (y - ye);
+        pts.push([X(x * sc), Y(ze + (z - ze) * sc), sc]);
+      }
+      pts.push([X(L.px), Y(L.pz), 1]);
+      for (var j = 1; j < pts.length; j++) g.push('<line x1="' + pts[j - 1][0].toFixed(1) + '" y1="' + pts[j - 1][1].toFixed(1) + '" x2="' + pts[j][0].toFixed(1) + '" y2="' + pts[j][1].toFixed(1) + '" stroke="' + KINDINK[kindOf(L.type)] + '" stroke-opacity=".55" stroke-width="' + (2 + 10 * pts[j][2]).toFixed(1) + '" stroke-linecap="round"/>');
+    }
+    if (L && L.gx != null) {   // where the model's batter expected it; pinned to the frame's edge, with an arrow, when he pictured it off the view
+      var ex = X(L.gx), ey = Y(L.gz), off = ey < 24 ? 'up' : ey > H - 10 ? 'down' : ex < 10 || ex > W - 10 ? 'side' : '';
+      var gxp = Math.max(30, Math.min(W - 30, ex)), gyp = Math.max(30, Math.min(H - 20, ey));
+      g.push('<line x1="' + gxp + '" y1="' + gyp + '" x2="' + X(L.px) + '" y2="' + Y(L.pz) + '" stroke="rgba(240,138,75,.7)" stroke-width="3" stroke-dasharray="8 8"/>');
+      if (off === 'up') g.push('<path d="M' + (gxp - 22) + ',' + (gyp + 14) + ' L' + gxp + ',' + (gyp - 14) + ' L' + (gxp + 22) + ',' + (gyp + 14) + '" fill="none" stroke="#f08a4b" stroke-width="6"/>');
+      else if (off === 'down') g.push('<path d="M' + (gxp - 22) + ',' + (gyp - 14) + ' L' + gxp + ',' + (gyp + 14) + ' L' + (gxp + 22) + ',' + (gyp - 14) + '" fill="none" stroke="#f08a4b" stroke-width="6"/>');
+      else g.push('<circle cx="' + gxp + '" cy="' + gyp + '" r="' + (0.2 * k) + '" fill="none" stroke="#f08a4b" stroke-width="5" stroke-dasharray="10 8"/>');
+      var right = gxp > W * 0.5, lx = gxp + (right ? -1 : 1) * 0.32 * k, anchor = right ? 'end' : 'start', ly = off === 'up' ? gyp + 8 : off === 'down' ? gyp - 50 : gyp - 0.3 * k;
+      var l2 = off === 'up' ? 'pictured it higher' : off === 'down' ? 'pictured it lower' : '';
+      g.push('<text x="' + lx + '" y="' + ly + '" text-anchor="' + anchor + '" fill="#f08a4b" font-size="30" font-family="ui-sans-serif,system-ui"><tspan x="' + lx + '">looked for ' + esc(typeName(L.guess)) + (L.guessShare != null ? ' ' + Math.round(100 * L.guessShare) + '%' : '') + '</tspan>' + (l2 ? '<tspan x="' + lx + '" dy="36">' + l2 + '</tspan>' : '') + '</text>');
+    }
+    P.forEach(function (q, idx) {
+      var last = q === L, r = (last ? 0.17 : 0.14) * k;
+      g.push('<circle cx="' + X(q.px) + '" cy="' + Y(q.pz) + '" r="' + r + '" fill="' + KINDINK[kindOf(q.type)] + '" fill-opacity="' + (last ? 1 : 0.5) + '" stroke="#0b0e14" stroke-width="3"/>');
+      g.push('<text x="' + (X(q.px) + r + 6) + '" y="' + (Y(q.pz) + 10) + '" fill="rgba(206,220,240,' + (last ? '.95' : '.6') + ')" font-size="28" font-family="ui-monospace,Menlo,monospace">' + (idx + 1) + '</text>');
+    });
+    g.push('</svg>');
+    var title = L ? '<div class="cvtitle">Pitch ' + P.length + ': ' + esc(typeName(L.type)) + (L.mph ? ', ' + Math.round(L.mph) + ' mph' : '') + '</div>' : '<div class="cvtitle"></div>';
+    return title + g.join('') + '<div class="cvkey"><b>Catcher’s view.</b> Filled: where each pitch crossed (Statcast). Dashed: where the model’s batter expected the last one.</div>';
+  }
+
+  // ------------------------------------------------------------ the park's sound (couch/sound.js): real events, a guessed crowd
+  var SND = null, MUTE = /[?&]mute\b/.test(q), NOVOICE = /[?&]novoice\b/.test(q);
+  function sound(st) {
+    if (MUTE || !window.CouchSound) return;
+    if (!SND) { SND = CouchSound.create({ base: 'sounds/', pk: st.pk }); if (NOVOICE) SND.mute('voice'); COUCH.sound = SND; }
+    SND.feed(st);
+  }
+  document.addEventListener('keydown', function (e) { if (!SND) return; if (e.key === 'v') SND.mute('voice'); if (e.key === 'c') SND.mute('park'); });
 
   // ------------------------------------------------------------ go
   if (REPLAY) {

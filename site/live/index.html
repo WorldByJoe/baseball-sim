@@ -105,7 +105,7 @@ table.led td { padding: 6px; text-align: right; font-family: var(--data); font-v
   function start(pk) {
     if (worker) worker.terminate();
     buf = [];
-    worker = new Worker('analyst.js?v=3.9.3');   // bump with each engine or bundle (GitHub Pages caches 10 min)
+    worker = new Worker('analyst.js?v=3.9.4');   // bump with each engine or bundle (GitHub Pages caches 10 min)
     worker.onmessage = function (e) {
       if (e.data.type === 'status') document.getElementById('status').textContent = e.data.text;
       else if (e.data.type === 'state') { buf.push({ at: Date.now() / 1000, s: e.data.state }); if (buf.length > 400) buf.shift(); show(); }
@@ -145,7 +145,7 @@ table.led td { padding: 6px; text-align: right; font-family: var(--data); font-v
         var hit = p['1B'] + p['2B'] + p['3B'] + p.HR;
         h += '<div class="probs">' + [['Strikeout', p.K], ['Walk', p.BB + p.HBP], ['Hit', hit], ['Home run', p.HR]].map(function (q) { return '<div class="prob"><b>' + pct(q[1]) + '</b><span>' + q[0] + '</span></div>'; }).join('') + '</div>';
       }
-      h += '<ol class="pitches">' + n.pitches.map(function (q) { return '<li class="' + (q.flag ? 'flag' : '') + '">' + esc(q.text) + '</li>'; }).join('') + '</ol>';
+      h += '<ol class="pitches">' + n.pitches.filter(function (q) { return q.text; }).map(function (q) { return '<li class="' + (q.flag ? 'flag' : '') + '">' + esc(q.text) + '</li>'; }).join('') + '</ol>';
       document.getElementById('plate').innerHTML = h;
     }
     document.getElementById('events').innerHTML = s.events.slice().reverse().map(function (e) { return '<li class="' + e.kind + (e.flag ? ' flag' : '') + '"><span class="tm">' + hhmm(e.t) + '</span>' + esc(e.text) + '</li>'; }).join('');
