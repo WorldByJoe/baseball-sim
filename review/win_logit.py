@@ -19,10 +19,10 @@ sys.path.insert(0, 'review')
 from replay_grids import GAMES, NICK
 
 
-def rows():
+def rows(d='diag_out/replays'):   # d: the replay set (the score grids' page fits one per setting)
     out = []
     for pk, ser, num, date in GAMES:
-        f = 'diag_out/replays/%d.jsonl' % pk
+        f = '%s/%d.jsonl' % (d, pk)
         if not os.path.exists(f): continue
         G = json.load(open('review/games/%d.json' % pk))
         R = [json.loads(l) for l in open(f) if l.startswith('{')]

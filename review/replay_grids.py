@@ -1,5 +1,5 @@
 """
-replay_grids.py · v0.9 · 2026-10-10
+replay_grids.py · v0.10 · 2026-10-10
 
 The division series score grids: each finished game's replays (review/replay_game.js,
 diag_out/replays/<pk>.jsonl) as a table of one team's runs (columns) against the other's
@@ -11,6 +11,7 @@ Within a series the same team keeps the columns (Game 1's visitor), so the grids
   python3 review/replay_grids.py OUT.html --page     (a whole document, for GitHub Pages)
 
 CHANGED
+  v0.10 the regression follows the switch: one fit and figure per setting; its verdict on significance computed
   v0.9  a fourth set: the pitching as it was that day AND each fielder's own error rate together (replay_game.js
         mode 'pitched+errors', diag_out/replays_both)
   v0.8  the ALCS against either AL Central team while their fifth game is to come (the pennant over three teams, each ALCS
@@ -306,47 +307,64 @@ def forecast_section(series):
 
 
 def logit_section():
-    """The replays' win share against the real results (review/win_logit.py's fit), as an SVG that follows the page's theme."""
+    """The replays' win share against the real results (review/win_logit.py's fit), one figure per setting (it follows the
+    page's switch), each an SVG on the page's theme."""
     import numpy as np
     from scipy import stats
     from win_logit import rows, fit
-    D = rows(); x = np.array([d['p'] for d in D]); y = np.array([d['y'] for d in D], float)
-    b, cov, mu, ll1, ll0 = fit(x, y); se = np.sqrt(np.diag(cov))
-    p_wald = 2 * stats.norm.sf(abs(b[1] / se[1])); p_lr = stats.chi2.sf(2 * (ll1 - ll0), 1)
-    r2m = 1 - ll1 / ll0; r2t = mu[y == 1].mean() - mu[y == 0].mean()
-    W, H, L, R, T, B = 760, 470, 64, 20, 24, 56
-    def X(v): return L + v * (W - L - R)
-    def Y(v): return T + (1.08 - v) / 1.16 * (H - T - B)   # 1.08 at the top, -0.08 at the bottom
-    xs = np.linspace(0, 1, 101); Xs = np.column_stack([np.ones_like(xs), xs]); eta = Xs @ b
-    se_eta = np.sqrt(np.einsum('ij,jk,ik->i', Xs, cov, Xs)); sig = lambda z: 1 / (1 + np.exp(-z))
-    lo, hi, fitc = sig(eta - 1.96 * se_eta), sig(eta + 1.96 * se_eta), sig(eta)
-    band = 'M' + ' L'.join('%.1f,%.1f' % (X(a), Y(c)) for a, c in zip(xs, hi)) + ' L' + ' L'.join('%.1f,%.1f' % (X(a), Y(c)) for a, c in zip(xs[::-1], lo[::-1])) + ' Z'
-    curve = 'M' + ' L'.join('%.1f,%.1f' % (X(a), Y(c)) for a, c in zip(xs, fitc))
-    g = ['<svg class="logit" viewBox="0 0 %d %d" role="img" aria-label="Logistic regression of the real result on the replays\' win share, %d games">' % (W, H, len(D))]
-    for t in range(0, 11):   # grid and the x axis
-        v = t / 10; g.append('<line class="gl" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (X(v), Y(1.08), X(v), Y(-0.08)))
-        g.append('<text class="tk" x="%.1f" y="%.1f" text-anchor="middle">%d%%</text>' % (X(v), H - B + 18, 10 * t))
-    for v, lab in ((0, 'lost'), (0.25, '25%'), (0.5, '50%'), (0.75, '75%'), (1, 'won')):
-        g.append('<line class="gl" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (X(0), Y(v), X(1), Y(v)))
-        g.append('<text class="tk" x="%.1f" y="%.1f" text-anchor="end">%s</text>' % (L - 8, Y(v) + 4, lab))
-    g.append('<path class="band" d="%s"/>' % band)
-    g.append('<line class="diag" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (X(0), Y(0), X(1), Y(1)))
-    g.append('<path class="fit" d="%s"/>' % curve)
-    for d in D:
-        cx, cy = X(d['p']), Y(d['y'])
-        tip = '%s: home team won %d of 1,000 replays (%.0f%%); %s the real game' % (d['label'], round(1000 * d['p']), 100 * d['p'], 'won' if d['y'] else 'lost')
-        ty = cy - 9 if d['y'] == 0 else cy + 9
-        g.append('<g class="pt"><title>%s</title><circle cx="%.1f" cy="%.1f" r="5.5"/><text class="pl" transform="translate(%.1f,%.1f) rotate(-90)" text-anchor="%s" dominant-baseline="middle">%s</text></g>' % (
-            html.escape(tip), cx, cy, cx, ty, 'start' if d['y'] == 0 else 'end', html.escape(d['label'])))
-    g.append('<text class="ax" x="%.1f" y="%.1f" text-anchor="middle">Home team\'s share of 1,000 replays won (regular-season pitching)</text>' % ((X(0) + X(1)) / 2, H - 12))
-    g.append('<text class="ax" transform="translate(16,%.1f) rotate(-90)" text-anchor="middle">Real game, and the fitted chance of winning</text>' % ((Y(1) + Y(0)) / 2))
-    g.append('</svg>')
-    stats_line = 'Slope %.1f (standard error %.1f), Wald p = %.3f; likelihood-ratio p = %.3f; McFadden R² = %.2f, Tjur R² = %.2f.' % (b[1], se[1], p_wald, p_lr, r2m, r2t)
+    figs, signif = [], []
+    for key, d in SETS:
+        D = rows(d); x = np.array([q['p'] for q in D]); y = np.array([q['y'] for q in D], float)
+        b, cov, mu, ll1, ll0 = fit(x, y); se = np.sqrt(np.diag(cov))
+        p_wald = 2 * stats.norm.sf(abs(b[1] / se[1])); p_lr = stats.chi2.sf(2 * (ll1 - ll0), 1)
+        r2m = 1 - ll1 / ll0; r2t = mu[y == 1].mean() - mu[y == 0].mean()
+        W, H, L, R, T, B = 760, 470, 64, 20, 24, 56
+        def X(v): return L + v * (W - L - R)
+        def Y(v): return T + (1.08 - v) / 1.16 * (H - T - B)   # 1.08 at the top, -0.08 at the bottom
+        xs = np.linspace(0, 1, 101); Xs = np.column_stack([np.ones_like(xs), xs]); eta = Xs @ b
+        se_eta = np.sqrt(np.einsum('ij,jk,ik->i', Xs, cov, Xs)); sig = lambda z: 1 / (1 + np.exp(-z))
+        lo, hi, fitc = sig(eta - 1.96 * se_eta), sig(eta + 1.96 * se_eta), sig(eta)
+        band = 'M' + ' L'.join('%.1f,%.1f' % (X(a), Y(c)) for a, c in zip(xs, hi)) + ' L' + ' L'.join('%.1f,%.1f' % (X(a), Y(c)) for a, c in zip(xs[::-1], lo[::-1])) + ' Z'
+        curve = 'M' + ' L'.join('%.1f,%.1f' % (X(a), Y(c)) for a, c in zip(xs, fitc))
+        g = ['<svg class="logit" viewBox="0 0 %d %d" role="img" aria-label="Logistic regression of the real result on the replays\' win share, %d games">' % (W, H, len(D))]
+        for t in range(0, 11):   # grid and the x axis
+            v = t / 10; g.append('<line class="gl" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (X(v), Y(1.08), X(v), Y(-0.08)))
+            g.append('<text class="tk" x="%.1f" y="%.1f" text-anchor="middle">%d%%</text>' % (X(v), H - B + 18, 10 * t))
+        for v, lab in ((0, 'lost'), (0.25, '25%'), (0.5, '50%'), (0.75, '75%'), (1, 'won')):
+            g.append('<line class="gl" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (X(0), Y(v), X(1), Y(v)))
+            g.append('<text class="tk" x="%.1f" y="%.1f" text-anchor="end">%s</text>' % (L - 8, Y(v) + 4, lab))
+        g.append('<path class="band" d="%s"/>' % band)
+        g.append('<line class="diag" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (X(0), Y(0), X(1), Y(1)))
+        g.append('<path class="fit" d="%s"/>' % curve)
+        # each row's labels spaced at least 13 px apart (pushed outward from the row's middle), a leader where a label moved
+        lx = {}
+        for row in (0, 1):
+            pts = sorted([q for q in D if q['y'] == row], key=lambda q: q['p'])
+            xs_ = [X(q['p']) for q in pts]
+            for k in range(1, len(xs_)): xs_[k] = max(xs_[k], xs_[k - 1] + 13)
+            shift = (sum(X(q['p']) for q in pts) - sum(xs_)) / len(xs_) if xs_ else 0   # recentre the run of labels on the dots
+            for q, x_ in zip(pts, xs_): lx[q['pk']] = x_ + shift
+        for d in D:
+            cx, cy = X(d['p']), Y(d['y']); tx = lx[d['pk']]
+            tip = '%s: home team won %d of 1,000 replays (%.0f%%); %s the real game' % (d['label'], round(1000 * d['p']), 100 * d['p'], 'won' if d['y'] else 'lost')
+            ty = cy - 14 if d['y'] == 0 else cy + 14
+            lead = '<line class="gl" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (cx, cy + (-6 if d['y'] == 0 else 6), tx, ty + (4 if d['y'] == 0 else -4)) if abs(tx - cx) > 1.5 else ''
+            g.append('<g class="pt"><title>%s</title>%s<circle cx="%.1f" cy="%.1f" r="5.5"/><text class="pl" transform="translate(%.1f,%.1f) rotate(-90)" text-anchor="%s" dominant-baseline="middle">%s</text></g>' % (
+                html.escape(tip), lead, cx, cy, tx, ty, 'start' if d['y'] == 0 else 'end', html.escape(d['label'])))
+        g.append('<text class="ax" x="%.1f" y="%.1f" text-anchor="middle">Home team\'s share of 1,000 replays won (%s)</text>' % ((X(0) + X(1)) / 2, H - 12, html.escape(SET_NAME[key])))
+        g.append('<text class="ax" transform="translate(16,%.1f) rotate(-90)" text-anchor="middle">Real game, and the fitted chance of winning</text>' % ((Y(1) + Y(0)) / 2))
+        g.append('</svg>')
+        stats_line = 'Slope %.1f (standard error %.1f), Wald p = %.3f; likelihood-ratio p = %.3f; McFadden R² = %.2f, Tjur R² = %.2f.' % (b[1], se[1], p_wald, p_lr, r2m, r2t)
+        signif.append(p_lr < 0.05 or p_wald < 0.05)
+        figs.append('<div data-set="%s"><div class="scroll">%s</div><p class="tally">%s</p></div>' % (key, '\n'.join(g), stats_line))
+    n = len(rows(SETS[0][1]))
+    verdict = ('but with only %d games the rise is not significant at the usual 0.05 level under any of the four settings: the uncertainty is wide enough to include no relationship at all.' % n
+               if not any(signif) else 'and the tests under the figure say whether, with only %d games, the rise is significant at the usual 0.05 level for the setting shown.' % n)
     return ('<section class="series logit-sec" id="regression"><h2><span class="tag">FIT</span> Did the replays pick the game winners?</h2>'
-            '<p class="lede">Each point is one game, seen from the home team&#39;s side: across, the share of the 1,000 replays (regular-season pitching) the home team won; up or down, whether it won the real game. The blue curve is a logistic regression, the curve that best turns the replay share into a probability of the real win, with its 95%% band. The dashed line is where the points would sit if the replay share were exactly the chance of winning, so that a team which won most of its replays won the real game just as often. The curve rises, so a higher replay share went with more real wins, but with only %d games the rise is not significant at the usual 0.05 level: the uncertainty is wide enough to include no relationship at all.</p>'
-            '<div class="scroll">%s</div><p class="tally">%s</p>'
+            '<p class="lede">Each point is one game, seen from the home team&#39;s side: across, the share of the 1,000 replays (under the setting chosen above) the home team won; up or down, whether it won the real game. The blue curve is a logistic regression, the curve that best turns the replay share into a probability of the real win, with its 95%% band. The dashed line is where the points would sit if the replay share were exactly the chance of winning, so that a team which won most of its replays won the real game just as often. The curve rises, so a higher replay share went with more real wins, %s</p>'
+            '%s'
             '<div class="howto"><span class="k"><span class="sw fit" aria-hidden="true"></span> logistic fit</span><span class="k"><span class="sw band" aria-hidden="true"></span> its 95%% band</span>'
-            '<span class="k"><span class="sw diag" aria-hidden="true"></span> a perfectly calibrated forecast</span></div></section>') % (len(D), '\n'.join(g), stats_line)
+            '<span class="k"><span class="sw diag" aria-hidden="true"></span> a perfectly calibrated forecast</span></div></section>') % (verdict, '\n'.join(figs))
 
 
 def main(path):
