@@ -18,7 +18,7 @@ Postseason Replays
 
 ## H2 (the header, paragraph 1)
 
-This page asks how likely each real postseason result was. Each division series game finished so far was played again 1,000 times by a simulation that plays every pitch from the players' traits. The traits come in two kinds: measured ones, taken straight from Statcast and held fixed, such as how fast a hitter swings and how hard a pitcher throws each pitch; and fitted ones, hidden qualities inferred from a hitter's statistics, such as how well he reads a pitch and how steady his timing is (the trait map lists them all). Each replay kept what the real game had: the batting order, each substitute entering at the turn he really took, and the real pitchers in their real order, each facing as many batters as he faced. Two things varied from replay to replay: the pitch-by-pitch chance of the game itself, and a fresh draw of every hitter's fitted traits from the range his statistics leave open. The spread of scores therefore includes what is not known about the players as well as the luck of the game.
+This page asks how likely each real postseason result was. Each postseason game finished so far was played again 1,000 times by a simulation that plays every pitch from the players' traits. The traits come in two kinds: measured ones, taken straight from Statcast and held fixed, such as how fast a hitter swings and how hard a pitcher throws each pitch; and fitted ones, hidden qualities inferred from a hitter's statistics, such as how well he reads a pitch and how steady his timing is (the trait map lists them all). Each replay kept what the real game had: the batting order, each substitute entering at the turn he really took, and the real pitchers in their real order, each facing as many batters as he faced. Two things varied from replay to replay: the pitch-by-pitch chance of the game itself, and a fresh draw of every hitter's fitted traits from the range his statistics leave open. The spread of scores therefore includes what is not known about the players as well as the luck of the game.
 
 ## H3 (the header, paragraph 2)
 
@@ -26,7 +26,7 @@ The page opens with the model's forecast for the League Championship Series and 
 
 ## H4 (the header, jump links)
 
-The LCS and World Series forecast · Division series score grids · Series picks · Game picks
+The LCS and World Series forecast · Score grids · Series picks · Game picks
 
 ## F1 (forecast section, heading)
 
@@ -100,7 +100,7 @@ Did the replays pick the series winners?
 
 ## P2 (series picks, the paragraph under the heading)
 
-The table takes the team that won or leads each series and shows, for each game, the share of the 1,000 replays that team won under whichever setting the switch above shows, marked W or L for whether it won the real game. The series chance combines those game shares into the chance of winning a best-of-five, with any game not yet played counted at the series' average share; the pick is the side that chance favours. These are not forecasts. Each game's replays used the lineups and pitchers that really played, which were known only once the game began, so the table asks a narrower question: given who played, did the replays lean the way the games went? Before the correction of 2026-10-08 (see the notes below), the regular-season setting gave the Dodgers 80%, the Brewers 85%, the Rays 47% and the White Sox 60%: the same calls, made with more confidence than the corrected replays support.
+The table takes the team that won or leads each series and shows, for each game, the share of the 1,000 replays that team won under whichever setting the switch above shows, marked W or L for whether it won the real game. The series chance combines those game shares into the chance of winning the series (best of five, or seven for a championship series), with any game not yet played counted at the series' average share; the pick is the side that chance favours. These are not forecasts. Each game's replays used the lineups and pitchers that really played, which were known only once the game began, so the table asks a narrower question: given who played, did the replays lean the way the games went? Before the correction of 2026-10-08 (see the notes below), the regular-season setting gave the Dodgers 80%, the Brewers 85%, the Rays 47% and the White Sox 60%: the same calls, made with more confidence than the corrected replays support.
 
 ## P3 (series picks, table column heads and verdicts)
 

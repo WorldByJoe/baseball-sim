@@ -3,7 +3,12 @@
 # fitted traits (exit 3 naming any who do not), builds his game-day pitching, replays it 1,000 times each way
 # (regular-season pitching, as pitched, fielders' own error rates) and rebuilds the score-grid page.
 cd ~/bsim-wt/review; PK=$1; OUT=${2:-/private/tmp/claude-501/-Users-joevonfischer-Library-CloudStorage-OneDrive-Colostate-Matlab-Trees2/b0851baa-7c9a-44bd-9641-9bcb33295153/scratchpad/ds_replays.html}
-until curl -s "https://statsapi.mlb.com/api/v1/schedule?sportId=1&gamePk=$PK" | grep -q '"detailedState" *: *"\(Final\|Game Over\|Completed Early\)"'; do sleep 300; done
+while :; do   # until it is final; an if-necessary game the series did not need is cancelled, and the watch ends (exit 4)
+  ST=$(curl -s "https://statsapi.mlb.com/api/v1/schedule?sportId=1&gamePk=$PK" | grep -o '"detailedState" *: *"[^"]*"' | head -1)
+  echo "$ST" | grep -q 'Final\|Game Over\|Completed Early' && break
+  echo "$ST" | grep -q 'Cancelled' && { echo "$PK cancelled"; exit 4; }
+  sleep 300
+done
 sleep 90
 curl -s "https://statsapi.mlb.com/api/v1.1/game/$PK/feed/live" -o playoffs/games/${PK}_feed.json && python3 review/game_feed.py $PK || exit 2
 python3 - "$PK" <<'PY' || exit 3

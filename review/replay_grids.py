@@ -1,5 +1,5 @@
 """
-replay_grids.py · v0.10 · 2026-10-10
+replay_grids.py · v0.11 · 2026-10-10
 
 The division series score grids: each finished game's replays (review/replay_game.js,
 diag_out/replays/<pk>.jsonl) as a table of one team's runs (columns) against the other's
@@ -11,6 +11,7 @@ Within a series the same team keeps the columns (Game 1's visitor), so the grids
   python3 review/replay_grids.py OUT.html --page     (a whole document, for GitHub Pages)
 
 CHANGED
+  v0.11 the championship series' games join the grids (best of seven in the series picks)
   v0.10 the regression follows the switch: one fit and figure per setting; its verdict on significance computed
   v0.9  a fourth set: the pitching as it was that day AND each fielder's own error rate together (replay_game.js
         mode 'pitched+errors', diag_out/replays_both)
@@ -32,6 +33,10 @@ GAMES = [  # pk, series, game number, date (MLB's schedule)
     (849835, 'ALDS', 1, '2026-10-03'), (849839, 'ALDS', 2, '2026-10-05'), (849838, 'ALDS', 3, '2026-10-07'),
     (849828, 'NLDS', 1, '2026-10-03'), (849823, 'NLDS', 2, '2026-10-04'), (849819, 'NLDS', 3, '2026-10-06'), (849822, 'NLDS', 4, '2026-10-07'),
     (849830, 'NLDS', 1, '2026-10-03'), (849825, 'NLDS', 2, '2026-10-04'), (849826, 'NLDS', 3, '2026-10-06'), (849827, 'NLDS', 4, '2026-10-07'),
+    (849820, 'ALCS', 1, '2026-10-12'), (849813, 'ALCS', 2, '2026-10-13'), (849818, 'ALCS', 3, '2026-10-15'), (849817, 'ALCS', 4, '2026-10-16'),
+    (849816, 'ALCS', 5, '2026-10-17'), (849815, 'ALCS', 6, '2026-10-19'), (849814, 'ALCS', 7, '2026-10-20'),
+    (849809, 'NLCS', 1, '2026-10-11'), (849812, 'NLCS', 2, '2026-10-12'), (849811, 'NLCS', 3, '2026-10-14'), (849810, 'NLCS', 4, '2026-10-15'),
+    (849808, 'NLCS', 5, '2026-10-16'), (849806, 'NLCS', 6, '2026-10-18'), (849807, 'NLCS', 7, '2026-10-19'),
 ]
 NICK = {'CWS': 'White Sox', 'CLE': 'Guardians', 'NYY': 'Yankees', 'TB': 'Rays', 'ATL': 'Braves', 'LAD': 'Dodgers', 'SD': 'Padres', 'MIL': 'Brewers'}
 
@@ -196,7 +201,8 @@ def picks_section(series):
             for k in pA: right[k] += (pA[k] > 0.5) == (w == A)
             ngames += 1
         lead = A if wins[A] >= wins[B] else B; other = B if lead == A else A
-        done = max(wins.values()) == 3
+        bo = 7 if S['name'].endswith('CS') or S['name'] == 'WS' else 5; need = bo // 2 + 1   # best of five (division series), seven (championship series)
+        done = max(wins.values()) == need
         status = '%s %s %d-%d' % (NICK[lead], 'won' if done else ('lead' if wins[lead] > wins[other] else 'tied with %s at' % NICK[other]), wins[lead], wins[other])
         if wins[lead] == wins[other]: status = '%s and %s tied %d-%d' % (NICK[A], NICK[B], wins[A], wins[B])
         cells = []
@@ -209,7 +215,7 @@ def picks_section(series):
                          ' <span class="wl %s" title="%s %s the real game">%s</span></td>' % (res.lower(), NICK[lead], 'won' if res == 'W' else 'lost', res))
         ch, verdict = [], []
         for k, _ in SETS:
-            c = series_chance([(x[2][k] if lead == A else 1 - x[2][k]) for x in games])
+            c = series_chance([(x[2][k] if lead == A else 1 - x[2][k]) for x in games], bo)
             ch.append('<span data-set="%s">%.0f%%</span>' % (k, 100 * c))
             if done: v = 'right' if c > 0.5 else 'missed'
             else: v = 'open, leans %s' % NICK[lead if c > 0.5 else other]
@@ -218,7 +224,7 @@ def picks_section(series):
             S['name'], NICK[A], NICK[B], status, ''.join(cells), ''.join(ch), ''.join(verdict)))
     tally = ''.join('<span data-set="%s">The team the replays favoured won %d of the %d games played so far.</span>' % (k, right[k], ngames) for k, _ in SETS)
     return ('<section class="series picks-sec" id="picks"><h2><span class="tag">SERIES</span> Did the replays pick the series winners?</h2>'
-            '<p class="lede">The table takes the team that won or leads each series and shows, for each game, the share of the 1,000 replays that team won under whichever setting the switch above shows, marked W or L for whether it won the real game. The series chance combines those game shares into the chance of winning a best-of-five, with any game not yet played counted at the series&#39; average share; the pick is the side that chance favours. These are not forecasts. Each game&#39;s replays used the lineups and pitchers that really played, which were known only once the game began, so the table asks a narrower question: given who played, did the replays lean the way the games went? Before the correction of 2026-10-08 (see the notes below), the regular-season setting gave the Dodgers 80%%, the Brewers 85%%, the Rays 47%% and the White Sox 60%%: the same calls, made with more confidence than the corrected replays support.</p>'
+            '<p class="lede">The table takes the team that won or leads each series and shows, for each game, the share of the 1,000 replays that team won under whichever setting the switch above shows, marked W or L for whether it won the real game. The series chance combines those game shares into the chance of winning the series (best of five, or seven for a championship series), with any game not yet played counted at the series&#39; average share; the pick is the side that chance favours. These are not forecasts. Each game&#39;s replays used the lineups and pitchers that really played, which were known only once the game began, so the table asks a narrower question: given who played, did the replays lean the way the games went? Before the correction of 2026-10-08 (see the notes below), the regular-season setting gave the Dodgers 80%%, the Brewers 85%%, the Rays 47%% and the White Sox 60%%: the same calls, made with more confidence than the corrected replays support.</p>'
             '<div class="scroll"><table class="picks"><thead><tr><th scope="col">Series</th><th scope="col">Result</th>'
             + ''.join('<th scope="col" class="g">G%d</th>' % g for g in range(1, 6)) +
             '<th scope="col">Series chance</th><th scope="col">The pick</th></tr></thead><tbody>%s</tbody></table></div><p class="tally">%s</p></section>') % ('\n'.join(rows), tally)
@@ -268,6 +274,7 @@ def forecast_section(series):
         for pk, num, date in S['games']:
             G, _ = load(pk); ab = (G['teams']['away']['abbrev'], G['teams']['home']['abbrev'])
             w[ab[0] if G['final']['away'] > G['final']['home'] else ab[1]] += 1
+        if S['name'] not in ('ALDS', 'NLDS'): continue   # the assumption's wording is about the division series
         if max(w.values()) < 3:
             al = json.load(open('review/series/ALCS.json')); t = al['hi'] if al['hi'] in w else al['lo']; o = B if t == A else A
             note = ' The %s were assumed to beat the %s, whose series stood %d-%d when the forecast ran.' % (NICK[t], NICK[o], w[t], w[o])
