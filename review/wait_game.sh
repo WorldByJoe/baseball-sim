@@ -14,8 +14,8 @@ miss = [p['name'] for s in ('away', 'home') for p in G['lineups'][s] if str(p['i
 if miss: print('MISSING:', miss); sys.exit(3)
 PY
 python3 review/as_pitched.py $PK
-for M in "" pitched "errors 1.77"; do
-  D=diag_out/replays; [ "$M" = pitched ] && D=diag_out/replays_pitched; [ "$M" = "errors 1.77" ] && D=diag_out/replays_errors
+for M in "" pitched "errors 1.77" "pitched+errors 1.77"; do
+  D=diag_out/replays; [ "$M" = pitched ] && D=diag_out/replays_pitched; [ "$M" = "errors 1.77" ] && D=diag_out/replays_errors; [ "$M" = "pitched+errors 1.77" ] && D=diag_out/replays_both
   tools/diag/run.sh bb_engine.js bb_names.js bb_field.js bb_game.js review/players.js review/replay_game.js -- $PK 1000 7 0 1 $M > $D/$PK.jsonl 2> $D/$PK.err &
 done
 wait

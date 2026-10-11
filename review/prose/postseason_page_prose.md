@@ -62,7 +62,7 @@ Pairing · Chance it happens · Favourite · Games it takes
 
 ## S1 (the replays switch, its three buttons)
 
-Regular-season pitching · Pitching as it was that day · Fielders' own error rates
+Regular-season pitching · Pitching as it was that day · Fielders' own error rates · Both together
 
 ## S2 (the replays switch, the line shown with the "season" set)
 
@@ -75,6 +75,10 @@ Each pitcher throws at the speeds and pitch mix he had that day, while the batte
 ## S4 (the replays switch, the line shown with the "errors" set)
 
 Regular-season pitching, with each fielder making errors at his own regular-season rate instead of the model's default (how the rates are built is in the notes below). The replays averaged {RUNS_ERRORS} runs and {ERR_ERRORS} errors a team; the {NGAMES} real games averaged {RUNS_REAL} runs and {ERR_REAL} errors.
+
+## S5 (the replays switch, the line shown with the "both" set; added 2026-10-10)
+
+Both changes at once: each pitcher at the speeds and pitch mix he had that day, and each fielder making errors at his own regular-season rate. The replays averaged {RUNS_BOTH} runs and {ERR_BOTH} errors a team; the {NGAMES} real games averaged {RUNS_REAL} runs and {ERR_REAL} errors.
 
 ## L1 (the score-grid legend (five keys))
 

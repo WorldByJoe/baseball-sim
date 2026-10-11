@@ -82,7 +82,7 @@ table.grid { border-collapse: separate; border-spacing: 2px; margin: 8px 0 0 8px
 .seg button[aria-pressed="true"] { background: var(--heat-hi); color: var(--on-hot); }
 .seg button:focus-visible { outline: 2px solid var(--star-ring); outline-offset: -2px; }
 .sum { margin: 0; font-size: 14px; font-variant-numeric: tabular-nums; }
-.wrap[data-show="season"] [data-set="pitched"], .wrap[data-show="season"] [data-set="errors"], .wrap[data-show="pitched"] [data-set="season"], .wrap[data-show="pitched"] [data-set="errors"], .wrap[data-show="errors"] [data-set="season"], .wrap[data-show="errors"] [data-set="pitched"] { display: none; }
+.wrap[data-show="season"] [data-set="pitched"], .wrap[data-show="season"] [data-set="errors"], .wrap[data-show="season"] [data-set="both"], .wrap[data-show="pitched"] [data-set="season"], .wrap[data-show="pitched"] [data-set="errors"], .wrap[data-show="pitched"] [data-set="both"], .wrap[data-show="errors"] [data-set="season"], .wrap[data-show="errors"] [data-set="pitched"], .wrap[data-show="errors"] [data-set="both"], .wrap[data-show="both"] [data-set="season"], .wrap[data-show="both"] [data-set="pitched"], .wrap[data-show="both"] [data-set="errors"] { display: none; }
 .game.pred { border-style: dashed; border-color: var(--muted); }
 .badge { font-family: var(--f-data); font-size: 11px; font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--muted); border-radius: 3px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px; }
 .tally.pred { color: var(--ink); }
@@ -179,10 +179,12 @@ footer p { margin: 0; }
       <button type="button" id="set-season" aria-pressed="true" data-pick="season">Regular-season pitching</button>
       <button type="button" id="set-pitched" aria-pressed="false" data-pick="pitched">Pitching as it was that day</button>
       <button type="button" id="set-errors" aria-pressed="false" data-pick="errors">Fielders' own error rates</button>
+      <button type="button" id="set-both" aria-pressed="false" data-pick="both">Both together</button>
     </div>
     <p class="sum" data-set="season">Each pitcher throws at his regular-season speeds and pitch mix, and every fielder makes errors at the model's default rate. The replays averaged <strong><!--RUNS_SEASON--></strong> runs and <!--ERR_SEASON--> errors a team; the <!--NGAMES--> real games averaged <!--RUNS_REAL--> runs and <!--ERR_REAL--> errors.</p>
     <p class="sum" data-set="pitched">Each pitcher throws at the speeds and pitch mix he had that day, while the batters still expect his regular-season mix (how the day's values are built is in the notes below). The replays averaged <strong><!--RUNS_PITCHED--></strong> runs and <!--ERR_PITCHED--> errors a team; the <!--NGAMES--> real games averaged <!--RUNS_REAL--> runs and <!--ERR_REAL--> errors.</p>
     <p class="sum" data-set="errors">Regular-season pitching, with each fielder making errors at his own regular-season rate instead of the model's default (how the rates are built is in the notes below). The replays averaged <strong><!--RUNS_ERRORS--></strong> runs and <!--ERR_ERRORS--> errors a team; the <!--NGAMES--> real games averaged <!--RUNS_REAL--> runs and <!--ERR_REAL--> errors.</p>
+    <p class="sum" data-set="both">Both changes at once: each pitcher at the speeds and pitch mix he had that day, and each fielder making errors at his own regular-season rate. The replays averaged <strong><!--RUNS_BOTH--></strong> runs and <!--ERR_BOTH--> errors a team; the <!--NGAMES--> real games averaged <!--RUNS_REAL--> runs and <!--ERR_REAL--> errors.</p>
   </div>
 
   <div class="howto" id="legend">
@@ -223,7 +225,8 @@ footer p { margin: 0; }
   var start = location.hash === '#pitched' ? 'pitched' : null;
   if (!start) { try { start = localStorage.getItem('ds-replays-set'); } catch (e) {} }
   if (location.hash === '#errors') start = 'errors';
-  if (start === 'pitched' || start === 'season' || start === 'errors') show(start);
+  if (location.hash === '#both') start = 'both';
+  if (start === 'pitched' || start === 'season' || start === 'errors' || start === 'both') show(start);
 
   // the two views: the trait map is a page of its own, opened in a frame the first time it is shown, as tall as its content, in the page's theme
   var vbtns = document.querySelectorAll('.views button'), vp = document.getElementById('view-playoffs'), vt = document.getElementById('view-traits'), frame = vt.querySelector('iframe');

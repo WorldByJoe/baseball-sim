@@ -1,5 +1,5 @@
 """
-replay_grids.py · v0.8 · 2026-10-08
+replay_grids.py · v0.9 · 2026-10-10
 
 The division series score grids: each finished game's replays (review/replay_game.js,
 diag_out/replays/<pk>.jsonl) as a table of one team's runs (columns) against the other's
@@ -11,6 +11,8 @@ Within a series the same team keeps the columns (Game 1's visitor), so the grids
   python3 review/replay_grids.py OUT.html --page     (a whole document, for GitHub Pages)
 
 CHANGED
+  v0.9  a fourth set: the pitching as it was that day AND each fielder's own error rate together (replay_game.js
+        mode 'pitched+errors', diag_out/replays_both)
   v0.8  the ALCS against either AL Central team while their fifth game is to come (the pennant over three teams, each ALCS
         weighted by the model's call of the game); once it is played, the winner's ALCS
   v0.7  the couch companion (live/) as a third view: live on GitHub Pages, its replay inside the artifact (published with live/ beside it)
@@ -33,8 +35,8 @@ GAMES = [  # pk, series, game number, date (MLB's schedule)
 NICK = {'CWS': 'White Sox', 'CLE': 'Guardians', 'NYY': 'Yankees', 'TB': 'Rays', 'ATL': 'Braves', 'LAD': 'Dodgers', 'SD': 'Padres', 'MIL': 'Brewers'}
 
 
-SETS = (('season', 'diag_out/replays'), ('pitched', 'diag_out/replays_pitched'), ('errors', 'diag_out/replays_errors'))
-SET_NAME = {'season': 'regular-season pitching', 'pitched': 'as pitched that day', 'errors': "fielders' own error rates"}
+SETS = (('season', 'diag_out/replays'), ('pitched', 'diag_out/replays_pitched'), ('errors', 'diag_out/replays_errors'), ('both', 'diag_out/replays_both'))
+SET_NAME = {'season': 'regular-season pitching', 'pitched': 'as pitched that day', 'errors': "fielders' own error rates", 'both': "as pitched that day, with fielders' own error rates"}
 
 
 def load(pk):
@@ -85,7 +87,7 @@ def load_pred(pk):
     for key in ('season', 'errors'):
         RS[key] = [json.loads(l) for f in sorted(glob.glob('diag_out/predict/%d_%s_*.jsonl' % (pk, key))) for l in open(f) if l.startswith('{')]
     if not all(RS.values()): return None, None
-    RS = {'season': RS['season'], 'pitched': RS['season'], 'errors': RS['errors']}
+    RS = {'season': RS['season'], 'pitched': RS['season'], 'errors': RS['errors'], 'both': RS['errors']}
     return M, RS
 
 
@@ -123,7 +125,8 @@ def pred_grid(pk, num, date, colTeam, rowTeam):
     for key, R in RS.items():
         N = len(R); colWins = sum(1 for r in R if r['score'][ci] > r['score'][ri]); extras = sum(1 for r in R if r['innings'] > 9)
         runs = sum(sum(r['score']) for r in R) / N / 2
-        extra = ' There is no game-day pitching before a game is played, so this view shows the regular-season setting.' if key == 'pitched' else ''
+        extra = (' There is no game-day pitching before a game is played, so this view shows the regular-season setting.' if key == 'pitched' else
+                 ' There is no game-day pitching before a game is played, so this view shows the fielders\' own error rates with regular-season pitching.' if key == 'both' else '')
         out.append('<p class="tally" data-set="%s">Simulations won: %s %s, %s %s · %s went to extra innings · %.1f runs a team on average.%s</p>' % (
             key, cn, f'{colWins:,}', rn, f'{N - colWins:,}', f'{extras:,}', runs, extra))
     out.append('</figcaption><div class="scroll">')

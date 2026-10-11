@@ -4,7 +4,7 @@
 # and World Series forecast (2,000 series each, fielders' own error rates)
 cd ~/bsim-wt/review
 T0=$(date +%s)
-review/run_set.sh diag_out/replays 1000 && review/run_set.sh diag_out/replays_pitched 1000 pitched && review/run_set.sh diag_out/replays_errors 1000 errors 1.77
+review/run_set.sh diag_out/replays 1000 && review/run_set.sh diag_out/replays_pitched 1000 pitched && review/run_set.sh diag_out/replays_errors 1000 errors 1.77 && review/run_set.sh diag_out/replays_both 1000 pitched+errors 1.77
 echo "replays done $(( $(date +%s) - T0 )) s"
 review/odds/run_pregame_ds.sh
 for mode in season errors; do G=""; [ $mode = errors ] && G=1.77; for p in 0 1 2 3 4 5 6 7; do
