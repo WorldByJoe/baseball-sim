@@ -4,26 +4,23 @@
  "home": "TB",
  "starters": {
   "CLE": [
-   682982,
-   "Daniel Espino"
+   656492,
+   "Foster Griffin"
   ],
   "TB": [
    656876,
    "Drew Rasmussen"
   ]
  },
- "assumedTeams": [
-  "CLE",
-  "TB"
- ],
- "assumed": true,
+ "assumedTeams": [],
+ "assumed": false,
  "sources": {
   "TB": 849838,
   "CLE": 849831
  },
  "lineups": "lineups as in their last games (Guardians: ALDS Game 5, Rays: ALDS Game 3)",
  "park": "Tropicana Field",
- "ran": "2026-10-10 23:36",
+ "ran": "2026-10-11 16:43",
  "series": "ALCS",
  "game": 1
 }
