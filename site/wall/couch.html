@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>Couch Analyst</title>
 <!-- ============================================================================
-     couch.html · v1.2 · 2026-10-08
+     couch.html · v1.3 · 2026-10-11
 
      The couch analyst on the wall: a live postseason game read pitch by pitch through the baseball-sim model.
      The same analysis as the web companion (site/live/analyst.js: each player's traits fitted to his 2025-26
@@ -27,6 +27,8 @@
      guarded. Source: WorldByJoe/baseball-sim, branch yankees-review, site/wall/couch.html.
 
      CHANGED
+       v1.3  the pregame card (couch/data/pregame_cards.js, review/couch_cards.py): the Postseason page's prediction for this
+             game, in the at-bat panel before first pitch and in the pregame box after; the Couch's own call when there is none
        v1.2  the catcher's view (each pitch where Statcast measured it crossing, the last one's measured flight, and where the
              model's batter expected it); the park's sound (couch/sound.js: real events, a guessed crowd, the announcers)
        v1.1  COUCH exposes the page's state for the wall's up-key card (about.js)
@@ -120,6 +122,13 @@ ol.events li.pa { color:var(--ink); }
 #wp { left:calc(2460 * var(--wu)); top:calc(1620 * var(--wu)); width:calc(1260 * var(--wu)); height:calc(440 * var(--wu)); }
 #wp svg { display:block; width:100%; height:calc(320 * var(--wu)); }
 #src { left:calc(120 * var(--wu)); top:calc(2085 * var(--wu)); width:calc(3600 * var(--wu)); font:400 var(--t5)/1.2 var(--font-num); letter-spacing:.06em; color:var(--ink-3); }
+.card-big { display:flex; gap:calc(60 * var(--wu)); align-items:baseline; margin:calc(10 * var(--wu)) 0 calc(24 * var(--wu)); }
+.card-big b { font:300 var(--t0)/1 var(--font-ui); font-variant-numeric:tabular-nums; }
+.card-big span { font:400 var(--t3)/1.2 var(--font-ui); margin-left:calc(16 * var(--wu)); }
+.card-line { font:400 var(--t4)/1.4 var(--font-ui); color:var(--ink-2); margin:0 0 calc(12 * var(--wu)); }
+.card-note { font:400 var(--t5)/1.4 var(--font-ui); color:var(--ink-3); margin:calc(16 * var(--wu)) 0 0; }
+.asm { font-weight:300; color:var(--ink-3); font-size:var(--t4); }
+#cg { display:block; width:calc(820 * var(--wu)); height:calc(690 * var(--wu)); }
 .empty { color:var(--ink-3); font:400 var(--t4)/1.4 var(--font-ui); }
 </style>
 </head>
@@ -194,6 +203,7 @@ window.postMessage = function (m) { if (COUCH.onmsg) COUCH.onmsg({ data: m }); }
       if (p.state === 'post' && !S.wentFinalAt) S.wentFinalAt = Date.now();
       if (p.g.seriesDescription) $('series').textContent = p.g.seriesDescription + (p.g.seriesGameNumber ? ' · Game ' + p.g.seriesGameNumber : '') + (p.g.teams ? ' · ' + nick(p.g.teams.away.team.name) + ' at ' + nick(p.g.teams.home.team.name) : '');
       start({ cmd: 'start', pk: p.g.gamePk });
+      if (!COUCH.lastState) showCard();
       maybeHandOff();
     }).catch(function () { $('status').textContent = 'MLB’s schedule did not answer'; if (GQ) start({ cmd: 'start', pk: GQ }); });
   }
@@ -227,7 +237,10 @@ window.postMessage = function (m) { if (COUCH.onmsg) COUCH.onmsg({ data: m }); }
     $('aAb').textContent = A.abbrev || nick(A.name); $('hAb').textContent = H.abbrev || nick(H.name);
     $('aR').textContent = sc[0]; $('hR').textContent = sc[1];
     if (s.status === 'Final') S.state = 'post';
-    if (n) {
+    var underway = n && (n.pitches.length || n.complete || s.events.some(function (e) { return e.kind === 'pa'; }));
+    if (n && !underway && showCard()) { $('sit').textContent = s.status === 'Final' ? 'Final' : 'Before first pitch'; }
+    else if (!n && showCard()) { $('sit').textContent = 'Before first pitch'; }
+    else if (n) {
       var d = '<span class="diamond">' + [n.bases[1], n.bases[0], n.bases[2], false].map(function (b, i) { return i === 3 ? '<i style="visibility:hidden"></i>' : '<i class="' + (b ? 'on' : '') + '"></i>'; }).join('') + '</span>';
       var o = '<span class="outs">' + [0, 1, 2].map(function (i) { return '<i class="' + (i < n.outs ? 'on' : '') + '"></i>'; }).join('') + '</span>';
       $('sit').innerHTML = (s.status === 'Final' ? 'Final' : (n.half === 'top' ? 'Top ' : 'Bottom ') + n.inning) + d + o;
@@ -246,7 +259,8 @@ window.postMessage = function (m) { if (COUCH.onmsg) COUCH.onmsg({ data: m }); }
     $('led').innerHTML = '<tr><th></th><th class="a">' + ab + ' exp.</th><th class="a">actual</th><th class="h">' + hb + ' exp.</th><th class="h">actual</th></tr>' +
       row('Strikeouts', 'K', pair) + row('Walks', 'BB', pair) + row('Hits in play', 'hits', pair) +
       '<tr><td>wOBA</td><td class="exp">' + w3(L.away.xwoba) + '</td><td class="act">' + w3(L.away.woba) + '</td><td class="exp">' + w3(L.home.xwoba) + '</td><td class="act">' + w3(L.home.woba) + '</td></tr>';
-    if (s.pregame) {
+    if (preBox(s)) { /* the Postseason page's card */ }
+    else if (s.pregame) {
       var g = s.pregame;
       $('pre').innerHTML = '<h2 class="key">Before the game</h2><p class="line">' + esc(g.awaySP) + ' against ' + esc(g.homeSP) + ', in ' + g.n + ' replays of tonight’s game:</p>' +
         '<p class="big"><span class="a">' + ab + ' ' + pct(g.awayWin) + '</span> &nbsp; <span class="h">' + hb + ' ' + pct(1 - g.awayWin) + '</span></p>' +
@@ -323,6 +337,65 @@ window.postMessage = function (m) { if (COUCH.onmsg) COUCH.onmsg({ data: m }); }
     return title + g.join('') + '<div class="cvkey"><b>Catcher’s view.</b> Filled: where each pitch crossed (Statcast). Dashed: where the model’s batter expected the last one.</div>';
   }
 
+  /* ------------------------------------------------------------ the pregame card
+     The Postseason page's prediction for this game (review/predict_next.py: 1,000 replays of it before first pitch, MLB's
+     starters when named, otherwise the rotation's next man, marked assumed; each team's latest lineup), shipped as
+     couch/data/pregame_cards.js by review/couch_cards.py. Reloaded every five minutes with a cache-buster (file://
+     serves a stale script otherwise), since a card is remade when MLB names a starter. Before first pitch it fills the
+     at-bat panel; once the game is under way its numbers stay in the pregame box. */
+  function loadCards() {
+    var sc = document.createElement('script'); sc.src = 'couch/data/pregame_cards.js?v=' + Date.now();
+    sc.onload = function () { sc.remove(); if (COUCH.lastState) render(COUCH.lastState); else showCard(); };
+    sc.onerror = function () { sc.remove(); };
+    document.body.appendChild(sc);
+  }
+  function cardFor(pk) { return pk && window.PREGAME_CARDS ? PREGAME_CARDS[String(pk)] || null : null; }
+  function curPk() { return (COUCH.lastState && COUCH.lastState.pk) || (S.game && S.game.gamePk) || null; }
+  function cardGrid(c) {
+    var G = c.season.grid, n = c.season.n, cap = G.length - 1, cell = 62, L = 96, T = 70, W = L + cell * (cap + 1) + 8, H = T + cell * (cap + 1) + 8, top = 0;
+    G.forEach(function (row) { row.forEach(function (v) { top = Math.max(top, v); }); });
+    var g = ['<svg id="cg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Final scores in the replays">'];
+    g.push('<text x="' + (L + cell * (cap + 1) / 2) + '" y="26" text-anchor="middle" fill="rgba(242,193,78,.95)" font-size="30" font-family="ui-sans-serif,system-ui">' + esc(c.awayName) + ' runs</text>');
+    g.push('<text transform="translate(28,' + (T + cell * (cap + 1) / 2) + ') rotate(-90)" text-anchor="middle" fill="rgba(124,196,232,.95)" font-size="30" font-family="ui-sans-serif,system-ui">' + esc(c.homeName) + ' runs</text>');
+    for (var i = 0; i <= cap; i++) {
+      var lab = i === cap ? cap + '+' : String(i);
+      g.push('<text x="' + (L + cell * i + cell / 2) + '" y="' + (T - 12) + '" text-anchor="middle" fill="rgba(206,220,240,.6)" font-size="26" font-family="ui-monospace,Menlo,monospace">' + lab + '</text>');
+      g.push('<text x="' + (L - 12) + '" y="' + (T + cell * i + cell / 2 + 9) + '" text-anchor="end" fill="rgba(206,220,240,.6)" font-size="26" font-family="ui-monospace,Menlo,monospace">' + lab + '</text>');
+    }
+    for (var h = 0; h <= cap; h++) for (var a = 0; a <= cap; a++) {
+      var v = G[h][a], x = L + cell * a, y = T + cell * h, tie = a === h && a < cap;
+      var fill = tie ? 'rgba(255,255,255,.04)' : v ? 'rgba(124,196,232,' + (0.08 + 0.85 * v / top).toFixed(3) + ')' : 'rgba(255,255,255,.02)';
+      g.push('<rect x="' + (x + 2) + '" y="' + (y + 2) + '" width="' + (cell - 4) + '" height="' + (cell - 4) + '" rx="4" fill="' + fill + '"/>');
+      if (v && !tie && v / n >= 0.005) g.push('<text x="' + (x + cell / 2) + '" y="' + (y + cell / 2 + 9) + '" text-anchor="middle" fill="' + (v / top > 0.55 ? '#0b0e14' : 'rgba(238,244,252,.85)') + '" font-size="26" font-family="ui-monospace,Menlo,monospace">' + v + '</text>');
+    }
+    g.push('</svg>');
+    return g.join('') + '<div class="cvkey"><b>Final scores in the ' + n.toLocaleString() + ' replays</b> (no game ends tied).</div>';
+  }
+  function starterName(c, t) { return esc(c.starters[t][1]) + ((c.assumedTeams || []).indexOf(t) >= 0 ? ' <span class="asm">(assumed)</span>' : ''); }
+  function showCard() {
+    var c = cardFor(curPk());
+    if (!c) return false;
+    var hw = c.season.homeWin, a = esc(c.awayName), h = esc(c.homeName), asm = (c.assumedTeams || []).length;
+    var head = '<h2 class="key">Before first pitch: the model’s call</h2><p class="matchup">' + starterName(c, c.away) + ' <span>vs</span> ' + starterName(c, c.home) + '</p>';
+    var body = '<div class="card-big"><div><b class="a">' + Math.round(100 * (1 - hw)) + '%</b><span class="a">' + a + '</span></div><div><b class="h">' + Math.round(100 * hw) + '%</b><span class="h">' + h + '</span></div></div>' +
+      '<p class="card-line">Expected runs ' + c.season.awayRuns.toFixed(1) + ' to ' + c.season.homeRuns.toFixed(1) + '. ' + Math.round(100 * c.season.extras) + '% of the replays went to extra innings.</p>' +
+      (c.errorsHomeWin != null ? '<p class="card-line">With each fielder making errors at his own rate: ' + h + ' ' + Math.round(100 * c.errorsHomeWin) + '%.</p>' : '') +
+      '<p class="card-note">' + esc(c.series) + ' Game ' + c.game + ', ' + esc(c.park) + '. ' + c.season.n.toLocaleString() + ' replays of tonight’s game before first pitch, regular-season pitching; ' + esc(c.lineups) + '.' +
+      (asm ? ' A starter marked assumed had not been named by MLB; the card is remade when he is.' : '') + '</p>';
+    $('plate').innerHTML = head + '<div class="pl-cols"><div>' + body + '</div><div>' + cardGrid(c) + '</div></div>';
+    return true;
+  }
+  function preBox(s) {   // the pregame box: the card's numbers when there is a card, the Couch's own replays otherwise
+    var c = cardFor(s.pk), ab = esc(s.teams.away.abbrev || nick(s.teams.away.name)), hb = esc(s.teams.home.abbrev || nick(s.teams.home.name));
+    if (c) {
+      $('pre').innerHTML = '<h2 class="key">Before the game</h2><p class="line">' + starterName(c, c.away) + ' against ' + starterName(c, c.home) + ', in ' + c.season.n.toLocaleString() + ' replays before first pitch:</p>' +
+        '<p class="big"><span class="a">' + ab + ' ' + Math.round(100 * (1 - c.season.homeWin)) + '%</span> &nbsp; <span class="h">' + hb + ' ' + Math.round(100 * c.season.homeWin) + '%</span></p>' +
+        '<p class="line">Expected runs ' + c.season.awayRuns.toFixed(1) + ' to ' + c.season.homeRuns.toFixed(1) + '. The Postseason page’s card.</p>';
+      return true;
+    }
+    return false;
+  }
+
   // ------------------------------------------------------------ the park's sound (couch/sound.js): real events, a guessed crowd
   var SND = null, MUTE = /[?&]mute\b/.test(q), NOVOICE = /[?&]novoice\b/.test(q);
   function sound(st) {
@@ -341,6 +414,7 @@ window.postMessage = function (m) { if (COUCH.onmsg) COUCH.onmsg({ data: m }); }
     schedule(); setInterval(schedule, CONFIG.schedMs);
   }
   setInterval(show, 1000);
+  loadCards(); setInterval(loadCards, 5 * 60 * 1000);
   setInterval(maybeHandOff, 5000);
 })();
 </script>

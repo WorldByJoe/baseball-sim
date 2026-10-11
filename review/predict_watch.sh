@@ -1,5 +1,6 @@
 #!/bin/bash
-# predict_watch.sh: every 30 minutes, review/predict_next.py (each championship series' next game, predicted or remade
+# predict_watch.sh · v1.1 · 2026-10-11 (v1.1: the card also goes to the wall's Couch, review/couch_cards.py --pi)
+# every 30 minutes, review/predict_next.py (each championship series' next game, predicted or remade
 # when its starters or lineups change); when it makes one, the page is rebuilt (the artifact copy in the scratchpad and
 # GitHub Pages' playoffs/index.html, committed and pushed, Joe's go-ahead for game pushes) and the watch ends so the
 # session can republish the artifact and start it again. Gives up after 12 days.
@@ -9,6 +10,7 @@ END=$(( $(date +%s) + 12 * 86400 ))
 while [ "$(date +%s)" -lt "$END" ]; do
   if python3 review/predict_next.py; then
     python3 review/replay_grids.py "$OUT" >/dev/null && python3 review/replay_grids.py ~/bsim-wt/pages/playoffs/index.html --page >/dev/null
+    python3 review/couch_cards.py --pi   # the same card on the wall's Couch
     (cd ~/bsim-wt/pages && git add playoffs/index.html && git commit -q -m "Postseason Replays (draft): a pregame prediction updated (review/predict_next.py)" && git push -q origin pages-live:main) || echo "push did not go through"
     exit 0
   fi
