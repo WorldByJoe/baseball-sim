@@ -1,0 +1,26 @@
+{
+ "pk": 849809,
+ "away": "LAD",
+ "home": "MIL",
+ "starters": {
+  "LAD": [
+   669373,
+   "Tarik Skubal"
+  ],
+  "MIL": [
+   694819,
+   "Jacob Misiorowski"
+  ]
+ },
+ "assumedTeams": [],
+ "assumed": false,
+ "sources": {
+  "MIL": 849827,
+  "LAD": 849822
+ },
+ "lineups": "lineups as in their last games (Dodgers: NLDS Game 4, Brewers: NLDS Game 4)",
+ "park": "American Family Field",
+ "ran": "2026-10-10 23:37",
+ "series": "NLCS",
+ "game": 1
+}

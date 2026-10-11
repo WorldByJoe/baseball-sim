@@ -1,5 +1,5 @@
 """
-replay_grids.py · v0.11 · 2026-10-10
+replay_grids.py · v0.12 · 2026-10-10
 
 The division series score grids: each finished game's replays (review/replay_game.js,
 diag_out/replays/<pk>.jsonl) as a table of one team's runs (columns) against the other's
@@ -11,6 +11,7 @@ Within a series the same team keeps the columns (Game 1's visitor), so the grids
   python3 review/replay_grids.py OUT.html --page     (a whole document, for GitHub Pages)
 
 CHANGED
+  v0.12 a series with only a prediction gets its band; only an assumed starter is marked (review/predict_next.py)
   v0.11 the championship series' games join the grids (best of seven in the series picks)
   v0.10 the regression follows the switch: one fit and figure per setting; its verdict on significance computed
   v0.9  a fourth set: the pitching as it was that day AND each fielder's own error rate together (replay_game.js
@@ -108,6 +109,15 @@ def pred_line(pk, ab):
     return ''.join(out)
 
 
+def starters_text(M, ab):
+    """Both named: 'Starters: A for the X, B for the Y'. Both assumed: 'Starters assumed, since MLB had not named them: ...'.
+    One assumed: that one marked '(assumed, not yet named by MLB)'."""
+    st = M['starters']; asm = set(M.get('assumedTeams') or ([ab['away'], ab['home']] if M.get('assumed') else []))
+    both = asm >= {ab['away'], ab['home']}
+    def one(t): return '%s%s for the %s' % (html.escape(st[t][1]), ' (assumed, not yet named by MLB)' if t in asm and not both else '', NICK[t])
+    return ('Starters assumed, since MLB had not named them: ' if both else 'Starters: ') + one(ab['away']) + ', ' + one(ab['home'])
+
+
 def pred_grid(pk, num, date, colTeam, rowTeam):
     """A game not yet played: its simulations before first pitch as a score grid, no star (there is no final yet)."""
     M, RS = load_pred(pk)
@@ -125,9 +135,7 @@ def pred_grid(pk, num, date, colTeam, rowTeam):
     st = M['starters']
     out = ['<figure class="game pred" id="g%d">' % pk,
            '<figcaption><h3>Game %d <span class="when">%s · at %s</span> <span class="badge">Prediction</span></h3>' % (num, when, html.escape(NICK[home])),
-           '<p class="final">Not yet played. Starters%s: %s for the %s, %s for the %s; %s.</p>' % (
-               ' assumed, since MLB had not named them' if M.get('assumed') else '', html.escape(st[ab['away']][1]), NICK[ab['away']], html.escape(st[ab['home']][1]), NICK[ab['home']],
-               html.escape(M.get('lineups', 'lineups from the last game')))]
+           '<p class="final">Not yet played. %s; %s.</p>' % (starters_text(M, ab), html.escape(M.get('lineups', 'lineups from the last game')))]
     for key, R in RS.items():
         N = len(R); colWins = sum(1 for r in R if r['score'][ci] > r['score'][ri]); extras = sum(1 for r in R if r['innings'] > 9)
         runs = sum(sum(r['score']) for r in R) / N / 2
@@ -192,6 +200,7 @@ def picks_section(series):
     """Each series' chance for its winner (or leader) from the replays' chance in each game, per set; and how often the favourite won a game."""
     rows = []; right = {k: 0 for k, _ in SETS}; ngames = 0
     for S in series:
+        if not S['games']: continue   # only a prediction so far
         A, B = S['col'], S['row']; wins = {A: 0, B: 0}; games = []
         for pk, num, date in S['games']:
             G, RS = load(pk); ab = (G['teams']['away']['abbrev'], G['teams']['home']['abbrev'])
@@ -387,8 +396,11 @@ def main(path):
         if pk in played: continue
         M, _ = load_pred(pk)
         if not M: continue
-        for s in series:
-            if s['key'] == frozenset((M['away'], M['home'])): s.setdefault('pred', []).append((pk, num, date))
+        key = frozenset((M['away'], M['home']))
+        band = [s for s in series if s['key'] == key]
+        if not band:   # nothing played in this series yet: Game 1's visitor across (the prediction for Game 1 is that game)
+            series.append({'key': key, 'name': ser, 'col': M['away'], 'row': M['home'], 'games': []}); band = series[-1:]
+        band[0].setdefault('pred', []).append((pk, num, date))
     body = []
     for s in series:
         body.append('<section class="series"><h2><span class="tag">%s</span> %s vs %s</h2><div class="games">' % (s['name'], NICK[s['col']], NICK[s['row']]))
