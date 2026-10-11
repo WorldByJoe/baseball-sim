@@ -1,5 +1,5 @@
 """
-series_spec.py · v0.2 · 2026-10-08
+series_spec.py · v0.3 · 2026-10-10
 
 The LCS and World Series as the series simulator plays them (review/series_sim.js): for each team, its lineup
 (its latest division series lineup, every man at the position he started) and its four-man rotation (its division
@@ -9,6 +9,7 @@ the team with home field (the better regular-season record: games 1, 2, 6 and 7 
   python3 review/series_spec.py   ->  review/series/<name>.json
 
 CHANGED
+  v0.3  the Guardians won Game 5: their rotation by rest; the Dodgers' order from MLB's named starters for Games 1 and 2
   v0.2  the Guardians too (they won Game 4; the ALDS goes to a fifth game): ALCS_CLE, WS_MIL_CLE, WS_LAD_CLE
   v0.1  first build (Joe, 2026-10-08: the LCS and the World Series before Game 1; the White Sox assumed into the ALCS)
 """
@@ -20,9 +21,9 @@ RECORD = {'TB': 98, 'CWS': 84, 'CLE': 85, 'MIL': 103, 'LAD': 100}   # 2026 regul
 VENUE = {'TB': '12', 'CWS': '4', 'CLE': '5', 'MIL': '32', 'LAD': '22'}
 ROTATION = {'TB': [656876, 642547, 607259, 643377],       # Rasmussen, Peralta, Martinez, Jax
             'CWS': [696146, 641743, 656794, 663436],      # Smith, Kay, Newcomb, D. Martin
-            'CLE': [800048, 668909, 682982, 676440],      # Messick, Williams, Espino, Bibee
+            'CLE': [682982, 800048, 676440, 668909],      # by rest after the ALDS's fifth game (10-10): Espino, Messick, Bibee, Williams
             'MIL': [694819, 701656, 669160, 688107],      # Misiorowski, Henderson, May, Gasser
-            'LAD': [669373, 605483, 808967, 607192]}      # Skubal, Snell, Yamamoto, Glasnow
+            'LAD': [669373, 808967, 605483, 607192]}      # MLB's probables for NLCS Games 1-2 (Skubal, Yamamoto), then Snell, Glasnow
 SERIES = {'ALCS': ('TB', 'CWS'), 'ALCS_CLE': ('TB', 'CLE'), 'NLCS': ('MIL', 'LAD'), 'WS_MIL_TB': ('MIL', 'TB'), 'WS_MIL_CWS': ('MIL', 'CWS'), 'WS_LAD_TB': ('LAD', 'TB'), 'WS_LAD_CWS': ('LAD', 'CWS'),
           'WS_MIL_CLE': ('MIL', 'CLE'), 'WS_LAD_CLE': ('LAD', 'CLE')}
 

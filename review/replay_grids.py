@@ -294,7 +294,7 @@ def forecast_section(series):
             '<div class="scroll"><table class="picks ws"><thead><tr><th scope="col">Pairing</th><th scope="col">Chance it happens</th><th scope="col">Favourite</th><th scope="col">Games it takes</th></tr></thead>'
             '<tbody>%s</tbody></table></div></div>'
             '<ul class="assume"><li>Lineups: each team&#39;s last division series lineup, every man at the position he started.</li>'
-            '<li>Starting pitchers: each team&#39;s division series starters in order, with regular-season starters added to make a four-man rotation.</li>'
+            '<li>Starting pitchers: each team&#39;s division series starters in order, with regular-season starters added to make a four-man rotation; the Guardians&#39; order follows their rest after the fifth game, and the Dodgers&#39; first two follow MLB&#39;s announced starters.</li>'
             '<li>Bullpens: the relievers on the playoff roster, brought in by the model&#39;s manager, all rested at the start of every game.</li>'
             '<li>Home field: the team with the better regular-season record plays games 1, 2, 6 and 7 at home; open-air parks at 60 F, roofed parks at 72 F.</li>'
             '<li>Each simulated series drew every hitter&#39;s traits once, at its start, and kept them for the whole series.</li></ul></section>') % (
@@ -338,7 +338,7 @@ def logit_section():
     g.append('<text class="ax" x="%.1f" y="%.1f" text-anchor="middle">Home team\'s share of 1,000 replays won (regular-season pitching)</text>' % ((X(0) + X(1)) / 2, H - 12))
     g.append('<text class="ax" transform="translate(16,%.1f) rotate(-90)" text-anchor="middle">Real game, and the fitted chance of winning</text>' % ((Y(1) + Y(0)) / 2))
     g.append('</svg>')
-    stats_line = 'Slope %.1f (standard error %.1f), Wald p = %.2f; likelihood-ratio p = %.2f; McFadden R² = %.2f, Tjur R² = %.2f.' % (b[1], se[1], p_wald, p_lr, r2m, r2t)
+    stats_line = 'Slope %.1f (standard error %.1f), Wald p = %.3f; likelihood-ratio p = %.3f; McFadden R² = %.2f, Tjur R² = %.2f.' % (b[1], se[1], p_wald, p_lr, r2m, r2t)
     return ('<section class="series logit-sec" id="regression"><h2><span class="tag">FIT</span> Did the replays pick the game winners?</h2>'
             '<p class="lede">Each point is one game, seen from the home team&#39;s side: across, the share of the 1,000 replays (regular-season pitching) the home team won; up or down, whether it won the real game. The blue curve is a logistic regression, the curve that best turns the replay share into a probability of the real win, with its 95%% band. The dashed line is where the points would sit if the replay share were exactly the chance of winning, so that a team which won most of its replays won the real game just as often. The curve rises, so a higher replay share went with more real wins, but with only %d games the rise is not significant at the usual 0.05 level: the uncertainty is wide enough to include no relationship at all.</p>'
             '<div class="scroll">%s</div><p class="tally">%s</p>'

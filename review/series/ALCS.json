@@ -102,14 +102,14 @@
   "CWS": {
    "lineup": [
     {
-     "id": 805367,
-     "name": "Chase Meidroth",
-     "pos": "2B"
+     "id": 803011,
+     "name": "Sam Antonacci",
+     "pos": "LF"
     },
     {
-     "id": 545341,
-     "name": "Randal Grichuk",
-     "pos": "LF"
+     "id": 691019,
+     "name": "Kyle Teel",
+     "pos": "C"
     },
     {
      "id": 678246,
@@ -122,29 +122,29 @@
      "pos": "1B"
     },
     {
-     "id": 502054,
-     "name": "Tommy Pham",
+     "id": 643217,
+     "name": "Andrew Benintendi",
      "pos": "DH"
     },
     {
-     "id": 686668,
-     "name": "Brenton Doyle",
-     "pos": "CF"
-    },
-    {
-     "id": 691019,
-     "name": "Kyle Teel",
-     "pos": "C"
-    },
-    {
-     "id": 695731,
-     "name": "Braden Montgomery",
+     "id": 671976,
+     "name": "Tristan Peters",
      "pos": "RF"
+    },
+    {
+     "id": 805367,
+     "name": "Chase Meidroth",
+     "pos": "2B"
     },
     {
      "id": 695657,
      "name": "Colson Montgomery",
      "pos": "SS"
+    },
+    {
+     "id": 686668,
+     "name": "Brenton Doyle",
+     "pos": "CF"
     }
    ],
    "rotation": [
