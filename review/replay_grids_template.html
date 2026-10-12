@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
 <style>
 /* Layout: a scorebook page with two views, the postseason and the trait map (a frame of its own). The postseason view: the forecast,
-   then the replays block (its set switch sticks while the replays scroll), each series a band of score grids that wrap on narrow screens. */
+   then the replays block (its set switch sticks while the regression, the grids and the series picks scroll), each series a band of score grids that wrap on narrow screens. */
 :root {
   --bg: #f4f6f9; --panel: #ffffff; --ink: #121a26; --muted: #5b6676; --line: #d6dce4;
   --heat-lo: #cde2fb; --heat-hi: #0d366b; --on-cool: #121a26; --on-hot: #ffffff;
@@ -36,6 +36,7 @@ body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f
 .jump a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
 .jump a:hover { border-bottom-color: var(--ink); }
 .replays { display: flex; flex-direction: column; gap: 34px; min-width: 0; }
+.replays [id] { scroll-margin-top: 190px; }   /* a jump link lands below the sticky switch */
 .wrap { max-width: 1240px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; display: flex; flex-direction: column; gap: 34px; }
 header { display: flex; flex-direction: column; gap: 10px; max-width: 68ch; }
 .eyebrow { font-family: var(--f-data); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
@@ -166,8 +167,8 @@ footer p { margin: 0; }
     <span class="eyebrow">2026 postseason · baseball-sim engine v3.9</span>
     <h1>Postseason Replays</h1>
     <p>This page asks how likely each real postseason result was. Each postseason game finished so far was played again 1,000 times by a simulation that plays every pitch from the players' traits. The traits come in two kinds: measured ones, taken straight from Statcast and held fixed, such as how fast a hitter swings and how hard a pitcher throws each pitch; and fitted ones, hidden qualities inferred from a hitter's statistics, such as how well he reads a pitch and how steady his timing is (the trait map lists them all). Each replay kept what the real game had: the batting order, each substitute entering at the turn he really took, and the real pitchers in their real order, each facing as many batters as he faced. Two things varied from replay to replay: the pitch-by-pitch chance of the game itself, and a fresh draw of every hitter's fitted traits from the range his statistics leave open. The spread of scores therefore includes what is not known about the players as well as the luck of the game.</p>
-    <p>The page opens with the model's forecast for the League Championship Series and the World Series, made before Game 1 of each. Then come the division series replays: a score grid for every game, and two checks on whether the replays picked the winners. The switch at the top opens the trait map, which lists every trait, ability and engine constant behind these games and where each value came from.</p>
-    <nav class="jump" aria-label="On this page"><a href="#forecast">The LCS and World Series forecast</a><a href="#grids">Score grids</a><a href="#picks">Series picks</a><a href="#regression">Game picks</a></nav>
+    <p>The page opens with the model's forecast for the League Championship Series and the World Series, made before Game 1 of each, and a check on whether the replays picked the game winners. Then come the replays themselves: a score grid for every game, newest first, and a check on whether they picked the series winners. The switch at the top opens the trait map, which lists every trait, ability and engine constant behind these games and where each value came from.</p>
+    <nav class="jump" aria-label="On this page"><a href="#forecast">The LCS and World Series forecast</a><a href="#regression">Game picks</a><a href="#legend">Score grids</a><a href="#picks">Series picks</a></nav>
   </header>
 
 <!--FORECAST-->
@@ -186,6 +187,8 @@ footer p { margin: 0; }
     <p class="sum" data-set="errors">Regular-season pitching, with each fielder making errors at his own regular-season rate instead of the model's default (how the rates are built is in the notes below). The replays averaged <strong><!--RUNS_ERRORS--></strong> runs and <!--ERR_ERRORS--> errors a team; the <!--NGAMES--> real games averaged <!--RUNS_REAL--> runs and <!--ERR_REAL--> errors.</p>
     <p class="sum" data-set="both">Both changes at once: each pitcher at the speeds and pitch mix he had that day, and each fielder making errors at his own regular-season rate. The replays averaged <strong><!--RUNS_BOTH--></strong> runs and <!--ERR_BOTH--> errors a team; the <!--NGAMES--> real games averaged <!--RUNS_REAL--> runs and <!--ERR_REAL--> errors.</p>
   </div>
+
+<!--REGRESSION-->
 
   <div class="howto" id="legend">
       <span class="k">Across: one team's runs. Down: the other's. Each cell counts how many of the 1,000 replays ended at that score.</span>

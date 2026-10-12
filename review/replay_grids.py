@@ -1,5 +1,5 @@
 """
-replay_grids.py · v0.12 · 2026-10-10
+replay_grids.py · v0.13 · 2026-10-12
 
 The division series score grids: each finished game's replays (review/replay_game.js,
 diag_out/replays/<pk>.jsonl) as a table of one team's runs (columns) against the other's
@@ -11,6 +11,7 @@ Within a series the same team keeps the columns (Game 1's visitor), so the grids
   python3 review/replay_grids.py OUT.html --page     (a whole document, for GitHub Pages)
 
 CHANGED
+  v0.13 newest games first; the game-pick regression sits under the forecast, below the switch it follows (Joe, 2026-10-12)
   v0.12 a series with only a prediction gets its band; only an assumed starter is marked (review/predict_next.py)
   v0.11 the championship series' games join the grids (best of seven in the series picks)
   v0.10 the regression follows the switch: one fit and figure per setting; its verdict on significance computed
@@ -401,14 +402,13 @@ def main(path):
         if not band:   # nothing played in this series yet: Game 1's visitor across (the prediction for Game 1 is that game)
             series.append({'key': key, 'name': ser, 'col': M['away'], 'row': M['home'], 'games': []}); band = series[-1:]
         band[0].setdefault('pred', []).append((pk, num, date))
-    body = []
-    for s in series:
+    body = []   # newest first: the series whose latest game (or prediction) is latest on top, and within each, the prediction, then its games from last to first
+    for s in sorted(series, key=lambda s: max(d for _, _, d in s['games'] + s.get('pred', [])), reverse=True):
         body.append('<section class="series"><h2><span class="tag">%s</span> %s vs %s</h2><div class="games">' % (s['name'], NICK[s['col']], NICK[s['row']]))
-        for pk, num, date in s['games']: body.append(grid(pk, num, date, s['col'], s['row']))
-        for pk, num, date in s.get('pred', []): body.append(pred_grid(pk, num, date, s['col'], s['row']))
+        for pk, num, date in s.get('pred', [])[::-1]: body.append(pred_grid(pk, num, date, s['col'], s['row']))
+        for pk, num, date in s['games'][::-1]: body.append(grid(pk, num, date, s['col'], s['row']))
         body.append('</div></section>')
     body.append(picks_section(series))
-    body.append(logit_section())
     runs = {}; errs = {}
     for key, d in SETS:
         tot = te = n = 0
@@ -418,7 +418,7 @@ def main(path):
         runs[key] = tot / n; errs[key] = te / n
     reale = sum(sum(json.load(open('playoffs/games/%d_feed.json' % g[0]))['liveData']['linescore']['teams'][s]['errors'] for s in ('away', 'home')) / 2 for g in games) / len(games)
     realr = sum((json.load(open('review/games/%d.json' % g[0]))['final']['away'] + json.load(open('review/games/%d.json' % g[0]))['final']['home']) / 2 for g in games) / len(games)
-    page = open('review/replay_grids_template.html').read().replace('<!--GRIDS-->', '\n'.join(body)).replace('<!--FORECAST-->', forecast_section(series))
+    page = open('review/replay_grids_template.html').read().replace('<!--GRIDS-->', '\n'.join(body)).replace('<!--FORECAST-->', forecast_section(series)).replace('<!--REGRESSION-->', logit_section())
     for key in runs: page = page.replace('<!--RUNS_%s-->' % key.upper(), '%.2f' % runs[key]).replace('<!--ERR_%s-->' % key.upper(), '%.2f' % errs[key])
     page = page.replace('<!--RUNS_REAL-->', '%.2f' % realr).replace('<!--ERR_REAL-->', '%.2f' % reale).replace('<!--NGAMES-->', str(len(games)))
     # the trait map (docs/trait_map.html on main) rides along as a JSON string the page opens in a frame of its own; every '<' escaped so no tag inside can end this one
