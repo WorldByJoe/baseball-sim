@@ -1,0 +1,26 @@
+{
+ "pk": 849812,
+ "away": "LAD",
+ "home": "MIL",
+ "starters": {
+  "LAD": [
+   808967,
+   "Yoshinobu Yamamoto"
+  ],
+  "MIL": [
+   701656,
+   "Logan Henderson"
+  ]
+ },
+ "assumedTeams": [],
+ "assumed": false,
+ "sources": {
+  "MIL": 849809,
+  "LAD": 849809
+ },
+ "lineups": "lineups as in their last games (Dodgers: NLCS Game 1, Brewers: NLCS Game 1)",
+ "park": "American Family Field",
+ "ran": "2026-10-11 21:44",
+ "series": "NLCS",
+ "game": 2
+}
