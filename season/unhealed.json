@@ -1,0 +1,104 @@
+{
+ "2025": {
+  "batter: expected wOBA": {
+   "n_early": 83,
+   "n_none": 181,
+   "usualChange": 0.0046,
+   "extraAfterEarlyInjury": -0.0174,
+   "se": 0.0058
+  },
+  "batter: exit speed": {
+   "n_early": 63,
+   "n_none": 164,
+   "usualChange": 0.0056,
+   "extraAfterEarlyInjury": -0.4178,
+   "se": 0.3388
+  },
+  "batter: bat speed": {
+   "n_early": 93,
+   "n_none": 197,
+   "usualChange": -0.0707,
+   "extraAfterEarlyInjury": -0.1684,
+   "se": 0.1006
+  },
+  "pitcher: fastball mph": {
+   "n_early": 66,
+   "n_none": 271,
+   "usualChange": 0.0049,
+   "extraAfterEarlyInjury": -0.0033,
+   "se": 0.067
+  },
+  "pitcher: strikeouts per batter faced": {
+   "n_early": 49,
+   "n_none": 239,
+   "usualChange": 0.0024,
+   "extraAfterEarlyInjury": 0.0064,
+   "se": 0.0099
+  },
+  "pitcher: expected wOBA allowed": {
+   "n_early": 49,
+   "n_none": 239,
+   "usualChange": 0.0038,
+   "extraAfterEarlyInjury": 0.0039,
+   "se": 0.0081
+  },
+  "recurrence": {
+   "backFromEarly": 249,
+   "placedAgainFromAugust": 67,
+   "sameBodyPart": 10,
+   "othersPlacedFromAugust": 117,
+   "others": 1014
+  }
+ },
+ "2026": {
+  "batter: expected wOBA": {
+   "n_early": 60,
+   "n_none": 195,
+   "usualChange": -0.0001,
+   "extraAfterEarlyInjury": -0.0087,
+   "se": 0.0069
+  },
+  "batter: exit speed": {
+   "n_early": 47,
+   "n_none": 174,
+   "usualChange": -0.057,
+   "extraAfterEarlyInjury": -0.2257,
+   "se": 0.3337
+  },
+  "batter: bat speed": {
+   "n_early": 75,
+   "n_none": 219,
+   "usualChange": -0.1732,
+   "extraAfterEarlyInjury": 0.2107,
+   "se": 0.1112
+  },
+  "pitcher: fastball mph": {
+   "n_early": 82,
+   "n_none": 255,
+   "usualChange": -0.0943,
+   "extraAfterEarlyInjury": 0.0149,
+   "se": 0.063
+  },
+  "pitcher: strikeouts per batter faced": {
+   "n_early": 64,
+   "n_none": 213,
+   "usualChange": -0.006,
+   "extraAfterEarlyInjury": -0.0025,
+   "se": 0.0088
+  },
+  "pitcher: expected wOBA allowed": {
+   "n_early": 64,
+   "n_none": 213,
+   "usualChange": 0.0037,
+   "extraAfterEarlyInjury": 0.0062,
+   "se": 0.0069
+  },
+  "recurrence": {
+   "backFromEarly": 261,
+   "placedAgainFromAugust": 51,
+   "sameBodyPart": 12,
+   "othersPlacedFromAugust": 111,
+   "others": 975
+  }
+ }
+}
