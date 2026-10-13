@@ -21,8 +21,8 @@ CHANGED
 """
 import json, os, sys
 import numpy as np
-HIST = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HIST); sys.path.insert(0, os.path.join(os.getcwd(), 'review'))
+HIST = os.environ.get('HISTDATA') or os.path.dirname(os.path.abspath(__file__))   # the data (HISTDATA: another folder laid out like history/)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); sys.path.insert(0, os.path.join(os.getcwd(), 'review'))
 import fit_hitters as FH
 import seasons as SE
 import datetime

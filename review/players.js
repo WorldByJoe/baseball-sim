@@ -81,6 +81,11 @@ var REVIEW = (function () {
   }
 
   function pitcher(rec, rng, env) {
+    if (!rec.summaries.pitching || !rec.traits.pitching || !rec.summaries.pitching.pitchTypes || !Object.keys(rec.summaries.pitching.pitchTypes).length) {
+      // no pitches of his in the seasons the replay may use (a position player pitching, a man back from injury): a generic
+      // reliever from the model's population, so the game can still be played
+      var G0 = BB.makePitcher(rng, { population: true, role: 'RP', throws: rec.throws || 'R' }); G0.name = rec.name; G0.mlbId = rec.id; G0.team = rec.team; G0.generic = true; return G0;
+    }
     var S = rec.summaries.pitching, T = rec.traits.pitching, role = (S.role && S.role.role) || 'RP';
     var P = BB.makePitcher(rng, { population: true, role: role, throws: rec.throws });
     P.name = rec.name; P.mlbId = rec.id; P.team = rec.team;

@@ -34,7 +34,8 @@ table.
 CHANGED
   v0.1  first build (the Yankees-Rays review)
 """
-import json, sys, math, random, warnings
+import json, sys, math, random, warnings, os
+PARTS = int(os.environ.get('FIT_PARTS', '6'))   # parallel jobs in the refinement's simulations
 import numpy as np
 warnings.filterwarnings('ignore', category=RuntimeWarning)   # numpy 2.0's matmul on this Mac warns spuriously; results are checked finite
 
@@ -160,8 +161,8 @@ def simulate(fits, npa, seed):
     """every hitter's model measures at his current refined mean (review/check_hitters.js, six jobs)"""
     import subprocess
     json.dump(fits, open('review/hitters_fit.json', 'w'), indent=1)
-    procs = [subprocess.Popen(['tools/diag/run.sh', 'bb_engine.js', 'review/players.js', 'review/check_hitters.js', '--', str(npa), str(seed), str(k), '6'],
-                              stdout=subprocess.PIPE, text=True) for k in range(6)]
+    procs = [subprocess.Popen(['tools/diag/run.sh', 'bb_engine.js', 'review/players.js', 'review/check_hitters.js', '--', str(npa), str(seed), str(k), str(PARTS)],
+                              stdout=subprocess.PIPE, text=True) for k in range(PARTS)]
     out = {}
     for pr in procs:
         for line in pr.communicate()[0].splitlines():
