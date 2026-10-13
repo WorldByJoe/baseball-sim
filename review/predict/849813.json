@@ -1,0 +1,26 @@
+{
+ "pk": 849813,
+ "away": "CLE",
+ "home": "TB",
+ "starters": {
+  "CLE": [
+   800048,
+   "Parker Messick"
+  ],
+  "TB": [
+   642547,
+   "Freddy Peralta"
+  ]
+ },
+ "assumedTeams": [],
+ "assumed": false,
+ "sources": {
+  "TB": 849820,
+  "CLE": 849820
+ },
+ "lineups": "lineups as in their last games (Guardians: ALCS Game 1, Rays: ALCS Game 1)",
+ "park": "Tropicana Field",
+ "ran": "2026-10-12 21:17",
+ "series": "ALCS",
+ "game": 2
+}
