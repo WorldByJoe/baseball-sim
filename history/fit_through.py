@@ -1,5 +1,5 @@
 """
-fit_through.py · v0.1 · 2026-10-12
+fit_through.py · v0.2 · 2026-10-12
 
 Each postseason hitter's hidden traits as they stood that October: history/seasons.py's carry-over model given his seasons
 up to and including S (none after), then review/fit_hitters.py's refinement on the simulator itself (4 steps of 1,500
@@ -14,6 +14,8 @@ change, not about any one player, so using it for an earlier October borrows no 
   python3 HIST/fit_through.py 2025 [refinement steps] [PA a step]      (from the worktree's root)
 
 CHANGED
+  v0.2  the age trend (history/aging.py): each season's prior mean moves with his age, so the step from one season to the next
+        carries a year of aging (python3 HIST/fit_through.py S steps PA noage for the old behaviour)
   v0.1  first build (Joe, 2026-10-12)
 """
 import json, os, sys
@@ -22,9 +24,20 @@ HIST = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HIST); sys.path.insert(0, os.path.join(os.getcwd(), 'review'))
 import fit_hitters as FH
 import seasons as SE
+import datetime
 
 
-def main(S, iters, npa):
+def age_terms(ages, A):
+    """history/aging.py's mean model for one player's seasons: per season, g (mean age - 30) + d (age - mean age) + e ((age - 30)^2 - its mean),
+    per hidden trait (standardised units)"""
+    a = np.array(ages); ab = a.mean(); q = (a - 30) ** 2
+    return [np.array([A[h]['z']['g'][0] * (ab - 30) + A[h]['z']['d'][0] * (x - ab) + A[h]['z']['e'][0] * (qq - q.mean()) for h in SE.HIDDEN]) for x, qq in zip(a, q)]
+
+
+def main(S, iters, npa, age=True):
+    A = json.load(open(os.path.join(HIST, 'aging.json')))['hidden'] if age else None
+    birth = {p['id']: p.get('birthDate') for p in json.load(open(os.path.join(HIST, 'rosters.json')))['players']}
+    agesum = []
     E = FH.emulator('diag_out/emu.jsonl')
     mu, sd = E['mu'][SE.NK:], E['sd'][SE.NK:]
     phi = np.array([json.load(open(os.path.join(HIST, 'seasons.json')))['hidden'][h]['phi'] for h in SE.HIDDEN])
@@ -43,6 +56,10 @@ def main(S, iters, npa):
                 q = SE.pieces(SE.season_rec(r, y, (2024, 2025, 2026)), E)
                 if q: P.append(q); ys.append(y)
         I = None
+        if P and A and birth.get(p['id']):
+            b = datetime.date.fromisoformat(birth[p['id']]); ages = [(datetime.date(y, 7, 1) - b).days / 365.25 for y in ys]
+            for q_, dz in zip(P, age_terms(ages, A)): q_['m0'] = q_['m0'] + dz
+            agesum.append(float(np.abs(age_terms(ages, A)[-1]).max()))
         if P:
             S0h = SE.sqrtm(P[0]['S0']); st = SE.stack(P, E); i = len(P) - 1
             u, C = SE.posterior_u(P, S0h, st, phi); sl = slice(SE.NH * i, SE.NH * (i + 1))
@@ -73,7 +90,7 @@ def main(S, iters, npa):
                               'id': p['id'], 'name': p['name'], 'team': p['team'], 'bats': v.get('bats'), 'position': v.get('position'),
                               'speed': g('speed'), 'armMph': g('armMph'), 'seasons': ys, 'basis': 'through %d' % S}
         if I is not None: FH._INTERNAL[p['id']] = I
-    print('%d hitters: %s' % (len(fits), kinds), file=sys.stderr)
+    print('%d hitters: %s; age trend %s (largest shift of a season\'s prior mean, median %.3f sd)' % (len(fits), kinds, 'on' if A else 'off', float(np.median(agesum)) if agesum else 0), file=sys.stderr)
     if iters:
         fits = FH.refine(fits, E, iters, npa, rng)
     json.dump(fits, open('review/hitters_fit.json', 'w'), indent=1)
@@ -82,4 +99,4 @@ def main(S, iters, npa):
 
 if __name__ == '__main__':
     a = sys.argv[1:]
-    main(int(a[0]), int(a[1]) if len(a) > 1 else 4, int(a[2]) if len(a) > 2 else 1500)
+    main(int(a[0]), int(a[1]) if len(a) > 1 else 4, int(a[2]) if len(a) > 2 else 1500, age='noage' not in a)

@@ -1,0 +1,82 @@
+{
+ "batter_2023": {
+  "players": 542,
+  "k_percent": 22.62,
+  "bb_percent": 8.601,
+  "z_swing_percent": 67.464,
+  "oz_swing_percent": 28.743,
+  "exit_velocity_avg": 89.077,
+  "hard_hit_percent": 39.756,
+  "avg_swing_speed": 71.419,
+  "sprint_speed": 27.32
+ },
+ "batter_2024": {
+  "players": 526,
+  "k_percent": 22.47,
+  "bb_percent": 8.202,
+  "z_swing_percent": 68.014,
+  "oz_swing_percent": 28.645,
+  "exit_velocity_avg": 88.912,
+  "hard_hit_percent": 39.24,
+  "avg_swing_speed": 71.422,
+  "sprint_speed": 27.337
+ },
+ "batter_2025": {
+  "players": 537,
+  "k_percent": 22.084,
+  "bb_percent": 8.44,
+  "z_swing_percent": 67.098,
+  "oz_swing_percent": 28.281,
+  "exit_velocity_avg": 89.466,
+  "hard_hit_percent": 41.4,
+  "avg_swing_speed": 71.74,
+  "sprint_speed": 27.355
+ },
+ "batter_2026": {
+  "players": 534,
+  "k_percent": 22.013,
+  "bb_percent": 8.911,
+  "z_swing_percent": 66.915,
+  "oz_swing_percent": 30.534,
+  "exit_velocity_avg": 88.86,
+  "hard_hit_percent": 39.085,
+  "avg_swing_speed": 72.018,
+  "sprint_speed": 27.365
+ },
+ "pitcher_2023": {
+  "players": 357,
+  "k_percent": 23.284,
+  "bb_percent": 8.164,
+  "in_zone_percent": 49.125,
+  "oz_swing_percent": 29.0,
+  "fastball_avg_speed": 93.282,
+  "arm_angle": 39.215
+ },
+ "pitcher_2024": {
+  "players": 351,
+  "k_percent": 23.067,
+  "bb_percent": 7.836,
+  "in_zone_percent": 49.685,
+  "oz_swing_percent": 28.866,
+  "fastball_avg_speed": 93.325,
+  "arm_angle": 38.01
+ },
+ "pitcher_2025": {
+  "players": 339,
+  "k_percent": 22.645,
+  "bb_percent": 7.923,
+  "in_zone_percent": 50.895,
+  "oz_swing_percent": 28.478,
+  "fastball_avg_speed": 93.643,
+  "arm_angle": 37.432
+ },
+ "pitcher_2026": {
+  "players": 327,
+  "k_percent": 22.595,
+  "bb_percent": 8.394,
+  "in_zone_percent": 47.666,
+  "oz_swing_percent": 30.793,
+  "fastball_avg_speed": 93.909,
+  "arm_angle": 37.26
+ }
+}

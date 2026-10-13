@@ -1,5 +1,5 @@
 """
-replay_view.py · v0.2 · 2026-10-12
+replay_view.py · v0.3 · 2026-10-12
 
 The inputs a postseason's replays read, as they stood that October, written into a worktree of their own (the review's
 scripts read fixed paths, so a past October gets its own checkout, e.g. ~/bsim-wt/hist2025):
@@ -16,6 +16,7 @@ scripts read fixed paths, so a past October gets its own checkout, e.g. ~/bsim-w
   python3 history/replay_view.py 2025 ~/bsim-wt/hist2025
 
 CHANGED
+  v0.3  the age trend in a pitcher's rates through S (history/aging.py): each season's expected rate moves with his age
   v0.2  only that October's participants, on the teams they played for then (the history files hold every October's men)
   v0.1  first build (Joe, 2026-10-12: the 2025 playoffs in the logistic regression)
 """
@@ -46,14 +47,16 @@ def relabel(o, S):
 
 def through(obs, mu, tv, rho):
     """the true rate in the last season of obs [(mean, se) or None per season, oldest first], given every season so far:
-    true values N(mu, tv) each season, correlated rho between consecutive seasons (rho^k k apart)"""
+    true values N(mu_s, tv) each season (mu a number, or one per season when his age moves it), correlated rho between
+    consecutive seasons (rho^k k apart)"""
+    mu = np.array(mu if np.ndim(mu) else [mu] * len(obs), float)
     idx = [i for i, o in enumerate(obs) if o]
     if not idx: return None
     n = len(obs); T = n - 1
     Sig = np.array([[tv * rho ** abs(i - j) for j in range(n)] for i in range(n)])
     x = np.array([obs[i][0] for i in idx]); C = Sig[np.ix_(idx, idx)] + np.diag([obs[i][1] ** 2 for i in idx])
     k = Sig[T, idx]; w = np.linalg.solve(C, k)
-    return mu + w @ (x - mu), math.sqrt(max(tv - w @ k, 1e-12))
+    return mu[T] + w @ (x - mu[idx]), math.sqrt(max(tv - w @ k, 1e-12))
 
 
 def main(S, wt):
@@ -68,6 +71,9 @@ def main(S, wt):
         v = [o['mean'] for r in recs for y, o in ((r['summaries'].get('pitching') or {}).get(k) or {}).items() if y.isdigit() and isinstance(o, dict) and o.get('mean') is not None]
         pm[k] = float(np.mean(v)) if v else None
     shrunk = 0
+    AG = json.load(open(os.path.join(HERE, 'aging.json')))['measured'] if 'noage' not in sys.argv else {}
+    import datetime
+    birth = {p['id']: p.get('birthDate') for p in json.load(open(os.path.join(HERE, 'rosters.json')))['players']}
     for r in recs:
         R = relabel(copy.deepcopy(r), S); R['team'] = part[r['id']]['team']
         ss = stats.get(str(r['id'])) or {}
@@ -85,7 +91,11 @@ def main(S, wt):
                 c = carry.get('pitcher ' + k); o = (r['summaries']['pitching'].get(k) or {})
                 if not c or not o or pm[k] is None: continue
                 obs = [(o[str(y)]['mean'], o[str(y)]['se']) if isinstance(o.get(str(y)), dict) and o[str(y)].get('se') else None for y in (S - 1, S)]
-                est = through(obs, pm[k], c['trueSd'] ** 2, min(max(c['corr'], 0.0), 0.99))
+                mus = pm[k]; ag = AG.get('pitcher ' + k)
+                if ag and birth.get(r['id']):   # his expected rate each season moves with his age: g (mean age - 30) + d (age - mean) + e ((age-30)^2 - mean)
+                    b = datetime.date.fromisoformat(birth[r['id']]); a_ = np.array([(datetime.date(y, 7, 1) - b).days / 365.25 for y in (S - 1, S)]); q_ = (a_ - 30) ** 2
+                    mus = [pm[k] + ag['g'][0] * (a_.mean() - 30) + ag['d'][0] * (x - a_.mean()) + ag['e'][0] * (qq - q_.mean()) for x, qq in zip(a_, q_)]
+                est = through(obs, mus, c['trueSd'] ** 2, min(max(c['corr'], 0.0), 0.99))
                 if est:
                     P[k]['pooled'] = {'mean': round(est[0], 4), 'se': round(est[1], 4), 'note': 'through %d: seasons %d-%d shrunk by reliability (history/replay_view.py)' % (S, S - 1, S)}
                     shrunk += 1
