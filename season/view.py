@@ -23,6 +23,14 @@ from replay_view import relabel, through
 UA = {'User-Agent': 'Mozilla/5.0 (research script; CSU; baseball trait model)'}
 
 
+def clean(o):
+    """NaN and infinity to null (Savant's boards give NaN for a rate with no events; JSON has no NaN)"""
+    if isinstance(o, float): return o if o == o and abs(o) != float('inf') else None
+    if isinstance(o, dict): return {k: clean(v) for k, v in o.items()}
+    if isinstance(o, list): return [clean(v) for v in o]
+    return o
+
+
 def main(fold, wt):
     fold, wt = os.path.abspath(fold), os.path.expanduser(wt)
     M = json.load(open(os.path.join(fold, 'players_measured.json'))); recs = M['players']
@@ -51,7 +59,7 @@ def main(fold, wt):
                 est = through(obs, pm[k], c['trueSd'] ** 2, min(max(c['corr'], 0.0), 0.99))
                 if est: P[k]['pooled'] = {'mean': round(est[0], 4), 'se': round(est[1], 4), 'note': 'through the fold: 2025 and the fold half shrunk by reliability'}; shrunk += 1
         out.append(R)
-    json.dump({'meta': dict(M['meta'], view='season fold %s (season/view.py)' % os.path.basename(fold)), 'players': out}, open(os.path.join(wt, 'playoffs', 'players_measured.json'), 'w'), separators=(',', ':'))
+    json.dump(clean({'meta': dict(M['meta'], view='season fold %s (season/view.py)' % os.path.basename(fold)), 'players': out}), open(os.path.join(wt, 'playoffs', 'players_measured.json'), 'w'), separators=(',', ':'), allow_nan=False)
     ros = json.load(open(os.path.join(fold, 'rosters.json')))
     byab = {t['abbrev']: t['id'] for t in ros['teams'].values()}
     for p in ros['players']: p['team'] = byab.get(p['teamAbbrev'])
