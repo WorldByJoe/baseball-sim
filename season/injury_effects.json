@@ -1,0 +1,858 @@
+{
+ "pitcher: fastball mph": {
+  "60-31 days before | under 20 days": {
+   "effect": -0.1534,
+   "se": 0.0816,
+   "rows": 12386
+  },
+  "60-31 days before | 20-59 days": {
+   "effect": 0.15155,
+   "se": 0.05378,
+   "rows": 17524
+  },
+  "60-31 days before | 60+ days": {
+   "effect": -0.03077,
+   "se": 0.08246,
+   "rows": 9070
+  },
+  "30-11 days before | under 20 days": {
+   "effect": -0.15235,
+   "se": 0.0928,
+   "rows": 12356
+  },
+  "30-11 days before | 20-59 days": {
+   "effect": 0.03207,
+   "se": 0.05953,
+   "rows": 17121
+  },
+  "30-11 days before | 60+ days": {
+   "effect": -0.21183,
+   "se": 0.07969,
+   "rows": 10884
+  },
+  "10-1 days before | under 20 days": {
+   "effect": -0.18033,
+   "se": 0.09141,
+   "rows": 7594
+  },
+  "10-1 days before | 20-59 days": {
+   "effect": -0.15208,
+   "se": 0.06409,
+   "rows": 12896
+  },
+  "10-1 days before | 60+ days": {
+   "effect": -0.34314,
+   "se": 0.08793,
+   "rows": 7336
+  },
+  "days 0-13 back | under 20 days": {
+   "effect": -0.21537,
+   "se": 0.09939,
+   "rows": 7267
+  },
+  "days 0-13 back | 20-59 days": {
+   "effect": -0.10589,
+   "se": 0.07779,
+   "rows": 15534
+  },
+  "days 0-13 back | 60+ days": {
+   "effect": -0.18739,
+   "se": 0.11458,
+   "rows": 9295
+  },
+  "days 14-27 back | under 20 days": {
+   "effect": -0.18949,
+   "se": 0.1167,
+   "rows": 4447
+  },
+  "days 14-27 back | 20-59 days": {
+   "effect": -0.09659,
+   "se": 0.07752,
+   "rows": 10095
+  },
+  "days 14-27 back | 60+ days": {
+   "effect": -0.23707,
+   "se": 0.14373,
+   "rows": 5665
+  },
+  "days 28-55 back | under 20 days": {
+   "effect": -0.19305,
+   "se": 0.12802,
+   "rows": 6115
+  },
+  "days 28-55 back | 20-59 days": {
+   "effect": -0.06252,
+   "se": 0.08186,
+   "rows": 16599
+  },
+  "days 28-55 back | 60+ days": {
+   "effect": -0.12906,
+   "se": 0.15255,
+   "rows": 8159
+  },
+  "days 56-120 back | under 20 days": {
+   "effect": -0.08518,
+   "se": 0.11552,
+   "rows": 6707
+  },
+  "days 56-120 back | 20-59 days": {
+   "effect": -0.08264,
+   "se": 0.08653,
+   "rows": 19372
+  },
+  "days 56-120 back | 60+ days": {
+   "effect": -0.20256,
+   "se": 0.14854,
+   "rows": 6006
+  }
+ },
+ "pitcher: whiffs per swing": {
+  "60-31 days before | under 20 days": {
+   "effect": -0.00671,
+   "se": 0.00642,
+   "rows": 10699
+  },
+  "60-31 days before | 20-59 days": {
+   "effect": -0.00156,
+   "se": 0.00508,
+   "rows": 15866
+  },
+  "60-31 days before | 60+ days": {
+   "effect": -0.00075,
+   "se": 0.00782,
+   "rows": 8032
+  },
+  "30-11 days before | under 20 days": {
+   "effect": -0.00705,
+   "se": 0.00592,
+   "rows": 10828
+  },
+  "30-11 days before | 20-59 days": {
+   "effect": -0.0046,
+   "se": 0.00476,
+   "rows": 15133
+  },
+  "30-11 days before | 60+ days": {
+   "effect": 0.00359,
+   "se": 0.00878,
+   "rows": 9568
+  },
+  "10-1 days before | under 20 days": {
+   "effect": -0.00268,
+   "se": 0.00798,
+   "rows": 6216
+  },
+  "10-1 days before | 20-59 days": {
+   "effect": -0.01237,
+   "se": 0.00565,
+   "rows": 11038
+  },
+  "10-1 days before | 60+ days": {
+   "effect": -0.00851,
+   "se": 0.0087,
+   "rows": 6228
+  },
+  "days 0-13 back | under 20 days": {
+   "effect": -0.01113,
+   "se": 0.00715,
+   "rows": 6284
+  },
+  "days 0-13 back | 20-59 days": {
+   "effect": -0.00817,
+   "se": 0.00567,
+   "rows": 13446
+  },
+  "days 0-13 back | 60+ days": {
+   "effect": -0.00612,
+   "se": 0.00757,
+   "rows": 7979
+  },
+  "days 14-27 back | under 20 days": {
+   "effect": -0.00513,
+   "se": 0.00929,
+   "rows": 3843
+  },
+  "days 14-27 back | 20-59 days": {
+   "effect": -0.00424,
+   "se": 0.00681,
+   "rows": 8888
+  },
+  "days 14-27 back | 60+ days": {
+   "effect": 0.01101,
+   "se": 0.00965,
+   "rows": 4806
+  },
+  "days 28-55 back | under 20 days": {
+   "effect": -0.01709,
+   "se": 0.00744,
+   "rows": 5174
+  },
+  "days 28-55 back | 20-59 days": {
+   "effect": -0.00384,
+   "se": 0.00614,
+   "rows": 14771
+  },
+  "days 28-55 back | 60+ days": {
+   "effect": 0.00064,
+   "se": 0.00967,
+   "rows": 7010
+  },
+  "days 56-120 back | under 20 days": {
+   "effect": -0.01037,
+   "se": 0.0065,
+   "rows": 5796
+  },
+  "days 56-120 back | 20-59 days": {
+   "effect": -0.00609,
+   "se": 0.00643,
+   "rows": 17600
+  },
+  "days 56-120 back | 60+ days": {
+   "effect": 0.00389,
+   "se": 0.01045,
+   "rows": 5218
+  }
+ },
+ "pitcher: strikeouts per batter faced": {
+  "60-31 days before | under 20 days": {
+   "effect": -0.00302,
+   "se": 0.00849,
+   "rows": 5692
+  },
+  "60-31 days before | 20-59 days": {
+   "effect": -0.00379,
+   "se": 0.00624,
+   "rows": 8509
+  },
+  "60-31 days before | 60+ days": {
+   "effect": -0.00726,
+   "se": 0.01003,
+   "rows": 4383
+  },
+  "30-11 days before | under 20 days": {
+   "effect": -0.00211,
+   "se": 0.00849,
+   "rows": 5801
+  },
+  "30-11 days before | 20-59 days": {
+   "effect": -0.00735,
+   "se": 0.00565,
+   "rows": 8216
+  },
+  "30-11 days before | 60+ days": {
+   "effect": -0.01229,
+   "se": 0.00972,
+   "rows": 5183
+  },
+  "10-1 days before | under 20 days": {
+   "effect": -0.00974,
+   "se": 0.01071,
+   "rows": 3354
+  },
+  "10-1 days before | 20-59 days": {
+   "effect": -0.0239,
+   "se": 0.00748,
+   "rows": 5995
+  },
+  "10-1 days before | 60+ days": {
+   "effect": -0.02145,
+   "se": 0.0109,
+   "rows": 3448
+  },
+  "days 0-13 back | under 20 days": {
+   "effect": -0.01395,
+   "se": 0.01002,
+   "rows": 3381
+  },
+  "days 0-13 back | 20-59 days": {
+   "effect": -0.01403,
+   "se": 0.00714,
+   "rows": 7237
+  },
+  "days 0-13 back | 60+ days": {
+   "effect": -0.01987,
+   "se": 0.01093,
+   "rows": 4253
+  },
+  "days 14-27 back | under 20 days": {
+   "effect": -0.02047,
+   "se": 0.01155,
+   "rows": 2072
+  },
+  "days 14-27 back | 20-59 days": {
+   "effect": -0.01032,
+   "se": 0.00754,
+   "rows": 4728
+  },
+  "days 14-27 back | 60+ days": {
+   "effect": -0.01462,
+   "se": 0.01298,
+   "rows": 2632
+  },
+  "days 28-55 back | under 20 days": {
+   "effect": -0.00592,
+   "se": 0.01124,
+   "rows": 2705
+  },
+  "days 28-55 back | 20-59 days": {
+   "effect": -0.01807,
+   "se": 0.00769,
+   "rows": 7830
+  },
+  "days 28-55 back | 60+ days": {
+   "effect": -0.00362,
+   "se": 0.01359,
+   "rows": 3755
+  },
+  "days 56-120 back | under 20 days": {
+   "effect": -0.01302,
+   "se": 0.01204,
+   "rows": 3109
+  },
+  "days 56-120 back | 20-59 days": {
+   "effect": -0.01757,
+   "se": 0.00832,
+   "rows": 9369
+  },
+  "days 56-120 back | 60+ days": {
+   "effect": -0.0148,
+   "se": 0.01428,
+   "rows": 2697
+  }
+ },
+ "pitcher: expected wOBA allowed": {
+  "60-31 days before | under 20 days": {
+   "effect": 0.00365,
+   "se": 0.00624,
+   "rows": 5692
+  },
+  "60-31 days before | 20-59 days": {
+   "effect": 0.00672,
+   "se": 0.00514,
+   "rows": 8509
+  },
+  "60-31 days before | 60+ days": {
+   "effect": 0.00391,
+   "se": 0.00654,
+   "rows": 4383
+  },
+  "30-11 days before | under 20 days": {
+   "effect": 0.00543,
+   "se": 0.00589,
+   "rows": 5801
+  },
+  "30-11 days before | 20-59 days": {
+   "effect": 0.01234,
+   "se": 0.00586,
+   "rows": 8216
+  },
+  "30-11 days before | 60+ days": {
+   "effect": 0.00055,
+   "se": 0.00816,
+   "rows": 5183
+  },
+  "10-1 days before | under 20 days": {
+   "effect": 0.03241,
+   "se": 0.00777,
+   "rows": 3354
+  },
+  "10-1 days before | 20-59 days": {
+   "effect": 0.02896,
+   "se": 0.00717,
+   "rows": 5995
+  },
+  "10-1 days before | 60+ days": {
+   "effect": 0.01823,
+   "se": 0.00938,
+   "rows": 3448
+  },
+  "days 0-13 back | under 20 days": {
+   "effect": 0.01481,
+   "se": 0.00774,
+   "rows": 3381
+  },
+  "days 0-13 back | 20-59 days": {
+   "effect": 0.01904,
+   "se": 0.00696,
+   "rows": 7237
+  },
+  "days 0-13 back | 60+ days": {
+   "effect": 0.01066,
+   "se": 0.00982,
+   "rows": 4253
+  },
+  "days 14-27 back | under 20 days": {
+   "effect": 0.01053,
+   "se": 0.00933,
+   "rows": 2072
+  },
+  "days 14-27 back | 20-59 days": {
+   "effect": 0.00831,
+   "se": 0.0074,
+   "rows": 4728
+  },
+  "days 14-27 back | 60+ days": {
+   "effect": 0.00253,
+   "se": 0.00995,
+   "rows": 2632
+  },
+  "days 28-55 back | under 20 days": {
+   "effect": 0.00047,
+   "se": 0.00988,
+   "rows": 2705
+  },
+  "days 28-55 back | 20-59 days": {
+   "effect": 0.01188,
+   "se": 0.00661,
+   "rows": 7830
+  },
+  "days 28-55 back | 60+ days": {
+   "effect": -0.01042,
+   "se": 0.01025,
+   "rows": 3755
+  },
+  "days 56-120 back | under 20 days": {
+   "effect": 0.00605,
+   "se": 0.00834,
+   "rows": 3109
+  },
+  "days 56-120 back | 20-59 days": {
+   "effect": 0.01244,
+   "se": 0.00672,
+   "rows": 9369
+  },
+  "days 56-120 back | 60+ days": {
+   "effect": 0.00873,
+   "se": 0.0117,
+   "rows": 2697
+  }
+ },
+ "batter: bat speed mph": {
+  "60-31 days before | under 20 days": {
+   "effect": 0.23303,
+   "se": 0.08234,
+   "rows": 16296
+  },
+  "60-31 days before | 20-59 days": {
+   "effect": -0.11338,
+   "se": 0.08791,
+   "rows": 14105
+  },
+  "60-31 days before | 60+ days": {
+   "effect": 0.22918,
+   "se": 0.16862,
+   "rows": 4156
+  },
+  "30-11 days before | under 20 days": {
+   "effect": 0.1022,
+   "se": 0.0956,
+   "rows": 15172
+  },
+  "30-11 days before | 20-59 days": {
+   "effect": -0.05023,
+   "se": 0.09618,
+   "rows": 14325
+  },
+  "30-11 days before | 60+ days": {
+   "effect": 0.07348,
+   "se": 0.19853,
+   "rows": 4438
+  },
+  "10-1 days before | under 20 days": {
+   "effect": 0.01792,
+   "se": 0.09983,
+   "rows": 8912
+  },
+  "10-1 days before | 20-59 days": {
+   "effect": -0.04543,
+   "se": 0.1058,
+   "rows": 9355
+  },
+  "10-1 days before | 60+ days": {
+   "effect": 0.19068,
+   "se": 0.2082,
+   "rows": 2962
+  },
+  "days 0-13 back | under 20 days": {
+   "effect": 0.02314,
+   "se": 0.10358,
+   "rows": 10739
+  },
+  "days 0-13 back | 20-59 days": {
+   "effect": -0.17101,
+   "se": 0.11263,
+   "rows": 11638
+  },
+  "days 0-13 back | 60+ days": {
+   "effect": -0.0912,
+   "se": 0.20905,
+   "rows": 3274
+  },
+  "days 14-27 back | under 20 days": {
+   "effect": -0.0713,
+   "se": 0.10394,
+   "rows": 8871
+  },
+  "days 14-27 back | 20-59 days": {
+   "effect": -0.13286,
+   "se": 0.12592,
+   "rows": 8808
+  },
+  "days 14-27 back | 60+ days": {
+   "effect": 0.18172,
+   "se": 0.21414,
+   "rows": 2595
+  },
+  "days 28-55 back | under 20 days": {
+   "effect": 0.01993,
+   "se": 0.09362,
+   "rows": 12322
+  },
+  "days 28-55 back | 20-59 days": {
+   "effect": -0.07961,
+   "se": 0.12653,
+   "rows": 13177
+  },
+  "days 28-55 back | 60+ days": {
+   "effect": 0.06137,
+   "se": 0.26585,
+   "rows": 3011
+  },
+  "days 56-120 back | under 20 days": {
+   "effect": -0.04893,
+   "se": 0.11721,
+   "rows": 15311
+  },
+  "days 56-120 back | 20-59 days": {
+   "effect": 0.03629,
+   "se": 0.15064,
+   "rows": 13932
+  },
+  "days 56-120 back | 60+ days": {
+   "effect": 0.00322,
+   "se": 0.30413,
+   "rows": 3082
+  }
+ },
+ "batter: exit speed mph": {
+  "60-31 days before | under 20 days": {
+   "effect": -0.01738,
+   "se": 0.24366,
+   "rows": 6450
+  },
+  "60-31 days before | 20-59 days": {
+   "effect": -0.30171,
+   "se": 0.26719,
+   "rows": 5537
+  },
+  "60-31 days before | 60+ days": {
+   "effect": 1.12154,
+   "se": 0.48634,
+   "rows": 1524
+  },
+  "30-11 days before | under 20 days": {
+   "effect": 0.04434,
+   "se": 0.25161,
+   "rows": 6018
+  },
+  "30-11 days before | 20-59 days": {
+   "effect": -0.1372,
+   "se": 0.29883,
+   "rows": 5383
+  },
+  "30-11 days before | 60+ days": {
+   "effect": 0.35901,
+   "se": 0.55316,
+   "rows": 1665
+  },
+  "10-1 days before | under 20 days": {
+   "effect": -0.82504,
+   "se": 0.30241,
+   "rows": 3492
+  },
+  "10-1 days before | 20-59 days": {
+   "effect": -0.68628,
+   "se": 0.32103,
+   "rows": 3569
+  },
+  "10-1 days before | 60+ days": {
+   "effect": -0.11981,
+   "se": 0.63139,
+   "rows": 1125
+  },
+  "days 0-13 back | under 20 days": {
+   "effect": -0.0346,
+   "se": 0.3001,
+   "rows": 4288
+  },
+  "days 0-13 back | 20-59 days": {
+   "effect": -0.15057,
+   "se": 0.32589,
+   "rows": 4424
+  },
+  "days 0-13 back | 60+ days": {
+   "effect": 0.03414,
+   "se": 0.63053,
+   "rows": 1252
+  },
+  "days 14-27 back | under 20 days": {
+   "effect": -0.07233,
+   "se": 0.31767,
+   "rows": 3584
+  },
+  "days 14-27 back | 20-59 days": {
+   "effect": 0.03809,
+   "se": 0.34763,
+   "rows": 3333
+  },
+  "days 14-27 back | 60+ days": {
+   "effect": -0.07724,
+   "se": 0.70182,
+   "rows": 1030
+  },
+  "days 28-55 back | under 20 days": {
+   "effect": 0.23714,
+   "se": 0.2863,
+   "rows": 4921
+  },
+  "days 28-55 back | 20-59 days": {
+   "effect": -0.06246,
+   "se": 0.33132,
+   "rows": 4972
+  },
+  "days 28-55 back | 60+ days": {
+   "effect": -0.47849,
+   "se": 0.76268,
+   "rows": 1194
+  },
+  "days 56-120 back | under 20 days": {
+   "effect": 0.40625,
+   "se": 0.28331,
+   "rows": 5995
+  },
+  "days 56-120 back | 20-59 days": {
+   "effect": 0.34588,
+   "se": 0.35311,
+   "rows": 5297
+  },
+  "days 56-120 back | 60+ days": {
+   "effect": -0.35816,
+   "se": 0.75695,
+   "rows": 1182
+  }
+ },
+ "batter: expected wOBA": {
+  "60-31 days before | under 20 days": {
+   "effect": -0.00344,
+   "se": 0.00494,
+   "rows": 9399
+  },
+  "60-31 days before | 20-59 days": {
+   "effect": -0.00227,
+   "se": 0.00539,
+   "rows": 8170
+  },
+  "60-31 days before | 60+ days": {
+   "effect": -0.00595,
+   "se": 0.00868,
+   "rows": 2301
+  },
+  "30-11 days before | under 20 days": {
+   "effect": -0.01416,
+   "se": 0.00499,
+   "rows": 8699
+  },
+  "30-11 days before | 20-59 days": {
+   "effect": 0.0036,
+   "se": 0.00497,
+   "rows": 7980
+  },
+  "30-11 days before | 60+ days": {
+   "effect": 0.00349,
+   "se": 0.00954,
+   "rows": 2486
+  },
+  "10-1 days before | under 20 days": {
+   "effect": -0.01074,
+   "se": 0.00638,
+   "rows": 5095
+  },
+  "10-1 days before | 20-59 days": {
+   "effect": -0.00515,
+   "se": 0.00647,
+   "rows": 5277
+  },
+  "10-1 days before | 60+ days": {
+   "effect": 0.00737,
+   "se": 0.01031,
+   "rows": 1664
+  },
+  "days 0-13 back | under 20 days": {
+   "effect": -0.00209,
+   "se": 0.00553,
+   "rows": 6199
+  },
+  "days 0-13 back | 20-59 days": {
+   "effect": -0.00578,
+   "se": 0.00631,
+   "rows": 6595
+  },
+  "days 0-13 back | 60+ days": {
+   "effect": -0.00038,
+   "se": 0.01089,
+   "rows": 1880
+  },
+  "days 14-27 back | under 20 days": {
+   "effect": -0.00023,
+   "se": 0.00598,
+   "rows": 5139
+  },
+  "days 14-27 back | 20-59 days": {
+   "effect": -0.01178,
+   "se": 0.00608,
+   "rows": 4998
+  },
+  "days 14-27 back | 60+ days": {
+   "effect": 0.01322,
+   "se": 0.01137,
+   "rows": 1529
+  },
+  "days 28-55 back | under 20 days": {
+   "effect": 0.00081,
+   "se": 0.0073,
+   "rows": 7051
+  },
+  "days 28-55 back | 20-59 days": {
+   "effect": -0.00693,
+   "se": 0.00608,
+   "rows": 7345
+  },
+  "days 28-55 back | 60+ days": {
+   "effect": 0.006,
+   "se": 0.01111,
+   "rows": 1773
+  },
+  "days 56-120 back | under 20 days": {
+   "effect": 0.00346,
+   "se": 0.00651,
+   "rows": 8585
+  },
+  "days 56-120 back | 20-59 days": {
+   "effect": -0.00599,
+   "se": 0.00688,
+   "rows": 7846
+  },
+  "days 56-120 back | 60+ days": {
+   "effect": -0.00402,
+   "se": 0.01504,
+   "rows": 1718
+  }
+ },
+ "batter: strikeouts per plate appearance": {
+  "60-31 days before | under 20 days": {
+   "effect": 0.00448,
+   "se": 0.00603,
+   "rows": 9399
+  },
+  "60-31 days before | 20-59 days": {
+   "effect": -0.0056,
+   "se": 0.0063,
+   "rows": 8170
+  },
+  "60-31 days before | 60+ days": {
+   "effect": 0.01146,
+   "se": 0.01079,
+   "rows": 2301
+  },
+  "30-11 days before | under 20 days": {
+   "effect": 0.00527,
+   "se": 0.00608,
+   "rows": 8699
+  },
+  "30-11 days before | 20-59 days": {
+   "effect": -0.0033,
+   "se": 0.00656,
+   "rows": 7980
+  },
+  "30-11 days before | 60+ days": {
+   "effect": -0.01885,
+   "se": 0.01257,
+   "rows": 2486
+  },
+  "10-1 days before | under 20 days": {
+   "effect": 0.00666,
+   "se": 0.00758,
+   "rows": 5095
+  },
+  "10-1 days before | 20-59 days": {
+   "effect": -0.00457,
+   "se": 0.00748,
+   "rows": 5277
+  },
+  "10-1 days before | 60+ days": {
+   "effect": -0.01939,
+   "se": 0.01317,
+   "rows": 1664
+  },
+  "days 0-13 back | under 20 days": {
+   "effect": -0.00066,
+   "se": 0.00734,
+   "rows": 6199
+  },
+  "days 0-13 back | 20-59 days": {
+   "effect": 0.00426,
+   "se": 0.00699,
+   "rows": 6595
+  },
+  "days 0-13 back | 60+ days": {
+   "effect": 0.00378,
+   "se": 0.01486,
+   "rows": 1880
+  },
+  "days 14-27 back | under 20 days": {
+   "effect": -0.00247,
+   "se": 0.00735,
+   "rows": 5139
+  },
+  "days 14-27 back | 20-59 days": {
+   "effect": 0.00224,
+   "se": 0.00725,
+   "rows": 4998
+  },
+  "days 14-27 back | 60+ days": {
+   "effect": -0.01504,
+   "se": 0.01591,
+   "rows": 1529
+  },
+  "days 28-55 back | under 20 days": {
+   "effect": 0.00184,
+   "se": 0.00803,
+   "rows": 7051
+  },
+  "days 28-55 back | 20-59 days": {
+   "effect": -0.00573,
+   "se": 0.00694,
+   "rows": 7345
+  },
+  "days 28-55 back | 60+ days": {
+   "effect": -0.00193,
+   "se": 0.01759,
+   "rows": 1773
+  },
+  "days 56-120 back | under 20 days": {
+   "effect": 0.00815,
+   "se": 0.00767,
+   "rows": 8585
+  },
+  "days 56-120 back | 20-59 days": {
+   "effect": -0.00356,
+   "se": 0.00809,
+   "rows": 7846
+  },
+  "days 56-120 back | 60+ days": {
+   "effect": 0.00409,
+   "se": 0.01779,
+   "rows": 1718
+  }
+ }
+}
