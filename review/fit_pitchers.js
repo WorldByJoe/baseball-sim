@@ -1,5 +1,5 @@
 /* ============================================================================
-   fit_pitchers.js · v0.2 · 2026-10-13
+   fit_pitchers.js · v0.3 · 2026-10-13
 
    Each playoff pitcher's two hidden traits: DECEPTION (scales how noisy the
    batter's read of his pitches is, bb_engine readFactors) and a COMMAND scale
@@ -18,6 +18,9 @@
          (ids file: a JSON list of the pitchers to fit, the rest skipped; season/run_aaa.sh fits only its Triple-A men)
 
    CHANGED
+     v0.3  the command scale is fitted on his measured scatter: when review/pitchers_fit.json already held a fit of his,
+           REVIEW.pitcher had applied its scale and v0.2 fitted the new one on top (saved alone, the replays then used
+           measured x new, not the measured x old x new that was fitted)
      v0.2  an optional list of the pitchers to fit
      v0.1  first build (the Yankees-Rays review)
 ============================================================================ */
@@ -50,7 +53,7 @@
     var pm = function (o) { return o && o.pooled ? o.pooled.mean : null; }, km = pm(S.K_pct), bm = pm(S.BB_pct);
     if (km === null || bm === null) return;
     var tK = logit(Lk) + logit(km) - logit(REAL.K), tB = logit(Lb) + logit(bm) - logit(REAL.BB);
-    var P = REVIEW.pitcher(r, rng, env), cmd0 = P.cmd.slice(), d = 1, c = 0.9, cur = null;
+    var P = REVIEW.pitcher(r, rng, env), pf0 = D.pfit && D.pfit.pitchers[id], cmd0 = pf0 ? [P.cmd[0] / pf0.cmdScale, P.cmd[1] / pf0.cmdScale] : P.cmd.slice(), d = 1, c = 0.9, cur = null;
     function set() { P.deception = d; P.cmd = [cmd0[0] * c, cmd0[1] * c]; }
     // bisection in log space, two rounds: deception for the strikeouts (rising with it), then the command scale
     // for the walks (rising with it); each holds the other where it last landed

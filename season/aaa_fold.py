@@ -1,5 +1,5 @@
 """
-aaa_fold.py · v0.1 · 2026-10-13
+aaa_fold.py · v0.2 · 2026-10-13
 
 Triple-A priors for the season replay's men with no major-league data in a fold's window (Joe, 2026-10-13). Without them
 such a man was the model's average major leaguer (a population hitter, a generic reliever), and the teams that leaned on
@@ -11,9 +11,12 @@ call-ups were overrated. For fold A (or B):
      his precision plus tau), in log-odds for a rate and in mph or degrees otherwise. Tau, the spread of the men's own
      differences beyond their sampling error, is added to a translated measure's variance, so a Triple-A line counts for
      less than a major-league one.
-  3. Each man with no major-league data in a role (hitting: no pitch seen in the window; pitching: no pitch type thrown)
-     and enough at Triple-A (30 plate appearances; 100 pitches) has his Triple-A summaries for that role, translated,
-     put in place of the empty ones, marked level 'AAA'. Triple-A has no bat tracking, so a hitter's bat speed, swing
+  3. v0.2: each man's Triple-A seasons in a role join his major-league ones, season by season, wherever Triple-A carries
+     at least 5% of the weight on his strikeout rate (so a man with a thin major-league season leans on his Triple-A
+     one, and a regular with a rehab stint is left alone), or wherever he has no major-league season (30 plate
+     appearances or 25 batters faced at Triple-A needed). Outcome measures are combined by precision in log-odds (the
+     translated Triple-A value with its variance plus tau); physical ones (the arsenal, release, location scatter) by
+     count. A man with no major-league data at all is marked level 'AAA', one with both 'MLB+AAA'. Triple-A has no bat tracking, so a hitter's bat speed, swing
      length, attack angle and swing tilt are imputed: their posterior mean given his height, weight and translated
      measures through the hitter emulator (diag_out/emu.jsonl, the model's major leaguers), the linear-Gaussian model
      the hidden traits are fitted by (the plug-in keeps the hidden traits' posterior mean exact, as the model is linear).
@@ -26,6 +29,8 @@ the taus, the pairs behind them, who was substituted and who had too little at T
   python3 season/aaa_fold.py A          (from the review worktree's root)
 
 CHANGED
+  v0.2  Triple-A informs thin major-league seasons too (Joe, 2026-10-13), not only men with none; league_means.json keeps
+        the pitchers' shrinkage targets major-league only
   v0.1  first build (Joe, 2026-10-13)
 """
 import copy, csv, glob, gzip, json, math, os, shutil, subprocess, sys
@@ -164,71 +169,157 @@ def impute_swing(rec, E):
     return {k: (float(mu[2 + i] + sd[2 + i] * post[i]), float(sd[2 + i] * math.sqrt(max(Sp[i, i], 0)))) for i, k in enumerate(SWING_KNOWN)}
 
 
+OUT_PATHS = {path: (name, rate) for name, path, rate in HIT + PIT}
+W_MIN = 0.05
+MIN_K_N = {'hitting': 30, 'pitching': 25}   # plate appearances, batters faced: a Triple-A season used on its own
+
+
+def ok(x): return isinstance(x, dict) and x.get('mean') is not None
+
+
+def zv(x, rate, sh=None):
+    """an entry in log-odds (rates) or units, with its variance; Triple-A entries moved by the shift and widened by tau"""
+    z = fwd(x['mean'], rate); v = se_fwd(x['mean'], x.get('se') or 0, rate) ** 2
+    if sh: z += sh['shift']; v += sh['tau'] ** 2 + sh.get('se', 0) ** 2
+    return z, v
+
+
+def comb_outcome(m, a, sh, rate):
+    if not ok(a): return m
+    za, va = zv(a, rate, sh)
+    if ok(m) and m.get('se'):
+        zm, vm = zv(m, rate); v = 1 / (1 / vm + 1 / va); z = v * (zm / vm + za / va)
+    else:
+        z, v = za, va
+    mu = back(z, rate)
+    out = dict(m if ok(m) else a); out.update(mean=round(mu, 5), se=round(math.sqrt(v) * (mu * (1 - mu) if rate else 1), 5),
+                                              n=(m.get('n') or 0 if ok(m) else 0) + (a.get('n') or 0), level='MLB+AAA' if ok(m) else 'AAA, translated (season/aaa_fold.py)')
+    return out
+
+
+def comb_phys(m, a):
+    if not ok(a): return m
+    if not ok(m): return dict(copy.deepcopy(a), level='AAA')
+    n1, n2 = m.get('n') or 0, a.get('n') or 0
+    out = dict(m); out['mean'] = round((n1 * m['mean'] + n2 * a['mean']) / (n1 + n2), 5) if n1 + n2 else m['mean']; out['n'] = n1 + n2
+    if m.get('se') and a.get('se'): out['se'] = round(1 / math.sqrt(1 / m['se'] ** 2 + 1 / a['se'] ** 2), 5)
+    out['level'] = 'MLB+AAA'
+    return out
+
+
+def merge(m, a, path, years, SH):
+    """his Triple-A node a into his major-league node m, for the seasons in years"""
+    if isinstance(a, dict) and any(k in YEARS for k in a):
+        out = copy.deepcopy(m) if isinstance(m, dict) else {}
+        o = OUT_PATHS.get(path)
+        for y in years:
+            ay, my = a.get(y), out.get(y)
+            if ay is None: continue
+            if o: out[y] = comb_outcome(my, ay, SH[o[0]], o[1])
+            elif ok(ay): out[y] = comb_phys(my, ay)
+            elif path[-1] == 'command':
+                if my is None or ((my.get('n') or 0) < 50 <= (ay.get('n') or 0)): out[y] = copy.deepcopy(ay)
+            elif my is None: out[y] = copy.deepcopy(ay)
+        if 'pooled' in a and 'pooled' not in out: out['pooled'] = translate({'pooled': a['pooled']}, SH[o[0]], o[1])['pooled'] if o and ok(a['pooled']) else copy.deepcopy(a['pooled'])
+        return out
+    if isinstance(a, dict):
+        out = copy.deepcopy(m) if isinstance(m, dict) else {}
+        for k, v in a.items(): out[k] = merge(out.get(k), v, path + (k,), years, SH)
+        return out
+    return m if m is not None else copy.deepcopy(a)
+
+
+def years_to_use(r, a, role, SH):
+    """the seasons where his Triple-A line joins: none in the majors (and enough at Triple-A), or Triple-A carries 5%+ of
+    the weight on his strikeout rate"""
+    km = node(r, ('summaries', role, 'K_pct')) or {}; ka = node(a, ('summaries', role, 'K_pct')) or {}
+    out, wts = [], {}
+    for y in YEARS:
+        x, z = km.get(y), ka.get(y)
+        if not ok(z) or not z.get('se'): continue
+        if not ok(x) or not x.get('se'):
+            if (z.get('n') or 0) >= MIN_K_N[role]: out.append(y); wts[y] = 1.0
+            continue
+        vm = zv(x, 1)[1]; va = zv(z, 1, SH['K' if role == 'hitting' else 'pK'])[1]; w = (1 / va) / (1 / va + 1 / vm)
+        if w >= W_MIN: out.append(y); wts[y] = round(w, 3)
+    return out, wts
+
+
 def main(F):
     fold, train = {'A': ('foldA', 'h1'), 'B': ('foldB', 'h2')}[F]
     D = os.path.join(HERE, 'aaa' + F); OUT = os.path.join(HERE, fold + '_aaa')
     build_aaa(fold, train, D)
     MJ = json.load(open(os.path.join(HERE, fold, 'players_measured.json')))
     M = {r['id']: r for r in MJ['players']}
+    # the pitchers' shrinkage targets (season/view.py), from the major-league records only
+    LM = {}
+    for k in ('K_pct', 'BB_pct', 'chaseRate'):
+        v = [o['mean'] for r in M.values() for y, o in ((r['summaries'].get('pitching') or {}).get(k) or {}).items() if y.isdigit() and isinstance(o, dict) and o.get('mean') is not None]
+        LM[k] = float(np.mean(v)) if v else None
     A = {r['id']: r for r in json.load(open(os.path.join(D, 'players_measured.json')))['players']}
     SH = shifts(M, A)
-    for k, s in SH.items(): print('  %-8s shift %+.3f (%s)  tau %.3f  pairs %d' % (k, s['shift'], 'log-odds' if s['rate'] else 'units', s['tau'], s['pairs']))
+    for k, s_ in SH.items(): print('  %-8s shift %+.3f (%s)  tau %.3f  pairs %d' % (k, s_['shift'], 'log-odds' if s_['rate'] else 'units', s_['tau'], s_['pairs']))
     E = FH.emulator(os.path.join(REV, 'diag_out', 'emu.jsonl'))
     SS = json.load(open(os.path.join(HERE, fold, 'season_stats.json')))
-    sub = {'hitting': [], 'pitching': []}; thin = {'hitting': [], 'pitching': []}; none = {'hitting': [], 'pitching': []}
+    done = {'hitting': {}, 'pitching': {}}
     for pid, r in M.items():
-        a = A.get(pid) or {'summaries': {}, 'traits': {}}
-        # hitting: no pitch seen in the window
-        if r['kind'] in ('position', 'two-way') and not r['summaries'].get('hitting'):
-            ah = a['summaries'].get('hitting'); pa = sum(((a.get('seasonStats') or {}).get('hitting_' + y) or {}).get('PA', 0) for y in YEARS)
-            if not ah: none['hitting'].append(pid)
-            elif pa < MIN_PA: thin['hitting'].append(pid)
-            else:
-                r['summaries']['hitting'] = dict(copy.deepcopy(ah), level='AAA')
-                for name, path, rate in HIT:
-                    o = node(a, path)
-                    if o: put(r, path, translate(o, SH[name], rate))
+        a = A.get(pid)
+        if not a: continue
+        # hitting
+        if r['kind'] in ('position', 'two-way') and a['summaries'].get('hitting'):
+            ys, wts = years_to_use(r, a, 'hitting', SH)
+            if ys:
+                had = bool(r['summaries'].get('hitting'))
+                r['summaries']['hitting'] = merge(r['summaries'].get('hitting'), a['summaries']['hitting'], ('summaries', 'hitting'), ys, SH)
+                r['summaries']['hitting']['level'] = 'MLB+AAA' if had else 'AAA'
+                sp = node(a, ('traits', 'sprayPulledDeg_bip'))
+                if sp: r['traits']['sprayPulledDeg_bip'] = merge(r['traits'].get('sprayPulledDeg_bip'), sp, ('traits', 'sprayPulledDeg_bip'), ys, SH)
                 st = SS['players'].setdefault(str(pid), {})
-                for y in YEARS:
-                    s = (a.get('seasonStats') or {}).get('hitting_' + y)
-                    if s and s.get('PA'):
-                        p = back(fwd(max(s['HR'], 0.5) / s['PA'], 1) + SH['HR']['shift'], 1) if s['HR'] else 0.0
-                        st['hitting_' + y] = {'PA': s['PA'], 'HR': round(p * s['PA'], 2), 'note': 'Triple-A, home runs translated to the majors (season/aaa_fold.py)'}
+                for y in ys:   # home runs: combined by precision as the measures are, written as an effective line
+                    sa = (a.get('seasonStats') or {}).get('hitting_' + y) or {}; sm = st.get('hitting_' + y) or {}
+                    if not sa.get('PA'): continue
+                    ea = {'mean': max(sa['HR'], 0.5) / sa['PA'], 'n': sa['PA']}; ea['se'] = math.sqrt(ea['mean'] * (1 - ea['mean']) / sa['PA'])
+                    em = None
+                    if sm.get('PA'):
+                        em = {'mean': max(sm.get('HR', 0), 0.5) / sm['PA'], 'n': sm['PA']}; em['se'] = math.sqrt(em['mean'] * (1 - em['mean']) / sm['PA'])
+                    c = comb_outcome(em, ea, SH['HR'], 1); p_ = c['mean']; pa_eff = p_ * (1 - p_) / c['se'] ** 2
+                    st['hitting_' + y] = {'PA': round(pa_eff), 'HR': round(p_ * pa_eff, 2), 'note': 'effective line: major-league %s + Triple-A %s translated (season/aaa_fold.py)' % (sm.get('PA') or 0, sa['PA'])}
                 r['seasonStats'] = st
-                imp = impute_swing(r, E)
-                if imp:
-                    for k, (m_, s_) in imp.items():
-                        v = {'mean': round(m_, 3), 'se': round(s_, 3), 'n': 0, 'note': 'imputed from Triple-A measures (season/aaa_fold.py)'}
-                        r['traits'][k] = dict({y: dict(v) for y in YEARS if (r['summaries']['hitting'].get('K_pct') or {}).get(y)}, pooled=v)
-                    sub['hitting'].append(pid)
-                else:
-                    del r['summaries']['hitting']; thin['hitting'].append(pid)
-        # pitching: no pitch type thrown in the window
-        if r['kind'] in ('pitcher', 'two-way') and not ((r['summaries'].get('pitching') or {}).get('pitchTypes')):
-            ap = a['summaries'].get('pitching') or {}
-            n = sum((ap.get('sampleSizes') or {}).get('pitchesThrown', {}).values()) if ap.get('sampleSizes') else 0
-            if not ap.get('pitchTypes'): none['pitching'].append(pid)
-            elif n < MIN_PITCHES: thin['pitching'].append(pid)
-            else:
-                P = copy.deepcopy(ap); P['level'] = 'AAA'
-                if (r['summaries'].get('pitching') or {}).get('role'): P['role'] = r['summaries']['pitching']['role']
-                r['summaries']['pitching'] = P
-                for name, path, rate in PIT:
-                    o = node(a, path)
-                    if o: put(r, path, translate(o, SH[name], rate))
-                r['traits']['pitching'] = copy.deepcopy(a['traits'].get('pitching'))
-                sub['pitching'].append(pid)
+                # bat tracking: Triple-A has none; a season without it takes his major-league mean, else the imputation
+                miss = [y for y in ys if not ok((r['traits'].get('batSpeed') or {}).get(y))]
+                if miss:
+                    imp = None if ok((r['traits'].get('batSpeed') or {}).get('pooled')) else impute_swing(r, E)
+                    for k in SWING_KNOWN:
+                        node_ = r['traits'].setdefault(k, {})
+                        src = node_.get('pooled') if ok(node_.get('pooled')) else ({'mean': round(imp[k][0], 3), 'se': round(imp[k][1], 3), 'n': 0, 'note': 'imputed from Triple-A measures (season/aaa_fold.py)'} if imp else None)
+                        if src is None: continue
+                        for y in miss: node_.setdefault(y, dict(src))
+                        node_.setdefault('pooled', dict(src))
+                done['hitting'][pid] = wts
+        # pitching
+        if r['kind'] in ('pitcher', 'two-way') and (a['summaries'].get('pitching') or {}).get('pitchTypes'):
+            ys, wts = years_to_use(r, a, 'pitching', SH)
+            if ys:
+                had = bool((r['summaries'].get('pitching') or {}).get('pitchTypes'))
+                role = (r['summaries'].get('pitching') or {}).get('role')
+                r['summaries']['pitching'] = merge(r['summaries'].get('pitching') if had else None, a['summaries']['pitching'], ('summaries', 'pitching'), ys, SH)
+                r['summaries']['pitching']['level'] = 'MLB+AAA' if had else 'AAA'
+                if role: r['summaries']['pitching']['role'] = role
+                r['traits']['pitching'] = merge(r['traits'].get('pitching') if had else None, a['traits'].get('pitching') or {}, ('traits', 'pitching'), ys, SH)
+                done['pitching'][pid] = wts
     if os.path.exists(OUT): shutil.rmtree(OUT)
     shutil.copytree(os.path.join(HERE, fold), OUT, symlinks=True)
-    MJ['meta'] = dict(MJ.get('meta') or {}, aaa='Triple-A priors for men with no major-league data in the window (season/aaa_fold.py)')
+    MJ['meta'] = dict(MJ.get('meta') or {}, aaa='Triple-A seasons joined to thin or missing major-league ones (season/aaa_fold.py v0.2)')
     json.dump(MJ, open(os.path.join(OUT, 'players_measured.json'), 'w'), separators=(',', ':'))
     json.dump(SS, open(os.path.join(OUT, 'season_stats.json'), 'w'), indent=0)
-    nm = lambda L: [M[i]['name'] for i in L]
-    rep = {'fold': fold, 'window': '2025 + 2026 %s' % train, 'shifts': SH, 'minimum': {'PA': MIN_PA, 'pitches': MIN_PITCHES, 'pairEvents': MIN_N},
-           'substituted': {k: nm(v) for k, v in sub.items()}, 'substitutedIds': sub, 'tooLittle': {k: nm(v) for k, v in thin.items()}, 'noTripleA': {k: nm(v) for k, v in none.items()}}
+    json.dump(LM, open(os.path.join(OUT, 'league_means.json'), 'w'))
+    only = {k: [i for i in v if (M[i]['summaries'].get(k) or {}).get('level') == 'AAA'] for k, v in done.items()}
+    rep = {'fold': fold, 'window': '2025 + 2026 %s' % train, 'shifts': SH, 'minimum': {'tripleAWeight': W_MIN, 'K_n': MIN_K_N, 'pairEvents': MIN_N},
+           'tripleAOnly': {k: [M[i]['name'] for i in v] for k, v in only.items()}, 'combined': {k: {M[i]['name']: w for i, w in v.items()} for k, v in done.items()},
+           'substitutedIds': {k: list(v) for k, v in done.items()}, 'tripleAOnlyIds': only}
     json.dump(rep, open(os.path.join(OUT, 'aaa.json'), 'w'), indent=1, ensure_ascii=False)
-    print('%s: Triple-A priors for %d hitters and %d pitchers; too little at Triple-A %d and %d; none there %d and %d' % (
-        fold, len(sub['hitting']), len(sub['pitching']), len(thin['hitting']), len(thin['pitching']), len(none['hitting']), len(none['pitching'])))
+    print('%s: Triple-A joined for %d hitters (%d with no major-league data) and %d pitchers (%d with none)' % (
+        fold, len(done['hitting']), len(only['hitting']), len(done['pitching']), len(only['pitching'])))
 
 
 if __name__ == '__main__':
