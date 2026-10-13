@@ -1,5 +1,5 @@
 """
-season_fade.py · v0.1 · 2026-10-12
+season_fade.py · v0.2 · 2026-10-13
 
 Do older players fade more within a season? For each player-season (regular season, history/pitches), the straight-line
 trend from opening day to the season's end of:
@@ -12,11 +12,13 @@ building up); b is the age difference asked about. Reported as the change over a
   python3 history/season_fade.py [years]       -> history/season_fade.json
 
 CHANGED
+  v0.2  HISTDATA: the data folder (season/league: every major leaguer, 2025-26)
   v0.1  first build (Joe, 2026-10-12: do older players have a stronger within-season decline?)
 """
 import csv, gzip, glob, json, os, sys, datetime, math
 import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.environ.get('HISTDATA') or HERE   # v0.2: another folder laid out like history/
 SWING = {'swinging_strike', 'swinging_strike_blocked', 'foul', 'foul_tip', 'hit_into_play'}
 WHIFF = {'swinging_strike', 'swinging_strike_blocked'}
 NOT_PA = {'caught_stealing_2b', 'caught_stealing_3b', 'caught_stealing_home', 'pickoff_1b', 'pickoff_2b', 'pickoff_3b', 'stolen_base_2b', 'stolen_base_3b', 'wild_pitch',
@@ -37,11 +39,11 @@ def slope(t, v, binary=False):
 
 
 def main(years):
-    birth = {p['id']: p.get('birthDate') for p in json.load(open(os.path.join(HERE, 'rosters.json')))['players']}
-    stats = json.load(open(os.path.join(HERE, 'season_stats.json')))['players']
+    birth = {p['id']: p.get('birthDate') for p in json.load(open(os.path.join(DATA, 'rosters.json')))['players']}
+    stats = json.load(open(os.path.join(DATA, 'season_stats.json')))['players']
     series = {}   # measure -> list of (slope per month, se, n, age, sp)
     MIN = {'batSpeed': 300, 'ev': 150, 'xwoba': 150, 'K_h': 250, 'fbVelo': 300, 'whiff_p': 300, 'K_p': 200}
-    for fn in sorted(glob.glob(os.path.join(HERE, 'pitches', '*.csv.gz'))):
+    for fn in sorted(glob.glob(os.path.join(DATA, 'pitches', '*.csv.gz'))):
         b = os.path.basename(fn)[:-7].split('_'); y, role, pid = int(b[0]), b[1], int(b[2])
         if y not in years or not birth.get(pid): continue
         open_day = datetime.date(y, 3, 20)
@@ -89,7 +91,7 @@ def main(years):
         print('%-9s %4d player-seasons | over a season: age 25 %+.3f (%.3f), 30 %+.3f, 35 %+.3f (%.3f) | age term per 10 years %+.3f a season (t %.1f)%s' % (
             k, len(L), six(25)[0], six(25)[1], six(30)[0], six(35)[0], six(35)[1], 60 * beta[1], beta[1] / bse[1],
             ' | starters vs relievers %+.3f a season (t %.1f)' % (6 * beta[2], beta[2] / bse[2]) if X.shape[1] > 2 else ''))
-    json.dump(out, open(os.path.join(HERE, 'season_fade.json'), 'w'), indent=1)
+    json.dump(out, open(os.path.join(DATA, 'season_fade.json'), 'w'), indent=1)
 
 
 if __name__ == '__main__':

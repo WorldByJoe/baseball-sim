@@ -48,19 +48,19 @@
     ],
     "missSd": 5.69
    },
-   "2": {
-    "corrShareBeforeMiss": [
-     0.118,
-     0.5351
-    ],
-    "missSd": 5.82
-   },
    "3": {
     "corrShareBeforeMiss": [
      0.122,
      0.5212
     ],
     "missSd": 5.61
+   },
+   "4": {
+    "corrShareBeforeMiss": [
+     0.182,
+     0.3349
+    ],
+    "missSd": 5.68
    }
   }
  },
@@ -113,19 +113,19 @@
     ],
     "missSd": 5.08
    },
-   "2": {
-    "corrShareBeforeMiss": [
-     -0.536,
-     0.0022
-    ],
-    "missSd": 5.16
-   },
    "3": {
     "corrShareBeforeMiss": [
      -0.513,
      0.0037
     ],
     "missSd": 5.02
+   },
+   "4": {
+    "corrShareBeforeMiss": [
+     -0.505,
+     0.0045
+    ],
+    "missSd": 4.81
    }
   }
  }

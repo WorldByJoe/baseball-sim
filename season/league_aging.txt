@@ -1,0 +1,82 @@
+  zoneSwing R2 0.93   residual sd 0.0215   of it structural 0.0107
+  chase     R2 0.84   residual sd 0.0222   of it structural 0.0136
+  whiffFB   R2 0.60   residual sd 0.0250   of it structural 0.0135
+  whiffBR   R2 0.67   residual sd 0.0448   of it structural 0.0273
+  whiffOS   R2 0.60   residual sd 0.0634   of it structural 0.0285
+  foul      R2 0.32   residual sd 0.0257   of it structural 0.0150
+  K         R2 0.69   residual sd 0.0333   of it structural 0.0221
+  BB        R2 0.68   residual sd 0.0200   of it structural 0.0092
+  HR        R2 0.42   residual sd 0.0159   of it structural 0.0121
+  ev        R2 0.82   residual sd 1.2806   of it structural 0.6458
+  hardHit   R2 0.79   residual sd 0.0432   of it structural 0.0244
+  GB        R2 0.69   residual sd 0.0422   of it structural 0.0218
+  LD        R2 0.23   residual sd 0.0299   of it structural 0.0067
+  FBs       R2 0.50   residual sd 0.0351   of it structural 0.0128
+  PU        R2 0.62   residual sd 0.0247   of it structural 0.0118
+  pull      R2 0.78   residual sd 1.6536   of it structural 0.3697
+521 hitters in the hidden-trait fit
+trait                         age  change/yr       se      t   in sd/yr
+pitcher K_pct                  34    -0.0192   0.0030   -6.4     -0.356
+hitter batSpeed                25     0.3842   0.0834    4.6      0.143
+hitter hardHit95_share         34    -0.0236   0.0053   -4.5     -0.308
+hitter exitVelo_bip            34    -0.5579   0.1523   -3.7     -0.259
+hitter speed                   34    -0.2046   0.0563   -3.6     -0.175
+hitter speed                   25    -0.1399   0.0417   -3.4     -0.119
+hidden pullBias                25     0.6959   0.2313    3.0      0.144
+pitcher fbVelo                 34    -0.1711   0.0596   -2.9     -0.070
+hitter chaseRate               34     0.0095   0.0035    2.7      0.157
+pitcher K_pct                  25     0.0104   0.0039    2.7      0.193
+hitter attack                  25     0.3402   0.1324    2.6      0.094
+hitter BB_pct                  34    -0.0064   0.0026   -2.5     -0.236
+hidden spotIn                  25    -0.1574   0.0664   -2.4     -0.182
+hitter swingLenFt              25     0.0276   0.0118    2.3      0.068
+hidden eyeSD                   34     0.0983   0.0429    2.3      0.114
+pitcher armAngle               25    -0.4903   0.2218   -2.2     -0.040
+pitcher ext                    34    -0.0181   0.0083   -2.2     -0.040
+pitcher chaseRate              34    -0.0052   0.0024   -2.2     -0.157
+hidden longSD                  34     0.0764   0.0353    2.2      0.154
+hitter BB_pct                  25     0.0034   0.0018    1.9      0.125
+hidden aggr                    34     0.0058   0.0032    1.8      0.085
+hidden faceSD                  34     0.5292   0.3145    1.7      0.162
+hitter armMph                  34    -0.5967   0.3878   -1.5     -0.101
+pitcher zoneRate               34    -0.0029   0.0019   -1.5     -0.084
+hidden timingSD                34     0.2226   0.1516    1.5      0.137
+hidden faceSD                  25     0.4657   0.3190    1.5      0.143
+hitter batSpeed                34    -0.1526   0.1050   -1.5     -0.057
+hitter exitVelo_bip            25     0.1646   0.1206    1.4      0.076
+hitter swingTilt               34    -0.1590   0.1336   -1.2     -0.041
+pitcher ext                    25    -0.0103   0.0091   -1.1     -0.023
+pitcher zoneRate               25     0.0022   0.0020    1.1      0.064
+hitter hardHit95_share         25     0.0047   0.0043    1.1      0.061
+hidden coverage                25     0.1448   0.1330    1.1      0.116
+hitter K_pct                   34     0.0040   0.0037    1.1      0.069
+hitter attack                  34    -0.1437   0.1536   -0.9     -0.040
+hidden longSD                  25     0.0309   0.0331    0.9      0.062
+hidden undercut                25     0.0153   0.0175    0.9      0.061
+hidden pullBias                34     0.2289   0.2613    0.9      0.047
+hitter swingLenFt              34    -0.0119   0.0145   -0.8     -0.029
+hitter zoneSwingRate           25    -0.0025   0.0031   -0.8     -0.050
+hidden fbLean                  34     0.0373   0.0464    0.8      0.069
+hitter chaseRate               25    -0.0022   0.0028   -0.8     -0.036
+hidden motorIn                 34     0.0159   0.0213    0.7      0.065
+hidden timingSD                25     0.1081   0.1529    0.7      0.066
+pitcher BB_pct                 25    -0.0014   0.0020   -0.7     -0.071
+hidden motorIn                 25    -0.0124   0.0211   -0.6     -0.051
+hidden undercut                34     0.0106   0.0183    0.6      0.043
+hidden eyeSD                   25     0.0201   0.0367    0.5      0.023
+hidden coverage                34     0.0683   0.1291    0.5      0.054
+pitcher fbVelo                 25     0.0313   0.0624    0.5      0.013
+pitcher chaseRate              25     0.0013   0.0028    0.5      0.039
+hitter swingTilt               25    -0.0518   0.1148   -0.5     -0.013
+pitcher BB_pct                 34     0.0007   0.0017    0.4      0.035
+hidden fbLean                  25     0.0183   0.0460    0.4      0.034
+hidden spotIn                  34    -0.0247   0.0681   -0.4     -0.029
+pitcher armAngle               34    -0.0563   0.1861   -0.3     -0.005
+hidden commit                  34    -0.0034   0.0126   -0.3     -0.028
+hidden learn                   25     0.0025   0.0108    0.2      0.025
+hitter K_pct                   25    -0.0006   0.0031   -0.2     -0.010
+hidden learn                   34    -0.0009   0.0105   -0.1     -0.009
+hitter zoneSwingRate           34    -0.0003   0.0036   -0.1     -0.006
+hitter armMph                  25     0.0142   0.2443    0.1      0.002
+hidden commit                  25     0.0005   0.0130    0.0      0.004
+hidden aggr                    25     0.0001   0.0026    0.0      0.001

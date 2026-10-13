@@ -1,0 +1,7 @@
+batSpeed   730 player-seasons | over a season: age 25 +0.177 (0.081), 30 +0.295, 35 +0.413 (0.122) | age term per 10 years +0.236 a season (t 1.5)
+ev         651 player-seasons | over a season: age 25 -0.533 (0.179), 30 -0.568, 35 -0.603 (0.260) | age term per 10 years -0.070 a season (t -0.2)
+xwoba      647 player-seasons | over a season: age 25 -0.010 (0.004), 30 -0.012, 35 -0.014 (0.007) | age term per 10 years -0.005 a season (t -0.5)
+K_h        614 player-seasons | over a season: age 25 +0.007 (0.004), 30 +0.009, 35 +0.012 (0.006) | age term per 10 years +0.004 a season (t 0.5)
+fbVelo     640 player-seasons | over a season: age 25 +0.438 (0.094), 30 +0.453, 35 +0.468 (0.096) | age term per 10 years +0.030 a season (t 0.2) | starters vs relievers -0.276 a season (t -2.8)
+whiff_p    764 player-seasons | over a season: age 25 +0.003 (0.005), 30 -0.003, 35 -0.008 (0.005) | age term per 10 years -0.011 a season (t -1.6) | starters vs relievers +0.002 a season (t 0.3)
+K_p        662 player-seasons | over a season: age 25 +0.009 (0.007), 30 -0.002, 35 -0.013 (0.007) | age term per 10 years -0.022 a season (t -2.4) | starters vs relievers -0.002 a season (t -0.3)

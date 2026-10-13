@@ -1,0 +1,207 @@
+{
+ "batSpeed": {
+  "playerSeasons": 730,
+  "perMonthAt30": [
+   0.0492,
+   0.01071
+  ],
+  "agePerMonthPerYear": [
+   0.003938,
+   0.002698
+  ],
+  "starterPerMonth": null,
+  "trueSlopeSd": 0.22657,
+  "seasonChange": {
+   "25": [
+    0.1771,
+    0.0806
+   ],
+   "30": [
+    0.2952,
+    0.0643
+   ],
+   "35": [
+    0.4134,
+    0.122
+   ]
+  },
+  "ageT": 1.46
+ },
+ "ev": {
+  "playerSeasons": 651,
+  "perMonthAt30": [
+   -0.0946,
+   0.02286
+  ],
+  "agePerMonthPerYear": [
+   -0.001166,
+   0.005871
+  ],
+  "starterPerMonth": null,
+  "trueSlopeSd": 0.23348,
+  "seasonChange": {
+   "25": [
+    -0.5326,
+    0.1791
+   ],
+   "30": [
+    -0.5676,
+    0.1372
+   ],
+   "35": [
+    -0.6025,
+    0.26
+   ]
+  },
+  "ageT": -0.2
+ },
+ "xwoba": {
+  "playerSeasons": 647,
+  "perMonthAt30": [
+   -0.00203,
+   0.00057
+  ],
+  "agePerMonthPerYear": [
+   -7.6e-05,
+   0.000145
+  ],
+  "starterPerMonth": null,
+  "trueSlopeSd": 0.00509,
+  "seasonChange": {
+   "25": [
+    -0.0099,
+    0.0043
+   ],
+   "30": [
+    -0.0122,
+    0.0034
+   ],
+   "35": [
+    -0.0144,
+    0.0065
+   ]
+  },
+  "ageT": -0.52
+ },
+ "K_h": {
+  "playerSeasons": 614,
+  "perMonthAt30": [
+   0.00158,
+   0.00053
+  ],
+  "agePerMonthPerYear": [
+   7.1e-05,
+   0.000137
+  ],
+  "starterPerMonth": null,
+  "trueSlopeSd": 0.00561,
+  "seasonChange": {
+   "25": [
+    0.0074,
+    0.0041
+   ],
+   "30": [
+    0.0095,
+    0.0032
+   ],
+   "35": [
+    0.0116,
+    0.0061
+   ]
+  },
+  "ageT": 0.52
+ },
+ "fbVelo": {
+  "playerSeasons": 640,
+  "perMonthAt30": [
+   0.07547,
+   0.01148
+  ],
+  "agePerMonthPerYear": [
+   0.000504,
+   0.002174
+  ],
+  "starterPerMonth": [
+   -0.04598,
+   0.01615
+  ],
+  "trueSlopeSd": 0.20071,
+  "seasonChange": {
+   "25": [
+    0.4377,
+    0.094
+   ],
+   "30": [
+    0.4528,
+    0.0689
+   ],
+   "35": [
+    0.4679,
+    0.0957
+   ]
+  },
+  "ageT": 0.23
+ },
+ "whiff_p": {
+  "playerSeasons": 764,
+  "perMonthAt30": [
+   -0.00044,
+   0.00065
+  ],
+  "agePerMonthPerYear": [
+   -0.000186,
+   0.000114
+  ],
+  "starterPerMonth": [
+   0.00029,
+   0.00085
+  ],
+  "trueSlopeSd": 0.00599,
+  "seasonChange": {
+   "25": [
+    0.0029,
+    0.0053
+   ],
+   "30": [
+    -0.0027,
+    0.0039
+   ],
+   "35": [
+    -0.0082,
+    0.0051
+   ]
+  },
+  "ageT": -1.63
+ },
+ "K_p": {
+  "playerSeasons": 662,
+  "perMonthAt30": [
+   -0.00029,
+   0.0009
+  ],
+  "agePerMonthPerYear": [
+   -0.000366,
+   0.000149
+  ],
+  "starterPerMonth": [
+   -0.00034,
+   0.00114
+  ],
+  "trueSlopeSd": 0.00661,
+  "seasonChange": {
+   "25": [
+    0.0092,
+    0.0071
+   ],
+   "30": [
+    -0.0018,
+    0.0054
+   ],
+   "35": [
+    -0.0127,
+    0.0069
+   ]
+  },
+  "ageT": -2.45
+ }
+}

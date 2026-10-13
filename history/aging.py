@@ -1,5 +1,5 @@
 """
-aging.py · v0.1 · 2026-10-12
+aging.py · v0.2 · 2026-10-13
 
 How each trait changes with age, read only from changes within the same players across seasons (between players, older
 men who are still in the majors are the ones who aged well, so comparing old with young flatters age). For every trait:
@@ -17,12 +17,14 @@ history/fit_through.py and history/replay_view.py use to carry a player's traits
   python3 history/aging.py [years]
 
 CHANGED
+  v0.2  HISTDATA: the data folder (season/league: every major leaguer, 2025-26)
   v0.1  first build (Joe, 2026-10-12: add an age trend to the trait projections; which traits does age move?)
 """
 import json, os, sys, math, datetime
 import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+DATA = os.environ.get('HISTDATA') or HERE   # v0.2: another folder laid out like history/
 import seasons as SE
 from seasons import FH, NH, NK
 
@@ -40,7 +42,7 @@ MEAS_KEY = {'K': ('hitter', 'K_pct'), 'BB': ('hitter', 'BB_pct'), 'chase': ('hit
 
 
 def league_shift(years):
-    L = json.load(open(os.path.join(HERE, 'league_seasons.json')))
+    L = json.load(open(os.path.join(DATA, 'league_seasons.json')))
     out = {}
     for key, (who, col, div) in LEAGUE_KEY.items():
         v = {y: L['%s_%d' % (who, y)][col] / div for y in years if col in L.get('%s_%d' % (who, y), {})}
@@ -138,13 +140,13 @@ def hidden(recs, birth, years, phi):
 
 
 def main(years):
-    recs = json.load(open(os.path.join(HERE, 'players_measured.json')))['players']
-    birth = {p['id']: p['birthDate'] for p in json.load(open(os.path.join(HERE, 'rosters.json')))['players'] if p.get('birthDate')}
-    S = json.load(open(os.path.join(HERE, 'seasons.json')))
+    recs = json.load(open(os.path.join(DATA, 'players_measured.json')))['players']
+    birth = {p['id']: p['birthDate'] for p in json.load(open(os.path.join(DATA, 'rosters.json')))['players'] if p.get('birthDate')}
+    S = json.load(open(os.path.join(DATA, 'seasons.json')))
     phi = np.array([S['hidden'][h]['phi'] for h in SE.HIDDEN])
     M = measured(recs, birth, years, S['measured'])
     H, n = hidden(recs, birth, years, phi)
-    json.dump({'years': years, 'measured': M, 'hidden': H, 'hiddenPlayers': n}, open(os.path.join(HERE, 'aging.json'), 'w'), indent=1)
+    json.dump({'years': years, 'measured': M, 'hidden': H, 'hiddenPlayers': n}, open(os.path.join(DATA, 'aging.json'), 'w'), indent=1)
     rows = []
     for k, v in M.items():
         for A in ('25', '34'):
