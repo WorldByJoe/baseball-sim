@@ -15,3 +15,5 @@ stable/league_run.raw
 
 # the diagnostic suites (tools/diag/suite.sh) and the audit runs
 diag_out/
+history/pitches/
+history/raw/
