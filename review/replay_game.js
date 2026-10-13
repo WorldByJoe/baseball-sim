@@ -1,5 +1,5 @@
 /* ============================================================================
-   replay_game.js · v0.4 · 2026-10-13
+   replay_game.js · v0.5 · 2026-10-13
 
    A postseason game played again as it was played: the real batting order with
    its substitutions (each man takes his spot at the turn he took it, at the
@@ -21,6 +21,7 @@
    'errors' (then G, the league factor): each fielder's own error tendency (review/err_mult.py); 'pitched+errors' both.
 
    CHANGED
+     v0.5  the home hitters' edge (bb_game v1.8) when review/home_edge.json turns it on; mode 'nohome' leaves it off
      v0.4  mode 'ghost' (combinable, e.g. 'ghost' or 'errors+ghost'): the regular season's runner on second in extra innings
      v0.3  mode 'errors': each fielder's own error tendency; every replay prints the errors charged to each side
      v0.2  mode 'pitched': the pitchers as they pitched that day (Joe, 2026-10-07); no tie at the 18th
@@ -29,6 +30,8 @@
 (function (A) {
   var PK = A[0], N = +A[1] || 200, SEED = +A[2] || 1, PART = +A[3] || 0, PARTS = +A[4] || 1, MODE = (A[5] || '').split('+'), PITCHED = MODE.indexOf('pitched') >= 0;
   var GHOST = MODE.indexOf('ghost') >= 0;   // mode 'ghost': the regular season's extra-innings runner on second (the postseason has none)
+  var HOMEEDGE = null; try { HOMEEDGE = JSON.parse(read('review/home_edge.json')); if (!HOMEEDGE.on) HOMEEDGE = null; } catch (e) { HOMEEDGE = null; }   // the home hitters' edge (bb_game v1.8), when review/home_edge.json turns it on
+  if (MODE.indexOf('nohome') >= 0) HOMEEDGE = null;
   // ERRORS (mode 'errors'): each fielder's own error tendency, his season errors per chance against his positions'
   // (review/err_mult.py) times one league factor G (A[6]), as errMult on his drops, fumbles and wild throws (bb_field v1.16)
   var ERR = MODE.indexOf('errors') >= 0 ? JSON.parse(read('review/err_mult.json')).players : null, GERR = +A[6] || 1;
@@ -112,7 +115,7 @@
   for (var g = 0; g < N; g++) {
     if (g % PARTS !== PART) continue;
     var ta = team('away', g % 40), th = team('home', (g * 7 + 3) % 40);
-    var GM = BBGame.simGame(ta, th, { rng: rng, env: env, rules: 'AL', ghost: GHOST, maxInnings: 60 });   // no tie: the game plays on
+    var GM = BBGame.simGame(ta, th, { rng: rng, env: env, rules: 'AL', ghost: GHOST, maxInnings: 60, homeEdge: HOMEEDGE });   // no tie: the game plays on
     print(JSON.stringify({ g: g, score: GM.score, innings: GM.finalInning, hits: GM.hits, errors: GM.errors }));
   }
 })(typeof arguments !== 'undefined' ? arguments : []);

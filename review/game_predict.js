@@ -1,5 +1,5 @@
 /* ============================================================================
-   game_predict.js · v0.1 · 2026-10-10
+   game_predict.js · v0.2 · 2026-10-13
 
    One game of a series, played many times before its first pitch: the series' teams as review/series_spec.py sets
    them (each team's latest lineup, every man at the position he started; its bullpen run by the model's manager,
@@ -12,12 +12,14 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js bb_game.js review/players.js review/game_predict.js -- SPEC GAME_INDEX AWAY_SP HOME_SP [games] [seed] [part] [parts] [G]
 
    CHANGED
+     v0.2  the home hitters' edge (bb_game v1.8) when review/home_edge.json turns it on
      v0.1  first build (Joe, 2026-10-10: pregame prediction cards for the championship series)
 ============================================================================ */
 (function (A) {
   var SPEC = A[0], K = +A[1] || 0, ASP = +A[2], HSP = +A[3], N = +A[4] || 1000, SEED = +A[5] || 1, PART = +A[6] || 0, PARTS = +A[7] || 1, GERR = A[8] ? +A[8] : 0;
   var S = JSON.parse(read(SPEC)), D = REVIEW.load(), rng = BB.makeRng(SEED * 7919 + PART * 31 + 23 + K);
   var ERR = GERR ? JSON.parse(read('review/err_mult.json')).players : null;
+  var HOMEEDGE = null; try { HOMEEDGE = JSON.parse(read('review/home_edge.json')); if (!HOMEEDGE.on) HOMEEDGE = null; } catch (e) { HOMEEDGE = null; }   // the home hitters' edge (bb_game v1.8), when review/home_edge.json turns it on
   function errOf(id) { var e = ERR && ERR[id]; return GERR * (e ? e.rel : 1); }
   var home = S.homeOf[K] === 'hi' ? S.hi : S.lo, away = home === S.hi ? S.lo : S.hi, SP = {}; SP[away] = ASP; SP[home] = HSP;
   var V = S.teams[home].venue;
@@ -45,7 +47,7 @@
   for (var g = 0; g < N; g++) {
     if (g % PARTS !== PART) continue;
     Object.keys(built).forEach(function (k) { fresh(built[k]); });
-    var GM = BBGame.simGame(team(away, g % 40), team(home, (g * 7 + 3) % 40), { rng: rng, env: env, rules: 'AL', ghost: false, maxInnings: 60 });
+    var GM = BBGame.simGame(team(away, g % 40), team(home, (g * 7 + 3) % 40), { rng: rng, env: env, rules: 'AL', ghost: false, maxInnings: 60, homeEdge: HOMEEDGE });
     print(JSON.stringify({ g: g, away: away, home: home, score: GM.score, innings: GM.finalInning, errors: GM.errors }));
   }
 })(typeof arguments !== 'undefined' ? arguments : []);

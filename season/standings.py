@@ -1,5 +1,5 @@
 """
-standings.py · v0.1 · 2026-10-13
+standings.py · v0.2 · 2026-10-13
 
 How well the season replay predicted each team's record and the standings. For every 2026 regular-season game, the home
 team's share of its replays (fold A replays the second half with traits from 2025 and the first half; fold B the first half
@@ -15,9 +15,10 @@ Against the real season:
   games      the favourite's record, the Brier score against the home team always at its season-wide rate, the logistic
              calibration slope c (1 = shares right), and the same for games between two postseason teams
 
-  python3 season/standings.py [--run 2]    -> season/standings_result[2].json
+  python3 season/standings.py [--run 2] [--sub replays_home]    -> season/standings_result[2][_home].json
 
 CHANGED
+  v0.2  --sub: another replay folder in the worktrees (replays_home: the home hitters' edge on)
   v0.1  first build (Joe, 2026-10-13: how well do we predict each team's win percentage and the final standings?)
 """
 import json, os, sys, math, urllib.request
@@ -26,6 +27,7 @@ from scipy import stats
 HERE = os.path.dirname(os.path.abspath(__file__))
 UA = {'User-Agent': 'Mozilla/5.0 (research script; CSU; baseball trait model)'}
 SUF = sys.argv[sys.argv.index('--run') + 1] if '--run' in sys.argv else ''   # '2': the rerun with the hitter fit's bounds widened
+SUB = sys.argv[sys.argv.index('--sub') + 1] if '--sub' in sys.argv else 'replays'
 FOLD = {'h2': os.path.expanduser('~/bsim-wt/hist26A' + SUF), 'h1': os.path.expanduser('~/bsim-wt/hist26B' + SUF)}
 DIV = {200: 'AL West', 201: 'AL East', 202: 'AL Central', 203: 'NL West', 204: 'NL East', 205: 'NL Central'}
 
@@ -47,7 +49,7 @@ def main():
     byid = {t['team']: t for t in St}
     games = []
     for g in sched:
-        f = os.path.join(FOLD[g['block']], 'diag_out', 'replays', '%d.jsonl' % g['pk'])
+        f = os.path.join(FOLD[g['block']], 'diag_out', SUB, '%d.jsonl' % g['pk'])
         if not os.path.exists(f): continue
         R = [json.loads(l) for l in open(f) if l.startswith('{')]
         if len(R) < 50: continue
@@ -128,7 +130,7 @@ def main():
                                                    'calib': [round(float(mp.params[1]), 2), round(float(mp.bse[1]), 2)], 'lrP': float(mp.llr_pvalue)}}
     print('games: favourite won %.1f%%; Brier %.4f vs %.4f for the home team at its rate (%.3f); calibration c %.2f (se %.2f), p %.2g; share sd %.3f' % (100 * fav, brier, brier0, hw, m.params[1], m.bse[1], m.llr_pvalue, p.std()))
     print('games between two postseason teams (%d): favourite won %.1f%%, share sd %.3f, calibration c %.2f (se %.2f), p %.2g' % (len(playoff), 100 * res['gameLevel']['betweenPostseasonTeams']['favouriteWon'], pp.std(), mp.params[1], mp.bse[1], mp.llr_pvalue))
-    json.dump(res, open(os.path.join(HERE, 'standings_result%s.json' % SUF), 'w'), indent=1)
+    json.dump(res, open(os.path.join(HERE, 'standings_result%s%s.json' % (SUF, '' if SUB == 'replays' else SUB[7:])), 'w'), indent=1)
 
 
 if __name__ == '__main__':

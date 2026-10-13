@@ -16,7 +16,7 @@ traits replaying the games they were fitted on, run 4's diag_out/replays_in) and
 p' = logistic(logit p + c_home - c_away). Scored as standings.py scores the model, against the model without it.
 And the whole season's term (both halves in sample) for where to look.
 
-  python3 season/coaching.py [run, default 4]     -> season/coaching.json
+  python3 season/coaching.py [run, default 4] [_home]     -> season/coaching[_home].json
 
 CHANGED
   v0.1  first build (Joe, 2026-10-13)
@@ -27,6 +27,7 @@ from scipy import stats
 import statsmodels.api as sm
 HERE = os.path.dirname(os.path.abspath(__file__))
 RUN = sys.argv[1] if len(sys.argv) > 1 else '4'
+SUB = sys.argv[2] if len(sys.argv) > 2 else ''   # '_home': the replays with the home hitters' edge (replays_home, replays_in_home)
 WT = {'h2': os.path.expanduser('~/bsim-wt/hist26A' + RUN), 'h1': os.path.expanduser('~/bsim-wt/hist26B' + RUN)}   # worktree that replays a half out of sample
 lg = lambda p: math.log(min(max(p, 1e-4), 1 - 1e-4) / (1 - min(max(p, 1e-4), 1 - 1e-4)))
 ex = lambda z: 1 / (1 + math.exp(-z))
@@ -84,8 +85,8 @@ def main():
         for s in ('away', 'home'): ab[G['teams'][s]['id']] = G['teams'][s]['abbrev']
     res = {'run': RUN, 'halves': {}}
     for test, train in (('h2', 'h1'), ('h1', 'h2')):
-        Pin = shares(sched, train, WT[test], 'replays_in')   # the test half's worktree holds its own training half, replayed in sample
-        Pout = shares(sched, test, WT[test], 'replays')
+        Pin = shares(sched, train, WT[test], 'replays_in' + SUB)   # the test half's worktree holds its own training half, replayed in sample
+        Pout = shares(sched, test, WT[test], 'replays' + SUB)
         T, tau2 = term([g for g in sched if g['block'] == train], Pin)
         Padj = {}
         for g in sched:
@@ -111,7 +112,7 @@ def main():
                 lab, s['teamCorr'], s['teamRmse'], s['teamSpread'], s['favouriteWon'], s['brier'], s['calib'][0], s['calib'][1]))
     # the whole season, in sample, for where to look
     Pin_all = {}
-    for test, train in (('h2', 'h1'), ('h1', 'h2')): Pin_all.update(shares(sched, train, WT[test], 'replays_in'))
+    for test, train in (('h2', 'h1'), ('h1', 'h2')): Pin_all.update(shares(sched, train, WT[test], 'replays_in' + SUB))
     T, tau2 = term(sched, Pin_all)
     res['season'] = {'tau': round(math.sqrt(tau2), 3), 'teams': {ab.get(t, str(t)): {k: round(v, 3) if isinstance(v, float) else v for k, v in d.items()} for t, d in T.items()}}
     tl = np.array([d['tally'] for d in T.values()]); te = np.array([d['tally'] - d['tallyExp'] for d in T.values()]); wm = np.array([d['w'] - d['e'] for d in T.values()])
@@ -120,7 +121,7 @@ def main():
     print('   team  tally (expected)  wins - expected  term (shrunk, log-odds)')
     for t, d in sorted(T.items(), key=lambda kv: -kv[1]['cs']):
         print('   %-4s  %+4d (%+5.1f)      %+5.1f           %+.3f' % (ab.get(t, t), d['tally'], d['tallyExp'], d['w'] - d['e'], d['cs']))
-    json.dump(res, open(os.path.join(HERE, 'coaching.json'), 'w'), indent=1)
+    json.dump(res, open(os.path.join(HERE, 'coaching%s.json' % SUB), 'w'), indent=1)
 
 
 if __name__ == '__main__':

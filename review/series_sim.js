@@ -1,5 +1,5 @@
 /* ============================================================================
-   series_sim.js · v0.2 · 2026-10-13
+   series_sim.js · v0.3 · 2026-10-13
 
    A best-of-seven series played many times before its first pitch (review/series_spec.py): each team's
    latest division series lineup, its four-man rotation in order (game k's starter is rotation[k mod 4]), its
@@ -13,6 +13,7 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js bb_game.js review/players.js review/series_sim.js -- SPEC [series] [seed] [part] [parts] [G]
 
    CHANGED
+     v0.3  the home hitters' edge (bb_game v1.8) when review/home_edge.json turns it on
      v0.2  any length: the series is as long as its home pattern (3, 5 or 7 games; first to a majority wins)
      v0.1  first build (Joe, 2026-10-08: the LCS and the World Series before Game 1)
 ============================================================================ */
@@ -20,6 +21,7 @@
   var SPEC = A[0], N = +A[1] || 100, SEED = +A[2] || 1, PART = +A[3] || 0, PARTS = +A[4] || 1, GERR = A[5] ? +A[5] : 0;
   var S = JSON.parse(read(SPEC)), D = REVIEW.load(), rng = BB.makeRng(SEED * 7919 + PART * 31 + 17);
   var ERR = GERR ? JSON.parse(read('review/err_mult.json')).players : null;
+  var HOMEEDGE = null; try { HOMEEDGE = JSON.parse(read('review/home_edge.json')); if (!HOMEEDGE.on) HOMEEDGE = null; } catch (e) { HOMEEDGE = null; }   // the home hitters' edge (bb_game v1.8), when review/home_edge.json turns it on
   function errOf(id) { var e = ERR && ERR[id]; return ERR ? GERR * (e ? e.rel : 1) : undefined; }
   var envs = {};
   function envOf(t) {   // October nights: 60 F in an open park, 72 under a roof
@@ -56,7 +58,7 @@
     var NG = S.homeOf.length, NEED = Math.ceil(NG / 2);   // best of 3, 5 or 7
     for (var g = 0; g < NG && wins[S.hi] < NEED && wins[S.lo] < NEED; g++) {
       var home = S.homeOf[g] === 'hi' ? S.hi : S.lo, away = home === S.hi ? S.lo : S.hi;
-      var GM = BBGame.simGame(team(away, home, draw[away], g), team(home, home, draw[home], g), { rng: rng, env: envOf(home), rules: 'AL', ghost: false, maxInnings: 60 });
+      var GM = BBGame.simGame(team(away, home, draw[away], g), team(home, home, draw[home], g), { rng: rng, env: envOf(home), rules: 'AL', ghost: false, maxInnings: 60, homeEdge: HOMEEDGE });
       var w = GM.score[1] > GM.score[0] ? home : away; wins[w]++;
       games.push([away, GM.score[0], home, GM.score[1], GM.finalInning]);
     }
