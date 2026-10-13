@@ -1,0 +1,396 @@
+{
+ "2025": {
+  "FF mph": {
+   "home": -0.02303,
+   "se": 0.01372,
+   "n": 226410
+  },
+  "FF vertical break in": {
+   "home": 0.0362,
+   "se": 0.01418,
+   "n": 226410
+  },
+  "FF arm-side break in": {
+   "home": -0.02646,
+   "se": 0.02183,
+   "n": 226366
+  },
+  "FF rpm": {
+   "home": 2.32672,
+   "se": 0.92612,
+   "n": 225832
+  },
+  "SI mph": {
+   "home": -0.0124,
+   "se": 0.01607,
+   "n": 110084
+  },
+  "SI vertical break in": {
+   "home": -0.00917,
+   "se": 0.02539,
+   "n": 110084
+  },
+  "SI arm-side break in": {
+   "home": -0.04844,
+   "se": 0.02454,
+   "n": 110067
+  },
+  "SI rpm": {
+   "home": 2.1899,
+   "se": 1.17737,
+   "n": 109837
+  },
+  "FC mph": {
+   "home": 0.00097,
+   "se": 0.02777,
+   "n": 53073
+  },
+  "FC vertical break in": {
+   "home": 0.00362,
+   "se": 0.04355,
+   "n": 53073
+  },
+  "FC arm-side break in": {
+   "home": -0.03172,
+   "se": 0.03962,
+   "n": 53059
+  },
+  "FC rpm": {
+   "home": 1.96167,
+   "se": 1.68272,
+   "n": 52972
+  },
+  "SL mph": {
+   "home": -0.04669,
+   "se": 0.02055,
+   "n": 102505
+  },
+  "SL vertical break in": {
+   "home": -0.02934,
+   "se": 0.0326,
+   "n": 102505
+  },
+  "SL arm-side break in": {
+   "home": -0.04607,
+   "se": 0.02574,
+   "n": 102505
+  },
+  "SL rpm": {
+   "home": 2.61847,
+   "se": 1.27496,
+   "n": 102197
+  },
+  "ST mph": {
+   "home": -0.05067,
+   "se": 0.02508,
+   "n": 54467
+  },
+  "ST vertical break in": {
+   "home": 0.00546,
+   "se": 0.04473,
+   "n": 54467
+  },
+  "ST arm-side break in": {
+   "home": -0.01521,
+   "se": 0.04862,
+   "n": 54433
+  },
+  "ST rpm": {
+   "home": 0.62967,
+   "se": 1.97763,
+   "n": 54362
+  },
+  "CU mph": {
+   "home": 0.05264,
+   "se": 0.02861,
+   "n": 46921
+  },
+  "CU vertical break in": {
+   "home": -0.02012,
+   "se": 0.03993,
+   "n": 46921
+  },
+  "CU arm-side break in": {
+   "home": 0.01203,
+   "se": 0.04249,
+   "n": 46921
+  },
+  "CU rpm": {
+   "home": 5.3438,
+   "se": 1.96831,
+   "n": 46851
+  },
+  "KC mph": {
+   "home": -0.02113,
+   "se": 0.07413,
+   "n": 13186
+  },
+  "KC vertical break in": {
+   "home": -0.02168,
+   "se": 0.08641,
+   "n": 13186
+  },
+  "KC arm-side break in": {
+   "home": 0.0362,
+   "se": 0.09362,
+   "n": 13186
+  },
+  "KC rpm": {
+   "home": 4.38102,
+   "se": 4.80584,
+   "n": 13155
+  },
+  "CH mph": {
+   "home": 0.02123,
+   "se": 0.02133,
+   "n": 73260
+  },
+  "CH vertical break in": {
+   "home": -0.02023,
+   "se": 0.03455,
+   "n": 73260
+  },
+  "CH arm-side break in": {
+   "home": 0.03782,
+   "se": 0.03573,
+   "n": 73236
+  },
+  "CH rpm": {
+   "home": 2.3158,
+   "se": 2.14279,
+   "n": 73082
+  },
+  "FS mph": {
+   "home": 0.03064,
+   "se": 0.04057,
+   "n": 23212
+  },
+  "FS vertical break in": {
+   "home": 0.10145,
+   "se": 0.08009,
+   "n": 23212
+  },
+  "FS arm-side break in": {
+   "home": -0.15002,
+   "se": 0.07978,
+   "n": 23212
+  },
+  "FS rpm": {
+   "home": 0.11404,
+   "se": 4.54,
+   "n": 23111
+  },
+  "zone rate": {
+   "home": 0.00319,
+   "se": 0.00112,
+   "n": 709909
+  },
+  "edge rate": {
+   "home": 0.00082,
+   "se": 0.001,
+   "n": 709909
+  },
+  "FF release height spread within a game in": {
+   "home": -0.0185,
+   "se": 0.00539,
+   "n": 4915
+  }
+ },
+ "2026": {
+  "FF mph": {
+   "home": -0.00287,
+   "se": 0.01426,
+   "n": 219168
+  },
+  "FF vertical break in": {
+   "home": 0.01516,
+   "se": 0.01459,
+   "n": 219169
+  },
+  "FF arm-side break in": {
+   "home": -0.02227,
+   "se": 0.02074,
+   "n": 219169
+  },
+  "FF rpm": {
+   "home": 0.79147,
+   "se": 1.03297,
+   "n": 218843
+  },
+  "SI mph": {
+   "home": -0.02832,
+   "se": 0.01575,
+   "n": 118801
+  },
+  "SI vertical break in": {
+   "home": 0.02431,
+   "se": 0.023,
+   "n": 118801
+  },
+  "SI arm-side break in": {
+   "home": -0.01443,
+   "se": 0.02346,
+   "n": 118801
+  },
+  "SI rpm": {
+   "home": -0.65681,
+   "se": 1.16325,
+   "n": 118529
+  },
+  "FC mph": {
+   "home": -0.04496,
+   "se": 0.02679,
+   "n": 57248
+  },
+  "FC vertical break in": {
+   "home": 0.06131,
+   "se": 0.03957,
+   "n": 57248
+  },
+  "FC arm-side break in": {
+   "home": -0.00079,
+   "se": 0.03578,
+   "n": 57248
+  },
+  "FC rpm": {
+   "home": -3.03455,
+   "se": 1.66815,
+   "n": 57143
+  },
+  "SL mph": {
+   "home": 0.007,
+   "se": 0.02191,
+   "n": 93539
+  },
+  "SL vertical break in": {
+   "home": -0.03899,
+   "se": 0.03273,
+   "n": 93540
+  },
+  "SL arm-side break in": {
+   "home": -0.04439,
+   "se": 0.02496,
+   "n": 93540
+  },
+  "SL rpm": {
+   "home": 0.64005,
+   "se": 1.49138,
+   "n": 93455
+  },
+  "ST mph": {
+   "home": -0.02699,
+   "se": 0.02434,
+   "n": 59340
+  },
+  "ST vertical break in": {
+   "home": 0.01366,
+   "se": 0.04201,
+   "n": 59340
+  },
+  "ST arm-side break in": {
+   "home": -0.01346,
+   "se": 0.04925,
+   "n": 59340
+  },
+  "ST rpm": {
+   "home": -2.01556,
+   "se": 1.98185,
+   "n": 59263
+  },
+  "CU mph": {
+   "home": 0.02168,
+   "se": 0.02672,
+   "n": 45409
+  },
+  "CU vertical break in": {
+   "home": -0.02054,
+   "se": 0.03896,
+   "n": 45409
+  },
+  "CU arm-side break in": {
+   "home": 0.00205,
+   "se": 0.04051,
+   "n": 45409
+  },
+  "CU rpm": {
+   "home": 0.55635,
+   "se": 1.95529,
+   "n": 45365
+  },
+  "KC mph": {
+   "home": -0.06083,
+   "se": 0.07174,
+   "n": 11689
+  },
+  "KC vertical break in": {
+   "home": 0.0408,
+   "se": 0.09521,
+   "n": 11689
+  },
+  "KC arm-side break in": {
+   "home": 0.08279,
+   "se": 0.10259,
+   "n": 11689
+  },
+  "KC rpm": {
+   "home": 0.60904,
+   "se": 4.60154,
+   "n": 11669
+  },
+  "CH mph": {
+   "home": -0.00865,
+   "se": 0.02218,
+   "n": 79841
+  },
+  "CH vertical break in": {
+   "home": -0.01221,
+   "se": 0.0343,
+   "n": 79841
+  },
+  "CH arm-side break in": {
+   "home": -0.01686,
+   "se": 0.03153,
+   "n": 79841
+  },
+  "CH rpm": {
+   "home": -2.40132,
+   "se": 2.19405,
+   "n": 79736
+  },
+  "FS mph": {
+   "home": 0.04127,
+   "se": 0.04655,
+   "n": 23080
+  },
+  "FS vertical break in": {
+   "home": -0.06424,
+   "se": 0.07606,
+   "n": 23080
+  },
+  "FS arm-side break in": {
+   "home": 0.04693,
+   "se": 0.07676,
+   "n": 23080
+  },
+  "FS rpm": {
+   "home": 4.9949,
+   "se": 4.63026,
+   "n": 23032
+  },
+  "zone rate": {
+   "home": 0.00184,
+   "se": 0.00113,
+   "n": 714114
+  },
+  "edge rate": {
+   "home": 2e-05,
+   "se": 0.001,
+   "n": 714114
+  },
+  "FF release height spread within a game in": {
+   "home": -0.00483,
+   "se": 0.00539,
+   "n": 5031
+  }
+ }
+}
