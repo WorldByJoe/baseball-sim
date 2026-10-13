@@ -1,32 +1,22 @@
 """
-replay_grids.py · v0.13 · 2026-10-12
+replay_grids.py · v0.14 · 2026-10-12
 
-The division series score grids: each finished game's replays (review/replay_game.js,
-diag_out/replays/<pk>.jsonl) as a table of one team's runs (columns) against the other's
-(rows), each cell the number of replays that ended at that score, shaded by count, the real
-final starred, and the replays in the cell that went to extra innings counted in its corner.
-Within a series the same team keeps the columns (Game 1's visitor), so the grids line up.
+The postseason score grids: each finished game's replays (review/replay_game.js, diag_out/replays*/<pk>.jsonl, one
+directory per setting) as a row of four columns, one per setting. Each column holds a table of one team's runs (columns)
+against the other's (rows), 0 to 10 or more, each cell the number of replays that ended at that score, shaded by count,
+the real final starred; and two histograms, the total runs and the home team's runs minus the away team's. Within a
+series the same team keeps the columns (Game 1's visitor), so the grids line up.
 
   python3 review/replay_grids.py OUT.html            (for the artifact)
   python3 review/replay_grids.py OUT.html --page     (a whole document, for GitHub Pages)
 
 CHANGED
+  v0.14 each game a row of four columns, one per setting, each labelled with its assumptions; grids capped at 10+;
+        under each grid, histograms of total runs and of home runs minus away runs (Joe, 2026-10-12)
   v0.13 newest games first; the game-pick regression sits under the forecast, below the switch it follows (Joe, 2026-10-12)
   v0.12 a series with only a prediction gets its band; only an assumed starter is marked (review/predict_next.py)
   v0.11 the championship series' games join the grids (best of seven in the series picks)
   v0.10 the regression follows the switch: one fit and figure per setting; its verdict on significance computed
-  v0.9  a fourth set: the pitching as it was that day AND each fielder's own error rate together (replay_game.js
-        mode 'pitched+errors', diag_out/replays_both)
-  v0.8  the ALCS against either AL Central team while their fifth game is to come (the pennant over three teams, each ALCS
-        weighted by the model's call of the game); once it is played, the winner's ALCS
-  v0.7  the couch companion (live/) as a third view: live on GitHub Pages, its replay inside the artifact (published with live/ beside it)
-  v0.6  a game not yet played shows its prediction before first pitch (diag_out/predict, review/pregame.js) as a card of its own; once played, its card says what the prediction gave
-  v0.5  the LCS and World Series forecast (review/series_forecast.json); the trait map as a second view; --page for GitHub Pages
-  v0.4  the series picks: each series' chance for its winner from the replays' game chances, per set; the favourite's games won
-  v0.3  a third set, each fielder's own error tendency (replay_game.js mode 'errors'); errors in the tallies and captions
-  v0.2  two sets a reader flips between: the regular season's pitching and the pitching as it was that day
-        (review/replay_game.js mode 'pitched'), on shared axes and colours; a game shows once both sets exist
-  v0.1  first build (Joe, 2026-10-07)
 """
 import json, sys, html, datetime, os
 
@@ -53,41 +43,137 @@ def load(pk):
     return G, R
 
 
-def table(R, ci, ri, n_c, n_r, top, real, colTeam, rowTeam, cn, rn, home, num, key):
-    cnt = [[0] * (n_c + 1) for _ in range(n_r + 1)]; ext = [[0] * (n_c + 1) for _ in range(n_r + 1)]
+CAP, TCAP, MCAP = 10, 20, 10   # score grids run 0 to '10+'; total runs 0 to '20+'; the margin '10+' either way
+PANEL = {   # each setting's name and its assumptions, as the label over its column
+    'season': ('Regular-season pitching', "Each pitcher at his regular-season speeds and pitch mix; every fielder at the model's default error rate."),
+    'pitched': ('Pitching as it was that day', "Each pitcher at the speeds and pitch mix he had that day; every fielder at the model's default error rate."),
+    'errors': ("Fielders' own error rates", 'Each pitcher at his regular-season speeds and pitch mix; each fielder at his own regular-season error rate.'),
+    'both': ('Both together', 'Each pitcher at the speeds and pitch mix he had that day; each fielder at his own regular-season error rate.'),
+}
+
+
+def cells(R, ci, ri):
+    c = {}
+    for r in R: k = (min(CAP, r['score'][ci]), min(CAP, r['score'][ri])); c[k] = c.get(k, 0) + 1
+    return c
+
+
+def lab(v, cap=CAP): return '%d+' % cap if v >= cap else str(v)
+
+
+def table(R, ci, ri, top, real, colTeam, rowTeam, cn, rn, home, num, key):
+    cnt = [[0] * (CAP + 1) for _ in range(CAP + 1)]; ext = [[0] * (CAP + 1) for _ in range(CAP + 1)]
     for r in R:
-        c, w = r['score'][ci], r['score'][ri]
+        c, w = min(CAP, r['score'][ci]), min(CAP, r['score'][ri])
         cnt[w][c] += 1
         if r['innings'] > 9: ext[w][c] += 1
-    N = len(R)
-    out = ['<table class="grid" data-set="%s" aria-label="Game %d replays (%s): %s runs across, %s runs down">' % (key, num, SET_NAME[key], cn, rn),
-           '<thead><tr><th class="corner" rowspan="2" colspan="2"></th><th class="axis" colspan="%d">%s runs%s</th></tr><tr>' % (n_c + 1, cn, ' (home)' if colTeam == home else ''),
-           ''.join('<th class="c">%d</th>' % c for c in range(n_c + 1)), '</tr></thead><tbody>']
-    for w in range(n_r + 1):
+    N = len(R); rc = {t: (min(CAP, v) if v >= 0 else -1) for t, v in real.items()}
+    out = ['<table class="grid" aria-label="Game %d replays (%s): %s runs across, %s runs down">' % (num, SET_NAME[key], cn, rn),
+           '<colgroup><col class="cs"><col class="cr">' + '<col>' * (CAP + 1) + '</colgroup>',
+           '<thead><tr><th class="corner" rowspan="2" colspan="2"></th><th class="axis" colspan="%d">%s runs%s</th></tr><tr>' % (CAP + 1, cn, ' (home)' if colTeam == home else ''),
+           ''.join('<th class="c">%s</th>' % lab(c) for c in range(CAP + 1)), '</tr></thead><tbody>']
+    for w in range(CAP + 1):
         row = ['<tr>']
-        if w == 0: row.append('<th class="axis side" rowspan="%d"><span>%s runs%s</span></th>' % (n_r + 1, rn, ' (home)' if rowTeam == home else ''))
-        row.append('<th class="r">%d</th>' % w)
-        for c in range(n_c + 1):
+        if w == 0: row.append('<th class="axis side" rowspan="%d"><span>%s runs%s</span></th>' % (CAP + 1, rn, ' (home)' if rowTeam == home else ''))
+        row.append('<th class="r">%s</th>' % lab(w))
+        for c in range(CAP + 1):
             k, e = cnt[w][c], ext[w][c]
-            star = (c == real[colTeam] and w == real[rowTeam])
+            tie = c == w and c < CAP   # 10+ against 10+ can still be decided
+            star = (c == rc[colTeam] and w == rc[rowTeam])
             cls = []
-            if c == w: cls.append('tie')
+            if tie: cls.append('tie')
             t = k / top if top else 0
             if k and t >= 0.5: cls.append('hot')
             if star: cls.append('real')
-            tip = '%s %d, %s %d: %s of %s replays' % (cn, c, rn, w, f'{k:,}', f'{N:,}') + (', %d in extra innings' % e if e else '') + (' (the real final)' if star else '')
-            if c == w: tip = 'A game cannot end tied'
+            tip = 'A game cannot end tied' if tie else '%s %s, %s %s: %s of %s replays' % (cn, lab(c), rn, lab(w), f'{k:,}', f'{N:,}') + (', %d in extra innings' % e if e else '') + (' (the real final)' if star else '')
             style = ' style="--t:%.3f"' % t if k else ''
-            inner = ('<span class="n">%d</span>' % k if k else '') + ('<span class="star" aria-label="real final">★</span>' if star else '') + ('<span class="x">x%d</span>' % e if e else '')
+            inner = ('<span class="n">%d</span>' % k if k else '') + ('<span class="star" aria-label="real final">★</span>' if star else '')
             row.append('<td class="%s"%s title="%s">%s</td>' % (' '.join(cls), style, html.escape(tip), inner))
         row.append('</tr>'); out.append(''.join(row))
     out.append('</tbody></table>')
     return ''.join(out)
 
 
+def hist(vals, lo, hi, ymax, real, N, kind, away, home):
+    """Bars, one a run: total runs (kind 'total') or the home team's runs minus the away team's ('margin'; there is no 0, since no
+    game ends tied). The real game's value outlined and starred; every bar's count in its tooltip."""
+    W, H, T, B, L = 280, 92, 13, 30, 4
+    n = hi - lo + 1; bw = (W - 2 * L) / n; ph = H - T - B; base = T + ph
+    cnt = {}
+    for v in vals: cnt[v] = cnt.get(v, 0) + 1
+    def name(v):
+        if kind == 'total': return '%s runs' % lab(v, TCAP)
+        return '%s by %s' % (NICK[home] if v > 0 else NICK[away], lab(abs(v), MCAP))
+    what = 'total runs' if kind == 'total' else 'home runs minus away runs'
+    g = ['<svg class="hist" viewBox="0 0 %d %d" role="img" aria-label="%s across the replays">' % (W, H, what)]
+    for v in range(lo, hi + 1):
+        k = cnt.get(v, 0)
+        if not k: continue
+        h = max(1.0, ph * k / ymax); x = L + (v - lo) * bw
+        cls = 'bar' + (' away' if kind == 'margin' and v < 0 else '') + (' real' if v == real else '')
+        g.append('<rect class="%s" x="%.1f" y="%.1f" width="%.1f" height="%.1f" rx="1"><title>%s: %s of %s replays</title></rect>' % (
+            cls, x + 0.8, base - h, bw - 1.6, h, html.escape(name(v)), f'{k:,}', f'{N:,}'))
+    g.append('<line class="base" x1="%d" x2="%d" y1="%.1f" y2="%.1f"/>' % (L, W - L, base + 0.5, base + 0.5))
+    if real is not None:
+        k = cnt.get(real, 0); h = ph * k / ymax if k else 0
+        g.append('<text class="rs" x="%.1f" y="%.1f" text-anchor="middle">★<title>The real game: %s</title></text>' % (L + (real - lo + 0.5) * bw, base - h - 2, html.escape(name(real))))
+    ticks = (0, 5, 10, 15, 20) if kind == 'total' else (-10, -5, 0, 5, 10)
+    for v in ticks:
+        x = L + (v - lo + 0.5) * bw
+        g.append('<text class="tk" x="%.1f" y="%.1f" text-anchor="middle">%s</text>' % (x, base + 12, lab(abs(v), TCAP if kind == 'total' else MCAP)))
+    if kind == 'margin':
+        g.append('<text class="sd" x="%d" y="%d" text-anchor="start">&#8592; %s won</text><text class="sd" x="%d" y="%d" text-anchor="end">%s won &#8594;</text>' % (
+            L, H - 3, NICK[away], W - L, H - 3, NICK[home]))
+    else:
+        g.append('<text class="sd" x="%d" y="%d" text-anchor="middle">runs by both teams</text>' % (W // 2, H - 3))
+    g.append('</svg>')
+    return ''.join(g)
+
+
+def panels(RS, ab, ci, ri, real, colTeam, rowTeam, num, preds=None, word='Replays'):
+    """A game's row: one column per setting, each labelled with its assumptions, holding its score grid, its tally and its two
+    histograms. Every column shares its game's scales, so the four compare at a glance. A setting with no runs (game-day
+    pitching before the game is played) keeps its place, empty."""
+    cn, rn = NICK[colTeam], NICK[rowTeam]; home, away = ab['home'], ab['away']
+    have = [k for k, _ in SETS if k in RS]
+    top = max(max(cells(RS[k], ci, ri).values()) for k in have)
+    tot = {k: [min(TCAP, r['score'][0] + r['score'][1]) for r in RS[k]] for k in have}
+    mar = {k: [max(-MCAP, min(MCAP, r['score'][1] - r['score'][0])) for r in RS[k]] for k in have}
+    def peak(vs):
+        c = {}
+        for v in vs: c[v] = c.get(v, 0) + 1
+        return max(c.values())
+    tmax = max(peak(v) for v in tot.values()); mmax = max(peak(v) for v in mar.values())
+    played = real[away] >= 0
+    rt = min(TCAP, real[away] + real[home]) if played else None
+    rm = max(-MCAP, min(MCAP, real[home] - real[away])) if played else None
+    def by(m): return 'even' if abs(m) < 0.05 else '%s by %.1f' % (NICK[home] if m > 0 else NICK[away], abs(m))
+    out = ['<div class="panels">']
+    for key, _ in SETS:
+        name, how = PANEL[key]
+        if key not in RS:
+            out.append('<section class="panel empty" data-col="%s"><header><h4>%s</h4><p class="how">%s</p></header>'
+                       '<p class="na">There is no game-day pitching before a game is played; this setting is filled in after it.</p></section>' % (key, name, html.escape(how)))
+            continue
+        R = RS[key]; N = len(R)
+        colWins = sum(1 for r in R if r['score'][ci] > r['score'][ri]); extras = sum(1 for r in R if r['innings'] > 9)
+        runs = sum(sum(r['score']) for r in R) / N / 2; ers = sum(sum(r.get('errors', [0, 0])) for r in R) / N / 2
+        tally = '%s won: %s %s, %s %s. %s in extra innings. %.1f runs and %.2f errors a team.' % (word, cn, f'{colWins:,}', rn, f'{N - colWins:,}', f'{extras:,}', runs, ers)
+        pl = ('<br><span class="pre">%s</span>' % preds[key]) if preds and key in preds else ''
+        mt = sum(r['score'][0] + r['score'][1] for r in R) / N; mm = sum(r['score'][1] - r['score'][0] for r in R) / N
+        out.append('<section class="panel" data-col="%s"><header><h4>%s</h4><p class="how">%s</p></header>' % (key, name, html.escape(how))
+                   + '<div class="gbox">%s</div>' % table(R, ci, ri, top, real, colTeam, rowTeam, cn, rn, home, num, key)
+                   + '<p class="tally">%s%s</p>' % (tally, pl)
+                   + '<div class="hbox"><p class="hh"><b>Total runs</b><span>average %.1f%s</span></p>%s</div>' % (mt, ' &middot; real %d' % (real[away] + real[home]) if played else '', hist(tot[key], 0, TCAP, tmax, rt, N, 'total', away, home))
+                   + '<div class="hbox"><p class="hh"><b>Home runs minus away runs</b><span>average %s%s</span></p>%s</div>' % (by(mm), ' &middot; real %s' % by(real[home] - real[away]).replace('.0', '') if played else '', hist(mar[key], -MCAP, MCAP, mmax, rm, N, 'margin', away, home))
+                   + '</section>')
+    out.append('</div>')
+    return ''.join(out)
+
+
 def load_pred(pk):
-    """A game's prediction before first pitch, if one was run: its notes and its simulations per set (no game-day pitching
-    exists before a game, so the as-pitched set shows the regular-season one)."""
+    """A game's prediction before first pitch, if one was run: its notes and its simulations in the two settings it can
+    have (no game-day pitching exists before a game)."""
     import glob
     meta = 'diag_out/predict/%d.json' % pk
     if not os.path.exists(meta): return None, None
@@ -95,19 +181,18 @@ def load_pred(pk):
     for key in ('season', 'errors'):
         RS[key] = [json.loads(l) for f in sorted(glob.glob('diag_out/predict/%d_%s_*.jsonl' % (pk, key))) for l in open(f) if l.startswith('{')]
     if not all(RS.values()): return None, None
-    RS = {'season': RS['season'], 'pitched': RS['season'], 'errors': RS['errors'], 'both': RS['errors']}
     return M, RS
 
 
-def pred_line(pk, ab):
-    """After the game: what the prediction before first pitch gave each side, per set."""
+def pred_lines(pk, ab):
+    """After the game: what the prediction before first pitch gave each side, in the settings it ran."""
     M, RS = load_pred(pk)
-    if not M: return ''
-    out = []
+    if not M: return {}
+    out = {}
     for key, R in RS.items():
         hw = sum(1 for r in R if r['score'][1] > r['score'][0]) / len(R)
-        out.append('<p class="tally pred" data-set="%s">Before first pitch the model gave %s %.0f%%, %s %.0f%%.</p>' % (key, NICK[ab['home']], 100 * hw, NICK[ab['away']], 100 * (1 - hw)))
-    return ''.join(out)
+        out[key] = 'Before first pitch the model gave %s %.0f%%, %s %.0f%%.' % (NICK[ab['home']], 100 * hw, NICK[ab['away']], 100 * (1 - hw))
+    return out
 
 
 def starters_text(M, ab):
@@ -120,33 +205,15 @@ def starters_text(M, ab):
 
 
 def pred_grid(pk, num, date, colTeam, rowTeam):
-    """A game not yet played: its simulations before first pitch as a score grid, no star (there is no final yet)."""
+    """A game not yet played: its simulations before first pitch, no star (there is no final yet)."""
     M, RS = load_pred(pk)
     ab = {'away': M['away'], 'home': M['home']}; side = {ab['away']: 0, ab['home']: 1}
-    ci, ri = side[colTeam], side[rowTeam]
-    allR = [r for R in RS.values() for r in R]
-    n_c = max(r['score'][ci] for r in allR); n_r = max(r['score'][ri] for r in allR)
-    top = 0
-    for R in RS.values():
-        c = {}
-        for r in R: k = (r['score'][ci], r['score'][ri]); c[k] = c.get(k, 0) + 1
-        top = max(top, max(c.values()))
     home = ab['home']; d = datetime.date.fromisoformat(date); when = d.strftime('%b ') + str(d.day)
-    cn, rn = NICK[colTeam], NICK[rowTeam]
-    st = M['starters']
     out = ['<figure class="game pred" id="g%d">' % pk,
            '<figcaption><h3>Game %d <span class="when">%s · at %s</span> <span class="badge">Prediction</span></h3>' % (num, when, html.escape(NICK[home])),
-           '<p class="final">Not yet played. %s; %s.</p>' % (starters_text(M, ab), html.escape(M.get('lineups', 'lineups from the last game')))]
-    for key, R in RS.items():
-        N = len(R); colWins = sum(1 for r in R if r['score'][ci] > r['score'][ri]); extras = sum(1 for r in R if r['innings'] > 9)
-        runs = sum(sum(r['score']) for r in R) / N / 2
-        extra = (' There is no game-day pitching before a game is played, so this view shows the regular-season setting.' if key == 'pitched' else
-                 ' There is no game-day pitching before a game is played, so this view shows the fielders\' own error rates with regular-season pitching.' if key == 'both' else '')
-        out.append('<p class="tally" data-set="%s">Simulations won: %s %s, %s %s · %s went to extra innings · %.1f runs a team on average.%s</p>' % (
-            key, cn, f'{colWins:,}', rn, f'{N - colWins:,}', f'{extras:,}', runs, extra))
-    out.append('</figcaption><div class="scroll">')
-    for key, R in RS.items(): out.append(table(R, ci, ri, n_c, n_r, top, {colTeam: -1, rowTeam: -1}, colTeam, rowTeam, cn, rn, home, num, key))
-    out.append('</div></figure>')
+           '<p class="final">Not yet played. %s; %s.</p></figcaption>' % (starters_text(M, ab), html.escape(M.get('lineups', 'lineups from the last game'))),
+           panels(RS, ab, side[colTeam], side[rowTeam], {colTeam: -1, rowTeam: -1}, colTeam, rowTeam, num, word='Simulations'),
+           '</figure>']
     return '\n'.join(out)
 
 
@@ -154,15 +221,7 @@ def grid(pk, num, date, colTeam, rowTeam):
     G, RS = load(pk)
     ab = {'away': G['teams']['away']['abbrev'], 'home': G['teams']['home']['abbrev']}
     side = {ab['away']: 0, ab['home']: 1}   # index into a replay's score [away, home]
-    ci, ri = side[colTeam], side[rowTeam]
     real = {ab['away']: G['final']['away'], ab['home']: G['final']['home']}
-    allR = [r for R in RS.values() for r in R]   # both sets share the axes and the colour scale, so a flip shows the change
-    n_c = max(max(r['score'][ci] for r in allR), real[colTeam]); n_r = max(max(r['score'][ri] for r in allR), real[rowTeam])
-    top = 0
-    for R in RS.values():
-        c = {}
-        for r in R: k = (r['score'][ci], r['score'][ri]); c[k] = c.get(k, 0) + 1
-        top = max(top, max(c.values()))
     feed = json.load(open('playoffs/games/%d_feed.json' % pk)); lsc = feed['liveData']['linescore']['teams']
     errs = {ab['away']: lsc['away']['errors'], ab['home']: lsc['home']['errors']}
     home = ab['home']; d = datetime.date.fromisoformat(date)
@@ -172,17 +231,10 @@ def grid(pk, num, date, colTeam, rowTeam):
     loser = rowTeam if winner == colTeam else colTeam
     out = ['<figure class="game" id="g%d">' % pk,
            '<figcaption><h3>Game %d <span class="when">%s · at %s</span></h3>' % (num, when, html.escape(NICK[home])),
-           '<p class="final">Final: %s %d, %s %d <span class="errs">· errors: %s %d, %s %d</span></p>' % (NICK[winner], real[winner], NICK[loser], real[loser],
-               cn, errs[colTeam], rn, errs[rowTeam])]
-    for key, R in RS.items():
-        N = len(R); colWins = sum(1 for r in R if r['score'][ci] > r['score'][ri]); extras = sum(1 for r in R if r['innings'] > 9)
-        runs = sum(sum(r['score']) for r in R) / N / 2; ers = sum(sum(r.get('errors', [0, 0])) for r in R) / N / 2
-        out.append('<p class="tally" data-set="%s">Replays won: %s %s, %s %s · %s went to extra innings · %.1f runs and %.2f errors a team on average</p>' % (
-            key, cn, f'{colWins:,}', rn, f'{N - colWins:,}', f'{extras:,}', runs, ers))
-    out.append(pred_line(pk, ab))
-    out.append('</figcaption><div class="scroll">')
-    for key, R in RS.items(): out.append(table(R, ci, ri, n_c, n_r, top, real, colTeam, rowTeam, cn, rn, home, num, key))
-    out.append('</div></figure>')
+           '<p class="final">Final: %s %d, %s %d <span class="errs">· errors: %s %d, %s %d</span></p></figcaption>' % (NICK[winner], real[winner], NICK[loser], real[loser],
+               cn, errs[colTeam], rn, errs[rowTeam]),
+           panels(RS, ab, side[colTeam], side[rowTeam], real, colTeam, rowTeam, num, preds=pred_lines(pk, ab)),
+           '</figure>']
     return '\n'.join(out)
 
 

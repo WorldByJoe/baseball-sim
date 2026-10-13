@@ -52,7 +52,7 @@ header p { margin: 0; }
 .series { display: flex; flex-direction: column; gap: 14px; min-width: 0; }   /* min-width 0: a wide table scrolls inside its box instead of widening the page */
 .series h2 { font-family: var(--f-display); font-weight: 600; font-size: 26px; margin: 0; display: flex; align-items: baseline; gap: 10px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
 .tag { font-family: var(--f-data); font-size: 12px; letter-spacing: 0.08em; color: var(--muted); font-weight: 400; }
-.games { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+.games { display: flex; flex-direction: column; gap: 18px; }
 .game { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 10px; min-width: 0; max-width: 100%; }
 figcaption { display: flex; flex-direction: column; gap: 2px; }
 .game h3 { font-family: var(--f-display); font-weight: 600; font-size: 20px; margin: 0; }
@@ -60,22 +60,49 @@ figcaption { display: flex; flex-direction: column; gap: 2px; }
 .final { margin: 0; font-weight: 600; }
 .tally { margin: 0; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .scroll { overflow-x: auto; max-width: 100%; }
-table.grid { border-collapse: separate; border-spacing: 2px; margin: 8px 0 0 8px; font-family: var(--f-data); font-variant-numeric: tabular-nums; }
-.grid th { font-weight: 400; color: var(--muted); font-size: 11px; padding: 0; }
-.grid th.c { height: 18px; text-align: center; }
-.grid th.r { width: 20px; text-align: right; padding-right: 4px; }
-.grid th.axis { font-family: var(--f-body); font-size: 12px; font-weight: 600; color: var(--ink); text-align: left; padding: 0 0 3px 2px; letter-spacing: 0.02em; }
-.grid th.side { width: 18px; padding: 0 2px 0 0; vertical-align: middle; }
+table.grid { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 1.5px; margin: 0; font-family: var(--f-data); font-variant-numeric: tabular-nums; }
+.grid col.cs { width: 15px; }
+.grid col.cr { width: 23px; }
+.grid th { font-weight: 400; color: var(--muted); font-size: 10px; padding: 0; }
+.grid th.c { height: 16px; text-align: center; }
+.grid th.r { text-align: right; padding-right: 3px; }
+.grid th.axis { font-family: var(--f-body); font-size: 11.5px; font-weight: 600; color: var(--ink); text-align: left; padding: 0 0 2px 2px; letter-spacing: 0.02em; white-space: nowrap; }
+.grid th.side { padding: 0 1px 0 0; vertical-align: middle; }
 .grid th.side span { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; display: inline-block; }
-.grid td { position: relative; width: 30px; min-width: 30px; height: 28px; padding: 0; text-align: center; font-size: 11.5px; color: var(--on-cool);
+.grid td { position: relative; height: 20px; padding: 0; text-align: center; font-size: 9.5px; color: var(--on-cool);
   background: color-mix(in oklab, var(--heat-hi) calc(var(--t, 0) * 100%), var(--heat-lo)); border-radius: 2px; }
 .grid td:not([style]) { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
 .grid td.tie { background: var(--tie); box-shadow: none; }
 .grid td.hot { color: var(--on-hot); }
-.grid td.real { box-shadow: inset 0 0 0 2.5px var(--star-ring); }
-.grid td .star { position: absolute; top: -8px; left: -6px; z-index: 1; font-size: 17px; color: var(--star); line-height: 1; text-shadow: 0 0 1px var(--star-ring), 0 0 3px var(--panel), 0 0 3px var(--panel); }
-.grid td .x { position: absolute; right: 2px; bottom: 0; font-size: 8.5px; line-height: 1.1; opacity: 0.85; }
+.grid td.real { box-shadow: inset 0 0 0 2px var(--star-ring); }
+.grid td .star { position: absolute; top: -7px; left: -5px; z-index: 1; font-size: 13px; color: var(--star); line-height: 1; text-shadow: 0 0 1px var(--star-ring), 0 0 3px var(--panel), 0 0 3px var(--panel); }
 .grid td .n { position: relative; top: 1px; }
+/* a game's row: one column per setting (four across on a wide screen, two on a tablet, one on a phone); subgrid keeps the
+   labels, grids, tallies and histograms of the columns side by side on one line each */
+.panels { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 262px), 1fr)); gap: 14px 12px; }
+.panel { display: grid; grid-row: span 5; grid-template-rows: subgrid; row-gap: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 4px; min-width: 0; }
+.panel header { display: flex; flex-direction: column; gap: 2px; }
+.panel h4 { font-family: var(--f-display); font-weight: 600; font-size: 16.5px; margin: 0; letter-spacing: 0.01em; }
+.panel .how { margin: 0; font-size: 12px; line-height: 1.35; color: var(--muted); }
+.panel .tally { font-size: 12px; line-height: 1.4; }
+.panel .pre { color: var(--ink); }
+.panel.empty { border-style: dashed; }
+.panel.empty .na { grid-row: span 4; align-self: center; margin: 0; padding: 0 10px; font-size: 12.5px; color: var(--muted); text-align: center; }
+.hbox { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.hh { margin: 0; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 8px; font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.hh b { font-weight: 600; color: var(--ink); }
+svg.hist { width: 100%; height: auto; display: block; font-family: var(--f-data); }
+svg.hist .bar { fill: var(--heat-hi); }
+svg.hist .bar.away { fill: color-mix(in oklab, var(--heat-hi) 45%, var(--heat-lo)); }
+svg.hist .bar.real { stroke: var(--star-ring); stroke-width: 1.5; }
+svg.hist .bar:hover { fill: var(--star); }
+svg.hist .base { stroke: var(--muted); stroke-width: 1; }
+svg.hist .rs { fill: var(--star); font-size: 12px; }
+svg.hist .tk { fill: var(--muted); font-size: 9.5px; }
+svg.hist .sd { fill: var(--muted); font-size: 9.5px; font-family: var(--f-body); }
+.wrap[data-show="season"] .panel[data-col="season"], .wrap[data-show="pitched"] .panel[data-col="pitched"], .wrap[data-show="errors"] .panel[data-col="errors"], .wrap[data-show="both"] .panel[data-col="both"] { border-color: var(--heat-hi); box-shadow: inset 0 0 0 1px var(--heat-hi); }
+.mini { display: inline-flex; align-items: flex-end; gap: 1.5px; height: 14px; }
+.mini i { display: block; width: 4px; background: var(--heat-hi); border-radius: 1px 1px 0 0; }
 .switch { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 12px 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
 .seg button { font: 600 14px var(--f-body); padding: 7px 14px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
@@ -167,7 +194,7 @@ footer p { margin: 0; }
     <span class="eyebrow">2026 postseason · baseball-sim engine v3.9</span>
     <h1>Postseason Replays</h1>
     <p>This page asks how likely each real postseason result was. Each postseason game finished so far was played again 1,000 times by a simulation that plays every pitch from the players' traits. The traits come in two kinds: measured ones, taken straight from Statcast and held fixed, such as how fast a hitter swings and how hard a pitcher throws each pitch; and fitted ones, hidden qualities inferred from a hitter's statistics, such as how well he reads a pitch and how steady his timing is (the trait map lists them all). Each replay kept what the real game had: the batting order, each substitute entering at the turn he really took, and the real pitchers in their real order, each facing as many batters as he faced. Two things varied from replay to replay: the pitch-by-pitch chance of the game itself, and a fresh draw of every hitter's fitted traits from the range his statistics leave open. The spread of scores therefore includes what is not known about the players as well as the luck of the game.</p>
-    <p>The page opens with the model's forecast for the League Championship Series and the World Series, made before Game 1 of each, and a check on whether the replays picked the game winners. Then come the replays themselves: a score grid for every game, newest first, and a check on whether they picked the series winners. The switch at the top opens the trait map, which lists every trait, ability and engine constant behind these games and where each value came from.</p>
+    <p>The page opens with the model's forecast for the League Championship Series and the World Series, made before Game 1 of each, and a check on whether the replays picked the game winners. Then come the replays themselves, newest first: for every game a row of four score grids, one for each setting, each with histograms of the total runs and the winning margin; and a check on whether the replays picked the series winners. The switch at the top opens the trait map, which lists every trait, ability and engine constant behind these games and where each value came from.</p>
     <nav class="jump" aria-label="On this page"><a href="#forecast">The LCS and World Series forecast</a><a href="#regression">Game picks</a><a href="#legend">Score grids</a><a href="#picks">Series picks</a></nav>
   </header>
 
@@ -191,18 +218,19 @@ footer p { margin: 0; }
 <!--REGRESSION-->
 
   <div class="howto" id="legend">
-      <span class="k">Across: one team's runs. Down: the other's. Each cell counts how many of the 1,000 replays ended at that score.</span>
+      <span class="k">Each game has one column per setting. In its score grid, across is one team's runs and down the other's; each cell counts how many of the 1,000 replays ended at that score, and scores of 10 or more share the last row and column.</span>
       <span class="k"><span class="ramp" aria-hidden="true"></span> fewer to more replays</span>
       <span class="k"><span class="chip star" aria-hidden="true">★</span> the real final</span>
-      <span class="k"><span class="chip x" aria-hidden="true">x4</span> 4 of the cell's replays went to extra innings</span>
       <span class="k"><span class="chip tie" aria-hidden="true"></span> a tie: no game ends there</span>
+      <span class="k"><span class="mini" aria-hidden="true"><i style="height:4px"></i><i style="height:9px"></i><i style="height:14px"></i><i style="height:8px"></i><i style="height:3px"></i></span> under each grid, one bar a run: the total runs of both teams, and the home team's runs minus the away team's (the star marks the real game)</span>
+      <span class="k">The switch outlines its setting in every game.</span>
     </div>
 
 <!--GRIDS-->
   </div>
 
   <footer>
-    <p>Each replay was played in the real park, with the designated hitter and, as in the real postseason, no runner placed on second base in extra innings. When a replay ran longer than the real game, the real game's pitchers ran out, and the model's manager took over with the rest of the playoff bullpen. Hover over a cell for its count and score.</p>
+    <p>Each replay was played in the real park, with the designated hitter and, as in the real postseason, no runner placed on second base in extra innings. When a replay ran longer than the real game, the real game's pitchers ran out, and the model's manager took over with the rest of the playoff bullpen. Hover over a cell or a bar for its count.</p>
     <p>Pitching as it was that day: for every pitch type a pitcher threw three or more times in the game, his speed is his regular-season speed plus that day's change (his average in the game against his season average), and his mix is that day's share of each type. The setting exists because postseason pitching differed from the regular season: on average, pitchers threw their fastballs 0.7 mph harder than in their own regular seasons, and they often changed their mixes.</p>
     <p>Fielders' own error rates: each fielder's errors per chance in 2025-26 are compared with the usual rate at the positions he played, and the ratio scales his chance in the model of dropping a ball, fumbling a grounder or throwing one away (a player with few chances is pulled toward the usual rate, because a handful of plays says little about him). The model on its own makes 0.26 errors a team per game, fewer than real fielders make, so one league-wide factor is applied on top to bring the replays' errors near these fielders' own regular-season rate: 0.43 a team per game against their 0.44. The spread among them is wide: the most error-prone errs at about twice his position's rate and the surest at about a third of it.</p>
     <p>Corrected 2026-10-08: each starter now plays the position he started at. Before the correction, a man who changed positions during a game was placed at the position he ended at, so in 8 lineups (7 games) two men shared one position and another position stood empty. In the model each fielder stands at the spot of his listed position, so the two men stood on the same spot and nobody stood at the empty one; a ball hit toward the empty position had to be reached by a fielder starting farther away, and more of those balls went for hits. Game 3 of White Sox vs Guardians, for example, listed two Cleveland left fielders and no centre fielder. That inflated the replays' scoring (4.24 runs a team, now 3.62) and widened their margins in those games.</p>
