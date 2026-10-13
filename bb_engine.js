@@ -66,6 +66,11 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     review  (yankees-review only) SPIN_KEEP 0.60 and the batted-ball drag 1.08 -> 1.13, FITTED to 2026's carry (Joe, 2026-10-13:
+             where the runs go missing): the engine's fly balls at 95+ mph and 30-45 deg landed 9-20 ft short and left the park
+             half as often; see SPIN_KEEP
+     review  (yankees-review only) AERO.batCdSpin: a scale on how fast a batted ball's drag grows with its spin (1 = Nathan's
+             slope, unchanged); a batted ball keeps its launch (p0, v0, w0) for review/carry_fit.js (2026-10-13)
      review  (yankees-review only) pitch.mishit: a pitcher's scale on the batter's miss along the barrel, fitted to the squareness
              of the contact he allows (review/fit_mishit.py); absent = 1, so the season's engine is unchanged
      (the playoff review's branch adds to v3.9: a pitcher's own DECEPTION scales the batter's read of his pitches
@@ -441,14 +446,24 @@ var BB = (function () {
   // movement already matched Savant (physics_check.js); against Nathan's
   // backspin table for a 103 mph, 27 deg drive the unscaled aerodynamics give
   // 380-399 ft from 500 to 2,000 rpm (his 368-400).
-  var AERO = { batCd: 1.08 };
+  var AERO = { batCd: 1.13, batCdSpin: 1 };   // batCd 1.13 (review, 2026-10-13, with SPIN_KEEP; was 1.08); batCdSpin (review): the batted ball's drag-per-spin slope over Nathan's (1 = his)
+  // SPIN_KEEP (review, 2026-10-13): the batted ball leaves with this share of the spin the rigid collision gives (rolling on
+  // the bat, collide()). With all of it, a 95+ mph drive at 25-30 deg spun about 2,900 rpm of backspin (4,200 at 35-40 deg,
+  // total spin to 5,400), far past Nathan's table for a 103 mph, 27 deg drive (368-400 ft from 500 to 2,000 rpm), and the
+  // spin's drag cost the high fly balls 9-20 ft against 2026's carry (season/carry_compare.py: every regular-season ball in
+  // play) while lift saturated. FITTED with batCd to 2026's median distance and home-run share by exit speed and launch
+  // angle (review/carry_fit.js re-flying the same contacts, season/carry_score.py): 0.60 and 1.13 take the rms distance
+  // error over 90+ mph, 10-45 deg from 16 to 11 ft and the home-run share error from .078 to .030, Nathan's drag and lift
+  // laws unchanged; a flatter drag-per-spin slope fitted no better. Open: the collision's spin itself (the rolling model
+  // gives too much; where is not yet known), and liners at 10-20 deg still carry 10-25 ft too far under every setting tried.
+  var SPIN_KEEP = 0.60;   // batCdSpin (review): the batted ball's drag-per-spin slope over Nathan's (1 = his)
 
   function accel(v, w, env, a, cds, sm) {
     var ux = v[0] - env.wind[0], uy = v[1] - env.wind[1], uz = v[2] - env.wind[2];
     var sp = Math.sqrt(ux * ux + uy * uy + uz * uz);
     var k = 0.5 * env.rho * BALL_A / BALL_M;
     var wm = Math.sqrt(w[0] * w[0] + w[1] * w[1] + w[2] * w[2]);
-    var kd = k * cdOf(wm / RPM) * cds * sp;
+    var kd = k * (typeof cds === 'number' ? cdOf(wm / RPM) * cds : (0.3008 + 0.0292 * cds[1] * wm / RPM / 1000) * cds[0]) * sp;   // cds: a scale, or [scale, drag-per-spin slope over Nathan's] (batted balls, review)
     a[0] = -kd * ux; a[1] = -kd * uy; a[2] = -kd * uz - G;
     var cx = w[1] * uz - w[2] * uy, cy = w[2] * ux - w[0] * uz, cz = w[0] * uy - w[1] * ux;
     var cm = Math.sqrt(cx * cx + cy * cy + cz * cz);          // = w_perp * speed
@@ -513,7 +528,7 @@ var BB = (function () {
     var wallZ = env.wallFt * FT, out = null, q = [0, 0, 0], qt = 0;
     while (t < 15) {
       q[0] = p[0]; q[1] = p[1]; q[2] = p[2]; qt = t;
-      step(p, v, w, env, BAT_DT, AERO.batCd); t += BAT_DT;
+      step(p, v, w, env, BAT_DT, AERO.batCdSpin === 1 ? AERO.batCd : [AERO.batCd, AERO.batCdSpin]); t += BAT_DT;
       if (p[2] > apex) apex = p[2];
       if (rec) path.push([t, p[0], p[1], p[2]]);
       var spray = Math.atan2(p[0], p[1]) / DEG, f;
@@ -1775,6 +1790,7 @@ var BB = (function () {
 
   // ----------------------------------------------------------------- FLY
   function battedBall(pitch, col, env, rec) {
+    col = { v: col.v, w: [col.w[0] * SPIN_KEEP, col.w[1] * SPIN_KEEP, col.w[2] * SPIN_KEEP], q: col.q };   // the spin it leaves with (SPIN_KEEP, review)
     var p0 = [pitch.plate.x, CONTACT_Y, pitch.plate.z], v = col.v, sp = norm(v);
     var fl = flyBatted(p0, v, col.w, env, rec);
     var vh = unit([v[0], v[1], 0]), side = cross(vh, [0, 0, 1]);
@@ -1792,7 +1808,7 @@ var BB = (function () {
              spin: norm(col.w) / RPM, backspin: back, q: col.q,
              kind: fl.kind, fair: fair, hr: fl.kind === 'over',
              landing: [fl.x, fl.y], landZ: fl.z, landV: fl.v, landW: fl.w, landT: fl.t,
-             dist: r / FT, projDist: proj / FT, hang: fl.t, apex: fl.apex / FT, path: fl.path };
+             dist: r / FT, projDist: proj / FT, hang: fl.t, apex: fl.apex / FT, path: fl.path, p0: p0, v0: v.slice(), w0: col.w.slice() };
   }
 
   // --------------------------------------------------- one plate appearance

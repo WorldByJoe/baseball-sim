@@ -1,5 +1,5 @@
 /* ============================================================================
-   replay_game.js · v0.6 · 2026-10-13
+   replay_game.js · v0.7 · 2026-10-13
 
    A postseason game played again as it was played: the real batting order with
    its substitutions (each man takes his spot at the turn he took it, at the
@@ -21,6 +21,8 @@
    'errors' (then G, the league factor): each fielder's own error tendency (review/err_mult.py); 'pitched+errors' both.
 
    CHANGED
+     v0.7  mode tokens 'send=a,b,c' (BBField.SEND.H1, going home from first on a hit, by outs) and 'vis=s' (the home edge's
+           visiting fielders' slower first step), for calibrating them
      v0.6  mode 'audit' (combinable): each replay prints its plate appearances (state before, result, runners' moves, runs,
            state after) for season/runs_audit.py, in place of the score line
      v0.5  the home hitters' edge (bb_game v1.8) when review/home_edge.json turns it on; mode 'nohome' leaves it off
@@ -35,6 +37,10 @@
   var GHOST = MODE.indexOf('ghost') >= 0;   // mode 'ghost': the regular season's extra-innings runner on second (the postseason has none)
   var HOMEEDGE = null; try { HOMEEDGE = JSON.parse(read('review/home_edge.json')); if (!HOMEEDGE.on) HOMEEDGE = null; } catch (e) { HOMEEDGE = null; }   // the home hitters' edge (bb_game v1.8), when review/home_edge.json turns it on
   if (MODE.indexOf('nohome') >= 0) HOMEEDGE = null;
+  MODE.forEach(function (m) {   // v0.7: calibration tokens
+    if (m.indexOf('send=') === 0) BBField.SEND.H1 = m.slice(5).split(',').map(Number);
+    if (m.indexOf('vis=') === 0) { HOMEEDGE = HOMEEDGE ? JSON.parse(JSON.stringify(HOMEEDGE)) : { eye: 1, timing: 1, barrel: 1, aggr: 0 }; HOMEEDGE.visReact = +m.slice(4); }
+  });
   // ERRORS (mode 'errors'): each fielder's own error tendency, his season errors per chance against his positions'
   // (review/err_mult.py) times one league factor G (A[6]), as errMult on his drops, fumbles and wild throws (bb_field v1.16)
   var ERR = MODE.indexOf('errors') >= 0 ? JSON.parse(read('review/err_mult.json')).players : null, GERR = +A[6] || 1;

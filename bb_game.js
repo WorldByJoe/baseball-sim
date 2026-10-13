@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_game.js · v1.8 · 2026-10-13
+   bb_game.js · v1.9 · 2026-10-13
 
    A whole game: two teams, nine innings or more, lineups that turn over,
    pitchers who tire and get replaced, managers with their own habits.
@@ -55,6 +55,9 @@
    at DH, the rest on the bench, the next man in the five-man rotation.
 
    CHANGED
+     v1.9  o.homeEdge.visReact: while the home side bats, the visiting fielders' first step is this much slower (s) on its
+           balls in play (season/runs_audit.py: home hitters' balls in play became hits more often than the same speed and
+           angle predict, actual minus expected wOBA +0.0035 a ball, 2025-26: the visitors in a park they do not know)
      v1.8  o.homeEdge {eye, timing, barrel, aggr}: while a home hitter bats, his eye, timing and barrel scatter are scaled
            by these and aggr is added to his aggression (a hitter at home reads and times the pitch a little better: season/home_field.py, 2025-26, within
            players and parks: 1.0 point fewer strikeouts, 0.3-0.45 more walks, home runs and exit speed unchanged;
@@ -334,7 +337,10 @@ var BBGame = (function () {
           runs += advanceForced(bases, B);
         } else {
           placeDefense();   // the bases and outs as the ball was hit (a steal or a wild pitch during the at-bat moves the infield)
-          var res = BBField.resolve(pa.bb, B, bases, outs, D, env, rng, { foulCaught: !!pa.foulCaught, side: sb, going: pa.pitches[n - 1].going || 0 });
+          var vis = HE && HE.visReact && half === 1 ? D.map(function (F) { return F.pl.react; }) : null;   // the visitors' first step, slower in a park not theirs (v1.9)
+          if (vis) D.forEach(function (F) { F.pl.react += HE.visReact; });
+          try { var res = BBField.resolve(pa.bb, B, bases, outs, D, env, rng, { foulCaught: !!pa.foulCaught, side: sb, going: pa.pitches[n - 1].going || 0 }); }
+          finally { if (vis) D.forEach(function (F, k) { F.pl.react = vis[k]; }); }
           play.play = res; play.desc = res.desc;
           outs += res.outsMade; runs += res.runs; bases = res.bases;
           if (res.hit !== 'SF') S.ab++;

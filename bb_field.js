@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.16 · 2026-10-07
+   bb_field.js · v1.17 · 2026-10-13
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -38,6 +38,9 @@
    cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.17 (the playoff review's branch) SEND.H1: a runner going home from first on a hit has his own margins by outs (SAFETY_H
+           kept for the rest), FITTED to 2025-26 (season/runs_audit.py: with SAFETY_H the model sent him home on a double
+           .60 of the time against the league's .37, too often on every kind of double and at every count of outs)
      v1.16 (the playoff review's branch) a fielder's own error tendency, pl.errMult: it scales his chance of dropping a
            ball he is under, of fumbling a grounder, and of throwing one away (exactly: the wild throw's chance times
            errMult); unset, nothing changes (review/replay_game.js mode 'errors')
@@ -109,6 +112,8 @@ var BBField = (function () {
   // .49 / .69 against .36 / .51 / .83, and .42 / .56 / .61 against .34 / .31 / .52): the throw home beats him too
   // easily on a single and too slowly on a double, so one margin cannot fit both. Kept as fitted in v1.9.
   var SAFETY_3 = [1.15, 0.95, 0.55], SAFETY_H = [0.8, 0.2, 0.0], READ_SD = 0.25;   // s, by outs: taking third, going home
+  // SEND.H1 (v1.17): going home from first on a hit, three bases' run with the coach's read at third; until fitted, SAFETY_H's
+  var SEND = { H1: [0.8, 0.2, 0.0] };
   // How sure a throw's arrival is: 0.15 s for an infield throw, and more the
   // longer it is beyond 40 m (footwork, a hop, the catcher moving for it); set
   // by hand, so runners are thrown out at third and home about as often as
@@ -666,7 +671,7 @@ var BBField = (function () {
       while (to + 1 < ahead && to < 4) {
         var next = to + 1, tRun = arrive(r, next);
         var tBall = ballTo(next, tField, fieldAt).t + TAG;
-        if (next >= 3 ? tBall - tRun + rng.n(0, READ_SD) > (next === 3 ? SAFETY_3 : SAFETY_H)[Math.min(outs, 2)] + r.pl.runAggr : tRun + SAFETY + r.pl.runAggr < tBall) to = next; else break;
+        if (next >= 3 ? tBall - tRun + rng.n(0, READ_SD) > (next === 3 ? SAFETY_3 : r.base === 1 ? SEND.H1 : SAFETY_H)[Math.min(outs, 2)] + r.pl.runAggr : tRun + SAFETY + r.pl.runAggr < tBall) to = next; else break;
       }
       if (T.groundRule) to = Math.min(4, r.base + 2);
       r.target = Math.min(to, ahead - 1); ahead = r.target >= 4 ? 5 : r.target;
@@ -794,7 +799,7 @@ var BBField = (function () {
     return best.c.p > 0 && rng.u() < best.c.p ? best : null;
   }
 
-  return { version: '1.15', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
+  return { version: '1.17', BASES: BASES, SEND: SEND, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack, restTime: restTime,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };
