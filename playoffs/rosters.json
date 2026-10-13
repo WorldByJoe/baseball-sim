@@ -4242,6 +4242,27 @@
    "szTop": 3.29,
    "szBot": 1.6,
    "addedLater": "2026-10-07: pitched in NLDS Game 4, not on the 2026-10-04 roster pull"
+  },
+  {
+   "id": 680736,
+   "name": "Justin Wrobleski",
+   "team": 119,
+   "teamAbbrev": "LAD",
+   "jersey": "70",
+   "position": "P",
+   "primaryPosition": "P",
+   "kind": "pitcher",
+   "bats": "L",
+   "throws": "L",
+   "heightIn": 73,
+   "weightLb": 194,
+   "birthDate": "2000-07-14",
+   "age": 26.25,
+   "mlbDebut": "2024-07-07",
+   "on40Man": true,
+   "szTop": 3.255,
+   "szBot": 1.643,
+   "addedLater": "2026-10-12: pitched in NLCS Game 2, not on the 2026-10-04 roster pull"
   }
  ]
 }

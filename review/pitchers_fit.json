@@ -1979,6 +1979,26 @@
    "nSq": 814,
    "targetSq": 0.8284,
    "sqBefore": 0.8437
+  },
+  "680736": {
+   "name": "Justin Wrobleski",
+   "team": "LAD",
+   "role": "RP",
+   "deception": 0.932,
+   "cmdScale": 0.893,
+   "K": 0.261,
+   "BB": 0.068,
+   "chase": 0.283,
+   "targetK": 0.259,
+   "targetBB": 0.063,
+   "measuredK": 0.2178,
+   "measuredBB": 0.0524,
+   "measuredChase": 0.3133,
+   "mishit": 0.974,
+   "measuredSq": 0.8422,
+   "nSq": 582,
+   "targetSq": 0.8435,
+   "sqBefore": 0.8415
   }
  }
 }
