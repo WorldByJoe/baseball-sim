@@ -12,26 +12,26 @@
   "bestOf": 3,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.594,
+   "winnerChance": 0.608,
    "favourite": "SD",
-   "favChance": 0.594,
+   "favChance": 0.608,
    "right": true
   },
   "replays": {
    "season": {
-    "winnerChance": 0.5,
-    "right": false
+    "winnerChance": 0.556,
+    "right": true
    },
    "pitched": {
-    "winnerChance": 0.55,
+    "winnerChance": 0.568,
     "right": true
    },
    "errors": {
-    "winnerChance": 0.532,
+    "winnerChance": 0.548,
     "right": true
    },
    "both": {
-    "winnerChance": 0.548,
+    "winnerChance": 0.558,
     "right": true
    }
   }
@@ -49,26 +49,26 @@
   "bestOf": 3,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.405,
+   "winnerChance": 0.407,
    "favourite": "MIL",
-   "favChance": 0.595,
+   "favChance": 0.593,
    "right": false
   },
   "replays": {
    "season": {
-    "winnerChance": 0.4,
+    "winnerChance": 0.411,
     "right": false
    },
    "pitched": {
-    "winnerChance": 0.377,
+    "winnerChance": 0.388,
     "right": false
    },
    "errors": {
-    "winnerChance": 0.366,
+    "winnerChance": 0.394,
     "right": false
    },
    "both": {
-    "winnerChance": 0.388,
+    "winnerChance": 0.391,
     "right": false
    }
   }
@@ -86,14 +86,14 @@
   "bestOf": 3,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.452,
+   "winnerChance": 0.442,
    "favourite": "BAL",
-   "favChance": 0.548,
+   "favChance": 0.558,
    "right": false
   },
   "replays": {
    "season": {
-    "winnerChance": 0.43,
+    "winnerChance": 0.425,
     "right": false
    },
    "pitched": {
@@ -101,11 +101,11 @@
     "right": false
    },
    "errors": {
-    "winnerChance": 0.413,
+    "winnerChance": 0.43,
     "right": false
    },
    "both": {
-    "winnerChance": 0.447,
+    "winnerChance": 0.434,
     "right": false
    }
   }
@@ -123,26 +123,26 @@
   "bestOf": 3,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.37,
+   "winnerChance": 0.398,
    "favourite": "HOU",
-   "favChance": 0.63,
+   "favChance": 0.602,
    "right": false
   },
   "replays": {
    "season": {
-    "winnerChance": 0.438,
+    "winnerChance": 0.424,
     "right": false
    },
    "pitched": {
-    "winnerChance": 0.395,
+    "winnerChance": 0.416,
     "right": false
    },
    "errors": {
-    "winnerChance": 0.411,
+    "winnerChance": 0.408,
     "right": false
    },
    "both": {
-    "winnerChance": 0.412,
+    "winnerChance": 0.383,
     "right": false
    }
   }
@@ -160,26 +160,26 @@
   "bestOf": 5,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.373,
+   "winnerChance": 0.377,
    "favourite": "PHI",
-   "favChance": 0.627,
+   "favChance": 0.623,
    "right": false
   },
   "replays": {
    "season": {
-    "winnerChance": 0.307,
+    "winnerChance": 0.356,
     "right": false
    },
    "pitched": {
-    "winnerChance": 0.314,
+    "winnerChance": 0.337,
     "right": false
    },
    "errors": {
-    "winnerChance": 0.326,
+    "winnerChance": 0.364,
     "right": false
    },
    "both": {
-    "winnerChance": 0.349,
+    "winnerChance": 0.343,
     "right": false
    }
   }
@@ -197,27 +197,27 @@
   "bestOf": 5,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.554,
-   "favourite": "LAD",
-   "favChance": 0.554,
-   "right": true
+   "winnerChance": 0.496,
+   "favourite": "SD",
+   "favChance": 0.504,
+   "right": false
   },
   "replays": {
    "season": {
-    "winnerChance": 0.527,
+    "winnerChance": 0.534,
     "right": true
    },
    "pitched": {
-    "winnerChance": 0.521,
+    "winnerChance": 0.53,
     "right": true
    },
    "errors": {
-    "winnerChance": 0.529,
+    "winnerChance": 0.514,
     "right": true
    },
    "both": {
-    "winnerChance": 0.511,
-    "right": true
+    "winnerChance": 0.495,
+    "right": false
    }
   }
  },
@@ -234,26 +234,26 @@
   "bestOf": 5,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.47,
-   "favourite": "DET",
-   "favChance": 0.53,
-   "right": false
+   "winnerChance": 0.522,
+   "favourite": "CLE",
+   "favChance": 0.522,
+   "right": true
   },
   "replays": {
    "season": {
-    "winnerChance": 0.505,
+    "winnerChance": 0.521,
     "right": true
    },
    "pitched": {
-    "winnerChance": 0.524,
-    "right": true
+    "winnerChance": 0.499,
+    "right": false
    },
    "errors": {
-    "winnerChance": 0.497,
+    "winnerChance": 0.492,
     "right": false
    },
    "both": {
-    "winnerChance": 0.552,
+    "winnerChance": 0.517,
     "right": true
    }
   }
@@ -271,26 +271,26 @@
   "bestOf": 5,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.562,
+   "winnerChance": 0.586,
    "favourite": "NYY",
-   "favChance": 0.562,
+   "favChance": 0.586,
    "right": true
   },
   "replays": {
    "season": {
-    "winnerChance": 0.606,
+    "winnerChance": 0.643,
     "right": true
    },
    "pitched": {
-    "winnerChance": 0.629,
+    "winnerChance": 0.639,
     "right": true
    },
    "errors": {
-    "winnerChance": 0.612,
+    "winnerChance": 0.618,
     "right": true
    },
    "both": {
-    "winnerChance": 0.605,
+    "winnerChance": 0.627,
     "right": true
    }
   }
@@ -308,26 +308,26 @@
   "bestOf": 7,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.551,
+   "winnerChance": 0.54,
    "favourite": "LAD",
-   "favChance": 0.551,
+   "favChance": 0.54,
    "right": true
   },
   "replays": {
    "season": {
-    "winnerChance": 0.616,
+    "winnerChance": 0.578,
     "right": true
    },
    "pitched": {
-    "winnerChance": 0.631,
+    "winnerChance": 0.595,
     "right": true
    },
    "errors": {
-    "winnerChance": 0.6,
+    "winnerChance": 0.551,
     "right": true
    },
    "both": {
-    "winnerChance": 0.6,
+    "winnerChance": 0.57,
     "right": true
    }
   }
@@ -345,26 +345,26 @@
   "bestOf": 7,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.603,
+   "winnerChance": 0.599,
    "favourite": "NYY",
-   "favChance": 0.603,
+   "favChance": 0.599,
    "right": true
   },
   "replays": {
    "season": {
-    "winnerChance": 0.599,
+    "winnerChance": 0.611,
     "right": true
    },
    "pitched": {
-    "winnerChance": 0.632,
+    "winnerChance": 0.625,
     "right": true
    },
    "errors": {
-    "winnerChance": 0.632,
+    "winnerChance": 0.631,
     "right": true
    },
    "both": {
-    "winnerChance": 0.649,
+    "winnerChance": 0.622,
     "right": true
    }
   }
@@ -382,26 +382,26 @@
   "bestOf": 7,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.504,
-   "favourite": "LAD",
-   "favChance": 0.504,
-   "right": true
+   "winnerChance": 0.454,
+   "favourite": "NYY",
+   "favChance": 0.546,
+   "right": false
   },
   "replays": {
    "season": {
-    "winnerChance": 0.508,
-    "right": true
+    "winnerChance": 0.453,
+    "right": false
    },
    "pitched": {
-    "winnerChance": 0.468,
+    "winnerChance": 0.448,
     "right": false
    },
    "errors": {
-    "winnerChance": 0.493,
+    "winnerChance": 0.488,
     "right": false
    },
    "both": {
-    "winnerChance": 0.447,
+    "winnerChance": 0.44,
     "right": false
    }
   }
@@ -419,26 +419,26 @@
   "bestOf": 3,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.438,
+   "winnerChance": 0.468,
    "favourite": "SD",
-   "favChance": 0.562,
+   "favChance": 0.532,
    "right": false
   },
   "replays": {
    "season": {
-    "winnerChance": 0.469,
+    "winnerChance": 0.494,
     "right": false
    },
    "pitched": {
-    "winnerChance": 0.508,
-    "right": true
+    "winnerChance": 0.493,
+    "right": false
    },
    "errors": {
-    "winnerChance": 0.487,
+    "winnerChance": 0.489,
     "right": false
    },
    "both": {
-    "winnerChance": 0.493,
+    "winnerChance": 0.479,
     "right": false
    }
   }
@@ -456,26 +456,26 @@
   "bestOf": 3,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.534,
+   "winnerChance": 0.523,
    "favourite": "LAD",
-   "favChance": 0.534,
+   "favChance": 0.523,
    "right": true
   },
   "replays": {
    "season": {
-    "winnerChance": 0.603,
+    "winnerChance": 0.556,
     "right": true
    },
    "pitched": {
-    "winnerChance": 0.55,
+    "winnerChance": 0.548,
     "right": true
    },
    "errors": {
-    "winnerChance": 0.539,
+    "winnerChance": 0.532,
     "right": true
    },
    "both": {
-    "winnerChance": 0.578,
+    "winnerChance": 0.556,
     "right": true
    }
   }
@@ -493,26 +493,26 @@
   "bestOf": 3,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.6,
+   "winnerChance": 0.599,
    "favourite": "DET",
-   "favChance": 0.6,
+   "favChance": 0.599,
    "right": true
   },
   "replays": {
    "season": {
-    "winnerChance": 0.506,
+    "winnerChance": 0.524,
     "right": true
    },
    "pitched": {
-    "winnerChance": 0.53,
+    "winnerChance": 0.538,
     "right": true
    },
    "errors": {
-    "winnerChance": 0.501,
+    "winnerChance": 0.513,
     "right": true
    },
    "both": {
-    "winnerChance": 0.527,
+    "winnerChance": 0.55,
     "right": true
    }
   }
@@ -530,26 +530,26 @@
   "bestOf": 3,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.45,
+   "winnerChance": 0.439,
    "favourite": "BOS",
-   "favChance": 0.55,
+   "favChance": 0.561,
    "right": false
   },
   "replays": {
    "season": {
-    "winnerChance": 0.488,
+    "winnerChance": 0.477,
     "right": false
    },
    "pitched": {
-    "winnerChance": 0.51,
-    "right": true
+    "winnerChance": 0.465,
+    "right": false
    },
    "errors": {
-    "winnerChance": 0.446,
+    "winnerChance": 0.452,
     "right": false
    },
    "both": {
-    "winnerChance": 0.492,
+    "winnerChance": 0.443,
     "right": false
    }
   }
@@ -567,26 +567,26 @@
   "bestOf": 5,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.549,
+   "winnerChance": 0.55,
    "favourite": "MIL",
-   "favChance": 0.549,
+   "favChance": 0.55,
    "right": true
   },
   "replays": {
    "season": {
-    "winnerChance": 0.572,
+    "winnerChance": 0.565,
     "right": true
    },
    "pitched": {
-    "winnerChance": 0.539,
+    "winnerChance": 0.563,
     "right": true
    },
    "errors": {
-    "winnerChance": 0.569,
+    "winnerChance": 0.554,
     "right": true
    },
    "both": {
-    "winnerChance": 0.549,
+    "winnerChance": 0.552,
     "right": true
    }
   }
@@ -604,26 +604,26 @@
   "bestOf": 5,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.376,
+   "winnerChance": 0.356,
    "favourite": "PHI",
-   "favChance": 0.624,
+   "favChance": 0.644,
    "right": false
   },
   "replays": {
    "season": {
-    "winnerChance": 0.438,
+    "winnerChance": 0.428,
     "right": false
    },
    "pitched": {
-    "winnerChance": 0.454,
+    "winnerChance": 0.45,
     "right": false
    },
    "errors": {
-    "winnerChance": 0.442,
+    "winnerChance": 0.407,
     "right": false
    },
    "both": {
-    "winnerChance": 0.473,
+    "winnerChance": 0.46,
     "right": false
    }
   }
@@ -641,26 +641,26 @@
   "bestOf": 5,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.606,
+   "winnerChance": 0.57,
    "favourite": "SEA",
-   "favChance": 0.606,
+   "favChance": 0.57,
    "right": true
   },
   "replays": {
    "season": {
-    "winnerChance": 0.571,
+    "winnerChance": 0.541,
     "right": true
    },
    "pitched": {
-    "winnerChance": 0.581,
+    "winnerChance": 0.566,
     "right": true
    },
    "errors": {
-    "winnerChance": 0.612,
+    "winnerChance": 0.578,
     "right": true
    },
    "both": {
-    "winnerChance": 0.606,
+    "winnerChance": 0.526,
     "right": true
    }
   }
@@ -678,26 +678,26 @@
   "bestOf": 5,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.462,
+   "winnerChance": 0.496,
    "favourite": "NYY",
-   "favChance": 0.538,
+   "favChance": 0.504,
    "right": false
   },
   "replays": {
    "season": {
-    "winnerChance": 0.413,
+    "winnerChance": 0.458,
     "right": false
    },
    "pitched": {
-    "winnerChance": 0.439,
-    "right": false
+    "winnerChance": 0.505,
+    "right": true
    },
    "errors": {
-    "winnerChance": 0.451,
+    "winnerChance": 0.455,
     "right": false
    },
    "both": {
-    "winnerChance": 0.454,
+    "winnerChance": 0.488,
     "right": false
    }
   }
@@ -715,26 +715,26 @@
   "bestOf": 7,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.532,
+   "winnerChance": 0.615,
    "favourite": "TOR",
-   "favChance": 0.532,
+   "favChance": 0.615,
    "right": true
   },
   "replays": {
    "season": {
-    "winnerChance": 0.578,
+    "winnerChance": 0.635,
     "right": true
    },
    "pitched": {
-    "winnerChance": 0.576,
+    "winnerChance": 0.663,
     "right": true
    },
    "errors": {
-    "winnerChance": 0.582,
+    "winnerChance": 0.651,
     "right": true
    },
    "both": {
-    "winnerChance": 0.603,
+    "winnerChance": 0.647,
     "right": true
    }
   }
@@ -752,26 +752,26 @@
   "bestOf": 7,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.572,
+   "winnerChance": 0.532,
    "favourite": "LAD",
-   "favChance": 0.572,
+   "favChance": 0.532,
    "right": true
   },
   "replays": {
    "season": {
-    "winnerChance": 0.458,
+    "winnerChance": 0.472,
     "right": false
    },
    "pitched": {
-    "winnerChance": 0.49,
+    "winnerChance": 0.468,
     "right": false
    },
    "errors": {
-    "winnerChance": 0.513,
-    "right": true
+    "winnerChance": 0.444,
+    "right": false
    },
    "both": {
-    "winnerChance": 0.487,
+    "winnerChance": 0.451,
     "right": false
    }
   }
@@ -789,26 +789,26 @@
   "bestOf": 7,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.525,
+   "winnerChance": 0.519,
    "favourite": "LAD",
-   "favChance": 0.525,
+   "favChance": 0.519,
    "right": true
   },
   "replays": {
    "season": {
-    "winnerChance": 0.519,
-    "right": true
+    "winnerChance": 0.473,
+    "right": false
    },
    "pitched": {
-    "winnerChance": 0.559,
-    "right": true
+    "winnerChance": 0.497,
+    "right": false
    },
    "errors": {
-    "winnerChance": 0.53,
-    "right": true
+    "winnerChance": 0.482,
+    "right": false
    },
    "both": {
-    "winnerChance": 0.521,
+    "winnerChance": 0.515,
     "right": true
    }
   }
@@ -826,26 +826,26 @@
   "bestOf": 5,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.675,
+   "winnerChance": 0.665,
    "favourite": "LAD",
-   "favChance": 0.675,
+   "favChance": 0.665,
    "right": true
   },
   "replays": {
    "season": {
-    "winnerChance": 0.677,
+    "winnerChance": 0.648,
     "right": true
    },
    "pitched": {
-    "winnerChance": 0.644,
+    "winnerChance": 0.633,
     "right": true
    },
    "errors": {
-    "winnerChance": 0.677,
+    "winnerChance": 0.62,
     "right": true
    },
    "both": {
-    "winnerChance": 0.642,
+    "winnerChance": 0.652,
     "right": true
    }
   }
@@ -863,26 +863,26 @@
   "bestOf": 5,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.465,
+   "winnerChance": 0.495,
    "favourite": "CWS",
-   "favChance": 0.535,
+   "favChance": 0.505,
    "right": false
   },
   "replays": {
    "season": {
-    "winnerChance": 0.493,
-    "right": false
+    "winnerChance": 0.548,
+    "right": true
    },
    "pitched": {
-    "winnerChance": 0.527,
+    "winnerChance": 0.54,
     "right": true
    },
    "errors": {
-    "winnerChance": 0.507,
+    "winnerChance": 0.515,
     "right": true
    },
    "both": {
-    "winnerChance": 0.505,
+    "winnerChance": 0.524,
     "right": true
    }
   }
@@ -900,26 +900,26 @@
   "bestOf": 5,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.809,
+   "winnerChance": 0.784,
    "favourite": "MIL",
-   "favChance": 0.809,
+   "favChance": 0.784,
    "right": true
   },
   "replays": {
    "season": {
-    "winnerChance": 0.699,
+    "winnerChance": 0.657,
     "right": true
    },
    "pitched": {
-    "winnerChance": 0.701,
+    "winnerChance": 0.668,
     "right": true
    },
    "errors": {
-    "winnerChance": 0.692,
+    "winnerChance": 0.673,
     "right": true
    },
    "both": {
-    "winnerChance": 0.678,
+    "winnerChance": 0.664,
     "right": true
    }
   }
@@ -937,27 +937,27 @@
   "bestOf": 5,
   "forecast": {
    "n": 1000,
-   "winnerChance": 0.508,
+   "winnerChance": 0.506,
    "favourite": "TB",
-   "favChance": 0.508,
+   "favChance": 0.506,
    "right": true
   },
   "replays": {
    "season": {
-    "winnerChance": 0.451,
+    "winnerChance": 0.465,
     "right": false
    },
    "pitched": {
-    "winnerChance": 0.43,
+    "winnerChance": 0.443,
     "right": false
    },
    "errors": {
-    "winnerChance": 0.456,
+    "winnerChance": 0.464,
     "right": false
    },
    "both": {
-    "winnerChance": 0.472,
-    "right": false
+    "winnerChance": 0.503,
+    "right": true
    }
   }
  }

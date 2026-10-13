@@ -1,0 +1,309 @@
+{
+ "fold": "foldB",
+ "window": "2025 + 2026 h2",
+ "shifts": {
+  "zoneSwing": {
+   "shift": -0.0042,
+   "se": 0.0131,
+   "tau": 0.1172,
+   "pairs": 459,
+   "rate": 1
+  },
+  "chase": {
+   "shift": 0.0881,
+   "se": 0.0131,
+   "tau": 0.114,
+   "pairs": 466,
+   "rate": 1
+  },
+  "whiffFB": {
+   "shift": 0.1239,
+   "se": 0.025,
+   "tau": 0.2741,
+   "pairs": 377,
+   "rate": 1
+  },
+  "whiffBR": {
+   "shift": 0.0945,
+   "se": 0.0271,
+   "tau": 0.1796,
+   "pairs": 258,
+   "rate": 1
+  },
+  "whiffOS": {
+   "shift": 0.2325,
+   "se": 0.0494,
+   "tau": 0.2788,
+   "pairs": 123,
+   "rate": 1
+  },
+  "foul": {
+   "shift": 0.0044,
+   "se": 0.0119,
+   "tau": 0.0808,
+   "pairs": 459,
+   "rate": 1
+  },
+  "K": {
+   "shift": 0.28,
+   "se": 0.0214,
+   "tau": 0.1983,
+   "pairs": 368,
+   "rate": 1
+  },
+  "BB": {
+   "shift": -0.4325,
+   "se": 0.0267,
+   "tau": 0.0,
+   "pairs": 345,
+   "rate": 1
+  },
+  "ev": {
+   "shift": -0.5912,
+   "se": 0.142,
+   "tau": 0.7674,
+   "pairs": 291,
+   "rate": 0
+  },
+  "hardHit": {
+   "shift": -0.0431,
+   "se": 0.0224,
+   "tau": 0.1489,
+   "pairs": 291,
+   "rate": 1
+  },
+  "GB": {
+   "shift": 0.0575,
+   "se": 0.0198,
+   "tau": 0.0,
+   "pairs": 291,
+   "rate": 1
+  },
+  "LD": {
+   "shift": -0.0632,
+   "se": 0.0239,
+   "tau": 0.012,
+   "pairs": 291,
+   "rate": 1
+  },
+  "FBs": {
+   "shift": -0.0439,
+   "se": 0.0248,
+   "tau": 0.1276,
+   "pairs": 291,
+   "rate": 1
+  },
+  "PU": {
+   "shift": 0.0726,
+   "se": 0.035,
+   "tau": 0.1459,
+   "pairs": 286,
+   "rate": 1
+  },
+  "pull": {
+   "shift": 0.0793,
+   "se": 0.2757,
+   "tau": 1.6899,
+   "pairs": 293,
+   "rate": 0
+  },
+  "pK": {
+   "shift": -0.2445,
+   "se": 0.0174,
+   "tau": 0.1495,
+   "pairs": 519,
+   "rate": 1
+  },
+  "pBB": {
+   "shift": -0.0311,
+   "se": 0.0231,
+   "tau": 0.0,
+   "pairs": 509,
+   "rate": 1
+  },
+  "pChase": {
+   "shift": -0.0863,
+   "se": 0.0117,
+   "tau": 0.1303,
+   "pairs": 643,
+   "rate": 1
+  },
+  "HR": {
+   "shift": -0.395,
+   "se": 0.0523,
+   "tau": 0.5216,
+   "pairs": 368,
+   "rate": 1
+  }
+ },
+ "minimum": {
+  "PA": 30,
+  "pitches": 100,
+  "pairEvents": 20
+ },
+ "substituted": {
+  "hitting": [
+   "Joey Meneses",
+   "Trey Mancini",
+   "Eloy Jiménez",
+   "Rodolfo Durán",
+   "P.J. Higgins",
+   "Jair Camargo",
+   "Jared Oliva",
+   "Trei Cruz",
+   "Ryan Ward",
+   "Davis Wendzel",
+   "Blake Hunt",
+   "Omar Martinez",
+   "Jack Brannigan",
+   "Jeferson Quero",
+   "Kyler Fedko",
+   "Felix Reyes",
+   "LuJames Groover",
+   "Sterlin Thompson",
+   "Cooper Ingle",
+   "Tanner Murray",
+   "Collin Price",
+   "Rikuu Nishida"
+  ],
+  "pitching": [
+   "Burch Smith",
+   "Vince Velasquez",
+   "Aaron Brooks",
+   "Brandon Leibrandt",
+   "Ty Blach",
+   "Keegan Thompson",
+   "Alek Manoah",
+   "Guillo Zuñiga",
+   "Cameron Foster",
+   "Eric Cerantola",
+   "James Karinchak",
+   "Ricky Vanasco",
+   "Josh Fleming",
+   "Matt Seelinger",
+   "Wilkin Ramos",
+   "Ryan Weiss",
+   "Tanner Andrews",
+   "Domingo Gonzalez",
+   "Eiberson Castellano",
+   "Brandan Bidois",
+   "Ken Waldichuk",
+   "Chase Solesky",
+   "William Kempner",
+   "Cameron Weston",
+   "Josh White",
+   "Peyton Pallette",
+   "Coleman Crow",
+   "Matt Pushard",
+   "Max Rajcic",
+   "Carter Baumler",
+   "Winston Santos",
+   "Marco Raya",
+   "Alimber Santa",
+   "Tyler Uberstine",
+   "Tyler Samaniego",
+   "Brian Fitzpatrick",
+   "Robby Snelling",
+   "Riley Martin",
+   "Sean Sullivan"
+  ]
+ },
+ "substitutedIds": {
+  "hitting": [
+   608841,
+   641820,
+   650391,
+   660710,
+   664731,
+   665856,
+   666931,
+   669360,
+   669899,
+   673995,
+   675448,
+   683079,
+   687394,
+   691620,
+   693459,
+   694025,
+   694410,
+   694514,
+   694876,
+   695020,
+   805672,
+   807747
+  ],
+  "pitching": [
+   572143,
+   592826,
+   605156,
+   605335,
+   621389,
+   624522,
+   666201,
+   670871,
+   671382,
+   672021,
+   675916,
+   676568,
+   676596,
+   676910,
+   678576,
+   680802,
+   681084,
+   682445,
+   682769,
+   684049,
+   686610,
+   686678,
+   687531,
+   687721,
+   687985,
+   688883,
+   689441,
+   690155,
+   691008,
+   691945,
+   692437,
+   694397,
+   695001,
+   700413,
+   701719,
+   702153,
+   702281,
+   702303,
+   807743
+  ]
+ },
+ "tooLittle": {
+  "hitting": [],
+  "pitching": [
+   "Yacksel Ríos",
+   "Sam Haggerty",
+   "Jonathan Heasley",
+   "Zack Short"
+  ]
+ },
+ "noTripleA": {
+  "hitting": [],
+  "pitching": [
+   "James McCann",
+   "Orlando Arcia",
+   "Austin Voth",
+   "Adam Frazier",
+   "Yunior Marte",
+   "Rodolfo Durán",
+   "Bryan Torres",
+   "Cody Ponce",
+   "Dylan Moore",
+   "P.J. Higgins",
+   "Buddy Kennedy",
+   "Jake Meyers",
+   "Andrew Nardi",
+   "Max Schuemann",
+   "Adrian Del Castillo",
+   "Joey Wiemer",
+   "Welinton Herrera"
+  ]
+ }
+}

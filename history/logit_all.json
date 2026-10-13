@@ -3,242 +3,20 @@
   "all": {
    "n": 109,
    "homeWins": 57,
-   "shareSd": 0.06,
-   "favouriteWon": 58,
-   "slope": [
-    4.52,
-    3.28
-   ],
-   "lrP": 0.1628,
-   "mcfadden": 0.013,
-   "calib": [
-    1.11,
-    0.81
-   ],
-   "calibP0": 0.163,
-   "calibP1": 0.891
-  },
-  "2026": {
-   "n": 19,
-   "homeWins": 9,
-   "shareSd": 0.086,
-   "favouriteWon": 9,
-   "slope": [
-    10.99,
-    6.71
-   ],
-   "lrP": 0.0707,
-   "mcfadden": 0.124,
-   "calib": [
-    2.72,
-    1.65
-   ],
-   "calibP0": 0.0676,
-   "calibP1": 0.296
-  },
-  "2025": {
-   "n": 47,
-   "homeWins": 26,
-   "shareSd": 0.047,
-   "favouriteWon": 24,
-   "slope": [
-    5.55,
-    6.48
-   ],
-   "lrP": 0.3874,
-   "mcfadden": 0.012,
-   "calib": [
-    1.38,
-    1.61
-   ],
-   "calibP0": 0.3858,
-   "calibP1": 0.811
-  },
-  "2024": {
-   "n": 43,
-   "homeWins": 22,
    "shareSd": 0.059,
-   "favouriteWon": 25,
+   "favouriteWon": 60,
    "slope": [
-    0.35,
-    5.19
+    5.65,
+    3.37
    ],
-   "lrP": 0.9459,
-   "mcfadden": 0.0,
-   "calib": [
-    0.06,
-    1.28
-   ],
-   "calibP0": 0.9646,
-   "calibP1": 0.46
-  }
- },
- "pitched": {
-  "all": {
-   "n": 109,
-   "homeWins": 57,
-   "shareSd": 0.065,
-   "favouriteWon": 59,
-   "slope": [
-    3.14,
-    3.0
-   ],
-   "lrP": 0.2922,
-   "mcfadden": 0.007,
-   "calib": [
-    0.77,
-    0.74
-   ],
-   "calibP0": 0.2919,
-   "calibP1": 0.758
-  },
-  "2026": {
-   "n": 19,
-   "homeWins": 9,
-   "shareSd": 0.086,
-   "favouriteWon": 10,
-   "slope": [
-    7.83,
-    6.1
-   ],
-   "lrP": 0.1758,
-   "mcfadden": 0.07,
-   "calib": [
-    1.95,
-    1.49
-   ],
-   "calibP0": 0.1692,
-   "calibP1": 0.527
-  },
-  "2025": {
-   "n": 47,
-   "homeWins": 26,
-   "shareSd": 0.049,
-   "favouriteWon": 27,
-   "slope": [
-    6.93,
-    6.3
-   ],
-   "lrP": 0.2632,
+   "lrP": 0.0872,
    "mcfadden": 0.019,
    "calib": [
-    1.72,
-    1.56
+    1.4,
+    0.83
    ],
-   "calibP0": 0.2616,
-   "calibP1": 0.643
-  },
-  "2024": {
-   "n": 43,
-   "homeWins": 22,
-   "shareSd": 0.066,
-   "favouriteWon": 22,
-   "slope": [
-    -0.37,
-    4.71
-   ],
-   "lrP": 0.9376,
-   "mcfadden": 0.0,
-   "calib": [
-    -0.11,
-    1.16
-   ],
-   "calibP0": 0.9235,
-   "calibP1": 0.338
-  }
- },
- "errors": {
-  "all": {
-   "n": 109,
-   "homeWins": 57,
-   "shareSd": 0.062,
-   "favouriteWon": 64,
-   "slope": [
-    5.26,
-    3.25
-   ],
-   "lrP": 0.0991,
-   "mcfadden": 0.018,
-   "calib": [
-    1.29,
-    0.8
-   ],
-   "calibP0": 0.1013,
-   "calibP1": 0.72
-  },
-  "2026": {
-   "n": 19,
-   "homeWins": 9,
-   "shareSd": 0.087,
-   "favouriteWon": 10,
-   "slope": [
-    9.21,
-    6.37
-   ],
-   "lrP": 0.1191,
-   "mcfadden": 0.092,
-   "calib": [
-    2.27,
-    1.56
-   ],
-   "calibP0": 0.116,
-   "calibP1": 0.415
-  },
-  "2025": {
-   "n": 47,
-   "homeWins": 26,
-   "shareSd": 0.045,
-   "favouriteWon": 24,
-   "slope": [
-    8.8,
-    6.95
-   ],
-   "lrP": 0.1959,
-   "mcfadden": 0.026,
-   "calib": [
-    2.2,
-    1.73
-   ],
-   "calibP0": 0.1941,
-   "calibP1": 0.489
-  },
-  "2024": {
-   "n": 43,
-   "homeWins": 22,
-   "shareSd": 0.062,
-   "favouriteWon": 30,
-   "slope": [
-    2.44,
-    5.02
-   ],
-   "lrP": 0.6265,
-   "mcfadden": 0.004,
-   "calib": [
-    0.56,
-    1.24
-   ],
-   "calibP0": 0.6484,
-   "calibP1": 0.724
-  }
- },
- "both": {
-  "all": {
-   "n": 109,
-   "homeWins": 57,
-   "shareSd": 0.062,
-   "favouriteWon": 63,
-   "slope": [
-    6.85,
-    3.3
-   ],
-   "lrP": 0.0327,
-   "mcfadden": 0.03,
-   "calib": [
-    1.68,
-    0.81
-   ],
-   "calibP0": 0.0334,
-   "calibP1": 0.402
+   "calibP0": 0.0859,
+   "calibP1": 0.631
   },
   "2026": {
    "n": 19,
@@ -246,35 +24,109 @@
    "shareSd": 0.079,
    "favouriteWon": 10,
    "slope": [
-    11.39,
-    7.18
+    12.51,
+    7.35
    ],
-   "lrP": 0.082,
-   "mcfadden": 0.115,
+   "lrP": 0.0599,
+   "mcfadden": 0.135,
    "calib": [
-    2.8,
-    1.76
+    3.09,
+    1.81
    ],
-   "calibP0": 0.0811,
-   "calibP1": 0.307
+   "calibP0": 0.0577,
+   "calibP1": 0.247
   },
   "2025": {
    "n": 47,
    "homeWins": 26,
-   "shareSd": 0.05,
-   "favouriteWon": 28,
+   "shareSd": 0.046,
+   "favouriteWon": 24,
    "slope": [
-    11.29,
-    6.57
+    3.94,
+    6.46
    ],
-   "lrP": 0.071,
-   "mcfadden": 0.05,
+   "lrP": 0.5404,
+   "mcfadden": 0.006,
    "calib": [
-    2.79,
-    1.63
+    0.99,
+    1.6
    ],
-   "calibP0": 0.0712,
-   "calibP1": 0.27
+   "calibP0": 0.5341,
+   "calibP1": 0.996
+  },
+  "2024": {
+   "n": 43,
+   "homeWins": 22,
+   "shareSd": 0.059,
+   "favouriteWon": 26,
+   "slope": [
+    4.74,
+    5.35
+   ],
+   "lrP": 0.3701,
+   "mcfadden": 0.013,
+   "calib": [
+    1.15,
+    1.32
+   ],
+   "calibP0": 0.3777,
+   "calibP1": 0.907
+  }
+ },
+ "pitched": {
+  "all": {
+   "n": 109,
+   "homeWins": 57,
+   "shareSd": 0.061,
+   "favouriteWon": 61,
+   "slope": [
+    4.56,
+    3.22
+   ],
+   "lrP": 0.1516,
+   "mcfadden": 0.014,
+   "calib": [
+    1.12,
+    0.79
+   ],
+   "calibP0": 0.1523,
+   "calibP1": 0.877
+  },
+  "2026": {
+   "n": 19,
+   "homeWins": 9,
+   "shareSd": 0.076,
+   "favouriteWon": 10,
+   "slope": [
+    9.17,
+    6.91
+   ],
+   "lrP": 0.1616,
+   "mcfadden": 0.075,
+   "calib": [
+    2.28,
+    1.7
+   ],
+   "calibP0": 0.1571,
+   "calibP1": 0.452
+  },
+  "2025": {
+   "n": 47,
+   "homeWins": 26,
+   "shareSd": 0.052,
+   "favouriteWon": 26,
+   "slope": [
+    6.06,
+    5.92
+   ],
+   "lrP": 0.2985,
+   "mcfadden": 0.017,
+   "calib": [
+    1.51,
+    1.46
+   ],
+   "calibP0": 0.2961,
+   "calibP1": 0.73
   },
   "2024": {
    "n": 43,
@@ -282,17 +134,165 @@
    "shareSd": 0.061,
    "favouriteWon": 25,
    "slope": [
-    3.7,
-    5.1
+    2.58,
+    5.12
    ],
-   "lrP": 0.4657,
-   "mcfadden": 0.009,
+   "lrP": 0.6129,
+   "mcfadden": 0.004,
    "calib": [
-    0.89,
+    0.61,
     1.26
    ],
-   "calibP0": 0.4752,
-   "calibP1": 0.932
+   "calibP0": 0.6267,
+   "calibP1": 0.759
+  }
+ },
+ "errors": {
+  "all": {
+   "n": 109,
+   "homeWins": 57,
+   "shareSd": 0.059,
+   "favouriteWon": 59,
+   "slope": [
+    4.05,
+    3.32
+   ],
+   "lrP": 0.2184,
+   "mcfadden": 0.01,
+   "calib": [
+    1.01,
+    0.82
+   ],
+   "calibP0": 0.2151,
+   "calibP1": 0.993
+  },
+  "2026": {
+   "n": 19,
+   "homeWins": 9,
+   "shareSd": 0.075,
+   "favouriteWon": 10,
+   "slope": [
+    10.15,
+    7.25
+   ],
+   "lrP": 0.1327,
+   "mcfadden": 0.086,
+   "calib": [
+    2.52,
+    1.78
+   ],
+   "calibP0": 0.1282,
+   "calibP1": 0.393
+  },
+  "2025": {
+   "n": 47,
+   "homeWins": 26,
+   "shareSd": 0.05,
+   "favouriteWon": 22,
+   "slope": [
+    -0.39,
+    5.92
+   ],
+   "lrP": 0.9475,
+   "mcfadden": 0.0,
+   "calib": [
+    -0.09,
+    1.47
+   ],
+   "calibP0": 0.9533,
+   "calibP1": 0.459
+  },
+  "2024": {
+   "n": 43,
+   "homeWins": 22,
+   "shareSd": 0.057,
+   "favouriteWon": 27,
+   "slope": [
+    5.88,
+    5.55
+   ],
+   "lrP": 0.2831,
+   "mcfadden": 0.019,
+   "calib": [
+    1.44,
+    1.38
+   ],
+   "calibP0": 0.2881,
+   "calibP1": 0.749
+  }
+ },
+ "both": {
+  "all": {
+   "n": 109,
+   "homeWins": 57,
+   "shareSd": 0.062,
+   "favouriteWon": 61,
+   "slope": [
+    4.37,
+    3.21
+   ],
+   "lrP": 0.1678,
+   "mcfadden": 0.013,
+   "calib": [
+    1.07,
+    0.79
+   ],
+   "calibP0": 0.1683,
+   "calibP1": 0.925
+  },
+  "2026": {
+   "n": 19,
+   "homeWins": 9,
+   "shareSd": 0.077,
+   "favouriteWon": 10,
+   "slope": [
+    14.32,
+    7.98
+   ],
+   "lrP": 0.041,
+   "mcfadden": 0.159,
+   "calib": [
+    3.5,
+    1.95
+   ],
+   "calibP0": 0.0407,
+   "calibP1": 0.2
+  },
+  "2025": {
+   "n": 47,
+   "homeWins": 26,
+   "shareSd": 0.05,
+   "favouriteWon": 24,
+   "slope": [
+    6.26,
+    6.17
+   ],
+   "lrP": 0.3024,
+   "mcfadden": 0.016,
+   "calib": [
+    1.56,
+    1.53
+   ],
+   "calibP0": 0.2983,
+   "calibP1": 0.712
+  },
+  "2024": {
+   "n": 43,
+   "homeWins": 22,
+   "shareSd": 0.06,
+   "favouriteWon": 27,
+   "slope": [
+    0.1,
+    5.12
+   ],
+   "lrP": 0.984,
+   "mcfadden": 0.0,
+   "calib": [
+    0.0,
+    1.26
+   ],
+   "calibP0": 0.9997,
+   "calibP1": 0.429
   }
  }
 }

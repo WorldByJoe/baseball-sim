@@ -1,0 +1,18 @@
+season   all  n 109  favourite won 60  share sd 0.059 | slope   5.7 (se  3.4) LR p 0.087 McF 0.02 | calibration c 1.40 (se 0.83): p(c=0) 0.086, p(c=1) 0.63
+season   2026 n  19  favourite won 10  share sd 0.079 | slope  12.5 (se  7.3) LR p 0.060 McF 0.14 | calibration c 3.09 (se 1.81): p(c=0) 0.058, p(c=1) 0.25
+season   2025 n  47  favourite won 24  share sd 0.046 | slope   3.9 (se  6.5) LR p 0.540 McF 0.01 | calibration c 0.99 (se 1.60): p(c=0) 0.534, p(c=1) 1.00
+season   2024 n  43  favourite won 26  share sd 0.059 | slope   4.7 (se  5.3) LR p 0.370 McF 0.01 | calibration c 1.15 (se 1.32): p(c=0) 0.378, p(c=1) 0.91
+pitched  all  n 109  favourite won 61  share sd 0.061 | slope   4.6 (se  3.2) LR p 0.152 McF 0.01 | calibration c 1.12 (se 0.79): p(c=0) 0.152, p(c=1) 0.88
+pitched  2026 n  19  favourite won 10  share sd 0.076 | slope   9.2 (se  6.9) LR p 0.162 McF 0.07 | calibration c 2.28 (se 1.70): p(c=0) 0.157, p(c=1) 0.45
+pitched  2025 n  47  favourite won 26  share sd 0.052 | slope   6.1 (se  5.9) LR p 0.298 McF 0.02 | calibration c 1.51 (se 1.46): p(c=0) 0.296, p(c=1) 0.73
+pitched  2024 n  43  favourite won 25  share sd 0.061 | slope   2.6 (se  5.1) LR p 0.613 McF 0.00 | calibration c 0.61 (se 1.26): p(c=0) 0.627, p(c=1) 0.76
+errors   all  n 109  favourite won 59  share sd 0.059 | slope   4.0 (se  3.3) LR p 0.218 McF 0.01 | calibration c 1.01 (se 0.82): p(c=0) 0.215, p(c=1) 0.99
+errors   2026 n  19  favourite won 10  share sd 0.075 | slope  10.2 (se  7.2) LR p 0.133 McF 0.09 | calibration c 2.52 (se 1.78): p(c=0) 0.128, p(c=1) 0.39
+errors   2025 n  47  favourite won 22  share sd 0.050 | slope  -0.4 (se  5.9) LR p 0.948 McF 0.00 | calibration c -0.09 (se 1.47): p(c=0) 0.953, p(c=1) 0.46
+errors   2024 n  43  favourite won 27  share sd 0.057 | slope   5.9 (se  5.5) LR p 0.283 McF 0.02 | calibration c 1.44 (se 1.38): p(c=0) 0.288, p(c=1) 0.75
+both     all  n 109  favourite won 61  share sd 0.062 | slope   4.4 (se  3.2) LR p 0.168 McF 0.01 | calibration c 1.07 (se 0.79): p(c=0) 0.168, p(c=1) 0.93
+both     2026 n  19  favourite won 10  share sd 0.077 | slope  14.3 (se  8.0) LR p 0.041 McF 0.16 | calibration c 3.50 (se 1.95): p(c=0) 0.041, p(c=1) 0.20
+both     2025 n  47  favourite won 24  share sd 0.050 | slope   6.3 (se  6.2) LR p 0.302 McF 0.02 | calibration c 1.56 (se 1.53): p(c=0) 0.298, p(c=1) 0.71
+both     2024 n  43  favourite won 27  share sd 0.060 | slope   0.1 (se  5.1) LR p 0.984 McF 0.00 | calibration c 0.00 (se 1.26): p(c=0) 1.000, p(c=1) 0.43
+history/points_2025.json: 47 games
+history/points_2024.json: 43 games

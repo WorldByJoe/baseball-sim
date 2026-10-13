@@ -5,10 +5,10 @@
   "y": 0,
   "label": "2025 World Series Game 5, Toronto Blue Jays at Los Angeles Dodgers",
   "p": {
-   "season": 0.535,
-   "pitched": 0.558,
-   "errors": 0.554,
-   "both": 0.544
+   "season": 0.53,
+   "pitched": 0.538,
+   "errors": 0.542,
+   "both": 0.549
   }
  },
  {
@@ -17,10 +17,10 @@
   "y": 0,
   "label": "2025 World Series Game 4, Toronto Blue Jays at Los Angeles Dodgers",
   "p": {
-   "season": 0.492,
-   "pitched": 0.55,
-   "errors": 0.503,
-   "both": 0.515
+   "season": 0.494,
+   "pitched": 0.519,
+   "errors": 0.487,
+   "both": 0.516
   }
  },
  {
@@ -29,10 +29,10 @@
   "y": 0,
   "label": "2025 World Series Game 7, Los Angeles Dodgers at Toronto Blue Jays",
   "p": {
-   "season": 0.484,
-   "pitched": 0.484,
-   "errors": 0.498,
-   "both": 0.504
+   "season": 0.545,
+   "pitched": 0.522,
+   "errors": 0.548,
+   "both": 0.495
   }
  },
  {
@@ -41,10 +41,10 @@
   "y": 0,
   "label": "2025 World Series Game 6, Los Angeles Dodgers at Toronto Blue Jays",
   "p": {
-   "season": 0.568,
-   "pitched": 0.539,
-   "errors": 0.544,
-   "both": 0.537
+   "season": 0.547,
+   "pitched": 0.56,
+   "errors": 0.548,
+   "both": 0.528
   }
  },
  {
@@ -53,10 +53,10 @@
   "y": 0,
   "label": "2025 World Series Game 2, Los Angeles Dodgers at Toronto Blue Jays",
   "p": {
-   "season": 0.437,
-   "pitched": 0.435,
-   "errors": 0.445,
-   "both": 0.471
+   "season": 0.505,
+   "pitched": 0.475,
+   "errors": 0.482,
+   "both": 0.489
   }
  },
  {
@@ -65,10 +65,10 @@
   "y": 1,
   "label": "2025 World Series Game 1, Los Angeles Dodgers at Toronto Blue Jays",
   "p": {
-   "season": 0.506,
-   "pitched": 0.466,
-   "errors": 0.491,
-   "both": 0.506
+   "season": 0.48,
+   "pitched": 0.509,
+   "errors": 0.497,
+   "both": 0.509
   }
  },
  {
@@ -77,10 +77,10 @@
   "y": 1,
   "label": "2025 NLCS Game 4, Milwaukee Brewers at Los Angeles Dodgers",
   "p": {
-   "season": 0.496,
-   "pitched": 0.505,
-   "errors": 0.523,
-   "both": 0.494
+   "season": 0.49,
+   "pitched": 0.511,
+   "errors": 0.454,
+   "both": 0.477
   }
  },
  {
@@ -89,10 +89,10 @@
   "y": 1,
   "label": "2025 World Series Game 3, Toronto Blue Jays at Los Angeles Dodgers",
   "p": {
-   "season": 0.527,
-   "pitched": 0.504,
-   "errors": 0.518,
-   "both": 0.526
+   "season": 0.466,
+   "pitched": 0.5,
+   "errors": 0.487,
+   "both": 0.503
   }
  },
  {
@@ -101,10 +101,10 @@
   "y": 1,
   "label": "2025 NLCS Game 3, Milwaukee Brewers at Los Angeles Dodgers",
   "p": {
-   "season": 0.457,
-   "pitched": 0.495,
-   "errors": 0.484,
-   "both": 0.457
+   "season": 0.451,
+   "pitched": 0.457,
+   "errors": 0.472,
+   "both": 0.467
   }
  },
  {
@@ -113,10 +113,10 @@
   "y": 0,
   "label": "2025 NLCS Game 2, Los Angeles Dodgers at Milwaukee Brewers",
   "p": {
-   "season": 0.51,
+   "season": 0.514,
    "pitched": 0.509,
-   "errors": 0.475,
-   "both": 0.48
+   "errors": 0.511,
+   "both": 0.517
   }
  },
  {
@@ -125,10 +125,10 @@
   "y": 0,
   "label": "2025 ALCS Game 4, Toronto Blue Jays at Seattle Mariners",
   "p": {
-   "season": 0.455,
-   "pitched": 0.449,
-   "errors": 0.442,
-   "both": 0.429
+   "season": 0.411,
+   "pitched": 0.405,
+   "errors": 0.396,
+   "both": 0.416
   }
  },
  {
@@ -137,10 +137,10 @@
   "y": 0,
   "label": "2025 NLCS Game 1, Los Angeles Dodgers at Milwaukee Brewers",
   "p": {
-   "season": 0.52,
-   "pitched": 0.51,
-   "errors": 0.509,
-   "both": 0.495
+   "season": 0.478,
+   "pitched": 0.517,
+   "errors": 0.517,
+   "both": 0.516
   }
  },
  {
@@ -149,10 +149,10 @@
   "y": 1,
   "label": "2025 ALCS Game 7, Seattle Mariners at Toronto Blue Jays",
   "p": {
-   "season": 0.538,
-   "pitched": 0.549,
-   "errors": 0.535,
-   "both": 0.568
+   "season": 0.564,
+   "pitched": 0.584,
+   "errors": 0.561,
+   "both": 0.594
   }
  },
  {
@@ -161,10 +161,10 @@
   "y": 1,
   "label": "2025 ALCS Game 6, Seattle Mariners at Toronto Blue Jays",
   "p": {
-   "season": 0.495,
-   "pitched": 0.441,
-   "errors": 0.481,
-   "both": 0.483
+   "season": 0.489,
+   "pitched": 0.52,
+   "errors": 0.48,
+   "both": 0.492
   }
  },
  {
@@ -173,10 +173,10 @@
   "y": 1,
   "label": "2025 ALCS Game 5, Toronto Blue Jays at Seattle Mariners",
   "p": {
-   "season": 0.491,
-   "pitched": 0.455,
-   "errors": 0.481,
-   "both": 0.455
+   "season": 0.451,
+   "pitched": 0.432,
+   "errors": 0.411,
+   "both": 0.431
   }
  },
  {
@@ -185,10 +185,10 @@
   "y": 0,
   "label": "2025 ALCS Game 1, Seattle Mariners at Toronto Blue Jays",
   "p": {
-   "season": 0.546,
-   "pitched": 0.539,
-   "errors": 0.542,
-   "both": 0.546
+   "season": 0.566,
+   "pitched": 0.607,
+   "errors": 0.562,
+   "both": 0.594
   }
  },
  {
@@ -197,10 +197,10 @@
   "y": 0,
   "label": "2025 NLDS 'B' Game 3, Philadelphia Phillies at Los Angeles Dodgers",
   "p": {
-   "season": 0.44,
-   "pitched": 0.385,
-   "errors": 0.427,
-   "both": 0.387
+   "season": 0.434,
+   "pitched": 0.389,
+   "errors": 0.425,
+   "both": 0.415
   }
  },
  {
@@ -209,10 +209,10 @@
   "y": 1,
   "label": "2025 NLDS 'B' Game 4, Philadelphia Phillies at Los Angeles Dodgers",
   "p": {
-   "season": 0.488,
-   "pitched": 0.527,
-   "errors": 0.477,
-   "both": 0.519
+   "season": 0.479,
+   "pitched": 0.524,
+   "errors": 0.455,
+   "both": 0.488
   }
  },
  {
@@ -221,10 +221,10 @@
   "y": 0,
   "label": "2025 ALCS Game 3, Toronto Blue Jays at Seattle Mariners",
   "p": {
-   "season": 0.418,
-   "pitched": 0.405,
-   "errors": 0.42,
-   "both": 0.405
+   "season": 0.379,
+   "pitched": 0.383,
+   "errors": 0.385,
+   "both": 0.416
   }
  },
  {
@@ -233,10 +233,10 @@
   "y": 0,
   "label": "2025 ALCS Game 2, Seattle Mariners at Toronto Blue Jays",
   "p": {
-   "season": 0.535,
-   "pitched": 0.523,
-   "errors": 0.548,
-   "both": 0.523
+   "season": 0.56,
+   "pitched": 0.541,
+   "errors": 0.58,
+   "both": 0.561
   }
  },
  {
@@ -245,10 +245,10 @@
   "y": 1,
   "label": "2025 NLDS 'A' Game 5, Chicago Cubs at Milwaukee Brewers",
   "p": {
-   "season": 0.534,
-   "pitched": 0.533,
-   "errors": 0.57,
-   "both": 0.549
+   "season": 0.575,
+   "pitched": 0.56,
+   "errors": 0.571,
+   "both": 0.569
   }
  },
  {
@@ -257,10 +257,10 @@
   "y": 1,
   "label": "2025 NLDS 'A' Game 1, Chicago Cubs at Milwaukee Brewers",
   "p": {
-   "season": 0.526,
-   "pitched": 0.513,
-   "errors": 0.51,
-   "both": 0.51
+   "season": 0.516,
+   "pitched": 0.507,
+   "errors": 0.486,
+   "both": 0.528
   }
  },
  {
@@ -269,10 +269,10 @@
   "y": 1,
   "label": "2025 NLDS 'A' Game 2, Chicago Cubs at Milwaukee Brewers",
   "p": {
-   "season": 0.577,
-   "pitched": 0.579,
-   "errors": 0.597,
-   "both": 0.572
+   "season": 0.558,
+   "pitched": 0.56,
+   "errors": 0.573,
+   "both": 0.534
   }
  },
  {
@@ -281,10 +281,10 @@
   "y": 1,
   "label": "2025 NLDS 'A' Game 3, Milwaukee Brewers at Chicago Cubs",
   "p": {
-   "season": 0.471,
-   "pitched": 0.519,
-   "errors": 0.517,
-   "both": 0.493
+   "season": 0.492,
+   "pitched": 0.484,
+   "errors": 0.509,
+   "both": 0.514
   }
  },
  {
@@ -293,10 +293,10 @@
   "y": 1,
   "label": "2025 NLDS 'A' Game 4 , Milwaukee Brewers at Chicago Cubs",
   "p": {
-   "season": 0.474,
-   "pitched": 0.503,
-   "errors": 0.477,
-   "both": 0.507
+   "season": 0.483,
+   "pitched": 0.475,
+   "errors": 0.476,
+   "both": 0.478
   }
  },
  {
@@ -305,10 +305,10 @@
   "y": 0,
   "label": "2025 NLDS 'B' Game 1, Los Angeles Dodgers at Philadelphia Phillies",
   "p": {
-   "season": 0.552,
-   "pitched": 0.5,
-   "errors": 0.536,
-   "both": 0.479
+   "season": 0.567,
+   "pitched": 0.526,
+   "errors": 0.552,
+   "both": 0.508
   }
  },
  {
@@ -317,10 +317,10 @@
   "y": 0,
   "label": "2025 NLDS 'B' Game 2, Los Angeles Dodgers at Philadelphia Phillies",
   "p": {
-   "season": 0.509,
-   "pitched": 0.509,
-   "errors": 0.491,
-   "both": 0.485
+   "season": 0.499,
+   "pitched": 0.493,
+   "errors": 0.527,
+   "both": 0.481
   }
  },
  {
@@ -329,10 +329,10 @@
   "y": 1,
   "label": "2025 ALDS 'B' Game 5, Detroit Tigers at Seattle Mariners",
   "p": {
-   "season": 0.546,
-   "pitched": 0.557,
-   "errors": 0.582,
-   "both": 0.577
+   "season": 0.519,
+   "pitched": 0.521,
+   "errors": 0.55,
+   "both": 0.529
   }
  },
  {
@@ -341,10 +341,10 @@
   "y": 1,
   "label": "2025 ALDS 'B' Game 4, Seattle Mariners at Detroit Tigers",
   "p": {
-   "season": 0.472,
-   "pitched": 0.432,
-   "errors": 0.456,
-   "both": 0.427
+   "season": 0.513,
+   "pitched": 0.452,
+   "errors": 0.477,
+   "both": 0.484
   }
  },
  {
@@ -353,10 +353,10 @@
   "y": 0,
   "label": "2025 ALDS 'B' Game 3, Seattle Mariners at Detroit Tigers",
   "p": {
-   "season": 0.491,
-   "pitched": 0.472,
-   "errors": 0.436,
-   "both": 0.473
+   "season": 0.467,
+   "pitched": 0.477,
+   "errors": 0.453,
+   "both": 0.508
   }
  },
  {
@@ -365,10 +365,10 @@
   "y": 1,
   "label": "2025 ALDS 'B' Game 2, Detroit Tigers at Seattle Mariners",
   "p": {
-   "season": 0.516,
-   "pitched": 0.46,
-   "errors": 0.534,
-   "both": 0.49
+   "season": 0.503,
+   "pitched": 0.49,
+   "errors": 0.487,
+   "both": 0.453
   }
  },
  {
@@ -377,10 +377,10 @@
   "y": 0,
   "label": "2025 ALDS 'B' Game 1, Detroit Tigers at Seattle Mariners",
   "p": {
-   "season": 0.591,
-   "pitched": 0.602,
-   "errors": 0.577,
-   "both": 0.616
+   "season": 0.566,
+   "pitched": 0.593,
+   "errors": 0.601,
+   "both": 0.578
   }
  },
  {
@@ -389,10 +389,10 @@
   "y": 1,
   "label": "2025 NL Wild Card 'B' Game 3, San Diego Padres at Chicago Cubs",
   "p": {
-   "season": 0.499,
-   "pitched": 0.524,
-   "errors": 0.509,
-   "both": 0.517
+   "season": 0.526,
+   "pitched": 0.501,
+   "errors": 0.515,
+   "both": 0.514
   }
  },
  {
@@ -401,10 +401,10 @@
   "y": 0,
   "label": "2025 ALDS 'A' Game 4, Toronto Blue Jays at New York Yankees",
   "p": {
-   "season": 0.495,
-   "pitched": 0.495,
-   "errors": 0.502,
-   "both": 0.478
+   "season": 0.486,
+   "pitched": 0.445,
+   "errors": 0.494,
+   "both": 0.451
   }
  },
  {
@@ -413,10 +413,10 @@
   "y": 1,
   "label": "2025 ALDS 'A' Game 3, Toronto Blue Jays at New York Yankees",
   "p": {
-   "season": 0.566,
-   "pitched": 0.545,
-   "errors": 0.527,
-   "both": 0.549
+   "season": 0.529,
+   "pitched": 0.516,
+   "errors": 0.547,
+   "both": 0.536
   }
  },
  {
@@ -425,10 +425,10 @@
   "y": 1,
   "label": "2025 ALDS 'A' Game 2, New York Yankees at Toronto Blue Jays",
   "p": {
-   "season": 0.424,
-   "pitched": 0.43,
-   "errors": 0.435,
-   "both": 0.45
+   "season": 0.462,
+   "pitched": 0.478,
+   "errors": 0.431,
+   "both": 0.465
   }
  },
  {
@@ -437,10 +437,10 @@
   "y": 1,
   "label": "2025 ALDS 'A' Game 1, New York Yankees at Toronto Blue Jays",
   "p": {
-   "season": 0.451,
-   "pitched": 0.48,
-   "errors": 0.49,
-   "both": 0.479
+   "season": 0.463,
+   "pitched": 0.493,
+   "errors": 0.514,
+   "both": 0.496
   }
  },
  {
@@ -449,10 +449,10 @@
   "y": 0,
   "label": "2025 NL Wild Card 'B' Game 2, San Diego Padres at Chicago Cubs",
   "p": {
-   "season": 0.488,
-   "pitched": 0.5,
-   "errors": 0.501,
-   "both": 0.473
+   "season": 0.517,
+   "pitched": 0.497,
+   "errors": 0.495,
+   "both": 0.476
   }
  },
  {
@@ -461,10 +461,10 @@
   "y": 1,
   "label": "2025 AL Wild Card 'B' Game 3, Boston Red Sox at New York Yankees",
   "p": {
-   "season": 0.47,
-   "pitched": 0.492,
-   "errors": 0.451,
-   "both": 0.459
+   "season": 0.486,
+   "pitched": 0.436,
+   "errors": 0.466,
+   "both": 0.456
   }
  },
  {
@@ -473,10 +473,10 @@
   "y": 1,
   "label": "2025 NL Wild Card 'B' Game 1, San Diego Padres at Chicago Cubs",
   "p": {
-   "season": 0.451,
-   "pitched": 0.492,
-   "errors": 0.463,
-   "both": 0.496
+   "season": 0.445,
+   "pitched": 0.489,
+   "errors": 0.468,
+   "both": 0.468
   }
  },
  {
@@ -485,10 +485,10 @@
   "y": 1,
   "label": "2025 NL Wild Card 'A' Game 2, Cincinnati Reds at Los Angeles Dodgers",
   "p": {
-   "season": 0.588,
-   "pitched": 0.554,
-   "errors": 0.557,
-   "both": 0.553
+   "season": 0.565,
+   "pitched": 0.539,
+   "errors": 0.524,
+   "both": 0.58
   }
  },
  {
@@ -497,10 +497,10 @@
   "y": 1,
   "label": "2025 NL Wild Card 'A' Game 1, Cincinnati Reds at Los Angeles Dodgers",
   "p": {
-   "season": 0.55,
-   "pitched": 0.513,
-   "errors": 0.495,
-   "both": 0.552
+   "season": 0.51,
+   "pitched": 0.525,
+   "errors": 0.519,
+   "both": 0.494
   }
  },
  {
@@ -509,10 +509,10 @@
   "y": 1,
   "label": "2025 AL Wild Card 'B' Game 2, Boston Red Sox at New York Yankees",
   "p": {
-   "season": 0.585,
-   "pitched": 0.577,
-   "errors": 0.51,
-   "both": 0.573
+   "season": 0.549,
+   "pitched": 0.548,
+   "errors": 0.516,
+   "both": 0.519
   }
  },
  {
@@ -521,10 +521,10 @@
   "y": 1,
   "label": "2025 AL Wild Card 'A' Game 2, Detroit Tigers at Cleveland Guardians",
   "p": {
-   "season": 0.533,
-   "pitched": 0.538,
-   "errors": 0.55,
-   "both": 0.537
+   "season": 0.532,
+   "pitched": 0.557,
+   "errors": 0.513,
+   "both": 0.541
   }
  },
  {
@@ -533,10 +533,10 @@
   "y": 0,
   "label": "2025 AL Wild Card 'A' Game 1, Detroit Tigers at Cleveland Guardians",
   "p": {
-   "season": 0.431,
-   "pitched": 0.399,
-   "errors": 0.437,
-   "both": 0.388
+   "season": 0.436,
+   "pitched": 0.387,
+   "errors": 0.441,
+   "both": 0.368
   }
  },
  {
@@ -545,10 +545,10 @@
   "y": 0,
   "label": "2025 AL Wild Card 'A' Game 3, Detroit Tigers at Cleveland Guardians",
   "p": {
-   "season": 0.524,
-   "pitched": 0.503,
-   "errors": 0.51,
-   "both": 0.52
+   "season": 0.484,
+   "pitched": 0.481,
+   "errors": 0.519,
+   "both": 0.492
   }
  },
  {
@@ -557,10 +557,10 @@
   "y": 0,
   "label": "2025 AL Wild Card 'B' Game 1, Boston Red Sox at New York Yankees",
   "p": {
-   "season": 0.421,
-   "pitched": 0.452,
-   "errors": 0.432,
-   "both": 0.453
+   "season": 0.42,
+   "pitched": 0.446,
+   "errors": 0.422,
+   "both": 0.412
   }
  }
 ]
