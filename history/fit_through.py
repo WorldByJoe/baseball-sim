@@ -15,7 +15,7 @@ change, not about any one player, so using it for an earlier October borrows no 
 
 CHANGED
   v0.2  the age trend (history/aging.py): each season's prior mean moves with his age, so the step from one season to the next
-        carries a year of aging (python3 HIST/fit_through.py S steps PA noage for the old behaviour)
+        carries a year of aging (off by default since Joe pinned it: python3 HIST/fit_through.py S steps PA age)
   v0.1  first build (Joe, 2026-10-12)
 """
 import json, os, sys
@@ -99,4 +99,4 @@ def main(S, iters, npa, age=True):
 
 if __name__ == '__main__':
     a = sys.argv[1:]
-    main(int(a[0]), int(a[1]) if len(a) > 1 else 4, int(a[2]) if len(a) > 2 else 1500, age='noage' not in a)
+    main(int(a[0]), int(a[1]) if len(a) > 1 else 4, int(a[2]) if len(a) > 2 else 1500, age='age' in a)   # the age trend is pinned for later (Joe, 2026-10-12): on only when asked

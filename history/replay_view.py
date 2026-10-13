@@ -71,7 +71,7 @@ def main(S, wt):
         v = [o['mean'] for r in recs for y, o in ((r['summaries'].get('pitching') or {}).get(k) or {}).items() if y.isdigit() and isinstance(o, dict) and o.get('mean') is not None]
         pm[k] = float(np.mean(v)) if v else None
     shrunk = 0
-    AG = json.load(open(os.path.join(HERE, 'aging.json')))['measured'] if 'noage' not in sys.argv else {}
+    AG = json.load(open(os.path.join(HERE, 'aging.json')))['measured'] if 'age' in sys.argv[3:] else {}   # pinned for later (Joe, 2026-10-12): on only when asked
     import datetime
     birth = {p['id']: p.get('birthDate') for p in json.load(open(os.path.join(HERE, 'rosters.json')))['players']}
     for r in recs:
