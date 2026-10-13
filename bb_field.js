@@ -38,8 +38,8 @@
    cut-off man is a timing rule, not a player.
 
    CHANGED
-     v1.17 (the playoff review's branch) SEND.H1: a runner going home from first on a hit has his own margins by outs (SAFETY_H
-           kept for the rest), FITTED to 2025-26 (season/runs_audit.py: with SAFETY_H the model sent him home on a double
+     v1.17 (the playoff review's branch) SEND.H1: a runner going home from first on a hit has his own margins by outs, [1.75,
+           1.30, 0.65] s (SAFETY_H kept for the rest), FITTED to 2025-26 (season/runs_audit.py: with SAFETY_H the model sent him home on a double
            .60 of the time against the league's .37, too often on every kind of double and at every count of outs)
      v1.16 (the playoff review's branch) a fielder's own error tendency, pl.errMult: it scales his chance of dropping a
            ball he is under, of fumbling a grounder, and of throwing one away (exactly: the wild throw's chance times
@@ -112,8 +112,11 @@ var BBField = (function () {
   // .49 / .69 against .36 / .51 / .83, and .42 / .56 / .61 against .34 / .31 / .52): the throw home beats him too
   // easily on a single and too slowly on a double, so one margin cannot fit both. Kept as fitted in v1.9.
   var SAFETY_3 = [1.15, 0.95, 0.55], SAFETY_H = [0.8, 0.2, 0.0], READ_SD = 0.25;   // s, by outs: taking third, going home
-  // SEND.H1 (v1.17): going home from first on a hit, three bases' run with the coach's read at third; until fitted, SAFETY_H's
-  var SEND = { H1: [0.8, 0.2, 0.0] };
+  // SEND.H1 (v1.17): going home from first on a hit, three bases' run with the coach's read at third. FITTED (season/calib34.sh:
+  // 400 second-half games x 3 per setting, fold A's traits, the 2026 carry) to the league's man on first alone scoring on a
+  // double, 2025-26: .270 / .327 / .500 by outs (2,869 doubles). With SAFETY_H's [0.8, 0.2, 0.0] he scored .49 / .64 / .67;
+  // margins 0.6 s higher gave .34 / .46 / .50, 1.0 s .26 / .35 / .46, 1.4 s .16 / .24 / .37, so by outs [1.75, 1.30, 0.65].
+  var SEND = { H1: [1.75, 1.30, 0.65] };
   // How sure a throw's arrival is: 0.15 s for an infield throw, and more the
   // longer it is beyond 40 m (footwork, a hop, the catcher moving for it); set
   // by hand, so runners are thrown out at third and home about as often as

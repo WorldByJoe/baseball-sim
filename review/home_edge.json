@@ -1,2 +1,9 @@
-{"on": true, "eye": 0.949, "timing": 1.0, "barrel": 1.0, "aggr": -0.011,
- "note": "the home hitters' edge (bb_game v1.8): at home a hitter's eye scatter x0.949 and his aggression -0.011 (more patient). Measured (season/home_field.py, 2025-26, within players and parks): home hitters 1.0 point fewer strikeouts, 0.37 more walks, home runs +0.05, exit speed unchanged. In the engine (review/home_calib.js, 4 seeds x 20,000 plate appearances): strikeouts -0.97, walks +0.43, home runs +0.13, chases -1.0 (real -0.3), swings at strikes +0.8 (real +0.3). Joe, 2026-10-13"}
+{
+"on": true,
+"eye": 0.949,
+"timing": 1.0,
+"barrel": 1.0,
+"aggr": -0.011,
+"note": "the home hitters' edge (bb_game v1.8): at home a hitter's eye scatter x0.949 and his aggression -0.011 (more patient). Measured (season/home_field.py, 2025-26, within players and parks): home hitters 1.0 point fewer strikeouts, 0.37 more walks, home runs +0.05, exit speed unchanged. In the engine (review/home_calib.js, 4 seeds x 20,000 plate appearances): strikeouts -0.97, walks +0.43, home runs +0.13, chases -1.0 (real -0.3), swings at strikes +0.8 (real +0.3). Joe, 2026-10-13 visReact 0.013 s (bb_game v1.9): the visiting fielders' first step while the home side bats, FITTED (season/calib34.sh) to the league's home edge on balls in play (hits per ball in play +0.004 at the same speed and angle; each 0.1 s gave +0.032 in the model).",
+"visReact": 0.013
+}
