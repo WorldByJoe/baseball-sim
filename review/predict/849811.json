@@ -12,17 +12,15 @@
    "Blake Snell"
   ]
  },
- "assumedTeams": [
-  "LAD"
- ],
- "assumed": true,
+ "assumedTeams": [],
+ "assumed": false,
  "sources": {
   "MIL": 849812,
   "LAD": 849812
  },
  "lineups": "lineups as in their last games (Brewers: NLCS Game 2, Dodgers: NLCS Game 2)",
  "park": "UNIQLO Field at Dodger Stadium",
- "ran": "2026-10-13 07:25",
+ "ran": "2026-10-13 13:30",
  "series": "NLCS",
  "game": 3
 }
