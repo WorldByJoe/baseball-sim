@@ -8,7 +8,7 @@ history/ (its rosters, season stats, leaderboards and pitches) for 2024, 2025 an
   - every season weighted alike in 'pooled' (pooled is not used here: history/seasons.py reads each season alone).
 Writes history/players_measured.json (each quantity {"2024": .., "2025": .., "2026": .., "pooled": ..}).
 
-  python3 history/measure_seasons.py
+  python3 history/measure_seasons.py [years, e.g. 2023,2024,2025,2026]
 
 CHANGED
   v0.1  first build (Joe, 2026-10-12)
@@ -19,8 +19,8 @@ sys.path.insert(0, os.path.join(HERE, '..', 'playoffs'))
 import measure_traits as MT
 
 MT.HERE = HERE
-MT.YEARS = (2024, 2025, 2026)
-MT.W = {2024: 1.0, 2025: 1.0, 2026: 1.0}
+MT.YEARS = tuple(int(y) for y in (sys.argv[1] if len(sys.argv) > 1 else '2024,2025,2026').split(','))
+MT.W = {y: 1.0 for y in MT.YEARS}
 _rows = MT.rows_of
 MT.rows_of = lambda role, pid: [r for r in _rows(role, pid) if r.get('game_type') == 'R']
 

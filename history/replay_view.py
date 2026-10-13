@@ -1,5 +1,5 @@
 """
-replay_view.py · v0.1 · 2026-10-12
+replay_view.py · v0.2 · 2026-10-12
 
 The inputs a postseason's replays read, as they stood that October, written into a worktree of their own (the review's
 scripts read fixed paths, so a past October gets its own checkout, e.g. ~/bsim-wt/hist2025):
@@ -16,6 +16,7 @@ scripts read fixed paths, so a past October gets its own checkout, e.g. ~/bsim-w
   python3 history/replay_view.py 2025 ~/bsim-wt/hist2025
 
 CHANGED
+  v0.2  only that October's participants, on the teams they played for then (the history files hold every October's men)
   v0.1  first build (Joe, 2026-10-12: the 2025 playoffs in the logistic regression)
 """
 import json, os, sys, copy, math
@@ -56,7 +57,8 @@ def through(obs, mu, tv, rho):
 
 
 def main(S, wt):
-    M = json.load(open(os.path.join(HERE, 'players_measured.json'))); recs = M['players']
+    part = {p['id']: p for p in json.load(open(os.path.join(HERE, 'participants_%d.json' % S)))['players']}   # that October's men, on that October's teams
+    M = json.load(open(os.path.join(HERE, 'players_measured.json'))); recs = [r for r in M['players'] if r['id'] in part]
     carry = json.load(open(os.path.join(HERE, 'seasons.json')))['measured']
     stats = json.load(open(os.path.join(HERE, 'season_stats.json')))['players']
     out = []
@@ -67,7 +69,7 @@ def main(S, wt):
         pm[k] = float(np.mean(v)) if v else None
     shrunk = 0
     for r in recs:
-        R = relabel(copy.deepcopy(r), S)
+        R = relabel(copy.deepcopy(r), S); R['team'] = part[r['id']]['team']
         ss = stats.get(str(r['id'])) or {}
         R['seasonStats'] = {g + '_2026': ss.get('%s_%d' % (g, S)) for g in ('hitting', 'pitching')}
         R['seasonStats'].update({g + '_2025': ss.get('%s_%d' % (g, S - 1)) for g in ('hitting', 'pitching')})
@@ -94,11 +96,11 @@ def main(S, wt):
     T = fetch_json('https://statsapi.mlb.com/api/v1/teams?sportId=1&season=%d' % S, 'history/teams_%d.json' % S)['teams']
     teams = {str(t['id']): {'id': t['id'], 'abbrev': t['abbreviation'], 'name': t['name'], 'venueId': t['venue']['id']} for t in T}
     byab = {t['abbrev']: t['id'] for t in teams.values()}
-    ros = json.load(open(os.path.join(HERE, 'rosters.json')))['players']
+    ros = [dict(p, teamAbbrev=part[p['id']]['team']) for p in json.load(open(os.path.join(HERE, 'rosters.json')))['players'] if p['id'] in part]
     for p in ros: p['team'] = byab.get(p['teamAbbrev'])
     json.dump({'note': 'postseason %d participants (history/replay_view.py)' % S, 'teams': teams, 'players': ros}, open(os.path.join(wt, 'playoffs', 'rosters.json'), 'w'), indent=1)
     F = json.load(open(os.path.join(HERE, 'fielding_season.json')))
-    F2 = {pid: {'name': f['name'], '2025': f.get(str(S - 1), []), '2026': f.get(str(S), [])} for pid, f in F.items()}
+    F2 = {pid: {'name': f['name'], '2025': f.get(str(S - 1), []), '2026': f.get(str(S), [])} for pid, f in F.items() if int(pid) in part}
     json.dump(F2, open(os.path.join(wt, 'playoffs', 'fielding_season.json'), 'w'), indent=0)
     pdir = os.path.join(wt, 'playoffs', 'pitches'); os.makedirs(pdir, exist_ok=True)
     for fn in os.listdir(pdir):
