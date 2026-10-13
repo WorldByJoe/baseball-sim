@@ -392,9 +392,9 @@ def logit_section():
         b6, cov6, _, l16, l06 = fit(x6, y6); p6 = stats.chi2.sf(2 * (l16 - l06), 1)
         p_wald = 2 * stats.norm.sf(abs(b[1] / se[1])); p_lr = stats.chi2.sf(2 * (ll1 - ll0), 1)
         r2m = 1 - ll1 / ll0; r2t = mu[y == 1].mean() - mu[y == 0].mean()
-        W, H, L, R, T, B = 760, 560, 64, 20, 14, 56
+        W, H, L, R, T, B = 760, 600, 64, 20, 14, 56
         def X(v): return L + v * (W - L - R)
-        def Y(v): return T + (1.3 - v) / 1.6 * (H - T - B)   # 1.3 at the top, -0.3 at the bottom: room outside each row for the past Octobers' stacks
+        def Y(v): return T + (1.4 - v) / 1.8 * (H - T - B)   # 1.4 at the top, -0.4 at the bottom: room outside each row for the past Octobers' stacks
         xs = np.linspace(0, 1, 101); Xs = np.column_stack([np.ones_like(xs), xs]); eta = Xs @ b
         se_eta = np.sqrt(np.einsum('ij,jk,ik->i', Xs, cov, Xs)); sig = lambda z: 1 / (1 + np.exp(-z))
         lo, hi, fitc = sig(eta - 1.96 * se_eta), sig(eta + 1.96 * se_eta), sig(eta)
@@ -402,7 +402,7 @@ def logit_section():
         curve = 'M' + ' L'.join('%.1f,%.1f' % (X(a), Y(c)) for a, c in zip(xs, fitc))
         g = ['<svg class="logit" viewBox="0 0 %d %d" role="img" aria-label="Logistic regression of the real result on the replays\' win share, %d games">' % (W, H, len(D) + len(Dp))]
         for t in range(0, 11):   # grid and the x axis
-            v = t / 10; g.append('<line class="gl" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (X(v), Y(1.3), X(v), Y(-0.3)))
+            v = t / 10; g.append('<line class="gl" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (X(v), Y(1.4), X(v), Y(-0.4)))
             g.append('<text class="tk" x="%.1f" y="%.1f" text-anchor="middle">%d%%</text>' % (X(v), H - B + 18, 10 * t))
         for v, lab in ((0, 'lost'), (0.25, '25%'), (0.5, '50%'), (0.75, '75%'), (1, 'won')):
             g.append('<line class="gl" x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f"/>' % (X(0), Y(v), X(1), Y(v)))
@@ -444,7 +444,9 @@ def logit_section():
         signif.append(p_lr < 0.05 or p_wald < 0.05)
         figs.append('<div data-set="%s"><div class="scroll">%s</div><p class="tally">%s</p></div>' % (key, '\n'.join(g), stats_line))
     n = len(rows(SETS[0][1])) + len([q for q in PAST if SETS[0][0] in q['p']])
-    past_txt = (' Filled points are this October&#39;s games; hollow points are the %d games of the 2025 postseason, replayed the same way with each player&#39;s traits as they stood that October (fitted to his 2024 and 2025 seasons, tied by how much each trait carries over from one season to the next), and the fit uses both Octobers.' % len(set(q['pk'] for q in PAST))) if PAST else ''
+    yrs = sorted({q['yr'] for q in PAST}); ylab = ' and '.join(str(y) for y in yrs)
+    past_txt = (' Filled points are this October&#39;s games; hollow points are the %d games of the %s postseason%s, replayed the same way with each player&#39;s traits as they stood that October (fitted to that season and the one before, tied by how much each trait carries over from one season to the next), and the fit uses every October.' % (
+        len(set(q['pk'] for q in PAST)), ylab, 's' if len(yrs) > 1 else '')) if PAST else ''
     verdict = ('but with only %d games the rise is not significant at the usual 0.05 level under any of the four settings: the uncertainty is wide enough to include no relationship at all.' % n
                if not any(signif) else 'and the tests under the figure say whether, with only %d games, the rise is significant at the usual 0.05 level for the setting shown.' % n)
     return ('<section class="series logit-sec" id="regression"><h2><span class="tag">FIT</span> Did the replays pick the game winners?</h2>'
@@ -452,7 +454,7 @@ def logit_section():
             '%s'
             '<div class="howto"><span class="k"><span class="sw fit" aria-hidden="true"></span> logistic fit</span><span class="k"><span class="sw band" aria-hidden="true"></span> its 95%% band</span>'
             '<span class="k"><span class="sw diag" aria-hidden="true"></span> a perfectly calibrated forecast</span>%s</div></section>') % (past_txt, verdict, '\n'.join(figs),
-            '<span class="k"><span class="sw dot" aria-hidden="true"></span> this October</span><span class="k"><span class="sw dot past" aria-hidden="true"></span> 2025</span>' if PAST else '')
+            '<span class="k"><span class="sw dot" aria-hidden="true"></span> this October</span><span class="k"><span class="sw dot past" aria-hidden="true"></span> %s</span>' % ylab if PAST else '')
 
 
 def main(path):

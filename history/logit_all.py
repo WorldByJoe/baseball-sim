@@ -8,7 +8,8 @@ whether it won the real game), per setting, from each October's worktree. Two fi
                         replays are too timid (real results follow them more steeply), c < 1 if too bold
 with the likelihood-ratio test of each against the intercept alone, and the same fits per October.
 
-  python3 history/logit_all.py      (also writes history/points_<year>.json for each past October)
+  python3 history/logit_all.py [--refit]     (also writes history/points_<year>.json for each past October; --refit: 2026 from
+                                               the history-2026 worktree)
 CHANGED
   v0.1  first build (Joe, 2026-10-12)
 """
@@ -19,8 +20,9 @@ REV = os.path.expanduser('~/bsim-wt/review')
 sys.path.insert(0, os.path.join(REV, 'review'))
 from replay_grids import GAMES, SETS
 
-OCT = {2026: (REV, [g[0] for g in GAMES]),
-       2025: (os.path.expanduser('~/bsim-wt/hist2025'), [g['pk'] for g in json.load(open(os.path.join(REV, 'history', 'participants_2025.json')))['games']])}
+def past(y): return (os.path.expanduser('~/bsim-wt/hist%d' % y), [g['pk'] for g in json.load(open(os.path.join(REV, 'history', 'participants_%d.json' % y)))['games']])
+# 2026 from the live review worktree (its original 2025-26 pooled fits), or with --refit from the history-2026 worktree (through 2026)
+OCT = {2026: (os.path.expanduser('~/bsim-wt/hist2026') if '--refit' in sys.argv else REV, [g[0] for g in GAMES]), 2025: past(2025), 2024: past(2024)}
 
 
 def rows(key, d):
@@ -47,7 +49,7 @@ def main():
         D = rows(key, d)
         if not D: continue
         res[key] = {}
-        for lab, sub in (('all', D), ('2026', [r for r in D if r['yr'] == 2026]), ('2025', [r for r in D if r['yr'] == 2025])):
+        for lab, sub in [('all', D)] + [(str(y), [r for r in D if r['yr'] == y]) for y in sorted(OCT, reverse=True)]:
             if len(sub) < 5: continue
             p = np.array([r['p'] for r in sub]); y = np.array([r['y'] for r in sub]); lp = np.log(p / (1 - p))
             b = fit(p, y); c = fit(lp, y)

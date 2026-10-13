@@ -1,40 +1,40 @@
 {
  "season": {
   "all": {
-   "n": 66,
-   "homeWins": 35,
-   "shareSd": 0.059,
-   "favouriteWon": 34,
+   "n": 109,
+   "homeWins": 57,
+   "shareSd": 0.06,
+   "favouriteWon": 58,
    "slope": [
-    8.03,
-    4.58
+    4.52,
+    3.28
    ],
-   "lrP": 0.0679,
-   "mcfadden": 0.037,
+   "lrP": 0.1628,
+   "mcfadden": 0.013,
    "calib": [
-    2.0,
-    1.13
+    1.11,
+    0.81
    ],
-   "calibP0": 0.0653,
-   "calibP1": 0.377
+   "calibP0": 0.163,
+   "calibP1": 0.891
   },
   "2026": {
    "n": 19,
    "homeWins": 9,
-   "shareSd": 0.081,
-   "favouriteWon": 10,
+   "shareSd": 0.086,
+   "favouriteWon": 9,
    "slope": [
-    12.85,
-    7.6
+    10.99,
+    6.71
    ],
-   "lrP": 0.0545,
-   "mcfadden": 0.141,
+   "lrP": 0.0707,
+   "mcfadden": 0.124,
    "calib": [
-    3.18,
-    1.88
+    2.72,
+    1.65
    ],
-   "calibP0": 0.0525,
-   "calibP1": 0.245
+   "calibP0": 0.0676,
+   "calibP1": 0.296
   },
   "2025": {
    "n": 47,
@@ -53,44 +53,62 @@
    ],
    "calibP0": 0.3858,
    "calibP1": 0.811
+  },
+  "2024": {
+   "n": 43,
+   "homeWins": 22,
+   "shareSd": 0.059,
+   "favouriteWon": 25,
+   "slope": [
+    0.35,
+    5.19
+   ],
+   "lrP": 0.9459,
+   "mcfadden": 0.0,
+   "calib": [
+    0.06,
+    1.28
+   ],
+   "calibP0": 0.9646,
+   "calibP1": 0.46
   }
  },
  "pitched": {
   "all": {
-   "n": 66,
-   "homeWins": 35,
-   "shareSd": 0.063,
-   "favouriteWon": 37,
+   "n": 109,
+   "homeWins": 57,
+   "shareSd": 0.065,
+   "favouriteWon": 59,
    "slope": [
-    7.53,
-    4.26
+    3.14,
+    3.0
    ],
-   "lrP": 0.0663,
-   "mcfadden": 0.037,
+   "lrP": 0.2922,
+   "mcfadden": 0.007,
    "calib": [
-    1.87,
-    1.05
+    0.77,
+    0.74
    ],
-   "calibP0": 0.0638,
-   "calibP1": 0.406
+   "calibP0": 0.2919,
+   "calibP1": 0.758
   },
   "2026": {
    "n": 19,
    "homeWins": 9,
-   "shareSd": 0.087,
+   "shareSd": 0.086,
    "favouriteWon": 10,
    "slope": [
-    10.22,
-    6.42
+    7.83,
+    6.1
    ],
-   "lrP": 0.0837,
-   "mcfadden": 0.114,
+   "lrP": 0.1758,
+   "mcfadden": 0.07,
    "calib": [
-    2.54,
-    1.58
+    1.95,
+    1.49
    ],
-   "calibP0": 0.0799,
-   "calibP1": 0.33
+   "calibP0": 0.1692,
+   "calibP1": 0.527
   },
   "2025": {
    "n": 47,
@@ -109,44 +127,62 @@
    ],
    "calibP0": 0.2616,
    "calibP1": 0.643
+  },
+  "2024": {
+   "n": 43,
+   "homeWins": 22,
+   "shareSd": 0.066,
+   "favouriteWon": 22,
+   "slope": [
+    -0.37,
+    4.71
+   ],
+   "lrP": 0.9376,
+   "mcfadden": 0.0,
+   "calib": [
+    -0.11,
+    1.16
+   ],
+   "calibP0": 0.9235,
+   "calibP1": 0.338
   }
  },
  "errors": {
   "all": {
-   "n": 66,
-   "homeWins": 35,
+   "n": 109,
+   "homeWins": 57,
    "shareSd": 0.062,
-   "favouriteWon": 35,
+   "favouriteWon": 64,
    "slope": [
-    9.59,
-    4.61
+    5.26,
+    3.25
    ],
-   "lrP": 0.0266,
-   "mcfadden": 0.054,
+   "lrP": 0.0991,
+   "mcfadden": 0.018,
    "calib": [
-    2.38,
-    1.14
+    1.29,
+    0.8
    ],
-   "calibP0": 0.0255,
-   "calibP1": 0.227
+   "calibP0": 0.1013,
+   "calibP1": 0.72
   },
   "2026": {
    "n": 19,
    "homeWins": 9,
-   "shareSd": 0.09,
-   "favouriteWon": 11,
+   "shareSd": 0.087,
+   "favouriteWon": 10,
    "slope": [
-    12.7,
-    7.15
+    9.21,
+    6.37
    ],
-   "lrP": 0.0391,
-   "mcfadden": 0.162,
+   "lrP": 0.1191,
+   "mcfadden": 0.092,
    "calib": [
-    3.13,
-    1.76
+    2.27,
+    1.56
    ],
-   "calibP0": 0.0375,
-   "calibP1": 0.225
+   "calibP0": 0.116,
+   "calibP1": 0.415
   },
   "2025": {
    "n": 47,
@@ -165,43 +201,61 @@
    ],
    "calibP0": 0.1941,
    "calibP1": 0.489
+  },
+  "2024": {
+   "n": 43,
+   "homeWins": 22,
+   "shareSd": 0.062,
+   "favouriteWon": 30,
+   "slope": [
+    2.44,
+    5.02
+   ],
+   "lrP": 0.6265,
+   "mcfadden": 0.004,
+   "calib": [
+    0.56,
+    1.24
+   ],
+   "calibP0": 0.6484,
+   "calibP1": 0.724
   }
  },
  "both": {
   "all": {
-   "n": 66,
-   "homeWins": 35,
-   "shareSd": 0.064,
-   "favouriteWon": 39,
+   "n": 109,
+   "homeWins": 57,
+   "shareSd": 0.062,
+   "favouriteWon": 63,
    "slope": [
-    9.61,
-    4.4
+    6.85,
+    3.3
    ],
-   "lrP": 0.0202,
-   "mcfadden": 0.059,
+   "lrP": 0.0327,
+   "mcfadden": 0.03,
    "calib": [
-    2.38,
-    1.09
+    1.68,
+    0.81
    ],
-   "calibP0": 0.0196,
-   "calibP1": 0.204
+   "calibP0": 0.0334,
+   "calibP1": 0.402
   },
   "2026": {
    "n": 19,
    "homeWins": 9,
-   "shareSd": 0.088,
-   "favouriteWon": 11,
+   "shareSd": 0.079,
+   "favouriteWon": 10,
    "slope": [
-    10.68,
-    6.56
+    11.39,
+    7.18
    ],
-   "lrP": 0.0731,
-   "mcfadden": 0.122,
+   "lrP": 0.082,
+   "mcfadden": 0.115,
    "calib": [
-    2.65,
-    1.62
+    2.8,
+    1.76
    ],
-   "calibP0": 0.0697,
+   "calibP0": 0.0811,
    "calibP1": 0.307
   },
   "2025": {
@@ -221,6 +275,24 @@
    ],
    "calibP0": 0.0712,
    "calibP1": 0.27
+  },
+  "2024": {
+   "n": 43,
+   "homeWins": 22,
+   "shareSd": 0.061,
+   "favouriteWon": 25,
+   "slope": [
+    3.7,
+    5.1
+   ],
+   "lrP": 0.4657,
+   "mcfadden": 0.009,
+   "calib": [
+    0.89,
+    1.26
+   ],
+   "calibP0": 0.4752,
+   "calibP1": 0.932
   }
  }
 }

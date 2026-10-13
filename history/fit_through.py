@@ -1,5 +1,5 @@
 """
-fit_through.py · v0.2 · 2026-10-12
+fit_through.py · v0.3 · 2026-10-12
 
 Each postseason hitter's hidden traits as they stood that October: history/seasons.py's carry-over model given his seasons
 up to and including S (none after), then review/fit_hitters.py's refinement on the simulator itself (4 steps of 1,500
@@ -14,6 +14,7 @@ change, not about any one player, so using it for an earlier October borrows no 
   python3 HIST/fit_through.py 2025 [refinement steps] [PA a step]      (from the worktree's root)
 
 CHANGED
+  v0.3  a pitcher who appears in a batting order gets hitting traits (the population's, without hitting data)
   v0.2  the age trend (history/aging.py): each season's prior mean moves with his age, so the step from one season to the next
         carries a year of aging (off by default since Joe pinned it: python3 HIST/fit_through.py S steps PA age)
   v0.1  first build (Joe, 2026-10-12)
@@ -48,8 +49,10 @@ def main(S, iters, npa, age=True):
     Z = (E['X'] - E['mu']) / E['sd']; Cpop = np.cov(Z.T)[SE.NK:, SE.NK:]
     rng = np.random.default_rng(20261012); fits = {}; kinds = {'S': 0, 'earlier': 0, 'none': 0}
     clip = lambda k, v: min(max(v, FH.RANGE[k][0]), FH.RANGE[k][1])
+    batted = {q['id'] for g in json.load(open(os.path.join(HIST, 'participants_%d.json' % S)))['games'] if os.path.exists('review/games/%d.json' % g['pk'])
+              for side in ('away', 'home') for q in json.load(open('review/games/%d.json' % g['pk']))['lineups'][side]}
     for p in part:
-        if p['kind'] == 'pitcher': continue
+        if p['kind'] == 'pitcher' and p['id'] not in batted: continue   # a pitcher in a batting order (his team lost the DH) needs hitting traits too
         r = allrecs.get(p['id']); P, ys = [], []
         if r and (r['summaries'].get('hitting') or {}):
             for y in years:

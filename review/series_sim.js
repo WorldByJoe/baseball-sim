@@ -1,5 +1,5 @@
 /* ============================================================================
-   series_sim.js · v0.1 · 2026-10-08
+   series_sim.js · v0.2 · 2026-10-13
 
    A best-of-seven series played many times before its first pitch (review/series_spec.py): each team's
    latest division series lineup, its four-man rotation in order (game k's starter is rotation[k mod 4]), its
@@ -13,6 +13,7 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js bb_game.js review/players.js review/series_sim.js -- SPEC [series] [seed] [part] [parts] [G]
 
    CHANGED
+     v0.2  any length: the series is as long as its home pattern (3, 5 or 7 games; first to a majority wins)
      v0.1  first build (Joe, 2026-10-08: the LCS and the World Series before Game 1)
 ============================================================================ */
 (function (A) {
@@ -52,12 +53,13 @@
     if (s % PARTS !== PART) continue;
     var draw = {}; draw[S.hi] = Math.floor(rng.u() * 40); draw[S.lo] = Math.floor(rng.u() * 40);   // one man all week
     var wins = {}; wins[S.hi] = 0; wins[S.lo] = 0; var games = [];
-    for (var g = 0; g < 7 && wins[S.hi] < 4 && wins[S.lo] < 4; g++) {
+    var NG = S.homeOf.length, NEED = Math.ceil(NG / 2);   // best of 3, 5 or 7
+    for (var g = 0; g < NG && wins[S.hi] < NEED && wins[S.lo] < NEED; g++) {
       var home = S.homeOf[g] === 'hi' ? S.hi : S.lo, away = home === S.hi ? S.lo : S.hi;
       var GM = BBGame.simGame(team(away, home, draw[away], g), team(home, home, draw[home], g), { rng: rng, env: envOf(home), rules: 'AL', ghost: false, maxInnings: 60 });
       var w = GM.score[1] > GM.score[0] ? home : away; wins[w]++;
       games.push([away, GM.score[0], home, GM.score[1], GM.finalInning]);
     }
-    print(JSON.stringify({ s: s, winner: wins[S.hi] === 4 ? S.hi : S.lo, games: games.length, wins: wins, played: games }));
+    print(JSON.stringify({ s: s, winner: wins[S.hi] === NEED ? S.hi : S.lo, games: games.length, wins: wins, played: games }));
   }
 })(typeof arguments !== 'undefined' ? arguments : []);

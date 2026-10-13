@@ -1,5 +1,5 @@
 """
-replay_view.py · v0.3 · 2026-10-12
+replay_view.py · v0.4 · 2026-10-13
 
 The inputs a postseason's replays read, as they stood that October, written into a worktree of their own (the review's
 scripts read fixed paths, so a past October gets its own checkout, e.g. ~/bsim-wt/hist2025):
@@ -16,6 +16,7 @@ scripts read fixed paths, so a past October gets its own checkout, e.g. ~/bsim-w
   python3 history/replay_view.py 2025 ~/bsim-wt/hist2025
 
 CHANGED
+  v0.4  a man with neither season (back from injury) takes his latest earlier regular season as last season
   v0.3  the age trend in a pitcher's rates through S (history/aging.py): each season's expected rate moves with his age
   v0.2  only that October's participants, on the teams they played for then (the history files hold every October's men)
   v0.1  first build (Joe, 2026-10-12: the 2025 playoffs in the logistic regression)
@@ -34,6 +35,9 @@ def relabel(o, S):
         if yk:
             out = {k: relabel(v, S) for k, v in o.items() if not (k.isdigit() and len(k) == 4) and k != 'pooled'}
             cur, prev = o.get(str(S)), o.get(str(S - 1))
+            if cur is None and prev is None:   # neither season (a man back from injury): his latest season before them, as last season
+                older = [int(k) for k in yk if int(k) < S - 1 and o.get(k) is not None]
+                if older: prev = o[str(max(older))]
             if cur is not None: out['2026'] = relabel(cur, S)
             if prev is not None: out['2025'] = relabel(prev, S)
             pick = cur if cur is not None else prev

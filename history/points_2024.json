@@ -1,0 +1,518 @@
+[
+ {
+  "pk": 775294,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 World Series Game 2, New York Yankees at Los Angeles Dodgers",
+  "p": {
+   "season": 0.536,
+   "pitched": 0.494,
+   "errors": 0.546,
+   "both": 0.498
+  }
+ },
+ {
+  "pk": 775296,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 World Series Game 5, Los Angeles Dodgers at New York Yankees",
+  "p": {
+   "season": 0.493,
+   "pitched": 0.455,
+   "errors": 0.475,
+   "both": 0.478
+  }
+ },
+ {
+  "pk": 775297,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 World Series Game 4, Los Angeles Dodgers at New York Yankees",
+  "p": {
+   "season": 0.51,
+   "pitched": 0.489,
+   "errors": 0.506,
+   "both": 0.498
+  }
+ },
+ {
+  "pk": 775298,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 World Series Game 3, Los Angeles Dodgers at New York Yankees",
+  "p": {
+   "season": 0.536,
+   "pitched": 0.595,
+   "errors": 0.582,
+   "both": 0.618
+  }
+ },
+ {
+  "pk": 775299,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 NLCS Game 5, Los Angeles Dodgers at New York Mets",
+  "p": {
+   "season": 0.421,
+   "pitched": 0.422,
+   "errors": 0.436,
+   "both": 0.435
+  }
+ },
+ {
+  "pk": 775300,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 World Series Game 1, New York Yankees at Los Angeles Dodgers",
+  "p": {
+   "season": 0.522,
+   "pitched": 0.471,
+   "errors": 0.502,
+   "both": 0.474
+  }
+ },
+ {
+  "pk": 775302,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 NLCS Game 6, New York Mets at Los Angeles Dodgers",
+  "p": {
+   "season": 0.515,
+   "pitched": 0.542,
+   "errors": 0.512,
+   "both": 0.518
+  }
+ },
+ {
+  "pk": 775303,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 NLCS Game 4, Los Angeles Dodgers at New York Mets",
+  "p": {
+   "season": 0.386,
+   "pitched": 0.393,
+   "errors": 0.416,
+   "both": 0.423
+  }
+ },
+ {
+  "pk": 775305,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 NLCS Game 3, Los Angeles Dodgers at New York Mets",
+  "p": {
+   "season": 0.476,
+   "pitched": 0.457,
+   "errors": 0.444,
+   "both": 0.455
+  }
+ },
+ {
+  "pk": 775306,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 NLCS Game 2, New York Mets at Los Angeles Dodgers",
+  "p": {
+   "season": 0.517,
+   "pitched": 0.508,
+   "errors": 0.494,
+   "both": 0.517
+  }
+ },
+ {
+  "pk": 775307,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 NLCS Game 1, New York Mets at Los Angeles Dodgers",
+  "p": {
+   "season": 0.573,
+   "pitched": 0.587,
+   "errors": 0.566,
+   "both": 0.554
+  }
+ },
+ {
+  "pk": 775309,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 ALCS Game 5, New York Yankees at Cleveland Guardians",
+  "p": {
+   "season": 0.45,
+   "pitched": 0.408,
+   "errors": 0.426,
+   "both": 0.386
+  }
+ },
+ {
+  "pk": 775310,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 ALCS Game 3, New York Yankees at Cleveland Guardians",
+  "p": {
+   "season": 0.459,
+   "pitched": 0.457,
+   "errors": 0.433,
+   "both": 0.507
+  }
+ },
+ {
+  "pk": 775311,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 ALCS Game 4, New York Yankees at Cleveland Guardians",
+  "p": {
+   "season": 0.478,
+   "pitched": 0.42,
+   "errors": 0.461,
+   "both": 0.412
+  }
+ },
+ {
+  "pk": 775312,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 ALCS Game 2, Cleveland Guardians at New York Yankees",
+  "p": {
+   "season": 0.529,
+   "pitched": 0.532,
+   "errors": 0.54,
+   "both": 0.573
+  }
+ },
+ {
+  "pk": 775313,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 NLDS 'B' Game 4 - Time Subject to Change, Philadelphia Phillies at New York Mets",
+  "p": {
+   "season": 0.353,
+   "pitched": 0.36,
+   "errors": 0.379,
+   "both": 0.373
+  }
+ },
+ {
+  "pk": 775314,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 ALCS Game 1, Cleveland Guardians at New York Yankees",
+  "p": {
+   "season": 0.587,
+   "pitched": 0.558,
+   "errors": 0.585,
+   "both": 0.578
+  }
+ },
+ {
+  "pk": 775316,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 NLDS 'B' Game 3, Philadelphia Phillies at New York Mets",
+  "p": {
+   "season": 0.436,
+   "pitched": 0.438,
+   "errors": 0.468,
+   "both": 0.463
+  }
+ },
+ {
+  "pk": 775317,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 NLDS 'A' Game 5, San Diego Padres at Los Angeles Dodgers",
+  "p": {
+   "season": 0.558,
+   "pitched": 0.535,
+   "errors": 0.566,
+   "both": 0.514
+  }
+ },
+ {
+  "pk": 775318,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 NLDS 'B' Game 1, New York Mets at Philadelphia Phillies",
+  "p": {
+   "season": 0.654,
+   "pitched": 0.635,
+   "errors": 0.656,
+   "both": 0.613
+  }
+ },
+ {
+  "pk": 775319,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 NLDS 'B' Game 2, New York Mets at Philadelphia Phillies",
+  "p": {
+   "season": 0.558,
+   "pitched": 0.569,
+   "errors": 0.569,
+   "both": 0.55
+  }
+ },
+ {
+  "pk": 775320,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 NLDS 'A' Game 4 , Los Angeles Dodgers at San Diego Padres",
+  "p": {
+   "season": 0.449,
+   "pitched": 0.467,
+   "errors": 0.454,
+   "both": 0.442
+  }
+ },
+ {
+  "pk": 775321,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 NLDS 'A' Game 3, Los Angeles Dodgers at San Diego Padres",
+  "p": {
+   "season": 0.554,
+   "pitched": 0.577,
+   "errors": 0.554,
+   "both": 0.589
+  }
+ },
+ {
+  "pk": 775322,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 NLDS 'A' Game 2, San Diego Padres at Los Angeles Dodgers",
+  "p": {
+   "season": 0.482,
+   "pitched": 0.508,
+   "errors": 0.483,
+   "both": 0.483
+  }
+ },
+ {
+  "pk": 775323,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 NLDS 'A' Game 1, San Diego Padres at Los Angeles Dodgers",
+  "p": {
+   "season": 0.535,
+   "pitched": 0.557,
+   "errors": 0.537,
+   "both": 0.564
+  }
+ },
+ {
+  "pk": 775324,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 ALDS 'B' Game 1, Detroit Tigers at Cleveland Guardians",
+  "p": {
+   "season": 0.507,
+   "pitched": 0.536,
+   "errors": 0.55,
+   "both": 0.561
+  }
+ },
+ {
+  "pk": 775325,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 ALDS 'B' Game 2, Detroit Tigers at Cleveland Guardians",
+  "p": {
+   "season": 0.538,
+   "pitched": 0.52,
+   "errors": 0.483,
+   "both": 0.523
+  }
+ },
+ {
+  "pk": 775326,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 ALDS 'B' Game 5, Detroit Tigers at Cleveland Guardians",
+  "p": {
+   "season": 0.489,
+   "pitched": 0.492,
+   "errors": 0.501,
+   "both": 0.53
+  }
+ },
+ {
+  "pk": 775327,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 ALDS 'B' Game 4 - Time Subject to Change, Cleveland Guardians at Detroit Tigers",
+  "p": {
+   "season": 0.492,
+   "pitched": 0.498,
+   "errors": 0.498,
+   "both": 0.478
+  }
+ },
+ {
+  "pk": 775328,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 ALDS 'B' Game 3 - Time Subject to Change, Cleveland Guardians at Detroit Tigers",
+  "p": {
+   "season": 0.529,
+   "pitched": 0.485,
+   "errors": 0.544,
+   "both": 0.496
+  }
+ },
+ {
+  "pk": 775329,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 ALDS 'A' Game 3 - Time Subject to Change, New York Yankees at Kansas City Royals",
+  "p": {
+   "season": 0.417,
+   "pitched": 0.461,
+   "errors": 0.45,
+   "both": 0.477
+  }
+ },
+ {
+  "pk": 775331,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 ALDS 'A' Game 4, New York Yankees at Kansas City Royals",
+  "p": {
+   "season": 0.432,
+   "pitched": 0.413,
+   "errors": 0.42,
+   "both": 0.41
+  }
+ },
+ {
+  "pk": 775332,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 ALDS 'A' Game 2, Kansas City Royals at New York Yankees",
+  "p": {
+   "season": 0.518,
+   "pitched": 0.583,
+   "errors": 0.525,
+   "both": 0.543
+  }
+ },
+ {
+  "pk": 775333,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 NL Wild Card Series , Atlanta Braves at San Diego Padres",
+  "p": {
+   "season": 0.503,
+   "pitched": 0.557,
+   "errors": 0.514,
+   "both": 0.551
+  }
+ },
+ {
+  "pk": 775334,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 ALDS 'A' Game 1, Kansas City Royals at New York Yankees",
+  "p": {
+   "season": 0.559,
+   "pitched": 0.569,
+   "errors": 0.585,
+   "both": 0.57
+  }
+ },
+ {
+  "pk": 775336,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 NL Wild Card Series , Atlanta Braves at San Diego Padres",
+  "p": {
+   "season": 0.497,
+   "pitched": 0.51,
+   "errors": 0.529,
+   "both": 0.513
+  }
+ },
+ {
+  "pk": 775337,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 NL Wild Card Series , New York Mets at Milwaukee Brewers",
+  "p": {
+   "season": 0.57,
+   "pitched": 0.598,
+   "errors": 0.599,
+   "both": 0.571
+  }
+ },
+ {
+  "pk": 775339,
+  "yr": 2024,
+  "y": 1,
+  "label": "2024 NL Wild Card Series , New York Mets at Milwaukee Brewers",
+  "p": {
+   "season": 0.5,
+   "pitched": 0.516,
+   "errors": 0.53,
+   "both": 0.533
+  }
+ },
+ {
+  "pk": 775340,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 NL Wild Card Series , New York Mets at Milwaukee Brewers",
+  "p": {
+   "season": 0.63,
+   "pitched": 0.633,
+   "errors": 0.64,
+   "both": 0.621
+  }
+ },
+ {
+  "pk": 775341,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 AL Wild Card Series , Kansas City Royals at Baltimore Orioles",
+  "p": {
+   "season": 0.556,
+   "pitched": 0.547,
+   "errors": 0.579,
+   "both": 0.537
+  }
+ },
+ {
+  "pk": 775343,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 AL Wild Card Series , Kansas City Royals at Baltimore Orioles",
+  "p": {
+   "season": 0.537,
+   "pitched": 0.534,
+   "errors": 0.537,
+   "both": 0.534
+  }
+ },
+ {
+  "pk": 775344,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 AL Wild Card Series , Detroit Tigers at Houston Astros",
+  "p": {
+   "season": 0.547,
+   "pitched": 0.558,
+   "errors": 0.558,
+   "both": 0.574
+  }
+ },
+ {
+  "pk": 775345,
+  "yr": 2024,
+  "y": 0,
+  "label": "2024 AL Wild Card Series , Detroit Tigers at Houston Astros",
+  "p": {
+   "season": 0.536,
+   "pitched": 0.583,
+   "errors": 0.561,
+   "both": 0.544
+  }
+ }
+]
