@@ -1,0 +1,455 @@
+{
+ "games": 2429,
+ "halves": {
+  "h1": {
+   "games": 96,
+   "realSd": 6.02,
+   "luckSd": 4.91,
+   "ceiling": 0.58,
+   "model": {
+    "corr": 0.331,
+    "rmse": 5.82,
+    "spread": 3.65
+   },
+   "other half": {
+    "corr": 0.651,
+    "rmse": 6.38,
+    "spread": 8.52
+   },
+   "last season": {
+    "corr": 0.381,
+    "rmse": 7.13,
+    "spread": 6.93
+   }
+  },
+  "h2": {
+   "games": 65,
+   "realSd": 6.12,
+   "luckSd": 4.05,
+   "ceiling": 0.749,
+   "model": {
+    "corr": 0.525,
+    "rmse": 5.16,
+    "spread": 2.54
+   },
+   "other half": {
+    "corr": 0.689,
+    "rmse": 4.36,
+    "spread": 4.37
+   },
+   "last season": {
+    "corr": 0.61,
+    "rmse": 4.88,
+    "spread": 4.79
+   }
+  }
+ },
+ "finalForecast": {
+  "model": {
+   "rmse": 5.16,
+   "corr": 0.902,
+   "divisionWinners": 4,
+   "postseasonTeams": 9,
+   "meanDivisionSpearman": 0.95
+  },
+  "first-half pace": {
+   "rmse": 4.36,
+   "corr": 0.916,
+   "divisionWinners": 4,
+   "postseasonTeams": 9,
+   "meanDivisionSpearman": 0.9
+  },
+  "0.500 the rest of the way": {
+   "rmse": 5.83,
+   "corr": 0.915,
+   "divisionWinners": 5,
+   "postseasonTeams": 9,
+   "meanDivisionSpearman": 0.91
+  }
+ },
+ "table": [
+  {
+   "team": "CLE",
+   "name": "Cleveland Guardians",
+   "division": "AL Central",
+   "real": 85,
+   "realLosses": 77,
+   "firstHalf": 51,
+   "forecast": 83.0,
+   "pace": 85.2,
+   "secondHalfExpected": 32.0,
+   "secondHalfReal": 34
+  },
+  {
+   "team": "CWS",
+   "name": "Chicago White Sox",
+   "division": "AL Central",
+   "real": 84,
+   "realLosses": 78,
+   "firstHalf": 50,
+   "forecast": 82.2,
+   "pace": 85.3,
+   "secondHalfExpected": 32.2,
+   "secondHalfReal": 34
+  },
+  {
+   "team": "MIN",
+   "name": "Minnesota Twins",
+   "division": "AL Central",
+   "real": 77,
+   "realLosses": 85,
+   "firstHalf": 48,
+   "forecast": 82.0,
+   "pace": 80.2,
+   "secondHalfExpected": 34.0,
+   "secondHalfReal": 29
+  },
+  {
+   "team": "DET",
+   "name": "Detroit Tigers",
+   "division": "AL Central",
+   "real": 76,
+   "realLosses": 86,
+   "firstHalf": 44,
+   "forecast": 79.1,
+   "pace": 74.2,
+   "secondHalfExpected": 35.1,
+   "secondHalfReal": 32
+  },
+  {
+   "team": "KC",
+   "name": "Kansas City Royals",
+   "division": "AL Central",
+   "real": 69,
+   "realLosses": 93,
+   "firstHalf": 38,
+   "forecast": 67.3,
+   "pace": 63.5,
+   "secondHalfExpected": 29.3,
+   "secondHalfReal": 31
+  },
+  {
+   "team": "TB",
+   "name": "Tampa Bay Rays",
+   "division": "AL East",
+   "real": 98,
+   "realLosses": 64,
+   "firstHalf": 56,
+   "forecast": 92.0,
+   "pace": 96.5,
+   "secondHalfExpected": 36.0,
+   "secondHalfReal": 42
+  },
+  {
+   "team": "NYY",
+   "name": "New York Yankees",
+   "division": "AL East",
+   "real": 93,
+   "realLosses": 68,
+   "firstHalf": 54,
+   "forecast": 87.8,
+   "pace": 90.6,
+   "secondHalfExpected": 33.8,
+   "secondHalfReal": 39
+  },
+  {
+   "team": "BOS",
+   "name": "Boston Red Sox",
+   "division": "AL East",
+   "real": 87,
+   "realLosses": 75,
+   "firstHalf": 46,
+   "forecast": 81.9,
+   "pace": 79.3,
+   "secondHalfExpected": 35.9,
+   "secondHalfReal": 41
+  },
+  {
+   "team": "BAL",
+   "name": "Baltimore Orioles",
+   "division": "AL East",
+   "real": 79,
+   "realLosses": 82,
+   "firstHalf": 46,
+   "forecast": 77.8,
+   "pace": 76.4,
+   "secondHalfExpected": 31.8,
+   "secondHalfReal": 33
+  },
+  {
+   "team": "TOR",
+   "name": "Toronto Blue Jays",
+   "division": "AL East",
+   "real": 79,
+   "realLosses": 83,
+   "firstHalf": 45,
+   "forecast": 76.1,
+   "pace": 75.9,
+   "secondHalfExpected": 31.1,
+   "secondHalfReal": 34
+  },
+  {
+   "team": "HOU",
+   "name": "Houston Astros",
+   "division": "AL West",
+   "real": 81,
+   "realLosses": 81,
+   "firstHalf": 47,
+   "forecast": 79.8,
+   "pace": 77.7,
+   "secondHalfExpected": 32.8,
+   "secondHalfReal": 34
+  },
+  {
+   "team": "TEX",
+   "name": "Texas Rangers",
+   "division": "AL West",
+   "real": 80,
+   "realLosses": 82,
+   "firstHalf": 49,
+   "forecast": 81.7,
+   "pace": 82.7,
+   "secondHalfExpected": 32.6,
+   "secondHalfReal": 31
+  },
+  {
+   "team": "SEA",
+   "name": "Seattle Mariners",
+   "division": "AL West",
+   "real": 76,
+   "realLosses": 86,
+   "firstHalf": 48,
+   "forecast": 78.3,
+   "pace": 80.2,
+   "secondHalfExpected": 30.3,
+   "secondHalfReal": 28
+  },
+  {
+   "team": "ATH",
+   "name": "Athletics",
+   "division": "AL West",
+   "real": 64,
+   "realLosses": 98,
+   "firstHalf": 41,
+   "forecast": 71.2,
+   "pace": 69.2,
+   "secondHalfExpected": 30.2,
+   "secondHalfReal": 23
+  },
+  {
+   "team": "LAA",
+   "name": "Los Angeles Angels",
+   "division": "AL West",
+   "real": 62,
+   "realLosses": 100,
+   "firstHalf": 38,
+   "forecast": 69.5,
+   "pace": 63.5,
+   "secondHalfExpected": 31.6,
+   "secondHalfReal": 24
+  },
+  {
+   "team": "MIL",
+   "name": "Milwaukee Brewers",
+   "division": "NL Central",
+   "real": 103,
+   "realLosses": 59,
+   "firstHalf": 59,
+   "forecast": 96.8,
+   "pace": 99.6,
+   "secondHalfExpected": 37.8,
+   "secondHalfReal": 44
+  },
+  {
+   "team": "CHC",
+   "name": "Chicago Cubs",
+   "division": "NL Central",
+   "real": 89,
+   "realLosses": 73,
+   "firstHalf": 54,
+   "forecast": 87.7,
+   "pace": 91.1,
+   "secondHalfExpected": 33.7,
+   "secondHalfReal": 35
+  },
+  {
+   "team": "PIT",
+   "name": "Pittsburgh Pirates",
+   "division": "NL Central",
+   "real": 82,
+   "realLosses": 80,
+   "firstHalf": 50,
+   "forecast": 85.0,
+   "pace": 83.5,
+   "secondHalfExpected": 35.0,
+   "secondHalfReal": 32
+  },
+  {
+   "team": "STL",
+   "name": "St. Louis Cardinals",
+   "division": "NL Central",
+   "real": 77,
+   "realLosses": 85,
+   "firstHalf": 50,
+   "forecast": 82.2,
+   "pace": 85.3,
+   "secondHalfExpected": 32.2,
+   "secondHalfReal": 27
+  },
+  {
+   "team": "CIN",
+   "name": "Cincinnati Reds",
+   "division": "NL Central",
+   "real": 75,
+   "realLosses": 87,
+   "firstHalf": 43,
+   "forecast": 77.7,
+   "pace": 73.3,
+   "secondHalfExpected": 34.7,
+   "secondHalfReal": 32
+  },
+  {
+   "team": "ATL",
+   "name": "Atlanta Braves",
+   "division": "NL East",
+   "real": 94,
+   "realLosses": 68,
+   "firstHalf": 55,
+   "forecast": 85.6,
+   "pace": 93.8,
+   "secondHalfExpected": 30.6,
+   "secondHalfReal": 39
+  },
+  {
+   "team": "PHI",
+   "name": "Philadelphia Phillies",
+   "division": "NL East",
+   "real": 88,
+   "realLosses": 74,
+   "firstHalf": 54,
+   "forecast": 91.6,
+   "pace": 90.2,
+   "secondHalfExpected": 37.6,
+   "secondHalfReal": 34
+  },
+  {
+   "team": "MIA",
+   "name": "Miami Marlins",
+   "division": "NL East",
+   "real": 80,
+   "realLosses": 82,
+   "firstHalf": 52,
+   "forecast": 84.2,
+   "pace": 86.8,
+   "secondHalfExpected": 32.2,
+   "secondHalfReal": 28
+  },
+  {
+   "team": "WSH",
+   "name": "Washington Nationals",
+   "division": "NL East",
+   "real": 77,
+   "realLosses": 85,
+   "firstHalf": 48,
+   "forecast": 83.6,
+   "pace": 80.2,
+   "secondHalfExpected": 35.6,
+   "secondHalfReal": 29
+  },
+  {
+   "team": "NYM",
+   "name": "New York Mets",
+   "division": "NL East",
+   "real": 74,
+   "realLosses": 88,
+   "firstHalf": 40,
+   "forecast": 73.1,
+   "pace": 66.8,
+   "secondHalfExpected": 33.1,
+   "secondHalfReal": 34
+  },
+  {
+   "team": "LAD",
+   "name": "Los Angeles Dodgers",
+   "division": "NL West",
+   "real": 100,
+   "realLosses": 62,
+   "firstHalf": 61,
+   "forecast": 96.0,
+   "pace": 101.9,
+   "secondHalfExpected": 35.0,
+   "secondHalfReal": 39
+  },
+  {
+   "team": "SD",
+   "name": "San Diego Padres",
+   "division": "NL West",
+   "real": 91,
+   "realLosses": 71,
+   "firstHalf": 48,
+   "forecast": 78.6,
+   "pace": 81.0,
+   "secondHalfExpected": 30.6,
+   "secondHalfReal": 43
+  },
+  {
+   "team": "AZ",
+   "name": "Arizona Diamondbacks",
+   "division": "NL West",
+   "real": 86,
+   "realLosses": 76,
+   "firstHalf": 49,
+   "forecast": 79.8,
+   "pace": 82.7,
+   "secondHalfExpected": 30.8,
+   "secondHalfReal": 37
+  },
+  {
+   "team": "SF",
+   "name": "San Francisco Giants",
+   "division": "NL West",
+   "real": 65,
+   "realLosses": 97,
+   "firstHalf": 41,
+   "forecast": 71.3,
+   "pace": 69.2,
+   "secondHalfExpected": 30.3,
+   "secondHalfReal": 24
+  },
+  {
+   "team": "COL",
+   "name": "Colorado Rockies",
+   "division": "NL West",
+   "real": 58,
+   "realLosses": 104,
+   "firstHalf": 39,
+   "forecast": 65.7,
+   "pace": 64.5,
+   "secondHalfExpected": 26.7,
+   "secondHalfReal": 19
+  }
+ ],
+ "gameLevel": {
+  "n": 2429,
+  "homeWinRate": 0.529,
+  "favouriteWon": 0.552,
+  "brier": 0.2445,
+  "brierHomeRate": 0.2492,
+  "calib": [
+   0.83,
+   0.11
+  ],
+  "lrP": 4.169546387099581e-14,
+  "shareSd": 0.091,
+  "betweenPostseasonTeams": {
+   "n": 348,
+   "favouriteWon": 0.575,
+   "shareSd": 0.089,
+   "calib": [
+    0.94,
+    0.31
+   ],
+   "lrP": 0.0017563845025472366
+  }
+ }
+}

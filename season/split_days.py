@@ -7,7 +7,7 @@ day files) split into one file per player, role and block, in playoffs/fetch_sta
 A pitch goes to its batter's batter file and its pitcher's pitcher file. Also season/players.json: per player, the
 pitches he saw and threw and the plate appearances he had in each block, and his name as Savant gives it.
 
-  python3 season/split_days.py
+  python3 season/split_days.py [blocks, e.g. 2025,h1]
 
 CHANGED
   v0.1  first build (Joe, 2026-10-13: the whole 2026 season, every team and game)
@@ -25,9 +25,12 @@ def block_of(date):
     return '2025' if date < '2026' else ('h1' if date <= ASB else 'h2')
 
 
-def main():
-    players = {}
-    for blk in ('2025', 'h1', 'h2'):
+def main(blocks):
+    pj = os.path.join(HERE, 'players.json')
+    players = {int(k): v for k, v in json.load(open(pj)).items()} if os.path.exists(pj) else {}
+    for blk in blocks:
+        for p in players.values():
+            for c in ('seen', 'thrown', 'pa'): p[c].pop(blk, None)
         yr = '2025' if blk == '2025' else '2026'
         files = sorted(glob.glob(os.path.join(HERE, '..', 'statcast', 'raw', 'pitches', yr, '*.csv')))
         rows = {}
@@ -56,4 +59,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1].split(',') if len(sys.argv) > 1 else ['2025', 'h1', 'h2'])
