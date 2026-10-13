@@ -1,0 +1,190 @@
+{
+ "name": "ALCS_CLE",
+ "hi": "TB",
+ "lo": "CLE",
+ "homeOf": [
+  "hi",
+  "hi",
+  "lo",
+  "lo",
+  "lo",
+  "hi",
+  "hi"
+ ],
+ "teams": {
+  "TB": {
+   "lineup": [
+    {
+     "id": 650490,
+     "name": "Yandy D\u00edaz",
+     "pos": "DH"
+    },
+    {
+     "id": 666018,
+     "name": "Jonathan Aranda",
+     "pos": "1B"
+    },
+    {
+     "id": 691406,
+     "name": "Junior Caminero",
+     "pos": "3B"
+    },
+    {
+     "id": 683748,
+     "name": "Victor Mesa Jr.",
+     "pos": "LF"
+    },
+    {
+     "id": 668723,
+     "name": "Ryan Vilade",
+     "pos": "RF"
+    },
+    {
+     "id": 689414,
+     "name": "Liam Hicks",
+     "pos": "C"
+    },
+    {
+     "id": 676356,
+     "name": "Jonny DeLuca",
+     "pos": "CF"
+    },
+    {
+     "id": 680700,
+     "name": "Richie Palacios",
+     "pos": "2B"
+    },
+    {
+     "id": 670764,
+     "name": "Taylor Walls",
+     "pos": "SS"
+    }
+   ],
+   "rotation": [
+    656876,
+    642547,
+    607259,
+    643377
+   ],
+   "venue": {
+    "id": 12,
+    "name": "Tropicana Field",
+    "city": "St. Petersburg",
+    "state": "FL",
+    "lat": 27.767778,
+    "lon": -82.6525,
+    "elevFt": 15,
+    "azimuthDeg": 359.0,
+    "roof": "Dome",
+    "turf": "Artificial Turf",
+    "capacity": 25025,
+    "dims": {
+     "leftLine": 315,
+     "left": 370,
+     "leftCenter": 410,
+     "center": 404,
+     "rightCenter": 404,
+     "right": 370,
+     "rightLine": 322
+    },
+    "fence": [
+     315,
+     410,
+     404,
+     404,
+     322
+    ],
+    "homeOf": [
+     "TB"
+    ]
+   }
+  },
+  "CLE": {
+   "lineup": [
+    {
+     "id": 680757,
+     "name": "Steven Kwan",
+     "pos": "LF"
+    },
+    {
+     "id": 608070,
+     "name": "Jos\u00e9 Ram\u00edrez",
+     "pos": "3B"
+    },
+    {
+     "id": 800050,
+     "name": "Chase DeLauter",
+     "pos": "RF"
+    },
+    {
+     "id": 666176,
+     "name": "Jo Adell",
+     "pos": "DH"
+    },
+    {
+     "id": 663993,
+     "name": "Nathaniel Lowe",
+     "pos": "1B"
+    },
+    {
+     "id": 683953,
+     "name": "Travis Bazzana",
+     "pos": "2B"
+    },
+    {
+     "id": 672275,
+     "name": "Patrick Bailey",
+     "pos": "C"
+    },
+    {
+     "id": 690984,
+     "name": "Petey Halpin",
+     "pos": "CF"
+    },
+    {
+     "id": 677587,
+     "name": "Brayan Rocchio",
+     "pos": "SS"
+    }
+   ],
+   "rotation": [
+    682982,
+    800048,
+    676440,
+    668909
+   ],
+   "venue": {
+    "id": 5,
+    "name": "Progressive Field",
+    "city": "Cleveland",
+    "state": "OH",
+    "lat": 41.495861,
+    "lon": -81.685255,
+    "elevFt": 653,
+    "azimuthDeg": 0.0,
+    "roof": "Open",
+    "turf": "Grass",
+    "capacity": 34830,
+    "dims": {
+     "leftLine": 325,
+     "left": 370,
+     "leftCenter": 410,
+     "center": 405,
+     "rightCenter": 375,
+     "right": null,
+     "rightLine": 325
+    },
+    "fence": [
+     325,
+     410,
+     405,
+     375,
+     325
+    ],
+    "homeOf": [
+     "CLE"
+    ]
+   }
+  }
+ }
+}

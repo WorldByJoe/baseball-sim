@@ -1,5 +1,5 @@
 /* ============================================================================
-   replay_game.js · v0.5 · 2026-10-13
+   replay_game.js · v0.6 · 2026-10-13
 
    A postseason game played again as it was played: the real batting order with
    its substitutions (each man takes his spot at the turn he took it, at the
@@ -21,6 +21,8 @@
    'errors' (then G, the league factor): each fielder's own error tendency (review/err_mult.py); 'pitched+errors' both.
 
    CHANGED
+     v0.6  mode 'audit' (combinable): each replay prints its plate appearances (state before, result, runners' moves, runs,
+           state after) for season/runs_audit.py, in place of the score line
      v0.5  the home hitters' edge (bb_game v1.8) when review/home_edge.json turns it on; mode 'nohome' leaves it off
      v0.4  mode 'ghost' (combinable, e.g. 'ghost' or 'errors+ghost'): the regular season's runner on second in extra innings
      v0.3  mode 'errors': each fielder's own error tendency; every replay prints the errors charged to each side
@@ -29,6 +31,7 @@
 ============================================================================ */
 (function (A) {
   var PK = A[0], N = +A[1] || 200, SEED = +A[2] || 1, PART = +A[3] || 0, PARTS = +A[4] || 1, MODE = (A[5] || '').split('+'), PITCHED = MODE.indexOf('pitched') >= 0;
+  var AUDIT = MODE.indexOf('audit') >= 0;   // v0.6: the plate appearances, for season/runs_audit.py
   var GHOST = MODE.indexOf('ghost') >= 0;   // mode 'ghost': the regular season's extra-innings runner on second (the postseason has none)
   var HOMEEDGE = null; try { HOMEEDGE = JSON.parse(read('review/home_edge.json')); if (!HOMEEDGE.on) HOMEEDGE = null; } catch (e) { HOMEEDGE = null; }   // the home hitters' edge (bb_game v1.8), when review/home_edge.json turns it on
   if (MODE.indexOf('nohome') >= 0) HOMEEDGE = null;
@@ -116,6 +119,18 @@
     if (g % PARTS !== PART) continue;
     var ta = team('away', g % 40), th = team('home', (g * 7 + 3) % 40);
     var GM = BBGame.simGame(ta, th, { rng: rng, env: env, rules: 'AL', ghost: GHOST, maxInnings: 60, homeEdge: HOMEEDGE });   // no tie: the game plays on
-    print(JSON.stringify({ g: g, score: GM.score, innings: GM.finalInning, hits: GM.hits, errors: GM.errors }));
+    if (AUDIT) {   // [half, inning, outs, bases before (1 first, 2 second, 4 third), result, batted-ball type, outs made, runs on the play, outs after, bases after, batting side's score after, runners' moves, steal attempts, steals safe, wild pitches and passed balls, exit speed, launch angle, spray, projected distance]
+      var bm = function (b) { return (b[1] ? 1 : 0) + (b[2] ? 2 : 0) + (b[3] ? 4 : 0); };
+      var P = GM.plays.map(function (q) {
+        var p = q.play || {}, st = 0, sts = 0, wp = 0;
+        (q.pa.pitches || []).forEach(function (r) { if (r.steal) { st++; if (!r.steal.out) sts++; } if (r.wild) wp++; });
+        var res = q.pa.result === 'BIP' ? (p.error ? 'E' : p.hit || 'OUT') : q.pa.result;
+        var mv = (p.runners || []).filter(function (r) { return r.from > 0; }).map(function (r) { return r.from + '' + (r.out ? 'x' : r.to); }).join(' ');
+        var bb = q.pa.bb;   // the batted ball: exit speed, launch angle, spray
+        return [q.half, q.inning, q.outs, bm(q.bases), res, p.type || '', p.outsMade || 0, q.runs || 0, q.outsAfter, bm(q.basesAfter), q.score ? q.score[q.half] : null, mv, st, sts, wp,
+                bb ? +bb.ev.toFixed(1) : null, bb ? +bb.la.toFixed(1) : null, bb ? +bb.spray.toFixed(1) : null, bb ? Math.round(bb.projDist) : null];
+      });
+      print(JSON.stringify({ g: g, score: GM.score, p: P }));
+    } else print(JSON.stringify({ g: g, score: GM.score, innings: GM.finalInning, hits: GM.hits, errors: GM.errors }));
   }
 })(typeof arguments !== 'undefined' ? arguments : []);

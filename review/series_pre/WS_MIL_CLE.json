@@ -1,0 +1,190 @@
+{
+ "name": "WS_MIL_CLE",
+ "hi": "MIL",
+ "lo": "CLE",
+ "homeOf": [
+  "hi",
+  "hi",
+  "lo",
+  "lo",
+  "lo",
+  "hi",
+  "hi"
+ ],
+ "teams": {
+  "MIL": {
+   "lineup": [
+    {
+     "id": 694192,
+     "name": "Jackson Chourio",
+     "pos": "LF"
+    },
+    {
+     "id": 592885,
+     "name": "Christian Yelich",
+     "pos": "DH"
+    },
+    {
+     "id": 661388,
+     "name": "William Contreras",
+     "pos": "C"
+    },
+    {
+     "id": 668930,
+     "name": "Brice Turang",
+     "pos": "2B"
+    },
+    {
+     "id": 641343,
+     "name": "Jake Bauers",
+     "pos": "1B"
+    },
+    {
+     "id": 806198,
+     "name": "Cooper Pratt",
+     "pos": "SS"
+    },
+    {
+     "id": 686217,
+     "name": "Sal Frelick",
+     "pos": "RF"
+    },
+    {
+     "id": 669003,
+     "name": "Garrett Mitchell",
+     "pos": "CF"
+    },
+    {
+     "id": 687401,
+     "name": "Joey Ortiz",
+     "pos": "3B"
+    }
+   ],
+   "rotation": [
+    694819,
+    701656,
+    669160,
+    688107
+   ],
+   "venue": {
+    "id": 32,
+    "name": "American Family Field",
+    "city": "Milwaukee",
+    "state": "WI",
+    "lat": 43.02838,
+    "lon": -87.97099,
+    "elevFt": 597,
+    "azimuthDeg": 129.0,
+    "roof": "Retractable",
+    "turf": "Grass",
+    "capacity": 40100,
+    "dims": {
+     "leftLine": 344,
+     "left": null,
+     "leftCenter": 371,
+     "center": 400,
+     "rightCenter": 374,
+     "right": null,
+     "rightLine": 345
+    },
+    "fence": [
+     344,
+     371,
+     400,
+     374,
+     345
+    ],
+    "homeOf": [
+     "MIL"
+    ]
+   }
+  },
+  "CLE": {
+   "lineup": [
+    {
+     "id": 680757,
+     "name": "Steven Kwan",
+     "pos": "LF"
+    },
+    {
+     "id": 608070,
+     "name": "Jos\u00e9 Ram\u00edrez",
+     "pos": "3B"
+    },
+    {
+     "id": 800050,
+     "name": "Chase DeLauter",
+     "pos": "RF"
+    },
+    {
+     "id": 666176,
+     "name": "Jo Adell",
+     "pos": "DH"
+    },
+    {
+     "id": 663993,
+     "name": "Nathaniel Lowe",
+     "pos": "1B"
+    },
+    {
+     "id": 683953,
+     "name": "Travis Bazzana",
+     "pos": "2B"
+    },
+    {
+     "id": 672275,
+     "name": "Patrick Bailey",
+     "pos": "C"
+    },
+    {
+     "id": 690984,
+     "name": "Petey Halpin",
+     "pos": "CF"
+    },
+    {
+     "id": 677587,
+     "name": "Brayan Rocchio",
+     "pos": "SS"
+    }
+   ],
+   "rotation": [
+    682982,
+    800048,
+    676440,
+    668909
+   ],
+   "venue": {
+    "id": 5,
+    "name": "Progressive Field",
+    "city": "Cleveland",
+    "state": "OH",
+    "lat": 41.495861,
+    "lon": -81.685255,
+    "elevFt": 653,
+    "azimuthDeg": 0.0,
+    "roof": "Open",
+    "turf": "Grass",
+    "capacity": 34830,
+    "dims": {
+     "leftLine": 325,
+     "left": 370,
+     "leftCenter": 410,
+     "center": 405,
+     "rightCenter": 375,
+     "right": null,
+     "rightLine": 325
+    },
+    "fence": [
+     325,
+     410,
+     405,
+     375,
+     325
+    ],
+    "homeOf": [
+     "CLE"
+    ]
+   }
+  }
+ }
+}
