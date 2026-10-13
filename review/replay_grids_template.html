@@ -125,6 +125,10 @@ svg.logit .diag { stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 5 4
 svg.logit .fit { stroke: var(--fit); stroke-width: 2.5; fill: none; }
 svg.logit .pt circle { fill: var(--ink); stroke: var(--panel); stroke-width: 2; }
 svg.logit .pt:hover circle { fill: var(--star); }
+svg.logit .pt.past circle { fill: var(--panel); stroke: var(--muted); stroke-width: 1.5; }
+svg.logit .pt.past:hover circle { fill: var(--star); }
+.sw.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ink); }
+.sw.dot.past { background: var(--panel); box-shadow: inset 0 0 0 1.5px var(--muted); }
 svg.logit .pl { fill: var(--muted); font-size: 10.5px; }
 .sw { display: inline-block; width: 26px; height: 10px; border-radius: 2px; }
 .sw.fit { height: 3px; background: var(--fit); }

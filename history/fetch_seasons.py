@@ -8,7 +8,9 @@ cache under playoffs/raw/statcast/ shared, so a season already pulled for the 20
   kept  history/pitches/{year}_{role}_{id}.csv.gz     (playoffs/fetch_statcast.py's columns)
         history/pitches/INDEX.json                    (rows per file, by game type)
 
-  python3 history/fetch_seasons.py --post 2025 --years 2024,2025,2026
+  python3 history/fetch_seasons.py --post 2025 --years 2024,2025,2026 [--reverse | --start N] [--index INDEX_b.json]
+
+A second run with --reverse and its own index works the list from the other end; the shared cache makes the overlap free.
 
 CHANGED
   v0.1  first build (Joe, 2026-10-12)
@@ -24,7 +26,7 @@ def main(argv):
     posts = [int(x) for x in argv[argv.index('--post') + 1].split(',')]
     years = [int(x) for x in argv[argv.index('--years') + 1].split(',')]
     os.makedirs(os.path.join(HERE, 'pitches'), exist_ok=True)
-    ip = os.path.join(HERE, 'pitches', 'INDEX.json')
+    ip = os.path.join(HERE, 'pitches', argv[argv.index('--index') + 1] if '--index' in argv else 'INDEX.json')
     index = json.load(open(ip))['files'] if os.path.exists(ip) else {}
     seen, jobs = set(), []
     for s in posts:
@@ -33,9 +35,12 @@ def main(argv):
             for y in years:
                 for role in roles:
                     if (p['id'], role, y) not in seen: seen.add((p['id'], role, y)); jobs.append((p, role, y))
+    if '--reverse' in argv: jobs = jobs[::-1]
+    if '--start' in argv: jobs = jobs[int(argv[argv.index('--start') + 1]):]
     for k, (p, role, y) in enumerate(jobs):
         key = '%d_%s_%d' % (y, role, p['id'])
         if key in index and index[key].get('rows') is not None: continue
+        if os.path.exists(os.path.join(HERE, 'pitches', key + '.csv.gz')) and ('--reverse' in argv or '--start' in argv): continue
         rows, note = pull(p['id'], role, y)
         if rows is None:
             index[key] = {'id': p['id'], 'name': p['name'], 'role': role, 'year': y, 'rows': None, 'error': 'fetch failed'}
