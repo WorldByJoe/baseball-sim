@@ -1,0 +1,4853 @@
+{
+ "season": 2024,
+ "games": [
+  {
+   "pk": 775345,
+   "type": "F",
+   "date": "2024-10-01",
+   "away": "Detroit Tigers",
+   "home": "Houston Astros",
+   "final": [
+    3,
+    1
+   ],
+   "series": "AL Wild Card Series "
+  },
+  {
+   "pk": 775343,
+   "type": "F",
+   "date": "2024-10-01",
+   "away": "Kansas City Royals",
+   "home": "Baltimore Orioles",
+   "final": [
+    1,
+    0
+   ],
+   "series": "AL Wild Card Series "
+  },
+  {
+   "pk": 775340,
+   "type": "F",
+   "date": "2024-10-01",
+   "away": "New York Mets",
+   "home": "Milwaukee Brewers",
+   "final": [
+    8,
+    4
+   ],
+   "series": "NL Wild Card Series "
+  },
+  {
+   "pk": 775333,
+   "type": "F",
+   "date": "2024-10-01",
+   "away": "Atlanta Braves",
+   "home": "San Diego Padres",
+   "final": [
+    0,
+    4
+   ],
+   "series": "NL Wild Card Series "
+  },
+  {
+   "pk": 775344,
+   "type": "F",
+   "date": "2024-10-02",
+   "away": "Detroit Tigers",
+   "home": "Houston Astros",
+   "final": [
+    5,
+    2
+   ],
+   "series": "AL Wild Card Series "
+  },
+  {
+   "pk": 775341,
+   "type": "F",
+   "date": "2024-10-02",
+   "away": "Kansas City Royals",
+   "home": "Baltimore Orioles",
+   "final": [
+    2,
+    1
+   ],
+   "series": "AL Wild Card Series "
+  },
+  {
+   "pk": 775339,
+   "type": "F",
+   "date": "2024-10-02",
+   "away": "New York Mets",
+   "home": "Milwaukee Brewers",
+   "final": [
+    3,
+    5
+   ],
+   "series": "NL Wild Card Series "
+  },
+  {
+   "pk": 775336,
+   "type": "F",
+   "date": "2024-10-02",
+   "away": "Atlanta Braves",
+   "home": "San Diego Padres",
+   "final": [
+    4,
+    5
+   ],
+   "series": "NL Wild Card Series "
+  },
+  {
+   "pk": 775337,
+   "type": "F",
+   "date": "2024-10-03",
+   "away": "New York Mets",
+   "home": "Milwaukee Brewers",
+   "final": [
+    4,
+    2
+   ],
+   "series": "NL Wild Card Series "
+  },
+  {
+   "pk": 775324,
+   "type": "D",
+   "date": "2024-10-05",
+   "away": "Detroit Tigers",
+   "home": "Cleveland Guardians",
+   "final": [
+    0,
+    7
+   ],
+   "series": "ALDS 'B' Game 1"
+  },
+  {
+   "pk": 775318,
+   "type": "D",
+   "date": "2024-10-05",
+   "away": "New York Mets",
+   "home": "Philadelphia Phillies",
+   "final": [
+    6,
+    2
+   ],
+   "series": "NLDS 'B' Game 1"
+  },
+  {
+   "pk": 775334,
+   "type": "D",
+   "date": "2024-10-05",
+   "away": "Kansas City Royals",
+   "home": "New York Yankees",
+   "final": [
+    5,
+    6
+   ],
+   "series": "ALDS 'A' Game 1"
+  },
+  {
+   "pk": 775323,
+   "type": "D",
+   "date": "2024-10-05",
+   "away": "San Diego Padres",
+   "home": "Los Angeles Dodgers",
+   "final": [
+    5,
+    7
+   ],
+   "series": "NLDS 'A' Game 1"
+  },
+  {
+   "pk": 775319,
+   "type": "D",
+   "date": "2024-10-06",
+   "away": "New York Mets",
+   "home": "Philadelphia Phillies",
+   "final": [
+    6,
+    7
+   ],
+   "series": "NLDS 'B' Game 2"
+  },
+  {
+   "pk": 775322,
+   "type": "D",
+   "date": "2024-10-06",
+   "away": "San Diego Padres",
+   "home": "Los Angeles Dodgers",
+   "final": [
+    10,
+    2
+   ],
+   "series": "NLDS 'A' Game 2"
+  },
+  {
+   "pk": 775325,
+   "type": "D",
+   "date": "2024-10-07",
+   "away": "Detroit Tigers",
+   "home": "Cleveland Guardians",
+   "final": [
+    3,
+    0
+   ],
+   "series": "ALDS 'B' Game 2"
+  },
+  {
+   "pk": 775332,
+   "type": "D",
+   "date": "2024-10-07",
+   "away": "Kansas City Royals",
+   "home": "New York Yankees",
+   "final": [
+    4,
+    2
+   ],
+   "series": "ALDS 'A' Game 2"
+  },
+  {
+   "pk": 775316,
+   "type": "D",
+   "date": "2024-10-08",
+   "away": "Philadelphia Phillies",
+   "home": "New York Mets",
+   "final": [
+    2,
+    7
+   ],
+   "series": "NLDS 'B' Game 3"
+  },
+  {
+   "pk": 775321,
+   "type": "D",
+   "date": "2024-10-08",
+   "away": "Los Angeles Dodgers",
+   "home": "San Diego Padres",
+   "final": [
+    5,
+    6
+   ],
+   "series": "NLDS 'A' Game 3"
+  },
+  {
+   "pk": 775328,
+   "type": "D",
+   "date": "2024-10-09",
+   "away": "Cleveland Guardians",
+   "home": "Detroit Tigers",
+   "final": [
+    0,
+    3
+   ],
+   "series": "ALDS 'B' Game 3 - Time Subject to Change"
+  },
+  {
+   "pk": 775313,
+   "type": "D",
+   "date": "2024-10-09",
+   "away": "Philadelphia Phillies",
+   "home": "New York Mets",
+   "final": [
+    1,
+    4
+   ],
+   "series": "NLDS 'B' Game 4 - Time Subject to Change"
+  },
+  {
+   "pk": 775329,
+   "type": "D",
+   "date": "2024-10-09",
+   "away": "New York Yankees",
+   "home": "Kansas City Royals",
+   "final": [
+    3,
+    2
+   ],
+   "series": "ALDS 'A' Game 3 - Time Subject to Change"
+  },
+  {
+   "pk": 775320,
+   "type": "D",
+   "date": "2024-10-09",
+   "away": "Los Angeles Dodgers",
+   "home": "San Diego Padres",
+   "final": [
+    8,
+    0
+   ],
+   "series": "NLDS 'A' Game 4 "
+  },
+  {
+   "pk": 775327,
+   "type": "D",
+   "date": "2024-10-10",
+   "away": "Cleveland Guardians",
+   "home": "Detroit Tigers",
+   "final": [
+    5,
+    4
+   ],
+   "series": "ALDS 'B' Game 4 - Time Subject to Change"
+  },
+  {
+   "pk": 775331,
+   "type": "D",
+   "date": "2024-10-10",
+   "away": "New York Yankees",
+   "home": "Kansas City Royals",
+   "final": [
+    3,
+    1
+   ],
+   "series": "ALDS 'A' Game 4"
+  },
+  {
+   "pk": 775317,
+   "type": "D",
+   "date": "2024-10-11",
+   "away": "San Diego Padres",
+   "home": "Los Angeles Dodgers",
+   "final": [
+    0,
+    2
+   ],
+   "series": "NLDS 'A' Game 5"
+  },
+  {
+   "pk": 775326,
+   "type": "D",
+   "date": "2024-10-12",
+   "away": "Detroit Tigers",
+   "home": "Cleveland Guardians",
+   "final": [
+    3,
+    7
+   ],
+   "series": "ALDS 'B' Game 5"
+  },
+  {
+   "pk": 775307,
+   "type": "L",
+   "date": "2024-10-13",
+   "away": "New York Mets",
+   "home": "Los Angeles Dodgers",
+   "final": [
+    0,
+    9
+   ],
+   "series": "NLCS Game 1"
+  },
+  {
+   "pk": 775306,
+   "type": "L",
+   "date": "2024-10-14",
+   "away": "New York Mets",
+   "home": "Los Angeles Dodgers",
+   "final": [
+    7,
+    3
+   ],
+   "series": "NLCS Game 2"
+  },
+  {
+   "pk": 775314,
+   "type": "L",
+   "date": "2024-10-14",
+   "away": "Cleveland Guardians",
+   "home": "New York Yankees",
+   "final": [
+    2,
+    5
+   ],
+   "series": "ALCS Game 1"
+  },
+  {
+   "pk": 775312,
+   "type": "L",
+   "date": "2024-10-15",
+   "away": "Cleveland Guardians",
+   "home": "New York Yankees",
+   "final": [
+    3,
+    6
+   ],
+   "series": "ALCS Game 2"
+  },
+  {
+   "pk": 775305,
+   "type": "L",
+   "date": "2024-10-16",
+   "away": "Los Angeles Dodgers",
+   "home": "New York Mets",
+   "final": [
+    8,
+    0
+   ],
+   "series": "NLCS Game 3"
+  },
+  {
+   "pk": 775310,
+   "type": "L",
+   "date": "2024-10-17",
+   "away": "New York Yankees",
+   "home": "Cleveland Guardians",
+   "final": [
+    5,
+    7
+   ],
+   "series": "ALCS Game 3"
+  },
+  {
+   "pk": 775303,
+   "type": "L",
+   "date": "2024-10-17",
+   "away": "Los Angeles Dodgers",
+   "home": "New York Mets",
+   "final": [
+    10,
+    2
+   ],
+   "series": "NLCS Game 4"
+  },
+  {
+   "pk": 775299,
+   "type": "L",
+   "date": "2024-10-18",
+   "away": "Los Angeles Dodgers",
+   "home": "New York Mets",
+   "final": [
+    6,
+    12
+   ],
+   "series": "NLCS Game 5"
+  },
+  {
+   "pk": 775311,
+   "type": "L",
+   "date": "2024-10-18",
+   "away": "New York Yankees",
+   "home": "Cleveland Guardians",
+   "final": [
+    8,
+    6
+   ],
+   "series": "ALCS Game 4"
+  },
+  {
+   "pk": 775309,
+   "type": "L",
+   "date": "2024-10-19",
+   "away": "New York Yankees",
+   "home": "Cleveland Guardians",
+   "final": [
+    5,
+    2
+   ],
+   "series": "ALCS Game 5"
+  },
+  {
+   "pk": 775302,
+   "type": "L",
+   "date": "2024-10-20",
+   "away": "New York Mets",
+   "home": "Los Angeles Dodgers",
+   "final": [
+    5,
+    10
+   ],
+   "series": "NLCS Game 6"
+  },
+  {
+   "pk": 775300,
+   "type": "W",
+   "date": "2024-10-25",
+   "away": "New York Yankees",
+   "home": "Los Angeles Dodgers",
+   "final": [
+    3,
+    6
+   ],
+   "series": "World Series Game 1"
+  },
+  {
+   "pk": 775294,
+   "type": "W",
+   "date": "2024-10-26",
+   "away": "New York Yankees",
+   "home": "Los Angeles Dodgers",
+   "final": [
+    2,
+    4
+   ],
+   "series": "World Series Game 2"
+  },
+  {
+   "pk": 775298,
+   "type": "W",
+   "date": "2024-10-28",
+   "away": "Los Angeles Dodgers",
+   "home": "New York Yankees",
+   "final": [
+    4,
+    2
+   ],
+   "series": "World Series Game 3"
+  },
+  {
+   "pk": 775297,
+   "type": "W",
+   "date": "2024-10-29",
+   "away": "Los Angeles Dodgers",
+   "home": "New York Yankees",
+   "final": [
+    4,
+    11
+   ],
+   "series": "World Series Game 4"
+  },
+  {
+   "pk": 775296,
+   "type": "W",
+   "date": "2024-10-30",
+   "away": "Los Angeles Dodgers",
+   "home": "New York Yankees",
+   "final": [
+    7,
+    6
+   ],
+   "series": "World Series Game 5"
+  }
+ ],
+ "players": [
+  {
+   "id": 700363,
+   "name": "AJ Smith-Shawver",
+   "team": "ATL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775333
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 607481,
+   "name": "Aaron Bummer",
+   "team": "ATL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775333
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 678226,
+   "name": "Daysbel Hern\u00e1ndez",
+   "team": "ATL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775336
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 669276,
+   "name": "Dylan Lee",
+   "team": "ATL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775336
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 445926,
+   "name": "Jesse Chavez",
+   "team": "ATL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775333
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 641729,
+   "name": "Joe Jim\u00e9nez",
+   "team": "ATL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775336
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 592426,
+   "name": "Luke Jackson",
+   "team": "ATL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775333
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 608331,
+   "name": "Max Fried",
+   "team": "ATL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775336
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 572955,
+   "name": "Pierce Johnson",
+   "team": "ATL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775336
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 642201,
+   "name": "Eli White",
+   "team": "ATL",
+   "bat": 1,
+   "pitch": 0,
+   "games": [
+    775333
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 570482,
+   "name": "Gio Urshela",
+   "team": "ATL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 624585,
+   "name": "Jorge Soler",
+   "team": "ATL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 542303,
+   "name": "Marcell Ozuna",
+   "team": "ATL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 621566,
+   "name": "Matt Olson",
+   "team": "ATL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 671739,
+   "name": "Michael Harris II",
+   "team": "ATL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 606115,
+   "name": "Orlando Arcia",
+   "team": "ATL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 645277,
+   "name": "Ozzie Albies",
+   "team": "ATL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 657656,
+   "name": "Ram\u00f3n Laureano",
+   "team": "ATL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 669221,
+   "name": "Sean Murphy",
+   "team": "ATL",
+   "bat": 1,
+   "pitch": 0,
+   "games": [
+    775336
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 518595,
+   "name": "Travis d'Arnaud",
+   "team": "ATL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 672335,
+   "name": "Cionel P\u00e9rez",
+   "team": "BAL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775341
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 669203,
+   "name": "Corbin Burnes",
+   "team": "BAL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775343
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 543056,
+   "name": "Danny Coulombe",
+   "team": "BAL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775341
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 642397,
+   "name": "Gregory Soto",
+   "team": "BAL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775341
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 657097,
+   "name": "Jacob Webb",
+   "team": "BAL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775341
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 669211,
+   "name": "Keegan Akin",
+   "team": "BAL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775343
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 622554,
+   "name": "Seranthony Dom\u00ednguez",
+   "team": "BAL",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775343,
+    775341
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 666974,
+   "name": "Yennier Cano",
+   "team": "BAL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775341
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 621107,
+   "name": "Zach Eflin",
+   "team": "BAL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775341
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 668939,
+   "name": "Adley Rutschman",
+   "team": "BAL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 623993,
+   "name": "Anthony Santander",
+   "team": "BAL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 596103,
+   "name": "Austin Slater",
+   "team": "BAL",
+   "bat": 1,
+   "pitch": 0,
+   "games": [
+    775341
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 656775,
+   "name": "Cedric Mullins",
+   "team": "BAL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 681297,
+   "name": "Colton Cowser",
+   "team": "BAL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 656896,
+   "name": "Emmanuel Rivera",
+   "team": "BAL",
+   "bat": 1,
+   "pitch": 0,
+   "games": [
+    775343
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 683002,
+   "name": "Gunnar Henderson",
+   "team": "BAL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 677008,
+   "name": "Heston Kjerstad",
+   "team": "BAL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 543510,
+   "name": "James McCann",
+   "team": "BAL",
+   "bat": 1,
+   "pitch": 0,
+   "games": [
+    775343
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 676059,
+   "name": "Jordan Westburg",
+   "team": "BAL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 602104,
+   "name": "Ram\u00f3n Ur\u00edas",
+   "team": "BAL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 663624,
+   "name": "Ryan Mountcastle",
+   "team": "BAL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 656811,
+   "name": "Ryan O'Hearn",
+   "team": "BAL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 502171,
+   "name": "Alex Cobb",
+   "team": "CLE",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775328,
+    775314
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 689958,
+   "name": "Andrew Walters",
+   "team": "CLE",
+   "bat": 0,
+   "pitch": 4,
+   "games": [
+    775328,
+    775326,
+    775314,
+    775310
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 594902,
+   "name": "Ben Lively",
+   "team": "CLE",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775312
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 671922,
+   "name": "Cade Smith",
+   "team": "CLE",
+   "bat": 0,
+   "pitch": 9,
+   "games": [
+    775324,
+    775325,
+    775328,
+    775327,
+    775326,
+    775312,
+    775310,
+    775311,
+    775309
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 669212,
+   "name": "Eli Morgan",
+   "team": "CLE",
+   "bat": 0,
+   "pitch": 6,
+   "games": [
+    775325,
+    775328,
+    775326,
+    775312,
+    775310,
+    775311
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 661403,
+   "name": "Emmanuel Clase",
+   "team": "CLE",
+   "bat": 0,
+   "pitch": 7,
+   "games": [
+    775324,
+    775325,
+    775327,
+    775326,
+    775310,
+    775311,
+    775309
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 681870,
+   "name": "Erik Sabrowski",
+   "team": "CLE",
+   "bat": 0,
+   "pitch": 5,
+   "games": [
+    775328,
+    775326,
+    775314,
+    775312,
+    775311
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 668909,
+   "name": "Gavin Williams",
+   "team": "CLE",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775311
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 683769,
+   "name": "Hunter Gaddis",
+   "team": "CLE",
+   "bat": 0,
+   "pitch": 8,
+   "games": [
+    775324,
+    775325,
+    775327,
+    775326,
+    775312,
+    775310,
+    775311,
+    775309
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 676282,
+   "name": "Joey Cantillo",
+   "team": "CLE",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775328,
+    775314,
+    775311
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 571510,
+   "name": "Matthew Boyd",
+   "team": "CLE",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775325,
+    775326,
+    775310
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 658648,
+   "name": "Pedro Avila",
+   "team": "CLE",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775314,
+    775312,
+    775310
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 676440,
+   "name": "Tanner Bibee",
+   "team": "CLE",
+   "bat": 0,
+   "pitch": 4,
+   "games": [
+    775324,
+    775327,
+    775312,
+    775309
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 682120,
+   "name": "Tim Herrin",
+   "team": "CLE",
+   "bat": 0,
+   "pitch": 9,
+   "games": [
+    775324,
+    775325,
+    775328,
+    775327,
+    775326,
+    775312,
+    775310,
+    775311,
+    775309
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 665926,
+   "name": "Andr\u00e9s Gim\u00e9nez",
+   "team": "CLE",
+   "bat": 10,
+   "pitch": 0,
+   "games": [
+    775324,
+    775325,
+    775328,
+    775327,
+    775326,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 682657,
+   "name": "Angel Mart\u00ednez",
+   "team": "CLE",
+   "bat": 1,
+   "pitch": 0,
+   "games": [
+    775328
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 595978,
+   "name": "Austin Hedges",
+   "team": "CLE",
+   "bat": 8,
+   "pitch": 0,
+   "games": [
+    775325,
+    775328,
+    775327,
+    775326,
+    775314,
+    775312,
+    775310,
+    775311
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 666310,
+   "name": "Bo Naylor",
+   "team": "CLE",
+   "bat": 10,
+   "pitch": 0,
+   "games": [
+    775324,
+    775325,
+    775328,
+    775327,
+    775326,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 677587,
+   "name": "Brayan Rocchio",
+   "team": "CLE",
+   "bat": 10,
+   "pitch": 0,
+   "games": [
+    775324,
+    775325,
+    775328,
+    775327,
+    775326,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 682177,
+   "name": "Daniel Schneemann",
+   "team": "CLE",
+   "bat": 3,
+   "pitch": 0,
+   "games": [
+    775314,
+    775310,
+    775311
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 681807,
+   "name": "David Fry",
+   "team": "CLE",
+   "bat": 10,
+   "pitch": 0,
+   "games": [
+    775324,
+    775325,
+    775328,
+    775327,
+    775326,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 678877,
+   "name": "Jhonkensy Noel",
+   "team": "CLE",
+   "bat": 9,
+   "pitch": 0,
+   "games": [
+    775324,
+    775325,
+    775328,
+    775327,
+    775326,
+    775314,
+    775310,
+    775311,
+    775309
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 647304,
+   "name": "Josh Naylor",
+   "team": "CLE",
+   "bat": 10,
+   "pitch": 0,
+   "games": [
+    775324,
+    775325,
+    775328,
+    775327,
+    775326,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 608070,
+   "name": "Jos\u00e9 Ram\u00edrez",
+   "team": "CLE",
+   "bat": 10,
+   "pitch": 0,
+   "games": [
+    775324,
+    775325,
+    775328,
+    775327,
+    775326,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 700932,
+   "name": "Kyle Manzardo",
+   "team": "CLE",
+   "bat": 9,
+   "pitch": 0,
+   "games": [
+    775324,
+    775325,
+    775328,
+    775327,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 657041,
+   "name": "Lane Thomas",
+   "team": "CLE",
+   "bat": 10,
+   "pitch": 0,
+   "games": [
+    775324,
+    775325,
+    775328,
+    775327,
+    775326,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 680757,
+   "name": "Steven Kwan",
+   "team": "CLE",
+   "bat": 10,
+   "pitch": 0,
+   "games": [
+    775324,
+    775325,
+    775328,
+    775327,
+    775326,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 686823,
+   "name": "Will Brennan",
+   "team": "CLE",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775325,
+    775328,
+    775327,
+    775314,
+    775312,
+    775310,
+    775311
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 689225,
+   "name": "Beau Brieske",
+   "team": "DET",
+   "bat": 0,
+   "pitch": 6,
+   "games": [
+    775345,
+    775344,
+    775325,
+    775328,
+    775327,
+    775326
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 676428,
+   "name": "Brant Hurter",
+   "team": "DET",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775344,
+    775328
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 669724,
+   "name": "Brenan Hanifee",
+   "team": "DET",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775344
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 695549,
+   "name": "Jackson Jobe",
+   "team": "DET",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775344,
+    775327
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 671345,
+   "name": "Jason Foley",
+   "team": "DET",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775345
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 672456,
+   "name": "Keider Montero",
+   "team": "DET",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775324,
+    775328
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 681857,
+   "name": "Reese Olson",
+   "team": "DET",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775324,
+    775327
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 674944,
+   "name": "Sean Guenther",
+   "team": "DET",
+   "bat": 0,
+   "pitch": 4,
+   "games": [
+    775344,
+    775324,
+    775328,
+    775327
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 669373,
+   "name": "Tarik Skubal",
+   "team": "DET",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775345,
+    775325,
+    775326
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 680744,
+   "name": "Ty Madden",
+   "team": "DET",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775324
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 663947,
+   "name": "Tyler Holton",
+   "team": "DET",
+   "bat": 0,
+   "pitch": 6,
+   "games": [
+    775345,
+    775344,
+    775324,
+    775328,
+    775327,
+    775326
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 676684,
+   "name": "Will Vest",
+   "team": "DET",
+   "bat": 0,
+   "pitch": 6,
+   "games": [
+    775345,
+    775344,
+    775325,
+    775328,
+    775327,
+    775326
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 628451,
+   "name": "Andy Ib\u00e1\u00f1ez",
+   "team": "DET",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344,
+    775324,
+    775325,
+    775328,
+    775327,
+    775326
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 690993,
+   "name": "Colt Keith",
+   "team": "DET",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344,
+    775324,
+    775325,
+    775328,
+    775327,
+    775326
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 690291,
+   "name": "Jace Jung",
+   "team": "DET",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775328,
+    775327
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 668670,
+   "name": "Jake Rogers",
+   "team": "DET",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344,
+    775324,
+    775325,
+    775328,
+    775327,
+    775326
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 669234,
+   "name": "Justyn-Henry Malloy",
+   "team": "DET",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344,
+    775324,
+    775325,
+    775328,
+    775327,
+    775326
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 681481,
+   "name": "Kerry Carpenter",
+   "team": "DET",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344,
+    775324,
+    775325,
+    775328,
+    775327,
+    775326
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 663837,
+   "name": "Matt Vierling",
+   "team": "DET",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344,
+    775324,
+    775325,
+    775328,
+    775327,
+    775326
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 678009,
+   "name": "Parker Meadows",
+   "team": "DET",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344,
+    775324,
+    775325,
+    775328,
+    775327,
+    775326
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 682985,
+   "name": "Riley Greene",
+   "team": "DET",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344,
+    775324,
+    775325,
+    775328,
+    775327,
+    775326
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 679529,
+   "name": "Spencer Torkelson",
+   "team": "DET",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344,
+    775324,
+    775325,
+    775328,
+    775327,
+    775326
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 700242,
+   "name": "Trey Sweeney",
+   "team": "DET",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344,
+    775324,
+    775325,
+    775328,
+    775327,
+    775326
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 672761,
+   "name": "Wenceel P\u00e9rez",
+   "team": "DET",
+   "bat": 6,
+   "pitch": 0,
+   "games": [
+    775345,
+    775324,
+    775325,
+    775328,
+    775327,
+    775326
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 656716,
+   "name": "Zach McKinstry",
+   "team": "DET",
+   "bat": 5,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344,
+    775324,
+    775325,
+    775327
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 650556,
+   "name": "Bryan Abreu",
+   "team": "HOU",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775344
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 687911,
+   "name": "Bryan King",
+   "team": "HOU",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775345
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 657571,
+   "name": "Caleb Ferguson",
+   "team": "HOU",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775345
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 664285,
+   "name": "Framber Valdez",
+   "team": "HOU",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775345
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 686613,
+   "name": "Hunter Brown",
+   "team": "HOU",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775344
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 593576,
+   "name": "H\u00e9ctor Neris",
+   "team": "HOU",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775345
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 623352,
+   "name": "Josh Hader",
+   "team": "HOU",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775345,
+    775344
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 669854,
+   "name": "Ronel Blanco",
+   "team": "HOU",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775345
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 519151,
+   "name": "Ryan Pressly",
+   "team": "HOU",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775344
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 608324,
+   "name": "Alex Bregman",
+   "team": "HOU",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 676801,
+   "name": "Chas McCormick",
+   "team": "HOU",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 676694,
+   "name": "Jake Meyers",
+   "team": "HOU",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 518792,
+   "name": "Jason Heyward",
+   "team": "HOU",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 665161,
+   "name": "Jeremy Pe\u00f1a",
+   "team": "HOU",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 572138,
+   "name": "Jon Singleton",
+   "team": "HOU",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 514888,
+   "name": "Jose Altuve",
+   "team": "HOU",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 663656,
+   "name": "Kyle Tucker",
+   "team": "HOU",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 643289,
+   "name": "Mauricio Dub\u00f3n",
+   "team": "HOU",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 605170,
+   "name": "Victor Caratini",
+   "team": "HOU",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 673237,
+   "name": "Yainer Diaz",
+   "team": "HOU",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 670541,
+   "name": "Yordan Alvarez",
+   "team": "HOU",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775345,
+    775344
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 701305,
+   "name": "Zach Dezenzo",
+   "team": "HOU",
+   "bat": 1,
+   "pitch": 0,
+   "games": [
+    775345
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 672582,
+   "name": "Angel Zerpa",
+   "team": "KC",
+   "bat": 0,
+   "pitch": 5,
+   "games": [
+    775341,
+    775334,
+    775332,
+    775329,
+    775331
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 663903,
+   "name": "Brady Singer",
+   "team": "KC",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775329
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 666142,
+   "name": "Cole Ragans",
+   "team": "KC",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775343,
+    775332
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 670167,
+   "name": "John Schreiber",
+   "team": "KC",
+   "bat": 0,
+   "pitch": 5,
+   "games": [
+    775341,
+    775334,
+    775332,
+    775329,
+    775331
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 663460,
+   "name": "Kris Bubic",
+   "team": "KC",
+   "bat": 0,
+   "pitch": 4,
+   "games": [
+    775343,
+    775341,
+    775332,
+    775329
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 668674,
+   "name": "Lucas Erceg",
+   "team": "KC",
+   "bat": 0,
+   "pitch": 5,
+   "games": [
+    775343,
+    775341,
+    775334,
+    775332,
+    775331
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 547179,
+   "name": "Michael Lorenzen",
+   "team": "KC",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775334,
+    775329
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 608379,
+   "name": "Michael Wacha",
+   "team": "KC",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775334,
+    775331
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 669674,
+   "name": "Sam Long",
+   "team": "KC",
+   "bat": 0,
+   "pitch": 5,
+   "games": [
+    775343,
+    775341,
+    775334,
+    775329,
+    775331
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 607625,
+   "name": "Seth Lugo",
+   "team": "KC",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775341,
+    775329
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 624428,
+   "name": "Adam Frazier",
+   "team": "KC",
+   "bat": 1,
+   "pitch": 0,
+   "games": [
+    775329
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 677951,
+   "name": "Bobby Witt Jr.",
+   "team": "KC",
+   "bat": 6,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341,
+    775334,
+    775332,
+    775329,
+    775331
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 680118,
+   "name": "Dairon Blanco",
+   "team": "KC",
+   "bat": 1,
+   "pitch": 0,
+   "games": [
+    775341
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 641658,
+   "name": "Garrett Hampson",
+   "team": "KC",
+   "bat": 4,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341,
+    775334,
+    775332
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 592669,
+   "name": "Hunter Renfroe",
+   "team": "KC",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775341,
+    775332
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 664728,
+   "name": "Kyle Isbel",
+   "team": "KC",
+   "bat": 6,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341,
+    775334,
+    775332,
+    775329,
+    775331
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 669004,
+   "name": "MJ Melendez",
+   "team": "KC",
+   "bat": 6,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341,
+    775334,
+    775332,
+    775329,
+    775331
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 672580,
+   "name": "Maikel Garcia",
+   "team": "KC",
+   "bat": 6,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341,
+    775334,
+    775332,
+    775329,
+    775331
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 686681,
+   "name": "Michael Massey",
+   "team": "KC",
+   "bat": 6,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341,
+    775334,
+    775332,
+    775329,
+    775331
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 521692,
+   "name": "Salvador Perez",
+   "team": "KC",
+   "bat": 6,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341,
+    775334,
+    775332,
+    775329,
+    775331
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 502054,
+   "name": "Tommy Pham",
+   "team": "KC",
+   "bat": 6,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341,
+    775334,
+    775332,
+    775329,
+    775331
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 686469,
+   "name": "Vinnie Pasquantino",
+   "team": "KC",
+   "bat": 6,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341,
+    775334,
+    775332,
+    775329,
+    775331
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 493329,
+   "name": "Yuli Gurriel",
+   "team": "KC",
+   "bat": 6,
+   "pitch": 0,
+   "games": [
+    775343,
+    775341,
+    775334,
+    775332,
+    775329,
+    775331
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 681911,
+   "name": "Alex Vesia",
+   "team": "LAD",
+   "bat": 0,
+   "pitch": 7,
+   "games": [
+    775323,
+    775320,
+    775317,
+    775300,
+    775294,
+    775298,
+    775296
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 607455,
+   "name": "Anthony Banda",
+   "team": "LAD",
+   "bat": 0,
+   "pitch": 10,
+   "games": [
+    775322,
+    775321,
+    775320,
+    775306,
+    775299,
+    775302,
+    775300,
+    775294,
+    775298,
+    775296
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 676508,
+   "name": "Ben Casparius",
+   "team": "LAD",
+   "bat": 0,
+   "pitch": 4,
+   "games": [
+    775307,
+    775305,
+    775302,
+    775297
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 595014,
+   "name": "Blake Treinen",
+   "team": "LAD",
+   "bat": 0,
+   "pitch": 9,
+   "games": [
+    775323,
+    775320,
+    775317,
+    775305,
+    775303,
+    775302,
+    775300,
+    775294,
+    775296
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 641703,
+   "name": "Brent Honeywell",
+   "team": "LAD",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775306,
+    775299,
+    775297
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 660813,
+   "name": "Brusdar Graterol",
+   "team": "LAD",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775300,
+    775298,
+    775296
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 543339,
+   "name": "Daniel Hudson",
+   "team": "LAD",
+   "bat": 0,
+   "pitch": 7,
+   "games": [
+    775322,
+    775321,
+    775320,
+    775307,
+    775302,
+    775298,
+    775297
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 683618,
+   "name": "Edgardo Henriquez",
+   "team": "LAD",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775322,
+    775306,
+    775303
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 623465,
+   "name": "Evan Phillips",
+   "team": "LAD",
+   "bat": 0,
+   "pitch": 5,
+   "games": [
+    775323,
+    775320,
+    775317,
+    775303,
+    775302
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 656427,
+   "name": "Jack Flaherty",
+   "team": "LAD",
+   "bat": 0,
+   "pitch": 5,
+   "games": [
+    775322,
+    775307,
+    775299,
+    775300,
+    775296
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 689017,
+   "name": "Landon Knack",
+   "team": "LAD",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775320,
+    775306,
+    775297
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 675627,
+   "name": "Michael Grove",
+   "team": "LAD",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775322
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 656629,
+   "name": "Michael Kopech",
+   "team": "LAD",
+   "bat": 0,
+   "pitch": 10,
+   "games": [
+    775323,
+    775321,
+    775320,
+    775317,
+    775305,
+    775302,
+    775300,
+    775294,
+    775298,
+    775296
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 518489,
+   "name": "Ryan Brasier",
+   "team": "LAD",
+   "bat": 0,
+   "pitch": 8,
+   "games": [
+    775323,
+    775322,
+    775320,
+    775306,
+    775305,
+    775302,
+    775298,
+    775296
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 621111,
+   "name": "Walker Buehler",
+   "team": "LAD",
+   "bat": 0,
+   "pitch": 4,
+   "games": [
+    775321,
+    775305,
+    775298,
+    775296
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 808967,
+   "name": "Yoshinobu Yamamoto",
+   "team": "LAD",
+   "bat": 0,
+   "pitch": 4,
+   "games": [
+    775323,
+    775317,
+    775303,
+    775294
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 681624,
+   "name": "Andy Pages",
+   "team": "LAD",
+   "bat": 8,
+   "pitch": 0,
+   "games": [
+    775321,
+    775320,
+    775317,
+    775307,
+    775306,
+    775303,
+    775299,
+    775302
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 605131,
+   "name": "Austin Barnes",
+   "team": "LAD",
+   "bat": 1,
+   "pitch": 0,
+   "games": [
+    775299
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 621035,
+   "name": "Chris Taylor",
+   "team": "LAD",
+   "bat": 13,
+   "pitch": 0,
+   "games": [
+    775323,
+    775321,
+    775320,
+    775317,
+    775307,
+    775305,
+    775303,
+    775302,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 571771,
+   "name": "Enrique Hern\u00e1ndez",
+   "team": "LAD",
+   "bat": 14,
+   "pitch": 0,
+   "games": [
+    775322,
+    775320,
+    775317,
+    775307,
+    775306,
+    775305,
+    775303,
+    775299,
+    775302,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 518692,
+   "name": "Freddie Freeman",
+   "team": "LAD",
+   "bat": 13,
+   "pitch": 0,
+   "games": [
+    775323,
+    775322,
+    775321,
+    775317,
+    775307,
+    775306,
+    775305,
+    775299,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 666158,
+   "name": "Gavin Lux",
+   "team": "LAD",
+   "bat": 12,
+   "pitch": 0,
+   "games": [
+    775323,
+    775322,
+    775321,
+    775320,
+    775317,
+    775307,
+    775305,
+    775299,
+    775300,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 595281,
+   "name": "Kevin Kiermaier",
+   "team": "LAD",
+   "bat": 4,
+   "pitch": 0,
+   "games": [
+    775307,
+    775305,
+    775303,
+    775302
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 571970,
+   "name": "Max Muncy",
+   "team": "LAD",
+   "bat": 16,
+   "pitch": 0,
+   "games": [
+    775323,
+    775322,
+    775321,
+    775320,
+    775317,
+    775307,
+    775306,
+    775305,
+    775303,
+    775299,
+    775302,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 500743,
+   "name": "Miguel Rojas",
+   "team": "LAD",
+   "bat": 4,
+   "pitch": 0,
+   "games": [
+    775323,
+    775322,
+    775321,
+    775294
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 605141,
+   "name": "Mookie Betts",
+   "team": "LAD",
+   "bat": 16,
+   "pitch": 0,
+   "games": [
+    775323,
+    775322,
+    775321,
+    775320,
+    775317,
+    775307,
+    775306,
+    775305,
+    775303,
+    775299,
+    775302,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 660271,
+   "name": "Shohei Ohtani",
+   "team": "LAD",
+   "bat": 16,
+   "pitch": 0,
+   "games": [
+    775323,
+    775322,
+    775321,
+    775320,
+    775317,
+    775307,
+    775306,
+    775305,
+    775303,
+    775299,
+    775302,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 606192,
+   "name": "Teoscar Hern\u00e1ndez",
+   "team": "LAD",
+   "bat": 16,
+   "pitch": 0,
+   "games": [
+    775323,
+    775322,
+    775321,
+    775320,
+    775317,
+    775307,
+    775306,
+    775305,
+    775303,
+    775299,
+    775302,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 669242,
+   "name": "Tommy Edman",
+   "team": "LAD",
+   "bat": 16,
+   "pitch": 0,
+   "games": [
+    775323,
+    775322,
+    775321,
+    775320,
+    775317,
+    775307,
+    775306,
+    775305,
+    775303,
+    775299,
+    775302,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 669257,
+   "name": "Will Smith",
+   "team": "LAD",
+   "bat": 16,
+   "pitch": 0,
+   "games": [
+    775323,
+    775322,
+    775321,
+    775320,
+    775317,
+    775307,
+    775306,
+    775305,
+    775303,
+    775299,
+    775302,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 676879,
+   "name": "Aaron Ashby",
+   "team": "MIL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775340
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 650644,
+   "name": "Aaron Civale",
+   "team": "MIL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775340
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 642207,
+   "name": "Devin Williams",
+   "team": "MIL",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775339,
+    775337
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 593423,
+   "name": "Frankie Montas",
+   "team": "MIL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775339
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 642547,
+   "name": "Freddy Peralta",
+   "team": "MIL",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775340,
+    775337
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 657649,
+   "name": "Jared Koenig",
+   "team": "MIL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775339
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 605452,
+   "name": "Joe Ross",
+   "team": "MIL",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775339,
+    775337
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 606303,
+   "name": "Joel Payamps",
+   "team": "MIL",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775340,
+    775339
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 683232,
+   "name": "Nick Mears",
+   "team": "MIL",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775340,
+    775337
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 668964,
+   "name": "Tobias Myers",
+   "team": "MIL",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775337
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 656730,
+   "name": "Trevor Megill",
+   "team": "MIL",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775339,
+    775337
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 663368,
+   "name": "Blake Perkins",
+   "team": "MIL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775339,
+    775337
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 668930,
+   "name": "Brice Turang",
+   "team": "MIL",
+   "bat": 3,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 669003,
+   "name": "Garrett Mitchell",
+   "team": "MIL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 596142,
+   "name": "Gary S\u00e1nchez",
+   "team": "MIL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775339,
+    775337
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 694192,
+   "name": "Jackson Chourio",
+   "team": "MIL",
+   "bat": 3,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 641343,
+   "name": "Jake Bauers",
+   "team": "MIL",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775340,
+    775337
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 687401,
+   "name": "Joey Ortiz",
+   "team": "MIL",
+   "bat": 3,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 656555,
+   "name": "Rhys Hoskins",
+   "team": "MIL",
+   "bat": 3,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 686217,
+   "name": "Sal Frelick",
+   "team": "MIL",
+   "bat": 3,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 661388,
+   "name": "William Contreras",
+   "team": "MIL",
+   "bat": 3,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 642715,
+   "name": "Willy Adames",
+   "team": "MIL",
+   "bat": 3,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 664849,
+   "name": "Danny Young",
+   "team": "NYM",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775307,
+    775303
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 656849,
+   "name": "David Peterson",
+   "team": "NYM",
+   "bat": 0,
+   "pitch": 5,
+   "games": [
+    775337,
+    775318,
+    775313,
+    775307,
+    775299
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 621242,
+   "name": "Edwin D\u00edaz",
+   "team": "NYM",
+   "bat": 0,
+   "pitch": 6,
+   "games": [
+    775337,
+    775319,
+    775313,
+    775306,
+    775299,
+    775302
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 500779,
+   "name": "Jose Quintana",
+   "team": "NYM",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775337,
+    775313,
+    775303
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 676130,
+   "name": "Jos\u00e9 Butt\u00f3",
+   "team": "NYM",
+   "bat": 0,
+   "pitch": 6,
+   "games": [
+    775340,
+    775337,
+    775319,
+    775307,
+    775303,
+    775302
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 673540,
+   "name": "Kodai Senga",
+   "team": "NYM",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775318,
+    775307,
+    775302
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 622663,
+   "name": "Luis Severino",
+   "team": "NYM",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775340,
+    775319,
+    775305
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 664208,
+   "name": "Phil Maton",
+   "team": "NYM",
+   "bat": 0,
+   "pitch": 6,
+   "games": [
+    775339,
+    775318,
+    775316,
+    775306,
+    775303,
+    775302
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 657585,
+   "name": "Reed Garrett",
+   "team": "NYM",
+   "bat": 0,
+   "pitch": 7,
+   "games": [
+    775339,
+    775318,
+    775313,
+    775307,
+    775305,
+    775299,
+    775302
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 592773,
+   "name": "Ryne Stanek",
+   "team": "NYM",
+   "bat": 0,
+   "pitch": 7,
+   "games": [
+    775340,
+    775339,
+    775318,
+    775316,
+    775306,
+    775299,
+    775302
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 640455,
+   "name": "Sean Manaea",
+   "team": "NYM",
+   "bat": 0,
+   "pitch": 4,
+   "games": [
+    775339,
+    775316,
+    775306,
+    775302
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 656731,
+   "name": "Tylor Megill",
+   "team": "NYM",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775319,
+    775305
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 607043,
+   "name": "Brandon Nimmo",
+   "team": "NYM",
+   "bat": 13,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337,
+    775318,
+    775319,
+    775316,
+    775313,
+    775307,
+    775306,
+    775305,
+    775303,
+    775299,
+    775302
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 682626,
+   "name": "Francisco Alvarez",
+   "team": "NYM",
+   "bat": 13,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337,
+    775318,
+    775319,
+    775316,
+    775313,
+    775307,
+    775306,
+    775305,
+    775303,
+    775299,
+    775302
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 596019,
+   "name": "Francisco Lindor",
+   "team": "NYM",
+   "bat": 13,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337,
+    775318,
+    775319,
+    775316,
+    775313,
+    775307,
+    775306,
+    775305,
+    775303,
+    775299,
+    775302
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 664056,
+   "name": "Harrison Bader",
+   "team": "NYM",
+   "bat": 12,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337,
+    775318,
+    775319,
+    775316,
+    775313,
+    775307,
+    775306,
+    775305,
+    775303,
+    775299
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 502110,
+   "name": "J.D. Martinez",
+   "team": "NYM",
+   "bat": 8,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775318,
+    775319,
+    775316,
+    775313,
+    775305,
+    775303
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 643446,
+   "name": "Jeff McNeil",
+   "team": "NYM",
+   "bat": 5,
+   "pitch": 0,
+   "games": [
+    775307,
+    775305,
+    775303,
+    775299,
+    775302
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 608385,
+   "name": "Jesse Winker",
+   "team": "NYM",
+   "bat": 10,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337,
+    775318,
+    775316,
+    775307,
+    775306,
+    775303,
+    775299,
+    775302
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 578428,
+   "name": "Jose Iglesias",
+   "team": "NYM",
+   "bat": 12,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337,
+    775318,
+    775319,
+    775316,
+    775313,
+    775307,
+    775306,
+    775305,
+    775303,
+    775299
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 620443,
+   "name": "Luis Torrens",
+   "team": "NYM",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775318,
+    775303
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 682668,
+   "name": "Luisangel Acu\u00f1a",
+   "team": "NYM",
+   "bat": 9,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337,
+    775318,
+    775316,
+    775313,
+    775307,
+    775306,
+    775299
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 668901,
+   "name": "Mark Vientos",
+   "team": "NYM",
+   "bat": 13,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337,
+    775318,
+    775319,
+    775316,
+    775313,
+    775307,
+    775306,
+    775305,
+    775303,
+    775299,
+    775302
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 624413,
+   "name": "Pete Alonso",
+   "team": "NYM",
+   "bat": 13,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337,
+    775318,
+    775319,
+    775316,
+    775313,
+    775307,
+    775306,
+    775305,
+    775303,
+    775299,
+    775302
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 516782,
+   "name": "Starling Marte",
+   "team": "NYM",
+   "bat": 13,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337,
+    775318,
+    775319,
+    775316,
+    775313,
+    775307,
+    775306,
+    775305,
+    775303,
+    775299,
+    775302
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 621438,
+   "name": "Tyrone Taylor",
+   "team": "NYM",
+   "bat": 13,
+   "pitch": 0,
+   "games": [
+    775340,
+    775339,
+    775337,
+    775318,
+    775319,
+    775316,
+    775313,
+    775307,
+    775306,
+    775305,
+    775303,
+    775299,
+    775302
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 607074,
+   "name": "Carlos Rod\u00f3n",
+   "team": "NYY",
+   "bat": 0,
+   "pitch": 4,
+   "games": [
+    775332,
+    775314,
+    775309,
+    775294
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 657376,
+   "name": "Clarke Schmidt",
+   "team": "NYY",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775329,
+    775310,
+    775298
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 605280,
+   "name": "Clay Holmes",
+   "team": "NYY",
+   "bat": 0,
+   "pitch": 13,
+   "games": [
+    775334,
+    775332,
+    775329,
+    775331,
+    775314,
+    775312,
+    775310,
+    775311,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 543037,
+   "name": "Gerrit Cole",
+   "team": "NYY",
+   "bat": 0,
+   "pitch": 5,
+   "games": [
+    775334,
+    775331,
+    775312,
+    775300,
+    775296
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 641656,
+   "name": "Ian Hamilton",
+   "team": "NYY",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775332,
+    775310
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 664776,
+   "name": "Jake Cousins",
+   "team": "NYY",
+   "bat": 0,
+   "pitch": 6,
+   "games": [
+    775332,
+    775311,
+    775309,
+    775300,
+    775294,
+    775298
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 661563,
+   "name": "Luis Gil",
+   "team": "NYY",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775311,
+    775297
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 596133,
+   "name": "Luke Weaver",
+   "team": "NYY",
+   "bat": 0,
+   "pitch": 12,
+   "games": [
+    775334,
+    775332,
+    775329,
+    775331,
+    775314,
+    775312,
+    775310,
+    775309,
+    775300,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 643410,
+   "name": "Mark Leiter Jr.",
+   "team": "NYY",
+   "bat": 0,
+   "pitch": 6,
+   "games": [
+    775311,
+    775309,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 641482,
+   "name": "Nestor Cortes",
+   "team": "NYY",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775300,
+    775298
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 657612,
+   "name": "Tim Hill",
+   "team": "NYY",
+   "bat": 0,
+   "pitch": 10,
+   "games": [
+    775334,
+    775332,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309,
+    775294,
+    775298,
+    775297
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 641835,
+   "name": "Tim Mayza",
+   "team": "NYY",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775332,
+    775310,
+    775297
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 592454,
+   "name": "Tommy Kahnle",
+   "team": "NYY",
+   "bat": 0,
+   "pitch": 9,
+   "games": [
+    775334,
+    775332,
+    775329,
+    775312,
+    775310,
+    775311,
+    775300,
+    775298,
+    775296
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 592450,
+   "name": "Aaron Judge",
+   "team": "NYY",
+   "bat": 14,
+   "pitch": 0,
+   "games": [
+    775334,
+    775332,
+    775329,
+    775331,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 657077,
+   "name": "Alex Verdugo",
+   "team": "NYY",
+   "bat": 14,
+   "pitch": 0,
+   "games": [
+    775334,
+    775332,
+    775329,
+    775331,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 519203,
+   "name": "Anthony Rizzo",
+   "team": "NYY",
+   "bat": 10,
+   "pitch": 0,
+   "games": [
+    775314,
+    775312,
+    775310,
+    775311,
+    775309,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 683011,
+   "name": "Anthony Volpe",
+   "team": "NYY",
+   "bat": 14,
+   "pitch": 0,
+   "games": [
+    775334,
+    775332,
+    775329,
+    775331,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 669224,
+   "name": "Austin Wells",
+   "team": "NYY",
+   "bat": 14,
+   "pitch": 0,
+   "games": [
+    775334,
+    775332,
+    775329,
+    775331,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 668752,
+   "name": "Duke Ellis",
+   "team": "NYY",
+   "bat": 1,
+   "pitch": 0,
+   "games": [
+    775331
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 519317,
+   "name": "Giancarlo Stanton",
+   "team": "NYY",
+   "bat": 14,
+   "pitch": 0,
+   "games": [
+    775334,
+    775332,
+    775329,
+    775331,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 650402,
+   "name": "Gleyber Torres",
+   "team": "NYY",
+   "bat": 14,
+   "pitch": 0,
+   "games": [
+    775334,
+    775332,
+    775329,
+    775331,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 691176,
+   "name": "Jasson Dom\u00ednguez",
+   "team": "NYY",
+   "bat": 3,
+   "pitch": 0,
+   "games": [
+    775310,
+    775309,
+    775300
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 665862,
+   "name": "Jazz Chisholm Jr.",
+   "team": "NYY",
+   "bat": 14,
+   "pitch": 0,
+   "games": [
+    775334,
+    775332,
+    775329,
+    775331,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 542932,
+   "name": "Jon Berti",
+   "team": "NYY",
+   "bat": 4,
+   "pitch": 0,
+   "games": [
+    775332,
+    775331,
+    775310,
+    775311
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 624431,
+   "name": "Jose Trevino",
+   "team": "NYY",
+   "bat": 4,
+   "pitch": 0,
+   "games": [
+    775310,
+    775309,
+    775294,
+    775298
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 665742,
+   "name": "Juan Soto",
+   "team": "NYY",
+   "bat": 14,
+   "pitch": 0,
+   "games": [
+    775334,
+    775332,
+    775329,
+    775331,
+    775314,
+    775312,
+    775310,
+    775311,
+    775309,
+    775300,
+    775294,
+    775298,
+    775297,
+    775296
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 665828,
+   "name": "Oswaldo Cabrera",
+   "team": "NYY",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775334,
+    775329,
+    775314,
+    775311,
+    775309,
+    775300,
+    775294
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 605400,
+   "name": "Aaron Nola",
+   "team": "PHI",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775316
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 608032,
+   "name": "Carlos Est\u00e9vez",
+   "team": "PHI",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775319,
+    775316,
+    775313
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 650911,
+   "name": "Cristopher S\u00e1nchez",
+   "team": "PHI",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775319
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 656546,
+   "name": "Jeff Hoffman",
+   "team": "PHI",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775318,
+    775319,
+    775313
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 621237,
+   "name": "Jos\u00e9 Alvarado",
+   "team": "PHI",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775316
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 614179,
+   "name": "Jos\u00e9 Ruiz",
+   "team": "PHI",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775319,
+    775316
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 621381,
+   "name": "Matt Strahm",
+   "team": "PHI",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775318,
+    775319,
+    775313
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 689147,
+   "name": "Orion Kerkering",
+   "team": "PHI",
+   "bat": 0,
+   "pitch": 4,
+   "games": [
+    775318,
+    775319,
+    775316,
+    775313
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 624133,
+   "name": "Ranger Suarez",
+   "team": "PHI",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775313
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 621383,
+   "name": "Tanner Banks",
+   "team": "PHI",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775318
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 554430,
+   "name": "Zack Wheeler",
+   "team": "PHI",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775318
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 664761,
+   "name": "Alec Bohm",
+   "team": "PHI",
+   "bat": 4,
+   "pitch": 0,
+   "games": [
+    775318,
+    775319,
+    775316,
+    775313
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 669720,
+   "name": "Austin Hays",
+   "team": "PHI",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775319,
+    775316
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 669016,
+   "name": "Brandon Marsh",
+   "team": "PHI",
+   "bat": 4,
+   "pitch": 0,
+   "games": [
+    775318,
+    775319,
+    775316,
+    775313
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 547180,
+   "name": "Bryce Harper",
+   "team": "PHI",
+   "bat": 4,
+   "pitch": 0,
+   "games": [
+    775318,
+    775319,
+    775316,
+    775313
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 681082,
+   "name": "Bryson Stott",
+   "team": "PHI",
+   "bat": 4,
+   "pitch": 0,
+   "games": [
+    775318,
+    775319,
+    775316,
+    775313
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 624641,
+   "name": "Edmundo Sosa",
+   "team": "PHI",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775319,
+    775316
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 592663,
+   "name": "J.T. Realmuto",
+   "team": "PHI",
+   "bat": 4,
+   "pitch": 0,
+   "games": [
+    775318,
+    775319,
+    775316,
+    775313
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 679032,
+   "name": "Johan Rojas",
+   "team": "PHI",
+   "bat": 3,
+   "pitch": 0,
+   "games": [
+    775318,
+    775319,
+    775316
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 665019,
+   "name": "Kody Clemens",
+   "team": "PHI",
+   "bat": 4,
+   "pitch": 0,
+   "games": [
+    775318,
+    775319,
+    775316,
+    775313
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 656941,
+   "name": "Kyle Schwarber",
+   "team": "PHI",
+   "bat": 4,
+   "pitch": 0,
+   "games": [
+    775318,
+    775319,
+    775316,
+    775313
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 592206,
+   "name": "Nick Castellanos",
+   "team": "PHI",
+   "bat": 4,
+   "pitch": 0,
+   "games": [
+    775318,
+    775319,
+    775316,
+    775313
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 607208,
+   "name": "Trea Turner",
+   "team": "PHI",
+   "bat": 4,
+   "pitch": 0,
+   "games": [
+    775318,
+    775319,
+    775316,
+    775313
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 642215,
+   "name": "Weston Wilson",
+   "team": "PHI",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775316,
+    775313
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 670970,
+   "name": "Adrian Morejon",
+   "team": "SD",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775323,
+    775320
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 689690,
+   "name": "Alek Jacob",
+   "team": "SD",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775322,
+    775320
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 663773,
+   "name": "Bryan Hoeing",
+   "team": "SD",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775336,
+    775323,
+    775320
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 656302,
+   "name": "Dylan Cease",
+   "team": "SD",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775323,
+    775320
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 592094,
+   "name": "Jason Adam",
+   "team": "SD",
+   "bat": 0,
+   "pitch": 5,
+   "games": [
+    775333,
+    775336,
+    775323,
+    775321,
+    775317
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 669093,
+   "name": "Jeremiah Estrada",
+   "team": "SD",
+   "bat": 0,
+   "pitch": 4,
+   "games": [
+    775336,
+    775323,
+    775321,
+    775320
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 605397,
+   "name": "Joe Musgrove",
+   "team": "SD",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775336
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 650633,
+   "name": "Michael King",
+   "team": "SD",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775333,
+    775321
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 663158,
+   "name": "Robert Suarez",
+   "team": "SD",
+   "bat": 0,
+   "pitch": 3,
+   "games": [
+    775333,
+    775336,
+    775321
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 656945,
+   "name": "Tanner Scott",
+   "team": "SD",
+   "bat": 0,
+   "pitch": 5,
+   "games": [
+    775336,
+    775323,
+    775322,
+    775321,
+    775317
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 593974,
+   "name": "Wandy Peralta",
+   "team": "SD",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775320
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 506433,
+   "name": "Yu Darvish",
+   "team": "SD",
+   "bat": 0,
+   "pitch": 2,
+   "games": [
+    775322,
+    775317
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 673513,
+   "name": "Yuki Matsui",
+   "team": "SD",
+   "bat": 0,
+   "pitch": 1,
+   "games": [
+    775320
+   ],
+   "kind": "pitcher"
+  },
+  {
+   "id": 663604,
+   "name": "Brandon Lockridge",
+   "team": "SD",
+   "bat": 2,
+   "pitch": 0,
+   "games": [
+    775323,
+    775322
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 444482,
+   "name": "David Peralta",
+   "team": "SD",
+   "bat": 5,
+   "pitch": 0,
+   "games": [
+    775323,
+    775322,
+    775321,
+    775320,
+    775317
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 456781,
+   "name": "Donovan Solano",
+   "team": "SD",
+   "bat": 5,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336,
+    775323,
+    775322,
+    775317
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 553869,
+   "name": "Elias D\u00edaz",
+   "team": "SD",
+   "bat": 1,
+   "pitch": 0,
+   "games": [
+    775323
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 665487,
+   "name": "Fernando Tatis Jr.",
+   "team": "SD",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336,
+    775323,
+    775322,
+    775321,
+    775320,
+    775317
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 701538,
+   "name": "Jackson Merrill",
+   "team": "SD",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336,
+    775323,
+    775322,
+    775321,
+    775320,
+    775317
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 630105,
+   "name": "Jake Cronenworth",
+   "team": "SD",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336,
+    775323,
+    775322,
+    775321,
+    775320,
+    775317
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 595777,
+   "name": "Jurickson Profar",
+   "team": "SD",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336,
+    775323,
+    775322,
+    775321,
+    775320,
+    775317
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 543309,
+   "name": "Kyle Higashioka",
+   "team": "SD",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336,
+    775323,
+    775322,
+    775321,
+    775320,
+    775317
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 650333,
+   "name": "Luis Arraez",
+   "team": "SD",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336,
+    775323,
+    775322,
+    775321,
+    775320,
+    775317
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 592518,
+   "name": "Manny Machado",
+   "team": "SD",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336,
+    775323,
+    775322,
+    775321,
+    775320,
+    775317
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 642180,
+   "name": "Tyler Wade",
+   "team": "SD",
+   "bat": 1,
+   "pitch": 0,
+   "games": [
+    775322
+   ],
+   "kind": "position"
+  },
+  {
+   "id": 593428,
+   "name": "Xander Bogaerts",
+   "team": "SD",
+   "bat": 7,
+   "pitch": 0,
+   "games": [
+    775333,
+    775336,
+    775323,
+    775322,
+    775321,
+    775320,
+    775317
+   ],
+   "kind": "position"
+  }
+ ]
+}

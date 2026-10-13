@@ -1,0 +1,2126 @@
+{
+ "season": 2026,
+ "note": "the eight division-series rosters (playoffs/rosters.json) and the games replayed so far",
+ "games": [
+  {
+   "pk": 849829,
+   "type": "D",
+   "date": "2026-10-03",
+   "away": "Chicago White Sox",
+   "home": "Cleveland Guardians",
+   "final": [
+    3,
+    0
+   ],
+   "series": "ALDS Game 1"
+  },
+  {
+   "pk": 849834,
+   "type": "D",
+   "date": "2026-10-05",
+   "away": "Chicago White Sox",
+   "home": "Cleveland Guardians",
+   "final": [
+    4,
+    3
+   ],
+   "series": "ALDS Game 2"
+  },
+  {
+   "pk": 849833,
+   "type": "D",
+   "date": "2026-10-07",
+   "away": "Cleveland Guardians",
+   "home": "Chicago White Sox",
+   "final": [
+    9,
+    3
+   ],
+   "series": "ALDS Game 3"
+  },
+  {
+   "pk": 849832,
+   "type": "D",
+   "date": "2026-10-08",
+   "away": "Cleveland Guardians",
+   "home": "Chicago White Sox",
+   "final": [
+    9,
+    5
+   ],
+   "series": "ALDS Game 4"
+  },
+  {
+   "pk": 849831,
+   "type": "D",
+   "date": "2026-10-10",
+   "away": "Chicago White Sox",
+   "home": "Cleveland Guardians",
+   "final": [
+    0,
+    2
+   ],
+   "series": "ALDS Game 5"
+  },
+  {
+   "pk": 849835,
+   "type": "D",
+   "date": "2026-10-03",
+   "away": "New York Yankees",
+   "home": "Tampa Bay Rays",
+   "final": [
+    0,
+    1
+   ],
+   "series": "ALDS Game 1"
+  },
+  {
+   "pk": 849839,
+   "type": "D",
+   "date": "2026-10-05",
+   "away": "New York Yankees",
+   "home": "Tampa Bay Rays",
+   "final": [
+    2,
+    5
+   ],
+   "series": "ALDS Game 2"
+  },
+  {
+   "pk": 849838,
+   "type": "D",
+   "date": "2026-10-07",
+   "away": "Tampa Bay Rays",
+   "home": "New York Yankees",
+   "final": [
+    4,
+    3
+   ],
+   "series": "ALDS Game 3"
+  },
+  {
+   "pk": 849828,
+   "type": "D",
+   "date": "2026-10-03",
+   "away": "Atlanta Braves",
+   "home": "Los Angeles Dodgers",
+   "final": [
+    3,
+    5
+   ],
+   "series": "NLDS Game 1"
+  },
+  {
+   "pk": 849823,
+   "type": "D",
+   "date": "2026-10-04",
+   "away": "Atlanta Braves",
+   "home": "Los Angeles Dodgers",
+   "final": [
+    3,
+    2
+   ],
+   "series": "NLDS Game 2"
+  },
+  {
+   "pk": 849819,
+   "type": "D",
+   "date": "2026-10-06",
+   "away": "Los Angeles Dodgers",
+   "home": "Atlanta Braves",
+   "final": [
+    3,
+    1
+   ],
+   "series": "NLDS Game 3"
+  },
+  {
+   "pk": 849822,
+   "type": "D",
+   "date": "2026-10-07",
+   "away": "Los Angeles Dodgers",
+   "home": "Atlanta Braves",
+   "final": [
+    4,
+    1
+   ],
+   "series": "NLDS Game 4"
+  },
+  {
+   "pk": 849830,
+   "type": "D",
+   "date": "2026-10-03",
+   "away": "San Diego Padres",
+   "home": "Milwaukee Brewers",
+   "final": [
+    2,
+    3
+   ],
+   "series": "NLDS Game 1"
+  },
+  {
+   "pk": 849825,
+   "type": "D",
+   "date": "2026-10-04",
+   "away": "San Diego Padres",
+   "home": "Milwaukee Brewers",
+   "final": [
+    3,
+    4
+   ],
+   "series": "NLDS Game 2"
+  },
+  {
+   "pk": 849826,
+   "type": "D",
+   "date": "2026-10-06",
+   "away": "Milwaukee Brewers",
+   "home": "San Diego Padres",
+   "final": [
+    3,
+    4
+   ],
+   "series": "NLDS Game 3"
+  },
+  {
+   "pk": 849827,
+   "type": "D",
+   "date": "2026-10-07",
+   "away": "Milwaukee Brewers",
+   "home": "San Diego Padres",
+   "final": [
+    3,
+    1
+   ],
+   "series": "NLDS Game 4"
+  },
+  {
+   "pk": 849820,
+   "type": "L",
+   "date": "2026-10-12",
+   "away": "Cleveland Guardians",
+   "home": "Tampa Bay Rays",
+   "final": [
+    7,
+    3
+   ],
+   "series": "ALCS Game 1"
+  },
+  {
+   "pk": 849809,
+   "type": "L",
+   "date": "2026-10-11",
+   "away": "Los Angeles Dodgers",
+   "home": "Milwaukee Brewers",
+   "final": [
+    1,
+    2
+   ],
+   "series": "NLCS Game 1"
+  },
+  {
+   "pk": 849812,
+   "type": "L",
+   "date": "2026-10-12",
+   "away": "Los Angeles Dodgers",
+   "home": "Milwaukee Brewers",
+   "final": [
+    4,
+    7
+   ],
+   "series": "NLCS Game 2"
+  }
+ ],
+ "players": [
+  {
+   "id": 643217,
+   "name": "Andrew Benintendi",
+   "team": "CWS",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 641743,
+   "name": "Anthony Kay",
+   "team": "CWS",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 695731,
+   "name": "Braden Montgomery",
+   "team": "CWS",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 686668,
+   "name": "Brenton Doyle",
+   "team": "CWS",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 663542,
+   "name": "Bryan Hudson",
+   "team": "CWS",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 805367,
+   "name": "Chase Meidroth",
+   "team": "CWS",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 695657,
+   "name": "Colson Montgomery",
+   "team": "CWS",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 689818,
+   "name": "David Sandlin",
+   "team": "CWS",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 663436,
+   "name": "Davis Martin",
+   "team": "CWS",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 607200,
+   "name": "Erick Fedde",
+   "team": "CWS",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 691799,
+   "name": "Grant Taylor",
+   "team": "CWS",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 696146,
+   "name": "Hagen Smith",
+   "team": "CWS",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 668670,
+   "name": "Jake Rogers",
+   "team": "CWS",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 663855,
+   "name": "Jordan Hicks",
+   "team": "CWS",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 691019,
+   "name": "Kyle Teel",
+   "team": "CWS",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 682668,
+   "name": "Luisangel Acu\u00f1a",
+   "team": "CWS",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 678246,
+   "name": "Miguel Vargas",
+   "team": "CWS",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 808959,
+   "name": "Munetaka Murakami",
+   "team": "CWS",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 702273,
+   "name": "Noah Schultz",
+   "team": "CWS",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 545341,
+   "name": "Randal Grichuk",
+   "team": "CWS",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 803011,
+   "name": "Sam Antonacci",
+   "team": "CWS",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 680732,
+   "name": "Sean Burke",
+   "team": "CWS",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 656794,
+   "name": "Sean Newcomb",
+   "team": "CWS",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 502054,
+   "name": "Tommy Pham",
+   "team": "CWS",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 671976,
+   "name": "Tristan Peters",
+   "team": "CWS",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 699823,
+   "name": "Tyler Davis",
+   "team": "CWS",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 694197,
+   "name": "Angel Genao",
+   "team": "CLE",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 682657,
+   "name": "Angel Mart\u00ednez",
+   "team": "CLE",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 595978,
+   "name": "Austin Hedges",
+   "team": "CLE",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 677587,
+   "name": "Brayan Rocchio",
+   "team": "CLE",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 671922,
+   "name": "Cade Smith",
+   "team": "CLE",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 800050,
+   "name": "Chase DeLauter",
+   "team": "CLE",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 682982,
+   "name": "Daniel Espino",
+   "team": "CLE",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 682177,
+   "name": "Daniel Schneemann",
+   "team": "CLE",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 681807,
+   "name": "David Fry",
+   "team": "CLE",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 681870,
+   "name": "Erik Sabrowski",
+   "team": "CLE",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 656492,
+   "name": "Foster Griffin",
+   "team": "CLE",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 668909,
+   "name": "Gavin Williams",
+   "team": "CLE",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 683769,
+   "name": "Hunter Gaddis",
+   "team": "CLE",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 666176,
+   "name": "Jo Adell",
+   "team": "CLE",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 676282,
+   "name": "Joey Cantillo",
+   "team": "CLE",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 608070,
+   "name": "Jos\u00e9 Ram\u00edrez",
+   "team": "CLE",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 670036,
+   "name": "Matt Festa",
+   "team": "CLE",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 663993,
+   "name": "Nathaniel Lowe",
+   "team": "CLE",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 800048,
+   "name": "Parker Messick",
+   "team": "CLE",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 672275,
+   "name": "Patrick Bailey",
+   "team": "CLE",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 690984,
+   "name": "Petey Halpin",
+   "team": "CLE",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 542888,
+   "name": "Shawn Armstrong",
+   "team": "CLE",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 680757,
+   "name": "Steven Kwan",
+   "team": "CLE",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 676440,
+   "name": "Tanner Bibee",
+   "team": "CLE",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 682120,
+   "name": "Tim Herrin",
+   "team": "CLE",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 683953,
+   "name": "Travis Bazzana",
+   "team": "CLE",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 645305,
+   "name": "Ali S\u00e1nchez",
+   "team": "NYY",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 683011,
+   "name": "Anthony Volpe",
+   "team": "NYY",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 669224,
+   "name": "Austin Wells",
+   "team": "NYY",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 700250,
+   "name": "Ben Rice",
+   "team": "NYY",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 687396,
+   "name": "Brent Headrick",
+   "team": "NYY",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 693645,
+   "name": "Cam Schlittler",
+   "team": "NYY",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 607074,
+   "name": "Carlos Rod\u00f3n",
+   "team": "NYY",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 641355,
+   "name": "Cody Bellinger",
+   "team": "NYY",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 670280,
+   "name": "David Bednar",
+   "team": "NYY",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 806146,
+   "name": "George Lombard Jr.",
+   "team": "NYY",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 543037,
+   "name": "Gerrit Cole",
+   "team": "NYY",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 519317,
+   "name": "Giancarlo Stanton",
+   "team": "NYY",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 671218,
+   "name": "Heliot Ramos",
+   "team": "NYY",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 665862,
+   "name": "Jazz Chisholm Jr.",
+   "team": "NYY",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 670167,
+   "name": "John Schreiber",
+   "team": "NYY",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 676609,
+   "name": "Jos\u00e9 Caballero",
+   "team": "NYY",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 671277,
+   "name": "Luis Garc\u00eda Jr.",
+   "team": "NYY",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 608331,
+   "name": "Max Fried",
+   "team": "NYY",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 621112,
+   "name": "Paul Blackburn",
+   "team": "NYY",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 502671,
+   "name": "Paul Goldschmidt",
+   "team": "NYY",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 641857,
+   "name": "Ryan McMahon",
+   "team": "NYY",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 677960,
+   "name": "Ryan Weathers",
+   "team": "NYY",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 642232,
+   "name": "Ryan Yarbrough",
+   "team": "NYY",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 682987,
+   "name": "Spencer Jones",
+   "team": "NYY",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 663757,
+   "name": "Trent Grisham",
+   "team": "NYY",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 701542,
+   "name": "Will Warren",
+   "team": "NYY",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 810938,
+   "name": "Ben Williamson",
+   "team": "TB",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 641329,
+   "name": "Bryan Baker",
+   "team": "TB",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 592155,
+   "name": "Cam Booser",
+   "team": "TB",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 656775,
+   "name": "Cedric Mullins",
+   "team": "TB",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 802415,
+   "name": "Chandler Simpson",
+   "team": "TB",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 642121,
+   "name": "Cole Sulser",
+   "team": "TB",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 656876,
+   "name": "Drew Rasmussen",
+   "team": "TB",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 642547,
+   "name": "Freddy Peralta",
+   "team": "TB",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 664076,
+   "name": "Garrett Cleavinger",
+   "team": "TB",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 643377,
+   "name": "Griffin Jax",
+   "team": "TB",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 693855,
+   "name": "Ian Seymour",
+   "team": "TB",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 666018,
+   "name": "Jonathan Aranda",
+   "team": "TB",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 676356,
+   "name": "Jonny DeLuca",
+   "team": "TB",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 622761,
+   "name": "Jorge Mateo",
+   "team": "TB",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 691406,
+   "name": "Junior Caminero",
+   "team": "TB",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 687330,
+   "name": "Kevin Kelly",
+   "team": "TB",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 689414,
+   "name": "Liam Hicks",
+   "team": "TB",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 663743,
+   "name": "Nick Fortes",
+   "team": "TB",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 607259,
+   "name": "Nick Martinez",
+   "team": "TB",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 680700,
+   "name": "Richie Palacios",
+   "team": "TB",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 668723,
+   "name": "Ryan Vilade",
+   "team": "TB",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 571927,
+   "name": "Steven Matz",
+   "team": "TB",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 670764,
+   "name": "Taylor Walls",
+   "team": "TB",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 669330,
+   "name": "Tyler Wells",
+   "team": "TB",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 683748,
+   "name": "Victor Mesa Jr.",
+   "team": "TB",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 650490,
+   "name": "Yandy D\u00edaz",
+   "team": "TB",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 700363,
+   "name": "AJ Smith-Shawver",
+   "team": "ATL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 663586,
+   "name": "Austin Riley",
+   "team": "ATL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 608718,
+   "name": "Brent Suter",
+   "team": "ATL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 676551,
+   "name": "Brewer Hicklen",
+   "team": "ATL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 519242,
+   "name": "Chris Sale",
+   "team": "ATL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 800311,
+   "name": "Didier Fuentes",
+   "team": "ATL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 686948,
+   "name": "Drake Baldwin",
+   "team": "ATL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 689266,
+   "name": "Dylan Dodd",
+   "team": "ATL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 669276,
+   "name": "Dylan Lee",
+   "team": "ATL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 656550,
+   "name": "Grant Holmes",
+   "team": "ATL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 673490,
+   "name": "Ha-Seong Kim",
+   "team": "ATL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 702275,
+   "name": "JR Ritchie",
+   "team": "ATL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 657041,
+   "name": "Lane Thomas",
+   "team": "ATL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 621566,
+   "name": "Matt Olson",
+   "team": "ATL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 643289,
+   "name": "Mauricio Dub\u00f3n",
+   "team": "ATL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 671739,
+   "name": "Michael Harris II",
+   "team": "ATL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 573262,
+   "name": "Mike Yastrzemski",
+   "team": "ATL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 645277,
+   "name": "Ozzie Albies",
+   "team": "ATL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 628452,
+   "name": "Raisel Iglesias",
+   "team": "ATL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 678061,
+   "name": "Ray Kerr",
+   "team": "ATL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 663158,
+   "name": "Robert Suarez",
+   "team": "ATL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 660670,
+   "name": "Ronald Acu\u00f1a Jr.",
+   "team": "ATL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 642133,
+   "name": "Rowdy Tellez",
+   "team": "ATL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 669221,
+   "name": "Sean Murphy",
+   "team": "ATL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 641816,
+   "name": "Tyler Mahle",
+   "team": "ATL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 682989,
+   "name": "Victor Mederos",
+   "team": "ATL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 681911,
+   "name": "Alex Vesia",
+   "team": "LAD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 681624,
+   "name": "Andy Pages",
+   "team": "LAD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 605483,
+   "name": "Blake Snell",
+   "team": "LAD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 592779,
+   "name": "Brock Stewart",
+   "team": "LAD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 683618,
+   "name": "Edgardo Henriquez",
+   "team": "LAD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 621242,
+   "name": "Edwin D\u00edaz",
+   "team": "LAD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 571771,
+   "name": "Enrique Hern\u00e1ndez",
+   "team": "LAD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 623465,
+   "name": "Evan Phillips",
+   "team": "LAD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 518692,
+   "name": "Freddie Freeman",
+   "team": "LAD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 676439,
+   "name": "Hunter Feduccia",
+   "team": "LAD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 808975,
+   "name": "Hyeseong Kim",
+   "team": "LAD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 800543,
+   "name": "Josue De Paula",
+   "team": "LAD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 663460,
+   "name": "Kris Bubic",
+   "team": "LAD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 663656,
+   "name": "Kyle Tucker",
+   "team": "LAD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 571970,
+   "name": "Max Muncy",
+   "team": "LAD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 500743,
+   "name": "Miguel Rojas",
+   "team": "LAD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 605141,
+   "name": "Mookie Betts",
+   "team": "LAD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 808963,
+   "name": "Roki Sasaki",
+   "team": "LAD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 660271,
+   "name": "Shohei Ohtani",
+   "team": "LAD",
+   "kind": "two-way",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 656945,
+   "name": "Tanner Scott",
+   "team": "LAD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 669373,
+   "name": "Tarik Skubal",
+   "team": "LAD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 606192,
+   "name": "Teoscar Hern\u00e1ndez",
+   "team": "LAD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 669242,
+   "name": "Tommy Edman",
+   "team": "LAD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 607192,
+   "name": "Tyler Glasnow",
+   "team": "LAD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 669257,
+   "name": "Will Smith",
+   "team": "LAD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 808967,
+   "name": "Yoshinobu Yamamoto",
+   "team": "LAD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 670970,
+   "name": "Adrian Morejon",
+   "team": "SD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 669720,
+   "name": "Austin Hays",
+   "team": "SD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 699134,
+   "name": "Bradgley Rodriguez",
+   "team": "SD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 688158,
+   "name": "David Morgan",
+   "team": "SD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 687957,
+   "name": "Dustin Harris",
+   "team": "SD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 806956,
+   "name": "Ethan Salas",
+   "team": "SD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 665487,
+   "name": "Fernando Tatis Jr.",
+   "team": "SD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 666023,
+   "name": "Freddy Fermin",
+   "team": "SD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 657757,
+   "name": "Gavin Sheets",
+   "team": "SD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 701538,
+   "name": "Jackson Merrill",
+   "team": "SD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 630105,
+   "name": "Jake Cronenworth",
+   "team": "SD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 687749,
+   "name": "Jase Bowen",
+   "team": "SD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 592094,
+   "name": "Jason Adam",
+   "team": "SD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 605397,
+   "name": "Joe Musgrove",
+   "team": "SD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 669134,
+   "name": "Luis Campusano",
+   "team": "SD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 592518,
+   "name": "Manny Machado",
+   "team": "SD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 695243,
+   "name": "Mason Miller",
+   "team": "SD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 650633,
+   "name": "Michael King",
+   "team": "SD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 609280,
+   "name": "Miguel Andujar",
+   "team": "SD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 601713,
+   "name": "Nick Pivetta",
+   "team": "SD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 681190,
+   "name": "Randy V\u00e1squez",
+   "team": "SD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 592662,
+   "name": "Robbie Ray",
+   "team": "SD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 669392,
+   "name": "Samad Taylor",
+   "team": "SD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 664034,
+   "name": "Ty France",
+   "team": "SD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 593428,
+   "name": "Xander Bogaerts",
+   "team": "SD",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 673513,
+   "name": "Yuki Matsui",
+   "team": "SD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 676879,
+   "name": "Aaron Ashby",
+   "team": "MIL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 682842,
+   "name": "Abner Uribe",
+   "team": "MIL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 683734,
+   "name": "Andrew Vaughn",
+   "team": "MIL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 622608,
+   "name": "Antonio Senzatela",
+   "team": "MIL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 668930,
+   "name": "Brice Turang",
+   "team": "MIL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 694477,
+   "name": "Chad Patrick",
+   "team": "MIL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 592885,
+   "name": "Christian Yelich",
+   "team": "MIL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 806198,
+   "name": "Cooper Pratt",
+   "team": "MIL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 669084,
+   "name": "DL Hall",
+   "team": "MIL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 666152,
+   "name": "David Hamilton",
+   "team": "MIL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 669160,
+   "name": "Dustin May",
+   "team": "MIL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 669003,
+   "name": "Garrett Mitchell",
+   "team": "MIL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 596142,
+   "name": "Gary S\u00e1nchez",
+   "team": "MIL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 694192,
+   "name": "Jackson Chourio",
+   "team": "MIL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 694819,
+   "name": "Jacob Misiorowski",
+   "team": "MIL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 641343,
+   "name": "Jake Bauers",
+   "team": "MIL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 668941,
+   "name": "JoJo Romero",
+   "team": "MIL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 687401,
+   "name": "Joey Ortiz",
+   "team": "MIL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 690986,
+   "name": "Kyle Harrison",
+   "team": "MIL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 701656,
+   "name": "Logan Henderson",
+   "team": "MIL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 800325,
+   "name": "Luis Lara",
+   "team": "MIL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 688107,
+   "name": "Robert Gasser",
+   "team": "MIL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 686217,
+   "name": "Sal Frelick",
+   "team": "MIL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 675660,
+   "name": "Shane Drohan",
+   "team": "MIL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 656730,
+   "name": "Trevor Megill",
+   "team": "MIL",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 661388,
+   "name": "William Contreras",
+   "team": "MIL",
+   "kind": "position",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 621111,
+   "name": "Walker Buehler",
+   "team": "SD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  },
+  {
+   "id": 680736,
+   "name": "Justin Wrobleski",
+   "team": "LAD",
+   "kind": "pitcher",
+   "bat": 0,
+   "pitch": 0,
+   "games": []
+  }
+ ]
+}

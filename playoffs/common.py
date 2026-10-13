@@ -64,9 +64,10 @@ def fetch(url, path, pause=None, check=None, timeout=180):
         return None
     _dead[host] = 0
     os.makedirs(os.path.dirname(full), exist_ok=True)
-    with open(full + '.part', 'wb') as f:
+    part = full + '.part%d' % os.getpid()      # one temporary name a process, so two workers fetching the same file cannot collide
+    with open(part, 'wb') as f:
         f.write(data)
-    os.replace(full + '.part', full)
+    os.replace(part, full)
     return data
 
 
