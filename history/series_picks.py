@@ -58,6 +58,15 @@ def main():
             r['year'], r['round'], r['hi'], r['lo'], r['winner'] or '-', r['wins'],
             ('%s %.0f%% %s' % (fc['favourite'], 100 * fc['favChance'], 'right' if fc['right'] else 'WRONG')) if fc else 'not run',
             ('winner %.0f%% %s' % (100 * rp['winnerChance'], 'right' if rp['right'] else 'WRONG')) if rp else '-'))
+    def summary(rows, lab):
+        fc = [r for r in rows if 'forecast' in r]
+        if not fc: return
+        brier = sum((1 - r['forecast']['winnerChance']) ** 2 for r in fc) / len(fc)
+        hf = sum(r['winner'] == r['hi'] for r in fc)
+        print('%-10s %2d series: forecast favourite won %2d (%.0f%%), Brier %.3f (coin 0.250); the team with home field won %2d' % (lab, len(fc), sum(r['forecast']['right'] for r in fc), 100 * sum(r['forecast']['right'] for r in fc) / len(fc), brier, hf))
+    done_ = [r for r in out if r['winner']]
+    for rd in ROUND.values(): summary([r for r in done_ if r['round'] == rd], rd.split()[0] if rd != 'World Series' else 'World')
+    summary(done_, 'all')
     for y in (2024, 2025, 2026):
         rows = [r for r in out if r['year'] == y and r['winner']]
         if not rows: continue
