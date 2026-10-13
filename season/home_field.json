@@ -1,0 +1,130 @@
+{
+ "2025": {
+  "wOBA": {
+   "home": 0.00901,
+   "se": 0.00247,
+   "n": 181317
+  },
+  "K": {
+   "home": -0.01061,
+   "se": 0.00206,
+   "n": 181317
+  },
+  "BB": {
+   "home": 0.0045,
+   "se": 0.00124,
+   "n": 181317
+  },
+  "HR": {
+   "home": 0.00015,
+   "se": 0.0008,
+   "n": 181317
+  },
+  "exitSpeed": {
+   "home": -0.12674,
+   "se": 0.08468,
+   "n": 124441
+  },
+  "pitcher: four-seam mph": {
+   "home": -0.02303,
+   "se": 0.01372,
+   "n": 226410
+  },
+  "pitcher: extension ft": {
+   "home": -0.00121,
+   "se": 0.00208,
+   "n": 226382
+  },
+  "pitcher: four-seam rpm": {
+   "home": 2.32604,
+   "se": 0.92613,
+   "n": 225830
+  },
+  "hitter: bat speed mph": {
+   "home": 0.0965,
+   "se": 0.02193,
+   "n": 318617
+  },
+  "hitter: chase": {
+   "home": -0.00284,
+   "se": 0.00151,
+   "n": 350807
+  },
+  "hitter: zone swing": {
+   "home": 0.00392,
+   "se": 0.00147,
+   "n": 359102
+  },
+  "umpire: called strike": {
+   "home": 0.00106,
+   "se": 0.00076,
+   "n": 368845
+  },
+  "runsPerGame": 0.278,
+  "runsPerGameSe": 0.076
+ },
+ "2026": {
+  "wOBA": {
+   "home": 0.00893,
+   "se": 0.00238,
+   "n": 181990
+  },
+  "K": {
+   "home": -0.0096,
+   "se": 0.00201,
+   "n": 181990
+  },
+  "BB": {
+   "home": 0.00289,
+   "se": 0.00128,
+   "n": 181990
+  },
+  "HR": {
+   "home": 0.00092,
+   "se": 0.00078,
+   "n": 181990
+  },
+  "exitSpeed": {
+   "home": 0.02813,
+   "se": 0.08167,
+   "n": 124097
+  },
+  "pitcher: four-seam mph": {
+   "home": -0.00287,
+   "se": 0.01426,
+   "n": 219168
+  },
+  "pitcher: extension ft": {
+   "home": -0.00471,
+   "se": 0.00175,
+   "n": 218962
+  },
+  "pitcher: four-seam rpm": {
+   "home": 0.79147,
+   "se": 1.03297,
+   "n": 218843
+  },
+  "hitter: bat speed mph": {
+   "home": 0.10754,
+   "se": 0.02132,
+   "n": 319456
+  },
+  "hitter: chase": {
+   "home": -0.00356,
+   "se": 0.00152,
+   "n": 374877
+  },
+  "hitter: zone swing": {
+   "home": 0.00255,
+   "se": 0.00149,
+   "n": 339237
+  },
+  "umpire: called strike": {
+   "home": 0.00219,
+   "se": 0.00069,
+   "n": 371386
+  },
+  "runsPerGame": 0.276,
+  "runsPerGameSe": 0.073
+ }
+}
