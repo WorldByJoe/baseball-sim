@@ -1,5 +1,5 @@
 """
-view.py · v0.1 · 2026-10-13
+view.py · v0.2 · 2026-10-13
 
 A season fold's inputs written into its worktree (as history/replay_view.py does for a past October; the season's
 labels are already 2025 and 2026, the 2026 one being the fold's half):
@@ -13,6 +13,8 @@ labels are already 2025 and 2026, the 2026 one being the fold's half):
   python3 season/view.py season/foldA ~/bsim-wt/hist26A
 
 CHANGED
+  v0.2  the league means a pitcher's rates are shrunk toward come from major-league lines only (not season/aaa_fold.py's
+        translated Triple-A ones), so a man with major-league data is fitted exactly as before
   v0.1  first build (Joe, 2026-10-13)
 """
 import json, os, sys, copy, glob, urllib.request
@@ -38,7 +40,7 @@ def main(fold, wt):
     stats = json.load(open(os.path.join(fold, 'season_stats.json')))['players']
     pm = {}
     for k in ('K_pct', 'BB_pct', 'chaseRate'):
-        v = [o['mean'] for r in recs for y, o in ((r['summaries'].get('pitching') or {}).get(k) or {}).items() if y.isdigit() and isinstance(o, dict) and o.get('mean') is not None]
+        v = [o['mean'] for r in recs if (r['summaries'].get('pitching') or {}).get('level') != 'AAA' for y, o in ((r['summaries'].get('pitching') or {}).get(k) or {}).items() if y.isdigit() and isinstance(o, dict) and o.get('mean') is not None]
         pm[k] = float(np.mean(v)) if v else None
     out, shrunk = [], 0
     for r in recs:

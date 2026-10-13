@@ -1,5 +1,5 @@
 """
-fit_hitters.py · v0.1 · 2026-10-06
+fit_hitters.py · v0.2 · 2026-10-13
 
 Each playoff hitter's hidden traits, with their uncertainty, from his measured
 2025-26 numbers (playoffs/players_measured.json) through a linear emulator of
@@ -32,6 +32,8 @@ table.
    linear emulator's misfit (strikeouts and home runs most) is taken out.
 
 CHANGED
+  v0.2  each hidden trait's limits read from the engine's own trait table (bb_engine.js), not copied: v0.1's copy went stale
+        when engine v3.2 rescaled motorIn and undercut, and it clipped 58% of the 2026 playoff hitters at motorIn 1.4
   v0.1  first build (the Yankees-Rays review)
 """
 import json, sys, math, random, warnings, os
@@ -46,9 +48,21 @@ MEAS = ['zoneSwing', 'chase', 'whiffFB', 'whiffBR', 'whiffOS', 'foul', 'K', 'BB'
 # the emulated measure's sampling variance, from its count
 NKEY = {'zoneSwing': 'zin', 'chase': 'zout', 'whiffFB': 'swFB', 'whiffBR': 'swBR', 'whiffOS': 'swOS', 'foul': 'sw', 'K': 'pa', 'BB': 'pa', 'HR': 'pa',
         'hardHit': 'bip', 'GB': 'bip', 'LD': 'bip', 'FBs': 'bip', 'PU': 'bip'}
-RANGE = {'motorIn': (0.56, 1.4), 'faceSD': (4, 20), 'undercut': (-0.35, 1.15), 'timingSD': (6.26, 15.26), 'longSD': (1.9, 5.1),
-         'spotIn': (2.7, 8.1), 'eyeSD': (3, 7.5), 'aggr': (-0.2, 0.2), 'commit': (0.2, 0.9), 'fbLean': (1, 3.6), 'pullBias': (-12, 14),
-         'learn': (0.1, 0.6), 'coverage': (3.8, 10.5)}
+def engine_range():
+    """each hidden trait's limits as the engine draws them (bb_engine.js's trait table, [mean, sd, min, max]); coverage is
+    drawn and then scaled by arm length (armIdx), so its limits are scaled by armIdx's"""
+    import re
+    src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'bb_engine.js')).read()
+    def row(k):
+        m = re.findall(r"^\s+%s:\s*\[\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\]" % k, src, re.M)
+        assert len(m) == 1, 'bb_engine.js: %d trait-table rows for %s' % (len(m), k)
+        return [float(x) for x in m[0]]
+    R = {k: (row(k)[2], row(k)[3]) for k in HIDDEN}
+    a = row('armIdx'); R['coverage'] = (R['coverage'][0] * a[2], R['coverage'][1] * a[3])
+    return R
+
+
+RANGE = engine_range()
 
 
 def emulator(path):

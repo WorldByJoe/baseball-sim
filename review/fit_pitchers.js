@@ -1,5 +1,5 @@
 /* ============================================================================
-   fit_pitchers.js · v0.1 · 2026-10-06
+   fit_pitchers.js · v0.2 · 2026-10-13
 
    Each playoff pitcher's two hidden traits: DECEPTION (scales how noisy the
    batter's read of his pitches is, bb_engine readFactors) and a COMMAND scale
@@ -14,13 +14,16 @@
    Writes review/pitchers_fit.json: per pitcher, deception, cmdScale, and the
    fitted against targeted rates.
 
-   Run:  tools/diag/run.sh bb_engine.js review/players.js review/fit_pitchers.js -- [PA an evaluation] [seed] [teams, comma-separated] [part] [parts] > out.json
+   Run:  tools/diag/run.sh bb_engine.js review/players.js review/fit_pitchers.js -- [PA an evaluation] [seed] [teams, comma-separated] [part] [parts] [ids file] > out.json
+         (ids file: a JSON list of the pitchers to fit, the rest skipped; season/run_aaa.sh fits only its Triple-A men)
 
    CHANGED
+     v0.2  an optional list of the pitchers to fit
      v0.1  first build (the Yankees-Rays review)
 ============================================================================ */
 (function (A) {
   var NPA = +A[0] || 1500, SEED = +A[1] || 5, TEAMS = A[2] ? A[2].split(',') : null, PART = +A[3] || 0, PARTS = +A[4] || 1, IN = BB.units.IN;
+  var ONLY = A[5] ? JSON.parse(read(A[5])).map(String) : null;
   var D = REVIEW.load(), rng = BB.makeRng(SEED), env = BB.mlbEnv(rng), ump = BB.makeUmp(rng), H = [];
   for (var i = 0; i < 200; i++) H.push(BB.makeBatter(rng, {}));
   function logit(p) { p = Math.min(0.999, Math.max(0.001, p)); return Math.log(p / (1 - p)); }
@@ -42,7 +45,7 @@
   var out = { league: { model: { K: Lk, BB: Lb, chase: Lc }, real: REAL }, pitchers: {} };
   Object.keys(D.recs).sort().forEach(function (id, n) {
     var r = D.recs[id], S = r.summaries.pitching;
-    if (r.kind === 'position' || !S || (TEAMS && TEAMS.indexOf(r.team) < 0)) return;
+    if (r.kind === 'position' || !S || (TEAMS && TEAMS.indexOf(r.team) < 0) || (ONLY && ONLY.indexOf(String(id)) < 0)) return;
     if (n % PARTS !== PART) return;
     var pm = function (o) { return o && o.pooled ? o.pooled.mean : null; }, km = pm(S.K_pct), bm = pm(S.BB_pct);
     if (km === null || bm === null) return;
