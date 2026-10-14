@@ -1,5 +1,5 @@
 /* ============================================================================
-   analyst.js · v0.3 · 2026-10-08
+   analyst.js · v0.4 · 2026-10-13
 
    The couch analyst in the browser: a Web Worker that follows one game on
    MLB's live feed (statsapi.mlb.com, open to any page) and runs the model on
@@ -13,6 +13,9 @@
    Messages out: { type: 'state', state }, { type: 'status', text }
 
    CHANGED
+     v0.4  a finished at-bat carries its result and the outs and bases after it (at a third out the card had kept two outs and
+           no result through the break); a man missing from the bundle (a late roster add) is played as an average major leaguer of his hand and position,
+           eight stand-ins averaged, and the card says so; before, his plate appearances had no odds and no pitch lines (Joe, 2026-10-13)
      v0.3  for the wall: each pitch's Statcast flight and zone and the model batter's expectation (where he pictured it,
            the type he looked for) in the state; cues (each new pitch, each finished at-bat) for the wall's sound
      v0.2  an at-bat is done only when MLB marks it complete (a game advisory, say a delay, had closed one early);
@@ -67,7 +70,7 @@ function parseFeed(d) {
     out.pas.push({ i: out.pas.length, inning: ab.inning, half: half, bat: half === 'top' ? 'away' : 'home', outs: outs, bases: bases.slice(), score: score.slice(),
                    batter: m.batter.id, batterName: m.batter.fullName, pitcher: m.pitcher.id, pitcherName: m.pitcher.fullName,
                    batSide: (m.batSide || {}).code, pitchHand: (m.pitchHand || {}).code, event: r.event || null, eventType: done ? r.eventType : null,
-                   desc: r.description || '', pitches: pitches, hit: done ? hit : null, scoreAfter: newScore });
+                   desc: r.description || '', pitches: pitches, hit: done ? hit : null, scoreAfter: newScore, outsAfter: (pl.count || {}).outs != null ? pl.count.outs : null, basesAfter: post });
     score = newScore; prevKey = key; bases = post; outs = (pl.count || {}).outs != null ? pl.count.outs : outs;
   });
   var ls = ld.linescore || {}, lt = ls.teams || {};
@@ -87,12 +90,29 @@ function envFor(G) {
   return (envCache[G.venue] = BB.makeEnv({ tempF: temp, elevFt: V ? V.elevFt : 0, fence: V ? V.fence : undefined }));
 }
 function posOf(G, id) { var p = null; ['away', 'home'].forEach(function (s) { G.lineups[s].forEach(function (q) { if (q.id === id) p = q.pos; }); }); return p || 'DH'; }
+/* A man the bundle lacks (a late roster add, Cleveland's Slade Cecconi in the ALCS) is a stand-in: league players of his hand
+   and position, made the engine's usual way, several of them so his odds are a league average, not one random draw. The card
+   says so (watch). */
+var STANDIN_N = 8, standinCache = {};
+function handOf(G, id, key) { var h = null; G.pas.forEach(function (q) { if (q.batter === id && key === 'batSide') h = q.batSide; if (q.pitcher === id && key === 'pitchHand') h = q.pitchHand; }); return h; }
+function standins(G, id, kind) {
+  if (!standinCache[id]) {
+    var L = [];
+    for (var k = 0; k < STANDIN_N; k++) {
+      var x = kind === 'pitcher' ? BB.makePitcher(rng, { role: 'RP', throws: handOf(G, id, 'pitchHand') || undefined }) : BB.makeBatter(rng, { pos: posOf(G, id) });
+      if (kind === 'pitcher') { x.mlbId = id; x.standin = true; } else { var b = handOf(G, id, 'batSide'); if (b === 'L' || b === 'R') x.bats = b; x.pos = posOf(G, id); x.standin = true; }
+      L.push(x);
+    }
+    standinCache[id] = L;
+  }
+  return standinCache[id];
+}
 function hitter(G, id, draw) {
-  if (!D.fits[id]) return null;
+  if (!D.fits[id]) { if (!G || !G.pas.some(function (q) { return q.batter === id; })) return null; var L = standins(G, id, 'hitter'); return L[draw == null ? 0 : draw % L.length]; }
   if (draw == null) { if (!hitterCache[id]) hitterCache[id] = REVIEW.hitter(D.fits[id], rng, null, posOf(G, id)); return hitterCache[id]; }
   return REVIEW.hitter(D.fits[id], rng, draw, posOf(G, id));
 }
-function pitcher(G, id) { if (!pitcherCache[id]) { if (!REC[id] || !REC[id].summaries.pitching) return null; pitcherCache[id] = REVIEW.pitcher(REC[id], rng, envFor(G)); } return pitcherCache[id]; }
+function pitcher(G, id) { if (!pitcherCache[id]) { if (!REC[id] || !REC[id].summaries.pitching) { var L = standins(G, id, 'pitcher'); L[0].pool = L; return L[0]; } pitcherCache[id] = REVIEW.pitcher(REC[id], rng, envFor(G)); } return pitcherCache[id]; }
 function defence(G, s, P) {
   var F = G.lineups[s].filter(function (p) { return p.order % 100 === 0 && p.pos !== 'DH'; }).map(function (p) { var h = hitter(G, p.id); if (!h) { h = BB.makeBatter(rng, { pos: p.pos }); } h.pos = p.pos; return h; });
   P.pos = 'P';
@@ -140,8 +160,8 @@ function analyse(G, i, M, withPitches) {
   var sit = { bases: basesObj, outs: pa.outs, inning: pa.inning, lead: lead };
   var cats = { K: 0, BB: 0, HBP: 0, '1B': 0, '2B': 0, '3B': 0, HR: 0, OUT: 0, E: 0 }, wsum = 0;
   for (k = 0; k < M; k++) {
-    var Bk = hitter(G, pa.batter, k); P0.load = ld0;
-    var res = BB.simPA(P0, Bk, { env: env, ump: UMP, framing: 0, seen: seen, rec: false, runnersOn: !!(pa.bases[0] || pa.bases[1] || pa.bases[2]) }, rng), c;
+    var Bk = hitter(G, pa.batter, k), Pk = P0.pool ? P0.pool[k % P0.pool.length] : P0; Pk.load = ld0;   // a stand-in pitcher: a different league arm each time
+    var res = BB.simPA(Pk, Bk, { env: env, ump: UMP, framing: 0, seen: seen, rec: false, runnersOn: !!(pa.bases[0] || pa.bases[1] || pa.bases[2]) }, rng), c;
     if (res.result === 'K' || res.result === 'BB' || res.result === 'HBP' || res.result === 'HR') c = res.result;
     else if (res.result === 'END') c = 'OUT';
     else { sit.u = rng.u(); BBField.positionDefense(Dd, Bk, sb, sit); var r = BBField.resolve(res.bb, Bk, basesObj.slice(), pa.outs, Dd, env, rng, { side: sb, foulCaught: !!res.foulCaught }); c = r.hit === 'OUT' || r.hit === 'SF' || r.hit === 'FC' ? 'OUT' : r.hit; }
@@ -213,6 +233,8 @@ function watch(G, pa, a) {
   for (var j = 0; j < pa.i; j++) if (G.pas[j].batter === pa.batter && G.pas[j].pitcher === pa.pitcher) k++;
   lines.push(pa.batterName + ' (bats ' + pa.batSide + ') against ' + pa.pitcherName + ' (throws ' + pa.pitchHand + '): ' + (side === 'same' ? 'a same-side' : 'an opposite-side') + ' matchup' +
              (k > 1 ? ', the ' + (['', '', 'second', 'third', 'fourth', 'fifth'][k] || k + 'th') + ' time he has faced him tonight' : '') + '.');
+  var gone = [!REC[pa.pitcher] || !(REC[pa.pitcher].summaries || {}).pitching ? last(pa.pitcherName) : null, !D.fits[pa.batter] ? last(pa.batterName) : null].filter(function (x) { return x; });
+  if (gone.length) lines.push(gone.join(' and ') + (gone.length > 1 ? ' are' : ' is') + ' not in our playoff data, so the model plays ' + (gone.length > 1 ? 'them' : 'him') + ' as an average major leaguer.');
   var m = mix(pa.pitcher, side);
   if (m.length) {
     lines.push(last(pa.pitcherName) + ' to ' + (pa.batSide === 'R' ? 'right' : 'left') + '-handed hitters: ' + m.slice(0, 3).map(function (x) { return (NAMES[x[0]] || x[0]) + ' ' + pct(x[1]); }).join(', ') + '.');
@@ -332,7 +354,10 @@ function stateOf(G, now) {
   var now_pa = null;
   if (cur) {
     var a = A.cache[cur.i] || {};
-    now_pa = { batter: cur.batterName, pitcher: cur.pitcherName, inning: cur.inning, half: cur.half, outs: cur.outs, bases: cur.bases.map(function (x) { return !!x; }), score: cur.score,
+    var after = !!cur.eventType && cur.outsAfter != null;   // a finished at-bat shows the outs and bases it left (the third out stays on the card through the break)
+    now_pa = { batter: cur.batterName, pitcher: cur.pitcherName, inning: cur.inning, half: cur.half, outs: after ? cur.outsAfter : cur.outs,
+               bases: (after ? (cur.outsAfter >= 3 ? [null, null, null] : cur.basesAfter) : cur.bases).map(function (x) { return !!x; }), score: cur.score,
+               result: cur.eventType ? { event: cur.event, desc: cur.desc, p: a.pActual != null ? a.pActual : null } : null,
                complete: !!cur.eventType, watch: a.watch || [], probs: a.probs || null, batSide: cur.batSide, pitchHand: cur.pitchHand,
                pitches: cur.pitches.map(function (f, j) { var q = (a.pitches || [])[j], x = q ? pitchText(q) : null;
                  return { text: x ? x[0] : null, flag: x ? x[1] : false, type: f.type, mph: f.mph, res: resultOf(f.code), px: f.px, pz: f.pz, top: f.top, bot: f.bot, tr: f.tr,
