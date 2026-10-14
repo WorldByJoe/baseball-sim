@@ -1653,6 +1653,7 @@ var BB = (function () {
   // them square), at 0.5 in .30 and .24, with the raw scatter x1.15 to keep the fastball whiffs .17 (0.4 in: .30 /
   // .24, whiffs .16; 0.6 in: .27 / .21).
   var LOOK_SD = 0.5, LOOK_GAIN = 1.3;
+  function tuneContact(o) { if (o.lookGain != null) LOOK_GAIN = o.lookGain; if (o.lookSd != null) LOOK_SD = o.lookSd; if (o.vertMiss != null) VERT_MISS = o.vertMiss; return { lookGain: LOOK_GAIN, lookSd: LOOK_SD, vertMiss: VERT_MISS }; }   // a calibration hook (step 2 of the run audit); unused, the constants stand
   function checkChance(B, rf, pitch) {   // the chance he tries to check: nothing new to see once he had picked it up (v2.7)
     if (rf.detected) return 0;
     return clamp((reachOf(B, pitch.plate.x + rf.lastPic[0], pitch.plate.z + rf.lastPic[1]) / IN - CHECK_IN[0]) / (CHECK_IN[1] - CHECK_IN[0]), 0, 1);
@@ -1891,7 +1892,7 @@ var BB = (function () {
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
     PITCH_TYPES: PITCH_TYPES, REPERTOIRES: REPERTOIRES, TRAITS: TRAITS, AERO: AERO,
     makeRng: makeRng, makeEnv: makeEnv, mlbEnv: mlbEnv, MLB_PARKS: MLB_PARKS, fenceAt: fenceAt,
-    makePitcher: makePitcher, PITCHER_FEATURES: PITCHER_FEATURES, makeBatter: makeBatter, ATHLETIC: ATHLETIC, drawBatter: drawBatter, hitterValue: hitterValue, fieldValue: fieldValue, playerValue: playerValue, FIELD_VALUE: FIELD_VALUE, STYLE: STYLE, drawPitcher: drawPitcher, pitcherValue: pitcherValue, pitcherFeatures: pitcherFeatures, FARM_N: FARM_N, CHAIN: CHAIN, makeUmp: makeUmp, FACE_PATH: FACE_PATH, CHECK: { effortSD: EFFORT_SD, at: CHECK_IN, hold: HOLD_P, slow: CHECK_SLOW }, checkChance: checkChance, equipFielder: equipFielder, FIELD_MEANS: FIELD_MEANS,
+    tuneContact: tuneContact, makePitcher: makePitcher, PITCHER_FEATURES: PITCHER_FEATURES, makeBatter: makeBatter, ATHLETIC: ATHLETIC, drawBatter: drawBatter, hitterValue: hitterValue, fieldValue: fieldValue, playerValue: playerValue, FIELD_VALUE: FIELD_VALUE, STYLE: STYLE, drawPitcher: drawPitcher, pitcherValue: pitcherValue, pitcherFeatures: pitcherFeatures, FARM_N: FARM_N, CHAIN: CHAIN, makeUmp: makeUmp, FACE_PATH: FACE_PATH, CHECK: { effortSD: EFFORT_SD, at: CHECK_IN, hold: HOLD_P, slow: CHECK_SLOW }, checkChance: checkChance, equipFielder: equipFielder, FIELD_MEANS: FIELD_MEANS,
     batOf: batOf, batSpeedOf: batSpeedOf, swingPowerOf: swingPowerOf,
     batMass: batMass, batRadius: batRadius, qAt: qAt, corOf: corOf, BAT_MODES: BAT_MODES, BAT_SHAPE: BAT_SHAPE, SWEET_IN: SWEET_IN, BAT_DEFAULT: BAT_DEFAULT,
     flyPitch: flyPitch, flyBatted: flyBatted, spinVector: spinVector, dirOf: dirOf, aim: aim, SWING_THR: SWING_THR, ZONE_HALF: ZONE_HALF, PLAN_LOC: PLAN_LOC,
