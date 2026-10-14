@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>Couch Analyst</title>
 <!-- ============================================================================
-     couch.html · v1.4 · 2026-10-12
+     couch.html · v1.5 · 2026-10-13
 
      The couch analyst on the wall: a live postseason game read pitch by pitch through the baseball-sim model.
      The same analysis as the web companion (site/live/analyst.js: each player's traits fitted to his 2025-26
@@ -27,6 +27,8 @@
      guarded. Source: WorldByJoe/baseball-sim, branch yankees-review, site/wall/couch.html.
 
      CHANGED
+       v1.5  a finished at-bat shows what it came to (MLB's description and the model's chance of it) under its pitches, and the
+             outs and bases it left: at a third out the card had kept two outs and no result through the break (Joe, 2026-10-13)
        v1.4  the pregame card shows the histograms of total runs and of home runs minus away runs (Joe, 2026-10-12)
        v1.3  the pregame card (couch/data/pregame_cards.js, review/couch_cards.py): the Postseason page's prediction for this
              game, in the at-bat panel before first pitch and in the pregame box after; the Couch's own call when there is none
@@ -100,6 +102,8 @@ ul.watch { margin:0 0 calc(24 * var(--wu)); padding-left:calc(40 * var(--wu)); f
 ul.watch li { margin-bottom:calc(6 * var(--wu)); }
 ol.pitches { list-style:none; margin:0; padding:0; display:grid; gap:calc(8 * var(--wu)); font:400 var(--t5)/1.3 var(--font-ui); }
 ol.pitches li { padding:calc(8 * var(--wu)) calc(18 * var(--wu)); border-left:calc(6 * var(--wu)) solid transparent; }
+p.result { margin:calc(18 * var(--wu)) 0 0; padding:calc(14 * var(--wu)) calc(18 * var(--wu)); border-left:calc(6 * var(--wu)) solid var(--ink); font:500 var(--t4)/1.3 var(--font-ui); color:var(--ink); }
+p.result span { font-weight:400; color:var(--ink-2); }
 ol.pitches li.flag, ol.events li.flag { border-left-color:var(--flag); color:var(--ink); background:rgba(240,138,75,.10); }
 
 /* the right rail */
@@ -254,7 +258,8 @@ window.postMessage = function (m) { if (COUCH.onmsg) COUCH.onmsg({ data: m }); }
         body += '<div class="probs">' + [['Strikeout', p.K], ['Walk', p.BB + p.HBP], ['Hit', hit], ['Home run', p.HR]].map(function (x) { return '<div class="prob"><b>' + pct(x[1]) + '</b><span>' + x[0] + '</span></div>'; }).join('') + '</div>';
       }
       body += '<ul class="watch">' + n.watch.slice(1, 4).map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>';
-      body += '<ol class="pitches">' + n.pitches.filter(function (x) { return x.text; }).slice(-6).map(function (x) { return '<li class="' + (x.flag ? 'flag' : '') + '">' + esc(x.text) + '</li>'; }).join('') + '</ol>';
+      body += '<ol class="pitches">' + n.pitches.filter(function (x) { return x.text; }).slice(n.result ? -5 : -6).map(function (x) { return '<li class="' + (x.flag ? 'flag' : '') + '">' + esc(x.text) + '</li>'; }).join('') + '</ol>';
+      if (n.result) body += '<p class="result">' + esc(n.result.desc || n.result.event) + (n.result.p != null ? ' <span>The model gave that ' + pct(n.result.p) + '.</span>' : '') + '</p>';   // what the at-bat came to
       $('plate').innerHTML = head + '<div class="pl-cols"><div>' + body + '</div><div>' + catcherView(n) + '</div></div>';
     }
     var L = s.ledger, ab = esc(A.abbrev || nick(A.name)), hb = esc(H.abbrev || nick(H.name));
