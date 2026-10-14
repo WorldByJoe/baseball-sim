@@ -4263,6 +4263,48 @@
    "szTop": 3.255,
    "szBot": 1.643,
    "addedLater": "2026-10-12: pitched in NLCS Game 2, not on the 2026-10-04 roster pull"
+  },
+  {
+   "id": 677944,
+   "name": "Slade Cecconi",
+   "team": 114,
+   "teamAbbrev": "CLE",
+   "jersey": "44",
+   "position": "P",
+   "primaryPosition": "P",
+   "kind": "pitcher",
+   "bats": "R",
+   "throws": "R",
+   "heightIn": 76,
+   "weightLb": 219,
+   "birthDate": "1999-06-24",
+   "age": 27.27,
+   "mlbDebut": "2023-08-02",
+   "on40Man": true,
+   "szTop": 3.388,
+   "szBot": 1.71,
+   "added": "2026-10-13"
+  },
+  {
+   "id": 811315,
+   "name": "Brody Hopkins",
+   "team": 139,
+   "teamAbbrev": "TB",
+   "jersey": "88",
+   "position": "P",
+   "primaryPosition": "P",
+   "kind": "pitcher",
+   "bats": "R",
+   "throws": "R",
+   "heightIn": 76,
+   "weightLb": 200,
+   "birthDate": "2002-01-18",
+   "age": 24.7,
+   "mlbDebut": "2026-09-13",
+   "on40Man": true,
+   "szTop": 3.388,
+   "szBot": 1.71,
+   "added": "2026-10-13"
   }
  ]
 }

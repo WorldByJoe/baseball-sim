@@ -2001,6 +2001,47 @@
    "nSq": 283,
    "targetSq": 0.8311,
    "sqBefore": 0.8363
+  },
+  "677944": {
+   "name": "Slade Cecconi",
+   "team": "CLE",
+   "role": "SP",
+   "deception": 0.979,
+   "cmdScale": 0.92,
+   "K": 0.227,
+   "BB": 0.075,
+   "chase": 0.276,
+   "targetK": 0.231,
+   "targetBB": 0.081,
+   "measuredK": 0.1928,
+   "measuredBB": 0.0672,
+   "measuredChase": 0.2619,
+   "mishit": 0.86,
+   "measuredSq": 0.845,
+   "nSq": 751,
+   "targetSq": 0.8461,
+   "sqBefore": 0.8349
+  },
+  "811315": {
+   "name": "Brody Hopkins",
+   "team": "TB",
+   "role": "RP",
+   "deception": 1.003,
+   "cmdScale": 1.275,
+   "K": 0.265,
+   "BB": 0.276,
+   "chase": 0.196,
+   "targetK": 0.28,
+   "targetBB": 0.25,
+   "measuredK": 0.2369,
+   "measuredBB": 0.2141,
+   "measuredChase": 0.1538,
+   "note": "targets from his 24 big-league batters and 438 at Triple-A (Durham, 2026), combined in log-odds with the season model's Triple-A level shifts (season/foldA_aaa/aaa.json pK, pBB): K .237, BB .214",
+   "mishit": 0.874,
+   "measuredSq": 0.8153,
+   "nSq": 11,
+   "targetSq": 0.8359,
+   "sqBefore": 0.8258
   }
  }
 }

@@ -80,7 +80,12 @@ var REVIEW = (function () {
     q.fit = { ivb: +fin[0].toFixed(2), hb: +fin[1].toFixed(2), ivbMeasured: +ivb.toFixed(2), hbMeasured: +hb.toFixed(2) };
   }
 
-  function pitcher(rec, rng, env) {
+  function pitcher0(rec, rng, env) {
+    if (!rec.summaries.pitching || !rec.traits.pitching || !rec.summaries.pitching.pitchTypes || !Object.keys(rec.summaries.pitching.pitchTypes).length) {
+      // no pitches of his in the seasons the replay may use (a position player pitching, a man back from injury): a generic
+      // reliever from the model's population, so the game can still be played
+      var G0 = BB.makePitcher(rng, { population: true, role: 'RP', throws: rec.throws || 'R' }); G0.name = rec.name; G0.mlbId = rec.id; G0.team = rec.team; G0.generic = true; return G0;
+    }
     var S = rec.summaries.pitching, T = rec.traits.pitching, role = (S.role && S.role.role) || 'RP';
     var P = BB.makePitcher(rng, { population: true, role: role, throws: rec.throws });
     P.name = rec.name; P.mlbId = rec.id; P.team = rec.team;
@@ -115,7 +120,14 @@ var REVIEW = (function () {
     var pf = PFIT && PFIT.pitchers[rec.id];   // the fitted hidden traits, when review/fit_pitchers.js has run
     if (pf) { P.deception = pf.deception; P.cmd = [P.cmd[0] * pf.cmdScale, P.cmd[1] * pf.cmdScale]; P.command = Math.sqrt((P.cmd[0] * P.cmd[0] + P.cmd[1] * P.cmd[1]) / 2); if (pf.mishit) P.mishit = pf.mishit; }
     return P;
+  }  function pitcher(rec, rng, env) {
+    var P = pitcher0(rec, rng, env);
+    if (!P.generic && (!P.pitches || !P.pitches.length)) {   // only pitch types the engine does not throw (a position player's lob, an eephus)
+      var G0 = BB.makePitcher(rng, { population: true, role: 'RP', throws: rec.throws || 'R' }); G0.name = rec.name; G0.mlbId = rec.id; G0.team = rec.team; G0.generic = true; return G0;
+    }
+    return P;
   }
+
   var PFIT = null;
 
   var GIVEN = null;

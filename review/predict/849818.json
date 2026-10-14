@@ -1,0 +1,29 @@
+{
+ "pk": 849818,
+ "away": "TB",
+ "home": "CLE",
+ "starters": {
+  "TB": [
+   607259,
+   "Nick Martinez"
+  ],
+  "CLE": [
+   682982,
+   "Daniel Espino"
+  ]
+ },
+ "assumedTeams": [
+  "TB",
+  "CLE"
+ ],
+ "assumed": true,
+ "sources": {
+  "TB": 849813,
+  "CLE": 849813
+ },
+ "lineups": "lineups as in their last games (Rays: ALCS Game 2, Guardians: ALCS Game 2)",
+ "park": "Progressive Field",
+ "ran": "2026-10-13 21:01",
+ "series": "ALCS",
+ "game": 3
+}

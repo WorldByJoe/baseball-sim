@@ -1,0 +1,41 @@
+1. per team-game:  runs 4.47 / 4.43  PA 38.30 / 37.84  H 8.33 / 8.23  BB+HBP 3.81 / 3.75  K 8.44 / 8.40  HR 1.11 / 1.12   (engine / real)
+2. per plate appearance:  K 0.220 / 0.222  BB 0.087 / 0.084  IBB 0.000 / 0.003  HBP 0.012 / 0.012  1B 0.133 / 0.144  2B 0.051 / 0.040  3B 0.005 / 0.004  HR 0.029 / 0.030  OUT 0.456 / 0.456  E 0.007 / 0.005
+3. balls in play (engine / real):  BABIP 0.290 / 0.289, errors 0.010 / 0.008
+     GB  share 0.436 / 0.442   hits 0.299 / 0.248   extra-base 0.044 / 0.021
+     LD  share 0.197 / 0.242   hits 0.641 / 0.622   extra-base 0.260 / 0.178
+     FB  share 0.249 / 0.239   hits 0.130 / 0.117   extra-base 0.060 / 0.063
+     PU  share 0.118 / 0.077   hits 0.005 / 0.015   extra-base 0.001 / 0.002
+4. runners (engine / real):
+     first to third on a single                 0.273 / 0.313   (n 8246 / 2190)
+     scores from second on a single             0.569 / 0.567   (n 3640 / 732)
+     scores from first on a double              0.392 / 0.370   (n 2975 / 562)
+     run scores on an air out, man on third     0.523 / 0.602   (n 3295 / 862)
+     double play on a grounder, man on first    0.335 / 0.404   (n 11357 / 3387)
+5. run expectancy, engine / real (outs x bases: empty, 1st, 2nd, 1st+2nd, 3rd, 1st+3rd, 2nd+3rd, loaded):
+     0 out  0.49/0.49  0.87/0.85  1.02/1.11  1.47/1.34  1.35/1.39  1.62/1.85  1.82/1.70  2.39/2.32
+     1 out  0.27/0.26  0.53/0.52  0.62/0.66  0.94/0.80  0.86/0.94  1.13/1.18  1.24/1.24  1.60/1.55
+     2 out  0.11/0.11  0.24/0.24  0.31/0.34  0.44/0.42  0.37/0.40  0.48/0.49  0.59/0.51  0.79/0.70
+   run value of each event, engine / real:  BB +0.343 / +0.303  HBP +0.346 / +0.331  1B +0.461 / +0.465  2B +0.701 / +0.745  3B +0.962 / +1.056  HR +1.422 / +1.387  K -0.269 / -0.268  OUT -0.265 / -0.256  E +0.568 / +0.426
+6. runs per team-game:  real events, real values 4.29  engine events, real values 4.48  engine events, engine values 4.44  real runs 4.43  engine runs 4.47
+7. run value per ball in play (real run values):  real contact, real outcomes +0.0409  engine contact, real outcomes +0.0339  engine contact, engine outcomes +0.0459   (26.0 balls in play a team-game)
+   launch angle shares (engine / real): <-10 0.190/0.184  -10-0 0.104/0.110  0-10 0.122/0.140  10-20 0.131/0.146  20-30 0.129/0.140  30-40 0.116/0.105  40-50 0.094/0.067  50+ 0.114/0.108
+   exit speed shares (engine / real):   <70 0.111/0.118  70-80 0.136/0.137  80-90 0.231/0.216  90-95 0.150/0.148  95-100 0.154/0.160  100-105 0.123/0.142  105+ 0.095/0.078   mean 88.6 / 87.8
+   cells that matter most (exit speed bin | angle bin): share engine/real, value engine/real, contact cost, fielding cost (runs per ball in play)
+     ev 100-105  la 20-30    0.021/0.026  +0.587/+0.731  -0.0039  -0.0030
+     ev 105-200  la 30-40    0.010/0.005  +1.178/+1.148  +0.0054  +0.0003
+     ev 105-200  la 20-30    0.017/0.014  +1.118/+1.210  +0.0041  -0.0016
+     ev -1-70    la -91--10  0.026/0.055  -0.124/-0.118  +0.0035  -0.0001
+     ev 100-105  la 0-10     0.022/0.030  +0.268/+0.210  -0.0018  +0.0012
+     ev -1-70    la 50-91    0.028/0.016  -0.244/-0.243  -0.0028  -0.0000
+     ev 105-200  la 40-50    0.004/0.001  +0.227/+0.531  +0.0015  -0.0011
+     ev 100-105  la 10-20    0.023/0.029  +0.358/+0.338  -0.0021  +0.0005
+     ev 80-90    la -91--10  0.053/0.041  -0.176/-0.171  -0.0022  -0.0003
+     ev 95-100   la 10-20    0.024/0.028  +0.328/+0.269  -0.0010  +0.0014
+     ev 80-90    la 40-50    0.028/0.020  -0.254/-0.250  -0.0021  -0.0001
+     ev 90-95    la 20-30    0.019/0.022  -0.004/-0.092  +0.0003  +0.0017
+   distance of balls in the air, median ft (engine / real) and home-run share (engine / real):
+     90-95 mph  15-20 deg 278/268 (0.00/0.00)  20-25 deg 320/314 (0.00/0.00)  25-30 deg 342/339 (0.02/0.03)  30-35 deg 347/343 (0.05/0.03)  35-40 deg 339/329 (0.03/0.02)
+     95-100 mph  15-20 deg 301/291 (0.00/0.00)  20-25 deg 344/340 (0.03/0.02)  25-30 deg 366/365 (0.13/0.15)  30-35 deg 370/366 (0.19/0.22)  35-40 deg 359/354 (0.14/0.14)
+     100-105 mph  15-20 deg 321/309 (0.01/0.00)  20-25 deg 366/368 (0.11/0.19)  25-30 deg 387/393 (0.43/0.55)  30-35 deg 390/393 (0.55/0.64)  35-40 deg 379/379 (0.38/0.41)
+     105-120 mph  15-20 deg 344/334 (0.06/0.06)  20-25 deg 391/392 (0.50/0.56)  25-30 deg 414/418 (0.89/0.93)  30-35 deg 415/418 (0.92/0.93)  35-40 deg 404/406 (0.76/0.78)
+8. home hitters minus visitors, per plate appearance (engine / real):  K -0.0196 / -0.0108  BB+HBP +0.0071 / +0.0014  H +0.0079 / +0.0086  HR +0.0026 / -0.0008  runs per PA +0.0105 / +0.0077
