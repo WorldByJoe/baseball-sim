@@ -313,7 +313,7 @@ var BB = (function () {
   // corrects a miss (LOOK_GAIN): the correction folds the far misses back to the edge of the ball, so the aim could
   // sit where the league's barrel does, and the pull was refitted to the league's launch minus attack by height
   // (-14.8 -3.5 7.0 18.4 25.9 30.4 from below the zone to above it; #31)
-  var VERT_MISS = 0.09;
+  var VERT_MISS = 0.05;   // the swing refit (review, 2026-10-14; was 0.09)
   // HE AIMS TO SUIT HIS SWING (v3.9, VS). A hitter learns where on the ball to aim for the swing he has: a steeper
   // swing aims higher on the ball, AIM_ATTACK in per deg of his attack trait above AIM_REF (the picks' mean attack,
   // so the league's aim under the ball stays the undercut trait's). In the league (42 days of 2025, hitters with 40+
@@ -322,7 +322,7 @@ var BB = (function () {
   // balls); in the model, whose aim did not depend on the swing, 1.79 and +0.79: the collision's own lift (a square
   // hit leaves at about twice the attack less the pitch's descent) on top of the swing's. MEASURED to that slope
   // (the model twin diag_out/vs/byb_model.js, two seeds: 0.12 gave -0.08 and -0.01, 0.15 -0.42 and -0.39).
-  var AIM_ATTACK = 0.13, AIM_REF = 7.8;
+  var AIM_ATTACK = -0.02, AIM_REF = 7.8;   // the swing refit (review, 2026-10-14; was 0.13): about none
   // TIMING SCATTER FOLLOWS THE TIME BEING JUDGED (v2.9). Judging when a ball arrives is timing an interval, and the
   // error of timing an interval grows with its length (a Weber fraction): a slower pitch, a longer flight, a larger
   // error. Until v2.9 the scatter grew with time pressure instead (faster = worse), and the model met fastballs over
@@ -701,7 +701,7 @@ var BB = (function () {
     swingLenFt: [7.231, 0.38, 6.2, 8.6], // ft: the bat head's path to contact, about the height line (0.047 per inch; r = .27)
     batOz:      [31.8, 0.6, 29, 35],     // oz: the bat he swings (plus 0.6 oz per 50 lb of hitter)
     swingPower: [25.287, 0.089, 10, 60],  // W/kg at 206 lb, lognormal with this log-sd; falls as weight^CHAIN.powerExp
-    motorIn:    [1.591, 0.247, 0.98, 2.47], // in: vertical bat-to-ball scatter AT 72 MPH before his last look corrects it; grows as bat speed squared (impulse variability); x1.4 in v2.2 (the miss table); x1.7 in v3.2, REFITTED with LOOK_GAIN so the fastball whiffs stay the league's (.174) once the last look folds the near misses back; x1.15 in v3.3 with LOOK_SD 0.5 (the whiffs again); x0.9 in v3.7 with VD (the fastball whiffs .183 -> .175, the league's .174)
+    motorIn:    [1.352, 0.210, 0.833, 2.10], // x0.85 in the swing refit (review, 2026-10-14: review/swing_fit.py, diag_out/swfit_best_path27.json); in: vertical bat-to-ball scatter AT 72 MPH before his last look corrects it; grows as bat speed squared (impulse variability); x1.4 in v2.2 (the miss table); x1.7 in v3.2, REFITTED with LOOK_GAIN so the fastball whiffs stay the league's (.174) once the last look folds the near misses back; x1.15 in v3.3 with LOOK_SD 0.5 (the whiffs again); x0.9 in v3.7 with VD (the fastball whiffs .183 -> .175, the league's .174)
     batSpeed:   [72.0, 2.65, 62, 82],    // mph - DERIVED from the chain; this entry only scales the display bars
     barrelSD:   [0.62, 0.11, 0.40, 1.1], // in - DERIVED (motorIn x (bat speed/72)^2); display scale only
     attack:    [7.939, 3.544, -3, 19],          // deg: upward tilt of the swing path at contact, at his usual contact point; the picks' mean REFITTED v3.6 (target 9 -> 7.8) so the attack his swings make (with the arc and PLAN_H) averages the league's over swings of 50+ mph, 9.6 (42 days of 2025; whiffs 14.2, contact 8.3); v3.6 before it 10.8
@@ -709,7 +709,7 @@ var BB = (function () {
     swingTilt: [31.626, 3.805, 22, 44],     // deg: the tilt of his swing plane for a mid-zone pitch (2025 leaderboard swing_path_tilt: 32.3 +- 3.8)
     faceSD:    [8.411, 4, 4, 20],           // deg: swing-to-swing scatter of the bat face's horizontal angle about its path at contact; fitted to fair-ball spray by contact depth (pitch-level 2025)
     undercut:  [1.011, 0.25, 0.25, 1.75],    // in: how far below the ball's centre he aims the barrel; REFITTED v3.2 (0.40 -> 1.0) to the league's barrel offset on fastball contact (0.85 in, read through the engine's own collision from launch minus attack: fastballs are met 25+ deg under the ball's middle .46 of the time, pitch-level 2025, 42 days), which the last look's correction allows without more whiffs; 1.4 tried with VD (v3.7): fastball launch minus attack the league's, but the batted-ball mix 38/17/28/16 and K% 25-26; v3.9: his aim for a swing of the picks' mean attack (AIM_REF), a steeper swing aiming higher (AIM_ATTACK)
-    timingSD:  [9.926, 1.66, 6.26, 15.26],  // ms at a 94-mph fastball's flight, growing with flight time (v2.9); x0.72 in v2.9 so contact depth about each batter's mean has the league's sd by kind: 7.4 in fastballs, 8.3 breaking, 8.2 off-speed (pitch-level 2025)
+    timingSD:  [7.941, 1.328, 5.008, 12.208],  // x0.8 in the swing refit (review, 2026-10-14); ms at a 94-mph fastball's flight, growing with flight time (v2.9); x0.72 in v2.9 so contact depth about each batter's mean has the league's sd by kind: 7.4 in fastballs, 8.3 breaking, 8.2 off-speed (pitch-level 2025)
     longSD:    [3.43, 0.51, 1.9, 5.1],   // in: along-the-barrel scatter; fitted so contact struck square vertically is squared up .695 of the time (pitch-level 2025), then x0.88 with the aim toward the hands (v2.2: the miss table's tail past the end)
     spotIn:    [5.046, 0.87, 2.7, 8.1],     // in: how far a pitch must have left his expected path by the commit point for him to pick it up; x1.09 in v2.2 (the miss table)
     eyeSD:     [5.363, 0.9, 3, 7.5],    // in: zone-judgement scatter at the commit point
@@ -1677,7 +1677,7 @@ var BB = (function () {
   // 1 in the model's were .18 and .14 (the correction scattered the folded swings back across the barrel, many of
   // them square), at 0.5 in .30 and .24, with the raw scatter x1.15 to keep the fastball whiffs .17 (0.4 in: .30 /
   // .24, whiffs .16; 0.6 in: .27 / .21).
-  var LOOK_SD = 0.5, LOOK_GAIN = 1.3;
+  var LOOK_SD = 0.4625, LOOK_GAIN = 1.0;   // the swing refit (review, 2026-10-14; were 0.5 and 1.3): review/swing_fit.py against 2026's launch angles, swing outcomes by kind, fastball fouls and spray
   function tuneContact(o) { if (o.lookGain != null) LOOK_GAIN = o.lookGain; if (o.lookSd != null) LOOK_SD = o.lookSd; if (o.vertMiss != null) VERT_MISS = o.vertMiss; if (o.geom != null) GEOM = o.geom; if (o.geomVertical != null) GEOM = o.geomVertical ? 'level' : 'path'; if (o.ex != null) E_X = o.ex; if (o.rx != null) R_X = o.rx; if (o.mu != null) MU_BAT = o.mu; if (o.muGamma != null) MU_GAMMA = o.muGamma; if (o.muRef != null) MU_REF = o.muRef; if (o.muVref != null) MU_VREF = o.muVref; if (o.spinKeep != null) SPIN_KEEP = o.spinKeep; if (o.aimAttack != null) AIM_ATTACK = o.aimAttack; return { lookGain: LOOK_GAIN, lookSd: LOOK_SD, vertMiss: VERT_MISS, geom: GEOM, ex: E_X, rx: R_X, mu: MU_BAT, muGamma: MU_GAMMA, muRef: MU_REF, muVref: MU_VREF, spinKeep: SPIN_KEEP, aimAttack: AIM_ATTACK }; }   // a calibration hook (step 2 of the run audit); unused, the constants stand
   function checkChance(B, rf, pitch) {   // the chance he tries to check: nothing new to see once he had picked it up (v2.7)
     if (rf.detected) return 0;
