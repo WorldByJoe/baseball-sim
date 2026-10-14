@@ -4,8 +4,8 @@
  "home": "CLE",
  "starters": {
   "TB": [
-   607259,
-   "Nick Martinez"
+   643377,
+   "Griffin Jax"
   ],
   "CLE": [
    682982,
@@ -13,7 +13,6 @@
   ]
  },
  "assumedTeams": [
-  "TB",
   "CLE"
  ],
  "assumed": true,
@@ -23,7 +22,7 @@
  },
  "lineups": "lineups as in their last games (Rays: ALCS Game 2, Guardians: ALCS Game 2)",
  "park": "Progressive Field",
- "ran": "2026-10-13 21:01",
+ "ran": "2026-10-13 21:40",
  "series": "ALCS",
  "game": 3
 }
