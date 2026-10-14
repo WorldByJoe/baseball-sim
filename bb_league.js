@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_league.js · v0.1 · 2026-10-03
+   bb_league.js · v0.2 · 2026-10-06
 
    A professional baseball world (Joe, 2026-10-03): thirty organisations, each
    with a major-league club and a club at each of the five levels below it -
@@ -17,8 +17,8 @@
    several Statcast seasons, the next step).
 
    A SEASON. Each level plays its own schedule (every club `games` games, a new
-   pairing each day; the home club alternates). The majors play AL or NL rules
-   by the home club's league, the minors use a designated hitter. Every plate
+   pairing each day; the home club alternates). Every level plays the current
+   rules, a designated hitter in every park. Every plate
    appearance is tallied for the batter and the pitcher.
 
    PROMOTION, at the end of a season, within each organisation and between
@@ -39,6 +39,7 @@
           BBLeague.report(U)  ->  text;   BBLeague.stable(U)  ->  plain object for the screen
 
    CHANGED
+     v0.2  the majors play the current rules: a designated hitter in every park (Joe, 2026-10-06)
      v0.1  first build
 ============================================================================ */
 
@@ -113,7 +114,7 @@ var BBLeague = (function () {
         for (var k = 0; k + 1 < order.length; k += 2) {
           var home = day % 2 ? order[k] : order[k + 1], away = day % 2 ? order[k + 1] : order[k];
           var A = BBGame.teamFromRoster(away, away.games), H = BBGame.teamFromRoster(home, home.games);
-          var rules = lv === 1 ? U.orgs[home.org].league : 'AL';
+          var rules = 'AL';   // the designated hitter in every park (the current rules)
           var G = BBGame.simGame(A, H, { rng: rng, rules: rules });
           home.games++; away.games++;
           if (G.score[1] > G.score[0]) { home.w++; away.l++; } else { away.w++; home.l++; }

@@ -1,5 +1,5 @@
 /* ============================================================================
-   invariants_check.js · v0.2 · 2026-10-05
+   invariants_check.js · v0.5 · 2026-10-06
 
    Every simulated play checked for the impossible, over whole games: base
    states that are legal (one man a base, nobody on 'base 0', nobody passing
@@ -16,9 +16,15 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js bb_game.js headless/invariants_check.js -- [games] [seed]
 
    CHANGED
+     v0.5  every trait's mean, at every position, lies inside the range its draws are clipped to (react's had fallen
+           below its floor in the integration: every position player then reacted in exactly 0.25 s)
+     v0.4  the current rules (bb_game v1.6): no pitcher leaves before he has faced three or finished a half-inning;
+           from the tenth inning each half starts with the man who batted before its leadoff hitter on second; no
+           more than two throws over a plate appearance
+     v0.3  a run on a caught fly whose third out is a runner tagged out is a time play, not a run after a third out
+           made by the batter (bb_field v1.10 judges the time; the rule had never fired while no tag-up was thrown out)
      v0.2  half the games play NL rules by name (a game given no rules now plays a designated hitter for both
            sides, bb_game v1.4), so the pitcher's spot and the pinch-hitter are still checked
-     v0.1  first build (the bug audit, docs/briefs/2026-10-05_bug_audit.md)
 ============================================================================ */
 (function (A) {
   var N = +A[0] || 500, SEED = +A[1] || 3, MAXEX = +A[2] || 3, rng = BB.makeRng(SEED);
@@ -29,6 +35,12 @@
     if (!EX[kind]) EX[kind] = [];
     if (EX[kind].length < MAXEX) EX[kind].push(key + (detail ? '  | ' + detail : ''));
   }
+  // the traits first: a mean outside its clip (at any position's offset) pins every draw at the edge
+  Object.keys(BB.TRAITS).forEach(function (k) {
+    var t = BB.TRAITS[k]; if (!Array.isArray(t) || t.length !== 4) return;
+    var offs = { all: 0 }; Object.keys(BB.FIELD_MEANS).forEach(function (pos) { if (BB.FIELD_MEANS[pos][k] !== undefined) offs[pos] = BB.FIELD_MEANS[pos][k]; });
+    Object.keys(offs).forEach(function (pos) { var m = t[0] + offs[pos]; if (!(m > t[2] && m < t[3])) flag('a trait whose mean lies outside the range its draws are clipped to', k + ' at ' + pos, 'mean ' + m.toFixed(3) + ', clipped to ' + t[2] + '..' + t[3]); });
+  });
   function ids(b) { var o = []; for (var i = 1; i <= 3; i++) if (b && b[i]) o.push(b[i].id); return o; }
   function show(b) { return [1, 2, 3].map(function (i) { return b && b[i] ? i : '-'; }).join(''); }
   function legal(b, what, key) {
@@ -87,7 +99,10 @@
     if (thirdOut && r.runs > scored) flag('more runs than runners crossed the plate', key);
     // no run scores when the third out is the batter before first base or a runner forced
     var bat0 = R.filter(function (q) { return q.from === 0; })[0];
-    if (thirdOut && r.runs && ((bat0 && bat0.out) || /force out|double play/.test(r.desc))) flag('a run scored on a play whose third out was a force or the batter', key, r.desc);
+    // (a caught fly puts the batter out first: a runner tagged out after it for the third out is a time play, and a run
+    // that crossed before the tag counts - bb_field v1.10 judges it)
+    var caught = (r.events || []).some(function (e) { return e.kind === 'catch'; });
+    if (thirdOut && r.runs && ((bat0 && bat0.out && !caught) || /force out|double play/.test(r.desc))) flag('a run scored on a play whose third out was a force or the batter', key, r.desc);
     // nobody passes the man ahead; one man a base
     var live = R.filter(function (q) { return !q.out; }).sort(function (a, b) { return b.from - a.from; });
     for (var i = 1; i < live.length; i++) {
@@ -113,12 +128,24 @@
   for (var g = 0; g < N; g++) {
     var T = BBNames.teams(rng), away = BBGame.makeTeam(rng, T[0]), home = BBGame.makeTeam(rng, T[1]);
     var G = BBGame.simGame(away, home, { rng: rng, rules: g % 2 ? 'NL' : 'AL' }), score = [0, 0], gone = {};
+    var mound = [null, null];   // each side's pitcher now: who, batters faced since he came in, whether he has finished a half
     nGames++;
     G.innings.forEach(function (inn, ii) {
-      var outs = 0, runsInn = 0, last = null;
+      var outs = 0, runsInn = 0, last = null, d = 1 - inn.half;
+      if (G.ghost && inn.n >= 10) {   // the extra-innings runner on second
+        var gk = 'seed ' + SEED + ' game ' + g + ' ' + (inn.half ? 'bot' : 'top') + ' ' + inn.n;
+        if (!inn.ghost || !inn.plays[0].bases[2] || inn.plays[0].bases[2].id !== inn.ghost.id || inn.plays[0].bases[1] || inn.plays[0].bases[3]) flag('an extra inning that did not start with its runner alone on second', gk);
+      }
       inn.plays.forEach(function (p, pi) {
         nPlays++;
         var key = 'seed ' + SEED + ' game ' + g + ' ' + (inn.half ? 'bot' : 'top') + ' ' + inn.n + ' play ' + pi + ' (' + p.batter.name + ': ' + p.desc + ')';
+        // the three-batter minimum: a pitcher replaced has faced three, or finished a half-inning
+        if (mound[d] && mound[d].id !== p.pitcher.id && mound[d].bf < 3 && !mound[d].done) flag('a pitcher left before facing three or finishing a half-inning', key, mound[d].bf + ' faced');
+        if (!mound[d] || mound[d].id !== p.pitcher.id) mound[d] = { id: p.pitcher.id, bf: 0, done: false };
+        if (p.pa.result !== 'END') mound[d].bf++;
+        var throwsOver = (p.pa.pickoffsEnd || []).length;
+        p.pa.pitches.forEach(function (q) { throwsOver += (q.pickoffs || []).length; });
+        if (throwsOver > 2) flag('more than two throws over in a plate appearance', key, String(throwsOver));
         if (p.outs !== outs) flag('a play started from a different out count than the last one left', key, p.outs + ' vs ' + outs);
         if (p.outsAfter > 3) flag('outs above three', key, String(p.outsAfter));
         if (p.outsAfter < p.outs) flag('outs went down', key);
@@ -174,6 +201,7 @@
         }
         outs = p.outsAfter; runsInn += p.runs; last = p;
       });
+      if (mound[d]) mound[d].done = true;   // he finished the half
       if (runsInn !== inn.runs) flag('the inning\'s runs are not the sum of its plays\'', 'seed ' + SEED + ' game ' + g + ' inning ' + inn.n + (inn.half ? ' bot' : ' top'));
       var isLast = ii === G.innings.length - 1;
       if (!last) flag('an inning with no plays', 'seed ' + SEED + ' game ' + g + ' inning ' + inn.n);
@@ -182,7 +210,7 @@
     if (G.score[0] !== score[0] || G.score[1] !== score[1]) flag('the final score is not the sum of the runs', 'seed ' + SEED + ' game ' + g);
     if (!G.over) flag('a game that did not finish', 'seed ' + SEED + ' game ' + g, G.finalInning + ' innings, ' + G.score.join('-'));
   }
-  print('invariants_check v0.2 · ' + nGames + ' games · seed ' + SEED + ' · ' + nPlays + ' plate appearances · ' + nPitches + ' pitches');
+  print('invariants_check v0.5 · ' + nGames + ' games · seed ' + SEED + ' · ' + nPlays + ' plate appearances · ' + nPitches + ' pitches');
   var kinds = Object.keys(V).sort(function (a, b) { return V[b] - V[a]; });
   if (!kinds.length) print('  no violations');
   kinds.forEach(function (k) { print('  ' + V[k] + '  ' + k); EX[k].forEach(function (e) { print('       e.g. ' + e); }); });

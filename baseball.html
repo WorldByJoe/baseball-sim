@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v4.8 · 2026-10-04
+  baseball.html · v4.9 · 2026-10-06
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a schedule - game night mode
@@ -48,6 +48,8 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v4.9  the model as it ends the season's development: engine v3.9 (the contact work through VS), bb_field v1.15,
+          bb_game v1.6 (the current rules), bb_schedule v0.8; the league stable rebuilt on it (?v=4)
     v4.8  the talk sets the clock (bb_call v0.7, bb_schedule v0.7): a segment lasts until its lines are said;
           the pitcher sets and the runners lead off at the end of a long set-up, not its start
     v4.7  the swing from above (Joe): opposite the flight chart, the bat frozen at contact or where the
@@ -56,7 +58,6 @@
     v4.6  a steal's wild throw drawn: the stealer carries on a base and everyone moves up (bb_game v1.1)
     v4.5  engine v2.8 (aim follows command, the batter reads the slot, the scouts see each pitch),
           bb_field v1.0 (the outfielder's stop and turn; separate sends to third and home)
-    v4.4  engine v2.7 (a check needs something new at the last look), bb_field v0.9 (the scorer's errors)
 ============================================================================ -->
 <!-- On the wall the shared ring script sits beside this file (handoff, settings,
      the stall budget, the setup door on 's'); standalone it is absent, so every
@@ -146,18 +147,18 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   <div id="hud" class="tag"></div>
 </div>
 <!-- version tags so a browser never runs a stale engine against a new page -->
-<script src="bb_engine.js?v=2.8"></script>
+<script src="bb_engine.js?v=3.9"></script>
 <script src="bb_names.js?v=0.1"></script>
-<script src="bb_field.js?v=1.0"></script>
-<script src="bb_game.js?v=1.1"></script>
-<script src="bb_schedule.js?v=0.7"></script>
+<script src="bb_field.js?v=1.15"></script>
+<script src="bb_game.js?v=1.6"></script>
+<script src="bb_schedule.js?v=0.8"></script>
 <script src="bb_call.js?v=0.7"></script>
 <script src="bb_organ.js?v=0.1"></script>
 <script src="bb_sound.js?v=0.1"></script>
 <!-- the park's sound files, when they are beside the page; without it the game plays silently -->
 <script src="sounds/manifest.js"></script>
 <!-- the league's standing rosters, when they are beside the page (headless/league_run.js writes them); without it every game draws two new teams -->
-<script src="stable/bb_stable.js?v=3"></script>
+<script src="stable/bb_stable.js?v=4"></script>
 <script>
 (function () {
   'use strict';

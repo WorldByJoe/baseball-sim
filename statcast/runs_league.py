@@ -1,5 +1,5 @@
 """
-runs_league.py · v0.1 · 2026-10-05
+runs_league.py · v0.2 · 2026-10-05
 
 Where the league's runs come from, measured from pitch-level Statcast the way
 headless/runs_check.js measures the model's: BaseRuns against actual runs per
@@ -20,6 +20,12 @@ Writes statcast/runs_league_2025.js (var RUNSL) and prints the tables.
   python3 statcast/runs_league.py 2025-05-05:2025-09-21
 
 CHANGED
+  v0.2  a force out and a fielder's choice out leave the batter on first (99% and 97% of them are on base at the
+        next plate appearance): they were counted as the batter's out, so the runner forced was 'left' rather than
+        out, runners forced out ran .69 a team-game where they were 1.35, and the force at second on a ground ball
+        with a man on first was 'batter out'; now a fielder's choice, as runs_check.js counts the model's (FC .83 a
+        team-game, the model's .28-.32: its infielders took the lead runner too seldom, not too often); a play's outs
+        go to the trailing runners, not the lead runner (an inning-ending double play had put the man on third out)
   v0.1  first build (the bug audit, docs/briefs/2026-10-05_bug_audit.md)
 """
 import json, os, sys, collections, re
@@ -135,8 +141,8 @@ def main(spec):
             elif ev.startswith('strikeout'): S['K'] += 1
             elif ev in ('sac_fly', 'sac_fly_double_play'): S['SF'] += 1
             elif ev in ('field_error',): S['ROE'] += 1
-            elif ev in ('fielders_choice', 'fielders_choice_out'): S['FC'] += 1
-            elif ev in ('field_out', 'force_out', 'grounded_into_double_play', 'double_play', 'triple_play', 'sac_bunt', 'sac_bunt_double_play', 'other_out'): S['outs in play'] += 1
+            elif ev in ('fielders_choice', 'fielders_choice_out', 'force_out'): S['FC'] += 1   # the batter reaches while a runner is put out or played on, as the model's 'FC'
+            elif ev in ('field_out', 'grounded_into_double_play', 'double_play', 'triple_play', 'sac_bunt', 'sac_bunt_double_play', 'other_out'): S['outs in play'] += 1
             if ev in ('grounded_into_double_play', 'double_play', 'sac_fly_double_play', 'strikeout_double_play', 'sac_bunt_double_play'): S['DP'] += 1
             if ev in HIT or ev in ('field_error', 'fielders_choice', 'fielders_choice_out', 'field_out', 'force_out', 'grounded_into_double_play', 'double_play', 'triple_play', 'sac_fly', 'sac_fly_double_play', 'sac_bunt', 'sac_bunt_double_play', 'other_out'):
                 S['balls in play'] += 1
@@ -151,19 +157,27 @@ def main(spec):
             missing = [bi for bi in (3, 2, 1) if b[bi] and b[bi] not in (nb[1], nb[2], nb[3])]
             batter_scored = 1 if ev == 'home_run' else 0
             left_runs = runs - batter_scored
-            batter_out = 1 if (ev in OUT_EVENTS or ev == 'fielders_choice_out') and ev not in ('fielders_choice',) else 0
+            batter_out = 1 if ev in OUT_EVENTS and ev not in ('force_out', 'fielders_choice_out') else 0   # on a force out or a fielder's choice out the batter reaches (v0.2)
+            if ev == 'force_out' and nxt is not None:
+                E['force outs with a next batter'] += 1; E['force outs, batter on base next'] += 1 if l.get('batter') in (nb[1], nb[2], nb[3]) or rid(l.get('batter')) in (nb[1], nb[2], nb[3]) else 0
             left_outs = made - batter_out
+            # the runners missing from the next plate appearance: the play's runs go to the lead runners, its outs to the
+            # trailing ones (a double play's outs are the forced men behind), the man on third first only when the play
+            # says he was out at home (v0.2: the outs had gone to the lead runner, so an inning-ending double play with men
+            # on first and third put the man on third out)
             went = {}
             for bi in (3, 2, 1):
-                if not b[bi]:
-                    continue
-                if b[bi] in (nb[1], nb[2], nb[3]):
+                if b[bi] and b[bi] in (nb[1], nb[2], nb[3]):
                     went[bi] = 'base%d' % ([nb[1], nb[2], nb[3]].index(b[bi]) + 1)
-                elif left_runs > 0:
+            for bi in (3, 2, 1):
+                if b[bi] and bi not in went and left_runs > 0:
                     went[bi] = 'scored'; left_runs -= 1
-                elif left_outs > 0:
+            order = (3, 1, 2) if 'out at home' in des else (1, 2, 3)
+            for bi in order:
+                if b[bi] and bi not in went and left_outs > 0:
                     went[bi] = 'out'; left_outs -= 1
-                else:
+            for bi in (3, 2, 1):
+                if b[bi] and bi not in went:
                     went[bi] = 'left'
             runner_out = sum(1 for bi in went if went[bi] == 'out')
             if ev in HIT and runner_out:
@@ -186,7 +200,7 @@ def main(spec):
                 if b[2] and not b[3]: TR['air out, R2 (3rd open)' + oo][went[2]] += 1
                 if b[1] and not b[2]: TR['air out, R1 (2nd open)' + oo][went[1]] += 1
             if bb == 'ground_ball' and outs < 2 and b[1]:
-                o = 'DP' if ev in ('grounded_into_double_play', 'double_play') else 'FC' if ev in ('fielders_choice', 'fielders_choice_out') else 'batter out' if ev in ('field_out', 'force_out') else 'error' if ev == 'field_error' else 'hit' if ev in HIT else ev
+                o = 'DP' if ev in ('grounded_into_double_play', 'double_play') else 'FC' if ev in ('fielders_choice', 'fielders_choice_out', 'force_out') else 'batter out' if ev == 'field_out' else 'error' if ev == 'field_error' else 'hit' if ev in HIT else ev
                 TR['ground ball, R1' + oo][o] += 1
             gb_out = bb == 'ground_ball' and ev in ('field_out', 'force_out', 'fielders_choice', 'fielders_choice_out', 'grounded_into_double_play', 'double_play')
             if gb_out and outs < 2:
