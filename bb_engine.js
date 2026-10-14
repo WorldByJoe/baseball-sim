@@ -209,6 +209,20 @@ var BB = (function () {
   // 0.27 gives .82. Square contact is not touched: below about 45 deg of incidence the ball rolls on the bat
   // (2/7 of the slip) within either cap.
   var MU_BAT = 0.27;
+  // THE CONTACT GEOMETRY AND THE LEATHER'S GRIP (review, 2026-10-13; engine-dev, calibration switches, defaults as before).
+  // GEOM: where the line of centres is measured from. D (swing()) is the HEIGHT of the ball's path over the barrel's; the two
+  // close along -u (the bat's path blended with the pitch's descent by their speeds, about 8 deg up on a typical swing), so
+  // the line of centres sits from -u by the impact parameter, D times the vertical part of the across-approach direction
+  // ('relative'). Until now it was measured from the barrel's path ('path'): 2 deg off on a typical swing, 6-7 on a very
+  // steep or a downward one. 'level' measures it from the level, right only for D as the centres' height difference at
+  // contact (Nathan's offset; with it his optimum fastball contact, 29.6 deg and 2421 rpm, came out 30.5 and 2152).
+  // E_X: the ball's tangential restitution, it grips the bat and springs back (Kensrud, Nathan & Smith, Am. J. Phys. 85,
+  // 503 (2017): 0.46 on a wood bat, spin 40% over rolling; a level tee test, 179 rpm per deg of launch: 142 at E_X 0, 168 at
+  // 0.46 with R_X 0.29); R_X: the bat's give across the contact (their r_x for a 29.4 oz wood bat). review/collide_check.js.
+  // In games ('relative', MU_BAT 0.12, nothing refitted): launch-angle shares nearer the league's and the swings' outcomes
+  // too (review/swing_mix.js), carry unchanged; but the grazes then leave at .92 of the pitch's speed against the league's
+  // .82 (review/graze_check.js), which 0.27 holds: one friction cannot serve both.
+  var GEOM = 'path', E_X = 0, R_X = 0;   // GEOM: 'path' (as it was), 'level' or 'relative' (calibration; see collide)
   // THE SWING IS A TILTED CIRCLE. Near contact the sweet spot travels on an arc
   // of radius SWING_R in a plane tilted from the ground by the batter's swing
   // tilt (Statcast's swing_path_tilt), with the barrel below the hands. Meeting
@@ -1653,7 +1667,7 @@ var BB = (function () {
   // them square), at 0.5 in .30 and .24, with the raw scatter x1.15 to keep the fastball whiffs .17 (0.4 in: .30 /
   // .24, whiffs .16; 0.6 in: .27 / .21).
   var LOOK_SD = 0.5, LOOK_GAIN = 1.3;
-  function tuneContact(o) { if (o.lookGain != null) LOOK_GAIN = o.lookGain; if (o.lookSd != null) LOOK_SD = o.lookSd; if (o.vertMiss != null) VERT_MISS = o.vertMiss; return { lookGain: LOOK_GAIN, lookSd: LOOK_SD, vertMiss: VERT_MISS }; }   // a calibration hook (step 2 of the run audit); unused, the constants stand
+  function tuneContact(o) { if (o.lookGain != null) LOOK_GAIN = o.lookGain; if (o.lookSd != null) LOOK_SD = o.lookSd; if (o.vertMiss != null) VERT_MISS = o.vertMiss; if (o.geom != null) GEOM = o.geom; if (o.geomVertical != null) GEOM = o.geomVertical ? 'level' : 'path'; if (o.ex != null) E_X = o.ex; if (o.rx != null) R_X = o.rx; if (o.mu != null) MU_BAT = o.mu; if (o.spinKeep != null) SPIN_KEEP = o.spinKeep; if (o.aimAttack != null) AIM_ATTACK = o.aimAttack; return { lookGain: LOOK_GAIN, lookSd: LOOK_SD, vertMiss: VERT_MISS, geom: GEOM, ex: E_X, rx: R_X, mu: MU_BAT, spinKeep: SPIN_KEEP, aimAttack: AIM_ATTACK }; }   // a calibration hook (step 2 of the run audit); unused, the constants stand
   function checkChance(B, rf, pitch) {   // the chance he tries to check: nothing new to see once he had picked it up (v2.7)
     if (rf.detected) return 0;
     return clamp((reachOf(B, pitch.plate.x + rf.lastPic[0], pitch.plate.z + rf.lastPic[1]) / IN - CHECK_IN[0]) / (CHECK_IN[1] - CHECK_IN[0]), 0, 1);
@@ -1765,14 +1779,24 @@ var BB = (function () {
     var up = cross(tipH, pf); if (up[2] < 0) up = [-up[0], -up[1], -up[2]];
     up = unit(up);
     var tip = unit([Math.cos(tl) * tipH[0] - Math.sin(tl) * up[0], Math.cos(tl) * tipH[1] - Math.sin(tl) * up[1], Math.cos(tl) * tipH[2] - Math.sin(tl) * up[2]]);   // the barrel, dipped toward its end
-    var q = unit(cross(pf, tip));
-    if (q[2] < 0) q = [-q[0], -q[1], -q[2]];
-    var s = sw.D / (BALL_R + batRadius(bat, xBar)), c = Math.sqrt(Math.max(0, 1 - s * s));
-    var n = [c * pf[0] + s * q[0], c * pf[1] + s * q[1], c * pf[2] + s * q[2]];   // the contact normal, from the face
     var vb = (sw.batAt || sw.batMph) * MPH * (1 + sw.dLong / (30 * IN));
     var V = [p[0] * vb, p[1] * vb, p[2] * vb];
     var vin = pitch.plate.v, win = pitch.plate.w;
     var u = [vin[0] - V[0], vin[1] - V[1], vin[2] - V[2]];
+    var q, e1, s, Rs = BALL_R + batRadius(bat, xBar);
+    if (GEOM === 'relative') {   // review (2026-10-13): D is the HEIGHT of the ball's path over the barrel's (swing()); the two close along -u, so the
+      // line of centres sits from -u (across the barrel) by the impact parameter, the height's share across that approach (q's vertical part)
+      var a = [-u[0], -u[1], -u[2]], at = dot(a, tip); e1 = unit([a[0] - at * tip[0], a[1] - at * tip[1], a[2] - at * tip[2]]);
+      q = unit(cross(e1, tip)); if (q[2] < 0) q = [-q[0], -q[1], -q[2]];
+      s = sw.D * q[2] / Rs;
+    } else if (GEOM === 'level') {   // the line of centres from the level (D as the centres' height difference at contact, as Nathan defines his offset)
+      e1 = unit([tip[1], -tip[0], 0]); if (dot(e1, pf) < 0) e1 = [-e1[0], -e1[1], -e1[2]];
+      q = unit(cross(e1, tip)); if (q[2] < 0) q = [-q[0], -q[1], -q[2]];
+      s = sw.D / Rs;
+    } else { e1 = pf; q = unit(cross(pf, tip)); if (q[2] < 0) q = [-q[0], -q[1], -q[2]]; s = sw.D / Rs; }   // 'path': from the barrel's path (the engine until now)
+    s = Math.max(-1, Math.min(1, s));
+    var c = Math.sqrt(Math.max(0, 1 - s * s));
+    var n = [c * e1[0] + s * q[0], c * e1[1] + s * q[1], c * e1[2] + s * q[2]];   // the contact normal
     var un = dot(u, n);
     if (un >= 0) return null;                  // the bat never closes on the ball
     var qe = qAt(bat, xBar, -un);
@@ -1781,7 +1805,8 @@ var BB = (function () {
     var wr = cross(win, rc);
     var slip = [u[0] + wr[0], u[1] + wr[1], u[2] + wr[2]];
     var sn = dot(slip, n);
-    var J = [-2 / 7 * (slip[0] - sn * n[0]), -2 / 7 * (slip[1] - sn * n[1]), -2 / 7 * (slip[2] - sn * n[2])];
+    var kx = 2 / 7 * (1 + E_X) / (1 + R_X);   // rolling (2/7 of the slip), times the leather's tangential spring-back (E_X) over the bat's own give across the contact (R_X)
+    var J = [-kx * (slip[0] - sn * n[0]), -kx * (slip[1] - sn * n[1]), -kx * (slip[2] - sn * n[2])];
     var jm = norm(J), jmax = MU_BAT * dvn;
     if (jm > jmax) { J[0] *= jmax / jm; J[1] *= jmax / jm; J[2] *= jmax / jm; }
     var dw = cross(rc, J), I = 0.4 * BALL_R * BALL_R;

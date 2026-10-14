@@ -1,5 +1,5 @@
 /* ============================================================================
-   carry_fit.js · v0.1 · 2026-10-13
+   carry_fit.js · v0.2 · 2026-10-13
 
    The same batted balls flown again under other aerodynamics, to fit the engine's carry to 2026's (season/carry_compare.py
    holds the real table). The model's hitters against its pitchers in MLB's parks and weather give the contacts once (each
@@ -9,12 +9,15 @@
    (AERO.batCdSpin), and a scale on the spin the collision gives (k: the hypothesis that the collision spins the ball too
    fast).
 
-   Run:  tools/diag/run.sh bb_engine.js review/carry_fit.js -- [PA] [seed] ['[[batCd, slope, k], ...]'] > out.jsonl
+   Run:  tools/diag/run.sh bb_engine.js review/carry_fit.js -- [PA] [seed] ['[[batCd, slope, k], ...]'] ['{tuneContact options}'] > out.jsonl
    CHANGED
+     v0.2  a fourth argument: BB.tuneContact options for the contacts (the collision's geometry and grip, SPIN_KEEP); each
+           cell also gives its median backspin (rpm) as flown
      v0.1  first build (Joe, 2026-10-13: flight first)
 ============================================================================ */
 (function (A) {
   var NPA = +A[0] || 40000, SEED = +A[1] || 1, FT = BB.units.FT, MPH = BB.units.MPH, DEG = Math.PI / 180;
+  if (A[3]) BB.tuneContact(JSON.parse(A[3]));
   var rng = BB.makeRng(SEED), H = [], P = [], C = [];
   for (var i = 0; i < 300; i++) H.push(BB.makeBatter(rng, {}));
   for (i = 0; i < 80; i++) P.push(BB.makePitcher(rng, { role: i % 12 < 7 ? 'SP' : 'RP' }));
@@ -23,7 +26,7 @@
     var B = H[k % H.length], Pk = P[(k * 7) % P.length], env = BB.mlbEnv(rng);
     Pk.load = rng.u() * 0.8 * Pk.stamina;
     var bb = BB.simPA(Pk, B, { env: env, ump: ump, framing: 0, seen: 40 * rng.u() * rng.u(), rec: false }, rng).bb;
-    if (bb && bb.v0 && bb.la >= 5 && bb.la < 50 && bb.ev >= 90) C.push({ p0: bb.p0, v0: bb.v0, w0: bb.w0, env: env, ev: bb.ev, la: bb.la });
+    if (bb && bb.v0 && bb.la >= 5 && bb.la < 50 && bb.ev >= 90) C.push({ p0: bb.p0, v0: bb.v0, w0: bb.w0, env: env, ev: bb.ev, la: bb.la, back: bb.backspin });
   }
   function fly(cd, slope, ks) {
     BB.AERO.batCd = cd; BB.AERO.batCdSpin = slope;
@@ -32,11 +35,12 @@
       var w = [c.w0[0] * ks, c.w0[1] * ks, c.w0[2] * ks], fl = BB.flyBatted(c.p0, c.v0, w, c.env, false), L = fl.land || fl;
       var e = c.ev < 95 ? 0 : c.ev < 100 ? 1 : c.ev < 105 ? 2 : 3, a = Math.floor((c.la - 10) / 5);
       if (a < 0 || a > 6) return;
-      var key = e + '|' + a; (cells[key] = cells[key] || []).push([Math.sqrt(L.x * L.x + L.y * L.y) / FT, fl.kind === 'over' ? 1 : 0]);
+      var key = e + '|' + a; (cells[key] = cells[key] || []).push([Math.sqrt(L.x * L.x + L.y * L.y) / FT, fl.kind === 'over' ? 1 : 0, c.back * ks]);
     });
     var out = {};
     Object.keys(cells).forEach(function (key) { var d = cells[key].map(function (x) { return x[0]; }).sort(function (a, b) { return a - b; });
-      out[key] = [d[Math.floor(d.length / 2)], cells[key].reduce(function (s, x) { return s + x[1]; }, 0) / d.length, d.length]; });
+      var bk = cells[key].map(function (x) { return x[2]; }).sort(function (a, b) { return a - b; });
+      out[key] = [d[Math.floor(d.length / 2)], cells[key].reduce(function (s, x) { return s + x[1]; }, 0) / d.length, d.length, Math.round(bk[Math.floor(bk.length / 2)])]; });
     print(JSON.stringify({ batCd: cd, slope: slope, k: ks, cells: out }));
   }
   (A[2] ? JSON.parse(A[2]) : [[1.08, 1, 1]].concat(
