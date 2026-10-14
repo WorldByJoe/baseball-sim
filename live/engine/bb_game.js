@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_game.js · v1.7 · 2026-10-07
+   bb_game.js · v1.8 · 2026-10-13
 
    A whole game: two teams, nine innings or more, lineups that turn over,
    pitchers who tire and get replaced, managers with their own habits.
@@ -55,6 +55,10 @@
    at DH, the rest on the bench, the next man in the five-man rotation.
 
    CHANGED
+     v1.8  o.homeEdge {eye, timing, barrel, aggr}: while a home hitter bats, his eye, timing and barrel scatter are scaled
+           by these and aggr is added to his aggression (a hitter at home reads and times the pitch a little better: season/home_field.py, 2025-26, within
+           players and parks: 1.0 point fewer strikeouts, 0.3-0.45 more walks, home runs and exit speed unchanged;
+           pitchers' own speed and extension unchanged); off unless given
      v1.7  (the playoff review's branch) a game played as it was: T.plan, the pitchers in their order with the batters
            each faced, and T.lineupPlan, who takes each spot in the order at which of its turns; a game that outruns
            the one played goes back to the manager and the rest of the pen; o.maxInnings raises the 18-inning safety stop
@@ -171,6 +175,7 @@ var BBGame = (function () {
     o = o || {};
     var rng = o.rng || BB.makeRng(o.seed || 1);
     var rules = o.rules || 'AL', ghost = o.ghost !== false;   // ghost: the extra-innings runner on second (regular season)
+    var HE = o.homeEdge || null;   // v1.8: the home hitters' edge, {eye, timing, barrel} scale factors on their scatter, aggr added
     var env = o.env || BB.mlbEnv(rng), ump = o.ump || named(rng, BB.makeUmp(rng));
     var G = { rules: rules, ghost: ghost, env: env, ump: ump, teams: [A, H], score: [0, 0], innings: [], plays: [], pitches: 0, over: false,
               hits: [0, 0], errors: [0, 0], lob: [0, 0], stats: [newStats(), newStats()], changes: [0, 0] };
@@ -296,10 +301,14 @@ var BBGame = (function () {
         var pa;
         if (walkHim(def, bat, B, bases, outs, inning, G.score[1 - half] - G.score[half])) pa = { result: 'IBB', pitches: [] };
         else {
+          var he0 = HE && half === 1 ? [B.eyeSD, B.timingSD, B.barrelSD, B.aggr] : null;   // the home edge, for this plate appearance only
+          if (he0) { B.eyeSD *= HE.eye || 1; B.timingSD *= HE.timing || 1; B.barrelSD *= HE.barrel || 1; B.aggr += HE.aggr || 0; }
+          try {
           pa = BB.simPA(P, B, { env: env, ump: ump, framing: def.catcher.framing || 0, seen: seenOwn + 0.25 * (seenTeam - seenOwn),
                                 runnersOn: !!(bases[1] || bases[2] || bases[3]), rec: true,
                                 foulCatch: function (bb) { caughtFoul = BBField.foulCatch(bb, D, env, rng); return !!caughtFoul; },
                                 beforePitch: beforePitch, afterPitch: afterPitch }, rng);
+          } finally { if (he0) { B.eyeSD = he0[0]; B.timingSD = he0[1]; B.barrelSD = he0[2]; B.aggr = he0[3]; } }
           if (pickLog.length) pa.pickoffsEnd = pickLog;   // thrown over, with no pitch after: the inning ended on the bases
         }
         var n = pa.pitches.length;
