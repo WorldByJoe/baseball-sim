@@ -1,5 +1,5 @@
 /* ============================================================================
-   replay_game.js · v0.7 · 2026-10-13
+   replay_game.js · v0.8 · 2026-10-13
 
    A postseason game played again as it was played: the real batting order with
    its substitutions (each man takes his spot at the turn he took it, at the
@@ -21,6 +21,7 @@
    'errors' (then G, the league factor): each fielder's own error tendency (review/err_mult.py); 'pitched+errors' both.
 
    CHANGED
+     v0.8  calibration tokens 'eye=x' and 'aggr=y': the home edge's eye factor and aggression shift (season/home_cal_games.sh)
      v0.7  mode tokens 'send=a,b,c' (BBField.SEND.H1, going home from first on a hit, by outs) and 'vis=s' (the home edge's
            visiting fielders' slower first step), for calibrating them
      v0.6  mode 'audit' (combinable): each replay prints its plate appearances (state before, result, runners' moves, runs,
@@ -40,6 +41,8 @@
   MODE.forEach(function (m) {   // v0.7: calibration tokens
     if (m.indexOf('send=') === 0) BBField.SEND.H1 = m.slice(5).split(',').map(Number);
     if (m.indexOf('vis=') === 0) { HOMEEDGE = HOMEEDGE ? JSON.parse(JSON.stringify(HOMEEDGE)) : { eye: 1, timing: 1, barrel: 1, aggr: 0 }; HOMEEDGE.visReact = +m.slice(4); }
+    var hk = /^(eye|aggr)=/.exec(m);   // v0.8: the home edge's eye factor and aggression shift, for calibrating it in games
+    if (hk) { HOMEEDGE = HOMEEDGE ? JSON.parse(JSON.stringify(HOMEEDGE)) : { eye: 1, timing: 1, barrel: 1, aggr: 0 }; HOMEEDGE[hk[1]] = +m.slice(hk[0].length); }
   });
   // ERRORS (mode 'errors'): each fielder's own error tendency, his season errors per chance against his positions'
   // (review/err_mult.py) times one league factor G (A[6]), as errMult on his drops, fumbles and wild throws (bb_field v1.16)
