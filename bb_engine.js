@@ -230,7 +230,10 @@ var BB = (function () {
   // 2012, normal speed about 41 m/s), MU_GAMMA is 0.46; a graze (normal speed 10-15 m/s) then gets about 0.26, near the
   // 0.27 MU_BAT was fitted to the grazes' speed. review/graze_check.js, swing_mix.js.
   var MU_GAMMA = 0, MU_REF = 0.15, MU_VREF = 41, MU_MAX = 0.8;
-  var GEOM = 'path', E_X = 0, R_X = 0;   // GEOM: 'path' (as it was), 'level' or 'relative' (calibration; see collide)
+  var GEOM = 'path', E_X = 0, R_X = 0;   // GEOM: 'path' (as it was), 'closing', 'relative' or 'level' (calibration; see collide)
+  // 'closing': the line of centres from the closing direction of bat and ball, D the offset across the barrel as swing()'s
+  // contact test takes it. 'relative' also shrank D by the barrel's tilt (its vertical part) while the contact test did not,
+  // so a truly glancing contact could not happen (review/foul_mix.js: too many solid side fouls).
   // THE SWING IS A TILTED CIRCLE. Near contact the sweet spot travels on an arc
   // of radius SWING_R in a plane tilted from the ground by the batter's swing
   // tilt (Statcast's swing_path_tilt), with the barrel below the hands. Meeting
@@ -1797,6 +1800,10 @@ var BB = (function () {
       var a = [-u[0], -u[1], -u[2]], at = dot(a, tip); e1 = unit([a[0] - at * tip[0], a[1] - at * tip[1], a[2] - at * tip[2]]);
       q = unit(cross(e1, tip)); if (q[2] < 0) q = [-q[0], -q[1], -q[2]];
       s = sw.D * q[2] / Rs;
+    } else if (GEOM === 'closing') {   // the closing direction as the reference, D as swing() treats it in its contact test (the offset across the barrel)
+      var a2 = [-u[0], -u[1], -u[2]], at2 = dot(a2, tip); e1 = unit([a2[0] - at2 * tip[0], a2[1] - at2 * tip[1], a2[2] - at2 * tip[2]]);
+      q = unit(cross(e1, tip)); if (q[2] < 0) q = [-q[0], -q[1], -q[2]];
+      s = sw.D / Rs;
     } else if (GEOM === 'level') {   // the line of centres from the level (D as the centres' height difference at contact, as Nathan defines his offset)
       e1 = unit([tip[1], -tip[0], 0]); if (dot(e1, pf) < 0) e1 = [-e1[0], -e1[1], -e1[2]];
       q = unit(cross(e1, tip)); if (q[2] < 0) q = [-q[0], -q[1], -q[2]];
