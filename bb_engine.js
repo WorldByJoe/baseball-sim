@@ -222,6 +222,14 @@ var BB = (function () {
   // In games ('relative', MU_BAT 0.12, nothing refitted): launch-angle shares nearer the league's and the swings' outcomes
   // too (review/swing_mix.js), carry unchanged; but the grazes then leave at .92 of the pitch's speed against the league's
   // .82 (review/graze_check.js), which 0.27 holds: one friction cannot serve both.
+  // THE LEATHER'S FRICTION FALLS AS THE CONTACT GETS HARDER (review, 2026-10-14; engine-dev, off by default: MU_GAMMA 0).
+  // A soft surface grips less per unit of load as the load grows (its contact area grows slower than the load). With
+  // MU_GAMMA > 0 the friction is MU_REF at a normal approach speed of MU_VREF and goes as that speed to the -MU_GAMMA:
+  // through the two measurements, at least 0.50 for a ball dropped on a bat at about 4 m/s (Cross & Nathan 2006, normal
+  // speed about 3 m/s) and about 0.15 for a ball fired at 120 mph sliding on wood past 40 deg of incidence (Nathan et al.
+  // 2012, normal speed about 41 m/s), MU_GAMMA is 0.46; a graze (normal speed 10-15 m/s) then gets about 0.26, near the
+  // 0.27 MU_BAT was fitted to the grazes' speed. review/graze_check.js, swing_mix.js.
+  var MU_GAMMA = 0, MU_REF = 0.15, MU_VREF = 41, MU_MAX = 0.8;
   var GEOM = 'path', E_X = 0, R_X = 0;   // GEOM: 'path' (as it was), 'level' or 'relative' (calibration; see collide)
   // THE SWING IS A TILTED CIRCLE. Near contact the sweet spot travels on an arc
   // of radius SWING_R in a plane tilted from the ground by the batter's swing
@@ -1667,7 +1675,7 @@ var BB = (function () {
   // them square), at 0.5 in .30 and .24, with the raw scatter x1.15 to keep the fastball whiffs .17 (0.4 in: .30 /
   // .24, whiffs .16; 0.6 in: .27 / .21).
   var LOOK_SD = 0.5, LOOK_GAIN = 1.3;
-  function tuneContact(o) { if (o.lookGain != null) LOOK_GAIN = o.lookGain; if (o.lookSd != null) LOOK_SD = o.lookSd; if (o.vertMiss != null) VERT_MISS = o.vertMiss; if (o.geom != null) GEOM = o.geom; if (o.geomVertical != null) GEOM = o.geomVertical ? 'level' : 'path'; if (o.ex != null) E_X = o.ex; if (o.rx != null) R_X = o.rx; if (o.mu != null) MU_BAT = o.mu; if (o.spinKeep != null) SPIN_KEEP = o.spinKeep; if (o.aimAttack != null) AIM_ATTACK = o.aimAttack; return { lookGain: LOOK_GAIN, lookSd: LOOK_SD, vertMiss: VERT_MISS, geom: GEOM, ex: E_X, rx: R_X, mu: MU_BAT, spinKeep: SPIN_KEEP, aimAttack: AIM_ATTACK }; }   // a calibration hook (step 2 of the run audit); unused, the constants stand
+  function tuneContact(o) { if (o.lookGain != null) LOOK_GAIN = o.lookGain; if (o.lookSd != null) LOOK_SD = o.lookSd; if (o.vertMiss != null) VERT_MISS = o.vertMiss; if (o.geom != null) GEOM = o.geom; if (o.geomVertical != null) GEOM = o.geomVertical ? 'level' : 'path'; if (o.ex != null) E_X = o.ex; if (o.rx != null) R_X = o.rx; if (o.mu != null) MU_BAT = o.mu; if (o.muGamma != null) MU_GAMMA = o.muGamma; if (o.muRef != null) MU_REF = o.muRef; if (o.muVref != null) MU_VREF = o.muVref; if (o.spinKeep != null) SPIN_KEEP = o.spinKeep; if (o.aimAttack != null) AIM_ATTACK = o.aimAttack; return { lookGain: LOOK_GAIN, lookSd: LOOK_SD, vertMiss: VERT_MISS, geom: GEOM, ex: E_X, rx: R_X, mu: MU_BAT, muGamma: MU_GAMMA, muRef: MU_REF, muVref: MU_VREF, spinKeep: SPIN_KEEP, aimAttack: AIM_ATTACK }; }   // a calibration hook (step 2 of the run audit); unused, the constants stand
   function checkChance(B, rf, pitch) {   // the chance he tries to check: nothing new to see once he had picked it up (v2.7)
     if (rf.detected) return 0;
     return clamp((reachOf(B, pitch.plate.x + rf.lastPic[0], pitch.plate.z + rf.lastPic[1]) / IN - CHECK_IN[0]) / (CHECK_IN[1] - CHECK_IN[0]), 0, 1);
@@ -1807,16 +1815,17 @@ var BB = (function () {
     var sn = dot(slip, n);
     var kx = 2 / 7 * (1 + E_X) / (1 + R_X);   // rolling (2/7 of the slip), times the leather's tangential spring-back (E_X) over the bat's own give across the contact (R_X)
     var J = [-kx * (slip[0] - sn * n[0]), -kx * (slip[1] - sn * n[1]), -kx * (slip[2] - sn * n[2])];
-    var jm = norm(J), jmax = MU_BAT * dvn;
+    var mu = MU_GAMMA ? Math.min(MU_MAX, MU_REF * Math.pow(Math.max(-un, 0.5) / MU_VREF, -MU_GAMMA)) : MU_BAT;   // the leather's friction falls as the contact gets harder (MU_GAMMA; 0 = one friction, MU_BAT)
+    var jm = norm(J), jmax = mu * dvn;
     if (jm > jmax) { J[0] *= jmax / jm; J[1] *= jmax / jm; J[2] *= jmax / jm; }
     var dw = cross(rc, J), I = 0.4 * BALL_R * BALL_R;
     return { v: [vin[0] + dvn * n[0] + J[0], vin[1] + dvn * n[1] + J[1], vin[2] + dvn * n[2] + J[2]],
-             w: [win[0] + dw[0] / I, win[1] + dw[1] / I, win[2] + dw[2] / I], q: qe };
+             w: [win[0] + dw[0] / I, win[1] + dw[1] / I, win[2] + dw[2] / I], q: qe, vn: -un, mu: mu, slid: jm > jmax };
   }
 
   // ----------------------------------------------------------------- FLY
   function battedBall(pitch, col, env, rec) {
-    col = { v: col.v, w: [col.w[0] * SPIN_KEEP, col.w[1] * SPIN_KEEP, col.w[2] * SPIN_KEEP], q: col.q };   // the spin it leaves with (SPIN_KEEP, review)
+    col = { v: col.v, w: [col.w[0] * SPIN_KEEP, col.w[1] * SPIN_KEEP, col.w[2] * SPIN_KEEP], q: col.q, vn: col.vn, mu: col.mu, slid: col.slid };   // the spin it leaves with (SPIN_KEEP, review)
     var p0 = [pitch.plate.x, CONTACT_Y, pitch.plate.z], v = col.v, sp = norm(v);
     var fl = flyBatted(p0, v, col.w, env, rec);
     var vh = unit([v[0], v[1], 0]), side = cross(vh, [0, 0, 1]);
@@ -1831,7 +1840,7 @@ var BB = (function () {
       fair = Math.abs(Math.atan2(fl.v[0], fl.v[1]) / DEG) <= 45 && Math.abs(landSpray) <= 60;
     } else fair = Math.abs(landSpray) <= 45;
     return { ev: sp / MPH, la: Math.asin(v[2] / sp) / DEG, spray: Math.atan2(v[0], v[1]) / DEG,
-             spin: norm(col.w) / RPM, backspin: back, q: col.q,
+             spin: norm(col.w) / RPM, backspin: back, q: col.q, vn: col.vn, mu: col.mu, slid: col.slid,
              kind: fl.kind, fair: fair, hr: fl.kind === 'over',
              landing: [fl.x, fl.y], landZ: fl.z, landV: fl.v, landW: fl.w, landT: fl.t,
              dist: r / FT, projDist: proj / FT, hang: fl.t, apex: fl.apex / FT, path: fl.path, p0: p0, v0: v.slice(), w0: col.w.slice() };
