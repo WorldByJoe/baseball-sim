@@ -20,9 +20,9 @@
      "pos": "LF"
     },
     {
-     "id": 592885,
-     "name": "Christian Yelich",
-     "pos": "DH"
+     "id": 668930,
+     "name": "Brice Turang",
+     "pos": "2B"
     },
     {
      "id": 661388,
@@ -30,14 +30,19 @@
      "pos": "C"
     },
     {
-     "id": 668930,
-     "name": "Brice Turang",
-     "pos": "2B"
-    },
-    {
      "id": 641343,
      "name": "Jake Bauers",
      "pos": "1B"
+    },
+    {
+     "id": 592885,
+     "name": "Christian Yelich",
+     "pos": "DH"
+    },
+    {
+     "id": 669003,
+     "name": "Garrett Mitchell",
+     "pos": "CF"
     },
     {
      "id": 806198,
@@ -50,13 +55,8 @@
      "pos": "RF"
     },
     {
-     "id": 669003,
-     "name": "Garrett Mitchell",
-     "pos": "CF"
-    },
-    {
-     "id": 687401,
-     "name": "Joey Ortiz",
+     "id": 666152,
+     "name": "David Hamilton",
      "pos": "3B"
     }
    ],
@@ -119,17 +119,7 @@
     {
      "id": 683748,
      "name": "Victor Mesa Jr.",
-     "pos": "LF"
-    },
-    {
-     "id": 668723,
-     "name": "Ryan Vilade",
      "pos": "RF"
-    },
-    {
-     "id": 689414,
-     "name": "Liam Hicks",
-     "pos": "C"
     },
     {
      "id": 676356,
@@ -137,9 +127,19 @@
      "pos": "CF"
     },
     {
-     "id": 680700,
-     "name": "Richie Palacios",
+     "id": 802415,
+     "name": "Chandler Simpson",
+     "pos": "LF"
+    },
+    {
+     "id": 810938,
+     "name": "Ben Williamson",
      "pos": "2B"
+    },
+    {
+     "id": 689414,
+     "name": "Liam Hicks",
+     "pos": "C"
     },
     {
      "id": 670764,

@@ -20,9 +20,9 @@
      "pos": "LF"
     },
     {
-     "id": 592885,
-     "name": "Christian Yelich",
-     "pos": "DH"
+     "id": 668930,
+     "name": "Brice Turang",
+     "pos": "2B"
     },
     {
      "id": 661388,
@@ -30,14 +30,19 @@
      "pos": "C"
     },
     {
-     "id": 668930,
-     "name": "Brice Turang",
-     "pos": "2B"
-    },
-    {
      "id": 641343,
      "name": "Jake Bauers",
      "pos": "1B"
+    },
+    {
+     "id": 592885,
+     "name": "Christian Yelich",
+     "pos": "DH"
+    },
+    {
+     "id": 669003,
+     "name": "Garrett Mitchell",
+     "pos": "CF"
     },
     {
      "id": 806198,
@@ -50,13 +55,8 @@
      "pos": "RF"
     },
     {
-     "id": 669003,
-     "name": "Garrett Mitchell",
-     "pos": "CF"
-    },
-    {
-     "id": 687401,
-     "name": "Joey Ortiz",
+     "id": 666152,
+     "name": "David Hamilton",
      "pos": "3B"
     }
    ],
@@ -112,9 +112,9 @@
      "pos": "1B"
     },
     {
-     "id": 669257,
-     "name": "Will Smith",
-     "pos": "C"
+     "id": 606192,
+     "name": "Teoscar Hern\u00e1ndez",
+     "pos": "LF"
     },
     {
      "id": 660271,
@@ -122,9 +122,9 @@
      "pos": "DH"
     },
     {
-     "id": 606192,
-     "name": "Teoscar Hern\u00e1ndez",
-     "pos": "LF"
+     "id": 669257,
+     "name": "Will Smith",
+     "pos": "C"
     },
     {
      "id": 571970,
@@ -132,9 +132,9 @@
      "pos": "3B"
     },
     {
-     "id": 571771,
-     "name": "Enrique Hern\u00e1ndez",
-     "pos": "2B"
+     "id": 681624,
+     "name": "Andy Pages",
+     "pos": "CF"
     },
     {
      "id": 663656,
@@ -142,9 +142,9 @@
      "pos": "RF"
     },
     {
-     "id": 681624,
-     "name": "Andy Pages",
-     "pos": "CF"
+     "id": 669242,
+     "name": "Tommy Edman",
+     "pos": "2B"
     }
    ],
    "rotation": [

@@ -32,17 +32,7 @@
     {
      "id": 683748,
      "name": "Victor Mesa Jr.",
-     "pos": "LF"
-    },
-    {
-     "id": 668723,
-     "name": "Ryan Vilade",
      "pos": "RF"
-    },
-    {
-     "id": 689414,
-     "name": "Liam Hicks",
-     "pos": "C"
     },
     {
      "id": 676356,
@@ -50,9 +40,19 @@
      "pos": "CF"
     },
     {
-     "id": 680700,
-     "name": "Richie Palacios",
+     "id": 802415,
+     "name": "Chandler Simpson",
+     "pos": "LF"
+    },
+    {
+     "id": 810938,
+     "name": "Ben Williamson",
      "pos": "2B"
+    },
+    {
+     "id": 689414,
+     "name": "Liam Hicks",
+     "pos": "C"
     },
     {
      "id": 670764,
@@ -114,12 +114,12 @@
     {
      "id": 800050,
      "name": "Chase DeLauter",
-     "pos": "RF"
+     "pos": "DH"
     },
     {
      "id": 666176,
      "name": "Jo Adell",
-     "pos": "DH"
+     "pos": "RF"
     },
     {
      "id": 663993,
@@ -132,14 +132,14 @@
      "pos": "2B"
     },
     {
-     "id": 672275,
-     "name": "Patrick Bailey",
-     "pos": "C"
-    },
-    {
      "id": 690984,
      "name": "Petey Halpin",
      "pos": "CF"
+    },
+    {
+     "id": 595978,
+     "name": "Austin Hedges",
+     "pos": "C"
     },
     {
      "id": 677587,

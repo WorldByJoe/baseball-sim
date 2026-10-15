@@ -25,9 +25,9 @@
      "pos": "1B"
     },
     {
-     "id": 669257,
-     "name": "Will Smith",
-     "pos": "C"
+     "id": 606192,
+     "name": "Teoscar Hern\u00e1ndez",
+     "pos": "LF"
     },
     {
      "id": 660271,
@@ -35,9 +35,9 @@
      "pos": "DH"
     },
     {
-     "id": 606192,
-     "name": "Teoscar Hern\u00e1ndez",
-     "pos": "LF"
+     "id": 669257,
+     "name": "Will Smith",
+     "pos": "C"
     },
     {
      "id": 571970,
@@ -45,9 +45,9 @@
      "pos": "3B"
     },
     {
-     "id": 571771,
-     "name": "Enrique Hern\u00e1ndez",
-     "pos": "2B"
+     "id": 681624,
+     "name": "Andy Pages",
+     "pos": "CF"
     },
     {
      "id": 663656,
@@ -55,9 +55,9 @@
      "pos": "RF"
     },
     {
-     "id": 681624,
-     "name": "Andy Pages",
-     "pos": "CF"
+     "id": 669242,
+     "name": "Tommy Edman",
+     "pos": "2B"
     }
    ],
    "rotation": [
@@ -114,12 +114,12 @@
     {
      "id": 800050,
      "name": "Chase DeLauter",
-     "pos": "RF"
+     "pos": "DH"
     },
     {
      "id": 666176,
      "name": "Jo Adell",
-     "pos": "DH"
+     "pos": "RF"
     },
     {
      "id": 663993,
@@ -132,14 +132,14 @@
      "pos": "2B"
     },
     {
-     "id": 672275,
-     "name": "Patrick Bailey",
-     "pos": "C"
-    },
-    {
      "id": 690984,
      "name": "Petey Halpin",
      "pos": "CF"
+    },
+    {
+     "id": 595978,
+     "name": "Austin Hedges",
+     "pos": "C"
     },
     {
      "id": 677587,
