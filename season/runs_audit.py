@@ -1,5 +1,5 @@
 """
-runs_audit.py · v0.2 · 2026-10-13
+runs_audit.py · v0.3 · 2026-10-14
 
 Where do the engine's runs go missing? (Joe, 2026-10-13: the model scores about 7.6 runs a game against the real 9.0, and
 turns the home hitters' edge into about half the runs real baseball does.) The engine's plate appearances (replay_game.js
@@ -24,6 +24,7 @@ hist26A4) against the real ones of the same games (Statcast, 2026 after the All-
   python3 season/runs_audit.py      -> season/runs_audit.json
 
 CHANGED
+  v0.3  real balls typed by launch angle as the engine's; liners' distance on balls not caught (the model review)
   v0.2  contact against fielding (exit speed and launch angle cells), and home against away
   v0.1  first build (Joe, 2026-10-13: start an investigation of where the runs go missing)
 """
@@ -76,6 +77,11 @@ def real(pks):
     P['toEnd'] = P.end - P.start
     P['res'] = [REAL_MAP.get(e, 'OUT' if e in OUTS_IN_PLAY else ('NOPA' if isinstance(e, str) else 'NOPA')) for e in P.events]
     P['type'] = P.bb_type.map(BBT).fillna('')
+    # v0.3: typed by launch angle as the engine's are (GB under 10, LD 10-25, FB 25-50, PU over); Statcast's own bb_type kept
+    # where the angle is missing. Statcast types some balls under 10 deg as liners, which had put the league's grounders at
+    # hits .248 against .268 under the engine's definition (the model review, 2026-10-14)
+    la_ = pd.to_numeric(P.la, errors='coerce')
+    P['type'] = np.where(la_.notna() & (P.type != ''), np.where(la_ < 10, 'GB', np.where(la_ < 25, 'LD', np.where(la_ < 50, 'FB', 'PU'))), P.type)
     P['runs'] = P.post_bat_score - last.bat_score.values + 0   # on the play's last pitch
     # the state after: the next plate appearance's in the same half, else three out
     nxt = P.groupby('halfkey').shift(-1)
@@ -185,7 +191,10 @@ def main():
         cells_ = []
         for alo, ahi in ((15, 20), (20, 25), (25, 30), (30, 35), (35, 40)):
             me = Be[(Be.ev >= lo) & (Be.ev < hi) & (Be.la >= alo) & (Be.la < ahi) & Be.dist.notna()]; mr = Br[(Br.ev >= lo) & (Br.ev < hi) & (Br.la >= alo) & (Br.la < ahi) & Br.dist.notna()]
-            cells_.append('%d-%d deg %3.0f/%3.0f (%.2f/%.2f)' % (alo, ahi, me.dist.median() if len(me) else np.nan, mr.dist.median() if len(mr) else np.nan, (me.res == 'HR').mean() if len(me) else np.nan, (mr.res == 'HR').mean() if len(mr) else np.nan))
+            # v0.3: below 25 deg the distance is of balls not caught: Statcast's hit distance on a caught liner is the catch
+            # point, 7-13 ft short of where it would land, while the engine's is the landing point (the home-run share uses all)
+            de = me[me.res != 'OUT'] if ahi <= 25 else me; dr = mr[mr.res != 'OUT'] if ahi <= 25 else mr
+            cells_.append('%d-%d deg %3.0f/%3.0f (%.2f/%.2f)' % (alo, ahi, de.dist.median() if len(de) else np.nan, dr.dist.median() if len(dr) else np.nan, (me.res == 'HR').mean() if len(me) else np.nan, (mr.res == 'HR').mean() if len(mr) else np.nan))
         print('     %d-%d mph  ' % (lo, hi) + '  '.join(cells_))
     # 8. home against away in the same games
     def ha(D):
