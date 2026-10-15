@@ -23,6 +23,7 @@
 ============================================================================ */
 (function (A) {
   var N = +A[0] || 300, SEED = +A[1] || 3, L = typeof GBL !== 'undefined' ? GBL : null;
+  if (A[2]) BBField.tuneField(JSON.parse(A[2]));   // calibration options (bb_field v1.18 tuneField)
   var U = BB.units, FT = U.FT, MPH = U.MPH, DEG = U.DEG, BASE = 90 * FT;
   var LA_E = [], LA5_E = [-30, -20, -10, -5, 0, 5, 10, 15], EV_E = [0, 70, 75, 80, 85, 90, 95, 100, 105, 110, 130], DIR_E = [-60, -15, 15, 60];
   for (var a = -30; a <= 16; a += 2) LA_E.push(a);

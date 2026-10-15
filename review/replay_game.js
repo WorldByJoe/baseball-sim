@@ -1,5 +1,5 @@
 /* ============================================================================
-   replay_game.js · v0.8 · 2026-10-13
+   replay_game.js · v0.9 · 2026-10-14
 
    A postseason game played again as it was played: the real batting order with
    its substitutions (each man takes his spot at the turn he took it, at the
@@ -21,6 +21,7 @@
    'errors' (then G, the league factor): each fielder's own error tendency (review/err_mult.py); 'pitched+errors' both.
 
    CHANGED
+     v0.9  audit: a hit with an error on the throw is labelled the hit; the steal columns read steal.safe (the model review)
      v0.8  calibration tokens 'eye=x' and 'aggr=y': the home edge's eye factor and aggression shift (season/home_cal_games.sh)
      v0.7  mode tokens 'send=a,b,c' (BBField.SEND.H1, going home from first on a hit, by outs) and 'vis=s' (the home edge's
            visiting fielders' slower first step), for calibrating them
@@ -132,8 +133,8 @@
       var bm = function (b) { return (b[1] ? 1 : 0) + (b[2] ? 2 : 0) + (b[3] ? 4 : 0); };
       var P = GM.plays.map(function (q) {
         var p = q.play || {}, st = 0, sts = 0, wp = 0;
-        (q.pa.pitches || []).forEach(function (r) { if (r.steal) { st++; if (!r.steal.out) sts++; } if (r.wild) wp++; });
-        var res = q.pa.result === 'BIP' ? (p.error ? 'E' : p.hit || 'OUT') : q.pa.result;
+        (q.pa.pitches || []).forEach(function (r) { if (r.steal) { st++; if (r.steal.safe) sts++; } if (r.wild) wp++; });
+        var res = q.pa.result === 'BIP' ? (/^(1B|2B|3B|HR)$/.test(p.hit || '') ? p.hit : p.error ? 'E' : p.hit || 'OUT') : q.pa.result;   // a hit with an error on the throw is the hit (v0.9)
         var mv = (p.runners || []).filter(function (r) { return r.from > 0; }).map(function (r) { return r.from + '' + (r.out ? 'x' : r.to); }).join(' ');
         var bb = q.pa.bb;   // the batted ball: exit speed, launch angle, spray
         return [q.half, q.inning, q.outs, bm(q.bases), res, p.type || '', p.outsMade || 0, q.runs || 0, q.outsAfter, bm(q.basesAfter), q.score ? q.score[q.half] : null, mv, st, sts, wp,

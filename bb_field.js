@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.17 · 2026-10-13
+   bb_field.js · v1.18 · 2026-10-14
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -38,6 +38,11 @@
    cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.18 THE INFIELDER'S RANGE AND THE COVERS (the model review, 2026-10-14): an infielder reaches REACH_IF on his feet and
+           REACH_DIVE on a dive that costs DIVE_REC to get up from (dives only when no ball on his feet is coming), on TAU_IF; fitted
+           to the league's grounders by exit speed (headless/ground_check.js: hits .322 -> .285, league .291; infield hits .016 ->
+           .054, .061); a man covering a base runs the runner's curve (the pitcher had reached first after the batter); a runner
+           going with the pitch is at speed; a throw that gets away leaves the batter the hit he had; tuneField (calibration only)
      v1.17 (the playoff review's branch) SEND.H1: a runner going home from first on a hit has his own margins by outs, [1.75,
            1.30, 0.65] s (SAFETY_H kept for the rest), FITTED to 2025-26 (season/runs_audit.py: with SAFETY_H the model sent him home on a double
            .60 of the time against the league's .37, too often on every kind of double and at every count of outs)
@@ -84,7 +89,16 @@ var BBField = (function () {
   // An outfielder braking to make his throw (settleTime) sheds speed at BRAKE_F, the constant acceleration the model
   // used until v1.12: an assumption, not a measurement.
   var BRAKE_F = 5.0, ACC_R = 4.5;   // m/s^2 (a runner's 4.5 puts the average home-to-first at 4.4 s, Statcast's average; 5.5 was tried and inflated BABIP to .315)
-  var REACH_GB = 1.5;  // m: a dive or full extension for a grounder
+  var REACH_GB = 1.5;  // m: an outfielder's full extension for a grounder (an infielder's: REACH_IF, REACH_DIVE)
+  // THE INFIELDER'S RANGE (v1.18, the model review of 2026-10-14). Until v1.18 every fielder, the pitcher and catcher
+  // included, ran the outfielder's curve (TAU_F 1.2 s, fitted to the outfield jump on a fly ball) and reached 1.5 m on
+  // any grounder with nothing to pay for it, so infielders ranged too little (90th percentile 26 ft to an out on 95-105
+  // mph grounders against the league's 38-41) and a ball reached was always an out (infield hits .016 of grounders
+  // against .061). An infielder starts from a loaded stance: his speed rises on TAU_IF; he reaches REACH_IF on his feet
+  // and REACH_DIVE on a dive, and a dive costs DIVE_REC s to get up and throw. FITTED to the league's ground balls by
+  // exit speed (hits, infield hits, outs) and to the infielders' range (headless/ground_check.js).
+  var TAU_IF = 1.2, REACH_IF = 0.7, REACH_DIVE = 2.4, DIVE_REC = 1.2;   // s, m, m, s
+  var DIVE_WAIT = 0.25;   // s: he waits up to this long for a ball he can take on his feet rather than dive at it earlier
   var LEAD = 4.66;     // m: a runner's lead when the ball is hit: Statcast's average secondary lead, 15.3 ft (2025, runners on first)
   var TAG = 0.25;      // s: catch and apply a tag
   var SAFETY = 0.30;   // s: the margin a runner wants before taking second (plus his own runAggr)
@@ -251,7 +265,15 @@ var BBField = (function () {
     return t;
   }
   function pathOf(pl, d) { d = Math.max(0, d); var r = Math.min(d, ROUTE_D); return r / pl.route + d - r; }   // the ground he runs to get d m from his spot
-  function moveTime(pl, d) { return pl.react + sprintTime(pl.speed * FT, TAU_F, pathOf(pl, d)); }   // a fielder, from the crack of the bat
+  function moveTime(pl, d, tau) { return pl.react + sprintTime(pl.speed * FT, tau || TAU_F, pathOf(pl, d)); }   // a fielder, from the crack of the bat
+  function tauOf(F) { return isOF(F.pos) ? TAU_F : TAU_IF; }
+  function mt(F, d) { return moveTime(F.pl, d, tauOf(F)); }   // a fielder by his role (v1.18)
+  // A man running to a base he covers knows where he is going: no route to read, the runner's measured start (v1.18; until
+  // then the pitcher covering first and the man covering second ran a fly-ball route on the outfield curve, and the
+  // pitcher reached first after the batter: 3-1 plays were hits .77 of the time)
+  function tuneField(o) { if (o.tauIF != null) TAU_IF = o.tauIF; if (o.reachIF != null) REACH_IF = o.reachIF; if (o.reachDive != null) REACH_DIVE = o.reachDive;
+    if (o.diveRec != null) DIVE_REC = o.diveRec; if (o.zCatch != null) Z_CATCH = o.zCatch; if (o.zTop != null) Z_TOP_REACH = o.zTop; if (o.diveWait != null) DIVE_WAIT = o.diveWait; if (o.cleanK != null) CLEAN_K = o.cleanK; }   // calibration only
+  function coverTime(F, d) { return F.pl.react + sprintTime(F.pl.speed * FT, TAU_RUN, Math.max(0, d)); }   // the runner's measured curve (TAU_RUN)
   function runTime(pl, d, standing) {     // a runner
     var v = pl.speed * FT; d = Math.max(0, d);
     var t = d < v * v / (2 * ACC_R) ? Math.sqrt(2 * d / ACC_R) : v / (2 * ACC_R) + d / v;
@@ -268,6 +290,7 @@ var BBField = (function () {
   // 1.5 m/s, fitted to the league's double plays per game on the old ball; 2.75
   // is a little under the 3 m/s of a man walking off on a steal.
   var V_CONTACT = 2.75;   // m/s
+  var V_GOING = 0.8;      // a runner going with the pitch is at this share of his sprint speed at contact (v1.18; set by hand)
   // RUNNING FROM REST (v1.9). A runner on base who starts from a standstill - tagging up, held at the bag till a fly
   // drops, frozen at his lead till a grounder is through - runs the league's measured curve: his speed rises toward
   // his sprint speed as 1 - exp(-t / TAU_RUN), TAU_RUN 0.78 s, fitted to Statcast's running splits (549 hitters,
@@ -454,13 +477,16 @@ var BBField = (function () {
   // point counted, so a liner that passed an infielder at chest height went
   // through untouched (gap 6 of CALIBRATION.md): the league catches .138 of
   // balls at 5-10 deg in the air, the model caught .043.
-  var Z_CATCH = 2.6, Z_LUNGE = 1.3;   // m
+  // v1.18: the reach to the side tapers to Z_TOP_REACH at the top, not to nothing. Z_CATCH 2.8 and 3.0 m (a 1.85 m
+  // infielder's jump reaches 2.9-3.1 m) were tried with the infielders' range below and caught low liners too often
+  // (0-15 deg hits short of the league's), so it stays 2.6.
+  var Z_CATCH = 2.6, Z_LUNGE = 1.3, Z_TOP_REACH = 0.5;   // m
   function catchChance(F, T) {
     var L = T.land, best = { m: -Infinity, t: L.t, at: [L.x, L.y] };
-    function tryPt(t, x, y, reach) { var m = t - moveTime(F.pl, dist(F.at, [x, y]) - reach); if (m > best.m) { best.m = m; best.t = t; best.at = [x, y]; } }
+    function tryPt(t, x, y, reach) { var m = t - mt(F, dist(F.at, [x, y]) - reach); if (m > best.m) { best.m = m; best.t = t; best.at = [x, y]; } }
     tryPt(L.t, L.x, L.y, REACH);
     var P = T.air;
-    if (P) for (var i = 4; i < P.length; i += 4) { var q = P[i]; if (q[0] >= L.t) break; if (q[3] <= Z_CATCH) tryPt(q[0], q[1], q[2], q[3] <= Z_LUNGE ? REACH : REACH * (Z_CATCH - q[3]) / (Z_CATCH - Z_LUNGE)); }
+    if (P) for (var i = 4; i < P.length; i += 4) { var q = P[i]; if (q[0] >= L.t) break; if (q[3] <= Z_CATCH) tryPt(q[0], q[1], q[2], q[3] <= Z_LUNGE ? REACH : Z_TOP_REACH + (REACH - Z_TOP_REACH) * (Z_CATCH - q[3]) / (Z_CATCH - Z_LUNGE)); }
     if (T.kind === 'wall' && L.z > Z_CATCH && best.t >= L.t) return { m: best.m, p: 0, t: best.t, at: best.at };
     return { m: best.m, p: Phi((best.m - CATCH_SET) / 0.2) * (1 - Math.min(1, DROP_K * (1 - F.pl.glove) * (F.pl.errMult || 1))), t: best.t, at: best.at };   // errMult: his own error tendency (v1.16)
   }
@@ -470,14 +496,18 @@ var BBField = (function () {
   var DROP_K = 0.15;
   // The first point on the ground track he can reach.
   function intercept(F, T) {
-    var G = T.ground;
+    var G = T.ground, diveAt = null;
     for (var k = 0; k < G.length; k += 2) {
       var q = G[k]; if (q[3] > 2.0) continue;
       var d = dist(F.at, [q[1], q[2]]);
-      if (moveTime(F.pl, d - (isOF(F.pos) ? REACH * 0.5 : REACH_GB)) <= q[0]) return { t: q[0], at: [q[1], q[2]], v: q[4], moved: d };
+      if (isOF(F.pos)) { if (mt(F, d - REACH * 0.5) <= q[0]) return { t: q[0], at: [q[1], q[2]], v: q[4], moved: d }; continue; }
+      if (mt(F, d - REACH_IF) <= q[0]) return { t: q[0], at: [q[1], q[2]], v: q[4], moved: d };
+      if (!diveAt && mt(F, d - REACH_DIVE) <= q[0]) diveAt = { t: q[0], at: [q[1], q[2]], v: q[4], moved: d, dive: true };   // he dives only for a ball he cannot reach on his feet (DIVE_REC)
+      if (diveAt && q[0] > diveAt.t + DIVE_WAIT) return diveAt;
     }
+    if (diveAt) return diveAt;
     var last = G.length ? G[G.length - 1] : [T.land.t, T.land.x, T.land.y, 0, 0], d2 = dist(F.at, [last[1], last[2]]);
-    return { t: Math.max(last[0], moveTime(F.pl, d2)), at: [last[1], last[2]], v: 0, moved: d2 };
+    return { t: Math.max(last[0], mt(F, d2)), at: [last[1], last[2]], v: 0, moved: d2 };
   }
   // A grounder fielded cleanly? Harder when it is hot, on a bad hop, and for an infielder when he had to
   // range for it (the ground he covered stands for fielding on the run). An outfielder picking up a ball
@@ -536,7 +566,7 @@ var BBField = (function () {
     // the second baseman (until v1.8 the shortstop covered on a ball to third).
     function coverOf(to, who) { return { 1: '1B', 2: who === 'SS' || who === '3B' ? '2B' : 'SS', 3: '3B', 4: 'C' }[to]; }
     function fielderAt(pos) { return D.filter(function (F) { return F.pos === pos; })[0]; }
-    function rcvArrival(to, who) { var Fr = D.filter(function (F) { return F.pos === coverOf(to, who); })[0]; return Fr ? moveTime(Fr.pl, dist(Fr.at, BASES[to])) + 0.1 : 0; }
+    function rcvArrival(to, who) { var Fr = D.filter(function (F) { return F.pos === coverOf(to, who); })[0]; return Fr ? coverTime(Fr, dist(Fr.at, BASES[to])) + 0.1 : 0; }
     function forced(i) { for (var j = i; j < R.length; j++) if (R[j].base !== R[i].base - (j - i)) return false; return true; }
     function scoreRuns(thirdOutForce) {
       R.forEach(function (r) { if (!r.out && r.target >= 4 && !thirdOutForce) { out.runs++; } });
@@ -613,13 +643,15 @@ var BBField = (function () {
     // man within a few steps of a bag); a first baseman far off the bag throws
     // to the pitcher covering, and waits for him; everyone else throws.
     var Pf = D.filter(function (F) { return F.pos === 'P'; })[0];
+    var tRec = ic.dive ? DIVE_REC : 0;   // up from a dive (v1.18)
     function ballTo(to, t0, from) {
       var d = dist(from, BASES[to]), self = Ff.pos === coverOf(to, Ff.pos) || d < 3;
-      if (self && (d < 12 || to !== 1)) return { t: t0 + 0.1 + moveTime(Ff.pl, d) - Ff.pl.react, how: 'run' };   // already moving; a step and a stretch
-      if (to === 1 && Ff.pos === '1B' && Pf) return { t: Math.max(t0 + Ff.pl.transfer + throwArrival(Ff, from, to), moveTime(Pf.pl, dist(Pf.at, BASES[1])) + 0.2), how: 'cover' };
+      t0 += tRec;
+      if (self && (d < 12 || to !== 1)) return { t: t0 + 0.1 + coverTime(Ff, d) - Ff.pl.react, how: 'run' };   // already moving; a step and a stretch
+      if (to === 1 && Ff.pos === '1B' && Pf) return { t: Math.max(t0 + Ff.pl.transfer + throwArrival(Ff, from, to), coverTime(Pf, dist(Pf.at, BASES[1])) + 0.2), how: 'cover' };
       return { t: Math.max(t0 + settle(to, from) + Ff.pl.transfer + throwArrival(Ff, from, to), rcvArrival(to, Ff.pos)), how: 'throw' };
     }
-    function settle(to, from) { return settleTime(Ff, from, to, ic.moved, ic.t - moveTime(Ff.pl, ic.moved - (isOF(Ff.pos) ? REACH * 0.5 : REACH_GB))); }
+    function settle(to, from) { return settleTime(Ff, from, to, ic.moved, ic.t - mt(Ff, ic.moved - (isOF(Ff.pos) ? REACH * 0.5 : REACH_GB))); }
     // The double play's relay: the man covering second catches the force, pivots and throws to first with his own
     // arm - and someone must be at first to take it. When the first baseman fielded the ball, the pitcher covers or
     // the first baseman gets back himself, whichever is there first (the league's 3-6 double plays: the pitcher took
@@ -628,8 +660,8 @@ var BBField = (function () {
     function relayAt1(tAt2) {
       var Pv = fielderAt(coverOf(2, Ff.pos)), t = tAt2 + PIVOT + throwTime(Pv ? Pv.pl.armMph : 85, BASE);
       if (Ff.pos === '1B') {
-        var tP = Pf ? moveTime(Pf.pl, dist(Pf.at, BASES[1])) + 0.2 : Infinity;
-        var tBack = tField + Ff.pl.transfer + moveTime(Ff.pl, dist(fieldAt, BASES[1])) - Ff.pl.react + 0.1;
+        var tP = Pf ? coverTime(Pf, dist(Pf.at, BASES[1])) + 0.2 : Infinity;
+        var tBack = tField + tRec + Ff.pl.transfer + coverTime(Ff, dist(fieldAt, BASES[1])) - Ff.pl.react + 0.1;
         t = Math.max(t, Math.min(tP, tBack));
       }
       return t;
@@ -642,7 +674,7 @@ var BBField = (function () {
     R.forEach(function (r, i) {
       if (r.base === 0) return;
       var isForced = forced(i);
-      if (r.going) r.start = 0.05;                                       // already running with the pitch
+      if (r.going) { r.start = 0.05; r.onContact = true; }               // already running with the pitch (v1.18: at speed, not from rest)
       else if (twoOut || (!flyBall && isForced)) { r.start = 0.05; r.onContact = true; }   // goes on contact
       else if (!flyBall) {                                                // unforced on a grounder: read the ball
         var to = r.base + 1, tRun = 0.1 + restTime(r.pl, BASE - LEAD);
@@ -659,6 +691,7 @@ var BBField = (function () {
     // or through, and starts from there at rest.
     function arrive(r, to) {
       var d = (to - r.base) * BASE - leadOf(r) + ROUND_PATH * Math.max(0, to - r.base - 1);   // each base he runs through is turned on an arc (v1.14)
+      if (r.going && r.base > 0) return r.start + stealTime(r.pl, d, V_GOING * r.pl.speed * FT);   // running with the pitch: at speed (v1.18; was restarted from rest)
       if (r.base > 0 && r.start !== null && r.start < 0.5 && !r.midway && r.onContact) return r.start + stealTime(r.pl, d, V_CONTACT);
       if (r.base > 0) return r.start + (r.start >= 0.5 && !r.midway ? 0.15 : 0.05) + restTime(r.pl, d);   // from a standstill (v1.9)
       return r.start + runTime(r.pl, d, true);   // the batter, out of the box
@@ -724,12 +757,12 @@ var BBField = (function () {
           if (em > 1 && err <= 1.6 && q < 1 && rng.u() < (em * q - q) / (1 - q)) err = 1.61;
           else if (em < 1 && err > 1.6 && rng.u() >= em) err = 1.59;
         }
-        ev.push({ t: tField + settle(to, fieldAt) + Ff.pl.transfer, kind: 'throw', who: Ff.pos, from: fieldAt, to: to, arrive: play.tBall, wild: err > 1.6, rcv: play.how === 'cover' ? 'P' : coverOf(to, Ff.pos) });
+        ev.push({ t: tField + tRec + settle(to, fieldAt) + Ff.pl.transfer, kind: 'throw', who: Ff.pos, from: fieldAt, to: to, arrive: play.tBall, wild: err > 1.6, rcv: play.how === 'cover' ? 'P' : coverOf(to, Ff.pos) });
       }
       var via = play.how === 'run' ? Ff.pos + ' unassisted' : play.how === 'cover' ? Ff.pos + ' to the pitcher covering' : Ff.pos + ' to ' + baseName(to);
       if (err > 1.6) {                                   // thrown away: everyone moves up a base, the men who held included (until v1.4 a holder stayed, and a runner behind him landed on top of him)
         out.error = true;
-        R.forEach(function (r) { r.target = Math.min(4, r.target + 1); });
+        R.forEach(function (r) { r.hitBase = r.target; r.target = Math.min(4, r.target + 1); });   // v1.18: the batter's hit is the base he had when it was thrown
         out.desc = 'throwing error by ' + Ff.pos;
       } else if (rng.u() < play.p) {
         play.r.out = true; out.outsMade++;
@@ -764,7 +797,7 @@ var BBField = (function () {
       }
       if (wouldBeOut && (out.error || chanceD(Ff, ic) <= ORDINARY_D) && !(triedRunner && clean)) { out.hit = 'E'; out.error = true; out.desc = 'reaches on an error by ' + Ff.pos; }
       else if (anyForceOut || (triedRunner && wouldBeOut)) out.hit = 'FC';   // a force tried and missed is the batter's hit only if he would have beaten a throw to first (rule 9.05; until v1.5 it was always a hit)
-      else out.hit = ['', '1B', '2B', '3B', 'HR'][batR.target];
+      else out.hit = ['', '1B', '2B', '3B', 'HR'][batR.hitBase !== undefined ? batR.hitBase : batR.target];   // the extra base on a throw that got away is the error's, not a hit (v1.18)
       if (T.groundRule) out.desc = 'ground-rule double';
     } else out.hit = batR.target >= 2 ? ['', '', '1B', '2B', '3B'][batR.target] : 'OUT';   // thrown out past first, he keeps the hit that got him there (rule 9.05; until v1.6 a plain out)
     if (!out.desc || out.hit === '1B' || out.hit === '2B' || out.hit === '3B') {
@@ -803,7 +836,7 @@ var BBField = (function () {
   }
 
   return { version: '1.17', BASES: BASES, SEND: SEND, positionDefense: positionDefense, makeDefense: makeDefense,
-           moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
+           moveTime: moveTime, tuneField: tuneField, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack, restTime: restTime,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };
 })();

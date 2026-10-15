@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_game.js · v1.9 · 2026-10-13
+   bb_game.js · v1.10 · 2026-10-14
 
    A whole game: two teams, nine innings or more, lineups that turn over,
    pitchers who tire and get replaced, managers with their own habits.
@@ -55,6 +55,7 @@
    at DH, the rest on the bench, the next man in the five-man rotation.
 
    CHANGED
+     v1.10 a catcher who comes in during a replay frames and throws as himself (st.catcher was set once; the model review)
      v1.9  o.homeEdge.visReact: while the home side bats, the visiting fielders' first step is this much slower (s) on its
            balls in play (season/runs_audit.py: home hitters' balls in play became hits more often than the same speed and
            angle predict, actual minus expected wOBA +0.0035 a ball, 2025-26: the visitors in a park they do not know)
@@ -404,7 +405,7 @@ var BBGame = (function () {
       var sl = st.idx % 9, sub = (st.lineupPlan[sl] || {})[++st.slotPA[sl]], old = st.order[sl];
       if (sub && sub !== old) {
         var fi = -1; st.defense.forEach(function (F, k) { if (F.pl === old) fi = k; });
-        if (fi >= 0) { sub.pos = st.defense[fi].pos; st.defense[fi] = { pos: sub.pos, pl: sub, at: st.defense[fi].at, std: st.defense[fi].std }; } else sub.pos = 'DH';
+        if (fi >= 0) { sub.pos = st.defense[fi].pos; st.defense[fi] = { pos: sub.pos, pl: sub, at: st.defense[fi].at, std: st.defense[fi].std }; if (sub.pos === 'C') st.catcher = sub; } else sub.pos = 'DH';   // v1.10: a new catcher frames
         st.order[sl] = sub;
       }
     }
