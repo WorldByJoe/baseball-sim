@@ -1,5 +1,5 @@
 /* ============================================================================
-   replay_game.js · v0.8 · 2026-10-15
+   replay_game.js · v1.4 · 2026-10-15
 
    A postseason game played again as it was played: the real batting order with
    its substitutions (each man takes his spot at the turn he took it, at the
@@ -21,7 +21,13 @@
    'errors' (then G, the league factor): each fielder's own error tendency (review/err_mult.py); 'pitched+errors' both.
 
    CHANGED
-     v0.8  each replay its own pitchers (REVIEW.redraw of the game's one build); until now one build served every replay (the model review)
+     v1.4  'fielding' leaves a hitter alone when players.js v0.7 has applied his range
+     v1.3  each replay copies the game's pitchers (REVIEW.redraw) and draws their fit's uncertainty afresh; v1.2's rebuild each replay was 20x slower
+     v1.2  pitchers built afresh for each replay, not once a game (the model review)
+     v1.1  mode 'pdraw': pitchers drawn from their fit's uncertainty (the model review)
+     v1.0  mode 'fielding': real fielders' range and catchers' framing (review/field_traits.json; the model review)
+     v0.9  audit: a hit with an error on the throw is labelled the hit; the steal columns read steal.safe (the model review)
+     v0.8  calibration tokens 'eye=x' and 'aggr=y': the home edge's eye factor and aggression shift (season/home_cal_games.sh)
      v0.7  mode tokens 'send=a,b,c' (BBField.SEND.H1, going home from first on a hit, by outs) and 'vis=s' (the home edge's
            visiting fielders' slower first step), for calibrating them
      v0.6  mode 'audit' (combinable): each replay prints its plate appearances (state before, result, runners' moves, runs,
@@ -41,10 +47,28 @@
   MODE.forEach(function (m) {   // v0.7: calibration tokens
     if (m.indexOf('send=') === 0) BBField.SEND.H1 = m.slice(5).split(',').map(Number);
     if (m.indexOf('vis=') === 0) { HOMEEDGE = HOMEEDGE ? JSON.parse(JSON.stringify(HOMEEDGE)) : { eye: 1, timing: 1, barrel: 1, aggr: 0 }; HOMEEDGE.visReact = +m.slice(4); }
+    var hk = /^(eye|aggr)=/.exec(m);   // v0.8: the home edge's eye factor and aggression shift, for calibrating it in games
+    if (hk) { HOMEEDGE = HOMEEDGE ? JSON.parse(JSON.stringify(HOMEEDGE)) : { eye: 1, timing: 1, barrel: 1, aggr: 0 }; HOMEEDGE[hk[1]] = +m.slice(hk[0].length); }
   });
   // ERRORS (mode 'errors'): each fielder's own error tendency, his season errors per chance against his positions'
   // (review/err_mult.py) times one league factor G (A[6]), as errMult on his drops, fumbles and wild throws (bb_field v1.16)
   var ERR = MODE.indexOf('errors') >= 0 ? JSON.parse(read('review/err_mult.json')).players : null, GERR = +A[6] || 1;
+  // v1.0 (the model review): a fielder's own range and a catcher's own framing from Savant's fielding run values
+  // (review/field_traits.py: z in sd of true talent, shrunk), mode token 'fielding'; mapped onto the engine's traits at the
+  // same quantile: route + 0.7 z sd and react - 0.7 z sd, framing + z sd; the draw's own spread kept in proportion to
+  // what the estimate leaves unknown
+  if (MODE.indexOf('pdraw') >= 0) REVIEW.setPDraw(true);   // v1.1: each pitcher drawn from his fit's uncertainty (review/pitcher_sd.py)
+  var FIELD = MODE.indexOf('fielding') >= 0 ? JSON.parse(read('review/field_traits.json')).players : null, TT = BB.TRAITS;
+  function fieldOf(h, id, pos) {
+    var f = FIELD && FIELD[id]; if (!f) return;
+    var r = f[pos] || f.all, keep;
+    if (r && pos !== 'DH' && pos !== 'C') {
+      keep = Math.sqrt(Math.max(0, 1 - r.rel));
+      h.route = Math.min(TT.route[3], Math.max(TT.route[2], TT.route[0] + (h.route - TT.route[0]) * keep + 0.7 * r.z * TT.route[1]));
+      h.react = Math.max(0.05, h.react - 0.7 * r.z * TT.react[1]);   // his position's first step, moved by his range
+    }
+    if (pos === 'C' && f.frame) { keep = Math.sqrt(Math.max(0, 1 - f.frame.rel)); h.framing = Math.min(TT.framing[3], Math.max(TT.framing[2], TT.framing[0] + ((h.framing || 0) - TT.framing[0]) * keep + f.frame.z * TT.framing[1])); }
+  }
   function errOf(id) { var e = ERR && ERR[id]; return ERR ? GERR * (e ? e.rel : 1) : undefined; }
   // AS PITCHED (mode 'pitched'): each man in the plan throws his game-day speed for every type he threw 3+ times
   // (his season speed plus that day's change, review/as_pitched.py) and his game-day mix; the batter's scouting report
@@ -90,8 +114,8 @@
   var SLOTS = { away: slots('away'), home: slots('home') };
   var built = {}, base = {};
   function pitcher(id, asReliever) {
-    if (!base[id]) base[id] = REVIEW.pitcher(D.recs[id], rng, env);   // the costly build, once a game
-    if (!built[id]) built[id] = REVIEW.redraw ? REVIEW.redraw(base[id], rng) : base[id];   // this replay's own pitcher
+    if (!base[id]) base[id] = REVIEW.pitcher(D.recs[id], rng, env);   // the expensive build, once a game
+    if (!built[id]) built[id] = REVIEW.redraw ? REVIEW.redraw(base[id], rng) : base[id];
     var P = built[id];
     if (asReliever && P.role === 'SP') { P.role = 'RP'; P.stamina = 35; }
     return P;
@@ -103,7 +127,7 @@
     SLOTS[s].forEach(function (list, k) {
       var plan = {};
       list.forEach(function (m, j) {
-        var h = REVIEW.hitter(D.fits[m.id], rng, draw, m.pos === 'DH' ? 'DH' : m.pos); h.pos = m.pos; h.homePos = m.pos; if (ERR) h.errMult = errOf(m.id);
+        var h = REVIEW.hitter(D.fits[m.id], rng, draw, m.pos === 'DH' ? 'DH' : m.pos); h.pos = m.pos; h.homePos = m.pos; if (ERR) h.errMult = errOf(m.id); if (FIELD && !h.fieldOwn) fieldOf(h, m.id, m.pos);   // v1.4: players.js v0.7 applies it already when review/field_traits.json is there
         if (j === 0) lineup.push(h); else plan[m.from] = h;
       });
       lineupPlan.push(plan);
@@ -125,7 +149,7 @@
   }
   for (var g = 0; g < N; g++) {
     if (g % PARTS !== PART) continue;
-    built = {};
+    built = {};   // v1.3: each replay its own copies of the game's pitchers (REVIEW.redraw), with his fit's uncertainty drawn afresh (v1.1-v1.2: drawn once for the whole game; v1.2's full rebuild each replay cost 20x)
     var ta = team('away', g % 40), th = team('home', (g * 7 + 3) % 40);
     var GM = BBGame.simGame(ta, th, { rng: rng, env: env, rules: 'AL', ghost: GHOST, maxInnings: 60, homeEdge: HOMEEDGE });   // no tie: the game plays on
     if (AUDIT) {   // [half, inning, outs, bases before (1 first, 2 second, 4 third), result, batted-ball type, outs made, runs on the play, outs after, bases after, batting side's score after, runners' moves, steal attempts, steals safe, wild pitches and passed balls, exit speed, launch angle, spray, projected distance]
@@ -133,7 +157,7 @@
       var P = GM.plays.map(function (q) {
         var p = q.play || {}, st = 0, sts = 0, wp = 0;
         (q.pa.pitches || []).forEach(function (r) { if (r.steal) { st++; if (r.steal.safe) sts++; } if (r.wild) wp++; });
-        var res = q.pa.result === 'BIP' ? (/^(1B|2B|3B|HR)$/.test(p.hit || '') ? p.hit : p.error ? 'E' : p.hit || 'OUT') : q.pa.result;   // a hit with an error on the throw is the hit (the model review)
+        var res = q.pa.result === 'BIP' ? (/^(1B|2B|3B|HR)$/.test(p.hit || '') ? p.hit : p.error ? 'E' : p.hit || 'OUT') : q.pa.result;   // a hit with an error on the throw is the hit (v0.9)
         var mv = (p.runners || []).filter(function (r) { return r.from > 0; }).map(function (r) { return r.from + '' + (r.out ? 'x' : r.to); }).join(' ');
         var bb = q.pa.bb;   // the batted ball: exit speed, launch angle, spray
         return [q.half, q.inning, q.outs, bm(q.bases), res, p.type || '', p.outsMade || 0, q.runs || 0, q.outsAfter, bm(q.basesAfter), q.score ? q.score[q.half] : null, mv, st, sts, wp,

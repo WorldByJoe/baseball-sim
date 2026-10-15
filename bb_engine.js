@@ -66,6 +66,11 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     review  (yankees-review only) SPIN_KEEP 0.60 and the batted-ball drag 1.08 -> 1.13, FITTED to 2026's carry (Joe, 2026-10-13:
+             where the runs go missing): the engine's fly balls at 95+ mph and 30-45 deg landed 9-20 ft short and left the park
+             half as often; see SPIN_KEEP
+     review  (yankees-review only) AERO.batCdSpin: a scale on how fast a batted ball's drag grows with its spin (1 = Nathan's
+             slope, unchanged); a batted ball keeps its launch (p0, v0, w0) for review/carry_fit.js (2026-10-13)
      review  (yankees-review only) pitch.mishit: a pitcher's scale on the batter's miss along the barrel, fitted to the squareness
              of the contact he allows (review/fit_mishit.py); absent = 1, so the season's engine is unchanged
      (the playoff review's branch adds to v3.9: a pitcher's own DECEPTION scales the batter's read of his pitches
@@ -204,6 +209,31 @@ var BB = (function () {
   // 0.27 gives .82. Square contact is not touched: below about 45 deg of incidence the ball rolls on the bat
   // (2/7 of the slip) within either cap.
   var MU_BAT = 0.27;
+  // THE CONTACT GEOMETRY AND THE LEATHER'S GRIP (review, 2026-10-13; engine-dev, calibration switches, defaults as before).
+  // GEOM: where the line of centres is measured from. D (swing()) is the HEIGHT of the ball's path over the barrel's; the two
+  // close along -u (the bat's path blended with the pitch's descent by their speeds, about 8 deg up on a typical swing), so
+  // the line of centres sits from -u by the impact parameter, D times the vertical part of the across-approach direction
+  // ('relative'). Until now it was measured from the barrel's path ('path'): 2 deg off on a typical swing, 6-7 on a very
+  // steep or a downward one. 'level' measures it from the level, right only for D as the centres' height difference at
+  // contact (Nathan's offset; with it his optimum fastball contact, 29.6 deg and 2421 rpm, came out 30.5 and 2152).
+  // E_X: the ball's tangential restitution, it grips the bat and springs back (Kensrud, Nathan & Smith, Am. J. Phys. 85,
+  // 503 (2017): 0.46 on a wood bat, spin 40% over rolling; a level tee test, 179 rpm per deg of launch: 142 at E_X 0, 168 at
+  // 0.46 with R_X 0.29); R_X: the bat's give across the contact (their r_x for a 29.4 oz wood bat). review/collide_check.js.
+  // In games ('relative', MU_BAT 0.12, nothing refitted): launch-angle shares nearer the league's and the swings' outcomes
+  // too (review/swing_mix.js), carry unchanged; but the grazes then leave at .92 of the pitch's speed against the league's
+  // .82 (review/graze_check.js), which 0.27 holds: one friction cannot serve both.
+  // THE LEATHER'S FRICTION FALLS AS THE CONTACT GETS HARDER (review, 2026-10-14; engine-dev, off by default: MU_GAMMA 0).
+  // A soft surface grips less per unit of load as the load grows (its contact area grows slower than the load). With
+  // MU_GAMMA > 0 the friction is MU_REF at a normal approach speed of MU_VREF and goes as that speed to the -MU_GAMMA:
+  // through the two measurements, at least 0.50 for a ball dropped on a bat at about 4 m/s (Cross & Nathan 2006, normal
+  // speed about 3 m/s) and about 0.15 for a ball fired at 120 mph sliding on wood past 40 deg of incidence (Nathan et al.
+  // 2012, normal speed about 41 m/s), MU_GAMMA is 0.46; a graze (normal speed 10-15 m/s) then gets about 0.26, near the
+  // 0.27 MU_BAT was fitted to the grazes' speed. review/graze_check.js, swing_mix.js.
+  var MU_GAMMA = 0, MU_REF = 0.15, MU_VREF = 41, MU_MAX = 0.8;
+  var GEOM = 'path', E_X = 0, R_X = 0;   // GEOM: 'path' (as it was), 'closing', 'relative' or 'level' (calibration; see collide)
+  // 'closing': the line of centres from the closing direction of bat and ball, D the offset across the barrel as swing()'s
+  // contact test takes it. 'relative' also shrank D by the barrel's tilt (its vertical part) while the contact test did not,
+  // so a truly glancing contact could not happen (review/foul_mix.js: too many solid side fouls).
   // THE SWING IS A TILTED CIRCLE. Near contact the sweet spot travels on an arc
   // of radius SWING_R in a plane tilted from the ground by the batter's swing
   // tilt (Statcast's swing_path_tilt), with the barrel below the hands. Meeting
@@ -283,7 +313,7 @@ var BB = (function () {
   // corrects a miss (LOOK_GAIN): the correction folds the far misses back to the edge of the ball, so the aim could
   // sit where the league's barrel does, and the pull was refitted to the league's launch minus attack by height
   // (-14.8 -3.5 7.0 18.4 25.9 30.4 from below the zone to above it; #31)
-  var VERT_MISS = 0.09;
+  var VERT_MISS = 0.05;   // the swing refit (review, 2026-10-14; was 0.09)
   // HE AIMS TO SUIT HIS SWING (v3.9, VS). A hitter learns where on the ball to aim for the swing he has: a steeper
   // swing aims higher on the ball, AIM_ATTACK in per deg of his attack trait above AIM_REF (the picks' mean attack,
   // so the league's aim under the ball stays the undercut trait's). In the league (42 days of 2025, hitters with 40+
@@ -292,7 +322,7 @@ var BB = (function () {
   // balls); in the model, whose aim did not depend on the swing, 1.79 and +0.79: the collision's own lift (a square
   // hit leaves at about twice the attack less the pitch's descent) on top of the swing's. MEASURED to that slope
   // (the model twin diag_out/vs/byb_model.js, two seeds: 0.12 gave -0.08 and -0.01, 0.15 -0.42 and -0.39).
-  var AIM_ATTACK = 0.13, AIM_REF = 7.8;
+  var AIM_ATTACK = -0.02, AIM_REF = 7.8;   // the swing refit (review, 2026-10-14; was 0.13): about none
   // TIMING SCATTER FOLLOWS THE TIME BEING JUDGED (v2.9). Judging when a ball arrives is timing an interval, and the
   // error of timing an interval grows with its length (a Weber fraction): a slower pitch, a longer flight, a larger
   // error. Until v2.9 the scatter grew with time pressure instead (faster = worse), and the model met fastballs over
@@ -441,14 +471,24 @@ var BB = (function () {
   // movement already matched Savant (physics_check.js); against Nathan's
   // backspin table for a 103 mph, 27 deg drive the unscaled aerodynamics give
   // 380-399 ft from 500 to 2,000 rpm (his 368-400).
-  var AERO = { batCd: 1.08 };
+  var AERO = { batCd: 1.13, batCdSpin: 1 };   // batCd 1.13 (review, 2026-10-13, with SPIN_KEEP; was 1.08); batCdSpin (review): the batted ball's drag-per-spin slope over Nathan's (1 = his)
+  // SPIN_KEEP (review, 2026-10-13): the batted ball leaves with this share of the spin the rigid collision gives (rolling on
+  // the bat, collide()). With all of it, a 95+ mph drive at 25-30 deg spun about 2,900 rpm of backspin (4,200 at 35-40 deg,
+  // total spin to 5,400), far past Nathan's table for a 103 mph, 27 deg drive (368-400 ft from 500 to 2,000 rpm), and the
+  // spin's drag cost the high fly balls 9-20 ft against 2026's carry (season/carry_compare.py: every regular-season ball in
+  // play) while lift saturated. FITTED with batCd to 2026's median distance and home-run share by exit speed and launch
+  // angle (review/carry_fit.js re-flying the same contacts, season/carry_score.py): 0.60 and 1.13 take the rms distance
+  // error over 90+ mph, 10-45 deg from 16 to 11 ft and the home-run share error from .078 to .030, Nathan's drag and lift
+  // laws unchanged; a flatter drag-per-spin slope fitted no better. Open: the collision's spin itself (the rolling model
+  // gives too much; where is not yet known), and liners at 10-20 deg still carry 10-25 ft too far under every setting tried.
+  var SPIN_KEEP = 0.60;   // batCdSpin (review): the batted ball's drag-per-spin slope over Nathan's (1 = his)
 
   function accel(v, w, env, a, cds, sm) {
     var ux = v[0] - env.wind[0], uy = v[1] - env.wind[1], uz = v[2] - env.wind[2];
     var sp = Math.sqrt(ux * ux + uy * uy + uz * uz);
     var k = 0.5 * env.rho * BALL_A / BALL_M;
     var wm = Math.sqrt(w[0] * w[0] + w[1] * w[1] + w[2] * w[2]);
-    var kd = k * cdOf(wm / RPM) * cds * sp;
+    var kd = k * (typeof cds === 'number' ? cdOf(wm / RPM) * cds : (0.3008 + 0.0292 * cds[1] * wm / RPM / 1000) * cds[0]) * sp;   // cds: a scale, or [scale, drag-per-spin slope over Nathan's] (batted balls, review)
     a[0] = -kd * ux; a[1] = -kd * uy; a[2] = -kd * uz - G;
     var cx = w[1] * uz - w[2] * uy, cy = w[2] * ux - w[0] * uz, cz = w[0] * uy - w[1] * ux;
     var cm = Math.sqrt(cx * cx + cy * cy + cz * cz);          // = w_perp * speed
@@ -513,7 +553,7 @@ var BB = (function () {
     var wallZ = env.wallFt * FT, out = null, q = [0, 0, 0], qt = 0;
     while (t < 15) {
       q[0] = p[0]; q[1] = p[1]; q[2] = p[2]; qt = t;
-      step(p, v, w, env, BAT_DT, AERO.batCd); t += BAT_DT;
+      step(p, v, w, env, BAT_DT, AERO.batCdSpin === 1 ? AERO.batCd : [AERO.batCd, AERO.batCdSpin]); t += BAT_DT;
       if (p[2] > apex) apex = p[2];
       if (rec) path.push([t, p[0], p[1], p[2]]);
       var spray = Math.atan2(p[0], p[1]) / DEG, f;
@@ -661,7 +701,7 @@ var BB = (function () {
     swingLenFt: [7.231, 0.38, 6.2, 8.6], // ft: the bat head's path to contact, about the height line (0.047 per inch; r = .27)
     batOz:      [31.8, 0.6, 29, 35],     // oz: the bat he swings (plus 0.6 oz per 50 lb of hitter)
     swingPower: [25.287, 0.089, 10, 60],  // W/kg at 206 lb, lognormal with this log-sd; falls as weight^CHAIN.powerExp
-    motorIn:    [1.591, 0.247, 0.98, 2.47], // in: vertical bat-to-ball scatter AT 72 MPH before his last look corrects it; grows as bat speed squared (impulse variability); x1.4 in v2.2 (the miss table); x1.7 in v3.2, REFITTED with LOOK_GAIN so the fastball whiffs stay the league's (.174) once the last look folds the near misses back; x1.15 in v3.3 with LOOK_SD 0.5 (the whiffs again); x0.9 in v3.7 with VD (the fastball whiffs .183 -> .175, the league's .174)
+    motorIn:    [1.352, 0.210, 0.833, 2.10], // x0.85 in the swing refit (review, 2026-10-14: review/swing_fit.py, diag_out/swfit_best_path27.json); in: vertical bat-to-ball scatter AT 72 MPH before his last look corrects it; grows as bat speed squared (impulse variability); x1.4 in v2.2 (the miss table); x1.7 in v3.2, REFITTED with LOOK_GAIN so the fastball whiffs stay the league's (.174) once the last look folds the near misses back; x1.15 in v3.3 with LOOK_SD 0.5 (the whiffs again); x0.9 in v3.7 with VD (the fastball whiffs .183 -> .175, the league's .174)
     batSpeed:   [72.0, 2.65, 62, 82],    // mph - DERIVED from the chain; this entry only scales the display bars
     barrelSD:   [0.62, 0.11, 0.40, 1.1], // in - DERIVED (motorIn x (bat speed/72)^2); display scale only
     attack:    [7.939, 3.544, -3, 19],          // deg: upward tilt of the swing path at contact, at his usual contact point; the picks' mean REFITTED v3.6 (target 9 -> 7.8) so the attack his swings make (with the arc and PLAN_H) averages the league's over swings of 50+ mph, 9.6 (42 days of 2025; whiffs 14.2, contact 8.3); v3.6 before it 10.8
@@ -669,7 +709,7 @@ var BB = (function () {
     swingTilt: [31.626, 3.805, 22, 44],     // deg: the tilt of his swing plane for a mid-zone pitch (2025 leaderboard swing_path_tilt: 32.3 +- 3.8)
     faceSD:    [8.411, 4, 4, 20],           // deg: swing-to-swing scatter of the bat face's horizontal angle about its path at contact; fitted to fair-ball spray by contact depth (pitch-level 2025)
     undercut:  [1.011, 0.25, 0.25, 1.75],    // in: how far below the ball's centre he aims the barrel; REFITTED v3.2 (0.40 -> 1.0) to the league's barrel offset on fastball contact (0.85 in, read through the engine's own collision from launch minus attack: fastballs are met 25+ deg under the ball's middle .46 of the time, pitch-level 2025, 42 days), which the last look's correction allows without more whiffs; 1.4 tried with VD (v3.7): fastball launch minus attack the league's, but the batted-ball mix 38/17/28/16 and K% 25-26; v3.9: his aim for a swing of the picks' mean attack (AIM_REF), a steeper swing aiming higher (AIM_ATTACK)
-    timingSD:  [9.926, 1.66, 6.26, 15.26],  // ms at a 94-mph fastball's flight, growing with flight time (v2.9); x0.72 in v2.9 so contact depth about each batter's mean has the league's sd by kind: 7.4 in fastballs, 8.3 breaking, 8.2 off-speed (pitch-level 2025)
+    timingSD:  [7.941, 1.328, 5.008, 12.208],  // x0.8 in the swing refit (review, 2026-10-14); ms at a 94-mph fastball's flight, growing with flight time (v2.9); x0.72 in v2.9 so contact depth about each batter's mean has the league's sd by kind: 7.4 in fastballs, 8.3 breaking, 8.2 off-speed (pitch-level 2025)
     longSD:    [3.43, 0.51, 1.9, 5.1],   // in: along-the-barrel scatter; fitted so contact struck square vertically is squared up .695 of the time (pitch-level 2025), then x0.88 with the aim toward the hands (v2.2: the miss table's tail past the end)
     spotIn:    [5.046, 0.87, 2.7, 8.1],     // in: how far a pitch must have left his expected path by the commit point for him to pick it up; x1.09 in v2.2 (the miss table)
     eyeSD:     [5.363, 0.9, 3, 7.5],    // in: zone-judgement scatter at the commit point
@@ -1637,7 +1677,11 @@ var BB = (function () {
   // 1 in the model's were .18 and .14 (the correction scattered the folded swings back across the barrel, many of
   // them square), at 0.5 in .30 and .24, with the raw scatter x1.15 to keep the fastball whiffs .17 (0.4 in: .30 /
   // .24, whiffs .16; 0.6 in: .27 / .21).
-  var LOOK_SD = 0.5, LOOK_GAIN = 1.3;
+  var LOOK_SD = 0.4625, LOOK_GAIN = 1.0;   // the swing refit (review, 2026-10-14; were 0.5 and 1.3): review/swing_fit.py against 2026's launch angles, swing outcomes by kind, fastball fouls and spray
+  var RISE_DET = 1, BS_DET = 1, BS_FOOL = 1, BS_T = 0;   // BS_T: the barrel scatter drawn from Student's t with BS_T degrees of freedom at the same sd (0 = normal)
+  function tDraw(rng, nu) { var c = 0; for (var i = 0; i < nu; i++) { var z = rng.n(0, 1); c += z * z; } return rng.n(0, 1) / Math.sqrt(c / nu) / Math.sqrt(nu / (nu - 2)); }
+    // the model review (2026-10-14): the scatter's shape by whether he picked the pitch up; 1 = as fitted
+  function tuneContact(o) { if (o.riseDet != null) RISE_DET = o.riseDet; if (o.bsDet != null) BS_DET = o.bsDet; if (o.bsFool != null) BS_FOOL = o.bsFool; if (o.bsT != null) BS_T = o.bsT; if (o.lookGain != null) LOOK_GAIN = o.lookGain; if (o.lookSd != null) LOOK_SD = o.lookSd; if (o.vertMiss != null) VERT_MISS = o.vertMiss; if (o.geom != null) GEOM = o.geom; if (o.geomVertical != null) GEOM = o.geomVertical ? 'level' : 'path'; if (o.ex != null) E_X = o.ex; if (o.rx != null) R_X = o.rx; if (o.mu != null) MU_BAT = o.mu; if (o.muGamma != null) MU_GAMMA = o.muGamma; if (o.muRef != null) MU_REF = o.muRef; if (o.muVref != null) MU_VREF = o.muVref; if (o.spinKeep != null) SPIN_KEEP = o.spinKeep; if (o.aimAttack != null) AIM_ATTACK = o.aimAttack; return { lookGain: LOOK_GAIN, lookSd: LOOK_SD, vertMiss: VERT_MISS, geom: GEOM, ex: E_X, rx: R_X, mu: MU_BAT, muGamma: MU_GAMMA, muRef: MU_REF, muVref: MU_VREF, spinKeep: SPIN_KEEP, aimAttack: AIM_ATTACK }; }   // a calibration hook (step 2 of the run audit); unused, the constants stand
   function checkChance(B, rf, pitch) {   // the chance he tries to check: nothing new to see once he had picked it up (v2.7)
     if (rf.detected) return 0;
     return clamp((reachOf(B, pitch.plate.x + rf.lastPic[0], pitch.plate.z + rf.lastPic[1]) / IN - CHECK_IN[0]) / (CHECK_IN[1] - CHECK_IN[0]), 0, 1);
@@ -1660,7 +1704,7 @@ var BB = (function () {
     // commit point (v3.5: the gap not in rf.leftT) he closed by launching later, also at full speed.
     var adjMs = Math.max(0, Math.abs(rf.leftT === undefined ? gh.t - pitch.plate.t : rf.leftT) - Math.abs(m[2])) * 1000;
     var e = -m[2] + rng.n(0, B.timingSD / 1000 * prot * pitch.plate.t / FLIGHT_REF);    // + = bat early (he expected it sooner); scatter grows with the flight he is timing
-    var D = -m[1] + (B.undercut - AIM_ATTACK * (B.attack - AIM_REF)) * IN + rng.n(0, B.barrelSD * IN * prot)   // + = ball above the barrel; his aim suits his swing (AIM_ATTACK)
+    var D = -m[1] + (B.undercut - AIM_ATTACK * (B.attack - AIM_REF)) * IN + B.barrelSD * IN * prot * (rf.detected ? BS_DET : BS_FOOL) * (BS_T ? tDraw(rng, BS_T) : rng.n(0, 1))   // + = ball above the barrel; his aim suits his swing (AIM_ATTACK); BS_DET / BS_FOOL (review, off at 1)
           + VERT_MISS * (pitch.plate.z - (B.zone.bot + B.zone.top) / 2)    // the barrel falls short of the pitch's height away from the middle of his zone
           - PL.over * IN * behind;                                          // and sits higher on a ball released behind his shoulder (the league's launch minus attack, -2.8 deg same-side)
     var xAim = pitch.plate.x + m[0];
@@ -1707,7 +1751,7 @@ var BB = (function () {
     var phiUsual = B.pullBias * DEG / Math.cos(tr), phiPlan = phiUsual + (LOC_DEPTH * inside + PLAN_H.depth * hz) / SWING_R, phi = phiPlan + sFwd / SWING_R;
     var theta = sb * (phi * Math.cos(tr)), faceTh = theta + sb * (LOC_FACE * inside + FACE_PATH * DEG) + face;   // the path, and the face that sends the ball
     var attackPlan = attack + (phiPlan - phiUsual) * Math.sin(tr) / DEG, attackAt = attack + (phi - phiUsual) * Math.sin(tr) / DEG;
-    D += sFwd * (DESCENT_KEPT * Math.tan(descent) - Math.tan(attackPlan * DEG));   // he steers to the ball's height where he meets it, not his barrel's (DESCENT_KEPT)
+    D += sFwd * (DESCENT_KEPT * Math.tan(descent) - Math.tan(attackPlan * DEG)) * (rf.detected ? RISE_DET : 1);   // he steers to the ball's height where he meets it, not his barrel's (DESCENT_KEPT); RISE_DET (review, off at 1)
     var depth = (phi - phiUsual) * SWING_R;   // m out front of his usual contact point
     var batAt = batMph * 1.015 * Math.pow(Math.max(0.2, 1 - Math.max(0, BAT_PEAK_M - depth) / ((B.swingLenFt || TRAITS.swingLenFt[0]) * FT)), BAT_GAIN_EXP);
     var bat = B.bat || BAT_DEFAULT, look = 0;
@@ -1749,14 +1793,28 @@ var BB = (function () {
     var up = cross(tipH, pf); if (up[2] < 0) up = [-up[0], -up[1], -up[2]];
     up = unit(up);
     var tip = unit([Math.cos(tl) * tipH[0] - Math.sin(tl) * up[0], Math.cos(tl) * tipH[1] - Math.sin(tl) * up[1], Math.cos(tl) * tipH[2] - Math.sin(tl) * up[2]]);   // the barrel, dipped toward its end
-    var q = unit(cross(pf, tip));
-    if (q[2] < 0) q = [-q[0], -q[1], -q[2]];
-    var s = sw.D / (BALL_R + batRadius(bat, xBar)), c = Math.sqrt(Math.max(0, 1 - s * s));
-    var n = [c * pf[0] + s * q[0], c * pf[1] + s * q[1], c * pf[2] + s * q[2]];   // the contact normal, from the face
     var vb = (sw.batAt || sw.batMph) * MPH * (1 + sw.dLong / (30 * IN));
     var V = [p[0] * vb, p[1] * vb, p[2] * vb];
     var vin = pitch.plate.v, win = pitch.plate.w;
     var u = [vin[0] - V[0], vin[1] - V[1], vin[2] - V[2]];
+    var q, e1, s, Rs = BALL_R + batRadius(bat, xBar);
+    if (GEOM === 'relative') {   // review (2026-10-13): D is the HEIGHT of the ball's path over the barrel's (swing()); the two close along -u, so the
+      // line of centres sits from -u (across the barrel) by the impact parameter, the height's share across that approach (q's vertical part)
+      var a = [-u[0], -u[1], -u[2]], at = dot(a, tip); e1 = unit([a[0] - at * tip[0], a[1] - at * tip[1], a[2] - at * tip[2]]);
+      q = unit(cross(e1, tip)); if (q[2] < 0) q = [-q[0], -q[1], -q[2]];
+      s = sw.D * q[2] / Rs;
+    } else if (GEOM === 'closing') {   // the closing direction as the reference, D as swing() treats it in its contact test (the offset across the barrel)
+      var a2 = [-u[0], -u[1], -u[2]], at2 = dot(a2, tip); e1 = unit([a2[0] - at2 * tip[0], a2[1] - at2 * tip[1], a2[2] - at2 * tip[2]]);
+      q = unit(cross(e1, tip)); if (q[2] < 0) q = [-q[0], -q[1], -q[2]];
+      s = sw.D / Rs;
+    } else if (GEOM === 'level') {   // the line of centres from the level (D as the centres' height difference at contact, as Nathan defines his offset)
+      e1 = unit([tip[1], -tip[0], 0]); if (dot(e1, pf) < 0) e1 = [-e1[0], -e1[1], -e1[2]];
+      q = unit(cross(e1, tip)); if (q[2] < 0) q = [-q[0], -q[1], -q[2]];
+      s = sw.D / Rs;
+    } else { e1 = pf; q = unit(cross(pf, tip)); if (q[2] < 0) q = [-q[0], -q[1], -q[2]]; s = sw.D / Rs; }   // 'path': from the barrel's path (the engine until now)
+    s = Math.max(-1, Math.min(1, s));
+    var c = Math.sqrt(Math.max(0, 1 - s * s));
+    var n = [c * e1[0] + s * q[0], c * e1[1] + s * q[1], c * e1[2] + s * q[2]];   // the contact normal
     var un = dot(u, n);
     if (un >= 0) return null;                  // the bat never closes on the ball
     var qe = qAt(bat, xBar, -un);
@@ -1765,16 +1823,19 @@ var BB = (function () {
     var wr = cross(win, rc);
     var slip = [u[0] + wr[0], u[1] + wr[1], u[2] + wr[2]];
     var sn = dot(slip, n);
-    var J = [-2 / 7 * (slip[0] - sn * n[0]), -2 / 7 * (slip[1] - sn * n[1]), -2 / 7 * (slip[2] - sn * n[2])];
-    var jm = norm(J), jmax = MU_BAT * dvn;
+    var kx = 2 / 7 * (1 + E_X) / (1 + R_X);   // rolling (2/7 of the slip), times the leather's tangential spring-back (E_X) over the bat's own give across the contact (R_X)
+    var J = [-kx * (slip[0] - sn * n[0]), -kx * (slip[1] - sn * n[1]), -kx * (slip[2] - sn * n[2])];
+    var mu = MU_GAMMA ? Math.min(MU_MAX, MU_REF * Math.pow(Math.max(-un, 0.5) / MU_VREF, -MU_GAMMA)) : MU_BAT;   // the leather's friction falls as the contact gets harder (MU_GAMMA; 0 = one friction, MU_BAT)
+    var jm = norm(J), jmax = mu * dvn;
     if (jm > jmax) { J[0] *= jmax / jm; J[1] *= jmax / jm; J[2] *= jmax / jm; }
     var dw = cross(rc, J), I = 0.4 * BALL_R * BALL_R;
     return { v: [vin[0] + dvn * n[0] + J[0], vin[1] + dvn * n[1] + J[1], vin[2] + dvn * n[2] + J[2]],
-             w: [win[0] + dw[0] / I, win[1] + dw[1] / I, win[2] + dw[2] / I], q: qe };
+             w: [win[0] + dw[0] / I, win[1] + dw[1] / I, win[2] + dw[2] / I], q: qe, vn: -un, mu: mu, slid: jm > jmax };
   }
 
   // ----------------------------------------------------------------- FLY
   function battedBall(pitch, col, env, rec) {
+    col = { v: col.v, w: [col.w[0] * SPIN_KEEP, col.w[1] * SPIN_KEEP, col.w[2] * SPIN_KEEP], q: col.q, vn: col.vn, mu: col.mu, slid: col.slid };   // the spin it leaves with (SPIN_KEEP, review)
     var p0 = [pitch.plate.x, CONTACT_Y, pitch.plate.z], v = col.v, sp = norm(v);
     var fl = flyBatted(p0, v, col.w, env, rec);
     var vh = unit([v[0], v[1], 0]), side = cross(vh, [0, 0, 1]);
@@ -1789,10 +1850,10 @@ var BB = (function () {
       fair = Math.abs(Math.atan2(fl.v[0], fl.v[1]) / DEG) <= 45 && Math.abs(landSpray) <= 60;
     } else fair = Math.abs(landSpray) <= 45;
     return { ev: sp / MPH, la: Math.asin(v[2] / sp) / DEG, spray: Math.atan2(v[0], v[1]) / DEG,
-             spin: norm(col.w) / RPM, backspin: back, q: col.q,
+             spin: norm(col.w) / RPM, backspin: back, q: col.q, vn: col.vn, mu: col.mu, slid: col.slid,
              kind: fl.kind, fair: fair, hr: fl.kind === 'over',
              landing: [fl.x, fl.y], landZ: fl.z, landV: fl.v, landW: fl.w, landT: fl.t,
-             dist: r / FT, projDist: proj / FT, hang: fl.t, apex: fl.apex / FT, path: fl.path };
+             dist: r / FT, projDist: proj / FT, hang: fl.t, apex: fl.apex / FT, path: fl.path, p0: p0, v0: v.slice(), w0: col.w.slice() };
   }
 
   // --------------------------------------------------- one plate appearance
@@ -1875,7 +1936,7 @@ var BB = (function () {
     geometry: { Y_PLATE: Y_PLATE, PLATE_HALF: PLATE_HALF, ZONE_HALF: ZONE_HALF, RUBBER_Y: RUBBER_Y, BALL_R: BALL_R },
     PITCH_TYPES: PITCH_TYPES, REPERTOIRES: REPERTOIRES, TRAITS: TRAITS, AERO: AERO,
     makeRng: makeRng, makeEnv: makeEnv, mlbEnv: mlbEnv, MLB_PARKS: MLB_PARKS, fenceAt: fenceAt,
-    makePitcher: makePitcher, PITCHER_FEATURES: PITCHER_FEATURES, makeBatter: makeBatter, ATHLETIC: ATHLETIC, drawBatter: drawBatter, hitterValue: hitterValue, fieldValue: fieldValue, playerValue: playerValue, FIELD_VALUE: FIELD_VALUE, STYLE: STYLE, drawPitcher: drawPitcher, pitcherValue: pitcherValue, pitcherFeatures: pitcherFeatures, FARM_N: FARM_N, CHAIN: CHAIN, makeUmp: makeUmp, FACE_PATH: FACE_PATH, CHECK: { effortSD: EFFORT_SD, at: CHECK_IN, hold: HOLD_P, slow: CHECK_SLOW }, checkChance: checkChance, equipFielder: equipFielder, FIELD_MEANS: FIELD_MEANS,
+    tuneContact: tuneContact, makePitcher: makePitcher, PITCHER_FEATURES: PITCHER_FEATURES, makeBatter: makeBatter, ATHLETIC: ATHLETIC, drawBatter: drawBatter, hitterValue: hitterValue, fieldValue: fieldValue, playerValue: playerValue, FIELD_VALUE: FIELD_VALUE, STYLE: STYLE, drawPitcher: drawPitcher, pitcherValue: pitcherValue, pitcherFeatures: pitcherFeatures, FARM_N: FARM_N, CHAIN: CHAIN, makeUmp: makeUmp, FACE_PATH: FACE_PATH, CHECK: { effortSD: EFFORT_SD, at: CHECK_IN, hold: HOLD_P, slow: CHECK_SLOW }, checkChance: checkChance, equipFielder: equipFielder, FIELD_MEANS: FIELD_MEANS,
     batOf: batOf, batSpeedOf: batSpeedOf, swingPowerOf: swingPowerOf,
     batMass: batMass, batRadius: batRadius, qAt: qAt, corOf: corOf, BAT_MODES: BAT_MODES, BAT_SHAPE: BAT_SHAPE, SWEET_IN: SWEET_IN, BAT_DEFAULT: BAT_DEFAULT,
     flyPitch: flyPitch, flyBatted: flyBatted, spinVector: spinVector, dirOf: dirOf, aim: aim, SWING_THR: SWING_THR, ZONE_HALF: ZONE_HALF, PLAN_LOC: PLAN_LOC,

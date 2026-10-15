@@ -1,5 +1,5 @@
 /* ============================================================================
-   players.js · v0.3 · 2026-10-15
+   players.js · v0.7 · 2026-10-15
 
    Real players as the engine's players, for the playoff review. Loaded after
    bb_engine.js (and bb_field.js, bb_game.js when games are played).
@@ -24,7 +24,12 @@
    along the barrel, when fitted (review/fit_mishit.py).
 
    CHANGED
-     v0.3  redraw(): each replay its own pitcher from the game's build (the model review: the replays had reused one build)
+     v0.7  fielders' own range and framing applied in hitter() from review/field_traits.json (every caller, not only replay_game's
+           'fielding' mode); pitcher draws on by default when the fits carry their uncertainty (run 7.5 on the live pages)
+     v0.6  redraw() draws a fresh population pitcher and takes from the build only what came from data or callers
+     v0.5  redraw(): a replay's copy of a pitcher built once a game, with PDRAW's draw made there (the model review)
+     v0.4  PDRAW: pitchers drawn from their fit's uncertainty (review/pitcher_sd.py; the model review)
+     v0.3  traits the data cannot identify (FREEZE) held at the posterior mean in replays (the model review)
      v0.2  setData(recs, fits, pfit) for a browser, which has no read(): the live page hands its bundle in
      v0.1  first build (the Yankees-Rays review, 2026-10-06)
 ============================================================================ */
@@ -35,6 +40,9 @@ var REVIEW = (function () {
   function latest(o) { if (!o) return null; var y = o['2026'] !== undefined ? o['2026'] : o['2025']; return typeof y === 'object' && y ? y.mean : y; }
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
+  var PDRAW = null;   // null: on when the pitchers' fits carry their uncertainty (review/pitcher_sd.py), v0.7
+  var FIELDT = null;   // v0.7: each fielder's own range and each catcher's framing (review/field_traits.json), applied in hitter()   // v0.4: draw each pitcher's deception and command from his fit's uncertainty (replay_game mode 'pdraw')
+  var FREEZE = ['learn', 'coverage', 'commit'];   // faceSD and timingSD are now measured directly (review/fit_hitters.py v0.3)
   function hitter(fit, rng, draw, pos) {
     var B = BB.makeBatter(rng, { population: true, pos: pos || fit.position || 'DH', bats: fit.bats });
     var k = fit.known, h = draw === undefined || draw === null ? (fit.refined || fit.mean) : fit.draws[draw % fit.draws.length];
@@ -45,10 +53,20 @@ var REVIEW = (function () {
     B.swingPower = v * v * v * B.bat.mEff / (4 * k.weightLb * 0.4536 * k.swingLenFt * FT);
     B.batSpeed = BB.batSpeedOf(B.swingPower, B.weightLb, B.swingLenFt, B.bat);
     for (var key in h) B[key] = h[key];
+    // the model review (2026-10-14): traits the data cannot identify (the posterior sd over 0.9 of the prior's and no
+    // carry-over from one season to the next) are held at his posterior mean, not drawn afresh each replay
+    if (fit.mean && draw !== undefined && draw !== null) FREEZE.forEach(function (k) { if (fit.mean[k] !== undefined) B[k] = fit.mean[k]; });
     B.barrelSD = B.motorIn * Math.pow(B.batSpeed / 72, 2);
     B.zone = { bot: 0.263 * B.heightIn * IN, top: 0.559 * B.heightIn * IN };
     if (fit.speed) B.speed = fit.speed;
     if (fit.armMph) B.armMph = fit.armMph;
+    var f = FIELDT && FIELDT[fit.id], TT = BB.TRAITS, ps = pos || fit.position || 'DH';
+    if (f) {   // v0.7: his own range (Savant) mapped as replay_game's 'fielding' mode does: route + 0.7 z sd, react - 0.7 z sd; framing + z sd
+      var r = f[ps] || f.all, keep;
+      if (r && ps !== 'DH' && ps !== 'C') { keep = Math.sqrt(Math.max(0, 1 - r.rel)); B.route = Math.min(TT.route[3], Math.max(TT.route[2], TT.route[0] + (B.route - TT.route[0]) * keep + 0.7 * r.z * TT.route[1])); B.react = Math.max(0.05, B.react - 0.7 * r.z * TT.react[1]); }
+      if (ps === 'C' && f.frame) { keep = Math.sqrt(Math.max(0, 1 - f.frame.rel)); B.framing = Math.min(TT.framing[3], Math.max(TT.framing[2], TT.framing[0] + ((B.framing || 0) - TT.framing[0]) * keep + f.frame.z * TT.framing[1])); }
+      B.fieldOwn = true;
+    }
     return B;
   }
 
@@ -121,30 +139,8 @@ var REVIEW = (function () {
     P.role = role;
     var pf = PFIT && PFIT.pitchers[rec.id];   // the fitted hidden traits, when review/fit_pitchers.js has run
     if (pf) { P.cmdScale = pf.cmdScale; P.deception = pf.deception; P.cmd = [P.cmd[0] * pf.cmdScale, P.cmd[1] * pf.cmdScale]; P.command = Math.sqrt((P.cmd[0] * P.cmd[0] + P.cmd[1] * P.cmd[1]) / 2); if (pf.mishit) P.mishit = pf.mishit; }
+    P.fitSd = pf && pf.sdLogDec ? { dec: pf.sdLogDec, cmd: pf.sdLogCmd, rho: pf.rhoDecCmd || 0 } : null;
     return P;
-  }  function pitcher(rec, rng, env) {
-    var P = pitcher0(rec, rng, env);
-    if (!P.generic && (!P.pitches || !P.pitches.length)) {   // only pitch types the engine does not throw (a position player's lob, an eephus)
-      var G0 = BB.makePitcher(rng, { population: true, role: 'RP', throws: rec.throws || 'R' }); G0.name = rec.name; G0.mlbId = rec.id; G0.team = rec.team; G0.generic = true; return G0;
-    }
-    return P;
-  }
-
-  var PFIT = null;
-
-  var GIVEN = null;
-  function setData(recs, fits, pfit) {   // a browser's bundle (live/data/playoff.js), in place of the files
-    var byId = {};
-    (recs.players || recs).forEach(function (r) { byId[r.id] = r; });
-    PFIT = pfit || null; GIVEN = { recs: byId, fits: fits, pfit: PFIT };
-  }
-  function load() {
-    if (GIVEN) return GIVEN;
-    var recs = JSON.parse(read('playoffs/players_measured.json')); recs = recs.players || recs;
-    var fits = JSON.parse(read('review/hitters_fit.json')), byId = {};
-    recs.forEach(function (r) { byId[r.id] = r; });
-    try { PFIT = JSON.parse(read('review/pitchers_fit.json')); } catch (e) { PFIT = null; }
-    return { recs: byId, fits: fits, pfit: PFIT };
   }
   // v0.6 (the model review, 2026-10-15): one replay's own pitcher from the game's single build. The build is costly (it flies
   // every pitch type to fit his shapes and caches his aims), so it is made once a game; each replay then draws a FRESH pitcher
@@ -164,11 +160,35 @@ var REVIEW = (function () {
     if (P0.cmdData) { P.cmd = P0.cmd.slice(); P.command = P0.command; }
     else if (P0.cmdScale) { P.cmd = [P.cmd[0] * P0.cmdScale, P.cmd[1] * P0.cmdScale]; P.command = Math.sqrt((P.cmd[0] * P.cmd[0] + P.cmd[1] * P.cmd[1]) / 2); }
     if (P0.staminaData) P.stamina = P0.stamina;
-    if (typeof PDRAW !== 'undefined' && PDRAW && P0.fitSd) {
+    if ((PDRAW === null ? !!P0.fitSd : PDRAW) && P0.fitSd) {
       var z1 = rng.n(0, 1), z2 = rng.n(0, 1), f = P0.fitSd, sc = Math.exp(f.cmd * (f.rho * z1 + Math.sqrt(1 - f.rho * f.rho) * z2));
       P.deception = P.deception * Math.exp(f.dec * z1); P.cmd = [P.cmd[0] * sc, P.cmd[1] * sc]; P.command = P.command * sc;
     }
     return P;
+  }  function pitcher(rec, rng, env) {
+    var P = pitcher0(rec, rng, env);
+    if (!P.generic && (!P.pitches || !P.pitches.length)) {   // only pitch types the engine does not throw (a position player's lob, an eephus)
+      var G0 = BB.makePitcher(rng, { population: true, role: 'RP', throws: rec.throws || 'R' }); G0.name = rec.name; G0.mlbId = rec.id; G0.team = rec.team; G0.generic = true; return G0;
+    }
+    return P;
   }
-  return { hitter: hitter, pitcher: pitcher, redraw: redraw, move: move, load: load, setData: setData };
+
+  var PFIT = null;
+
+  var GIVEN = null;
+  function setData(recs, fits, pfit, ft) {   // a browser's bundle (live/data/playoff.js), in place of the files
+    var byId = {};
+    (recs.players || recs).forEach(function (r) { byId[r.id] = r; });
+    PFIT = pfit || null; FIELDT = ft || null; GIVEN = { recs: byId, fits: fits, pfit: PFIT };
+  }
+  function load() {
+    if (GIVEN) return GIVEN;
+    var recs = JSON.parse(read('playoffs/players_measured.json')); recs = recs.players || recs;
+    var fits = JSON.parse(read('review/hitters_fit.json')), byId = {};
+    recs.forEach(function (r) { byId[r.id] = r; });
+    try { PFIT = JSON.parse(read('review/pitchers_fit.json')); } catch (e) { PFIT = null; }
+    try { FIELDT = JSON.parse(read('review/field_traits.json')).players; } catch (e) { FIELDT = null; }
+    return { recs: byId, fits: fits, pfit: PFIT };
+  }
+  return { hitter: hitter, pitcher: pitcher, redraw: redraw, move: move, load: load, setData: setData, setPDraw: function (v) { PDRAW = !!v; } };
 })();

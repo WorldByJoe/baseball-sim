@@ -1,5 +1,5 @@
 /* ============================================================================
-   emulate_hitters.js · v0.1 · 2026-10-06
+   emulate_hitters.js · v0.2 · 2026-10-14
 
    The emulator behind the playoff hitters' hidden traits. Draws major-league
    hitters (the farm's picks), plays each against the league's pitchers, and
@@ -14,6 +14,7 @@
    Run:  tools/diag/run.sh bb_engine.js review/emulate_hitters.js -- [hitters] [PA each] [seed] > out.jsonl
 
    CHANGED
+     v0.2  the spread of contact depth and the spray left after the bat's direction (the model review: timingSD, faceSD)
      v0.1  first build (the Yankees-Rays review, 2026-10-06)
 ============================================================================ */
 (function (A) {
@@ -32,7 +33,7 @@
   for (i = 0; i < N; i++) {
     var B = BB.makeBatter(rng, {});
     var m = { zin: 0, zsw: 0, zout: 0, osw: 0, sw: { FB: 0, BR: 0, OS: 0 }, wh: { FB: 0, BR: 0, OS: 0 }, foul: 0, pa: 0, k: 0, bb: 0, hr: 0,
-              bip: 0, ev: 0, hh: 0, la: { GB: 0, LD: 0, FB: 0, PU: 0 }, pull: 0 };
+              bip: 0, ev: 0, hh: 0, la: { GB: 0, LD: 0, FB: 0, PU: 0 }, pull: 0, dep: [], sp: [] };
     for (var k = 0; k < NPA; k++) {
       var Pi = P[Math.floor(rng.u() * P.length)]; Pi.load = rng.u() * Pi.stamina;
       var sb = BB.batterSide(B, Pi);
@@ -46,20 +47,28 @@
         m.sw[kind]++;
         if (!(q.swing && q.swing.contact)) m.wh[kind]++;
         if (q.result === 'foul') m.foul++;
+        if (q.swing && q.swing.contact && q.swing.depth !== undefined) m.dep.push(q.swing.depth / IN);   // v0.2: contact depth, in
         if (q.bb && (q.result === 'in_play' || q.result === 'hr')) {
           var bb = q.bb; m.bip++; m.ev += bb.ev; if (bb.ev >= 95) m.hh++;
           m.la[bb.la < 10 ? 'GB' : bb.la < 25 ? 'LD' : bb.la < 50 ? 'FB' : 'PU']++;
           m.pull += bb.spray * sb;
+          if (q.swing) m.sp.push([bb.spray * sb, q.swing.theta / Math.PI * 180 * sb]);   // v0.2: pulled spray and the bat's pulled direction
         }
       });
     }
     var sw = m.sw.FB + m.sw.BR + m.sw.OS, t = {};
+    // v0.2 (the model review): the spread of contact depth (identifies timingSD) and of pulled spray once the bat's
+    // direction is accounted for, his own line, residual sd with n - 2 (identifies faceSD), as season/face_measure.py
+    var dm = m.dep.reduce(function (a, b) { return a + b; }, 0) / Math.max(1, m.dep.length), dsd = Math.sqrt(m.dep.reduce(function (a, b) { return a + (b - dm) * (b - dm); }, 0) / Math.max(1, m.dep.length - 1));
+    var nS = m.sp.length, sx = 0, sy = 0, sxx = 0, sxy = 0, syy = 0;
+    m.sp.forEach(function (v) { sx += v[1]; sy += v[0]; sxx += v[1] * v[1]; sxy += v[1] * v[0]; syy += v[0] * v[0]; });
+    var vx = sxx - sx * sx / nS, cxy = sxy - sx * sy / nS, vy = syy - sy * sy / nS, sres = Math.sqrt(Math.max(0, vy - (vx > 0 ? cxy * cxy / vx : 0)) / Math.max(1, nS - 2));
     KEYS.forEach(function (key) { t[key] = +(+B[key]).toFixed(5); });
     t.bats = B.bats;
     var y = { zoneSwing: m.zsw / m.zin, chase: m.osw / m.zout, whiffFB: m.wh.FB / m.sw.FB, whiffBR: m.wh.BR / m.sw.BR, whiffOS: m.wh.OS / m.sw.OS,
               foul: m.foul / sw, K: m.k / m.pa, BB: m.bb / m.pa, HR: m.hr / m.pa, ev: m.ev / m.bip, hardHit: m.hh / m.bip,
-              GB: m.la.GB / m.bip, LD: m.la.LD / m.bip, FBs: m.la.FB / m.bip, PU: m.la.PU / m.bip, pull: m.pull / m.bip };
-    var n = { zin: m.zin, zout: m.zout, swFB: m.sw.FB, swBR: m.sw.BR, swOS: m.sw.OS, sw: sw, pa: m.pa, bip: m.bip };
+              GB: m.la.GB / m.bip, LD: m.la.LD / m.bip, FBs: m.la.FB / m.bip, PU: m.la.PU / m.bip, pull: m.pull / m.bip, depthSD: dsd, sprayRes: sres };
+    var n = { zin: m.zin, zout: m.zout, swFB: m.sw.FB, swBR: m.sw.BR, swOS: m.sw.OS, sw: sw, pa: m.pa, bip: m.bip, con: m.dep.length };
     for (var q in y) y[q] = +y[q].toFixed(5);
     print(JSON.stringify({ t: t, y: y, n: n }));
   }
