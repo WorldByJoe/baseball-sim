@@ -1,5 +1,5 @@
 /* ============================================================================
-   players.js · v0.6 · 2026-10-15
+   players.js · v0.7 · 2026-10-15
 
    Real players as the engine's players, for the playoff review. Loaded after
    bb_engine.js (and bb_field.js, bb_game.js when games are played).
@@ -24,6 +24,8 @@
    along the barrel, when fitted (review/fit_mishit.py).
 
    CHANGED
+     v0.7  fielders' own range and framing applied in hitter() from review/field_traits.json (every caller, not only replay_game's
+           'fielding' mode); pitcher draws on by default when the fits carry their uncertainty (run 7.5 on the live pages)
      v0.6  redraw() draws a fresh population pitcher and takes from the build only what came from data or callers
      v0.5  redraw(): a replay's copy of a pitcher built once a game, with PDRAW's draw made there (the model review)
      v0.4  PDRAW: pitchers drawn from their fit's uncertainty (review/pitcher_sd.py; the model review)
@@ -38,7 +40,8 @@ var REVIEW = (function () {
   function latest(o) { if (!o) return null; var y = o['2026'] !== undefined ? o['2026'] : o['2025']; return typeof y === 'object' && y ? y.mean : y; }
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
-  var PDRAW = false;   // v0.4: draw each pitcher's deception and command from his fit's uncertainty (replay_game mode 'pdraw')
+  var PDRAW = null;   // null: on when the pitchers' fits carry their uncertainty (review/pitcher_sd.py), v0.7
+  var FIELDT = null;   // v0.7: each fielder's own range and each catcher's framing (review/field_traits.json), applied in hitter()   // v0.4: draw each pitcher's deception and command from his fit's uncertainty (replay_game mode 'pdraw')
   var FREEZE = ['learn', 'coverage', 'commit'];   // faceSD and timingSD are now measured directly (review/fit_hitters.py v0.3)
   function hitter(fit, rng, draw, pos) {
     var B = BB.makeBatter(rng, { population: true, pos: pos || fit.position || 'DH', bats: fit.bats });
@@ -57,6 +60,13 @@ var REVIEW = (function () {
     B.zone = { bot: 0.263 * B.heightIn * IN, top: 0.559 * B.heightIn * IN };
     if (fit.speed) B.speed = fit.speed;
     if (fit.armMph) B.armMph = fit.armMph;
+    var f = FIELDT && FIELDT[fit.id], TT = BB.TRAITS, ps = pos || fit.position || 'DH';
+    if (f) {   // v0.7: his own range (Savant) mapped as replay_game's 'fielding' mode does: route + 0.7 z sd, react - 0.7 z sd; framing + z sd
+      var r = f[ps] || f.all, keep;
+      if (r && ps !== 'DH' && ps !== 'C') { keep = Math.sqrt(Math.max(0, 1 - r.rel)); B.route = Math.min(TT.route[3], Math.max(TT.route[2], TT.route[0] + (B.route - TT.route[0]) * keep + 0.7 * r.z * TT.route[1])); B.react = Math.max(0.05, B.react - 0.7 * r.z * TT.react[1]); }
+      if (ps === 'C' && f.frame) { keep = Math.sqrt(Math.max(0, 1 - f.frame.rel)); B.framing = Math.min(TT.framing[3], Math.max(TT.framing[2], TT.framing[0] + ((B.framing || 0) - TT.framing[0]) * keep + f.frame.z * TT.framing[1])); }
+      B.fieldOwn = true;
+    }
     return B;
   }
 
@@ -150,7 +160,7 @@ var REVIEW = (function () {
     if (P0.cmdData) { P.cmd = P0.cmd.slice(); P.command = P0.command; }
     else if (P0.cmdScale) { P.cmd = [P.cmd[0] * P0.cmdScale, P.cmd[1] * P0.cmdScale]; P.command = Math.sqrt((P.cmd[0] * P.cmd[0] + P.cmd[1] * P.cmd[1]) / 2); }
     if (P0.staminaData) P.stamina = P0.stamina;
-    if (typeof PDRAW !== 'undefined' && PDRAW && P0.fitSd) {
+    if ((PDRAW === null ? !!P0.fitSd : PDRAW) && P0.fitSd) {
       var z1 = rng.n(0, 1), z2 = rng.n(0, 1), f = P0.fitSd, sc = Math.exp(f.cmd * (f.rho * z1 + Math.sqrt(1 - f.rho * f.rho) * z2));
       P.deception = P.deception * Math.exp(f.dec * z1); P.cmd = [P.cmd[0] * sc, P.cmd[1] * sc]; P.command = P.command * sc;
     }
@@ -166,10 +176,10 @@ var REVIEW = (function () {
   var PFIT = null;
 
   var GIVEN = null;
-  function setData(recs, fits, pfit) {   // a browser's bundle (live/data/playoff.js), in place of the files
+  function setData(recs, fits, pfit, ft) {   // a browser's bundle (live/data/playoff.js), in place of the files
     var byId = {};
     (recs.players || recs).forEach(function (r) { byId[r.id] = r; });
-    PFIT = pfit || null; GIVEN = { recs: byId, fits: fits, pfit: PFIT };
+    PFIT = pfit || null; FIELDT = ft || null; GIVEN = { recs: byId, fits: fits, pfit: PFIT };
   }
   function load() {
     if (GIVEN) return GIVEN;
@@ -177,6 +187,7 @@ var REVIEW = (function () {
     var fits = JSON.parse(read('review/hitters_fit.json')), byId = {};
     recs.forEach(function (r) { byId[r.id] = r; });
     try { PFIT = JSON.parse(read('review/pitchers_fit.json')); } catch (e) { PFIT = null; }
+    try { FIELDT = JSON.parse(read('review/field_traits.json')).players; } catch (e) { FIELDT = null; }
     return { recs: byId, fits: fits, pfit: PFIT };
   }
   return { hitter: hitter, pitcher: pitcher, redraw: redraw, move: move, load: load, setData: setData, setPDraw: function (v) { PDRAW = !!v; } };

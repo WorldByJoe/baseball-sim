@@ -1678,10 +1678,11 @@ var BB = (function () {
   // them square), at 0.5 in .30 and .24, with the raw scatter x1.15 to keep the fastball whiffs .17 (0.4 in: .30 /
   // .24, whiffs .16; 0.6 in: .27 / .21).
   var LOOK_SD = 0.4625, LOOK_GAIN = 1.0;   // the swing refit (review, 2026-10-14; were 0.5 and 1.3): review/swing_fit.py against 2026's launch angles, swing outcomes by kind, fastball fouls and spray
+  var TOP_K = 0, TOP_S0 = 0, Q_SCALE = 1;   // the model review's item 4: the collision's loss on the ball's top half, and a scale on its efficiency (calibration; off)
   var RISE_DET = 1, BS_DET = 1, BS_FOOL = 1, BS_T = 0;   // BS_T: the barrel scatter drawn from Student's t with BS_T degrees of freedom at the same sd (0 = normal)
   function tDraw(rng, nu) { var c = 0; for (var i = 0; i < nu; i++) { var z = rng.n(0, 1); c += z * z; } return rng.n(0, 1) / Math.sqrt(c / nu) / Math.sqrt(nu / (nu - 2)); }
     // the model review (2026-10-14): the scatter's shape by whether he picked the pitch up; 1 = as fitted
-  function tuneContact(o) { if (o.riseDet != null) RISE_DET = o.riseDet; if (o.bsDet != null) BS_DET = o.bsDet; if (o.bsFool != null) BS_FOOL = o.bsFool; if (o.bsT != null) BS_T = o.bsT; if (o.lookGain != null) LOOK_GAIN = o.lookGain; if (o.lookSd != null) LOOK_SD = o.lookSd; if (o.vertMiss != null) VERT_MISS = o.vertMiss; if (o.geom != null) GEOM = o.geom; if (o.geomVertical != null) GEOM = o.geomVertical ? 'level' : 'path'; if (o.ex != null) E_X = o.ex; if (o.rx != null) R_X = o.rx; if (o.mu != null) MU_BAT = o.mu; if (o.muGamma != null) MU_GAMMA = o.muGamma; if (o.muRef != null) MU_REF = o.muRef; if (o.muVref != null) MU_VREF = o.muVref; if (o.spinKeep != null) SPIN_KEEP = o.spinKeep; if (o.aimAttack != null) AIM_ATTACK = o.aimAttack; return { lookGain: LOOK_GAIN, lookSd: LOOK_SD, vertMiss: VERT_MISS, geom: GEOM, ex: E_X, rx: R_X, mu: MU_BAT, muGamma: MU_GAMMA, muRef: MU_REF, muVref: MU_VREF, spinKeep: SPIN_KEEP, aimAttack: AIM_ATTACK }; }   // a calibration hook (step 2 of the run audit); unused, the constants stand
+  function tuneContact(o) { if (o.riseDet != null) RISE_DET = o.riseDet; if (o.bsDet != null) BS_DET = o.bsDet; if (o.bsFool != null) BS_FOOL = o.bsFool; if (o.bsT != null) BS_T = o.bsT; if (o.topK != null) TOP_K = o.topK; if (o.topS0 != null) TOP_S0 = o.topS0; if (o.qScale != null) Q_SCALE = o.qScale; if (o.lookGain != null) LOOK_GAIN = o.lookGain; if (o.lookSd != null) LOOK_SD = o.lookSd; if (o.vertMiss != null) VERT_MISS = o.vertMiss; if (o.geom != null) GEOM = o.geom; if (o.geomVertical != null) GEOM = o.geomVertical ? 'level' : 'path'; if (o.ex != null) E_X = o.ex; if (o.rx != null) R_X = o.rx; if (o.mu != null) MU_BAT = o.mu; if (o.muGamma != null) MU_GAMMA = o.muGamma; if (o.muRef != null) MU_REF = o.muRef; if (o.muVref != null) MU_VREF = o.muVref; if (o.spinKeep != null) SPIN_KEEP = o.spinKeep; if (o.aimAttack != null) AIM_ATTACK = o.aimAttack; return { lookGain: LOOK_GAIN, lookSd: LOOK_SD, vertMiss: VERT_MISS, geom: GEOM, ex: E_X, rx: R_X, mu: MU_BAT, muGamma: MU_GAMMA, muRef: MU_REF, muVref: MU_VREF, spinKeep: SPIN_KEEP, aimAttack: AIM_ATTACK }; }   // a calibration hook (step 2 of the run audit); unused, the constants stand
   function checkChance(B, rf, pitch) {   // the chance he tries to check: nothing new to see once he had picked it up (v2.7)
     if (rf.detected) return 0;
     return clamp((reachOf(B, pitch.plate.x + rf.lastPic[0], pitch.plate.z + rf.lastPic[1]) / IN - CHECK_IN[0]) / (CHECK_IN[1] - CHECK_IN[0]), 0, 1);
@@ -1817,7 +1818,8 @@ var BB = (function () {
     var n = [c * e1[0] + s * q[0], c * e1[1] + s * q[1], c * e1[2] + s * q[2]];   // the contact normal
     var un = dot(u, n);
     if (un >= 0) return null;                  // the bat never closes on the ball
-    var qe = qAt(bat, xBar, -un);
+    var qe = qAt(bat, xBar, -un) * Q_SCALE;
+    if (s < -TOP_S0) qe *= Math.max(0.2, 1 - TOP_K * (-s - TOP_S0));   // THE TOPPED BALL (the model review, item 4): struck on its top half, the collision keeps less (off at TOP_K 0)
     var dvn = -(1 + qe) * un;
     var rc = [-BALL_R * n[0], -BALL_R * n[1], -BALL_R * n[2]];
     var wr = cross(win, rc);

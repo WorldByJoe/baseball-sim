@@ -1,5 +1,5 @@
 /* ============================================================================
-   replay_game.js · v1.3 · 2026-10-14
+   replay_game.js · v1.4 · 2026-10-15
 
    A postseason game played again as it was played: the real batting order with
    its substitutions (each man takes his spot at the turn he took it, at the
@@ -21,6 +21,7 @@
    'errors' (then G, the league factor): each fielder's own error tendency (review/err_mult.py); 'pitched+errors' both.
 
    CHANGED
+     v1.4  'fielding' leaves a hitter alone when players.js v0.7 has applied his range
      v1.3  each replay copies the game's pitchers (REVIEW.redraw) and draws their fit's uncertainty afresh; v1.2's rebuild each replay was 20x slower
      v1.2  pitchers built afresh for each replay, not once a game (the model review)
      v1.1  mode 'pdraw': pitchers drawn from their fit's uncertainty (the model review)
@@ -126,7 +127,7 @@
     SLOTS[s].forEach(function (list, k) {
       var plan = {};
       list.forEach(function (m, j) {
-        var h = REVIEW.hitter(D.fits[m.id], rng, draw, m.pos === 'DH' ? 'DH' : m.pos); h.pos = m.pos; h.homePos = m.pos; if (ERR) h.errMult = errOf(m.id); if (FIELD) fieldOf(h, m.id, m.pos);
+        var h = REVIEW.hitter(D.fits[m.id], rng, draw, m.pos === 'DH' ? 'DH' : m.pos); h.pos = m.pos; h.homePos = m.pos; if (ERR) h.errMult = errOf(m.id); if (FIELD && !h.fieldOwn) fieldOf(h, m.id, m.pos);   // v1.4: players.js v0.7 applies it already when review/field_traits.json is there
         if (j === 0) lineup.push(h); else plan[m.from] = h;
       });
       lineupPlan.push(plan);
