@@ -1,5 +1,5 @@
 """
-fit_through.py · v0.3 · 2026-10-12
+fit_through.py · v0.4 · 2026-10-14
 
 Each postseason hitter's hidden traits as they stood that October: history/seasons.py's carry-over model given his seasons
 up to and including S (none after), then review/fit_hitters.py's refinement on the simulator itself (4 steps of 1,500
@@ -14,6 +14,7 @@ change, not about any one player, so using it for an earlier October borrows no 
   python3 HIST/fit_through.py 2025 [refinement steps] [PA a step]      (from the worktree's root)
 
 CHANGED
+  v0.4  CALLUP_LEVEL: a man with no data takes the farm's k-th pick's traits as his prior (off unless set; the model review)
   v0.3  a pitcher who appears in a batting order gets hitting traits (the population's, without hitting data)
   v0.2  the age trend (history/aging.py): each season's prior mean moves with his age, so the step from one season to the next
         carries a year of aging (off by default since Joe pinned it: python3 HIST/fit_through.py S steps PA age)
@@ -26,6 +27,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); sys.path.insert(
 import fit_hitters as FH
 import seasons as SE
 import datetime
+# v0.4: CALLUP_LEVEL=k (with LEVEL_MEANS, the path of review/level_means.js's output): the prior of a man with no data
+LEVEL = json.load(open(os.environ['LEVEL_MEANS']))[os.environ['CALLUP_LEVEL']] if os.environ.get('CALLUP_LEVEL') else None
 
 
 def age_terms(ages, A):
@@ -80,6 +83,9 @@ def main(S, iters, npa, age=True):
         else:
             kinds['none'] += 1; m = np.zeros(SE.NH); Cm = Cpop
             known = {k: float(E['mu'][j]) for j, k in enumerate(SE.KNOWN)}
+            if LEVEL:   # v0.4: a call-up with no major-league data is the farm's LEVEL-th pick, not its major leaguer (the model review)
+                known = {k: LEVEL[k] for k in SE.KNOWN}
+                m = np.array([(LEVEL[h] - mu[k]) / sd[k] for k, h in enumerate(SE.HIDDEN)])
             v = view.get(p['id']) or {}
             for k in ('heightIn', 'weightLb'):
                 if v.get(k): known[k] = v[k]
