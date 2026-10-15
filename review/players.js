@@ -1,5 +1,5 @@
 /* ============================================================================
-   players.js · v0.4 · 2026-10-14
+   players.js · v0.5 · 2026-10-14
 
    Real players as the engine's players, for the playoff review. Loaded after
    bb_engine.js (and bb_field.js, bb_game.js when games are played).
@@ -24,6 +24,7 @@
    along the barrel, when fitted (review/fit_mishit.py).
 
    CHANGED
+     v0.5  redraw(): a replay's copy of a pitcher built once a game, with PDRAW's draw made there (the model review)
      v0.4  PDRAW: pitchers drawn from their fit's uncertainty (review/pitcher_sd.py; the model review)
      v0.3  traits the data cannot identify (FREEZE) held at the posterior mean in replays (the model review)
      v0.2  setData(recs, fits, pfit) for a browser, which has no read(): the live page hands its bundle in
@@ -125,11 +126,22 @@ var REVIEW = (function () {
     if (use26 && use26.pitchesPerApp) P.stamina = role === 'SP' ? Math.max(75, use26.pitchesPerApp.mean) : Math.max(15, 1.2 * use26.pitchesPerApp.mean);
     P.role = role;
     var pf = PFIT && PFIT.pitchers[rec.id];   // the fitted hidden traits, when review/fit_pitchers.js has run
-    if (pf && PDRAW && pf.sdLogDec) {   // v0.4: a draw from his fit's uncertainty (review/pitcher_sd.py; the model review)
-      var z1 = rng.n(0, 1), z2 = rng.n(0, 1), rho = pf.rhoDecCmd || 0;
-      pf = { deception: pf.deception * Math.exp(pf.sdLogDec * z1), cmdScale: pf.cmdScale * Math.exp(pf.sdLogCmd * (rho * z1 + Math.sqrt(1 - rho * rho) * z2)), mishit: pf.mishit };
-    }
     if (pf) { P.deception = pf.deception; P.cmd = [P.cmd[0] * pf.cmdScale, P.cmd[1] * pf.cmdScale]; P.command = Math.sqrt((P.cmd[0] * P.cmd[0] + P.cmd[1] * P.cmd[1]) / 2); if (pf.mishit) P.mishit = pf.mishit; }
+    P.fitSd = pf && pf.sdLogDec ? { dec: pf.sdLogDec, cmd: pf.sdLogCmd, rho: pf.rhoDecCmd || 0 } : null;
+    return P;
+  }
+  // v0.5: one replay's copy of a pitcher built once for the game (the build flies every pitch type and caches his aims, which
+  // his deception and command do not touch): shared pitch shapes and aim caches, fresh copies of what a replay changes, and
+  // with PDRAW his deception and command drawn from his fit's uncertainty (review/pitcher_sd.py). Until v0.5 the draw was made
+  // at the build, and replay_game built each pitcher once for every replay of the game, so the draw never averaged out.
+  function redraw(P0, rng) {
+    var P = {}; for (var k in P0) P[k] = P0[k];
+    P.pitches = P0.pitches ? P0.pitches.map(function (q) { var c = {}; for (var j in q) c[j] = q[j]; return c; }) : P0.pitches;
+    P.cmd = P0.cmd ? P0.cmd.slice() : P0.cmd;
+    if (PDRAW && P0.fitSd) {
+      var z1 = rng.n(0, 1), z2 = rng.n(0, 1), f = P0.fitSd, sc = Math.exp(f.cmd * (f.rho * z1 + Math.sqrt(1 - f.rho * f.rho) * z2));
+      P.deception = P0.deception * Math.exp(f.dec * z1); P.cmd = [P0.cmd[0] * sc, P0.cmd[1] * sc]; P.command = P0.command * sc;
+    }
     return P;
   }  function pitcher(rec, rng, env) {
     var P = pitcher0(rec, rng, env);
@@ -155,5 +167,5 @@ var REVIEW = (function () {
     try { PFIT = JSON.parse(read('review/pitchers_fit.json')); } catch (e) { PFIT = null; }
     return { recs: byId, fits: fits, pfit: PFIT };
   }
-  return { hitter: hitter, pitcher: pitcher, move: move, load: load, setData: setData, setPDraw: function (v) { PDRAW = !!v; } };
+  return { hitter: hitter, pitcher: pitcher, redraw: redraw, move: move, load: load, setData: setData, setPDraw: function (v) { PDRAW = !!v; } };
 })();
