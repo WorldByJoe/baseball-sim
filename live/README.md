@@ -12,4 +12,9 @@ https://worldbyjoe.github.io/baseball-sim/live/
 - `data/playoff.js`: the playoff rosters' measured and fitted traits (refitted on engine v3.9, 2026-10-06: the
   112 hitters and all eight teams' pitchers) and the league's 2025 balls in play.
 
+Pause (2026-10-15): the Pause button holds the page while the TV is paused. On Resume, every update arrives as late as
+the pause lasted, spaced by MLB's own time on each pitch. Behind live, the analyst plays any backlog (a phone that slept,
+a reload) forward one pitch at a time, so nothing floods in at once. The hold is remembered per game in the browser.
+Back to live skips ahead.
+
 Built 2026-10-06. Nothing here touches the rest of the site.

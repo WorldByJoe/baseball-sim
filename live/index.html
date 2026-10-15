@@ -33,6 +33,10 @@ body { background: var(--bg); color: var(--ink); font: 400 16px/1.5 var(--body);
 .diamond i { width: 9px; height: 9px; border: 1.5px solid var(--muted); display: block; }
 .diamond i.on { background: var(--away); border-color: var(--away); }
 .ctl { font-size: 13px; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+.ctl button { font: 600 15px/1 var(--display); letter-spacing: 0.06em; text-transform: uppercase; padding: 7px 12px 6px; border-radius: 4px; border: 1px solid var(--rule); background: var(--panel); color: var(--ink); cursor: pointer; }
+.ctl button.on { background: var(--flag); border-color: var(--flag); color: var(--bg); }
+.ctl button:focus-visible { outline: 2px solid var(--home); outline-offset: 2px; }
+#age { font-family: var(--data); font-variant-numeric: tabular-nums; }
 .ctl input { width: 64px; font: 500 14px var(--data); background: var(--panel); color: var(--ink); border: 1px solid var(--rule); border-radius: 4px; padding: 4px 6px; }
 .grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 16px; max-width: 1200px; }
 @media (min-width: 900px) { .grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); } }
@@ -75,10 +79,10 @@ table.led td { padding: 6px; text-align: right; font-family: var(--data); font-v
 <div class="bar">
   <div class="score" id="score">Couch Analyst</div>
   <div class="sit" id="sit"></div>
-  <div class="ctl"><label for="delay">TV delay, seconds</label><input id="delay" type="number" min="0" max="120" step="1" value="0"><span id="age"></span></div>
+  <div class="ctl"><button id="pause" type="button" aria-pressed="false">Pause</button><button id="tolive" type="button" hidden>Back to live</button><label for="delay">TV delay, seconds</label><input id="delay" type="number" min="0" max="120" step="1" value="0"><span id="age"></span></div>
 </div>
 <nav class="pick" id="pick" aria-label="Today's games"></nav>
-<p class="intro">Today's postseason games, read pitch by pitch through the <a href="https://github.com/WorldByJoe/baseball-sim">baseball-sim</a> model: each player's traits fitted to his 2025-26 Statcast numbers, MLB's live feed, and the analysis run in your own browser. If the page runs ahead of your TV, set the delay.</p>
+<p class="intro">Today's postseason games, read pitch by pitch through the <a href="https://github.com/WorldByJoe/baseball-sim">baseball-sim</a> model: each player's traits fitted to his 2025-26 Statcast numbers, MLB's live feed, and the analysis run in your own browser. If the page runs ahead of your TV, set the delay. Pause the page when you pause the TV; when you resume, every pitch arrives as late as you paused, spaced by MLB's own clock. Back to live skips ahead.</p>
 <div class="status" id="status" role="status"></div>
 <div class="grid">
   <div style="display:grid;gap:16px;min-width:0">
@@ -93,25 +97,55 @@ table.led td { padding: 6px; text-align: right; font-family: var(--data); font-v
 </div>
 <script>
 (function () {
-  var buf = [], delay = 0;
+  var buf = [], delay = 0, lagS = [], curPk = null, hold = { pk: null, offset: 0, pausedAt: null };   // hold: how far the viewer has paused behind live, for this game
   try { delay = +(localStorage.getItem('couch-delay') || 0); } catch (e) {}
   var din = document.getElementById('delay'); din.value = delay;
   din.addEventListener('change', function () { delay = Math.max(0, +din.value || 0); try { localStorage.setItem('couch-delay', String(delay)); } catch (e) {} show(); });
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function pct(p) { return p == null ? '' : (p < 0.01 ? (100 * p).toFixed(1) : Math.round(100 * p)) + '%'; }
+  function mmss(x) { x = Math.max(0, Math.round(x)); var h = Math.floor(x / 3600), m = Math.floor(x / 60) % 60, s2 = x % 60; return (h ? h + ':' + (m < 10 ? '0' : '') : '') + m + ':' + (s2 < 10 ? '0' : '') + s2; }
+  function behind(now) { return hold.offset + (hold.pausedAt ? now - hold.pausedAt : 0); }   // paused, the hold grows with the clock, so the page stands still
+  function saveHold() { try { localStorage.setItem('couch-hold', JSON.stringify(hold)); } catch (e) {} }
+  function setFull() { if (worker) worker.postMessage({ cmd: 'full', on: behind(Date.now() / 1000) > 0 }); }   // behind live, the analyst plays a backlog forward pitch by pitch
+  function paintHold() {
+    var b = document.getElementById('pause'), p = !!hold.pausedAt;
+    b.textContent = p ? 'Resume' : 'Pause'; b.className = p ? 'on' : ''; b.setAttribute('aria-pressed', p ? 'true' : 'false');
+    document.getElementById('tolive').hidden = !(p || hold.offset > 0);
+  }
+  document.getElementById('pause').addEventListener('click', function () {
+    var now = Date.now() / 1000;
+    if (hold.pausedAt) { hold.offset += now - hold.pausedAt; hold.pausedAt = null; } else hold.pausedAt = now;
+    hold.pk = curPk; saveHold(); setFull(); paintHold(); show();
+  });
+  document.getElementById('tolive').addEventListener('click', function () {
+    hold = { pk: curPk, offset: 0, pausedAt: null }; saveHold(); setFull(); paintHold(); show();
+  });
+  function stamp(s, now) {   // when a state counts as having arrived: MLB's time of its latest pitch plus the feed's usual lag, so a burst keeps the game's own spacing
+    if (replay || s.ft == null) return now;
+    if (s.latest && now - s.ft < 120) { lagS.push(now - s.ft); if (lagS.length > 15) lagS.shift(); }
+    var L = lagS.length ? lagS.slice().sort(function (a, b) { return a - b; })[lagS.length >> 1] : 15;
+    return Math.min(now, s.ft + L);
+  }
+  function sig(s) { var e = s.events[s.events.length - 1] || {}, c = s.cues[s.cues.length - 1] || {}; return [s.ft, s.status, (s.wp || []).length, !!s.pregame, c.id, e.t, e.text].join('|'); }
   function hhmm(t) { var d = new Date(t * 1000); return d.toTimeString().slice(0, 5); }
   // the games: today's postseason schedule (US Mountain date), or a game named in the link (?g=PK), or the replay (?replay)
   var q = location.search, gq = (q.match(/[?&]g=(\d+)/) || [])[1], replay = /[?&]replay\b/.test(q), worker = null;
   function start(pk) {
     if (worker) worker.terminate();
-    buf = [];
-    worker = new Worker('analyst.js?v=3.9.6');   // bump with each engine or bundle (GitHub Pages caches 10 min)
+    buf = []; curPk = replay ? 'replay' : pk;
+    try { var hs = JSON.parse(localStorage.getItem('couch-hold') || 'null'); if (hs && hs.pk === curPk) hold = hs; else hold = { pk: curPk, offset: 0, pausedAt: null }; } catch (e) {}
+    paintHold();
+    worker = new Worker('analyst.js?v=3.9.7');   // bump with each engine or bundle (GitHub Pages caches 10 min)
     worker.onmessage = function (e) {
       if (e.data.type === 'status') document.getElementById('status').textContent = e.data.text;
-      else if (e.data.type === 'state') { buf.push({ at: Date.now() / 1000, s: e.data.state }); if (buf.length > 400) buf.shift(); show(); }
+      else if (e.data.type === 'state') {
+        var now = Date.now() / 1000, st = e.data.state, last = buf[buf.length - 1];
+        if (last && last.sig === sig(st)) return;   // nothing new in it
+        buf.push({ at: Math.max(stamp(st, now), last ? last.at : 0), s: st, sig: sig(st) }); show();
+      }
     };
     worker.onerror = function (e) { document.getElementById('status').textContent = 'The analyst stopped: ' + e.message; };
-    worker.postMessage(replay ? { cmd: 'start', pk: 849839, replay: 'data/replay_849839_feed.json', replayWp: 'data/replay_849839_wp.json', dt: 1500 } : { cmd: 'start', pk: pk });
+    worker.postMessage(replay ? { cmd: 'start', pk: 849839, replay: 'data/replay_849839_feed.json', replayWp: 'data/replay_849839_wp.json', dt: 1500 } : { cmd: 'start', pk: pk, full: behind(Date.now() / 1000) > 0 });
   }
   function poll() { show(); setTimeout(poll, 1000); }
   var day = new Date(Date.now() - 6 * 3600 * 1000).toISOString().slice(0, 10);
@@ -126,11 +160,13 @@ table.led td { padding: 6px; text-align: right; font-family: var(--data); font-v
     if (replay || pick) start(pick);
     else document.getElementById('status').textContent = 'No postseason games today. Try the replay.';
   }).catch(function () { if (replay || gq) start(+gq); else document.getElementById('status').textContent = 'MLB\'s schedule did not answer.'; });
+  var shown = null;
   function show() {
-    var now = Date.now() / 1000, pick = null;
-    for (var k = buf.length - 1; k >= 0; k--) if (buf[k].at <= now - delay) { pick = buf[k]; break; }
-    document.getElementById('age').textContent = buf.length ? (pick ? 'showing ' + Math.round(now - pick.at) + ' s ago' : 'holding') : '';
-    if (pick) render(pick.s);
+    var now = Date.now() / 1000, b = behind(now), pick = null, k;
+    for (k = buf.length - 1; k >= 0; k--) if (buf[k].at <= now - delay - b) { pick = buf[k]; break; }
+    if (k > 0) buf.splice(0, k);   // what came before the state on show is never needed again (a pause only holds it)
+    document.getElementById('age').textContent = hold.pausedAt ? 'paused ' + mmss(now - hold.pausedAt) : b > 0 ? mmss(b) + ' behind live' : buf.length ? (pick ? (now - pick.at < 300 ? 'showing ' + Math.round(now - pick.at) + ' s ago' : '') : 'holding') : '';
+    if (pick && pick !== shown) { shown = pick; render(pick.s); }
   }
   function render(s) {
     var A = s.teams.away, H = s.teams.home, ab = A.abbrev || A.name, hb = H.abbrev || H.name, n = s.now;

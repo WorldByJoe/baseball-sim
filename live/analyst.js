@@ -1,5 +1,5 @@
 /* ============================================================================
-   analyst.js · v0.5 · 2026-10-15
+   analyst.js · v0.6 · 2026-10-15
 
    The couch analyst in the browser: a Web Worker that follows one game on
    MLB's live feed (statsapi.mlb.com, open to any page) and runs the model on
@@ -9,10 +9,12 @@
    in one script, with the playoff players bundled in data/playoff.js. The wall's couch.html loads it as a
    plain script on its own thread (postMessage and importScripts stood in for).
 
-   Messages in:  { cmd: 'start', pk, replay (a feed file, optional), dt }
+   Messages in:  { cmd: 'start', pk, replay (a feed file, optional), dt, full }, { cmd: 'full', on }
    Messages out: { type: 'state', state }, { type: 'status', text }
 
    CHANGED
+     v0.6  MLB's time on every pitch and at-bat (state.ft, events' t); with 'full' on (the page is paused or behind live), a backlog
+           is played forward one pitch at a time, a state sent for each, so a paused viewer's page can hold them to the TV (Joe, 2026-10-15)
      v0.5  each simulation draws its own copy of the pitcher (REVIEW.redraw), in the at-bat analysis and the pregame replays (the model review)
      v0.4  a finished at-bat carries its result and the outs and bases after it (at a third out the card had kept two outs and
            no result through the break); a man missing from the bundle (a late roster add) is played as an average major leaguer of his hand and position,
@@ -25,7 +27,7 @@
            thread from a local file and cannot fetch
      v0.1  first build (Brewers-Padres, NLDS Game 3, 2026-10-06)
 ============================================================================ */
-var V = '?v=3.9.6';   // bump with each engine or bundle, as index.html's worker tag (GitHub Pages caches 10 min)
+var V = '?v=3.9.7';   // bump with each engine or bundle, as index.html's worker tag (GitHub Pages caches 10 min)
 importScripts('engine/bb_engine.js' + V, 'engine/bb_names.js' + V, 'engine/bb_field.js' + V, 'engine/bb_game.js' + V, 'engine/players.js' + V, 'data/playoff.js' + V);
 REVIEW.setData(PLAYOFF.recs, PLAYOFF.fits, PLAYOFF.pfit);
 
@@ -43,6 +45,7 @@ function kindOf(t) { return BB.PITCH_TYPES[t] ? BB.PITCH_TYPES[t].kind : null; }
 function last(n) { var a = String(n).split(' ').filter(function (w) { return !/^(Jr\.?|Sr\.?|II|III|IV)$/.test(w); }); return a[a.length - 1]; }   // the surname, without Jr.
 
 // ---------------------------------------------------------------- the feed
+function ts(x) { var v = Date.parse(x); return isNaN(v) ? null : v / 1000; }   // MLB's ISO time, in seconds
 function parseFeed(d) {
   var gd = d.gameData, ld = d.liveData, box = ld.boxscore.teams, out = { teams: {}, lineups: {}, pitchers: {}, pas: [] };
   ['away', 'home'].forEach(function (s) {
@@ -61,14 +64,14 @@ function parseFeed(d) {
       if (ev.hitData && ev.hitData.launchSpeed != null) { var h = ev.hitData, co = h.coordinates || {}; hit = { ev: h.launchSpeed, la: h.launchAngle, dist: h.totalDistance, hcx: co.coordX, hcy: co.coordY, traj: h.trajectory, hard: h.hardness }; }
       if (!ev.isPitch) return;
       var pd = ev.pitchData || {}, c = pd.coordinates || {}, br = pd.breaks || {}, det = ev.details || {};
-      pitches.push({ code: det.code, type: (det.type || {}).code, mph: pd.startSpeed, rpm: br.spinRate, px: c.pX, pz: c.pZ, balls: b, strikes: s,
+      pitches.push({ t: ts(ev.endTime || ev.startTime), code: det.code, type: (det.type || {}).code, mph: pd.startSpeed, rpm: br.spinRate, px: c.pX, pz: c.pZ, balls: b, strikes: s,
                       top: pd.strikeZoneTop, bot: pd.strikeZoneBottom, tr: c.x0 != null ? [c.x0, c.y0, c.z0, c.vX0, c.vY0, c.vZ0, c.aX, c.aY, c.aZ] : null });   // Statcast's own fit of the flight, for the catcher's view
       var cnt = ev.count || {}; if (cnt.balls != null) b = cnt.balls; if (cnt.strikes != null) s = cnt.strikes;
     });
     var r = pl.result || {}, done = !!r.eventType && pl.about.isComplete !== false && r.eventType !== 'game_advisory';   // a delay marks an at-bat still under way 'game_advisory'
     var post = [m.postOnFirst ? m.postOnFirst.id : null, m.postOnSecond ? m.postOnSecond.id : null, m.postOnThird ? m.postOnThird.id : null];
     var newScore = [r.awayScore != null ? r.awayScore : score[0], r.homeScore != null ? r.homeScore : score[1]];
-    out.pas.push({ i: out.pas.length, inning: ab.inning, half: half, bat: half === 'top' ? 'away' : 'home', outs: outs, bases: bases.slice(), score: score.slice(),
+    out.pas.push({ i: out.pas.length, tStart: ts(ab.startTime), tEnd: done ? ts(ab.endTime) : null, inning: ab.inning, half: half, bat: half === 'top' ? 'away' : 'home', outs: outs, bases: bases.slice(), score: score.slice(),
                    batter: m.batter.id, batterName: m.batter.fullName, pitcher: m.pitcher.id, pitcherName: m.pitcher.fullName,
                    batSide: (m.batSide || {}).code, pitchHand: (m.pitchHand || {}).code, event: r.event || null, eventType: done ? r.eventType : null,
                    desc: r.description || '', pitches: pitches, hit: done ? hit : null, scoreAfter: newScore, outsAfter: (pl.count || {}).outs != null ? pl.count.outs : null, basesAfter: post });
@@ -299,11 +302,39 @@ function pregame(G) {
 }
 
 // ---------------------------------------------------------------- following the game
-var A = { cache: {}, done: {}, events: [], cues: [], cueN: 0, pre: null, wp: [], pk: null, live: true };
+var A = { cache: {}, done: {}, events: [], cues: [], cueN: 0, pre: null, wp: [], pk: null, live: true, full: false };
+function cut(pa, j) {   // the at-bat as it stood after j pitches, not yet finished
+  return Object.assign({}, pa, { pitches: pa.pitches.slice(0, j), eventType: null, hit: null, desc: '', scoreAfter: pa.score.slice(), outsAfter: null, basesAfter: pa.bases.slice() });
+}
+function frames(G) {   // v0.6: the game as it stood after each pitch not yet seen (and each new batter, and each finished at-bat)
+  var out = [], pas = G.pas;
+  pas.forEach(function (pa, i) {
+    var s = A.done[i], n = pa.pitches.length, fin = !!pa.eventType;
+    if (s && s[0] === n && s[1] === fin) return;
+    for (var j = s ? s[0] + 1 : 0; j < n; j++) out.push(Object.assign({}, G, { pas: pas.slice(0, i).concat([cut(pa, j)]), status: 'Live', detailed: 'In Progress' }));   // the new batter, then each pitch but the last
+    out.push(Object.assign({}, G, { pas: pas.slice(0, i + 1), status: 'Live', detailed: 'In Progress' }));   // the last pitch with the result it brought
+  });
+  if (out.length) { out[out.length - 1].status = G.status; out[out.length - 1].detailed = G.detailed; }
+  return out;
+}
 function step(feed) {
-  var G = parseFeed(feed), now = Date.now() / 1000, pas = G.pas;
+  if (A.busy) return;   // a catch-up still under way; the next poll picks up whatever it missed
+  var G = parseFeed(feed), F = A.full && A.live ? frames(G) : [];
+  if (F.length <= 1) { A.latest = true; advance(G); status(''); after(G); return; }
+  A.busy = true;
+  var run = function () {
+    try { F.forEach(function (g, k) { if (F.length > 3) status('Catching up pitch by pitch: ' + (k + 1) + ' of ' + F.length); A.latest = k === F.length - 1; advance(g); }); }
+    finally { A.busy = false; A.latest = true; }
+    status(''); after(G);
+  };
+  if (F.length <= 3) { run(); return; }
+  fetch('https://statsapi.mlb.com/api/v1/game/' + A.pk + '/winProbability').then(function (r) { return r.json(); })   // the curve first, so each held state can draw its part of it
+    .then(function (w) { A.wp = w.map(function (x) { return [x.atBatIndex, x.homeTeamWinProbability]; }); }).catch(function () {}).then(run);
+}
+function advance(G) {
+  var now = Date.now() / 1000, pas = G.pas;
   var todo = pas.filter(function (pa) { var s = A.done[pa.i]; return !s || s[0] !== pa.pitches.length || s[1] !== !!pa.eventType; });
-  var backlog = todo.length > 3;
+  var backlog = todo.length > 3 && !A.full;
   todo.forEach(function (pa, n) {
     var i = pa.i, complete = !!pa.eventType, prev = A.cache[i], quick = backlog && n < todo.length - 2, seenP = A.done[i] ? A.done[i][0] : 0;
     var onBase = pa.bases.filter(function (x) { return x; }).length, ctx = { bat: pa.bat, inning: pa.inning, half: pa.half, outs: pa.outs, onBase: onBase, score: pa.score.slice(), batter: pa.batterName };
@@ -316,11 +347,11 @@ function step(feed) {
     else { a = analyse(G, i, 0, true); a.probs = prev.probs; a.xwoba = prev.xwoba; a.pActual = a.probs && a.actual ? (a.probs[a.actual] != null ? a.probs[a.actual] : null) : null; }
     a.watch = (prev && prev.watch) || watch(G, pa, a);
     A.cache[i] = a;
-    if (!prev && !quick) A.events.push({ t: now, kind: 'up', text: 'Now batting: ' + a.watch[0], flag: false });
-    if (!quick) (a.pitches || []).slice(prev ? (prev.pitches || []).length : 0).forEach(function (q) { var x = pitchText(q); A.events.push({ t: now, kind: 'pitch', text: x[0], flag: x[1] }); });
+    if (!prev && !quick) A.events.push({ t: pa.tStart || now, kind: 'up', text: 'Now batting: ' + a.watch[0], flag: false });
+    if (!quick) (a.pitches || []).slice(prev ? (prev.pitches || []).length : 0).forEach(function (q, j) { var x = pitchText(q), f = pa.pitches[(prev ? (prev.pitches || []).length : 0) + j]; A.events.push({ t: (f && f.t) || now, kind: 'pitch', text: x[0], flag: x[1] }); });
     if (complete) {
       a.league = leagueHit(pa);
-      var y = paText(pa, a, a.league); A.events.push({ t: now, kind: 'pa', text: y[0], flag: y[1] });
+      var y = paText(pa, a, a.league); A.events.push({ t: pa.tEnd || now, kind: 'pa', text: y[0], flag: y[1] });
       var ri = pa.bat === 'away' ? 0 : 1;
       A.cues.push(Object.assign({ id: ++A.cueN, kind: 'pa', eventType: pa.eventType, event: pa.event, desc: pa.desc, runs: pa.scoreAfter[ri] - pa.score[ri], scoreAfter: pa.scoreAfter.slice(),
         pActual: a.pActual, flag: y[1], hit: pa.hit }, ctx));
@@ -329,8 +360,10 @@ function step(feed) {
     }
     A.done[i] = [pa.pitches.length, complete];
   });
-  status('');
   postMessage({ type: 'state', state: stateOf(G, now) });
+}
+function after(G) {
+  var now = Date.now() / 1000;
   if (A.live && A.wpDue) {   // MLB's curve, once a step (not once a plate appearance), and drawn again when it lands
     A.wpDue = false;
     fetch('https://statsapi.mlb.com/api/v1/game/' + A.pk + '/winProbability').then(function (r) { return r.json(); }).then(function (w) {
@@ -366,7 +399,8 @@ function stateOf(G, now) {
                           gx: q ? q.gx : null, gz: q ? q.gz : null, guess: q ? q.guess : null, guessShare: q ? q.guessShare : null }; }) };
   }
   var score = cur ? (cur.eventType ? cur.scoreAfter : cur.score) : [G.final.away, G.final.home];
-  return { updated: now, pk: A.pk, teams: G.teams, status: G.status, detailed: G.detailed, final: G.final, score: score, now: now_pa, ledger: led, pregame: A.pre && !A.pre.failed ? A.pre : null, wp: A.wp, events: A.events.slice(-60), cues: A.cues.slice(-60) };
+  var ft = cur ? (cur.eventType ? cur.tEnd : cur.pitches.length ? cur.pitches[cur.pitches.length - 1].t : cur.tStart) : null;   // v0.6: MLB's time of the latest thing this state shows
+  return { updated: now, ft: ft, latest: A.latest !== false, pk: A.pk, teams: G.teams, status: G.status, detailed: G.detailed, final: G.final, score: score, now: now_pa, ledger: led, pregame: A.pre && !A.pre.failed ? A.pre : null, wp: cur ? A.wp.filter(function (x) { return x[0] <= cur.i; }) : A.wp, events: A.events.slice(-60), cues: A.cues.slice(-60) };
 }
 
 // ---------------------------------------------------------------- the loop: live, or a finished game replayed
@@ -387,8 +421,9 @@ function replayFeeds(full) {
 }
 onmessage = function (e) {
   var m = e.data;
+  if (m.cmd === 'full') { A.full = !!m.on; return; }
   if (m.cmd !== 'start') return;
-  A.pk = m.pk;
+  A.pk = m.pk; A.full = !!m.full;
   if (m.replay) {
     A.live = false;
     status('Loading the replay');
