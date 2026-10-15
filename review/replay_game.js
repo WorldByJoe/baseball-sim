@@ -1,5 +1,5 @@
 /* ============================================================================
-   replay_game.js · v1.0 · 2026-10-14
+   replay_game.js · v1.1 · 2026-10-14
 
    A postseason game played again as it was played: the real batting order with
    its substitutions (each man takes his spot at the turn he took it, at the
@@ -21,6 +21,7 @@
    'errors' (then G, the league factor): each fielder's own error tendency (review/err_mult.py); 'pitched+errors' both.
 
    CHANGED
+     v1.1  mode 'pdraw': pitchers drawn from their fit's uncertainty (the model review)
      v1.0  mode 'fielding': real fielders' range and catchers' framing (review/field_traits.json; the model review)
      v0.9  audit: a hit with an error on the throw is labelled the hit; the steal columns read steal.safe (the model review)
      v0.8  calibration tokens 'eye=x' and 'aggr=y': the home edge's eye factor and aggression shift (season/home_cal_games.sh)
@@ -53,6 +54,7 @@
   // (review/field_traits.py: z in sd of true talent, shrunk), mode token 'fielding'; mapped onto the engine's traits at the
   // same quantile: route + 0.7 z sd and react - 0.7 z sd, framing + z sd; the draw's own spread kept in proportion to
   // what the estimate leaves unknown
+  if (MODE.indexOf('pdraw') >= 0) REVIEW.setPDraw(true);   // v1.1: each pitcher drawn from his fit's uncertainty (review/pitcher_sd.py)
   var FIELD = MODE.indexOf('fielding') >= 0 ? JSON.parse(read('review/field_traits.json')).players : null, TT = BB.TRAITS;
   function fieldOf(h, id, pos) {
     var f = FIELD && FIELD[id]; if (!f) return;

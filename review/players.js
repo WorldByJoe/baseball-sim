@@ -1,5 +1,5 @@
 /* ============================================================================
-   players.js · v0.3 · 2026-10-14
+   players.js · v0.4 · 2026-10-14
 
    Real players as the engine's players, for the playoff review. Loaded after
    bb_engine.js (and bb_field.js, bb_game.js when games are played).
@@ -24,6 +24,7 @@
    along the barrel, when fitted (review/fit_mishit.py).
 
    CHANGED
+     v0.4  PDRAW: pitchers drawn from their fit's uncertainty (review/pitcher_sd.py; the model review)
      v0.3  traits the data cannot identify (FREEZE) held at the posterior mean in replays (the model review)
      v0.2  setData(recs, fits, pfit) for a browser, which has no read(): the live page hands its bundle in
      v0.1  first build (the Yankees-Rays review, 2026-10-06)
@@ -35,6 +36,7 @@ var REVIEW = (function () {
   function latest(o) { if (!o) return null; var y = o['2026'] !== undefined ? o['2026'] : o['2025']; return typeof y === 'object' && y ? y.mean : y; }
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
+  var PDRAW = false;   // v0.4: draw each pitcher's deception and command from his fit's uncertainty (replay_game mode 'pdraw')
   var FREEZE = ['learn', 'coverage', 'commit'];   // faceSD and timingSD are now measured directly (review/fit_hitters.py v0.3)
   function hitter(fit, rng, draw, pos) {
     var B = BB.makeBatter(rng, { population: true, pos: pos || fit.position || 'DH', bats: fit.bats });
@@ -123,6 +125,10 @@ var REVIEW = (function () {
     if (use26 && use26.pitchesPerApp) P.stamina = role === 'SP' ? Math.max(75, use26.pitchesPerApp.mean) : Math.max(15, 1.2 * use26.pitchesPerApp.mean);
     P.role = role;
     var pf = PFIT && PFIT.pitchers[rec.id];   // the fitted hidden traits, when review/fit_pitchers.js has run
+    if (pf && PDRAW && pf.sdLogDec) {   // v0.4: a draw from his fit's uncertainty (review/pitcher_sd.py; the model review)
+      var z1 = rng.n(0, 1), z2 = rng.n(0, 1), rho = pf.rhoDecCmd || 0;
+      pf = { deception: pf.deception * Math.exp(pf.sdLogDec * z1), cmdScale: pf.cmdScale * Math.exp(pf.sdLogCmd * (rho * z1 + Math.sqrt(1 - rho * rho) * z2)), mishit: pf.mishit };
+    }
     if (pf) { P.deception = pf.deception; P.cmd = [P.cmd[0] * pf.cmdScale, P.cmd[1] * pf.cmdScale]; P.command = Math.sqrt((P.cmd[0] * P.cmd[0] + P.cmd[1] * P.cmd[1]) / 2); if (pf.mishit) P.mishit = pf.mishit; }
     return P;
   }  function pitcher(rec, rng, env) {
@@ -149,5 +155,5 @@ var REVIEW = (function () {
     try { PFIT = JSON.parse(read('review/pitchers_fit.json')); } catch (e) { PFIT = null; }
     return { recs: byId, fits: fits, pfit: PFIT };
   }
-  return { hitter: hitter, pitcher: pitcher, move: move, load: load, setData: setData };
+  return { hitter: hitter, pitcher: pitcher, move: move, load: load, setData: setData, setPDraw: function (v) { PDRAW = !!v; } };
 })();
