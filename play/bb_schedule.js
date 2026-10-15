@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_schedule.js · v0.8 · 2026-10-06
+   bb_schedule.js · v0.9 · 2026-10-15
 
    The game and its schedule, shared by the screen (baseball.html) and the
    headless tools, so the broadcast script can be written and checked
@@ -39,6 +39,7 @@
    teams are drawn fresh as before.
 
    CHANGED
+     v0.9  the real-player game: two clubs drafted at random from 2026's major leaguers with their own traits, 3 games in 10 (Joe)
      v0.8  the majors play the current rules: a designated hitter in every park (Joe, 2026-10-06)
      v0.7  holds: a segment waits for the lines the broadcast must say in it (the talk sets the pace)
      v0.6  more air for the omniscient broadcast: setup 4 s, a take 3.4, a foul 3.0, the batter's
@@ -78,9 +79,42 @@ var BBSchedule = (function () {
   // ============================================================ THE GAME
   var LEVEL_W = [0.55, 0.15, 0.10, 0.08, 0.07, 0.05];   // how often the screen visits each level: the majors, then Triple-A down to Rookie
   function stableOf() { return typeof window !== 'undefined' ? window.BB_STABLE || null : typeof BB_STABLE !== 'undefined' ? BB_STABLE : null; }
+  // THE REAL-PLAYER GAME (v0.9, Joe 2026-10-15): two clubs drafted at random from 2026's major leaguers, each man with his own
+  // traits (stable/bb_real2026.js, review/build_real2026.py: run 7's hitter fits and the season's pitcher fits, through
+  // review/players.js as the playoff replays build them). Thirteen hitters a club by the positions a standing roster has,
+  // five starters and eight relievers, nobody on both clubs; the day's team from the roster as the league's clubs choose
+  // theirs (BBGame.teamFromRoster). REAL_W of games, when the file is there.
+  var REAL_W = 0.3, ROSTER_POS = ['C', 'C', '1B', '2B', 'SS', '3B', 'SS', 'LF', 'CF', 'RF', 'CF', '1B', 'DH'], realReady = false;
+  function realOf() { var R = typeof window !== 'undefined' ? window.BB_REAL : typeof BB_REAL !== 'undefined' ? BB_REAL : null; return R && typeof REVIEW !== 'undefined' ? R : null; }
+  function realClubs(rng, RL, env) {
+    if (!realReady) { REVIEW.setData(RL.recs, RL.fits, RL.pfit); realReady = true; }
+    var POSMAP = { OF: 'LF', TWP: 'DH' }, byPos = {}, taken = {};
+    Object.keys(RL.fits).forEach(function (k) { var f = RL.fits[k], ps = POSMAP[f.position] || f.position; (byPos[ps] = byPos[ps] || []).push(f); });
+    var sp = RL.recs.filter(function (r) { return ((r.summaries.pitching.role || {}).role) === 'SP'; }), rp = RL.recs.filter(function (r) { return ((r.summaries.pitching.role || {}).role) !== 'SP'; });
+    function pick(list) { for (var t = 0; t < 400; t++) { var x = list[Math.floor(rng.u() * list.length)]; if (!taken[x.id]) { taken[x.id] = 1; return x; } } return null; }
+    var TT = BB.TRAITS, names = BBNames.teams(rng);
+    return names.slice(0, 2).map(function (nm) {
+      var R = { city: nm.city, nick: nm.nick, name: nm.city + ' ' + nm.nick, level: 1, real: true };
+      R.hitters = ROSTER_POS.map(function (pos) {
+        var f = pick(byPos[pos] && byPos[pos].length > 4 ? byPos[pos] : byPos.DH.concat(byPos['1B']));
+        var b = REVIEW.hitter(f, rng, null, pos === 'DH' ? 'DH' : pos); b.homePos = pos;
+        if (f.rangeZ !== undefined && pos !== 'DH' && pos !== 'C') {   // his own range (Savant), as replay_game's 'fielding' maps it
+          b.route = Math.min(TT.route[3], Math.max(TT.route[2], b.route + 0.7 * f.rangeZ * TT.route[1])); b.react = Math.max(0.05, b.react - 0.7 * f.rangeZ * TT.react[1]);
+        }
+        return b;
+      });
+      function arm(list) { var r = pick(list), P = REVIEW.pitcher(r, rng, env); P.bat = BB.makeBatter(rng, { pitcher: true, pos: 'P' }); P.bat.name = P.name; P.bat.id = P.id; P.warm = 0; P.used = false; P.pitchesToday = 0; return P; }
+      R.starters = [0, 1, 2, 3, 4].map(function () { return arm(sp); });
+      R.relievers = [0, 1, 2, 3, 4, 5, 6, 7].map(function () { return arm(rp); });
+      R.manager = { hook: Math.min(0.85, Math.max(0.3, rng.n(0.5, 0.12))), warmAt: 0.2, ibb: Math.max(0.02, rng.n(0.075, 0.02)), glove: Math.max(0, rng.n(0.012, 0.004)) };
+      return BBGame.teamFromRoster(R, Math.floor(rng.u() * 5));
+    });
+  }
   function game(seed) {
-    var rng = BB.makeRng(seed), ST = stableOf(), away, home, rules, level = 0, levelName = '';
-    if (ST) {   // two clubs of one level from the league, each with its roster as it stands
+    var rng = BB.makeRng(seed), ST = stableOf(), RL = realOf(), away, home, rules, level = 0, levelName = '', real = false, envR = null;
+    if (RL && rng.u() < REAL_W) {
+      envR = BB.mlbEnv(rng); var C = realClubs(rng, RL, envR); away = C[0]; home = C[1]; rules = 'AL'; level = 1; levelName = 'Real 2026 players'; real = true;
+    } else if (ST) {   // two clubs of one level from the league, each with its roster as it stands
       level = rng.pickW(LEVEL_W) + 1; levelName = ST.levels[level - 1].name;
       var n = ST.orgs.length, ia = Math.floor(rng.u() * n), ih; do { ih = Math.floor(rng.u() * n); } while (ih === ia);
       away = BBGame.teamFromRoster(ST.orgs[ia].clubs[level - 1], Math.floor(rng.u() * 5));
@@ -90,10 +124,10 @@ var BBSchedule = (function () {
       var teams = BBNames.teams(rng);
       away = BBGame.makeTeam(rng, teams[0]); home = BBGame.makeTeam(rng, teams[1]);
     }
-    var env = BB.mlbEnv(rng), parkName = BBNames.park(rng);
+    var env = envR || BB.mlbEnv(rng), parkName = BBNames.park(rng);
     var ump = BB.makeUmp(rng); ump.name = BBNames.fullName(BBNames.person(rng));
     var G = BBGame.simGame(away, home, { rng: rng, env: env, ump: ump, rules: rules });
-    G.level = level; G.levelName = levelName;
+    G.level = level; G.levelName = levelName; G.real = real;
     var PLAYER = {};   // every man who can bat, by id (a pitcher bats as his .bat)
     [away, home].forEach(function (Tm) { Tm.lineup.concat(Tm.bench).forEach(function (b) { PLAYER[b.id] = b; });
       [Tm.starter].concat(Tm.bullpen).forEach(function (P) { if (P.bat) PLAYER[P.id] = P.bat; }); });
@@ -220,7 +254,7 @@ var BBSchedule = (function () {
     return { SEG: SEG, total: total, segAt: segAt, playDuration: playDuration, runnerArrive: runnerArrive, ownArrive: ownArrive };
   }
 
-  return { version: '0.7', PACE: PACE, HR_BASE: HR_BASE, CELEB: CELEB, Phi: Phi, winProb: winProb, game: game, build: build };
+  return { version: '0.9', PACE: PACE, HR_BASE: HR_BASE, CELEB: CELEB, Phi: Phi, winProb: winProb, game: game, build: build };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = BBSchedule;

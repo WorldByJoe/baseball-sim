@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v4.9 · 2026-10-06
+  baseball.html · v5.1 · 2026-10-15
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a schedule - game night mode
@@ -48,6 +48,10 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v5.1  the model as the 2026 review left it (Joe, 2026-10-15): the engine of engine-dev (the playoff review's flight and
+          contact, the swing refit), bb_field v1.18 (infielders dive and recover, base covers in time), bb_game v1.10; and the
+          real-player game: 3 games in 10, two clubs drafted at random from 2026's major leaguers with their own traits
+          (review/players.js, stable/bb_real2026.js; bb_schedule v0.9); the league stable rebuilt on this engine (?v=5)
     v4.9  the model as it ends the season's development: engine v3.9 (the contact work through VS), bb_field v1.15,
           bb_game v1.6 (the current rules), bb_schedule v0.8; the league stable rebuilt on it (?v=4)
     v4.8  the talk sets the clock (bb_call v0.7, bb_schedule v0.7): a segment lasts until its lines are said;
@@ -147,18 +151,20 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   <div id="hud" class="tag"></div>
 </div>
 <!-- version tags so a browser never runs a stale engine against a new page -->
-<script src="bb_engine.js?v=3.9"></script>
-<script src="bb_names.js?v=0.1"></script>
-<script src="bb_field.js?v=1.15"></script>
-<script src="bb_game.js?v=1.6"></script>
-<script src="bb_schedule.js?v=0.8"></script>
+<script src="bb_engine.js?v=3.9r7"></script>
+<script src="bb_names.js?v=0.2"></script>
+<script src="bb_field.js?v=1.18"></script>
+<script src="bb_game.js?v=1.10"></script>
+<script src="review/players.js?v=0.6"></script>
+<script src="stable/bb_real2026.js?v=1"></script>
+<script src="bb_schedule.js?v=0.9"></script>
 <script src="bb_call.js?v=0.7"></script>
 <script src="bb_organ.js?v=0.1"></script>
 <script src="bb_sound.js?v=0.1"></script>
 <!-- the park's sound files, when they are beside the page; without it the game plays silently -->
 <script src="sounds/manifest.js"></script>
 <!-- the league's standing rosters, when they are beside the page (headless/league_run.js writes them); without it every game draws two new teams -->
-<script src="stable/bb_stable.js?v=4"></script>
+<script src="stable/bb_stable.js?v=5"></script>
 <script>
 (function () {
   'use strict';
@@ -1685,7 +1691,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
     if (seg.kind === 'pregame') {
       var h = ['<h1>' + esc(G.teams[0].name) + ' at ' + esc(G.teams[1].name) + '</h1>'];
       h.push('<div class="row soft">' + esc(parkName) + ' · ' + f0(env.elevFt) + ' ft · ' + f0(env.tempF) + '°F · ' + f0(100 * env.rh) + '% RH · ' + rulesWords() + ' · HP umpire ' + esc(ump.name) + '</div>');
-      h.push('<div class="row faint">' + (G.level ? 'two ' + G.levelName.toLowerCase() + ' clubs with their rosters as they stand in the league' : 'each man the best of six candidates for his place') + '; the numbers on the right are his odds, projected over 250 plate appearances · first pitch in ' + f0(Math.max(0, seg.dur - tau)) + ' s (p to skip)</div>');
+      h.push('<div class="row faint">' + (G.real ? 'two clubs drafted at random from the 2026 major leaguers, each man with his own measured and fitted traits' : G.level ? 'two ' + G.levelName.toLowerCase() + ' clubs with their rosters as they stand in the league' : 'each man the best of six candidates for his place') + '; the numbers on the right are his odds, projected over 250 plate appearances · first pitch in ' + f0(Math.max(0, seg.dur - tau)) + ' s (p to skip)</div>');
       h.push('<div class="row faint">the win probability on the board is an estimate from the run difference, the innings left and the base-out state</div>');
       h.push('<div class="cols">' + teamSheet(G.teams[0], false) + teamSheet(G.teams[1], true) + '</div>');
       setHTML(EL.overlay, h.join('')); EL.overlay.className = 'on';

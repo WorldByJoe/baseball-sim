@@ -1,9 +1,13 @@
 # Ballgame (the latest version)
 
-The game screen and everything it loads, as of the `integrate` branch after PR #42: baseball.html v4.9 with the
-broadcast (bb_call v0.7, bb_schedule v0.8) and the swing view, bb_engine v3.9 (the model as the season's development
-left it), bb_field v1.15, bb_game v1.6 (the current rules), and the crowd, field and organ sounds. https://worldbyjoe.github.io/baseball-sim/play/
+The game screen and everything it loads, updated 2026-10-15 at the end of the 2026 model review: baseball.html v5.1 with
+the broadcast (bb_call v0.7, bb_schedule v0.9), the engine of the `engine-dev` branch (the playoff review's batted-ball
+flight and contact, the swing refit of run 6), bb_field v1.18 (infielders dive and must get up, base covers arrive in
+time), bb_game v1.10, and the crowd, field and organ sounds. https://worldbyjoe.github.io/baseball-sim/play/
 
-The announcers' voices come from the speech server on the TV's Pi and are silent here; without the league
-stable (stable/bb_stable.js, generated) each game draws fresh teams. Copied 2026-10-06 (engine v3.9); the root baseball.html
-redirects here.
+Three games in ten are drawn from real players: two clubs of 2026 major leaguers picked at random, each man with his own
+measured and fitted traits (stable/bb_real2026.js, built by review/build_real2026.py on engine-dev from the season
+replay's fits; review/players.js builds them as the playoff replays do). The rest are the league stable's clubs at one of
+its six levels, or freshly drawn teams when the stable (stable/bb_stable.js, generated, not in git) is absent.
+
+The announcers' voices come from the speech server on the TV's Pi and are silent here. The root baseball.html redirects here.

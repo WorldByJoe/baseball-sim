@@ -646,7 +646,7 @@ var BBCall = (function () {
         say(seg, 1.2, 'pa', 'excited', ['Ladies and gentlemen, now taking the field, your ' + H.name + '!'], 1, { chime: true });
         cue(seg, 3.2, 'applause_polite', 1.0); cue(seg, 4.2, 'cheer_medium', 0.8);
         play_(seg, 4.4, 'organ_take_field');
-        var lvl = G.level > 1 ? G.levelName + ' baseball tonight. ' : '';
+        var lvl = G.real ? 'A draft of real major leaguers tonight, every man playing to his own numbers. ' : G.level > 1 ? G.levelName + ' baseball tonight. ' : '';
         say(seg, 6.5, 'pbp', 'building', [lvl + 'And ' + H.starter.name + ', the ' + hand(H.starter) + ', will take the ball for the ' + H.nick + '. ' + first.batter.name + ' leads off for the ' + A.nick + '.',
                                          ln(H.starter) + ' on the mound for the ' + H.nick + '.'], 1, { slide: 2 });
         return;
