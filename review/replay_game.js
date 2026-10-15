@@ -1,5 +1,5 @@
 /* ============================================================================
-   replay_game.js · v1.4 · 2026-10-15
+   replay_game.js · v1.5 · 2026-10-15
 
    A postseason game played again as it was played: the real batting order with
    its substitutions (each man takes his spot at the turn he took it, at the
@@ -21,6 +21,7 @@
    'errors' (then G, the league factor): each fielder's own error tendency (review/err_mult.py); 'pitched+errors' both.
 
    CHANGED
+     v1.5  mode token tf={json}: BBField.tuneField options (calibration)
      v1.4  'fielding' leaves a hitter alone when players.js v0.7 has applied his range
      v1.3  each replay copies the game's pitchers (REVIEW.redraw) and draws their fit's uncertainty afresh; v1.2's rebuild each replay was 20x slower
      v1.2  pitchers built afresh for each replay, not once a game (the model review)
@@ -58,6 +59,7 @@
   // same quantile: route + 0.7 z sd and react - 0.7 z sd, framing + z sd; the draw's own spread kept in proportion to
   // what the estimate leaves unknown
   if (MODE.indexOf('pdraw') >= 0) REVIEW.setPDraw(true);   // v1.1: each pitcher drawn from his fit's uncertainty (review/pitcher_sd.py)
+  MODE.forEach(function (m) { if (m.indexOf('tf=') === 0 && BBField.tuneField) BBField.tuneField(JSON.parse(m.slice(3))); if (m.indexOf('tc=') === 0) BB.tuneContact(JSON.parse(m.slice(3))); });   // tc={...}: BB.tuneContact (calibration)   // v1.5: tf={...} fielding calibration options
   var FIELD = MODE.indexOf('fielding') >= 0 ? JSON.parse(read('review/field_traits.json')).players : null, TT = BB.TRAITS;
   function fieldOf(h, id, pos) {
     var f = FIELD && FIELD[id]; if (!f) return;

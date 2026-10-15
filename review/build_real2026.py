@@ -8,7 +8,7 @@ the second half's preferred: 2025 and 2026's second half), with each man's own r
 spins, release, command, workload) and their fitted deception, command scale and mishit. Hitters need 100 plate
 appearances in the fits' window and pitchers 30 batters faced, so the draws are real major leaguers, not a September cup.
 
-  python3 review/build_real2026.py OUT.js       -> window.BB_REAL = { fits, recs, pfit, made }
+  python3 review/build_real2026.py OUT.js [fold-B worktree] [fold-A worktree]       -> window.BB_REAL = { fits, recs, pfit, made }
 """
 import json, os, sys, datetime
 H = os.path.expanduser('~/bsim-wt')
@@ -18,8 +18,9 @@ def load(w):
     recs = {str(r['id']): r for r in json.load(open('%s/%s/playoffs/players_measured.json' % (H, w)))['players']}
     pf = json.load(open('%s/%s/review/pitchers_fit.json' % (H, w)))
     return fits, recs, pf
-fB, rB, pB = load('hist26B7'); fA, rA, pA = load('hist26A7')
-ft = json.load(open('%s/hist26B7/review/field_traits.json' % H))['players'] if os.path.exists('%s/hist26B7/review/field_traits.json' % H) else {}
+WB, WA = (sys.argv[2], sys.argv[3]) if len(sys.argv) > 3 else ('hist26B7', 'hist26A7')
+fB, rB, pB = load(WB); fA, rA, pA = load(WA)
+ft = json.load(open('%s/%s/review/field_traits.json' % (H, WB)))['players'] if os.path.exists('%s/%s/review/field_traits.json' % (H, WB)) else {}
 def pa(r, kind):
     ss = (r or {}).get('seasonStats') or {}
     if kind == 'hit': return sum(((ss.get('hitting_%d' % y) or {}).get('PA') or 0) for y in (2025, 2026))
