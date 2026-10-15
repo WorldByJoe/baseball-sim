@@ -1,0 +1,94 @@
+{
+ "intro": "<p>Under each game, a note on what surprised the model and what decided it. Each game was set against what the published model expected before it, with the lineups as they were. Three yardsticks separate surprise from skill. The first is the model's win share for each side, from 1,000 replays. The second is each side's expected runs, hits, home runs, strikeouts and walks, from 300 replays of the same game. The third is the hits each side's contact deserved, from the 2026 league's hit rate at that exit speed and launch angle. A side with more hits than its contact deserved had luck on balls in play or poor defence against it. The turning points are the plate appearances that moved the win expectancy most, using the league's 2026 win expectancy by inning, outs, bases and score.</p>\n<p>One bias runs through every game. The live engine expects about half again as many extra-base hits as real teams produced (72 real against 108 expected across all twenty games). That is the doubles excess the season audit found, so a team's extra-base shortfall means something only when it is larger than that.</p>",
+ "games": {
+  "849828": {
+   "title": "NLDS Game 1, 3 October: Braves 3 at Dodgers 5",
+   "html": "<p class=\"meta\">Model: Dodgers 64%. Dodgers runs 5 (expected 4.9); Braves 3 (3.4).</p>\n<p>The favourite won in the expected way, through power. The Dodgers hit three home runs where the replays averaged 1.4, and two of them decided the game. Teoscar Hernández hit a two-run homer off Victor Mederos in the fourth, the largest swing of the night at 21 points of win expectancy. Kyle Tucker added a two-run homer off AJ Smith-Shawver in the sixth. Tarik Skubal held Atlanta to two hits and one run over six innings with seven strikeouts. Both lineups got fewer hits than their contact deserved (the Dodgers 8 against 10.2, the Braves 4 against 5.8), so the result was not a product of luck on balls in play.</p>"
+  },
+  "849829": {
+   "title": "ALDS Game 1, 3 October: White Sox 3 at Guardians 0",
+   "html": "<p class=\"meta\">Model: Guardians 52%. Guardians runs 0 (expected 2.9); White Sox 3 (2.8).</p>\n<p>Cleveland's shutout was the surprise, and it was mostly real rather than bad luck. The Guardians managed three hits against 6.7 expected, but their contact deserved only 4.2, because they hit five balls at 95 mph or more against 7.7 expected. They struck out 12 times against 9.9 expected. Chicago won with a relay of relievers: Hagen Smith threw 2.2 hitless innings (with three walks) and Grant Taylor four innings of two-hit ball with six strikeouts. Munetaka Murakami's two-run homer off Parker Messick in the fourth was the game's largest swing.</p>"
+  },
+  "849830": {
+   "title": "NLDS Game 1, 3 October: Padres 2 at Brewers 3",
+   "html": "<p class=\"meta\">Model: Brewers 68%. Brewers runs 3 (expected 4.5); Padres 2 (3.0).</p>\n<p>Milwaukee won as favoured but scored only on home runs. Jackson Chourio's two-run homer in the third and William Contreras's solo homer off Adrian Morejon in the seventh (23 points of win expectancy) were the runs that counted. The Padres outhit Milwaukee 9 to 7, with more hits than their contact deserved (9 against 7.1), yet left them stranded: Jackson Merrill's outs in key spots cost San Diego 29 points of win expectancy. Milwaukee's hitters struck out only six times against 9.5 expected, the first sign of a pattern that ran through their October. Trevor Megill closed with 1.1 scoreless innings.</p>"
+  },
+  "849835": {
+   "title": "ALDS Game 1, 3 October: Yankees 0 at Rays 1",
+   "html": "<p class=\"meta\">Model: Rays 54%. Yankees runs 0 (expected 2.7); Rays 1 (3.0).</p>\n<p>Drew Rasmussen's start was the biggest single-player surprise of the round. He allowed one hit in eight innings with ten strikeouts, worth 58 points of win expectancy. The Yankees' one hit compared with 6.6 expected, and their contact deserved 5.5, so roughly four hits went missing to good defence or bad luck. The rest was weak contact: seven hard-hit balls against 9.8 expected. Jonathan Aranda's solo homer off Gerrit Cole in the third was the only run.</p>"
+  },
+  "849823": {
+   "title": "NLDS Game 2, 4 October: Braves 3 at Dodgers 2",
+   "html": "<p class=\"meta\">Model: Dodgers 58%. Braves runs 3 (expected 3.9); Dodgers 2 (4.2).</p>\n<p>Atlanta won on walks. The Braves drew nine against 3.1 expected, five of them off Blake Snell in 3.2 innings and three off Roki Sasaki in two. They scored three runs without a home run. The Dodgers hit the ball softly, with six hard-hit balls against 9.7 expected, and their only runs were solo homers by Freddie Freeman and, in the ninth, Max Muncy. Didier Fuentes held them to one hit over 3.2 innings of relief. Michael Harris II's run-scoring double in the seventh put Atlanta ahead for good.</p>"
+  },
+  "849825": {
+   "title": "NLDS Game 2, 4 October: Padres 3 at Brewers 4",
+   "html": "<p class=\"meta\">Model: Brewers 61%. Brewers runs 4 (expected 3.7); Padres 3 (2.9).</p>\n<p>One swing decided it. Down a run in the ninth, Milwaukee had the bases loaded with two out after Mason Miller walked three men in the inning. Jackson Chourio's two-run single to centre was worth 75 points of win expectancy, the largest single play of the postseason. Neither side homered, where the replays expected about one each. A seventh-inning error by Jake Cronenworth had given Milwaukee an unearned run that kept the game close enough for the walk-off.</p>"
+  },
+  "849834": {
+   "title": "ALDS Game 2, 5 October: White Sox 4 at Guardians 3",
+   "html": "<p class=\"meta\">Model: Guardians 54%. White Sox runs 4 (expected 3.0); Guardians 3 (3.0).</p>\n<p>Gavin Williams struck out eleven in five innings, and Cleveland still lost. Two of the Guardians' three runs came unearned in the first on Sean Newcomb's throwing error. Chicago then got 5.1 innings of one-hit relief from Sean Burke. Braden Montgomery's two-run double off Erik Sabrowski in the sixth (29 points) put Chicago ahead. The White Sox won while hitting the ball softly (four hard-hit balls against 7.4 expected), so sequencing did more for them than contact.</p>"
+  },
+  "849839": {
+   "title": "ALDS Game 2, 5 October: Yankees 2 at Rays 5",
+   "html": "<p class=\"meta\">Model: Rays 46%. Rays runs 5 (expected 2.6); Yankees 2 (2.9).</p>\n<p>The model had the Yankees as slight favourites, and Tampa Bay's contact overturned that. The Rays struck out four times against 8.9 expected and hit fifteen balls at 95 mph or more against 8.2 expected. Their contact deserved 11.2 hits and they got eight, so they were if anything unlucky. Cam Schlittler gave up three runs in 4.1 innings, and Junior Caminero's double in the fifth was the key hit. New York's two runs were both solo homers by Ben Rice.</p>"
+  },
+  "849819": {
+   "title": "NLDS Game 3, 6 October: Dodgers 3 at Braves 1",
+   "html": "<p class=\"meta\">Model: Braves 57%. Dodgers runs 3 (expected 3.3); Braves 1 (3.8).</p>\n<p>Yoshinobu Yamamoto took the game away from Atlanta. He struck out ten in seven innings and allowed four hits, and the Braves hit only four balls hard against 9.4 expected. The Dodgers scored all three runs in the fourth on two homers off Chris Sale, Enrique Hernández's two-run shot and Freddie Freeman's solo. Sale struck out seven but the two homers, against 0.7 expected, cost him the game.</p>"
+  },
+  "849826": {
+   "title": "NLDS Game 3, 6 October: Brewers 3 at Padres 4",
+   "html": "<p class=\"meta\">Model: Padres 45%. Brewers runs 3 (expected 4.0); Padres 4 (3.6).</p>\n<p>Milwaukee outhit San Diego 11 to 6 and lost. The Brewers hit fifteen balls hard against 9.1 expected, and their contact deserved 8.0 hits against the eleven they got, yet the hits came singly. Christian Yelich's ninth-inning double play with the tying run aboard cost 25 points of win expectancy. San Diego scored twice in the third without a hard-hit ball, then on Jake Cronenworth's homer and on a throwing error by Cooper Pratt. Michael King's two innings of relief closed it.</p>"
+  },
+  "849822": {
+   "title": "NLDS Game 4, 7 October: Dodgers 4 at Braves 1",
+   "html": "<p class=\"meta\">Model: Braves 36%. Dodgers runs 4 (expected 4.9); Braves 1 (3.1).</p>\n<p>The Dodgers were heavy favourites and won without much drama. Andy Pages's two-run single off Robert Suarez in the seventh (28 points) broke a 1-1 game, and Max Muncy homered in the ninth. Tyler Glasnow walked five in 4.2 innings but allowed one hit. Atlanta's three hits fell well short of the 6.2 their contact deserved. The Dodgers struck out only five times against 9.2 expected.</p>"
+  },
+  "849827": {
+   "title": "NLDS Game 4, 7 October: Brewers 3 at Padres 1",
+   "html": "<p class=\"meta\">Model: Padres 42%. Brewers runs 3 (expected 4.0); Padres 1 (2.8).</p>\n<p>Milwaukee's hitters struck out three times against 10.8 expected, the most extreme contact game of the postseason. Ten hits came out of it, two more than the contact deserved. On the other side, Aaron Ashby threw three hitless innings of relief, and San Diego's three hits fell short of the 6.6 its contact deserved. Fernando Tatis Jr.'s homer was the Padres' only run. Walker Buehler struck out nobody in three innings.</p>"
+  },
+  "849833": {
+   "title": "ALDS Game 3, 7 October: Guardians 9 at White Sox 3",
+   "html": "<p class=\"meta\">Model: White Sox 48%. Guardians runs 9 (expected 3.5; 5% of replays scored as many); White Sox 3 (3.4).</p>\n<p>Two numbers explain the rout. Chicago's pitchers walked ten Guardians against 3.8 expected, and Chicago's hitters struck out nineteen times against 10.8 expected. Cleveland scored nine without a home run, so the walks put men on for the hits: Jo Adell's bases-clearing triple off Hagen Smith in the third was the decisive swing (27 points). Foster Griffin struck out seven in 2.2 innings and Cade Smith five in two.</p>"
+  },
+  "849838": {
+   "title": "ALDS Game 3, 7 October: Rays 4 at Yankees 3",
+   "html": "<p class=\"meta\">Model: Yankees 54%. Rays runs 4 (expected 3.1); Yankees 3 (3.1).</p>\n<p>Tampa Bay won on two home runs off Max Fried, against 0.6 expected: Victor Mesa Jr.'s two-run shot in the sixth (29 points) and Ryan Vilade's solo in the fourth. New York struck out twelve times against 8.6 expected. A review in the sixth turned Anthony Volpe's home run into a double for fan interference, which may have cost the Yankees a run. The Rays completed a three-game sweep.</p>"
+  },
+  "849832": {
+   "title": "ALDS Game 4, 8 October: Guardians 9 at White Sox 5",
+   "html": "<p class=\"meta\">Model: White Sox 47%. Guardians runs 9 (expected 3.6; 7% of replays); White Sox 5 (3.4).</p>\n<p>Cleveland repeated the formula. The Guardians drew eight walks against 3.6 expected and struck out only three times against 8.5 expected. Grant Taylor faced six batters in the sixth without getting an out, allowing four hits, two walks and five runs, worth minus 43 points of win expectancy. José Ramírez's two-run homer in the fifth and Patrick Bailey's homer and run-scoring single did the rest. Chicago's hitters also drew nine walks, so both staffs were wild, but Cleveland's hitters turned their chances into runs.</p>"
+  },
+  "849831": {
+   "title": "ALDS Game 5, 10 October: White Sox 0 at Guardians 2",
+   "html": "<p class=\"meta\">Model: Guardians 55%. White Sox runs 0 (expected 2.9); Guardians 2 (3.4).</p>\n<p>Gavin Williams struck out twelve in 5.2 innings and allowed one hit. The White Sox struck out 21 times against 13.4 expected and hit two balls hard against 7.5 expected, about as complete a shutdown as the model's numbers can describe. José Ramírez's two-run homer off Sean Burke in the fourth was the series-winning swing. Chicago's 75 strikeouts in five games against 61 expected were the series' clearest difference.</p>"
+  },
+  "849809": {
+   "title": "NLCS Game 1, 11 October: Dodgers 1 at Brewers 2",
+   "html": "<p class=\"meta\">Model: Brewers 60%. Dodgers runs 1 (expected 2.8); Brewers 2 (3.4).</p>\n<p>The Dodgers put runners on and could not move them. They drew six walks against 3.5 expected and got seven hits, but none went for extra bases against 2.4 expected. Enrique Hernández's double play in the second cost 13 points of win expectancy. Milwaukee scored on Brice Turang's homer off Tarik Skubal and Luis Lara's run-scoring single. Aaron Ashby (two hitless innings) and Trevor Megill finished it.</p>"
+  },
+  "849812": {
+   "title": "NLCS Game 2, 12 October: Dodgers 4 at Brewers 7",
+   "html": "<p class=\"meta\">Model: Brewers 61%. Brewers runs 7 (expected 4.2; 21% of replays); Dodgers 4 (3.2).</p>\n<p>Milwaukee knocked Yoshinobu Yamamoto out in the third, and the Dodgers' contact went unrewarded. The Brewers got twelve hits against 7.8 expected and drew seven walks against 4.0. Their contact deserved 11.2 hits, so the hits were earned, though mostly singles: they hit only six balls hard. Christian Yelich's two-run single in the third and William Contreras's homer and run-scoring single (29 points in all) built the lead. The Dodgers got three hits from contact that deserved 6.3. Milwaukee's bullpen (Uribe, Romero, Ashby) allowed no hits over the last four innings.</p>"
+  },
+  "849820": {
+   "title": "ALCS Game 1, 12 October: Guardians 7 at Rays 3",
+   "html": "<p class=\"meta\">Model: Rays 52%. Guardians runs 7 (expected 2.6; 4% of replays); Rays 3 (2.8).</p>\n<p>Cleveland's fourteen hits were the surprise. The replays expected 7.3, and the contact deserved 11.2, so about three of the hits were luck and the rest strong contact. Two homers off Drew Rasmussen, against 0.5 expected, came from Chase DeLauter in the sixth and Patrick Bailey in the seventh. Nathaniel Lowe's two-run single in the eighth (19 points) opened it up against Tampa Bay's bullpen. Rasmussen, who had allowed one hit in his last start, gave up eight in six innings.</p>"
+  },
+  "849813": {
+   "title": "ALCS Game 2, 13 October: Guardians 1 at Rays 3",
+   "html": "<p class=\"meta\">Model: Rays 54%. Guardians runs 1 (expected 3.0); Rays 3 (3.3).</p>\n<p>This was the most ordinary game of the postseason by the model's measures. Freddy Peralta threw six scoreless innings. Tampa Bay scored all three runs in the fourth, two on Liam Hicks's single and one on a fielding error by José Ramírez. Cleveland's contact deserved 7.6 hits and got six.</p>"
+  },
+  "849811": {
+   "title": "NLCS Game 3, 14 October: Brewers 6 at Dodgers 2",
+   "html": "<p class=\"meta\">Model: Dodgers 56%. Brewers runs 6 (expected 4.4; 33% of replays scored as many); Dodgers 2 (3.3).</p>\n<p>The Brewers won with three home runs off Blake Snell, against 1.0 expected. Snell otherwise pitched well, striking out nine in six innings and allowing four hits. Jackson Chourio's solo homer in the first gave Milwaukee the lead. In the sixth Abner Uribe walked three, and Will Smith's two-run double put the Dodgers ahead 2-1 (minus 42 points of win expectancy for Uribe). Milwaukee answered at once in the seventh. Jake Bauers's two-run homer (31 points, the night's largest swing) and Garrett Mitchell's solo shot made it 4-2, a run on a strikeout in the eighth made it 5-2, and Joey Ortiz singled in the sixth run in the ninth. Robert Gasser held the Dodgers scoreless for five innings, and DL Hall and Trevor Megill finished with 3.2 innings of one-hit relief. The Dodgers again hit the ball hard (ten hard-hit balls against 8.8 expected) and got five hits where their contact deserved 6.2.</p>",
+   "series": {
+    "title": "Milwaukee against the Dodgers: the series so far",
+    "html": "<p>The model made Milwaukee a modest favourite at home and the Dodgers a slight favourite in Los Angeles, about 1.8 expected wins for the Brewers in three games. They won all three, and the reason sits on the Dodgers' side of the ball more than Milwaukee's.</p>\n<p><strong>The Dodgers hit the ball hard and got nothing for it.</strong> Over the three games they hit 29 balls at 95 mph or more, slightly more than the 27 expected, yet they had 15 hits where their contact deserved 19.4. They hit no home runs against 2.5 expected and two extra-base hits against 7.7 (about 5 once the engine's doubles excess is taken out). Four or five hits went missing on balls that should have fallen, which points at Milwaukee's outfield defence and at luck, not at weak Dodger swings. Their runners stranded the rest: they drew 13 walks, more than expected, and scored seven runs against 9.3 expected.</p>\n<p><strong>Milwaukee's pitching kept the ball in the park all October.</strong> Across seven postseason games Brewers pitchers allowed two home runs where the model expected six, and five extra-base hits where it expected eighteen. Opponents got 38 hits from contact that deserved 46. The bullpen did the most: in the NLCS, Ashby, Uribe, Megill, Hall, Romero and May threw 13.2 innings and allowed four hits.</p>\n<p><strong>Milwaukee's hitters put the ball in play.</strong> All postseason the Brewers struck out 61 times where the replays expected 74, the largest strikeout shortfall of any team, and they turned it into 60 hits against 52 expected. In the NLCS they added five home runs against 2.8 expected, three of them tonight. The model has no way to make a lineup contact-heavier in October than in its regular season, so this is either a real change in approach or the kind of run that seven games produce by chance.</p>"
+   }
+  }
+ },
+ "updated": "2026-10-14"
+}

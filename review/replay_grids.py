@@ -1,5 +1,5 @@
 """
-replay_grids.py · v0.15 · 2026-10-12
+replay_grids.py · v0.16 · 2026-10-14
 
 The postseason score grids: each finished game's replays (review/replay_game.js, diag_out/replays*/<pk>.jsonl, one
 directory per setting) as a row of four columns, one per setting. Each column holds a table of one team's runs (columns)
@@ -11,6 +11,7 @@ series the same team keeps the columns (Game 1's visitor), so the grids line up.
   python3 review/replay_grids.py OUT.html --page     (a whole document, for GitHub Pages)
 
 CHANGED
+  v0.16 under each game's histograms, a note on what surprised the model and what decided the game (review/game_stories.json; Joe)
   v0.15 the regression adds past Octobers (history/points_<year>.json: 2025's 47 games, hollow) and fits them with this one
   v0.14 each game a row of four columns, one per setting, each labelled with its assumptions; grids capped at 10+;
         under each grid, histograms of total runs and of home runs minus away runs (Joe, 2026-10-12)
@@ -217,6 +218,19 @@ def pred_grid(pk, num, date, colTeam, rowTeam):
     return '\n'.join(out)
 
 
+STORIES = json.load(open('review/game_stories.json')) if os.path.exists('review/game_stories.json') else {'games': {}}
+
+
+def story(pk):
+    """v0.16: under the game's histograms, what surprised the model and what decided the game (review/game_stories.json,
+    written from review/postseason_story.py's fact sheets; Joe, 2026-10-14), and on a series' latest game the series so far"""
+    S = STORIES['games'].get(str(pk))
+    if not S: return ''
+    out = ['<div class="story"><h5>What surprised the model, and what decided it</h5>', S['html']]
+    if S.get('series'): out += ['<h5>%s</h5>' % S['series']['title'], S['series']['html']]
+    return '\n'.join(out + ['</div>'])
+
+
 def grid(pk, num, date, colTeam, rowTeam):
     G, RS = load(pk)
     ab = {'away': G['teams']['away']['abbrev'], 'home': G['teams']['home']['abbrev']}
@@ -234,6 +248,7 @@ def grid(pk, num, date, colTeam, rowTeam):
            '<p class="final">Final: %s %d, %s %d <span class="errs">· errors: %s %d, %s %d</span></p></figcaption>' % (NICK[winner], real[winner], NICK[loser], real[loser],
                cn, errs[colTeam], rn, errs[rowTeam]),
            panels(RS, ab, side[colTeam], side[rowTeam], real, colTeam, rowTeam, num, preds=pred_lines(pk, ab)),
+           story(pk),
            '</figure>']
     return '\n'.join(out)
 
@@ -475,7 +490,7 @@ def main(path):
         if not band:   # nothing played in this series yet: Game 1's visitor across (the prediction for Game 1 is that game)
             series.append({'key': key, 'name': ser, 'col': M['away'], 'row': M['home'], 'games': []}); band = series[-1:]
         band[0].setdefault('pred', []).append((pk, num, date))
-    body = []   # newest first: the series whose latest game (or prediction) is latest on top, and within each, the prediction, then its games from last to first
+    body = ['<section class="series story-intro"><h2><span class="tag">NOTES</span> Reading the game notes</h2>%s</section>' % STORIES['intro']] if STORIES.get('intro') else []   # newest first: the series whose latest game (or prediction) is latest on top, and within each, the prediction, then its games from last to first
     for s in sorted(series, key=lambda s: max(d for _, _, d in s['games'] + s.get('pred', [])), reverse=True):
         body.append('<section class="series"><h2><span class="tag">%s</span> %s vs %s</h2><div class="games">' % (s['name'], NICK[s['col']], NICK[s['row']]))
         for pk, num, date in s.get('pred', [])[::-1]: body.append(pred_grid(pk, num, date, s['col'], s['row']))
