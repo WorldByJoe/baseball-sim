@@ -1,5 +1,5 @@
 /* ============================================================================
-   analyst.js · v0.4 · 2026-10-13
+   analyst.js · v0.5 · 2026-10-15
 
    The couch analyst in the browser: a Web Worker that follows one game on
    MLB's live feed (statsapi.mlb.com, open to any page) and runs the model on
@@ -13,6 +13,7 @@
    Messages out: { type: 'state', state }, { type: 'status', text }
 
    CHANGED
+     v0.5  each simulation draws its own copy of the pitcher (REVIEW.redraw), in the at-bat analysis and the pregame replays (the model review)
      v0.4  a finished at-bat carries its result and the outs and bases after it (at a third out the card had kept two outs and
            no result through the break); a man missing from the bundle (a late roster add) is played as an average major leaguer of his hand and position,
            eight stand-ins averaged, and the card says so; before, his plate appearances had no odds and no pitch lines (Joe, 2026-10-13)
@@ -24,7 +25,7 @@
            thread from a local file and cannot fetch
      v0.1  first build (Brewers-Padres, NLDS Game 3, 2026-10-06)
 ============================================================================ */
-var V = '?v=3.9.5';   // bump with each engine or bundle, as index.html's worker tag (GitHub Pages caches 10 min)
+var V = '?v=3.9.6';   // bump with each engine or bundle, as index.html's worker tag (GitHub Pages caches 10 min)
 importScripts('engine/bb_engine.js' + V, 'engine/bb_names.js' + V, 'engine/bb_field.js' + V, 'engine/bb_game.js' + V, 'engine/players.js' + V, 'data/playoff.js' + V);
 REVIEW.setData(PLAYOFF.recs, PLAYOFF.fits, PLAYOFF.pfit);
 
@@ -160,7 +161,7 @@ function analyse(G, i, M, withPitches) {
   var sit = { bases: basesObj, outs: pa.outs, inning: pa.inning, lead: lead };
   var cats = { K: 0, BB: 0, HBP: 0, '1B': 0, '2B': 0, '3B': 0, HR: 0, OUT: 0, E: 0 }, wsum = 0;
   for (k = 0; k < M; k++) {
-    var Bk = hitter(G, pa.batter, k), Pk = P0.pool ? P0.pool[k % P0.pool.length] : P0; Pk.load = ld0;   // a stand-in pitcher: a different league arm each time
+    var Bk = hitter(G, pa.batter, k), Pk = P0.pool ? P0.pool[k % P0.pool.length] : (REVIEW.redraw ? REVIEW.redraw(P0, rng) : P0); Pk.load = ld0;   // v0.5: each simulation its own draw of him (the model review)   // a stand-in pitcher: a different league arm each time
     var res = BB.simPA(Pk, Bk, { env: env, ump: UMP, framing: 0, seen: seen, rec: false, runnersOn: !!(pa.bases[0] || pa.bases[1] || pa.bases[2]) }, rng), c;
     if (res.result === 'K' || res.result === 'BB' || res.result === 'HBP' || res.result === 'HR') c = res.result;
     else if (res.result === 'END') c = 'OUT';
@@ -276,8 +277,8 @@ function paText(pa, a, lg) {
 function pregame(G) {
   var pp = G.probables, asp = (pp.away || {}).id || G.pitchers.away[0], hsp = (pp.home || {}).id || G.pitchers.home[0];
   if (!asp || !hsp || !REC[asp] || !REC[hsp]) return null;
-  var env = envFor(G), built = {};
-  function P(id, rel) { if (!built[id]) { built[id] = REVIEW.pitcher(REC[id], rng, env); built[id].bat = BB.makeBatter(rng, { pitcher: true, pos: 'P' }); } var p = built[id]; if (rel && p.role === 'SP') { p.role = 'RP'; p.stamina = 35; } return p; }
+  var env = envFor(G), built = {}, base = {};
+  function P(id, rel) { if (!base[id]) { base[id] = REVIEW.pitcher(REC[id], rng, env); base[id].bat = BB.makeBatter(rng, { pitcher: true, pos: 'P' }); } if (!built[id]) built[id] = REVIEW.redraw ? REVIEW.redraw(base[id], rng) : base[id]; var p = built[id]; if (rel && p.role === 'SP') { p.role = 'RP'; p.stamina = 35; } return p; }
   function fresh(p) { p.load = 0; p.used = false; p.pitchesToday = 0; p.warm = 0; return p; }
   function team(s, draw, sp) {
     var T = G.teams[s], starters = G.lineups[s].filter(function (p) { return p.order % 100 === 0; }), ids = {};
@@ -289,6 +290,7 @@ function pregame(G) {
   }
   var N = 200, aw = 0, ar = 0, hr = 0;
   for (var g = 0; g < N; g++) {
+    built = {};   // v0.5: each pregame replay its own pitchers (the model review)
     if (g % 50 === 0) status('Playing tonight’s game before the first pitch: ' + g + ' of ' + N);
     var GM = BBGame.simGame(team('away', g % 24, asp), team('home', (g * 7 + 3) % 24, hsp), { rng: rng, env: env, rules: 'AL', ghost: false });
     if (GM.score[0] > GM.score[1]) aw++; ar += GM.score[0]; hr += GM.score[1];

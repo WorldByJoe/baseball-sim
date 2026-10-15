@@ -1,5 +1,5 @@
 /* ============================================================================
-   players.js · v0.2 · 2026-10-06
+   players.js · v0.3 · 2026-10-15
 
    Real players as the engine's players, for the playoff review. Loaded after
    bb_engine.js (and bb_field.js, bb_game.js when games are played).
@@ -24,6 +24,7 @@
    along the barrel, when fitted (review/fit_mishit.py).
 
    CHANGED
+     v0.3  redraw(): each replay its own pitcher from the game's build (the model review: the replays had reused one build)
      v0.2  setData(recs, fits, pfit) for a browser, which has no read(): the live page hands its bundle in
      v0.1  first build (the Yankees-Rays review, 2026-10-06)
 ============================================================================ */
@@ -110,15 +111,16 @@ var REVIEW = (function () {
     pitches.forEach(function (q) { q.usage /= tot; });
     pitches.sort(function (a, b) { return b.usage - a.usage; });
     P.pitches = pitches;
-    if (cw) P.cmd = [cx / cw, cz / cw];
+    if (cw) { P.cmd = [cx / cw, cz / cw]; P.cmdData = true; }
     P.command = Math.sqrt((P.cmd[0] * P.cmd[0] + P.cmd[1] * P.cmd[1]) / 2);
     var ff = pitches.filter(function (q) { return BB.PITCH_TYPES[q.type].kind === 'FB'; })[0];
     if (ff) P.fbVelo = ff.velo;
     var use26 = S.use && (S.use['2026'] || S.use['2025']);
+    if (use26 && use26.pitchesPerApp) P.staminaData = true;
     if (use26 && use26.pitchesPerApp) P.stamina = role === 'SP' ? Math.max(75, use26.pitchesPerApp.mean) : Math.max(15, 1.2 * use26.pitchesPerApp.mean);
     P.role = role;
     var pf = PFIT && PFIT.pitchers[rec.id];   // the fitted hidden traits, when review/fit_pitchers.js has run
-    if (pf) { P.deception = pf.deception; P.cmd = [P.cmd[0] * pf.cmdScale, P.cmd[1] * pf.cmdScale]; P.command = Math.sqrt((P.cmd[0] * P.cmd[0] + P.cmd[1] * P.cmd[1]) / 2); if (pf.mishit) P.mishit = pf.mishit; }
+    if (pf) { P.cmdScale = pf.cmdScale; P.deception = pf.deception; P.cmd = [P.cmd[0] * pf.cmdScale, P.cmd[1] * pf.cmdScale]; P.command = Math.sqrt((P.cmd[0] * P.cmd[0] + P.cmd[1] * P.cmd[1]) / 2); if (pf.mishit) P.mishit = pf.mishit; }
     return P;
   }  function pitcher(rec, rng, env) {
     var P = pitcher0(rec, rng, env);
@@ -144,5 +146,29 @@ var REVIEW = (function () {
     try { PFIT = JSON.parse(read('review/pitchers_fit.json')); } catch (e) { PFIT = null; }
     return { recs: byId, fits: fits, pfit: PFIT };
   }
-  return { hitter: hitter, pitcher: pitcher, move: move, load: load, setData: setData };
+  // v0.6 (the model review, 2026-10-15): one replay's own pitcher from the game's single build. The build is costly (it flies
+  // every pitch type to fit his shapes and caches his aims), so it is made once a game; each replay then draws a FRESH pitcher
+  // from the population and takes from the build only what came from data or from the caller: his body and slot, his pitch
+  // shapes and their aim caches (shared), his measured command and workload, his fitted deception, command scale and
+  // mishit, and anything a caller added (errMult, a velocity boost, his bat). Everything else (fielding, holding runners,
+  // whatever else the population draws) is drawn afresh, as a full rebuild would. Until v0.6 the replays built each pitcher
+  // once a game and reused him in every replay, so whatever was drawn for him never averaged out. With PDRAW (engine-dev),
+  // his deception and command are also drawn from his fit's uncertainty.
+  var DATA_KEYS = ['name', 'mlbId', 'team', 'generic', 'heightIn', 'weightLb', 'armAngle', 'rel', 'fbVelo', 'role', 'deception', 'mishit', 'throws', 'armSide'];
+  function redraw(P0, rng) {
+    if (!P0 || !P0.pitches) return P0;
+    var P = BB.makePitcher(rng, { population: true, role: P0.role, throws: P0.throws });
+    DATA_KEYS.forEach(function (k) { if (P0[k] !== undefined) P[k] = P0[k]; });
+    for (var k in P0) if (!(k in P)) P[k] = P0[k];   // what callers added
+    P.pitches = P0.pitches.map(function (q) { var c = {}; for (var j in q) c[j] = q[j]; return c; });
+    if (P0.cmdData) { P.cmd = P0.cmd.slice(); P.command = P0.command; }
+    else if (P0.cmdScale) { P.cmd = [P.cmd[0] * P0.cmdScale, P.cmd[1] * P0.cmdScale]; P.command = Math.sqrt((P.cmd[0] * P.cmd[0] + P.cmd[1] * P.cmd[1]) / 2); }
+    if (P0.staminaData) P.stamina = P0.stamina;
+    if (typeof PDRAW !== 'undefined' && PDRAW && P0.fitSd) {
+      var z1 = rng.n(0, 1), z2 = rng.n(0, 1), f = P0.fitSd, sc = Math.exp(f.cmd * (f.rho * z1 + Math.sqrt(1 - f.rho * f.rho) * z2));
+      P.deception = P.deception * Math.exp(f.dec * z1); P.cmd = [P.cmd[0] * sc, P.cmd[1] * sc]; P.command = P.command * sc;
+    }
+    return P;
+  }
+  return { hitter: hitter, pitcher: pitcher, redraw: redraw, move: move, load: load, setData: setData };
 })();

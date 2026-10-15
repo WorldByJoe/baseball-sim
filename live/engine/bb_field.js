@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.16 · 2026-10-07
+   bb_field.js · v1.17 · 2026-10-15
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -38,6 +38,7 @@
    cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.17 the model review's code bugs: a runner going with the pitch is at speed; a throw that gets away leaves the batter his hit
      v1.16 (the playoff review's branch) a fielder's own error tendency, pl.errMult: it scales his chance of dropping a
            ball he is under, of fumbling a grounder, and of throwing one away (exactly: the wild throw's chance times
            errMult); unset, nothing changes (review/replay_game.js mode 'errors')
@@ -260,6 +261,7 @@ var BBField = (function () {
   // 1.5 m/s, fitted to the league's double plays per game on the old ball; 2.75
   // is a little under the 3 m/s of a man walking off on a steal.
   var V_CONTACT = 2.75;   // m/s
+  var V_GOING = 0.8;      // a runner going with the pitch is at this share of his sprint speed at contact (set by hand; the model review)
   // RUNNING FROM REST (v1.9). A runner on base who starts from a standstill - tagging up, held at the bag till a fly
   // drops, frozen at his lead till a grounder is through - runs the league's measured curve: his speed rises toward
   // his sprint speed as 1 - exp(-t / TAU_RUN), TAU_RUN 0.78 s, fitted to Statcast's running splits (549 hitters,
@@ -634,7 +636,7 @@ var BBField = (function () {
     R.forEach(function (r, i) {
       if (r.base === 0) return;
       var isForced = forced(i);
-      if (r.going) r.start = 0.05;                                       // already running with the pitch
+      if (r.going) { r.start = 0.05; r.onContact = true; }               // already running with the pitch (at speed, not from rest; the model review)
       else if (twoOut || (!flyBall && isForced)) { r.start = 0.05; r.onContact = true; }   // goes on contact
       else if (!flyBall) {                                                // unforced on a grounder: read the ball
         var to = r.base + 1, tRun = 0.1 + restTime(r.pl, BASE - LEAD);
@@ -651,6 +653,7 @@ var BBField = (function () {
     // or through, and starts from there at rest.
     function arrive(r, to) {
       var d = (to - r.base) * BASE - leadOf(r) + ROUND_PATH * Math.max(0, to - r.base - 1);   // each base he runs through is turned on an arc (v1.14)
+      if (r.going && r.base > 0) return r.start + stealTime(r.pl, d, V_GOING * r.pl.speed * FT);   // running with the pitch: at speed (was restarted from rest)
       if (r.base > 0 && r.start !== null && r.start < 0.5 && !r.midway && r.onContact) return r.start + stealTime(r.pl, d, V_CONTACT);
       if (r.base > 0) return r.start + (r.start >= 0.5 && !r.midway ? 0.15 : 0.05) + restTime(r.pl, d);   // from a standstill (v1.9)
       return r.start + runTime(r.pl, d, true);   // the batter, out of the box
@@ -721,7 +724,7 @@ var BBField = (function () {
       var via = play.how === 'run' ? Ff.pos + ' unassisted' : play.how === 'cover' ? Ff.pos + ' to the pitcher covering' : Ff.pos + ' to ' + baseName(to);
       if (err > 1.6) {                                   // thrown away: everyone moves up a base, the men who held included (until v1.4 a holder stayed, and a runner behind him landed on top of him)
         out.error = true;
-        R.forEach(function (r) { r.target = Math.min(4, r.target + 1); });
+        R.forEach(function (r) { r.hitBase = r.target; r.target = Math.min(4, r.target + 1); });   // the batter's hit is the base he had when it was thrown (the model review)
         out.desc = 'throwing error by ' + Ff.pos;
       } else if (rng.u() < play.p) {
         play.r.out = true; out.outsMade++;
@@ -756,7 +759,7 @@ var BBField = (function () {
       }
       if (wouldBeOut && (out.error || chanceD(Ff, ic) <= ORDINARY_D) && !(triedRunner && clean)) { out.hit = 'E'; out.error = true; out.desc = 'reaches on an error by ' + Ff.pos; }
       else if (anyForceOut || (triedRunner && wouldBeOut)) out.hit = 'FC';   // a force tried and missed is the batter's hit only if he would have beaten a throw to first (rule 9.05; until v1.5 it was always a hit)
-      else out.hit = ['', '1B', '2B', '3B', 'HR'][batR.target];
+      else out.hit = ['', '1B', '2B', '3B', 'HR'][batR.hitBase !== undefined ? batR.hitBase : batR.target];   // the extra base on a throw that got away is the error's
       if (T.groundRule) out.desc = 'ground-rule double';
     } else out.hit = batR.target >= 2 ? ['', '', '1B', '2B', '3B'][batR.target] : 'OUT';   // thrown out past first, he keeps the hit that got him there (rule 9.05; until v1.6 a plain out)
     if (!out.desc || out.hit === '1B' || out.hit === '2B' || out.hit === '3B') {

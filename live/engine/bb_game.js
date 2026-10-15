@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_game.js · v1.8 · 2026-10-13
+   bb_game.js · v1.9 · 2026-10-15
 
    A whole game: two teams, nine innings or more, lineups that turn over,
    pitchers who tire and get replaced, managers with their own habits.
@@ -55,6 +55,7 @@
    at DH, the rest on the bench, the next man in the five-man rotation.
 
    CHANGED
+     v1.9 a catcher who comes in during a replay frames and throws as himself (the model review)
      v1.8  o.homeEdge {eye, timing, barrel, aggr}: while a home hitter bats, his eye, timing and barrel scatter are scaled
            by these and aggr is added to his aggression (a hitter at home reads and times the pitch a little better: season/home_field.py, 2025-26, within
            players and parks: 1.0 point fewer strikeouts, 0.3-0.45 more walks, home runs and exit speed unchanged;
@@ -398,7 +399,7 @@ var BBGame = (function () {
       var sl = st.idx % 9, sub = (st.lineupPlan[sl] || {})[++st.slotPA[sl]], old = st.order[sl];
       if (sub && sub !== old) {
         var fi = -1; st.defense.forEach(function (F, k) { if (F.pl === old) fi = k; });
-        if (fi >= 0) { sub.pos = st.defense[fi].pos; st.defense[fi] = { pos: sub.pos, pl: sub, at: st.defense[fi].at, std: st.defense[fi].std }; } else sub.pos = 'DH';
+        if (fi >= 0) { sub.pos = st.defense[fi].pos; st.defense[fi] = { pos: sub.pos, pl: sub, at: st.defense[fi].at, std: st.defense[fi].std }; if (sub.pos === 'C') st.catcher = sub; } else sub.pos = 'DH';   // a new catcher frames as himself (the model review)
         st.order[sl] = sub;
       }
     }
