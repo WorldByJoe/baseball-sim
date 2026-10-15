@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.17 · 2026-10-15
+   bb_field.js · v1.17.2 · 2026-10-15
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -38,7 +38,12 @@
    cut-off man is a timing rule, not a player.
 
    CHANGED
-     v1.17 the model review's code bugs: a runner going with the pitch is at speed; a throw that gets away leaves the batter his hit
+     v1.17.2 run 7.5's fielding for the live pages (Joe, 2026-10-15): v1.17 with two of the model review's code bugs fixed, a
+             runner going with the pitch at speed and a thrown-away ball leaving the batter his hit; NOT the base covers, which
+             cost forecast skill (the model review; v1.18 keeps them for the Ballgame)
+     v1.17 (the playoff review's branch) SEND.H1: a runner going home from first on a hit has his own margins by outs, [1.75,
+           1.30, 0.65] s (SAFETY_H kept for the rest), FITTED to 2025-26 (season/runs_audit.py: with SAFETY_H the model sent him home on a double
+           .60 of the time against the league's .37, too often on every kind of double and at every count of outs)
      v1.16 (the playoff review's branch) a fielder's own error tendency, pl.errMult: it scales his chance of dropping a
            ball he is under, of fumbling a grounder, and of throwing one away (exactly: the wild throw's chance times
            errMult); unset, nothing changes (review/replay_game.js mode 'errors')
@@ -110,6 +115,11 @@ var BBField = (function () {
   // .49 / .69 against .36 / .51 / .83, and .42 / .56 / .61 against .34 / .31 / .52): the throw home beats him too
   // easily on a single and too slowly on a double, so one margin cannot fit both. Kept as fitted in v1.9.
   var SAFETY_3 = [1.15, 0.95, 0.55], SAFETY_H = [0.8, 0.2, 0.0], READ_SD = 0.25;   // s, by outs: taking third, going home
+  // SEND.H1 (v1.17): going home from first on a hit, three bases' run with the coach's read at third. FITTED (season/calib34.sh:
+  // 400 second-half games x 3 per setting, fold A's traits, the 2026 carry) to the league's man on first alone scoring on a
+  // double, 2025-26: .270 / .327 / .500 by outs (2,869 doubles). With SAFETY_H's [0.8, 0.2, 0.0] he scored .49 / .64 / .67;
+  // margins 0.6 s higher gave .34 / .46 / .50, 1.0 s .26 / .35 / .46, 1.4 s .16 / .24 / .37, so by outs [1.75, 1.30, 0.65].
+  var SEND = { H1: [1.75, 1.30, 0.65] };
   // How sure a throw's arrival is: 0.15 s for an infield throw, and more the
   // longer it is beyond 40 m (footwork, a hop, the catcher moving for it); set
   // by hand, so runners are thrown out at third and home about as often as
@@ -261,7 +271,7 @@ var BBField = (function () {
   // 1.5 m/s, fitted to the league's double plays per game on the old ball; 2.75
   // is a little under the 3 m/s of a man walking off on a steal.
   var V_CONTACT = 2.75;   // m/s
-  var V_GOING = 0.8;      // a runner going with the pitch is at this share of his sprint speed at contact (set by hand; the model review)
+  var V_GOING = 0.8;      // a runner going with the pitch is at this share of his sprint speed at contact (v1.17.2; set by hand)
   // RUNNING FROM REST (v1.9). A runner on base who starts from a standstill - tagging up, held at the bag till a fly
   // drops, frozen at his lead till a grounder is through - runs the league's measured curve: his speed rises toward
   // his sprint speed as 1 - exp(-t / TAU_RUN), TAU_RUN 0.78 s, fitted to Statcast's running splits (549 hitters,
@@ -636,7 +646,7 @@ var BBField = (function () {
     R.forEach(function (r, i) {
       if (r.base === 0) return;
       var isForced = forced(i);
-      if (r.going) { r.start = 0.05; r.onContact = true; }               // already running with the pitch (at speed, not from rest; the model review)
+      if (r.going) { r.start = 0.05; r.onContact = true; }               // already running with the pitch (v1.17.2: at speed, not from rest)
       else if (twoOut || (!flyBall && isForced)) { r.start = 0.05; r.onContact = true; }   // goes on contact
       else if (!flyBall) {                                                // unforced on a grounder: read the ball
         var to = r.base + 1, tRun = 0.1 + restTime(r.pl, BASE - LEAD);
@@ -653,7 +663,7 @@ var BBField = (function () {
     // or through, and starts from there at rest.
     function arrive(r, to) {
       var d = (to - r.base) * BASE - leadOf(r) + ROUND_PATH * Math.max(0, to - r.base - 1);   // each base he runs through is turned on an arc (v1.14)
-      if (r.going && r.base > 0) return r.start + stealTime(r.pl, d, V_GOING * r.pl.speed * FT);   // running with the pitch: at speed (was restarted from rest)
+      if (r.going && r.base > 0) return r.start + stealTime(r.pl, d, V_GOING * r.pl.speed * FT);   // running with the pitch: at speed (v1.17.2; was restarted from rest)
       if (r.base > 0 && r.start !== null && r.start < 0.5 && !r.midway && r.onContact) return r.start + stealTime(r.pl, d, V_CONTACT);
       if (r.base > 0) return r.start + (r.start >= 0.5 && !r.midway ? 0.15 : 0.05) + restTime(r.pl, d);   // from a standstill (v1.9)
       return r.start + runTime(r.pl, d, true);   // the batter, out of the box
@@ -669,7 +679,7 @@ var BBField = (function () {
       while (to + 1 < ahead && to < 4) {
         var next = to + 1, tRun = arrive(r, next);
         var tBall = ballTo(next, tField, fieldAt).t + TAG;
-        if (next >= 3 ? tBall - tRun + rng.n(0, READ_SD) > (next === 3 ? SAFETY_3 : SAFETY_H)[Math.min(outs, 2)] + r.pl.runAggr : tRun + SAFETY + r.pl.runAggr < tBall) to = next; else break;
+        if (next >= 3 ? tBall - tRun + rng.n(0, READ_SD) > (next === 3 ? SAFETY_3 : r.base === 1 ? SEND.H1 : SAFETY_H)[Math.min(outs, 2)] + r.pl.runAggr : tRun + SAFETY + r.pl.runAggr < tBall) to = next; else break;
       }
       if (T.groundRule) to = Math.min(4, r.base + 2);
       r.target = Math.min(to, ahead - 1); ahead = r.target >= 4 ? 5 : r.target;
@@ -724,7 +734,7 @@ var BBField = (function () {
       var via = play.how === 'run' ? Ff.pos + ' unassisted' : play.how === 'cover' ? Ff.pos + ' to the pitcher covering' : Ff.pos + ' to ' + baseName(to);
       if (err > 1.6) {                                   // thrown away: everyone moves up a base, the men who held included (until v1.4 a holder stayed, and a runner behind him landed on top of him)
         out.error = true;
-        R.forEach(function (r) { r.hitBase = r.target; r.target = Math.min(4, r.target + 1); });   // the batter's hit is the base he had when it was thrown (the model review)
+        R.forEach(function (r) { r.hitBase = r.target; r.target = Math.min(4, r.target + 1); });   // v1.17.2: the batter's hit is the base he had when it was thrown
         out.desc = 'throwing error by ' + Ff.pos;
       } else if (rng.u() < play.p) {
         play.r.out = true; out.outsMade++;
@@ -759,7 +769,7 @@ var BBField = (function () {
       }
       if (wouldBeOut && (out.error || chanceD(Ff, ic) <= ORDINARY_D) && !(triedRunner && clean)) { out.hit = 'E'; out.error = true; out.desc = 'reaches on an error by ' + Ff.pos; }
       else if (anyForceOut || (triedRunner && wouldBeOut)) out.hit = 'FC';   // a force tried and missed is the batter's hit only if he would have beaten a throw to first (rule 9.05; until v1.5 it was always a hit)
-      else out.hit = ['', '1B', '2B', '3B', 'HR'][batR.hitBase !== undefined ? batR.hitBase : batR.target];   // the extra base on a throw that got away is the error's
+      else out.hit = ['', '1B', '2B', '3B', 'HR'][batR.hitBase !== undefined ? batR.hitBase : batR.target];   // the extra base on a throw that got away is the error's (v1.17.2)
       if (T.groundRule) out.desc = 'ground-rule double';
     } else out.hit = batR.target >= 2 ? ['', '', '1B', '2B', '3B'][batR.target] : 'OUT';   // thrown out past first, he keeps the hit that got him there (rule 9.05; until v1.6 a plain out)
     if (!out.desc || out.hit === '1B' || out.hit === '2B' || out.hit === '3B') {
@@ -797,7 +807,7 @@ var BBField = (function () {
     return best.c.p > 0 && rng.u() < best.c.p ? best : null;
   }
 
-  return { version: '1.15', BASES: BASES, positionDefense: positionDefense, makeDefense: makeDefense,
+  return { version: '1.17', BASES: BASES, SEND: SEND, positionDefense: positionDefense, makeDefense: makeDefense,
            moveTime: moveTime, runTime: runTime, stealTime: stealTime, LEAD_STEAL: LEAD_STEAL, accessible: accessible,
            throwTime: throwTime, throwArrival: throwArrival, buildTrack: buildTrack, restTime: restTime,
            catchChance: catchChance, intercept: intercept, resolve: resolve, foulCatch: foulCatch, onDirt: onDirt };
