@@ -34,11 +34,13 @@
   function f3(v) { return v === null || v === undefined || isNaN(v) ? '' : v.toFixed(3).replace(/^0/, '').replace(/^-0/, '-'); }
   function med(xs) { if (!xs.length) return null; var s = xs.slice().sort(function (a, b) { return a - b; }); return s[s.length >> 1]; }
   function rate(a, n) { return n ? a / n : null; }
+  var DPN = 0, DPY = 0;
   var rng = BB.makeRng(SEED), B = [], SPOT = {};   // SPOT: the model's average starting spot by position and batter side, bases empty
   for (var g = 0; g < N; g++) {
     var T = BBNames.teams(rng), G = BBGame.simGame(BBGame.makeTeam(rng, T[0]), BBGame.makeTeam(rng, T[1]), { rng: rng });
     G.plays.forEach(function (p) {
       if (!p.play || !p.pa || !p.pa.bb) return;
+      if (p.pa.bb.la < 10 && !p.pa.bb.hr && p.bases && p.bases[1] && p.outs < 2) { DPN++; if (p.play.dp) DPY++; }   // v0.2: double plays (the league's .404, 2026)
       var bb = p.pa.bb, r = p.play, sb = p.pa.pitches[p.pa.pitches.length - 1].side;
       if (bb.la < -30 || bb.la >= 15 || bb.hr) return;
       var h = r.hit === '1B' || r.hit === '2B' || r.hit === '3B' || r.hit === 'HR' ? r.hit : null;
@@ -154,4 +156,5 @@
   print('All -30..15: hits per ball ' + f3(rate(B.filter(function (b) { return b.hit; }).length, B.length)) + ' (n ' + B.length + '); ground balls (<10): ' + f3(rate(gb.filter(function (b) { return b.hit; }).length, gb.length)) +
         ' (n ' + gb.length + '), infield hits ' + f3(rate(gb.filter(function (b) { return b.infHit; }).length, gb.length)) + ' of balls, errors ' + f3(rate(gb.filter(function (b) { return b.err; }).length, gb.length)) +
         (L ? '   | league ' + f3(L.totals.all[0] / L.totals.all[1]) + '; ground balls ' + f3(L.totals.gb[0] / L.totals.gb[1]) + ', infield hits ' + f3(L.totals.gb_inf_hits / L.totals.gb[1]) + ', errors ' + f3(L.totals.gb_err / L.totals.gb[1]) : ''));
+  print('DP on a grounder, man on first, under two out: ' + (DPY / Math.max(1, DPN)).toFixed(3) + ' (n ' + DPN + ')');
 })(typeof arguments !== 'undefined' ? arguments : []);

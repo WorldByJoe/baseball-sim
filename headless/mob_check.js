@@ -30,6 +30,7 @@
 ============================================================================ */
 (function (A) {
   var N = +A[0] || 600, SEED = +A[1] || 3, CSV = A[2] === 'csv', rng = BB.makeRng(SEED), L = typeof MOB !== 'undefined' ? MOB : null;
+  if (A[3]) BBField.tuneField(JSON.parse(A[3]));   // calibration options (bb_field v1.18)
   var SECT = [-90, -30, -15, 0, 15, 30, 90], SECT_N = ['<-30', '-30..-15', '-15..0', '0..15', '15..30', '>30'];
   var CLS_B = ['empty', 'hold 2 out', 'hold+DP', 'DP', 'R3 <2 out', 'R2', 'other'];
   var SPD = L ? L.C['speed tertiles (ft/s)'] : [26.6, 27.8];
