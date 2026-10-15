@@ -30,14 +30,14 @@
      "pos": "C"
     },
     {
+     "id": 683734,
+     "name": "Andrew Vaughn",
+     "pos": "DH"
+    },
+    {
      "id": 641343,
      "name": "Jake Bauers",
      "pos": "1B"
-    },
-    {
-     "id": 592885,
-     "name": "Christian Yelich",
-     "pos": "DH"
     },
     {
      "id": 669003,
@@ -50,13 +50,13 @@
      "pos": "SS"
     },
     {
-     "id": 686217,
-     "name": "Sal Frelick",
+     "id": 800325,
+     "name": "Luis Lara",
      "pos": "RF"
     },
     {
-     "id": 666152,
-     "name": "David Hamilton",
+     "id": 687401,
+     "name": "Joey Ortiz",
      "pos": "3B"
     }
    ],
@@ -117,6 +117,16 @@
      "pos": "LF"
     },
     {
+     "id": 663656,
+     "name": "Kyle Tucker",
+     "pos": "RF"
+    },
+    {
+     "id": 681624,
+     "name": "Andy Pages",
+     "pos": "CF"
+    },
+    {
      "id": 660271,
      "name": "Shohei Ohtani",
      "pos": "DH"
@@ -127,19 +137,9 @@
      "pos": "C"
     },
     {
-     "id": 571970,
-     "name": "Max Muncy",
+     "id": 500743,
+     "name": "Miguel Rojas",
      "pos": "3B"
-    },
-    {
-     "id": 681624,
-     "name": "Andy Pages",
-     "pos": "CF"
-    },
-    {
-     "id": 663656,
-     "name": "Kyle Tucker",
-     "pos": "RF"
     },
     {
      "id": 669242,
