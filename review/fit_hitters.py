@@ -1,5 +1,5 @@
 """
-fit_hitters.py · v0.2 · 2026-10-13
+fit_hitters.py · v0.3 · 2026-10-14
 
 Each playoff hitter's hidden traits, with their uncertainty, from his measured
 2025-26 numbers (playoffs/players_measured.json) through a linear emulator of
@@ -32,6 +32,7 @@ table.
    linear emulator's misfit (strikeouts and home runs most) is taken out.
 
 CHANGED
+  v0.3  two direct measures, the spread of contact depth (timingSD) and of spray left after the bat's direction (faceSD) (the model review)
   v0.2  each hidden trait's limits read from the engine's own trait table (bb_engine.js), not copied: v0.1's copy went stale
         when engine v3.2 rescaled motorIn and undercut, and it clipped 58% of the 2026 playoff hitters at motorIn 1.4
   v0.1  first build (the Yankees-Rays review)
@@ -44,7 +45,14 @@ warnings.filterwarnings('ignore', category=RuntimeWarning)   # numpy 2.0's matmu
 _INTERNAL = {}
 KNOWN = ['heightIn', 'weightLb', 'swingLenFt', 'batSpeed', 'attack', 'swingTilt']
 HIDDEN = ['motorIn', 'faceSD', 'undercut', 'timingSD', 'longSD', 'spotIn', 'eyeSD', 'aggr', 'commit', 'fbLean', 'pullBias', 'learn', 'coverage']
-MEAS = ['zoneSwing', 'chase', 'whiffFB', 'whiffBR', 'whiffOS', 'foul', 'K', 'BB', 'HR', 'ev', 'hardHit', 'GB', 'LD', 'FBs', 'PU', 'pull']
+MEAS = ['zoneSwing', 'chase', 'whiffFB', 'whiffBR', 'whiffOS', 'foul', 'K', 'BB', 'HR', 'ev', 'hardHit', 'GB', 'LD', 'FBs', 'PU', 'pull', 'depthSD', 'sprayRes']
+# v0.3 (the model review, 2026-10-14): two direct measures for the traits the fit could not identify. depthSD, the spread of
+# his contact depth (in; measure_traits' contactDepthIn), carries timingSD; sprayRes, the spread of his pulled spray left once
+# the bat's direction is accounted for (deg; season/face_measure.py), carries faceSD. Each is fitted as his difference from
+# the real league's mean (REAL_MEAN, the 2026 folds' hitters with 50+ contacts), added to the emulated league's, since the
+# engine's levels run below the real ones (the real include tracking noise): 7.7 and 18.0 against 9.0 and 24.6.
+REAL_MEAN = {'depthSD': 9.01, 'sprayRes': 24.6}
+SHIFT = {}
 # the emulated measure's sampling variance, from its count
 NKEY = {'zoneSwing': 'zin', 'chase': 'zout', 'whiffFB': 'swFB', 'whiffBR': 'swBR', 'whiffOS': 'swOS', 'foul': 'sw', 'K': 'pa', 'BB': 'pa', 'HR': 'pa',
         'hardHit': 'bip', 'GB': 'bip', 'LD': 'bip', 'FBs': 'bip', 'PU': 'bip'}
@@ -82,11 +90,16 @@ def emulator(path):
             samp = np.mean([Y[i, j] * (1 - Y[i, j]) / max(1, L[i]['n'][NKEY[m]]) for i in range(len(L))])
         elif m == 'ev':
             samp = np.mean([15.0 ** 2 / max(1, r['n']['bip']) for r in L])
+        elif m == 'depthSD':   # the sd of an sd: sd^2 / (2 n)
+            samp = np.mean([Y[i, j] ** 2 / (2 * max(2, L[i]['n'].get('con', 1))) for i in range(len(L))])
+        elif m == 'sprayRes':
+            samp = np.mean([Y[i, j] ** 2 / (2 * max(3, L[i]['n']['bip'] - 2)) for i in range(len(L))])
         else:   # pulled spray: about 25 deg sd a ball
             samp = np.mean([25.0 ** 2 / max(1, r['n']['bip']) for r in L])
         struct.append(max(res[:, j].var() - samp, 0.05 * res[:, j].var()))
         r2 = 1 - res[:, j].var() / Y[:, j].var()
         print('  %-9s R2 %.2f   residual sd %.4f   of it structural %.4f' % (m, r2, res[:, j].std(), math.sqrt(struct[-1])), file=sys.stderr)
+    for m in REAL_MEAN: SHIFT[m] = float(Y[:, MEAS.index(m)].mean()) - REAL_MEAN[m]
     return {'mu': mu, 'sd': sd, 'coef': coef, 'struct': np.array(struct), 'X': X}
 
 
@@ -115,6 +128,10 @@ def target(rec):
         t['HR'] = (None, None)
     sp = (rec['traits'].get('sprayPulledDeg_bip') or {}).get('pooled') or {}
     t['pull'] = (sp.get('mean'), sp.get('se')) if sp.get('mean') is not None and sp.get('se') else (None, None)
+    dp = ((rec['traits'].get('contactDepthIn') or {}).get('all') or {}).get('pooled') or {}
+    t['depthSD'] = (dp['sd'] + SHIFT.get('depthSD', 0), dp['se_of_sd']) if dp.get('sd') is not None and dp.get('se_of_sd') and dp.get('n', 0) >= 20 else (None, None)
+    fr = (rec['traits'].get('sprayResDeg') or {}).get('pooled') or {}
+    t['sprayRes'] = (fr['mean'] + SHIFT.get('sprayRes', 0), fr['se']) if fr.get('mean') is not None and fr.get('se') else (None, None)
     return t
 
 
@@ -201,7 +218,8 @@ def refine(fits, E, iters, npa, rng):
             rows, J = I['rows'], I['Bh']
             fsim = np.array([ys[MEAS[j]] for j in rows])
             simv = np.array([(fsim[i] * (1 - fsim[i]) / (npa * 3.4 if MEAS[j] in ('zoneSwing', 'chase') else npa * 1.6 if MEAS[j] in ('whiffFB', 'foul') else npa * 0.7 if MEAS[j] == 'whiffBR' else npa * 0.3 if MEAS[j] == 'whiffOS' else npa * 0.68 if MEAS[j] in ('hardHit', 'GB', 'LD', 'FBs', 'PU') else npa))
-                             if MEAS[j] not in ('ev', 'pull') else (15.0 ** 2 if MEAS[j] == 'ev' else 25.0 ** 2) / (0.68 * npa) for i, j in enumerate(rows)])
+                             if MEAS[j] not in ('ev', 'pull', 'depthSD', 'sprayRes') else fsim[i] ** 2 / (2 * 0.3 * npa) if MEAS[j] == 'depthSD' else fsim[i] ** 2 / (2 * 0.68 * npa) if MEAS[j] == 'sprayRes'
+                             else (15.0 ** 2 if MEAS[j] == 'ev' else 25.0 ** 2) / (0.68 * npa) for i, j in enumerate(rows)])
             R = I['se2'] + simv + 0.25 * E['struct'][rows]
             Ri = np.diag(1 / R)
             mk = (np.array([f['refined'][h] for h in HIDDEN]) - mu[nk:]) / sd[nk:]

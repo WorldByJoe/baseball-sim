@@ -1,5 +1,5 @@
 /* ============================================================================
-   players.js · v0.2 · 2026-10-06
+   players.js · v0.3 · 2026-10-14
 
    Real players as the engine's players, for the playoff review. Loaded after
    bb_engine.js (and bb_field.js, bb_game.js when games are played).
@@ -24,6 +24,7 @@
    along the barrel, when fitted (review/fit_mishit.py).
 
    CHANGED
+     v0.3  traits the data cannot identify (FREEZE) held at the posterior mean in replays (the model review)
      v0.2  setData(recs, fits, pfit) for a browser, which has no read(): the live page hands its bundle in
      v0.1  first build (the Yankees-Rays review, 2026-10-06)
 ============================================================================ */
@@ -34,6 +35,7 @@ var REVIEW = (function () {
   function latest(o) { if (!o) return null; var y = o['2026'] !== undefined ? o['2026'] : o['2025']; return typeof y === 'object' && y ? y.mean : y; }
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
+  var FREEZE = ['learn', 'coverage', 'commit'];   // faceSD and timingSD are now measured directly (review/fit_hitters.py v0.3)
   function hitter(fit, rng, draw, pos) {
     var B = BB.makeBatter(rng, { population: true, pos: pos || fit.position || 'DH', bats: fit.bats });
     var k = fit.known, h = draw === undefined || draw === null ? (fit.refined || fit.mean) : fit.draws[draw % fit.draws.length];
@@ -44,6 +46,9 @@ var REVIEW = (function () {
     B.swingPower = v * v * v * B.bat.mEff / (4 * k.weightLb * 0.4536 * k.swingLenFt * FT);
     B.batSpeed = BB.batSpeedOf(B.swingPower, B.weightLb, B.swingLenFt, B.bat);
     for (var key in h) B[key] = h[key];
+    // the model review (2026-10-14): traits the data cannot identify (the posterior sd over 0.9 of the prior's and no
+    // carry-over from one season to the next) are held at his posterior mean, not drawn afresh each replay
+    if (fit.mean && draw !== undefined && draw !== null) FREEZE.forEach(function (k) { if (fit.mean[k] !== undefined) B[k] = fit.mean[k]; });
     B.barrelSD = B.motorIn * Math.pow(B.batSpeed / 72, 2);
     B.zone = { bot: 0.263 * B.heightIn * IN, top: 0.559 * B.heightIn * IN };
     if (fit.speed) B.speed = fit.speed;
