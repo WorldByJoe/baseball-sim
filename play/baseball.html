@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ballgame</title>
 <!-- ============================================================================
-  baseball.html · v5.1 · 2026-10-15
+  baseball.html · v5.2 · 2026-10-15
 
   The baseball app's screen: a whole game, played by the engine up front
   (about 50 ms) and then REPLAYED on a schedule - game night mode
@@ -48,6 +48,10 @@
   colour-blind separation waived for now (Joe).
 
   CHANGED
+    v5.2  the model review's realism changes (Joe, 2026-10-15): engine v3.10 (the topped ball and a gentler sweet spot, fitted
+          to the league's squared-up distribution; less lift on low-spin liners), bb_field v1.19 (one rule for taking a base,
+          fitted on real players: runs 4.39 against the league's 4.43), players v0.7; the real-player file refitted on this
+          engine (?v=2) and the league stable rebuilt (?v=6)
     v5.1  the model as the 2026 review left it (Joe, 2026-10-15): the engine of engine-dev (the playoff review's flight and
           contact, the swing refit), bb_field v1.18 (infielders dive and recover, base covers in time), bb_game v1.10; and the
           real-player game: 3 games in 10, two clubs drafted at random from 2026's major leaguers with their own traits
@@ -151,12 +155,12 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
   <div id="hud" class="tag"></div>
 </div>
 <!-- version tags so a browser never runs a stale engine against a new page -->
-<script src="bb_engine.js?v=3.9r7"></script>
+<script src="bb_engine.js?v=3.10"></script>
 <script src="bb_names.js?v=0.2"></script>
-<script src="bb_field.js?v=1.18"></script>
+<script src="bb_field.js?v=1.19"></script>
 <script src="bb_game.js?v=1.10"></script>
-<script src="review/players.js?v=0.6"></script>
-<script src="stable/bb_real2026.js?v=1"></script>
+<script src="review/players.js?v=0.7"></script>
+<script src="stable/bb_real2026.js?v=2"></script>
 <script src="bb_schedule.js?v=0.9"></script>
 <script src="bb_call.js?v=0.7"></script>
 <script src="bb_organ.js?v=0.1"></script>
@@ -164,7 +168,7 @@ body.final #bcard, body.final #board, body.final #pcard, body.final #seq, body.f
 <!-- the park's sound files, when they are beside the page; without it the game plays silently -->
 <script src="sounds/manifest.js"></script>
 <!-- the league's standing rosters, when they are beside the page (headless/league_run.js writes them); without it every game draws two new teams -->
-<script src="stable/bb_stable.js?v=5"></script>
+<script src="stable/bb_stable.js?v=6"></script>
 <script>
 (function () {
   'use strict';

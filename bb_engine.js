@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_engine.js · v3.9 · 2026-10-06
+   bb_engine.js · v3.10 · 2026-10-15
 
    The baseball engine. Pure JavaScript, seeded randomness, no DOM and no
    clock: the same file runs headless under jsc (calibration batches of
@@ -66,6 +66,10 @@
    releases from the -x side; a right-handed batter stands on the -x side.
 
    CHANGED
+     v3.10 (engine-dev, the model review's realism changes, for the Ballgame; the live forecasts stay on run 7.5): THE TOPPED BALL
+           (TOP_K 1.0: struck on its top half the collision keeps less) and Q_SCALE 0.96, fitted to the league's squared-up
+           distribution (weak topped .046/.045, 105+ mph .080/.078); CL_LOW 0.4, less lift at low spin factor on batted balls only
+           (liners carried 5-20 ft long); and the switches tested and left off (RISE_DET, BS_DET, BS_FOOL, BS_T)
      review  (yankees-review only) SPIN_KEEP 0.60 and the batted-ball drag 1.08 -> 1.13, FITTED to 2026's carry (Joe, 2026-10-13:
              where the runs go missing): the engine's fly balls at 95+ mph and 30-45 deg landed 9-20 ft short and left the park
              half as often; see SPIN_KEEP
@@ -457,7 +461,9 @@ var BB = (function () {
   // factor S = R*w_perp/v. Only the TRANSVERSE part of the spin makes lift -
   // gyro spin along the flight path bends nothing.
   function cdOf(spinRpm) { return 0.3008 + 0.0292 * spinRpm / 1000; }
-  function clOf(S) { return 1.12 * S / (0.583 + 2.333 * S); }
+  var CL_LOW = 0.4, CL_S0 = 0.25;   // v3.10 default: liners on hits land within a foot of the league's (the model review)   // the model review (liners carried 10-20 ft long on hits): below spin factor CL_S0 the lift is scaled by (S / CL_S0)^CL_LOW; 0 = Sawicki's curve as it was (calibration; off)
+  var IN_BAT = false;   // set while a batted ball flies, so CL_LOW leaves pitches alone
+  function clOf(S) { var c = 1.12 * S / (0.583 + 2.333 * S); return CL_LOW && IN_BAT && S < CL_S0 ? c * Math.pow(S / CL_S0, CL_LOW) : c; }
   // Batted-ball drag multiplier, FITTED to how far the league's balls in the
   // air carried by exit velocity and launch angle (statcast/bip.py table 5,
   // 42 days of 2025; headless/bip_check.js plays whole games, so MLB's parks
@@ -553,7 +559,7 @@ var BB = (function () {
     var wallZ = env.wallFt * FT, out = null, q = [0, 0, 0], qt = 0;
     while (t < 15) {
       q[0] = p[0]; q[1] = p[1]; q[2] = p[2]; qt = t;
-      step(p, v, w, env, BAT_DT, AERO.batCdSpin === 1 ? AERO.batCd : [AERO.batCd, AERO.batCdSpin]); t += BAT_DT;
+      IN_BAT = true; step(p, v, w, env, BAT_DT, AERO.batCdSpin === 1 ? AERO.batCd : [AERO.batCd, AERO.batCdSpin]); IN_BAT = false; t += BAT_DT;
       if (p[2] > apex) apex = p[2];
       if (rec) path.push([t, p[0], p[1], p[2]]);
       var spray = Math.atan2(p[0], p[1]) / DEG, f;
@@ -1678,10 +1684,11 @@ var BB = (function () {
   // them square), at 0.5 in .30 and .24, with the raw scatter x1.15 to keep the fastball whiffs .17 (0.4 in: .30 /
   // .24, whiffs .16; 0.6 in: .27 / .21).
   var LOOK_SD = 0.4625, LOOK_GAIN = 1.0;   // the swing refit (review, 2026-10-14; were 0.5 and 1.3): review/swing_fit.py against 2026's launch angles, swing outcomes by kind, fastball fouls and spray
+  var TOP_K = 1.0, TOP_S0 = 0, Q_SCALE = 0.96;   // v3.10 defaults (the model review, item 4: fitted to the league's squared-up distribution)   // the model review's item 4: the collision's loss on the ball's top half, and a scale on its efficiency (calibration; off)
   var RISE_DET = 1, BS_DET = 1, BS_FOOL = 1, BS_T = 0;   // BS_T: the barrel scatter drawn from Student's t with BS_T degrees of freedom at the same sd (0 = normal)
   function tDraw(rng, nu) { var c = 0; for (var i = 0; i < nu; i++) { var z = rng.n(0, 1); c += z * z; } return rng.n(0, 1) / Math.sqrt(c / nu) / Math.sqrt(nu / (nu - 2)); }
     // the model review (2026-10-14): the scatter's shape by whether he picked the pitch up; 1 = as fitted
-  function tuneContact(o) { if (o.riseDet != null) RISE_DET = o.riseDet; if (o.bsDet != null) BS_DET = o.bsDet; if (o.bsFool != null) BS_FOOL = o.bsFool; if (o.bsT != null) BS_T = o.bsT; if (o.lookGain != null) LOOK_GAIN = o.lookGain; if (o.lookSd != null) LOOK_SD = o.lookSd; if (o.vertMiss != null) VERT_MISS = o.vertMiss; if (o.geom != null) GEOM = o.geom; if (o.geomVertical != null) GEOM = o.geomVertical ? 'level' : 'path'; if (o.ex != null) E_X = o.ex; if (o.rx != null) R_X = o.rx; if (o.mu != null) MU_BAT = o.mu; if (o.muGamma != null) MU_GAMMA = o.muGamma; if (o.muRef != null) MU_REF = o.muRef; if (o.muVref != null) MU_VREF = o.muVref; if (o.spinKeep != null) SPIN_KEEP = o.spinKeep; if (o.aimAttack != null) AIM_ATTACK = o.aimAttack; return { lookGain: LOOK_GAIN, lookSd: LOOK_SD, vertMiss: VERT_MISS, geom: GEOM, ex: E_X, rx: R_X, mu: MU_BAT, muGamma: MU_GAMMA, muRef: MU_REF, muVref: MU_VREF, spinKeep: SPIN_KEEP, aimAttack: AIM_ATTACK }; }   // a calibration hook (step 2 of the run audit); unused, the constants stand
+  function tuneContact(o) { if (o.riseDet != null) RISE_DET = o.riseDet; if (o.bsDet != null) BS_DET = o.bsDet; if (o.bsFool != null) BS_FOOL = o.bsFool; if (o.bsT != null) BS_T = o.bsT; if (o.clLow != null) CL_LOW = o.clLow; if (o.clS0 != null) CL_S0 = o.clS0; if (o.topK != null) TOP_K = o.topK; if (o.topS0 != null) TOP_S0 = o.topS0; if (o.qScale != null) Q_SCALE = o.qScale; if (o.lookGain != null) LOOK_GAIN = o.lookGain; if (o.lookSd != null) LOOK_SD = o.lookSd; if (o.vertMiss != null) VERT_MISS = o.vertMiss; if (o.geom != null) GEOM = o.geom; if (o.geomVertical != null) GEOM = o.geomVertical ? 'level' : 'path'; if (o.ex != null) E_X = o.ex; if (o.rx != null) R_X = o.rx; if (o.mu != null) MU_BAT = o.mu; if (o.muGamma != null) MU_GAMMA = o.muGamma; if (o.muRef != null) MU_REF = o.muRef; if (o.muVref != null) MU_VREF = o.muVref; if (o.spinKeep != null) SPIN_KEEP = o.spinKeep; if (o.aimAttack != null) AIM_ATTACK = o.aimAttack; return { lookGain: LOOK_GAIN, lookSd: LOOK_SD, vertMiss: VERT_MISS, geom: GEOM, ex: E_X, rx: R_X, mu: MU_BAT, muGamma: MU_GAMMA, muRef: MU_REF, muVref: MU_VREF, spinKeep: SPIN_KEEP, aimAttack: AIM_ATTACK }; }   // a calibration hook (step 2 of the run audit); unused, the constants stand
   function checkChance(B, rf, pitch) {   // the chance he tries to check: nothing new to see once he had picked it up (v2.7)
     if (rf.detected) return 0;
     return clamp((reachOf(B, pitch.plate.x + rf.lastPic[0], pitch.plate.z + rf.lastPic[1]) / IN - CHECK_IN[0]) / (CHECK_IN[1] - CHECK_IN[0]), 0, 1);
@@ -1817,7 +1824,8 @@ var BB = (function () {
     var n = [c * e1[0] + s * q[0], c * e1[1] + s * q[1], c * e1[2] + s * q[2]];   // the contact normal
     var un = dot(u, n);
     if (un >= 0) return null;                  // the bat never closes on the ball
-    var qe = qAt(bat, xBar, -un);
+    var qe = qAt(bat, xBar, -un) * Q_SCALE;
+    if (s < -TOP_S0) qe *= Math.max(0.2, 1 - TOP_K * (-s - TOP_S0));   // THE TOPPED BALL (the model review, item 4): struck on its top half, the collision keeps less (off at TOP_K 0)
     var dvn = -(1 + qe) * un;
     var rc = [-BALL_R * n[0], -BALL_R * n[1], -BALL_R * n[2]];
     var wr = cross(win, rc);

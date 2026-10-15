@@ -1,5 +1,5 @@
 /* ============================================================================
-   bb_field.js · v1.18 · 2026-10-14
+   bb_field.js · v1.19 · 2026-10-15
 
    The ball in play: fielders, throws and base runners, from the moment the
    engine's batted ball leaves the bat to the moment every runner is on a
@@ -38,6 +38,8 @@
    cut-off man is a timing rule, not a player.
 
    CHANGED
+     v1.19 one rule for taking a base: second read as third and home are (SAFETY_2 0.6 s), going home D_H 0.15 s more (the
+           model review, item 5; fitted on real players)
      v1.18 THE INFIELDER'S RANGE AND THE COVERS (the model review, 2026-10-14): an infielder reaches REACH_IF on his feet and
            REACH_DIVE on a dive that costs DIVE_REC to get up from (only when no ball on his feet is coming), and a long run costs
            RUN_REC a metre off his throw; refitted with PIVOT and V_CONTACT (ground_check, mob_check, seed 5: GB hits .297/.291,
@@ -135,6 +137,14 @@ var BBField = (function () {
   // double, 2025-26: .270 / .327 / .500 by outs (2,869 doubles). With SAFETY_H's [0.8, 0.2, 0.0] he scored .49 / .64 / .67;
   // margins 0.6 s higher gave .34 / .46 / .50, 1.0 s .26 / .35 / .46, 1.4 s .16 / .24 / .37, so by outs [1.75, 1.30, 0.65].
   var SEND = { H1: [1.75, 1.30, 0.65] };
+  // ONE RULE FOR TAKING A BASE (v1.19, the model review's item 5): taking second is read as taking third and home are, a judged
+  // race with READ_SD of error, margin SAFETY_2 s; taking third and going home shift SAFETY_3 and SAFETY_H / SEND.H1 by D_3 and
+  // D_H. FITTED on real players with engine v3.10 (300 second-half games x 4, review/run_score.py): first to third .317 (league
+  // .313), scoring from second on a single .579 (.567), from first on a double .419 (.370), on a fly ball .619 (.617), runs 4.39
+  // (4.43); doubles barely move with the margins (most are clean, so their excess is where balls land and how fast outfielders
+  // reach them, not the decision). null / 0 restores v1.18.
+  var SAFETY_2 = 0.6, D_3 = -0.3, D_H = -0.15;
+  function D3H(next) { return next === 3 ? D_3 : D_H; }
   // How sure a throw's arrival is: 0.15 s for an infield throw, and more the
   // longer it is beyond 40 m (footwork, a hop, the catcher moving for it); set
   // by hand, so runners are thrown out at third and home about as often as
@@ -276,7 +286,7 @@ var BBField = (function () {
   // then the pitcher covering first and the man covering second ran a fly-ball route on the outfield curve, and the
   // pitcher reached first after the batter: 3-1 plays were hits .77 of the time)
   function tuneField(o) { if (o.tauIF != null) TAU_IF = o.tauIF; if (o.reachIF != null) REACH_IF = o.reachIF; if (o.reachDive != null) REACH_DIVE = o.reachDive;
-    if (o.diveRec != null) DIVE_REC = o.diveRec; if (o.zCatch != null) Z_CATCH = o.zCatch; if (o.zTop != null) Z_TOP_REACH = o.zTop; if (o.diveWait != null) DIVE_WAIT = o.diveWait; if (o.cleanK != null) CLEAN_K = o.cleanK; if (o.runRec != null) RUN_REC = o.runRec; if (o.runFree != null) RUN_FREE = o.runFree; if (o.pivot != null) PIVOT = o.pivot; if (o.vContact != null) V_CONTACT = o.vContact; }   // calibration only
+    if (o.diveRec != null) DIVE_REC = o.diveRec; if (o.zCatch != null) Z_CATCH = o.zCatch; if (o.zTop != null) Z_TOP_REACH = o.zTop; if (o.diveWait != null) DIVE_WAIT = o.diveWait; if (o.cleanK != null) CLEAN_K = o.cleanK; if (o.runRec != null) RUN_REC = o.runRec; if (o.runFree != null) RUN_FREE = o.runFree; if (o.pivot != null) PIVOT = o.pivot; if (o.vContact != null) V_CONTACT = o.vContact; if (o.safety2 !== undefined) SAFETY_2 = o.safety2; if (o.d3 != null) D_3 = o.d3; if (o.dH != null) D_H = o.dH; }   // calibration only
   function coverTime(F, d) { return F.pl.react + sprintTime(F.pl.speed * FT, TAU_RUN, Math.max(0, d)); }   // the runner's measured curve (TAU_RUN)
   function runTime(pl, d, standing) {     // a runner
     var v = pl.speed * FT; d = Math.max(0, d);
@@ -614,7 +624,7 @@ var BBField = (function () {
       R.slice(0, -1).forEach(function (r) {
         var to = r.base + 1, tRun = tc + 0.05 + restTime(r.pl, BASE), oNow = Math.min(outs + 1, 2);   // from a standstill; the outs he now plays with
         var tBall = Math.max(tc + settleC(to) + F.pl.transfer + throwArrival(F, at, to), rcvArrival(to, F.pos)) + TAG;
-        var goes = to < aheadTag && (to >= 3 ? tBall - tRun + rng.n(0, READ_SD) > (to === 3 ? SAFETY_3 : SAFETY_H)[oNow] + r.pl.runAggr : tRun + SAFETY + r.pl.runAggr < tBall);
+        var goes = to < aheadTag && (to >= 3 ? tBall - tRun + rng.n(0, READ_SD) > (to === 3 ? SAFETY_3 : SAFETY_H)[oNow] + D3H(to) + r.pl.runAggr : tRun + SAFETY + r.pl.runAggr < tBall);
         if (goes) tagging.push({ r: r, to: to, tRun: tRun, tBall: tBall });
         aheadTag = goes ? to : r.base;
       });
@@ -720,7 +730,8 @@ var BBField = (function () {
       while (to + 1 < ahead && to < 4) {
         var next = to + 1, tRun = arrive(r, next);
         var tBall = ballTo(next, tField, fieldAt).t + TAG;
-        if (next >= 3 ? tBall - tRun + rng.n(0, READ_SD) > (next === 3 ? SAFETY_3 : r.base === 1 ? SEND.H1 : SAFETY_H)[Math.min(outs, 2)] + r.pl.runAggr : tRun + SAFETY + r.pl.runAggr < tBall) to = next; else break;
+        if (next >= 3 ? tBall - tRun + rng.n(0, READ_SD) > (next === 3 ? SAFETY_3 : r.base === 1 ? SEND.H1 : SAFETY_H)[Math.min(outs, 2)] + D3H(next) + r.pl.runAggr
+            : SAFETY_2 !== null ? tBall - tRun + rng.n(0, READ_SD) > SAFETY_2 + r.pl.runAggr : tRun + SAFETY + r.pl.runAggr < tBall) to = next; else break;   // v1.19: taking second read as third and home are
       }
       if (T.groundRule) to = Math.min(4, r.base + 2);
       r.target = Math.min(to, ahead - 1); ahead = r.target >= 4 ? 5 : r.target;

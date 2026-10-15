@@ -1,9 +1,9 @@
 # Ballgame (the latest version)
 
-The game screen and everything it loads, updated 2026-10-15 at the end of the 2026 model review: baseball.html v5.1 with
-the broadcast (bb_call v0.7, bb_schedule v0.9), the engine of the `engine-dev` branch (the playoff review's batted-ball
-flight and contact, the swing refit of run 6), bb_field v1.18 (infielders dive and must get up, base covers arrive in
-time), bb_game v1.10, and the crowd, field and organ sounds. https://worldbyjoe.github.io/baseball-sim/play/
+The game screen and everything it loads, updated 2026-10-15 at the end of the 2026 model review: baseball.html v5.2 with
+the broadcast (bb_call v0.7, bb_schedule v0.9), engine v3.10 of the `engine-dev` branch (the playoff review's flight and contact, the swing refit,
+the topped ball and less lift on low-spin liners), bb_field v1.19 (infielders dive and recover, base covers in time, one
+rule for taking a base), bb_game v1.10, and the crowd, field and organ sounds. https://worldbyjoe.github.io/baseball-sim/play/
 
 Three games in ten are drawn from real players: two clubs of 2026 major leaguers picked at random, each man with his own
 measured and fitted traits (stable/bb_real2026.js, built by review/build_real2026.py on engine-dev from the season
