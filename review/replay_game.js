@@ -1,5 +1,5 @@
 /* ============================================================================
-   replay_game.js · v0.9 · 2026-10-14
+   replay_game.js · v1.0 · 2026-10-14
 
    A postseason game played again as it was played: the real batting order with
    its substitutions (each man takes his spot at the turn he took it, at the
@@ -21,6 +21,7 @@
    'errors' (then G, the league factor): each fielder's own error tendency (review/err_mult.py); 'pitched+errors' both.
 
    CHANGED
+     v1.0  mode 'fielding': real fielders' range and catchers' framing (review/field_traits.json; the model review)
      v0.9  audit: a hit with an error on the throw is labelled the hit; the steal columns read steal.safe (the model review)
      v0.8  calibration tokens 'eye=x' and 'aggr=y': the home edge's eye factor and aggression shift (season/home_cal_games.sh)
      v0.7  mode tokens 'send=a,b,c' (BBField.SEND.H1, going home from first on a hit, by outs) and 'vis=s' (the home edge's
@@ -48,6 +49,21 @@
   // ERRORS (mode 'errors'): each fielder's own error tendency, his season errors per chance against his positions'
   // (review/err_mult.py) times one league factor G (A[6]), as errMult on his drops, fumbles and wild throws (bb_field v1.16)
   var ERR = MODE.indexOf('errors') >= 0 ? JSON.parse(read('review/err_mult.json')).players : null, GERR = +A[6] || 1;
+  // v1.0 (the model review): a fielder's own range and a catcher's own framing from Savant's fielding run values
+  // (review/field_traits.py: z in sd of true talent, shrunk), mode token 'fielding'; mapped onto the engine's traits at the
+  // same quantile: route + 0.7 z sd and react - 0.7 z sd, framing + z sd; the draw's own spread kept in proportion to
+  // what the estimate leaves unknown
+  var FIELD = MODE.indexOf('fielding') >= 0 ? JSON.parse(read('review/field_traits.json')).players : null, TT = BB.TRAITS;
+  function fieldOf(h, id, pos) {
+    var f = FIELD && FIELD[id]; if (!f) return;
+    var r = f[pos] || f.all, keep;
+    if (r && pos !== 'DH' && pos !== 'C') {
+      keep = Math.sqrt(Math.max(0, 1 - r.rel));
+      h.route = Math.min(TT.route[3], Math.max(TT.route[2], TT.route[0] + (h.route - TT.route[0]) * keep + 0.7 * r.z * TT.route[1]));
+      h.react = Math.max(0.05, h.react - 0.7 * r.z * TT.react[1]);   // his position's first step, moved by his range
+    }
+    if (pos === 'C' && f.frame) { keep = Math.sqrt(Math.max(0, 1 - f.frame.rel)); h.framing = Math.min(TT.framing[3], Math.max(TT.framing[2], TT.framing[0] + ((h.framing || 0) - TT.framing[0]) * keep + f.frame.z * TT.framing[1])); }
+  }
   function errOf(id) { var e = ERR && ERR[id]; return ERR ? GERR * (e ? e.rel : 1) : undefined; }
   // AS PITCHED (mode 'pitched'): each man in the plan throws his game-day speed for every type he threw 3+ times
   // (his season speed plus that day's change, review/as_pitched.py) and his game-day mix; the batter's scouting report
@@ -105,7 +121,7 @@
     SLOTS[s].forEach(function (list, k) {
       var plan = {};
       list.forEach(function (m, j) {
-        var h = REVIEW.hitter(D.fits[m.id], rng, draw, m.pos === 'DH' ? 'DH' : m.pos); h.pos = m.pos; h.homePos = m.pos; if (ERR) h.errMult = errOf(m.id);
+        var h = REVIEW.hitter(D.fits[m.id], rng, draw, m.pos === 'DH' ? 'DH' : m.pos); h.pos = m.pos; h.homePos = m.pos; if (ERR) h.errMult = errOf(m.id); if (FIELD) fieldOf(h, m.id, m.pos);
         if (j === 0) lineup.push(h); else plan[m.from] = h;
       });
       lineupPlan.push(plan);
