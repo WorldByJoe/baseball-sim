@@ -1,5 +1,5 @@
 """
-fetch_games.py · v0.1 · 2026-10-13
+fetch_games.py · v0.2 · 2026-10-14
 
 Every 2026 regular-season game: MLB's schedule (final games only; a suspended game counts once, on the day it ended),
 each game's live feed (season/raw/feeds/<pk>.json) parsed as review/game_feed.py parses a postseason game
@@ -9,6 +9,7 @@ Writes season/schedule.json: pk, date, block (h1 through the All-Star break, h2 
   python3 season/fetch_games.py
 
 CHANGED
+  v0.2  SEASON_Y: another season (2025) in season/y<year>, relabelled (the model review)
   v0.1  first build (Joe, 2026-10-13)
 """
 import json, os, sys, urllib.request, time
@@ -19,7 +20,9 @@ from game_feed import parse
 
 API = 'https://statsapi.mlb.com/api/v1'
 UA = {'User-Agent': 'Mozilla/5.0 (research script; CSU; baseball trait model)'}
-ASB = '2026-07-13'
+SY = int(os.environ.get('SEASON_Y', '2026')); PY = SY - 1   # the season replayed (SEASON_Y=2025, the model review: its data in season/y2025, labelled as 2026's, the year before as 2025's)
+BASE = HERE if SY == 2026 else os.path.join(HERE, 'y%d' % SY)
+ASB = {2026: '2026-07-13', 2025: '2025-07-13'}[SY]
 
 
 def get(url, tries=4):
@@ -32,7 +35,7 @@ def get(url, tries=4):
 
 
 def one(g):
-    pk = g['pk']; raw = os.path.join(HERE, 'raw', 'feeds', '%d.json' % pk); out = os.path.join(HERE, 'games', '%d.json' % pk)
+    pk = g['pk']; raw = os.path.join(BASE, 'raw', 'feeds', '%d.json' % pk); out = os.path.join(BASE, 'games', '%d.json' % pk)
     if os.path.exists(out): return pk, None
     try:
         if not os.path.exists(raw):
@@ -45,8 +48,8 @@ def one(g):
 
 
 def main():
-    os.makedirs(os.path.join(HERE, 'raw', 'feeds'), exist_ok=True); os.makedirs(os.path.join(HERE, 'games'), exist_ok=True)
-    S = json.loads(get(API + '/schedule?sportId=1&season=2026&gameType=R&hydrate=venue'))
+    os.makedirs(os.path.join(BASE, 'raw', 'feeds'), exist_ok=True); os.makedirs(os.path.join(BASE, 'games'), exist_ok=True)
+    S = json.loads(get(API + '/schedule?sportId=1&season=%d&gameType=R&hydrate=venue' % SY))
     games, seen = [], set()
     for d in S['dates']:
         for g in d['games']:
@@ -59,22 +62,22 @@ def main():
                           'awayName': g['teams']['away']['team']['name'], 'homeName': g['teams']['home']['team']['name'],
                           'final': [g['teams']['away'].get('score'), g['teams']['home'].get('score')], 'venue': g['venue']['id'], 'venueName': g['venue']['name'],
                           'doubleHeader': g.get('doubleHeader'), 'inningsScheduled': g.get('scheduledInnings', 9)})
-    json.dump(games, open(os.path.join(HERE, 'schedule.json'), 'w'), indent=0)
+    json.dump(games, open(os.path.join(BASE, 'schedule.json'), 'w'), indent=0)
     print('%d final games (%d first half, %d second)' % (len(games), sum(g['block'] == 'h1' for g in games), sum(g['block'] == 'h2' for g in games)), flush=True)
-    St = json.loads(get(API + '/standings?leagueId=103,104&season=2026&standingsTypes=regularSeason&hydrate=team'))
+    St = json.loads(get(API + '/standings?leagueId=103,104&season=%d&standingsTypes=regularSeason&hydrate=team' % SY))
     tab = []
     for rec in St['records']:
         for t in rec['teamRecords']:
             tab.append({'team': t['team']['id'], 'name': t['team']['name'], 'abbrev': t['team'].get('abbreviation'), 'division': rec['division']['id'],
                         'league': rec['league']['id'], 'w': t['wins'], 'l': t['losses'], 'rs': t.get('runsScored'), 'ra': t.get('runsAllowed'), 'divRank': t.get('divisionRank')})
-    json.dump(tab, open(os.path.join(HERE, 'standings.json'), 'w'), indent=1)
+    json.dump(tab, open(os.path.join(BASE, 'standings.json'), 'w'), indent=1)
     print('standings: %d teams' % len(tab), flush=True)
     bad = []
     with ThreadPoolExecutor(4) as ex:
         for k, (pk, err) in enumerate(ex.map(one, games)):
             if err: bad.append((pk, err))
             if k % 200 == 0: print('  %d/%d' % (k, len(games)), flush=True)
-    json.dump(bad, open(os.path.join(HERE, 'games_failed.json'), 'w'), indent=1)
+    json.dump(bad, open(os.path.join(BASE, 'games_failed.json'), 'w'), indent=1)
     print('parsed %d, failed %d' % (len(games) - len(bad), len(bad)))
 
 

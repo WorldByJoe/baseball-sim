@@ -1,5 +1,5 @@
 /* ============================================================================
-   series_sim.js · v0.3 · 2026-10-13
+   series_sim.js · v0.4 · 2026-10-15
 
    A best-of-seven series played many times before its first pitch (review/series_spec.py): each team's
    latest division series lineup, its four-man rotation in order (game k's starter is rotation[k mod 4]), its
@@ -13,6 +13,7 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js bb_game.js review/players.js review/series_sim.js -- SPEC [series] [seed] [part] [parts] [G]
 
    CHANGED
+     v0.4  each simulated series its own pitchers (REVIEW.redraw of one build a park); until now one build served every series (the model review)
      v0.3  the home hitters' edge (bb_game v1.8) when review/home_edge.json turns it on
      v0.2  any length: the series is as long as its home pattern (3, 5 or 7 games; first to a majority wins)
      v0.1  first build (Joe, 2026-10-08: the LCS and the World Series before Game 1)
@@ -29,10 +30,11 @@
     if (!envs[t]) envs[t] = BB.makeEnv({ tempF: /dome|retract/i.test(V.roof || '') ? 72 : 60, elevFt: V.elevFt, fence: V.fence });
     return envs[t];
   }
-  var built = {};
+  var built = {}, base = {};
   function pitcher(id, park, asReliever) {   // built once a park (the aim depends on the air)
     var k = id + '@' + park;
-    if (!built[k]) { built[k] = REVIEW.pitcher(D.recs[id], rng, envOf(park)); if (ERR) built[k].errMult = errOf(id); }
+    if (!base[k]) { base[k] = REVIEW.pitcher(D.recs[id], rng, envOf(park)); if (ERR) base[k].errMult = errOf(id); }   // the costly build, once a park
+    if (!built[k]) built[k] = REVIEW.redraw ? REVIEW.redraw(base[k], rng) : base[k];   // this series' own pitcher
     var P = built[k];
     if (asReliever && P.role === 'SP') { P.role = 'RP'; P.stamina = 35; }
     return P;
@@ -53,6 +55,7 @@
   }
   for (var s = 0; s < N; s++) {
     if (s % PARTS !== PART) continue;
+    built = {};
     var draw = {}; draw[S.hi] = Math.floor(rng.u() * 40); draw[S.lo] = Math.floor(rng.u() * 40);   // one man all week
     var wins = {}; wins[S.hi] = 0; wins[S.lo] = 0; var games = [];
     var NG = S.homeOf.length, NEED = Math.ceil(NG / 2);   // best of 3, 5 or 7

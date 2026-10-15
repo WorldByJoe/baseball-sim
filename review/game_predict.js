@@ -1,5 +1,5 @@
 /* ============================================================================
-   game_predict.js · v0.2 · 2026-10-13
+   game_predict.js · v0.3 · 2026-10-15
 
    One game of a series, played many times before its first pitch: the series' teams as review/series_spec.py sets
    them (each team's latest lineup, every man at the position he started; its bullpen run by the model's manager,
@@ -12,6 +12,7 @@
    Run:  tools/diag/run.sh bb_engine.js bb_names.js bb_field.js bb_game.js review/players.js review/game_predict.js -- SPEC GAME_INDEX AWAY_SP HOME_SP [games] [seed] [part] [parts] [G]
 
    CHANGED
+     v0.3  each replay its own pitchers (REVIEW.redraw of the game's one build); until now one build served every replay (the model review)
      v0.2  the home hitters' edge (bb_game v1.8) when review/home_edge.json turns it on
      v0.1  first build (Joe, 2026-10-10: pregame prediction cards for the championship series)
 ============================================================================ */
@@ -24,9 +25,10 @@
   var home = S.homeOf[K] === 'hi' ? S.hi : S.lo, away = home === S.hi ? S.lo : S.hi, SP = {}; SP[away] = ASP; SP[home] = HSP;
   var V = S.teams[home].venue;
   var env = BB.makeEnv({ tempF: /dome|retract/i.test(V.roof || '') ? 72 : 60, elevFt: V.elevFt, fence: V.fence });   // October nights: 60 F open, 72 under a roof
-  var built = {};
+  var built = {}, base = {};
   function pitcher(id, asReliever) {
-    if (!built[id]) { built[id] = REVIEW.pitcher(D.recs[id], rng, env); if (ERR) built[id].errMult = errOf(id); }
+    if (!base[id]) { base[id] = REVIEW.pitcher(D.recs[id], rng, env); if (ERR) base[id].errMult = errOf(id); }   // the costly build, once
+    if (!built[id]) built[id] = REVIEW.redraw ? REVIEW.redraw(base[id], rng) : base[id];   // this replay's own pitcher
     var P = built[id];
     if (asReliever && P.role === 'SP') { P.role = 'RP'; P.stamina = 35; }
     return P;
@@ -46,7 +48,7 @@
   }
   for (var g = 0; g < N; g++) {
     if (g % PARTS !== PART) continue;
-    Object.keys(built).forEach(function (k) { fresh(built[k]); });
+    built = {};
     var GM = BBGame.simGame(team(away, g % 40), team(home, (g * 7 + 3) % 40), { rng: rng, env: env, rules: 'AL', ghost: false, maxInnings: 60, homeEdge: HOMEEDGE });
     print(JSON.stringify({ g: g, away: away, home: home, score: GM.score, innings: GM.finalInning, errors: GM.errors }));
   }

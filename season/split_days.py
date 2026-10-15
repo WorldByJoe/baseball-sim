@@ -1,5 +1,5 @@
 """
-split_days.py · v0.2 · 2026-10-13
+split_days.py · v0.3 · 2026-10-14
 
 Every pitch of the 2025 and 2026 regular seasons (statcast/raw/pitches/<year>/<date>.csv, statcast/fetch_pitches.py's
 day files) split into one file per player, role and block, in playoffs/fetch_statcast.py's extract format:
@@ -13,6 +13,7 @@ season/players_aaa.json, cut at the same date (the majors' All-Star break), so e
   python3 season/split_days.py [blocks, e.g. 2025,h1] [--aaa]
 
 CHANGED
+  v0.3  SEASON_Y: another season (2025) in season/y<year>, relabelled (the model review)
   v0.2  --aaa: Triple-A, for the priors of men with no major-league data in a fold's window
   v0.1  first build (Joe, 2026-10-13: the whole 2026 season, every team and game)
 """
@@ -22,21 +23,23 @@ sys.path.insert(0, os.path.join(HERE, '..', 'playoffs'))
 from fetch_statcast import OUT_COLS, extract
 
 KEEP = OUT_COLS[:-1] + ['des', 'player_name']
-ASB = '2026-07-13'
+SY = int(os.environ.get('SEASON_Y', '2026')); PY = SY - 1   # the season replayed (SEASON_Y=2025, the model review: its data in season/y2025, labelled as 2026's, the year before as 2025's)
+BASE = HERE if SY == 2026 else os.path.join(HERE, 'y%d' % SY)
+ASB = {2026: '2026-07-13', 2025: '2025-07-13'}[SY]
 
 
 def block_of(date):
-    return '2025' if date < '2026' else ('h1' if date <= ASB else 'h2')
+    return str(PY) if date < str(SY) else ('h1' if date <= ASB else 'h2')
 
 
 def main(blocks, aaa=False):
     SRC, OUT, PJ = ('pitches_aaa', 'pitches_aaa', 'players_aaa.json') if aaa else ('pitches', 'pitches', 'players.json')
-    pj = os.path.join(HERE, PJ)
+    pj = os.path.join(BASE, PJ)
     players = {int(k): v for k, v in json.load(open(pj)).items()} if os.path.exists(pj) else {}
     for blk in blocks:
         for p in players.values():
             for c in ('seen', 'thrown', 'pa'): p[c].pop(blk, None)
-        yr = '2025' if blk == '2025' else '2026'
+        yr = str(PY) if blk == str(PY) else str(SY)
         files = sorted(glob.glob(os.path.join(HERE, '..', 'statcast', 'raw', SRC, yr, '*.csv')))
         rows = {}
         n = 0
@@ -55,7 +58,7 @@ def main(blocks, aaa=False):
                 if r.get('player_name') and not p['name']: p['name'] = r['player_name']
                 q = players.setdefault(int(r['pitcher']), {'name': None, 'seen': {}, 'thrown': {}, 'pa': {}})
                 q['thrown'][blk] = q['thrown'].get(blk, 0) + 1
-        out = os.path.join(HERE, OUT, blk); os.makedirs(out, exist_ok=True)
+        out = os.path.join(BASE, OUT, blk); os.makedirs(out, exist_ok=True)
         for (role, pid), L in rows.items():
             extract(L, os.path.join(out, '%s_%d.csv.gz' % (role, pid)))
         print('%s: %d pitches, %d player-role files' % (blk, n, len(rows)), flush=True)
@@ -65,4 +68,4 @@ def main(blocks, aaa=False):
 
 if __name__ == '__main__':
     a = [x for x in sys.argv[1:] if x != '--aaa']
-    main(a[0].split(',') if a else ['2025', 'h1', 'h2'], aaa='--aaa' in sys.argv)
+    main(a[0].split(',') if a else [str(PY), 'h1', 'h2'], aaa='--aaa' in sys.argv)

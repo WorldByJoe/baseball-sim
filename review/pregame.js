@@ -1,5 +1,5 @@
 /* ============================================================================
-   pregame.js · v0.2 · 2026-10-08
+   pregame.js · v0.3 · 2026-10-15
 
    Who should have won: one postseason game played many times before its
    first pitch, with the real lineups in their real order and positions, the
@@ -21,6 +21,7 @@
    as in the replays' and the series' errors mode.
 
    CHANGED
+     v0.3  each replay its own pitchers (REVIEW.redraw of the game's one build); until now one build served every replay (the model review)
      v0.2  the errors mode (G); no 18-inning stop (the postseason has none); each game's errors printed
      v0.1  first build (the Yankees-Rays review, 2026-10-06)
 ============================================================================ */
@@ -42,9 +43,10 @@
   function errOf(id) { var e = ERR && ERR[id]; return GERR * (e ? e.rel : 1); }
   var BOOST = {};
   (A[9] || '').split(',').forEach(function (b) { var f = b.split(':'); if (f.length === 3) (BOOST[+f[0]] = BOOST[+f[0]] || {})[f[1]] = +f[2]; });
-  var built = {};
+  var built = {}, base = {};
   function pitcher(id, asReliever) {
-    if (!built[id]) { built[id] = REVIEW.pitcher(D.recs[id], rng, env); if (ERR) built[id].errMult = errOf(id); if (BOOST[id]) built[id].pitches.forEach(function (q) { if (BOOST[id][q.type]) { q.velo = BOOST[id][q.type]; q.aimCache = { ok: false }; } }); built[id].bat = BB.makeBatter(rng, { pitcher: true, pos: 'P' }); built[id].bat.name = built[id].name; built[id].bat.id = built[id].id; }
+    if (!base[id]) { base[id] = REVIEW.pitcher(D.recs[id], rng, env); if (ERR) base[id].errMult = errOf(id); if (BOOST[id]) base[id].pitches.forEach(function (q) { if (BOOST[id][q.type]) { q.velo = BOOST[id][q.type]; q.aimCache = { ok: false }; } }); base[id].bat = BB.makeBatter(rng, { pitcher: true, pos: 'P' }); base[id].bat.name = base[id].name; base[id].bat.id = base[id].id; }
+    if (!built[id]) built[id] = REVIEW.redraw ? REVIEW.redraw(base[id], rng) : base[id];   // this replay's own pitcher
     var P = built[id];
     if (asReliever && P.role === 'SP') { P.role = 'RP'; P.stamina = 35; }
     return P;
@@ -70,6 +72,7 @@
   }
   for (var g = 0; g < N; g++) {
     if (g % PARTS !== PART) continue;
+    built = {};
     var draw = g % 40, ta = team('away', draw), th = team('home', (g * 7 + 3) % 40), A0 = SWAP ? th : ta, H0 = SWAP ? ta : th;
     var GM = BBGame.simGame(A0, H0, { rng: rng, env: env, rules: 'AL', ghost: false, maxInnings: 60 });
     print(JSON.stringify({ g: g, away: A0.name, home: H0.name, score: GM.score, innings: GM.finalInning, hits: GM.hits, errors: GM.errors, pitchers: GM.pitchersUsed }));

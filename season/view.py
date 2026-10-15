@@ -1,5 +1,5 @@
 """
-view.py · v0.3 · 2026-10-13
+view.py · v0.4 · 2026-10-14
 
 A season fold's inputs written into its worktree (as history/replay_view.py does for a past October; the season's
 labels are already 2025 and 2026, the 2026 one being the fold's half):
@@ -13,6 +13,7 @@ labels are already 2025 and 2026, the 2026 one being the fold's half):
   python3 season/view.py season/foldA ~/bsim-wt/hist26A
 
 CHANGED
+  v0.4  SEASON_Y: another season (2025) in season/y<year>, relabelled (the model review)
   v0.3  the fold's league_means.json, when there (season/aaa_fold.py v0.2), is the pitchers' shrinkage target
   v0.2  the league means a pitcher's rates are shrunk toward come from major-league lines only (not season/aaa_fold.py's
         translated Triple-A ones), so a man with major-league data is fitted exactly as before
@@ -21,6 +22,8 @@ CHANGED
 import json, os, sys, copy, glob, urllib.request
 import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
+SY = int(os.environ.get('SEASON_Y', '2026')); PY = SY - 1   # the season replayed (SEASON_Y=2025, the model review: its data in season/y2025, labelled as 2026's, the year before as 2025's)
+BASE = HERE if SY == 2026 else os.path.join(HERE, 'y%d' % SY)
 sys.path.insert(0, os.path.join(HERE, '..', 'history'))
 from replay_view import relabel, through
 UA = {'User-Agent': 'Mozilla/5.0 (research script; CSU; baseball trait model)'}
@@ -76,16 +79,16 @@ def main(fold, wt):
     part = json.load(open(os.path.join(fold, 'participants_2026.json')))
     gdir = os.path.join(wt, 'review', 'games'); os.makedirs(gdir, exist_ok=True)
     venues, ng = {}, 0
-    sched = {g['pk']: g for g in json.load(open(os.path.join(HERE, 'schedule.json')))}
+    sched = {g['pk']: g for g in json.load(open(os.path.join(BASE, 'schedule.json')))}
     for g in part['games']:
-        src = os.path.join(HERE, 'games', '%d.json' % g['pk']); dst = os.path.join(gdir, '%d.json' % g['pk'])
+        src = os.path.join(BASE, 'games', '%d.json' % g['pk']); dst = os.path.join(gdir, '%d.json' % g['pk'])
         if not os.path.exists(src): continue
         if os.path.lexists(dst): os.remove(dst)
         os.symlink(src, dst); ng += 1
         venues[sched[g['pk']]['venue']] = json.load(open(src))['venue']
     V = {}
     for vid, nm in venues.items():
-        fn = os.path.join(HERE, 'raw', 'venue_%d.json' % vid)
+        fn = os.path.join(BASE, 'raw', 'venue_%d.json' % vid)
         if not os.path.exists(fn): open(fn, 'wb').write(urllib.request.urlopen(urllib.request.Request('https://statsapi.mlb.com/api/v1/venues/%d?hydrate=location,fieldInfo' % vid, headers=UA), timeout=60).read())
         v = json.load(open(fn))['venues'][0]; loc, fi = v.get('location', {}), v.get('fieldInfo', {})
         fence = [fi.get(k) for k in ('leftLine', 'leftCenter', 'center', 'rightCenter', 'rightLine')]

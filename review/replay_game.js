@@ -1,5 +1,5 @@
 /* ============================================================================
-   replay_game.js · v0.6 · 2026-10-13
+   replay_game.js · v0.8 · 2026-10-15
 
    A postseason game played again as it was played: the real batting order with
    its substitutions (each man takes his spot at the turn he took it, at the
@@ -21,6 +21,9 @@
    'errors' (then G, the league factor): each fielder's own error tendency (review/err_mult.py); 'pitched+errors' both.
 
    CHANGED
+     v0.8  each replay its own pitchers (REVIEW.redraw of the game's one build); until now one build served every replay (the model review)
+     v0.7  mode tokens 'send=a,b,c' (BBField.SEND.H1, going home from first on a hit, by outs) and 'vis=s' (the home edge's
+           visiting fielders' slower first step), for calibrating them
      v0.6  mode 'audit' (combinable): each replay prints its plate appearances (state before, result, runners' moves, runs,
            state after) for season/runs_audit.py, in place of the score line
      v0.5  the home hitters' edge (bb_game v1.8) when review/home_edge.json turns it on; mode 'nohome' leaves it off
@@ -35,6 +38,10 @@
   var GHOST = MODE.indexOf('ghost') >= 0;   // mode 'ghost': the regular season's extra-innings runner on second (the postseason has none)
   var HOMEEDGE = null; try { HOMEEDGE = JSON.parse(read('review/home_edge.json')); if (!HOMEEDGE.on) HOMEEDGE = null; } catch (e) { HOMEEDGE = null; }   // the home hitters' edge (bb_game v1.8), when review/home_edge.json turns it on
   if (MODE.indexOf('nohome') >= 0) HOMEEDGE = null;
+  MODE.forEach(function (m) {   // v0.7: calibration tokens
+    if (m.indexOf('send=') === 0) BBField.SEND.H1 = m.slice(5).split(',').map(Number);
+    if (m.indexOf('vis=') === 0) { HOMEEDGE = HOMEEDGE ? JSON.parse(JSON.stringify(HOMEEDGE)) : { eye: 1, timing: 1, barrel: 1, aggr: 0 }; HOMEEDGE.visReact = +m.slice(4); }
+  });
   // ERRORS (mode 'errors'): each fielder's own error tendency, his season errors per chance against his positions'
   // (review/err_mult.py) times one league factor G (A[6]), as errMult on his drops, fumbles and wild throws (bb_field v1.16)
   var ERR = MODE.indexOf('errors') >= 0 ? JSON.parse(read('review/err_mult.json')).players : null, GERR = +A[6] || 1;
@@ -81,9 +88,10 @@
     return out;
   }
   var SLOTS = { away: slots('away'), home: slots('home') };
-  var built = {};
+  var built = {}, base = {};
   function pitcher(id, asReliever) {
-    if (!built[id]) built[id] = REVIEW.pitcher(D.recs[id], rng, env);
+    if (!base[id]) base[id] = REVIEW.pitcher(D.recs[id], rng, env);   // the costly build, once a game
+    if (!built[id]) built[id] = REVIEW.redraw ? REVIEW.redraw(base[id], rng) : base[id];   // this replay's own pitcher
     var P = built[id];
     if (asReliever && P.role === 'SP') { P.role = 'RP'; P.stamina = 35; }
     return P;
@@ -117,14 +125,15 @@
   }
   for (var g = 0; g < N; g++) {
     if (g % PARTS !== PART) continue;
+    built = {};
     var ta = team('away', g % 40), th = team('home', (g * 7 + 3) % 40);
     var GM = BBGame.simGame(ta, th, { rng: rng, env: env, rules: 'AL', ghost: GHOST, maxInnings: 60, homeEdge: HOMEEDGE });   // no tie: the game plays on
     if (AUDIT) {   // [half, inning, outs, bases before (1 first, 2 second, 4 third), result, batted-ball type, outs made, runs on the play, outs after, bases after, batting side's score after, runners' moves, steal attempts, steals safe, wild pitches and passed balls, exit speed, launch angle, spray, projected distance]
       var bm = function (b) { return (b[1] ? 1 : 0) + (b[2] ? 2 : 0) + (b[3] ? 4 : 0); };
       var P = GM.plays.map(function (q) {
         var p = q.play || {}, st = 0, sts = 0, wp = 0;
-        (q.pa.pitches || []).forEach(function (r) { if (r.steal) { st++; if (!r.steal.out) sts++; } if (r.wild) wp++; });
-        var res = q.pa.result === 'BIP' ? (p.error ? 'E' : p.hit || 'OUT') : q.pa.result;
+        (q.pa.pitches || []).forEach(function (r) { if (r.steal) { st++; if (r.steal.safe) sts++; } if (r.wild) wp++; });
+        var res = q.pa.result === 'BIP' ? (/^(1B|2B|3B|HR)$/.test(p.hit || '') ? p.hit : p.error ? 'E' : p.hit || 'OUT') : q.pa.result;   // a hit with an error on the throw is the hit (the model review)
         var mv = (p.runners || []).filter(function (r) { return r.from > 0; }).map(function (r) { return r.from + '' + (r.out ? 'x' : r.to); }).join(' ');
         var bb = q.pa.bb;   // the batted ball: exit speed, launch angle, spray
         return [q.half, q.inning, q.outs, bm(q.bases), res, p.type || '', p.outsMade || 0, q.runs || 0, q.outsAfter, bm(q.basesAfter), q.score ? q.score[q.half] : null, mv, st, sts, wp,

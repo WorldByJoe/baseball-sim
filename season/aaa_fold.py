@@ -1,5 +1,5 @@
 """
-aaa_fold.py · v0.2 · 2026-10-13
+aaa_fold.py · v0.3 · 2026-10-14
 
 Triple-A priors for the season replay's men with no major-league data in a fold's window (Joe, 2026-10-13). Without them
 such a man was the model's average major leaguer (a population hitter, a generic reliever), and the teams that leaned on
@@ -29,6 +29,7 @@ the taus, the pairs behind them, who was substituted and who had too little at T
   python3 season/aaa_fold.py A          (from the review worktree's root)
 
 CHANGED
+  v0.3  SEASON_Y: another season (2025) (the model review)
   v0.2  Triple-A informs thin major-league seasons too (Joe, 2026-10-13), not only men with none; league_means.json keeps
         the pitchers' shrinkage targets major-league only
   v0.1  first build (Joe, 2026-10-13)
@@ -37,6 +38,8 @@ import copy, csv, glob, gzip, json, math, os, shutil, subprocess, sys
 import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 REV = os.path.join(HERE, '..')
+SY = int(os.environ.get('SEASON_Y', '2026')); PY = SY - 1   # v0.3: SEASON_Y=2025, its folds in season/y2025 (the model review)
+BASE = HERE if SY == 2026 else os.path.join(HERE, 'y%d' % SY)
 sys.path.insert(0, os.path.join(REV, 'review'))
 import fit_hitters as FH
 
@@ -77,12 +80,12 @@ def counts(fn):
 
 def build_aaa(fold, train, D):
     """the fold's window at Triple-A, laid out like the fold, then measured"""
-    F = os.path.join(HERE, fold)
+    F = os.path.join(BASE, fold)
     os.makedirs(os.path.join(D, 'pitches'), exist_ok=True)
     for fn in glob.glob(os.path.join(D, 'pitches', '*.csv.gz')): os.remove(fn)
     ros = json.load(open(os.path.join(F, 'rosters.json'))); ids = {p['id'] for p in ros['players']}
-    for blk, lab in (('2025', '2025'), (train, '2026')):
-        for fn in glob.glob(os.path.join(HERE, 'pitches_aaa', blk, '*.csv.gz')):
+    for blk, lab in ((str(PY), '2025'), (train, '2026')):
+        for fn in glob.glob(os.path.join(BASE, 'pitches_aaa', blk, '*.csv.gz')):
             if int(os.path.basename(fn).split('_')[1].split('.')[0]) in ids:
                 os.symlink(os.path.abspath(fn), os.path.join(D, 'pitches', '%s_%s' % (lab, os.path.basename(fn))))
     shutil.copy(os.path.join(F, 'rosters.json'), D)
@@ -90,8 +93,8 @@ def build_aaa(fold, train, D):
     mlb = json.load(open(os.path.join(F, 'season_stats.json')))['players']; ss = {}
     for pid in ids:
         st = {k: v for k, v in (mlb.get(str(pid)) or {}).items() if k.startswith('pitching')}   # his major-league usage, for his role
-        for blk, lab in (('2025', '2025'), (train, '2026')):
-            pa, hr = counts(os.path.join(HERE, 'pitches_aaa', blk, 'batter_%d.csv.gz' % pid))
+        for blk, lab in ((str(PY), '2025'), (train, '2026')):
+            pa, hr = counts(os.path.join(BASE, 'pitches_aaa', blk, 'batter_%d.csv.gz' % pid))
             st['hitting_' + lab] = {'PA': pa, 'HR': hr, 'note': 'Triple-A %s, from its pitches' % blk} if pa else None
         ss[str(pid)] = st
     json.dump({'note': 'Triple-A hitting lines; major-league pitching lines (usage)', 'players': ss}, open(os.path.join(D, 'season_stats.json'), 'w'), indent=0)
@@ -247,9 +250,9 @@ def years_to_use(r, a, role, SH):
 
 def main(F):
     fold, train = {'A': ('foldA', 'h1'), 'B': ('foldB', 'h2')}[F]
-    D = os.path.join(HERE, 'aaa' + F); OUT = os.path.join(HERE, fold + '_aaa')
+    D = os.path.join(BASE, 'aaa' + F); OUT = os.path.join(BASE, fold + '_aaa')
     build_aaa(fold, train, D)
-    MJ = json.load(open(os.path.join(HERE, fold, 'players_measured.json')))
+    MJ = json.load(open(os.path.join(BASE, fold, 'players_measured.json')))
     M = {r['id']: r for r in MJ['players']}
     # the pitchers' shrinkage targets (season/view.py), from the major-league records only
     LM = {}
@@ -260,7 +263,7 @@ def main(F):
     SH = shifts(M, A)
     for k, s_ in SH.items(): print('  %-8s shift %+.3f (%s)  tau %.3f  pairs %d' % (k, s_['shift'], 'log-odds' if s_['rate'] else 'units', s_['tau'], s_['pairs']))
     E = FH.emulator(os.path.join(REV, 'diag_out', 'emu.jsonl'))
-    SS = json.load(open(os.path.join(HERE, fold, 'season_stats.json')))
+    SS = json.load(open(os.path.join(BASE, fold, 'season_stats.json')))
     done = {'hitting': {}, 'pitching': {}}
     for pid, r in M.items():
         a = A.get(pid)
@@ -308,7 +311,7 @@ def main(F):
                 r['traits']['pitching'] = merge(r['traits'].get('pitching') if had else None, a['traits'].get('pitching') or {}, ('traits', 'pitching'), ys, SH)
                 done['pitching'][pid] = wts
     if os.path.exists(OUT): shutil.rmtree(OUT)
-    shutil.copytree(os.path.join(HERE, fold), OUT, symlinks=True)
+    shutil.copytree(os.path.join(BASE, fold), OUT, symlinks=True)
     MJ['meta'] = dict(MJ.get('meta') or {}, aaa='Triple-A seasons joined to thin or missing major-league ones (season/aaa_fold.py v0.2)')
     json.dump(MJ, open(os.path.join(OUT, 'players_measured.json'), 'w'), separators=(',', ':'))
     json.dump(SS, open(os.path.join(OUT, 'season_stats.json'), 'w'), indent=0)

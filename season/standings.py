@@ -1,5 +1,5 @@
 """
-standings.py · v0.3 · 2026-10-14
+standings.py · v0.4 · 2026-10-14
 
 How well the season replay predicted each team's record and the standings. For every 2026 regular-season game, the home
 team's share of its replays (fold A replays the second half with traits from 2025 and the first half; fold B the first half
@@ -18,6 +18,7 @@ Against the real season:
   python3 season/standings.py [--run 2] [--sub replays_home] [--vs 6]    -> season/standings_result[2][_home].json
 
 CHANGED
+  v0.4  SEASON_Y: another season (2025) (the model review)
   v0.3  the protocol: Brier and calibration net of replay noise, the team-strength error, --vs RUN paired bootstrap (the model review)
   v0.2  --sub: another replay folder in the worktrees (replays_home: the home hitters' edge on)
   v0.1  first build (Joe, 2026-10-13: how well do we predict each team's win percentage and the final standings?)
@@ -26,10 +27,12 @@ import json, os, sys, math, urllib.request
 import numpy as np
 from scipy import stats
 HERE = os.path.dirname(os.path.abspath(__file__))
+SY = int(os.environ.get('SEASON_Y', '2026')); PY = SY - 1; YY = '%02d' % (SY % 100)   # v0.4: SEASON_Y=2025, its folds in season/y2025, worktrees hist25A/B
+BASE = HERE if SY == 2026 else os.path.join(HERE, 'y%d' % SY)
 UA = {'User-Agent': 'Mozilla/5.0 (research script; CSU; baseball trait model)'}
 SUF = sys.argv[sys.argv.index('--run') + 1] if '--run' in sys.argv else ''   # '2': the rerun with the hitter fit's bounds widened
 SUB = sys.argv[sys.argv.index('--sub') + 1] if '--sub' in sys.argv else 'replays'
-FOLD = {'h2': os.path.expanduser('~/bsim-wt/hist26A' + SUF), 'h1': os.path.expanduser('~/bsim-wt/hist26B' + SUF)}
+FOLD = {'h2': os.path.expanduser('~/bsim-wt/hist%sA' % YY + SUF), 'h1': os.path.expanduser('~/bsim-wt/hist%sB' % YY + SUF)}
 DIV = {200: 'AL West', 201: 'AL East', 202: 'AL Central', 203: 'NL West', 204: 'NL East', 205: 'NL Central'}
 
 
@@ -46,7 +49,7 @@ def postseason(tab):
 
 
 def main():
-    sched = json.load(open(os.path.join(HERE, 'schedule.json'))); St = json.load(open(os.path.join(HERE, 'standings.json')))
+    sched = json.load(open(os.path.join(BASE, 'schedule.json'))); St = json.load(open(os.path.join(BASE, 'standings.json')))
     byid = {t['team']: t for t in St}
     games = []
     for g in sched:
@@ -69,7 +72,7 @@ def main():
         half[g['block']][w][0] += 1
     # per half: the model's expected wins in that half's games against the real wins in them (each half replayed with traits
     # from the other half and 2025), beside the other half's record and last season's, both as a share times the half's games
-    S25 = json.load(urllib.request.urlopen(urllib.request.Request('https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=2025&standingsTypes=regularSeason', headers=UA), timeout=60))
+    S25 = json.load(urllib.request.urlopen(urllib.request.Request('https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=%d&standingsTypes=regularSeason' % PY, headers=UA), timeout=60))
     w25 = {t['team']['id']: t['wins'] / (t['wins'] + t['losses']) for rec in S25['records'] for t in rec['teamRecords']}
     expH = {b: {t: [0.0, 0] for t in teams} for b in ('h1', 'h2')}
     for g in games:
@@ -148,7 +151,7 @@ def main():
           % (res['protocol']['brierMC'], res['protocol']['calibDeattenuated'], lam, {h: round(e / n, 4) for h, (e, n) in tse.items()}, res['protocol'].get('teamStrengthError', {}).get('pooledWinsPer162', float('nan'))))
     if '--vs' in sys.argv:
         V = sys.argv[sys.argv.index('--vs') + 1]
-        FV = {'h2': os.path.expanduser('~/bsim-wt/hist26A' + V), 'h1': os.path.expanduser('~/bsim-wt/hist26B' + V)}
+        FV = {'h2': os.path.expanduser('~/bsim-wt/hist%sA' % YY + V), 'h1': os.path.expanduser('~/bsim-wt/hist%sB' % YY + V)}
         pv = {}
         for g in games:
             f = os.path.join(FV[g['block']], 'diag_out', 'replays', '%d.jsonl' % g['pk'])
@@ -173,7 +176,7 @@ def main():
         res['vs' + V] = out
         print('paired against run %s on %d games: Brier difference %+.5f (se %.5f); team correlation difference h1 %+.3f (se %.3f), h2 %+.3f (se %.3f)'
               % (V, out['games'], out['brierDiff'], out['brierDiffSe'], out['h1']['corrDiff'], out['h1']['se'], out['h2']['corrDiff'], out['h2']['se']))
-    json.dump(res, open(os.path.join(HERE, 'standings_result%s%s.json' % (SUF, '' if SUB == 'replays' else SUB[7:])), 'w'), indent=1)
+    json.dump(res, open(os.path.join(BASE, 'standings_result%s%s.json' % (SUF, '' if SUB == 'replays' else SUB[7:])), 'w'), indent=1)
 
 
 if __name__ == '__main__':
