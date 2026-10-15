@@ -294,6 +294,7 @@ var BBField = (function () {
   // 1.5 m/s, fitted to the league's double plays per game on the old ball; 2.75
   // is a little under the 3 m/s of a man walking off on a steal.
   var V_CONTACT = 1.0;    // m/s (v1.18: refitted with PIVOT and the infielders' range to the league's plays with a man on first: DP .424/.403, lead runner out .247/.274, batter out .217/.180, hit .089/.101, headless/mob_check.js 600 games)
+  var V_TWO_OUT = 2.75;   // m/s: a runner with two out is off on contact at V_CONTACT's old value (v1.18: V_CONTACT itself was refitted for the forced runner on a grounder)
   var V_GOING = 0.8;      // a runner going with the pitch is at this share of his sprint speed at contact (v1.18; set by hand)
   // RUNNING FROM REST (v1.9). A runner on base who starts from a standstill - tagging up, held at the bag till a fly
   // drops, frozen at his lead till a grounder is through - runs the league's measured curve: his speed rises toward
@@ -687,7 +688,7 @@ var BBField = (function () {
       if (r.base === 0) return;
       var isForced = forced(i);
       if (r.going) { r.start = 0.05; r.onContact = true; }               // already running with the pitch (v1.18: at speed, not from rest)
-      else if (twoOut || (!flyBall && isForced)) { r.start = 0.05; r.onContact = true; }   // goes on contact
+      else if (twoOut || (!flyBall && isForced)) { r.start = 0.05; r.onContact = true; r.v0 = twoOut ? V_TWO_OUT : V_CONTACT; }   // goes on contact (v1.18: with two out he is off with the pitch)
       else if (!flyBall) {                                                // unforced on a grounder: read the ball
         var to = r.base + 1, tRun = 0.1 + restTime(r.pl, BASE - LEAD);
         var tBall = ballTo(to, ic.t, ic.at).t + TAG;
@@ -704,7 +705,7 @@ var BBField = (function () {
     function arrive(r, to) {
       var d = (to - r.base) * BASE - leadOf(r) + ROUND_PATH * Math.max(0, to - r.base - 1);   // each base he runs through is turned on an arc (v1.14)
       if (r.going && r.base > 0) return r.start + stealTime(r.pl, d, V_GOING * r.pl.speed * FT);   // running with the pitch: at speed (v1.18; was restarted from rest)
-      if (r.base > 0 && r.start !== null && r.start < 0.5 && !r.midway && r.onContact) return r.start + stealTime(r.pl, d, V_CONTACT);
+      if (r.base > 0 && r.start !== null && r.start < 0.5 && !r.midway && r.onContact) return r.start + stealTime(r.pl, d, r.v0 || V_CONTACT);
       if (r.base > 0) return r.start + (r.start >= 0.5 && !r.midway ? 0.15 : 0.05) + restTime(r.pl, d);   // from a standstill (v1.9)
       return r.start + runTime(r.pl, d, true);   // the batter, out of the box
     }

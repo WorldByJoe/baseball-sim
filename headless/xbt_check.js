@@ -11,6 +11,7 @@
 ============================================================================ */
 (function (A) {
   var N = +A[0] || 400, SEED = +A[1] || 3, rng = BB.makeRng(SEED), L = typeof BASERUN !== 'undefined' ? BASERUN : null;
+  if (A[2]) BBField.tuneField(JSON.parse(A[2]));   // calibration options (bb_field v1.18)
   var T = {};
   function add(k, outs, where) { [outs, 'all'].forEach(function (o) { var c = T[k + '|' + o] = T[k + '|' + o] || { n: 0 }; c.n++; c[where] = (c[where] || 0) + 1; }); }
   for (var g = 0; g < N; g++) {
