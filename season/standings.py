@@ -1,5 +1,5 @@
 """
-standings.py · v0.2 · 2026-10-13
+standings.py · v0.3 · 2026-10-14
 
 How well the season replay predicted each team's record and the standings. For every 2026 regular-season game, the home
 team's share of its replays (fold A replays the second half with traits from 2025 and the first half; fold B the first half
@@ -15,9 +15,10 @@ Against the real season:
   games      the favourite's record, the Brier score against the home team always at its season-wide rate, the logistic
              calibration slope c (1 = shares right), and the same for games between two postseason teams
 
-  python3 season/standings.py [--run 2] [--sub replays_home]    -> season/standings_result[2][_home].json
+  python3 season/standings.py [--run 2] [--sub replays_home] [--vs 6]    -> season/standings_result[2][_home].json
 
 CHANGED
+  v0.3  the protocol: Brier and calibration net of replay noise, the team-strength error, --vs RUN paired bootstrap (the model review)
   v0.2  --sub: another replay folder in the worktrees (replays_home: the home hitters' edge on)
   v0.1  first build (Joe, 2026-10-13: how well do we predict each team's win percentage and the final standings?)
 """
@@ -130,6 +131,48 @@ def main():
                                                    'calib': [round(float(mp.params[1]), 2), round(float(mp.bse[1]), 2)], 'lrP': float(mp.llr_pvalue)}}
     print('games: favourite won %.1f%%; Brier %.4f vs %.4f for the home team at its rate (%.3f); calibration c %.2f (se %.2f), p %.2g; share sd %.3f' % (100 * fav, brier, brier0, hw, m.params[1], m.bse[1], m.llr_pvalue, p.std()))
     print('games between two postseason teams (%d): favourite won %.1f%%, share sd %.3f, calibration c %.2f (se %.2f), p %.2g' % (len(playoff), 100 * res['gameLevel']['betweenPostseasonTeams']['favouriteWon'], pp.std(), mp.params[1], mp.bse[1], mp.llr_pvalue))
+    # v0.3 THE PROTOCOL (the model review, 2026-10-14): replay noise taken out of the Brier (each share's Monte Carlo variance
+    # p(1-p)/n adds to it) and out of the calibration slope (noise in the regressor attenuates c by var_true / var_observed of
+    # the logit shares); the team-strength error (the RMSE with luck's binomial part taken out), per half and pooled per 162
+    # games; with --vs RUN, the paired differences from that run on the same games and teams, by bootstrap
+    ng_ = np.array([g['n'] for g in games], float); mc = p * (1 - p) / ng_
+    lv = 1 / (np.clip(p, .02, .98) * (1 - np.clip(p, .02, .98)) * ng_); lam = max(lp.var() - lv.mean(), 1e-9) / lp.var()
+    res['protocol'] = {'brierMC': round(float(brier - mc.mean()), 4), 'calibDeattenuated': round(float(m.params[1] / lam), 2), 'attenuation': round(float(lam), 3)}
+    tse = {}
+    for h in res['halves']:
+        r_ = res['halves'][h]; e = math.sqrt(max(r_['model']['rmse'] ** 2 - r_['luckSd'] ** 2, 0)); tse[h] = (e, r_['games'])
+    if tse:
+        pooled = math.sqrt(sum((e / n) ** 2 * n for e, n in tse.values()) / sum(n for e, n in tse.values()))
+        res['protocol']['teamStrengthError'] = {h: round(e / n, 4) for h, (e, n) in tse.items()}; res['protocol']['teamStrengthError']['pooledWinsPer162'] = round(pooled * 162, 2)
+    print('protocol: Brier less replay noise %.4f; calibration de-attenuated %.2f (attenuation %.3f); team-strength error %s, pooled %.1f wins per 162'
+          % (res['protocol']['brierMC'], res['protocol']['calibDeattenuated'], lam, {h: round(e / n, 4) for h, (e, n) in tse.items()}, res['protocol'].get('teamStrengthError', {}).get('pooledWinsPer162', float('nan'))))
+    if '--vs' in sys.argv:
+        V = sys.argv[sys.argv.index('--vs') + 1]
+        FV = {'h2': os.path.expanduser('~/bsim-wt/hist26A' + V), 'h1': os.path.expanduser('~/bsim-wt/hist26B' + V)}
+        pv = {}
+        for g in games:
+            f = os.path.join(FV[g['block']], 'diag_out', 'replays', '%d.jsonl' % g['pk'])
+            if os.path.exists(f):
+                R = [json.loads(l) for l in open(f) if l.startswith('{')]
+                if len(R) >= 50: pv[g['pk']] = (sum(r['score'][1] > r['score'][0] for r in R) / len(R), len(R))
+        idx = [i for i, g in enumerate(games) if g['pk'] in pv]
+        a = np.array([games[i]['p'] for i in idx]); b = np.array([pv[games[i]['pk']][0] for i in idx]); yy = y[idx]
+        na = np.array([games[i]['n'] for i in idx], float); nb = np.array([pv[games[i]['pk']][1] for i in idx], float)
+        d = ((a - yy) ** 2 - a * (1 - a) / na) - ((b - yy) ** 2 - b * (1 - b) / nb)   # each Brier less its replay noise
+        rng_ = np.random.default_rng(1); bs = [d[rng_.integers(0, len(d), len(d))].mean() for _ in range(2000)]
+        out = {'games': len(idx), 'brierDiff': round(float(d.mean()), 5), 'brierDiffSe': round(float(np.std(bs)), 5)}
+        for h in ('h1', 'h2'):
+            T = {t: [0.0, 0.0, 0] for t in teams}
+            for i in idx:
+                g = games[i]
+                if g['block'] != h: continue
+                T[g['home']][0] += games[i]['p']; T[g['away']][0] += 1 - games[i]['p']; T[g['home']][1] += pv[g['pk']][0]; T[g['away']][1] += 1 - pv[g['pk']][0]
+            W = np.array([half[h][t][0] for t in teams], float); A_ = np.array([T[t][0] for t in teams]); B_ = np.array([T[t][1] for t in teams])
+            dc = [np.corrcoef(A_[k], W[k])[0, 1] - np.corrcoef(B_[k], W[k])[0, 1] for k in (rng_.integers(0, len(teams), len(teams)) for _ in range(2000))]
+            out[h] = {'corrDiff': round(float(np.corrcoef(A_, W)[0, 1] - np.corrcoef(B_, W)[0, 1]), 3), 'se': round(float(np.std(dc)), 3)}
+        res['vs' + V] = out
+        print('paired against run %s on %d games: Brier difference %+.5f (se %.5f); team correlation difference h1 %+.3f (se %.3f), h2 %+.3f (se %.3f)'
+              % (V, out['games'], out['brierDiff'], out['brierDiffSe'], out['h1']['corrDiff'], out['h1']['se'], out['h2']['corrDiff'], out['h2']['se']))
     json.dump(res, open(os.path.join(HERE, 'standings_result%s%s.json' % (SUF, '' if SUB == 'replays' else SUB[7:])), 'w'), indent=1)
 
 
