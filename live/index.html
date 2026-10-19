@@ -135,7 +135,7 @@ table.led td { padding: 6px; text-align: right; font-family: var(--data); font-v
     buf = []; curPk = replay ? 'replay' : pk;
     try { var hs = JSON.parse(localStorage.getItem('couch-hold') || 'null'); if (hs && hs.pk === curPk) hold = hs; else hold = { pk: curPk, offset: 0, pausedAt: null }; } catch (e) {}
     paintHold();
-    worker = new Worker('analyst.js?v=3.9.8');   // bump with each engine or bundle (GitHub Pages caches 10 min)
+    worker = new Worker('analyst.js?v=3.9.9');   // bump with each engine or bundle (GitHub Pages caches 10 min)
     worker.onmessage = function (e) {
       if (e.data.type === 'status') document.getElementById('status').textContent = e.data.text;
       else if (e.data.type === 'state') {
@@ -180,7 +180,7 @@ table.led td { padding: 6px; text-align: right; font-family: var(--data); font-v
       if (p) {
         var four = function (q) { return [['Strikeout', q.K], ['Walk', q.BB + q.HBP], ['Hit', q['1B'] + q['2B'] + q['3B'] + q.HR], ['Home run', q.HR]]; };
         var pn = n.probsNow && n.countNow && (n.countNow[0] || n.countNow[1]) ? n.probsNow : null;   // v0.7: moved to the count now
-        h += '<p class="note" style="margin:0 0 6px">' + (pn ? 'This at-bat at ' + n.countNow[0] + '-' + n.countNow[1] + ':' : (n.complete ? 'The model, before the first pitch:' : 'This at-bat, before the first pitch:')) + '</p>';
+        h += '<p class="note" style="margin:0 0 6px">' + (pn ? 'This at-bat at ' + n.countNow[0] + '-' + n.countNow[1] + ({ ball: ', after a ball', called: ', after a called strike', whiff: ', after a swinging miss', foul: ', after a foul' }[n.prevNow] || '') + ':' : (n.complete ? 'The model, before the first pitch:' : 'This at-bat, before the first pitch:')) + '</p>';
         h += '<div class="probs">' + four(pn || p).map(function (q) { return '<div class="prob"><b>' + pct(q[1]) + '</b><span>' + q[0] + '</span></div>'; }).join('') + '</div>';
         if (pn) h += '<p class="note" style="margin:-4px 0 10px">At 0-0 the model had ' + four(p).map(function (q) { return q[0].toLowerCase() + ' ' + pct(q[1]); }).join(', ') + '.</p>';
       }

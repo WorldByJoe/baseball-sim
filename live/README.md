@@ -23,4 +23,9 @@ count-moved chance, the runners moved by the league's advancement tables, the ga
 win chance at a plate appearance's start. MLB's line, once a plate appearance, stays for comparison (dashed).
 `data/count_wp.js` holds those tables (built by forecast/couch/couch_data.py on the forecast branch).
 
+Two strikes (2026-10-19, analyst.js v0.8): at a two-strike count the odds also follow the pitch that brought the count
+there. After a swinging miss a strikeout was likelier than after a foul (at 0-2 and 1-2, about 5 points once the
+batter and pitcher are accounted for). The multipliers in `data/count_wp.js` (prev) are standardized for the matchup,
+since the model's own chances already carry it.
+
 Built 2026-10-06. Nothing here touches the rest of the site.

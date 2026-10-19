@@ -1,5 +1,5 @@
 /* ============================================================================
-   analyst.js · v0.7 · 2026-10-18
+   analyst.js · v0.8 · 2026-10-19
 
    The couch analyst in the browser: a Web Worker that follows one game on
    MLB's live feed (statsapi.mlb.com, open to any page) and runs the model on
@@ -13,6 +13,8 @@
    Messages out: { type: 'state', state }, { type: 'status', text }
 
    CHANGED
+     v0.8  at two strikes the odds also follow the pitch that brought the count there (Joe, 2026-10-19): after a swinging miss a
+           strikeout is likelier than after a foul (data/count_wp.js prev, standardized for the matchup; forecast/words/path_predict.py)
      v0.7  pitch by pitch (Joe, 2026-10-18): the at-bat's odds moved to the count now (how 2026's plate appearances ended from each
            count, data/count_wp.js, forecast/couch/couch_data.py), and a win chance after every pitch: each outcome's count-moved
            chance, the runners moved by the league's advancement tables, the game state then looked up in the league's win
@@ -31,7 +33,7 @@
            thread from a local file and cannot fetch
      v0.1  first build (Brewers-Padres, NLDS Game 3, 2026-10-06)
 ============================================================================ */
-var V = '?v=3.9.8';   // bump with each engine or bundle, as index.html's worker tag (GitHub Pages caches 10 min)
+var V = '?v=3.9.9';   // bump with each engine or bundle, as index.html's worker tag (GitHub Pages caches 10 min)
 importScripts('data/count_wp.js' + V, 'engine/bb_engine.js' + V, 'engine/bb_names.js' + V, 'engine/bb_field.js' + V, 'engine/bb_game.js' + V, 'engine/players.js' + V, 'data/playoff.js' + V);
 REVIEW.setData(PLAYOFF.recs, PLAYOFF.fits, PLAYOFF.pfit);
 
@@ -147,9 +149,13 @@ function countAfter(pitches) {   // the count once the last pitch is in (balls, 
   if (r === 'ball') b++; else if (r === 'called' || r === 'whiff') k++; else if (r === 'foul') k = Math.min(2, k + (k < 2 ? 1 : 0)); else return null;
   return b >= 4 || k >= 3 ? null : [b, k];
 }
-function probsAt(probs, b, k) {   // the model's chances for this matchup, moved from 0-0 to the count b-k
-  var row = CWP.count[Math.min(b, 3) + '-' + Math.min(k, 2)], out = {}, tot = 0;
-  CWP.cats.forEach(function (c, i) { var v = (probs[c] || 0) * (CW0[i] > 0 ? row[i] / CW0[i] : 1); out[c] = v; tot += v; });
+function prevOf(pitches, j) {   // how the pitch before index j came out (ball, called, whiff, foul), or null
+  return j > 0 && pitches[j - 1] ? resultOf(pitches[j - 1].code) : null;
+}
+function probsAt(probs, b, k, prev) {   // the model's chances for this matchup, moved from 0-0 to the count b-k (and, at two strikes, by the pitch before)
+  var key = Math.min(b, 3) + '-' + Math.min(k, 2), row = CWP.count[key], out = {}, tot = 0;
+  var pm = k >= 2 && prev && CWP.prev && CWP.prev[key] ? CWP.prev[key][prev] : null;   // v0.8
+  CWP.cats.forEach(function (c, i) { var v = (probs[c] || 0) * (CW0[i] > 0 ? row[i] / CW0[i] : 1) * (pm ? pm[CWP.pg.indexOf(CWP.pcat[c])] : 1); out[c] = v; tot += v; });
   if (probs.CI) { out.BB += probs.CI; tot += probs.CI; }
   CWP.cats.forEach(function (c) { out[c] = tot > 0 ? out[c] / tot : 0; });
   return out;
@@ -168,8 +174,8 @@ function weAfter(inn, half, s2, lead) {   // after the play: s2 the base-out sta
   }
   return weAt(inn, half, Math.floor(s2 / 8), s2 % 8, lead);
 }
-function homeWin(pa, probs, b, k) {   // the home side's win chance with this batter at the count b-k
-  var q = probsAt(probs, b, k), half = pa.half === 'top' ? 0 : 1, sgn = half === 1 ? 1 : -1, lead = pa.score[1] - pa.score[0];
+function homeWin(pa, probs, b, k, prev) {   // the home side's win chance with this batter at the count b-k, after a pitch that came out prev
+  var q = probsAt(probs, b, k, prev), half = pa.half === 'top' ? 0 : 1, sgn = half === 1 ? 1 : -1, lead = pa.score[1] - pa.score[0];
   var s = Math.min(pa.outs, 2) * 8 + (pa.bases[0] ? 1 : 0) + (pa.bases[1] ? 2 : 0) + (pa.bases[2] ? 4 : 0), tot = 0;
   var parts = [['K', q.K], ['BB', q.BB], ['HBP', q.HBP], ['1B', q['1B']], ['2B', q['2B']], ['3B', q['3B']], ['HR', q.HR], ['E', q.E], ['GO', q.OUT * CWP.go], ['AO', q.OUT * (1 - CWP.go)]];
   parts.forEach(function (pp) {
@@ -434,7 +440,8 @@ function stateOf(G, now) {
     var a = A.cache[cur.i] || {};
     var after = !!cur.eventType && cur.outsAfter != null;   // a finished at-bat shows the outs and bases it left (the third out stays on the card through the break)
     var cnow = !cur.eventType ? countAfter(cur.pitches) : null;
-    now_pa = { countNow: cnow, probsNow: cnow && a.probs ? probsAt(a.probs, cnow[0], cnow[1]) : null, wpNow: cnow && a.probs ? homeWin(cur, a.probs, cnow[0], cnow[1]) : null,
+    var pnow = cnow ? prevOf(cur.pitches, cur.pitches.length) : null;
+    now_pa = { countNow: cnow, prevNow: cnow && cnow[1] >= 2 ? pnow : null, probsNow: cnow && a.probs ? probsAt(a.probs, cnow[0], cnow[1], pnow) : null, wpNow: cnow && a.probs ? homeWin(cur, a.probs, cnow[0], cnow[1], pnow) : null,
                batter: cur.batterName, pitcher: cur.pitcherName, inning: cur.inning, half: cur.half, outs: after ? cur.outsAfter : cur.outs,
                bases: (after ? (cur.outsAfter >= 3 ? [null, null, null] : cur.basesAfter) : cur.bases).map(function (x) { return !!x; }), score: cur.score,
                result: cur.eventType ? { event: cur.event, desc: cur.desc, p: a.pActual != null ? a.pActual : null } : null,
@@ -452,7 +459,7 @@ function stateOf(G, now) {
     for (var j = 0; j <= last; j++) {
       var bk = j < n ? [pa.pitches[j].balls, pa.pitches[j].strikes] : countAfter(pa.pitches);
       if (!bk) break;
-      wpp.push([+(pa.i + j / (n + 1)).toFixed(3), +homeWin(pa, a2.probs, bk[0], bk[1]).toFixed(4)]);
+      wpp.push([+(pa.i + j / (n + 1)).toFixed(3), +homeWin(pa, a2.probs, bk[0], bk[1], prevOf(pa.pitches, j)).toFixed(4)]);
     }
   });
   if (G.status === 'Final' && cur && wpp.length) wpp.push([cur.i + 1, G.final.home > G.final.away ? 1 : 0]);   // the line ends at the result
