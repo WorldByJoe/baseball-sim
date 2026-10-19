@@ -17,4 +17,10 @@ the pause lasted, spaced by MLB's own time on each pitch. Behind live, the analy
 a reload) forward one pitch at a time, so nothing floods in at once. The hold is remembered per game in the browser.
 Back to live skips ahead.
 
+Pitch by pitch (2026-10-18, analyst.js v0.7): the at-bat's odds move with the count (how 2026's plate appearances
+ended from each count), and the win-probability chart draws the model's own line before every pitch: each outcome's
+count-moved chance, the runners moved by the league's advancement tables, the game state then valued by the league's
+win chance at a plate appearance's start. MLB's line, once a plate appearance, stays for comparison (dashed).
+`data/count_wp.js` holds those tables (built by forecast/couch/couch_data.py on the forecast branch).
+
 Built 2026-10-06. Nothing here touches the rest of the site.

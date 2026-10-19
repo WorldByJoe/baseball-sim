@@ -135,7 +135,7 @@ table.led td { padding: 6px; text-align: right; font-family: var(--data); font-v
     buf = []; curPk = replay ? 'replay' : pk;
     try { var hs = JSON.parse(localStorage.getItem('couch-hold') || 'null'); if (hs && hs.pk === curPk) hold = hs; else hold = { pk: curPk, offset: 0, pausedAt: null }; } catch (e) {}
     paintHold();
-    worker = new Worker('analyst.js?v=3.9.7');   // bump with each engine or bundle (GitHub Pages caches 10 min)
+    worker = new Worker('analyst.js?v=3.9.8');   // bump with each engine or bundle (GitHub Pages caches 10 min)
     worker.onmessage = function (e) {
       if (e.data.type === 'status') document.getElementById('status').textContent = e.data.text;
       else if (e.data.type === 'state') {
@@ -178,8 +178,11 @@ table.led td { padding: 6px; text-align: right; font-family: var(--data); font-v
       var p = n.probs, h = '<h2>At the plate</h2><p class="matchup">' + esc(n.batter) + ' <span>vs</span> ' + esc(n.pitcher) + '</p>';
       h += '<ul class="watch">' + n.watch.slice(1).map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>';
       if (p) {
-        var hit = p['1B'] + p['2B'] + p['3B'] + p.HR;
-        h += '<div class="probs">' + [['Strikeout', p.K], ['Walk', p.BB + p.HBP], ['Hit', hit], ['Home run', p.HR]].map(function (q) { return '<div class="prob"><b>' + pct(q[1]) + '</b><span>' + q[0] + '</span></div>'; }).join('') + '</div>';
+        var four = function (q) { return [['Strikeout', q.K], ['Walk', q.BB + q.HBP], ['Hit', q['1B'] + q['2B'] + q['3B'] + q.HR], ['Home run', q.HR]]; };
+        var pn = n.probsNow && n.countNow && (n.countNow[0] || n.countNow[1]) ? n.probsNow : null;   // v0.7: moved to the count now
+        h += '<p class="note" style="margin:0 0 6px">' + (pn ? 'This at-bat at ' + n.countNow[0] + '-' + n.countNow[1] + ':' : (n.complete ? 'The model, before the first pitch:' : 'This at-bat, before the first pitch:')) + '</p>';
+        h += '<div class="probs">' + four(pn || p).map(function (q) { return '<div class="prob"><b>' + pct(q[1]) + '</b><span>' + q[0] + '</span></div>'; }).join('') + '</div>';
+        if (pn) h += '<p class="note" style="margin:-4px 0 10px">At 0-0 the model had ' + four(p).map(function (q) { return q[0].toLowerCase() + ' ' + pct(q[1]); }).join(', ') + '.</p>';
       }
       h += '<ol class="pitches">' + n.pitches.filter(function (q) { return q.text; }).map(function (q) { return '<li class="' + (q.flag ? 'flag' : '') + '">' + esc(q.text) + '</li>'; }).join('') + '</ol>';
       document.getElementById('plate').innerHTML = h;
@@ -194,11 +197,17 @@ table.led td { padding: 6px; text-align: right; font-family: var(--data); font-v
       var g = s.pregame;
       document.getElementById('pre').innerHTML = '<h2>Before the game</h2><p>' + esc(g.awaySP) + ' against ' + esc(g.homeSP) + '. In ' + g.n + ' replays of tonight\'s game: <b>' + esc(ab) + ' ' + pct(g.awayWin) + '</b>, ' + esc(hb) + ' ' + pct(1 - g.awayWin) + '. Expected runs ' + g.awayRuns.toFixed(1) + ' to ' + g.homeRuns.toFixed(1) + '.</p>';
     }
-    var wp = s.wp || [];
-    if (wp.length) {
-      var W = 600, Hh = 150, x = function (i) { return 30 + (W - 40) * (i + 1) / Math.max(wp.length, 70); }, y = function (v) { return 10 + (Hh - 30) * (1 - v / 100); };
-      var path = wp.map(function (q, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ',' + y(100 - q[1]).toFixed(1); }).join(' ');
-      document.getElementById('wp').innerHTML = '<svg viewBox="0 0 ' + W + ' ' + Hh + '" role="img" aria-label="' + esc(ab) + ' win probability"><line x1="30" x2="' + (W - 10) + '" y1="' + y(50) + '" y2="' + y(50) + '" stroke="var(--rule)" stroke-dasharray="4 4"/><text x="4" y="' + (y(100) + 4) + '">100</text><text x="4" y="' + (y(50) + 4) + '">50</text><text x="4" y="' + (y(0) + 4) + '">0</text><path d="' + path + '" fill="none" stroke="var(--away)" stroke-width="2"/><text x="' + (W - 10) + '" y="' + (Hh - 4) + '" text-anchor="end">' + esc(ab) + ' chance, ' + Math.round(100 - wp[wp.length - 1][1]) + '%</text></svg>';
+    var wp = s.wp || [], wpp = s.wpPitch || [];   // v0.7: the model's line, before every pitch; MLB's, once a plate appearance
+    if (wp.length || wpp.length) {
+      var span = Math.max(70, wpp.length ? wpp[wpp.length - 1][0] + 1 : 0, wp.length ? wp[wp.length - 1][0] + 2 : 0);
+      var W = 600, Hh = 170, x = function (v) { return 30 + (W - 40) * v / span; }, y = function (v) { return 10 + (Hh - 46) * (1 - v / 100); };
+      var mlb = wp.map(function (q, i) { return (i ? 'L' : 'M') + x(q[0] + 1).toFixed(1) + ',' + y(100 - q[1]).toFixed(1); }).join(' ');
+      var mod = wpp.map(function (q, i) { return (i ? 'L' : 'M') + x(q[0]).toFixed(1) + ',' + y(100 - 100 * q[1]).toFixed(1); }).join(' ');
+      var nowM = n && n.wpNow != null ? 100 - 100 * n.wpNow : (wpp.length ? 100 - 100 * wpp[wpp.length - 1][1] : null), nowL = wp.length ? 100 - wp[wp.length - 1][1] : null;
+      document.getElementById('wp').innerHTML = '<svg viewBox="0 0 ' + W + ' ' + Hh + '" role="img" aria-label="' + esc(ab) + ' win probability, pitch by pitch"><line x1="30" x2="' + (W - 10) + '" y1="' + y(50) + '" y2="' + y(50) + '" stroke="var(--rule)" stroke-dasharray="4 4"/><text x="4" y="' + (y(100) + 4) + '">100</text><text x="4" y="' + (y(50) + 4) + '">50</text><text x="4" y="' + (y(0) + 4) + '">0</text>' +
+        (mlb ? '<path d="' + mlb + '" fill="none" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="3 3"/>' : '') + (mod ? '<path d="' + mod + '" fill="none" stroke="var(--away)" stroke-width="2"/>' : '') +
+        '<line x1="34" x2="52" y1="' + (Hh - 22) + '" y2="' + (Hh - 22) + '" stroke="var(--away)" stroke-width="2"/><text x="56" y="' + (Hh - 18) + '">' + esc(ab) + ' chance, the model, pitch by pitch' + (nowM != null ? ': ' + Math.round(nowM) + '%' : '') + '</text>' +
+        '<line x1="34" x2="52" y1="' + (Hh - 6) + '" y2="' + (Hh - 6) + '" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="3 3"/><text x="56" y="' + (Hh - 2) + '">MLB\'s, once a plate appearance' + (nowL != null ? ': ' + Math.round(nowL) + '%' : '') + '</text></svg>';
     }
   }
   poll();
