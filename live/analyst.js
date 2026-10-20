@@ -1,5 +1,5 @@
 /* ============================================================================
-   analyst.js · v0.8 · 2026-10-19
+   analyst.js · v0.9 · 2026-10-19
 
    The couch analyst in the browser: a Web Worker that follows one game on
    MLB's live feed (statsapi.mlb.com, open to any page) and runs the model on
@@ -13,6 +13,7 @@
    Messages out: { type: 'state', state }, { type: 'status', text }
 
    CHANGED
+     v0.9  now.pitchCount: the pitches the man on the mound has thrown in this game so far (Joe, 2026-10-19, for the TV)
      v0.8  at two strikes the odds also follow the pitch that brought the count there (Joe, 2026-10-19): after a swinging miss a
            strikeout is likelier than after a foul (data/count_wp.js prev, standardized for the matchup; forecast/words/path_predict.py)
      v0.7  pitch by pitch (Joe, 2026-10-18): the at-bat's odds moved to the count now (how 2026's plate appearances ended from each
@@ -33,7 +34,7 @@
            thread from a local file and cannot fetch
      v0.1  first build (Brewers-Padres, NLDS Game 3, 2026-10-06)
 ============================================================================ */
-var V = '?v=3.9.9';   // bump with each engine or bundle, as index.html's worker tag (GitHub Pages caches 10 min)
+var V = '?v=3.9.10';   // bump with each engine or bundle, as index.html's worker tag (GitHub Pages caches 10 min)
 importScripts('data/count_wp.js' + V, 'engine/bb_engine.js' + V, 'engine/bb_names.js' + V, 'engine/bb_field.js' + V, 'engine/bb_game.js' + V, 'engine/players.js' + V, 'data/playoff.js' + V);
 REVIEW.setData(PLAYOFF.recs, PLAYOFF.fits, PLAYOFF.pfit);
 
@@ -441,7 +442,8 @@ function stateOf(G, now) {
     var after = !!cur.eventType && cur.outsAfter != null;   // a finished at-bat shows the outs and bases it left (the third out stays on the card through the break)
     var cnow = !cur.eventType ? countAfter(cur.pitches) : null;
     var pnow = cnow ? prevOf(cur.pitches, cur.pitches.length) : null;
-    now_pa = { countNow: cnow, prevNow: cnow && cnow[1] >= 2 ? pnow : null, probsNow: cnow && a.probs ? probsAt(a.probs, cnow[0], cnow[1], pnow) : null, wpNow: cnow && a.probs ? homeWin(cur, a.probs, cnow[0], cnow[1], pnow) : null,
+    var pcount = pas.reduce(function (t, q) { return t + (q.pitcher === cur.pitcher ? q.pitches.length : 0); }, 0);   // v0.9
+    now_pa = { pitchCount: pcount, countNow: cnow, prevNow: cnow && cnow[1] >= 2 ? pnow : null, probsNow: cnow && a.probs ? probsAt(a.probs, cnow[0], cnow[1], pnow) : null, wpNow: cnow && a.probs ? homeWin(cur, a.probs, cnow[0], cnow[1], pnow) : null,
                batter: cur.batterName, pitcher: cur.pitcherName, inning: cur.inning, half: cur.half, outs: after ? cur.outsAfter : cur.outs,
                bases: (after ? (cur.outsAfter >= 3 ? [null, null, null] : cur.basesAfter) : cur.bases).map(function (x) { return !!x; }), score: cur.score,
                result: cur.eventType ? { event: cur.event, desc: cur.desc, p: a.pActual != null ? a.pActual : null } : null,

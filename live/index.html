@@ -136,7 +136,7 @@ table.led td { padding: 6px; text-align: right; font-family: var(--data); font-v
     buf = []; curPk = replay ? 'replay' : pk;
     try { var hs = JSON.parse(localStorage.getItem('couch-hold') || 'null'); if (hs && hs.pk === curPk) hold = hs; else hold = { pk: curPk, offset: 0, pausedAt: null }; } catch (e) {}
     paintHold();
-    worker = new Worker('analyst.js?v=3.9.9');   // bump with each engine or bundle (GitHub Pages caches 10 min)
+    worker = new Worker('analyst.js?v=3.9.10');   // bump with each engine or bundle (GitHub Pages caches 10 min)
     worker.onmessage = function (e) {
       if (e.data.type === 'status') document.getElementById('status').textContent = e.data.text;
       else if (e.data.type === 'state') {
