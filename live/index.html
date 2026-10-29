@@ -82,8 +82,8 @@ table.led td { padding: 6px; text-align: right; font-family: var(--data); font-v
   <div class="ctl"><button id="pause" type="button" aria-pressed="false">Pause</button><button id="tolive" type="button" hidden>Back to live</button><label for="delay">TV delay, seconds</label><input id="delay" type="number" min="0" max="120" step="1" value="0"><span id="age"></span></div>
 </div>
 <nav class="pick" id="pick" aria-label="Today's games"></nav>
-<p class="intro">Today's postseason games, read pitch by pitch through the <a href="https://github.com/WorldByJoe/baseball-sim">baseball-sim</a> model: each player's traits fitted to his 2025-26 Statcast numbers, MLB's live feed, and the analysis run in your own browser. If the page runs ahead of your TV, set the delay. Pause the page when you pause the TV; when you resume, every pitch arrives as late as you paused, spaced by MLB's own clock. Back to live skips ahead.</p>
-<p class="intro"><a href="ws.html">World Series Game 1 preview</a>: the starters, tonight&#39;s lineups, what should decide it, home field, who stands out, and what beat each team when it lost.</p>
+<p class="intro">The 2026 season is over: the Brewers beat the Rays in five games to win the World Series on 28 October. Through the postseason this page read each game pitch by pitch through the <a href="https://github.com/WorldByJoe/baseball-sim">baseball-sim</a> model: each player's traits fitted to his 2025-26 Statcast numbers, MLB's live feed, and the analysis run in your own browser. Until games return, choose the replay of World Series Game 5 above. During a live game, if the page runs ahead of your TV, set the delay. Pause the page when you pause the TV; when you resume, every pitch arrives as late as you paused, spaced by MLB's own clock. Back to live skips ahead.</p>
+<p class="intro"><a href="../playoffs/#review">The postseason in review</a>: how the Brewers won, and how the model did.</p>
 <p class="intro">Also: the <a href="../words/">At-Bat Word Tree</a>, every 2026 plate appearance as a word, one letter per pitch, in a 3D tree you can turn and zoom.</p>
 <div class="status" id="status" role="status"></div>
 <div class="grid">
@@ -147,7 +147,7 @@ table.led td { padding: 6px; text-align: right; font-family: var(--data); font-v
       }
     };
     worker.onerror = function (e) { document.getElementById('status').textContent = 'The analyst stopped: ' + e.message; };
-    worker.postMessage(replay ? { cmd: 'start', pk: 849839, replay: 'data/replay_849839_feed.json', replayWp: 'data/replay_849839_wp.json', dt: 1500 } : { cmd: 'start', pk: pk, full: behind(Date.now() / 1000) > 0 });
+    worker.postMessage(replay ? { cmd: 'start', pk: 849799, replay: 'data/replay_849799_feed.json', replayWp: 'data/replay_849799_wp.json', dt: 1500 } : { cmd: 'start', pk: pk, full: behind(Date.now() / 1000) > 0 });
   }
   function poll() { show(); setTimeout(poll, 1000); }
   var day = new Date(Date.now() - 6 * 3600 * 1000).toISOString().slice(0, 10);
@@ -158,9 +158,9 @@ table.led td { padding: 6px; text-align: right; font-family: var(--data); font-v
     nav.innerHTML = games.map(function (g) {
       var t = new Date(g.gameDate).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), a = g.teams.away.team.name.split(' ').pop(), h = g.teams.home.team.name.split(' ').pop();
       return '<a href="?g=' + g.gamePk + '" class="' + (!replay && g.gamePk === pick ? 'on' : '') + '">' + a + ' at ' + h + ' \u00b7 ' + (g.status.abstractGameState === 'Preview' ? t : g.status.detailedState) + '</a>';
-    }).join('') + '<a href="?replay" class="' + (replay ? 'on' : '') + '">Replay: Yankees at Rays, Game 2</a>';
+    }).join('') + '<a href="?replay" class="' + (replay ? 'on' : '') + '">Replay: World Series Game 5, Brewers at Rays</a>';
     if (replay || pick) start(pick);
-    else document.getElementById('status').textContent = 'No postseason games today. Try the replay.';
+    else document.getElementById('status').textContent = 'No games today: the 2026 season is over. Try the replay of World Series Game 5.';
   }).catch(function () { if (replay || gq) start(+gq); else document.getElementById('status').textContent = 'MLB\'s schedule did not answer.'; });
   var shown = null;
   function show() {
